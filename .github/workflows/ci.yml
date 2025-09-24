@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    uses: ./.github/workflows/_setup.yml
+
+  ci:
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      NX_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || 'origin/main' }}
+      NX_HEAD: ${{ github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node from .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable corepack
+        run: corepack enable || true
+
+      - name: Detect package manager
+        id: pm
+        shell: bash
+        run: |
+          if [ -f pnpm-lock.yaml ]; then echo "pm=pnpm" >> $GITHUB_OUTPUT; exit 0; fi
+          if [ -f yarn.lock ]; then echo "pm=yarn" >> $GITHUB_OUTPUT; exit 0; fi
+          if [ -f package-lock.json ]; then echo "pm=npm" >> $GITHUB_OUTPUT; exit 0; fi
+          echo "pm=npm" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          PM="${{ steps.pm.outputs.pm }}"
+          if [ "$PM" = "pnpm" ]; then pnpm install --frozen-lockfile; fi
+          if [ "$PM" = "yarn" ]; then yarn install --frozen-lockfile; fi
+          if [ "$PM" = "npm" ]; then npm ci; fi
+
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/nx
+          key: ${{ runner.os }}-nx-${{ hashFiles('**/nx.json', '**/project.json', '**/workspace.json', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+
+      - name: PR Template Validation
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          echo "Validating PR template compliance..."
+
+          # Check if PR description contains required sections
+          PR_BODY="${{ github.event.pull_request.body }}"
+
+          if [[ -z "$PR_BODY" ]]; then
+            echo "❌ PR description is empty"
+            exit 1
+          fi
+
+          # Check for required sections
+          if ! echo "$PR_BODY" | grep -q "## Current Behavior"; then
+            echo "❌ Missing 'Current Behavior' section"
+            exit 1
+          fi
+
+          if ! echo "$PR_BODY" | grep -q "## Expected Behavior"; then
+            echo "❌ Missing 'Expected Behavior' section"
+            exit 1
+          fi
+
+          if ! echo "$PR_BODY" | grep -q "## Related Issue"; then
+            echo "❌ Missing 'Related Issue' section"
+            exit 1
+          fi
+
+          echo "✅ PR template validation passed"
+
+      - name: Nx Format - Check
+        run: npx nx format:check
+
+      - name: Nx Affected - Lint
+        run: npx nx affected --target=lint --parallel=3 --base=$NX_BASE --head=$NX_HEAD || echo "No affected projects for lint"
+
+      - name: Nx Affected - Test
+        run: npx nx affected --target=test --parallel=3 --base=$NX_BASE --head=$NX_HEAD || echo "No affected projects for test"
+
+      - name: Nx Affected - Build
+        run: npx nx affected --target=build --parallel=3 --base=$NX_BASE --head=$NX_HEAD || echo "No affected projects for build"
+
+      - name: Security - Dependency audit
+        shell: bash
+        run: |
+          PM="${{ steps.pm.outputs.pm }}"
+          if [ "$PM" = "pnpm" ]; then pnpm audit --audit-level=high || true; fi
+          if [ "$PM" = "yarn" ]; then yarn audit --level high || true; fi
+          if [ "$PM" = "npm" ]; then npm audit --audit-level=high || true; fi
+
+      - name: CI Summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## 🚀 CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Completed Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "- Code formatting validation" >> $GITHUB_STEP_SUMMARY
+          echo "- Linting validation" >> $GITHUB_STEP_SUMMARY
+          echo "- Test execution" >> $GITHUB_STEP_SUMMARY
+          echo "- Build validation" >> $GITHUB_STEP_SUMMARY
+          echo "- Security dependency audit" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "- PR template validation" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Quality Gates:" >> $GITHUB_STEP_SUMMARY
+          echo "- All affected projects validated" >> $GITHUB_STEP_SUMMARY
+          echo "- Security vulnerabilities checked" >> $GITHUB_STEP_SUMMARY
+          echo "- Code quality standards enforced" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Pipeline Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/forepath/devkit/tree/main/docs
+    about: Check our comprehensive documentation for guides and references
+  - name: 💬 Community Discussions
+    url: https://github.com/forepath/devkit/discussions
+    about: Ask questions and share ideas with the community
+  - name: 🐛 Bug Reports
+    url: https://github.com/forepath/devkit/issues/new?template=bug_report.md
+    about: Report bugs and issues with DevKit
+  - name: ✨ Feature Requests
+    url: https://github.com/forepath/devkit/issues/new?template=feature_request.md
+    about: Suggest new features and improvements
+  - name: 📞 Support
+    url: https://forepath.io/kontakt
+    about: Get direct support from our team

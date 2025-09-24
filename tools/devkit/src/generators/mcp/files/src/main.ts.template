@@ -1,0 +1,21 @@
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
+const server = new McpServer({
+  name: '<%= name %>',
+  version: '1.0.0',
+});
+
+server.tool('get-number-of-the-day', async () => {
+  const number = Math.floor(Math.random() * 101);
+
+  return {
+    content: [{ type: 'text', text: JSON.stringify(number) }],
+  };
+});
+
+const transport = new StdioServerTransport();
+
+(async () => {
+  await server.connect(transport);
+})();

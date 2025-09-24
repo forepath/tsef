@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "Mcp",
+  "title": "MCP Server Generator",
+  "description": "Nx generator for creating a new MCP server",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use?"
+    },
+    "protected": {
+      "type": "boolean",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 1
+      },
+      "default": true,
+      "x-prompt": "Enable authenticated routes?"
+    }
+  },
+  "required": ["name"]
+}

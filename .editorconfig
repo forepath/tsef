@@ -1,0 +1,105 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# TypeScript and JavaScript files
+[*.{ts,js,tsx,jsx}]
+indent_size = 2
+max_line_length = 120
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# Package.json
+[package.json]
+indent_size = 2
+
+# Nx configuration
+[nx.json]
+indent_size = 2
+
+# TypeScript configuration
+[tsconfig*.json]
+indent_size = 2
+
+# ESLint configuration
+[.eslintrc*.json]
+indent_size = 2
+
+# Prettier configuration
+[.prettierrc*]
+indent_size = 2
+
+# GitHub workflows
+[.github/workflows/*.yml]
+indent_size = 2
+
+# Docker files
+[Dockerfile*]
+indent_size = 2
+
+# Shell scripts
+[*.sh]
+indent_size = 2
+
+# Makefile
+[Makefile]
+indent_style = tab
+
+# HTML files
+[*.html]
+indent_size = 2
+max_line_length = 120
+
+# CSS and SCSS files
+[*.{css,scss,sass}]
+indent_size = 2
+max_line_length = 120
+
+# XML files
+[*.xml]
+indent_size = 2
+
+# Properties files
+[*.properties]
+indent_size = 2
+
+# Ini files
+[*.ini]
+indent_size = 2
+
+# TOML files
+[*.toml]
+indent_size = 2
+
+# Cursor configuration files
+[.cursor/*.json]
+indent_size = 2
+
+# MCP configuration files
+[.cursor/mcp.json]
+indent_size = 2
+
+# CLI configuration files
+[.cursor/cli.json]
+indent_size = 2

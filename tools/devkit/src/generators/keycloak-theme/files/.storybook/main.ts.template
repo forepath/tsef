@@ -1,0 +1,18 @@
+import type { StorybookConfig } from '@storybook/angular';
+import { join } from 'path';
+
+const config: StorybookConfig = {
+  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  addons: [],
+  framework: {
+    name: '@storybook/angular',
+    options: {},
+  },
+  staticDirs: [
+    {
+      from: join(__dirname, '../../../node_modules/keycloakify/res/public/keycloakify-dev-resources'),
+      to: '/keycloakify-dev-resources',
+    },
+  ],
+};
+export default config;

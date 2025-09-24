@@ -1,0 +1,76 @@
+import { formatFiles, GeneratorCallback, Tree, updateJson } from '@nx/devkit';
+import { libraryGenerator as angularLibraryGenerator } from '@nx/angular/generators';
+import { libraryGenerator as nodeLibraryGenerator } from '@nx/node';
+import { libraryGenerator as jsLibraryGenerator } from '@nx/js';
+import { LibGeneratorSchema } from './schema';
+
+export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
+  const domainRoot = `libs/domains/${options.domain}`;
+  const libName = `${options.domain}-${options.scope}-${options.type}-${options.name}`;
+  const libFolder = `${options.scope}/${options.type}-${options.name}`;
+  const libRoot = `${domainRoot}/${libFolder}`;
+  let generatorFn: (tree: Tree, schema: any) => Promise<GeneratorCallback>;
+
+  switch (options.generator) {
+    case 'js':
+      generatorFn = jsLibraryGenerator;
+      break;
+    case 'node':
+      generatorFn = nodeLibraryGenerator;
+      break;
+    case 'angular':
+      generatorFn = angularLibraryGenerator;
+      break;
+    default:
+      throw new Error(`Unsupported generator type: ${options.generator}`);
+  }
+
+  await generatorFn(tree, {
+    name: libName,
+    directory: libRoot,
+    tags: `domain:${options.domain},scope:${options.scope},type:${options.type}`,
+    importPath: undefined,
+    prefix: options.domain,
+    skipTsConfig: true,
+    style: 'scss',
+  });
+
+  const domainIndex = `libs/domains/${options.domain}/index.ts`;
+
+  if (!tree.exists(domainIndex)) {
+    tree.write(domainIndex, `// ${options.domain} domain exports\n`);
+  }
+
+  const exportPath = `./${libFolder}/src`;
+  const exportLine = `export * from '${exportPath}';\n`;
+  const current = tree.read(domainIndex, 'utf-8') || '';
+
+  if (!current.includes(exportLine)) {
+    tree.write(domainIndex, current + exportLine);
+  }
+
+  updateJson(tree, '.eslintrc.json', (json) => {
+    const depConstraints =
+      json.overrides[1].rules['@nx/enforce-module-boundaries'][1]
+        .depConstraints || [];
+    const scopeTag = `scope:${options.scope}`;
+
+    if (
+      !depConstraints.some((constraint) => constraint.sourceTag === scopeTag)
+    ) {
+      depConstraints.push({
+        sourceTag: scopeTag,
+        onlyDependOnLibsWithTags: [scopeTag, 'scope:shared'],
+      });
+    }
+
+    json.overrides[1].rules['@nx/enforce-module-boundaries'][1].depConstraints =
+      depConstraints;
+
+    return json;
+  });
+
+  await formatFiles(tree);
+}
+
+export default libGenerator;

@@ -1,0 +1,14 @@
+# Code Owners for DevKit
+# This file defines ownership of different parts of the codebase
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owners - required for all PRs
+* @forepath/forepath
+
+# Contact Information
+# For questions about code ownership or review requests:
+# - General: hi@forepath.io
+# - Architecture: hi@forepath.io
+# - Security: security@forepath.io
+# - DevOps: hi@forepath.io
+# - Legal: hi@forepath.io

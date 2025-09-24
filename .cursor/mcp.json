@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "nx": {
+      "command": "npx",
+      "args": ["nx-mcp@0.6.12"]
+    },
+    "devkit": {
+      "command": "node",
+      "args": ["dist/apps/mcp-proxy/main.js"]
+    },
+    "repomix": {
+      "command": "npx",
+      "args": ["repomix@1.6.1", "--mcp"]
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--env-file",
+        "~/.cursor/.env",
+        "--env-file",
+        "./.cursor/.github.env",
+        "ghcr.io/github/github-mcp-server"
+      ]
+    }
+  }
+}

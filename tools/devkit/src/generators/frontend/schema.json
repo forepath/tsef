@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "Frontend",
+  "title": "Angular Frontend Application Generator",
+  "description": "Nx generator for creating a new Angular frontend application",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use?"
+    },
+    "prefix": {
+      "type": "string",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 1
+      },
+      "default": "app",
+      "x-prompt": "What prefix would you like to use?"
+    },
+    "ui": {
+      "type": "string",
+      "description": " ",
+      "$default": {
+        "$source": "argv",
+        "index": 2
+      },
+      "default": "clarity",
+      "enum": ["clarity", "bootstrap", "none"],
+      "x-prompt": {
+        "message": "What ui would you like to use?",
+        "type": "list",
+        "items": [
+          { "value": "clarity", "label": "Clarity (VMWare)" },
+          { "value": "bootstrap", "label": "Bootstrap (Twitter)" },
+          { "value": "none", "label": "None" }
+        ]
+      }
+    },
+    "protected": {
+      "type": "boolean",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 3
+      },
+      "default": true,
+      "x-prompt": "Enable authenticated routes?"
+    },
+    "localization": {
+      "type": "boolean",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 4
+      },
+      "default": true,
+      "x-prompt": "Enable localization?"
+    },
+    "ssr": {
+      "type": "boolean",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 5
+      },
+      "default": true,
+      "x-prompt": "Enable server-side rendering (SSR)?"
+    }
+  },
+  "required": ["name", "prefix"]
+}

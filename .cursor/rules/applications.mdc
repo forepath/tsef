@@ -1,0 +1,62 @@
+---
+alwaysApply: true
+---
+
+# Application Guidelines
+
+This document defines the rules and best practices for structuring applications within the monorepo. It enforces consistency, scalability, and maintainability across all application types.
+
+> The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in RFC 2119.
+
+## General Rules
+
+- Applications **MUST** be structured according to their scope (`frontend`, `backend`, `native`, `keycloak-theme`).
+- Applications **MUST** follow the naming convention `{scope}-{name}`, e.g., `frontend-portal`, `backend-api`.
+- Applications **MUST** depend only on libraries and shared resources allowed by the monorepo dependency rules.
+- Applications **SHOULD** remain modular and leverage libraries instead of embedding large code blocks.
+- Applications **MAY** include multiple sub-modules or feature modules as needed.
+
+## Frontend Applications (`scope:frontend`)
+
+- Frontend applications **MUST** contain Angular (or other chosen frontend framework) code only.
+- Frontend applications **MUST NOT** contain backend logic.
+- Frontend applications **SHOULD** rely on `ui`, `feature`, `util`, and `shared` libraries for functionality.
+- Frontend applications **MAY** implement routing, state management, and SSR if needed.
+- Frontend applications **SHOULD** integrate design system libraries consistently.
+
+## Backend Applications (`scope:backend`)
+
+- Backend applications **MUST** contain backend framework–specific code (e.g. NestJS).
+- Backend applications **MUST NOT** depend on frontend or native libraries directly, **except via allowed shared libraries** (e.g., REST clients or cross-cutting integration utilities).
+- Backend applications **SHOULD** centralize business logic in `data-access` and `feature` libraries.
+- Backend applications **MAY** expose APIs, services, and workers.
+- Backend applications **SHOULD** follow consistent security and authentication practices.
+
+## Device Native Applications (`scope:native`)
+
+- Native applications **MUST** contain code targeting mobile/desktop frameworks (e.g. Capacitor).
+- Native applications **MUST NOT** depend on frontend or backend libraries directly.
+- Native applications **MAY** rely on shared libraries for cross-platform logic.
+- Native applications **SHOULD** encapsulate platform-specific features and integrations.
+- Native applications **SHOULD** follow platform UI/UX guidelines consistently.
+
+## Keycloak Theme Applications (`scope:keycloak`)
+
+- Keycloak-theme applications **MUST** contain only frontend and email theme customizations for Keycloak.
+- Keycloak-theme applications **MUST NOT** include business logic or backend code.
+- Keycloak-theme applications **MAY** include custom styles, templates, and branding assets.
+- Keycloak-theme applications **SHOULD** integrate with frontend applications for a consistent authentication experience.
+- Keycloak-theme applications **MAY** be reused across multiple frontend applications in the monorepo.
+- Keycloak-theme applications **MUST** depend only on shared UI libraries for styling and presentation.
+
+## Dependency Guidelines
+
+- Applications **MUST** depend only on allowed libraries for their scope.
+- Applications **MUST NOT** directly depend on other applications.
+- Applications **MAY** import from `shared` libraries for cross-cutting concerns.
+
+## Build & Deployment
+
+- Applications **SHOULD** include a clearly defined build process.
+- Applications **SHOULD** be containerizable and deployable independently.
+- Applications **MAY** leverage environment-specific configurations, provided they do not break dependency rules.

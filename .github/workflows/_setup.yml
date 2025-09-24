@@ -1,0 +1,56 @@
+name: Setup
+
+on:
+  workflow_call: {}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node from .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable corepack
+        run: corepack enable || true
+
+      - name: Detect package manager
+        id: pm
+        shell: bash
+        run: |
+          if [ -f pnpm-lock.yaml ]; then echo "pm=pnpm" >> $GITHUB_OUTPUT; exit 0; fi
+          if [ -f yarn.lock ]; then echo "pm=yarn" >> $GITHUB_OUTPUT; exit 0; fi
+          if [ -f package-lock.json ]; then echo "pm=npm" >> $GITHUB_OUTPUT; exit 0; fi
+          echo "pm=pnpm" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          PM="${{ steps.pm.outputs.pm }}"
+          if [ "$PM" = "pnpm" ]; then pnpm install --frozen-lockfile; fi
+          if [ "$PM" = "yarn" ]; then yarn install --frozen-lockfile; fi
+          if [ "$PM" = "npm" ]; then npm ci; fi
+
+      - name: Restore Cypress cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/Cypress
+            node_modules/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('**/pnpm-lock.yaml', '**/yarn.lock', '**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cypress-
+
+      - name: Cypress binary install
+        shell: bash
+        env:
+          CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
+        run: |
+          PM="${{ steps.pm.outputs.pm }}"
+          if [ "$PM" = "pnpm" ]; then pnpm exec cypress install || true; fi
+          if [ "$PM" = "yarn" ]; then yarn run -s cypress install || yarn dlx cypress install || true; fi
+          if [ "$PM" = "npm" ]; then npx --yes cypress install || true; fi

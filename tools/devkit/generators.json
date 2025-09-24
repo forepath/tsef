@@ -1,0 +1,44 @@
+{
+  "generators": {
+    "backend": {
+      "factory": "./src/generators/backend/backend",
+      "schema": "./src/generators/backend/schema.json",
+      "description": "backend generator"
+    },
+    "frontend": {
+      "factory": "./src/generators/frontend/frontend",
+      "schema": "./src/generators/frontend/schema.json",
+      "description": "frontend generator"
+    },
+    "keycloak-theme": {
+      "factory": "./src/generators/keycloak-theme/keycloak-theme",
+      "schema": "./src/generators/keycloak-theme/schema.json",
+      "description": "keycloak-theme generator"
+    },
+    "domain": {
+      "factory": "./src/generators/domain/domain",
+      "schema": "./src/generators/domain/schema.json",
+      "description": "domain generator"
+    },
+    "lib": {
+      "factory": "./src/generators/lib/lib",
+      "schema": "./src/generators/lib/schema.json",
+      "description": "lib generator"
+    },
+    "native": {
+      "factory": "./src/generators/native/native",
+      "schema": "./src/generators/native/schema.json",
+      "description": "native generator"
+    },
+    "mcp": {
+      "factory": "./src/generators/mcp/mcp",
+      "schema": "./src/generators/mcp/schema.json",
+      "description": "mcp generator"
+    },
+    "init": {
+      "factory": "./src/generators/init/init",
+      "schema": "./src/generators/init/schema.json",
+      "description": "init generator"
+    }
+  }
+}
