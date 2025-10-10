@@ -1,0 +1,21 @@
+{
+  "name": "auth-frontend-ui-login-form",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domains/auth/frontend/ui-login-form/src",
+  "prefix": "auth",
+  "projectType": "library",
+  "tags": ["domain:auth", "scope:frontend", "type:ui"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/domains/auth/frontend/ui-login-form/jest.config.ts",
+        "tsConfig": "libs/domains/auth/frontend/ui-login-form/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

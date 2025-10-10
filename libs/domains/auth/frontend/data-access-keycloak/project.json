@@ -1,0 +1,21 @@
+{
+  "name": "auth-frontend-data-access-keycloak",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domains/auth/frontend/data-access-keycloak/src",
+  "prefix": "auth",
+  "projectType": "library",
+  "tags": ["domain:auth", "scope:frontend", "type:data-access"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/domains/auth/frontend/data-access-keycloak/jest.config.ts",
+        "tsConfig": "libs/domains/auth/frontend/data-access-keycloak/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

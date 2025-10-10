@@ -1,65 +1,36 @@
 {
   "recommendations": [
-    // Essential Development Tools
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "ms-vscode.vscode-typescript-next",
     "ms-vscode.vscode-json",
-
-    // Nx and Monorepo Support
     "nrwl.angular-console",
-
-    // Git and Version Control
     "eamodio.gitlens",
     "mhutchie.git-graph",
     "github.vscode-pull-request-github",
-
-    // Markdown and Documentation
     "yzhang.markdown-all-in-one",
     "davidanson.vscode-markdownlint",
     "bierner.markdown-mermaid",
-
-    // Testing and Quality
     "ms-vscode.test-adapter-converter",
     "hbenl.vscode-test-explorer",
     "orta.vscode-jest",
-
-    // Angular and Frontend
     "angular.ng-template",
     "johnpapa.angular2",
     "cyrilletuzi.angular-schematics",
-
-    // Docker and Containers
     "ms-azuretools.vscode-docker",
     "ms-vscode-remote.remote-containers",
-
-    // Productivity and Utilities
     "bradlc.vscode-tailwindcss",
     "formulahendry.auto-rename-tag",
     "christian-kohler.path-intellisense",
-
-    // Code Quality and Linting
     "streetsidesoftware.code-spell-checker",
     "usernamehw.errorlens",
     "gruntfuggly.todo-tree",
-
-    // Themes and Appearance
     "pkief.material-icon-theme",
     "zhuangtongfa.material-theme",
-
-    // AI and Productivity
     "github.copilot",
     "github.copilot-chat",
-
-    // File Management
     "alefragnani.project-manager",
-
-    // Terminal and Shell
     "ms-vscode.powershell"
   ],
-  "unwantedRecommendations": [
-    // Extensions that might conflict or are not needed
-    "ms-vscode.vscode-typescript",
-    "hookyqr.beautify"
-  ]
+  "unwantedRecommendations": ["ms-vscode.vscode-typescript", "hookyqr.beautify"]
 }

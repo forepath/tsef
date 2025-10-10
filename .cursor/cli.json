@@ -9,6 +9,7 @@
       "Shell(ng)",
       "Shell(gh)",
       "Shell(git)",
+      "Shell(git checkout)",
       "Shell(npx)",
       "Shell(node)",
       "Shell(npm)",

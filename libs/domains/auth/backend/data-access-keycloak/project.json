@@ -1,0 +1,16 @@
+{
+  "name": "auth-backend-data-access-keycloak",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domains/auth/backend/data-access-keycloak/src",
+  "projectType": "library",
+  "tags": ["domain:auth", "scope:backend", "type:data-access"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/domains/auth/backend/data-access-keycloak/jest.config.ts"
+      }
+    }
+  }
+}
