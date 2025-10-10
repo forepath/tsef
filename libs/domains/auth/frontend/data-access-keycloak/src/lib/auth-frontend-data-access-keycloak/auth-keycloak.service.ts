@@ -1,21 +1,19 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, from, throwError } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
-import { KeycloakService } from 'keycloak-angular';
 import {
-  UserProfile,
+  AuthError,
   AuthState,
+  DecodedToken,
+  KeycloakConfig,
+  KeycloakInitOptions,
   LoginRequest,
   LoginResponse,
   LogoutRequest,
   RefreshTokenRequest,
   RefreshTokenResponse,
-  KeycloakConfig,
-  KeycloakInitOptions,
-  AuthError,
-  TokenInfo,
-  DecodedToken,
+  UserProfile,
 } from '@auth/shared/util-types';
+import { KeycloakService } from 'keycloak-angular';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',

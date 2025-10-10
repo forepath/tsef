@@ -1,14 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Store, Action } from '@ngrx/store';
+import { Injectable, inject } from '@angular/core';
+import { LoginRequest, LogoutRequest, RefreshTokenRequest, UserProfile } from '@auth';
+import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import {
-  AuthState,
-  UserProfile,
-  LoginRequest,
-  LogoutRequest,
-  RefreshTokenRequest,
-  AuthEvent,
-} from '@auth/shared/util-types';
 
 // Actions
 export const AuthActions = {
@@ -338,7 +331,7 @@ export class AuthEffects {
   providedIn: 'root',
 })
 export class AuthFacade {
-  constructor(private store: Store<{ auth: AuthFeatureState }>) {}
+  private store: Store<{ auth: AuthFeatureState }> = inject(Store);
 
   // Selectors
   isAuthenticated$: Observable<boolean> = this.store.select(selectIsAuthenticated);

@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@auth/auth": ["libs/domains/auth/index.ts"],
+      "@auth": ["libs/domains/auth/index.ts"],
       "@forepath/devkit": ["tools/devkit/src/index.ts"]
     }
   },

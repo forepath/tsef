@@ -11,7 +11,7 @@ describe('Auth Shared Types', () => {
         lastName: 'User',
         roles: ['user'],
         groups: ['group1'],
-        attributes: { department: 'IT' }
+        attributes: { department: 'IT' },
       };
 
       expect(userProfile.id).toBe('123');
@@ -31,7 +31,7 @@ describe('Auth Shared Types', () => {
         refreshToken: 'refresh123',
         expiresAt: Date.now() + 3600000,
         loading: false,
-        error: null
+        error: null,
       };
 
       expect(authState.isAuthenticated).toBe(true);
@@ -45,7 +45,7 @@ describe('Auth Shared Types', () => {
       const config: KeycloakConfig = {
         url: 'http://localhost:8080/auth',
         realm: 'test-realm',
-        clientId: 'test-client'
+        clientId: 'test-client',
       };
 
       expect(config.url).toBe('http://localhost:8080/auth');
@@ -59,7 +59,7 @@ describe('Auth Shared Types', () => {
       const loginRequest: LoginRequest = {
         username: 'testuser',
         password: 'password123',
-        rememberMe: true
+        rememberMe: true,
       };
 
       expect(loginRequest.username).toBe('testuser');

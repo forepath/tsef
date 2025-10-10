@@ -1,5 +1,10 @@
 import { AuthGuard, RolesGuard, ResourceGuard, PermissionsGuard } from './auth-backend-feature-guards';
-import { KeycloakService, KeycloakAuthGuard, KeycloakResourceGuard, KeycloakRoleGuard } from '@auth/backend/data-access-keycloak';
+import {
+  KeycloakService,
+  KeycloakAuthGuard,
+  KeycloakResourceGuard,
+  KeycloakRoleGuard,
+} from '@auth/backend/data-access-keycloak';
 import { Reflector } from '@nestjs/core';
 import { ExecutionContext } from '@nestjs/common';
 
@@ -12,15 +17,15 @@ describe('Auth Guards', () => {
       user: {
         sub: 'user123',
         exp: Date.now() / 1000 + 3600,
-        realm_access: { roles: ['user'] }
+        realm_access: { roles: ['user'] },
       },
-      userProfile: null
+      userProfile: null,
     };
 
     mockExecutionContext = {
       switchToHttp: () => ({
-        getRequest: () => mockRequest
-      })
+        getRequest: () => mockRequest,
+      }),
     } as ExecutionContext;
   });
 
@@ -31,7 +36,7 @@ describe('Auth Guards', () => {
 
     beforeEach(() => {
       keycloakAuthGuard = {
-        canActivate: jest.fn().mockResolvedValue(true)
+        canActivate: jest.fn().mockResolvedValue(true),
       } as any;
 
       keycloakService = {
@@ -41,8 +46,8 @@ describe('Auth Guards', () => {
           username: 'testuser',
           email: 'test@example.com',
           roles: ['user'],
-          groups: []
-        })
+          groups: [],
+        }),
       } as any;
 
       authGuard = new AuthGuard(keycloakAuthGuard, keycloakService);
@@ -50,16 +55,16 @@ describe('Auth Guards', () => {
 
     it('should allow access for valid token', async () => {
       const result = await authGuard.canActivate(mockExecutionContext);
-      
+
       expect(result).toBe(true);
       expect(mockRequest.userProfile).toBeDefined();
     });
 
     it('should deny access for expired token', async () => {
       keycloakService.isTokenExpired = jest.fn().mockReturnValue(true);
-      
+
       const result = await authGuard.canActivate(mockExecutionContext);
-      
+
       expect(result).toBe(false);
     });
   });
@@ -72,15 +77,15 @@ describe('Auth Guards', () => {
 
     beforeEach(() => {
       keycloakRoleGuard = {
-        canActivate: jest.fn().mockResolvedValue(true)
+        canActivate: jest.fn().mockResolvedValue(true),
       } as any;
 
       keycloakService = {
-        hasAnyRole: jest.fn().mockReturnValue(true)
+        hasAnyRole: jest.fn().mockReturnValue(true),
       } as any;
 
       reflector = {
-        getAllAndOverride: jest.fn().mockReturnValue(['user'])
+        getAllAndOverride: jest.fn().mockReturnValue(['user']),
       } as any;
 
       rolesGuard = new RolesGuard(keycloakRoleGuard, keycloakService, reflector);
@@ -88,16 +93,16 @@ describe('Auth Guards', () => {
 
     it('should allow access for user with required role', async () => {
       const result = await rolesGuard.canActivate(mockExecutionContext);
-      
+
       expect(result).toBe(true);
       expect(keycloakService.hasAnyRole).toHaveBeenCalledWith(mockRequest.user, ['user']);
     });
 
     it('should deny access for user without required role', async () => {
       keycloakService.hasAnyRole = jest.fn().mockReturnValue(false);
-      
+
       const result = await rolesGuard.canActivate(mockExecutionContext);
-      
+
       expect(result).toBe(false);
     });
   });

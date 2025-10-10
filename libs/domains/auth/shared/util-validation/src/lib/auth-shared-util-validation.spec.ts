@@ -33,7 +33,7 @@ describe('Auth Validation Utilities', () => {
     it('should reject short password', () => {
       const result = validatePassword('123');
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.code === 'TOO_SHORT')).toBe(true);
+      expect(result.errors.some((e) => e.code === 'TOO_SHORT')).toBe(true);
     });
 
     it('should reject empty password', () => {
@@ -54,7 +54,7 @@ describe('Auth Validation Utilities', () => {
     it('should reject short username', () => {
       const result = validateUsername('ab');
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.code === 'TOO_SHORT')).toBe(true);
+      expect(result.errors.some((e) => e.code === 'TOO_SHORT')).toBe(true);
     });
 
     it('should reject empty username', () => {
@@ -69,7 +69,7 @@ describe('Auth Validation Utilities', () => {
     it('should validate correct login request', () => {
       const result = validateLoginRequest({
         username: 'testuser',
-        password: 'password123'
+        password: 'password123',
       });
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -78,7 +78,7 @@ describe('Auth Validation Utilities', () => {
     it('should validate email login request', () => {
       const result = validateLoginRequest({
         email: 'test@example.com',
-        password: 'password123'
+        password: 'password123',
       });
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -86,18 +86,18 @@ describe('Auth Validation Utilities', () => {
 
     it('should reject login request without credentials', () => {
       const result = validateLoginRequest({
-        password: 'password123'
+        password: 'password123',
       });
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.code === 'REQUIRED')).toBe(true);
+      expect(result.errors.some((e) => e.code === 'REQUIRED')).toBe(true);
     });
 
     it('should reject login request without password', () => {
       const result = validateLoginRequest({
-        username: 'testuser'
+        username: 'testuser',
       });
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.code === 'REQUIRED')).toBe(true);
+      expect(result.errors.some((e) => e.code === 'REQUIRED')).toBe(true);
     });
   });
 });

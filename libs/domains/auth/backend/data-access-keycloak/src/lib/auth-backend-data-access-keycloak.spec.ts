@@ -10,12 +10,12 @@ describe('KeycloakService', () => {
     configService = {
       get: jest.fn((key: string, defaultValue?: string) => {
         const config = {
-          'KEYCLOAK_URL': 'http://localhost:8080/auth',
-          'KEYCLOAK_REALM': 'test-realm',
-          'KEYCLOAK_CLIENT_ID': 'test-client'
+          KEYCLOAK_URL: 'http://localhost:8080/auth',
+          KEYCLOAK_REALM: 'test-realm',
+          KEYCLOAK_CLIENT_ID: 'test-client',
         };
         return config[key] || defaultValue;
-      })
+      }),
     } as any;
 
     service = new KeycloakService(configService);
@@ -24,7 +24,7 @@ describe('KeycloakService', () => {
   describe('getKeycloakConfig', () => {
     it('should return keycloak configuration', () => {
       const config = service.getKeycloakConfig();
-      
+
       expect(config.url).toBe('http://localhost:8080/auth');
       expect(config.realm).toBe('test-realm');
       expect(config.clientId).toBe('test-client');
@@ -42,18 +42,18 @@ describe('KeycloakService', () => {
         auth_time: Date.now() / 1000,
         session_state: 'session123',
         realm_access: {
-          roles: ['user', 'admin']
+          roles: ['user', 'admin'],
         },
         resource_access: {
           'test-client': {
-            roles: ['client-role']
-          }
+            roles: ['client-role'],
+          },
         },
         preferred_username: 'testuser',
         email: 'test@example.com',
         given_name: 'Test',
         family_name: 'User',
-        name: 'Test User'
+        name: 'Test User',
       };
 
       const userProfile = service.extractUserProfile(token);
@@ -78,7 +78,7 @@ describe('KeycloakService', () => {
         exp: Date.now() / 1000 + 3600,
         iat: Date.now() / 1000,
         auth_time: Date.now() / 1000,
-        session_state: 'session123'
+        session_state: 'session123',
       };
 
       expect(service.isTokenExpired(token)).toBe(false);
@@ -92,7 +92,7 @@ describe('KeycloakService', () => {
         exp: Date.now() / 1000 - 3600,
         iat: Date.now() / 1000 - 7200,
         auth_time: Date.now() / 1000 - 7200,
-        session_state: 'session123'
+        session_state: 'session123',
       };
 
       expect(service.isTokenExpired(token)).toBe(true);
@@ -110,8 +110,8 @@ describe('KeycloakService', () => {
         auth_time: Date.now() / 1000,
         session_state: 'session123',
         realm_access: {
-          roles: ['user', 'admin']
-        }
+          roles: ['user', 'admin'],
+        },
       };
 
       expect(service.hasRole(token, 'user')).toBe(true);
