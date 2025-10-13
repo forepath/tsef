@@ -1,0 +1,21 @@
+.hero {
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 48px;
+    right: -64px;
+    aspect-ratio: 1 / 1;
+    height: calc(100% - 48px);
+    background-image: url('assets/background-hero.svg');
+    background-position: right bottom;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    z-index: -1;
+    mix-blend-mode: color-burn;
+    opacity: 0.25;
+  }
+}

@@ -1,0 +1,29 @@
+.what-you-get {
+  background-color: white;
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 48px;
+    right: 48px;
+    aspect-ratio: 1 / 1;
+    height: 50%;
+    background-image: url('assets/background-section-light.svg');
+    background-position: right bottom;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    z-index: 1;
+  }
+
+  > * {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+.card {
+  background-color: #fafafc;
+}

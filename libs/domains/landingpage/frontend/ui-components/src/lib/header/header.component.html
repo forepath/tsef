@@ -1,0 +1,36 @@
+<header class="px-3">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start gap-5">
+      <a
+        href="/"
+        class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none p-5 logo-container"
+      >
+        <img src="tsef.svg" alt="TSEF" width="32" height="32" />
+      </a>
+      <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+        <li>
+          <a
+            href="https://github.com/forepath/devkit/blob/main/docs/README.md"
+            target="_blank"
+            class="nav-link px-3"
+            i18n="@@headerDocs"
+            >Docs</a
+          >
+        </li>
+      </ul>
+      <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0">
+        <li>
+          <a href="#" class="nav-link px-2 link-secondary"><i class="bi bi-github fs-4"></i></a>
+        </li>
+      </ul>
+      <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0">
+        <li>
+          <a href="/en/" class="nav-link px-2" [class.text-highlight]="isEn">EN</a>
+        </li>
+        <li>
+          <a href="/de/" class="nav-link px-2" [class.text-highlight]="isDe">DE</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</header>

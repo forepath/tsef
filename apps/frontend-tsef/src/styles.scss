@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+$font-family-sans-serif: 'Manrope', sans-serif;
+$primary: #1f283b;
+$secondary: #334155;
+$tertiary: #64748b;
+$quaternary: #94a3b8;
+$quinary: #e2e8f0;
+$senary: #f1f5f9;
+$septenary: #f8fafc;
+$octonary: #f1f5f9;
+$nonary: #f8fafc;
+
+// Custom color palette
+$danger: #c2185b; // Angular pink for danger/errors
+$success: #b8a082; // Darker gold-brown for success
+
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap/scss/bootstrap-grid';
+@import 'bootstrap-icons/font/bootstrap-icons';
+
+body {
+  background-color: #fafafc;
+}
+
+.py-10 {
+  padding-top: 6rem !important;
+  padding-bottom: 6rem !important;
+}
+
+.card {
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.alert {
+  background: linear-gradient(135deg, #dbd2c1 0%, #e8dfd0 50%, #dbd2c1 100%);
+  border: 0;
+}
+
+.text-highlight {
+  color: #3178c6; // Fallback for browsers that don't support gradients (TypeScript Blue)
+  background: linear-gradient(90deg, #3178c6 0%, #41badb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}

@@ -17,7 +17,12 @@
     "paths": {
       "@forepath/devkit": ["tools/devkit/src/index.ts"],
       "@forepath/identity/backend": ["libs/domains/identity/backend/index.ts"],
-      "@forepath/identity/frontend": ["libs/domains/identity/frontend/index.ts"]
+      "@forepath/identity/frontend": [
+        "libs/domains/identity/frontend/index.ts"
+      ],
+      "@forepath/landingpage/frontend": [
+        "libs/domains/landingpage/frontend/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,0 +1,13 @@
+.faq {
+  background-color: #f8f9fa;
+}
+
+.accordion-button {
+  background-color: white;
+  border-color: #dee2e6;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: #dbd2c1;
+  border-color: #6c757d;
+}

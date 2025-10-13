@@ -1,0 +1,21 @@
+{
+  "name": "landingpage-frontend-ui-components",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domains/landingpage/frontend/ui-components/src",
+  "prefix": "landingpage",
+  "projectType": "library",
+  "tags": ["domain:landingpage", "scope:frontend", "type:ui"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/domains/landingpage/frontend/ui-components/jest.config.ts",
+        "tsConfig": "libs/domains/landingpage/frontend/ui-components/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

@@ -1,0 +1,945 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="cmpTitle" datatype="html">
+        <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>TSEF<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> vs Alternatives</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpDescription" datatype="html">
+        <source> While other tools provide basic monorepo functionality, TSEF delivers enterprise-grade capabilities that go far beyond standard development workflows. See how TSEF compares to traditional solutions and why it&apos;s the clear choice for organizations that demand quality, compliance, and scalability. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpHeaderFeature" datatype="html">
+        <source>Feature</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpHeaderStandardNx" datatype="html">
+        <source>Standard Nx</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">21,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpHeaderTsef" datatype="html">
+        <source>TSEF</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">22,24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpRow1" datatype="html">
+        <source>Monorepo tooling</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">27,28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpRow2" datatype="html">
+        <source>AI-powered agents</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">36,37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpRow3" datatype="html">
+        <source>Enterprise governance</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">45,46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpRow4" datatype="html">
+        <source>Built-in compliance</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">55,56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpRow5" datatype="html">
+        <source>Test coverage enforcement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">65,66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpRow6" datatype="html">
+        <source>Multi-framework generators</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">75,76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpRow7" datatype="html">
+        <source>Zero-config patterns</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">85,86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpBannerTitle" datatype="html">
+        <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-info-circle me-2 fs-5&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Migration Path </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">106,108</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cmpBannerText" datatype="html">
+        <source> Already using Nx? TSEF extends Nx seamlessly. Add TSEF generators to your existing workspace without breaking changes. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/comparison/comparison.component.html</context>
+          <context context-type="linenumber">110,112</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqTitle" datatype="html">
+        <source>Frequently Asked Questions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqSubtitle" datatype="html">
+        <source>Address common objections</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">6,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqQ1" datatype="html">
+        <source>Is this just Nx with extra steps?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">23,24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqA1" datatype="html">
+        <source> TSEF extends Nx with enterprise governance, AI agents, and compliance automation that would take months to build yourself. It&apos;s Nx plus everything enterprises need for production-ready applications. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">33,34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqQ2" datatype="html">
+        <source>What if we already use Nx?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">49,50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqA2" datatype="html">
+        <source> TSEF is built on Nx. You can adopt incrementally by adding TSEF generators to your existing workspace. No breaking changes, just enhanced capabilities. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">59,60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqQ3" datatype="html">
+        <source>How much does it cost?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">75,76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqA3" datatype="html">
+        <source> TSEF is open source and free. No licensing fees, no vendor lock-in. You own your code and can customize everything to your needs. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">85,86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqQ4" datatype="html">
+        <source>What about vendor lock-in?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">101,102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqA4" datatype="html">
+        <source> TSEF generates standard Angular, NestJS, Ionic, and Keycloak code. You own your code and can eject anytime. No proprietary formats or dependencies. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">111,112</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqQ5" datatype="html">
+        <source>Can we customize the rules?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">127,128</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="faqA5" datatype="html">
+        <source> Yes. All 200+ rules are configurable. Start with defaults, customize as needed. You can add your own rules or disable ones that don&apos;t fit your organization. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/faq/faq.component.html</context>
+          <context context-type="linenumber">137,138</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerCopyright" datatype="html">
+        <source>© <x id="INTERPOLATION" equiv-text="{{ currentYear }}"/> The Typescript Enterprise Framework (TSEF)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/footer/footer.component.html</context>
+          <context context-type="linenumber">9,10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerLegalDisclosure" datatype="html">
+        <source>Legal Disclosure</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/footer/footer.component.html</context>
+          <context context-type="linenumber">14,16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerPrivacyPolicy" datatype="html">
+        <source>Privacy Policy</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/footer/footer.component.html</context>
+          <context context-type="linenumber">17,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedTitle" datatype="html">
+        <source>Get Started</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedDescription" datatype="html">
+        <source> Ready to transform your enterprise development workflow? Get started with TSEF in <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>minutes, not months<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/>. Our streamlined onboarding process and comprehensive documentation ensure you&apos;re productive from day one, with enterprise-grade applications running in your environment within hours. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">7,10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedQuickStart" datatype="html">
+        <source>Quick Start</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedCreateWorkspace" datatype="html">
+        <source> Create your first TSEF workspace in under 2 minutes. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedDocumentation" datatype="html">
+        <source>Documentation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">46,48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedInstallationGuide" datatype="html">
+        <source>Installation Guide</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">52,54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedFirstProjectTutorial" datatype="html">
+        <source>First Project Tutorial</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">58,60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedGeneratorReference" datatype="html">
+        <source>Generator Reference</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">64,66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedEnterprisePatternsGuide" datatype="html">
+        <source>Enterprise Patterns Guide</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">70,72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedViewOnGithub" datatype="html">
+        <source>View on GitHub</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">88,91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedJoinCommunity" datatype="html">
+        <source>Join Community</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">96,98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="getStartedGetSupport" datatype="html">
+        <source>Get Support</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/get-started/get-started.component.html</context>
+          <context context-type="linenumber">100,102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="headerDocs" datatype="html">
+        <source>Docs</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/header/header.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroTitle" datatype="html">
+        <source> The <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>AI-ready<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> TypeScript Enterprise Framework </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">6,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroSubtitle" datatype="html">
+        <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>Enterprise-grade<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> Nx workflow with AI-powered development agents and built-in compliance. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">9,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroBullet1" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>AI-powered agents<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> automate development workflows</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">18,19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroBullet2" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>80%+ test coverage<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> enforced automatically</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">22,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroBullet3" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Zero-config<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> enterprise patterns</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">26,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroBullet4" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>8 generators<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for Angular, NestJS, Ionic, Keycloak</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">34,35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroBullet5" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>4 frameworks<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> in single monorepo</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">38,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroBullet6" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>200+ rules<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for enterprise compliance</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">42,43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroBannerTitle" datatype="html">
+        <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right-circle me-2&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/>Beyond Standard Nx </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">50,52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroBannerText" datatype="html">
+        <source> While Nx provides monorepo tooling, TSEF adds enterprise governance, AI-powered workflows, and built-in compliance for production-ready applications. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">53,55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroCtaGetStarted" datatype="html">
+        <source>Get Started</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">61,62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="heroCtaViewOnGithub" datatype="html">
+        <source>View on GitHub</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/hero/hero.component.html</context>
+          <context context-type="linenumber">69,71</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwTitle" datatype="html">
+        <source>How It Works</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwDescription" datatype="html">
+        <source> TSEF transforms enterprise development through a <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>streamlined<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> three-step process that eliminates complexity while ensuring enterprise-grade quality. From intelligent code generation to automated deployment, every step is guided by AI agents and enforced by 200+ enterprise rules. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep1" datatype="html">
+        <source>Generate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep1Item1" datatype="html">
+        <source>Run a generator (frontend, backend, native, keycloak-theme)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">33,34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep1Item2" datatype="html">
+        <source>AI agents scaffold enterprise-grade code</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">38,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep1Item3" datatype="html">
+        <source>Domain-driven structure automatically created</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">42,43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep2" datatype="html">
+        <source>Develop</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">58,59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep2Item1" datatype="html">
+        <source>AI agents enforce 200+ enterprise rules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">62,63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep2Item2" datatype="html">
+        <source>Automated testing ensures 80% coverage</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">66,67</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep2Item3" datatype="html">
+        <source>Real-time compliance validation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">70,71</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep2Item4" datatype="html">
+        <source>Zero-config patterns guide best practices</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">74,75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep3" datatype="html">
+        <source>Deploy</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">90,91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep3Item1" datatype="html">
+        <source>Containerized applications ready to ship</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">94,95</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep3Item2" datatype="html">
+        <source>Infrastructure as code included</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">98,99</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep3Item3" datatype="html">
+        <source>Monitoring and observability built-in</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">102,103</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="hiwStep3Item4" datatype="html">
+        <source>Disaster recovery procedures documented</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/how-it-works/how-it-works.component.html</context>
+          <context context-type="linenumber">106,107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofTitle" datatype="html">
+        <source>Proven Results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofDescription" datatype="html">
+        <source> TSEF delivers measurable outcomes backed by concrete metrics and enterprise-grade capabilities. Every number represents real value delivered to development teams, from automated code generation to enforced quality standards. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">7,10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofMetric8" datatype="html">
+        <source>8</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofMetric8Caption" datatype="html">
+        <source>Generators covering all application types</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">20,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofMetric4" datatype="html">
+        <source>4</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofMetric4Caption" datatype="html">
+        <source>Frameworks seamlessly integrated</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">30,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofMetric200" datatype="html">
+        <source>200+</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">39,40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofMetric200Caption" datatype="html">
+        <source>Enterprise rules enforced</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">40,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofMetric80" datatype="html">
+        <source>80%+</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">49,50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofMetric80Caption" datatype="html">
+        <source>Test coverage guaranteed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">50,52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofBannerTitle" datatype="html">
+        <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-github me-2 fs-5&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Open Source &amp; Community Driven </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">63,65</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="proofBannerText" datatype="html">
+        <source> TSEF is built by developers, for developers. Contribute, customize, and own your code. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/proof/proof.component.html</context>
+          <context context-type="linenumber">67,69</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="technologyTitle" datatype="html">
+        <source> Powered by the <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>industry&apos;s favorite technologies<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/technology/technology.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygTitle" datatype="html">
+        <source>What You Get</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygDescription" datatype="html">
+        <source> TSEF provides a <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>comprehensive<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> enterprise development platform that combines AI-powered automation with proven frameworks and governance. Every feature is designed to accelerate development while maintaining the highest standards of quality, security, and compliance. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard1Title" datatype="html">
+        <source>AI-Powered Development</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard1Item1" datatype="html">
+        <source>Intelligent code generation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">26,28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard1Item2" datatype="html">
+        <source>Automated testing and validation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">30,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard1Item3" datatype="html">
+        <source>Real-time compliance checking</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">34,36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard1Item4" datatype="html">
+        <source>Context-aware suggestions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">38,40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard2Title" datatype="html">
+        <source>Multi-Framework Monorepo</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">49,51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard2Item1" datatype="html">
+        <source>Angular for web applications</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">54,56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard2Item2" datatype="html">
+        <source>Clarity and Bootstrap for UX/UI</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">58,60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard2Item3" datatype="html">
+        <source>NestJS for backend services</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">62,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard2Item4" datatype="html">
+        <source>Ionic for mobile apps</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">66,68</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard2Item5" datatype="html">
+        <source>Keycloak for authentication</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">70,72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard3Title" datatype="html">
+        <source>Enterprise Governance</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">83,85</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard3Item1" datatype="html">
+        <source>200+ rules for consistency</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">88,90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard3Item2" datatype="html">
+        <source>Dependency boundary enforcement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">92,94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard3Item3" datatype="html">
+        <source>Security best practices</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">96,98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard3Item4" datatype="html">
+        <source>Compliance automation (GDPR, CCPA)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">100,102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard4Title" datatype="html">
+        <source>Production-Ready Infrastructure</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">111,113</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard4Item1" datatype="html">
+        <source>Docker containerization</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">116,118</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard4Item2" datatype="html">
+        <source>Kubernetes deployment configs</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">120,122</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard4Item3" datatype="html">
+        <source>CI/CD pipeline templates</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">124,126</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wygCard4Item4" datatype="html">
+        <source>Monitoring and alerting</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/what-you-get/what-you-get.component.html</context>
+          <context context-type="linenumber">128,130</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbTitle" datatype="html">
+        <source>Who Benefits?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbDescription" datatype="html">
+        <source> TSEF delivers <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>measurable value<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> across every level of your organization. From developers writing their first line of code to CTOs making strategic technology decisions, everyone benefits from standardized, enterprise-grade development practices that accelerate delivery while reducing risk and technical debt. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">7,10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard1Title" datatype="html">
+        <source>Development Teams</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard1Item1" datatype="html">
+        <source>Ship features faster with AI-powered workflows</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">24,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard1Item2" datatype="html">
+        <source>Focus on business logic, not boilerplate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard1Item3" datatype="html">
+        <source>Consistent patterns across all projects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">32,33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard1Item4" datatype="html">
+        <source>Automated testing and quality gates</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">36,37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard2Title" datatype="html">
+        <source>Engineering Managers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">47,48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard2Item1" datatype="html">
+        <source>Reduce onboarding time from weeks to days</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">51,52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard2Item2" datatype="html">
+        <source>Enforce quality standards automatically</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">55,56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard2Item3" datatype="html">
+        <source>Predictable delivery timelines</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">59,60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard2Item4" datatype="html">
+        <source>Clear dependency boundaries</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">63,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard3Title" datatype="html">
+        <source>CTOs &amp; Architects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">74,75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard3Item1" datatype="html">
+        <source>Enterprise-ready from day one</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">78,79</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard3Item2" datatype="html">
+        <source>Scalable monorepo architecture</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">82,83</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard3Item3" datatype="html">
+        <source>Built-in security and compliance</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">86,87</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wbCard3Item4" datatype="html">
+        <source>Future-proof technology stack</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/who-benefits/who-benefits.component.html</context>
+          <context context-type="linenumber">90,91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyTitle" datatype="html">
+        <source>Why TSEF?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyDescription" datatype="html">
+        <source> Enterprise development teams face <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>mounting pressure<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> to deliver secure, compliant, and scalable applications at unprecedented speed. Traditional approaches lead to inconsistent quality, slow onboarding, and compliance nightmares that cost millions in technical debt and missed opportunities. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">7,10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyCard1Title" datatype="html">
+        <source>Inconsistent Quality</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyCard1SolutionTitle" datatype="html">
+        <source>The TSEF Solution</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">36,37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyCard1SolutionText" datatype="html">
+        <source>200+ enforced rules, 80%+ test coverage minimum</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">37,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyCard2Title" datatype="html">
+        <source>Slow Onboarding</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">47,48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyCard2SolutionTitle" datatype="html">
+        <source>The TSEF Solution</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">63,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyCard2SolutionText" datatype="html">
+        <source>AI agents guide development, 8 generators, zero-config patterns</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">64,66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyCard3Title" datatype="html">
+        <source>Compliance Burden</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">74,75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyCard3SolutionTitle" datatype="html">
+        <source>The TSEF Solution</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">90,91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="whyCard3SolutionText" datatype="html">
+        <source>Built-in compliance, automated monitoring, enterprise governance rules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/domains/landingpage/frontend/ui-components/src/lib/why-tsef/why-tsef.component.html</context>
+          <context context-type="linenumber">92,94</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" datatype="plaintext" original="ng2.template" target-language="de">
+    <body>
+      <trans-unit id="cmpTitle" datatype="html">
+        <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>TSEF<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> vs Alternatives</source>
+        <target><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>TSEF<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> vs Alternativen</target>
+      </trans-unit>
+      <trans-unit id="cmpDescription" datatype="html">
+        <source> While other tools provide basic monorepo functionality, TSEF delivers enterprise-grade capabilities that go far beyond standard development workflows. See how TSEF compares to traditional solutions and why it&apos;s the clear choice for organizations that demand quality, compliance, and scalability. </source>
+        <target> Während andere Tools grundlegende Monorepo-Funktionen bieten, liefert TSEF unternehmensreife Funktionen, die weit über Standard-Entwicklungsabläufe hinausgehen. Sehen Sie, wie TSEF im Vergleich zu traditionellen Lösungen abschneidet und warum es die klare Wahl für Organisationen ist, die Qualität, Compliance und Skalierbarkeit verlangen. </target>
+      </trans-unit>
+      <trans-unit id="cmpHeaderFeature" datatype="html">
+        <source>Feature</source>
+        <target>Funktion</target>
+      </trans-unit>
+      <trans-unit id="cmpHeaderStandardNx" datatype="html">
+        <source>Standard Nx</source>
+        <target>Standard Nx</target>
+      </trans-unit>
+      <trans-unit id="cmpHeaderTsef" datatype="html">
+        <source>TSEF</source>
+        <target>TSEF</target>
+      </trans-unit>
+      <trans-unit id="cmpRow1" datatype="html">
+        <source>Monorepo tooling</source>
+        <target>Monorepo-Tooling</target>
+      </trans-unit>
+      <trans-unit id="cmpRow2" datatype="html">
+        <source>AI-powered agents</source>
+        <target>KI-gestützte Agents</target>
+      </trans-unit>
+      <trans-unit id="cmpRow3" datatype="html">
+        <source>Enterprise governance</source>
+        <target>Unternehmens-Governance</target>
+      </trans-unit>
+      <trans-unit id="cmpRow4" datatype="html">
+        <source>Built-in compliance</source>
+        <target>Integrierte Compliance</target>
+      </trans-unit>
+      <trans-unit id="cmpRow5" datatype="html">
+        <source>Test coverage enforcement</source>
+        <target>Durchsetzung der Testabdeckung</target>
+      </trans-unit>
+      <trans-unit id="cmpRow6" datatype="html">
+        <source>Multi-framework generators</source>
+        <target>Generatoren für mehrere Frameworks</target>
+      </trans-unit>
+      <trans-unit id="cmpRow7" datatype="html">
+        <source>Zero-config patterns</source>
+        <target>Zero-Config-Patterns</target>
+      </trans-unit>
+      <trans-unit id="cmpBannerTitle" datatype="html">
+        <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-info-circle me-2 fs-5&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Migration Path </source>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-info-circle me-2 fs-5&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Migrationspfad </target>
+      </trans-unit>
+      <trans-unit id="cmpBannerText" datatype="html">
+        <source> Already using Nx? TSEF extends Nx seamlessly. Add TSEF generators to your existing workspace without breaking changes. </source>
+        <target> Sie verwenden bereits Nx? TSEF erweitert Nx nahtlos. Fügen Sie Ihrem bestehenden Workspace TSEF-Generatoren hinzu – ohne Breaking Changes. </target>
+      </trans-unit>
+      <trans-unit id="faqTitle" datatype="html">
+        <source>Frequently Asked Questions</source>
+        <target>Häufig gestellte Fragen</target>
+      </trans-unit>
+      <trans-unit id="faqSubtitle" datatype="html">
+        <source>Address common objections</source>
+        <target>Häufige Einwände adressieren</target>
+      </trans-unit>
+      <trans-unit id="faqQ1" datatype="html">
+        <source>Is this just Nx with extra steps?</source>
+        <target>Ist das nur Nx mit zusätzlichen Schritten?</target>
+      </trans-unit>
+      <trans-unit id="faqA1" datatype="html">
+        <source> TSEF extends Nx with enterprise governance, AI agents, and compliance automation that would take months to build yourself. It&apos;s Nx plus everything enterprises need for production-ready applications. </source>
+        <target> TSEF erweitert Nx um Unternehmens-Governance, KI-Agents und Compliance-Automatisierung, die Sie selbst Monate kosten würde. Es ist Nx plus alles, was Unternehmen für produktionsreife Anwendungen benötigen. </target>
+      </trans-unit>
+      <trans-unit id="faqQ2" datatype="html">
+        <source>What if we already use Nx?</source>
+        <target>Was ist, wenn wir bereits Nx verwenden?</target>
+      </trans-unit>
+      <trans-unit id="faqA2" datatype="html">
+        <source> TSEF is built on Nx. You can adopt incrementally by adding TSEF generators to your existing workspace. No breaking changes, just enhanced capabilities. </source>
+        <target> TSEF basiert auf Nx. Sie können schrittweise übernehmen, indem Sie Ihrem bestehenden Workspace TSEF-Generatoren hinzufügen. Keine Breaking Changes, nur erweiterte Funktionen. </target>
+      </trans-unit>
+      <trans-unit id="faqQ3" datatype="html">
+        <source>How much does it cost?</source>
+        <target>Wie viel kostet es?</target>
+      </trans-unit>
+      <trans-unit id="faqA3" datatype="html">
+        <source> TSEF is open source and free. No licensing fees, no vendor lock-in. You own your code and can customize everything to your needs. </source>
+        <target> TSEF ist Open Source und kostenlos. Keine Lizenzgebühren, kein Vendor-Lock-in. Sie besitzen Ihren Code und können alles an Ihre Bedürfnisse anpassen. </target>
+      </trans-unit>
+      <trans-unit id="faqQ4" datatype="html">
+        <source>What about vendor lock-in?</source>
+        <target>Wie sieht es mit Vendor-Lock-in aus?</target>
+      </trans-unit>
+      <trans-unit id="faqA4" datatype="html">
+        <source> TSEF generates standard Angular, NestJS, Ionic, and Keycloak code. You own your code and can eject anytime. No proprietary formats or dependencies. </source>
+        <target> TSEF generiert standardkonformen Code für Angular, NestJS, Ionic und Keycloak. Sie besitzen Ihren Code und können jederzeit aussteigen. Keine proprietären Formate oder Abhängigkeiten. </target>
+      </trans-unit>
+      <trans-unit id="faqQ5" datatype="html">
+        <source>Can we customize the rules?</source>
+        <target>Können wir die Regeln anpassen?</target>
+      </trans-unit>
+      <trans-unit id="faqA5" datatype="html">
+        <source> Yes. All 200+ rules are configurable. Start with defaults, customize as needed. You can add your own rules or disable ones that don&apos;t fit your organization. </source>
+        <target> Ja. Alle 200+ Regeln sind konfigurierbar. Starten Sie mit Standards und passen Sie bei Bedarf an. Sie können eigene Regeln hinzufügen oder solche deaktivieren, die nicht zu Ihrer Organisation passen. </target>
+      </trans-unit>
+      <trans-unit id="footerCopyright" datatype="html">
+        <source>© <x id="INTERPOLATION" equiv-text="{{ currentYear }}"/> The Typescript Enterprise Framework (TSEF)</source>
+        <target>© <x id="INTERPOLATION" equiv-text="{{ currentYear }}"/> The Typescript Enterprise Framework (TSEF)</target>
+      </trans-unit>
+      <trans-unit id="footerLegalDisclosure" datatype="html">
+        <source>Legal Disclosure</source>
+        <target>Impressum</target>
+      </trans-unit>
+      <trans-unit id="footerPrivacyPolicy" datatype="html">
+        <source>Privacy Policy</source>
+        <target>Datenschutzerklärung</target>
+      </trans-unit>
+      <trans-unit id="getStartedTitle" datatype="html">
+        <source>Get Started</source>
+        <target>Los geht’s</target>
+      </trans-unit>
+      <trans-unit id="getStartedDescription" datatype="html">
+        <source> Ready to transform your enterprise development workflow? Get started with TSEF in <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>minutes, not months<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/>. Our streamlined onboarding process and comprehensive documentation ensure you&apos;re productive from day one, with enterprise-grade applications running in your environment within hours. </source>
+        <target> Bereit, Ihren Enterprise-Entwicklungsworkflow zu transformieren? Starten Sie mit TSEF in <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>Minuten statt Monaten<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/>. Unser schlanker Onboarding-Prozess und umfassende Dokumentation sorgen dafür, dass Sie ab dem ersten Tag produktiv sind – mit unternehmensreifen Anwendungen in Ihrer Umgebung innerhalb weniger Stunden. </target>
+      </trans-unit>
+      <trans-unit id="getStartedQuickStart" datatype="html">
+        <source>Quick Start</source>
+        <target>Schnellstart</target>
+      </trans-unit>
+      <trans-unit id="getStartedCreateWorkspace" datatype="html">
+        <source> Create your first TSEF workspace in under 2 minutes. </source>
+        <target> Erstellen Sie Ihren ersten TSEF-Workspace in unter 2 Minuten. </target>
+      </trans-unit>
+      <trans-unit id="getStartedDocumentation" datatype="html">
+        <source>Documentation</source>
+        <target>Dokumentation</target>
+      </trans-unit>
+      <trans-unit id="getStartedInstallationGuide" datatype="html">
+        <source>Installation Guide</source>
+        <target>Installationsanleitung</target>
+      </trans-unit>
+      <trans-unit id="getStartedFirstProjectTutorial" datatype="html">
+        <source>First Project Tutorial</source>
+        <target>Erstes Projekt – Tutorial</target>
+      </trans-unit>
+      <trans-unit id="getStartedGeneratorReference" datatype="html">
+        <source>Generator Reference</source>
+        <target>Generator-Referenz</target>
+      </trans-unit>
+      <trans-unit id="getStartedEnterprisePatternsGuide" datatype="html">
+        <source>Enterprise Patterns Guide</source>
+        <target>Leitfaden für Enterprise Patterns</target>
+      </trans-unit>
+      <trans-unit id="getStartedViewOnGithub" datatype="html">
+        <source>View on GitHub</source>
+        <target>Auf GitHub ansehen</target>
+      </trans-unit>
+      <trans-unit id="getStartedJoinCommunity" datatype="html">
+        <source>Join Community</source>
+        <target>Community beitreten</target>
+      </trans-unit>
+      <trans-unit id="getStartedGetSupport" datatype="html">
+        <source>Get Support</source>
+        <target>Support erhalten</target>
+      </trans-unit>
+      <trans-unit id="headerDocs" datatype="html">
+        <source>Docs</source>
+        <target>Dokumente</target>
+      </trans-unit>
+      <trans-unit id="heroTitle" datatype="html">
+        <source> The <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>AI-ready<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> TypeScript Enterprise Framework </source>
+        <target> Das <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>KI-bereite<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> TypeScript Enterprise Framework </target>
+      </trans-unit>
+      <trans-unit id="heroSubtitle" datatype="html">
+        <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>Enterprise-grade<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> Nx workflow with AI-powered development agents and built-in compliance. </source>
+        <target><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>Unternehmensreifer<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> Nx-Workflow mit KI-gestützten Entwicklungs-Agents und integrierter Compliance. </target>
+      </trans-unit>
+      <trans-unit id="heroBullet1" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>AI-powered agents<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> automate development workflows</source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>KI-gestützte Agents<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> automatisieren Entwicklungs-Workflows</target>
+      </trans-unit>
+      <trans-unit id="heroBullet2" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>80%+ test coverage<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> enforced automatically</source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>80%+ Testabdeckung<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> wird automatisch durchgesetzt</target>
+      </trans-unit>
+      <trans-unit id="heroBullet3" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Zero-config<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> enterprise patterns</source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Zero-Config<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Enterprise-Patterns</target>
+      </trans-unit>
+      <trans-unit id="heroBullet4" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>8 generators<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for Angular, NestJS, Ionic, Keycloak</source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>8 Generatoren<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> für Angular, NestJS, Ionic, Keycloak</target>
+      </trans-unit>
+      <trans-unit id="heroBullet5" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>4 frameworks<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> in single monorepo</source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>4 Frameworks<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> in einem Monorepo</target>
+      </trans-unit>
+      <trans-unit id="heroBullet6" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>200+ rules<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for enterprise compliance</source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>200+ Regeln<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> für Enterprise-Compliance</target>
+      </trans-unit>
+      <trans-unit id="heroBannerTitle" datatype="html">
+        <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right-circle me-2&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/>Beyond Standard Nx </source>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right-circle me-2&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/>Über Standard-Nx hinaus </target>
+      </trans-unit>
+      <trans-unit id="heroBannerText" datatype="html">
+        <source> While Nx provides monorepo tooling, TSEF adds enterprise governance, AI-powered workflows, and built-in compliance for production-ready applications. </source>
+        <target> Während Nx Monorepo-Tools bereitstellt, ergänzt TSEF Unternehmens-Governance, KI-gestützte Workflows und integrierte Compliance für produktionsreife Anwendungen. </target>
+      </trans-unit>
+      <trans-unit id="heroCtaGetStarted" datatype="html">
+        <source>Get Started</source>
+        <target>Jetzt starten</target>
+      </trans-unit>
+      <trans-unit id="heroCtaViewOnGithub" datatype="html">
+        <source>View on GitHub</source>
+        <target>Auf GitHub ansehen</target>
+      </trans-unit>
+      <trans-unit id="hiwTitle" datatype="html">
+        <source>How It Works</source>
+        <target>So funktioniert es</target>
+      </trans-unit>
+      <trans-unit id="hiwDescription" datatype="html">
+        <source> TSEF transforms enterprise development through a <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>streamlined<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> three-step process that eliminates complexity while ensuring enterprise-grade quality. From intelligent code generation to automated deployment, every step is guided by AI agents and enforced by 200+ enterprise rules. </source>
+        <target> TSEF transformiert die Enterprise-Entwicklung durch einen <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>vereinfachten<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> Drei-Schritte-Prozess, der Komplexität eliminiert und gleichzeitig Qualität auf Unternehmensniveau sicherstellt. Von intelligenter Codegenerierung bis zur automatisierten Bereitstellung – jeder Schritt wird von KI-Agents geführt und durch 200+ Enterprise-Regeln abgesichert. </target>
+      </trans-unit>
+      <trans-unit id="hiwStep1" datatype="html">
+        <source>Generate</source>
+        <target>Generieren</target>
+      </trans-unit>
+      <trans-unit id="hiwStep1Item1" datatype="html">
+        <source>Run a generator (frontend, backend, native, keycloak-theme)</source>
+        <target>Führen Sie einen Generator aus (Frontend, Backend, Native, Keycloak-Theme)</target>
+      </trans-unit>
+      <trans-unit id="hiwStep1Item2" datatype="html">
+        <source>AI agents scaffold enterprise-grade code</source>
+        <target>KI-Agents erstellen Gerüste für Code in Unternehmensqualität</target>
+      </trans-unit>
+      <trans-unit id="hiwStep1Item3" datatype="html">
+        <source>Domain-driven structure automatically created</source>
+        <target>Domänengetriebene Struktur wird automatisch erstellt</target>
+      </trans-unit>
+      <trans-unit id="hiwStep2" datatype="html">
+        <source>Develop</source>
+        <target>Entwickeln</target>
+      </trans-unit>
+      <trans-unit id="hiwStep2Item1" datatype="html">
+        <source>AI agents enforce 200+ enterprise rules</source>
+        <target>KI-Agents setzen 200+ Unternehmensregeln durch</target>
+      </trans-unit>
+      <trans-unit id="hiwStep2Item2" datatype="html">
+        <source>Automated testing ensures 80% coverage</source>
+        <target>Automatisierte Tests stellen 80% Abdeckung sicher</target>
+      </trans-unit>
+      <trans-unit id="hiwStep2Item3" datatype="html">
+        <source>Real-time compliance validation</source>
+        <target>Echtzeit-Compliance-Validierung</target>
+      </trans-unit>
+      <trans-unit id="hiwStep2Item4" datatype="html">
+        <source>Zero-config patterns guide best practices</source>
+        <target>Zero-Config-Patterns leiten Best Practices</target>
+      </trans-unit>
+      <trans-unit id="hiwStep3" datatype="html">
+        <source>Deploy</source>
+        <target>Bereitstellen</target>
+      </trans-unit>
+      <trans-unit id="hiwStep3Item1" datatype="html">
+        <source>Containerized applications ready to ship</source>
+        <target>Containerisierte Anwendungen sind einsatzbereit</target>
+      </trans-unit>
+      <trans-unit id="hiwStep3Item2" datatype="html">
+        <source>Infrastructure as code included</source>
+        <target>Infrastructure as Code inklusive</target>
+      </trans-unit>
+      <trans-unit id="hiwStep3Item3" datatype="html">
+        <source>Monitoring and observability built-in</source>
+        <target>Monitoring und Observability integriert</target>
+      </trans-unit>
+      <trans-unit id="hiwStep3Item4" datatype="html">
+        <source>Disaster recovery procedures documented</source>
+        <target>Notfallwiederherstellungsprozesse dokumentiert</target>
+      </trans-unit>
+      <trans-unit id="proofTitle" datatype="html">
+        <source>Proven Results</source>
+        <target>Bewährte Ergebnisse</target>
+      </trans-unit>
+      <trans-unit id="proofDescription" datatype="html">
+        <source> TSEF delivers measurable outcomes backed by concrete metrics and enterprise-grade capabilities. Every number represents real value delivered to development teams, from automated code generation to enforced quality standards. </source>
+        <target> TSEF liefert messbare Ergebnisse, gestützt durch konkrete Kennzahlen und Funktionen auf Unternehmensniveau. Jede Zahl steht für echten Mehrwert für Entwicklungsteams – von automatischer Codegenerierung bis hin zu durchgesetzten Qualitätsstandards. </target>
+      </trans-unit>
+      <trans-unit id="proofMetric8" datatype="html">
+        <source>8</source>
+        <target>8</target>
+      </trans-unit>
+      <trans-unit id="proofMetric8Caption" datatype="html">
+        <source>Generators covering all application types</source>
+        <target>Generatoren für alle Anwendungstypen</target>
+      </trans-unit>
+      <trans-unit id="proofMetric4" datatype="html">
+        <source>4</source>
+        <target>4</target>
+      </trans-unit>
+      <trans-unit id="proofMetric4Caption" datatype="html">
+        <source>Frameworks seamlessly integrated</source>
+        <target>Nahtlos integrierte Frameworks</target>
+      </trans-unit>
+      <trans-unit id="proofMetric200" datatype="html">
+        <source>200+</source>
+        <target>200+</target>
+      </trans-unit>
+      <trans-unit id="proofMetric200Caption" datatype="html">
+        <source>Enterprise rules enforced</source>
+        <target>Unternehmensregeln durchgesetzt</target>
+      </trans-unit>
+      <trans-unit id="proofMetric80" datatype="html">
+        <source>80%+</source>
+        <target>80%+</target>
+      </trans-unit>
+      <trans-unit id="proofMetric80Caption" datatype="html">
+        <source>Test coverage guaranteed</source>
+        <target>Testabdeckung garantiert</target>
+      </trans-unit>
+      <trans-unit id="proofBannerTitle" datatype="html">
+        <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-github me-2 fs-5&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Open Source &amp; Community Driven </source>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-github me-2 fs-5&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Open Source &amp; Community-getrieben </target>
+      </trans-unit>
+      <trans-unit id="proofBannerText" datatype="html">
+        <source> TSEF is built by developers, for developers. Contribute, customize, and own your code. </source>
+        <target> TSEF wird von Entwicklern für Entwickler gebaut. Tragen Sie bei, passen Sie an und besitzen Sie Ihren Code. </target>
+      </trans-unit>
+      <trans-unit id="technologyTitle" datatype="html">
+        <source> Powered by the <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>industry&apos;s favorite technologies<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target> Angetrieben von den <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>Lieblingstechnologien der Branche<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="wygTitle" datatype="html">
+        <source>What You Get</source>
+        <target>Was Sie erhalten</target>
+      </trans-unit>
+      <trans-unit id="wygDescription" datatype="html">
+        <source> TSEF provides a <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>comprehensive<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> enterprise development platform that combines AI-powered automation with proven frameworks and governance. Every feature is designed to accelerate development while maintaining the highest standards of quality, security, and compliance. </source>
+        <target> TSEF bietet eine <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>umfassende<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> Enterprise-Entwicklungsplattform, die KI-gestützte Automatisierung mit bewährten Frameworks und Governance kombiniert. Jede Funktion ist darauf ausgelegt, die Entwicklung zu beschleunigen und gleichzeitig höchste Standards bei Qualität, Sicherheit und Compliance einzuhalten. </target>
+      </trans-unit>
+      <trans-unit id="wygCard1Title" datatype="html">
+        <source>AI-Powered Development</source>
+        <target>KI-gestützte Entwicklung</target>
+      </trans-unit>
+      <trans-unit id="wygCard1Item1" datatype="html">
+        <source>Intelligent code generation</source>
+        <target>Intelligente Codegenerierung</target>
+      </trans-unit>
+      <trans-unit id="wygCard1Item2" datatype="html">
+        <source>Automated testing and validation</source>
+        <target>Automatisiertes Testen und Validieren</target>
+      </trans-unit>
+      <trans-unit id="wygCard1Item3" datatype="html">
+        <source>Real-time compliance checking</source>
+        <target>Echtzeit-Compliance-Prüfung</target>
+      </trans-unit>
+      <trans-unit id="wygCard1Item4" datatype="html">
+        <source>Context-aware suggestions</source>
+        <target>Kontextbezogene Vorschläge</target>
+      </trans-unit>
+      <trans-unit id="wygCard2Title" datatype="html">
+        <source>Multi-Framework Monorepo</source>
+        <target>Monorepo mit mehreren Frameworks</target>
+      </trans-unit>
+      <trans-unit id="wygCard2Item1" datatype="html">
+        <source>Angular for web applications</source>
+        <target>Angular für Webanwendungen</target>
+      </trans-unit>
+      <trans-unit id="wygCard2Item2" datatype="html">
+        <source>Clarity and Bootstrap for UX/UI</source>
+        <target>Clarity und Bootstrap für UX/UI</target>
+      </trans-unit>
+      <trans-unit id="wygCard2Item3" datatype="html">
+        <source>NestJS for backend services</source>
+        <target>NestJS für Backend-Services</target>
+      </trans-unit>
+      <trans-unit id="wygCard2Item4" datatype="html">
+        <source>Ionic for mobile apps</source>
+        <target>Ionic für mobile Apps</target>
+      </trans-unit>
+      <trans-unit id="wygCard2Item5" datatype="html">
+        <source>Keycloak for authentication</source>
+        <target>Keycloak für Authentifizierung</target>
+      </trans-unit>
+      <trans-unit id="wygCard3Title" datatype="html">
+        <source>Enterprise Governance</source>
+        <target>Enterprise-Governance</target>
+      </trans-unit>
+      <trans-unit id="wygCard3Item1" datatype="html">
+        <source>200+ rules for consistency</source>
+        <target>200+ Regeln für Konsistenz</target>
+      </trans-unit>
+      <trans-unit id="wygCard3Item2" datatype="html">
+        <source>Dependency boundary enforcement</source>
+        <target>Durchsetzung von Abhängigkeitsgrenzen</target>
+      </trans-unit>
+      <trans-unit id="wygCard3Item3" datatype="html">
+        <source>Security best practices</source>
+        <target>Sicherheitsbest Practices</target>
+      </trans-unit>
+      <trans-unit id="wygCard3Item4" datatype="html">
+        <source>Compliance automation (GDPR, CCPA)</source>
+        <target>Compliance-Automatisierung (DSGVO, CCPA)</target>
+      </trans-unit>
+      <trans-unit id="wygCard4Title" datatype="html">
+        <source>Production-Ready Infrastructure</source>
+        <target>Produktionsreife Infrastruktur</target>
+      </trans-unit>
+      <trans-unit id="wygCard4Item1" datatype="html">
+        <source>Docker containerization</source>
+        <target>Docker-Containerisierung</target>
+      </trans-unit>
+      <trans-unit id="wygCard4Item2" datatype="html">
+        <source>Kubernetes deployment configs</source>
+        <target>Kubernetes-Bereitstellungskonfigurationen</target>
+      </trans-unit>
+      <trans-unit id="wygCard4Item3" datatype="html">
+        <source>CI/CD pipeline templates</source>
+        <target>CI/CD-Pipelinevorlagen</target>
+      </trans-unit>
+      <trans-unit id="wygCard4Item4" datatype="html">
+        <source>Monitoring and alerting</source>
+        <target>Monitoring und Alarmierung</target>
+      </trans-unit>
+      <trans-unit id="wbTitle" datatype="html">
+        <source>Who Benefits?</source>
+        <target>Wer profitiert?</target>
+      </trans-unit>
+      <trans-unit id="wbDescription" datatype="html">
+        <source> TSEF delivers <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>measurable value<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> across every level of your organization. From developers writing their first line of code to CTOs making strategic technology decisions, everyone benefits from standardized, enterprise-grade development practices that accelerate delivery while reducing risk and technical debt. </source>
+        <target> TSEF liefert <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>messbaren Mehrwert<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> auf allen Ebenen Ihrer Organisation. Von Entwicklerinnen und Entwicklern der ersten Codezeile bis zu CTOs mit strategischen Technologieentscheidungen profitieren alle von standardisierten, enterprise-tauglichen Entwicklungspraktiken, die die Lieferung beschleunigen und gleichzeitig Risiko und technische Schulden reduzieren. </target>
+      </trans-unit>
+      <trans-unit id="wbCard1Title" datatype="html">
+        <source>Development Teams</source>
+        <target>Entwicklungsteams</target>
+      </trans-unit>
+      <trans-unit id="wbCard1Item1" datatype="html">
+        <source>Ship features faster with AI-powered workflows</source>
+        <target>Funktionen schneller liefern mit KI-gestützten Workflows</target>
+      </trans-unit>
+      <trans-unit id="wbCard1Item2" datatype="html">
+        <source>Focus on business logic, not boilerplate</source>
+        <target>Fokus auf Geschäftslogik statt Boilerplate</target>
+      </trans-unit>
+      <trans-unit id="wbCard1Item3" datatype="html">
+        <source>Consistent patterns across all projects</source>
+        <target>Konsistente Patterns in allen Projekten</target>
+      </trans-unit>
+      <trans-unit id="wbCard1Item4" datatype="html">
+        <source>Automated testing and quality gates</source>
+        <target>Automatisierte Tests und Quality Gates</target>
+      </trans-unit>
+      <trans-unit id="wbCard2Title" datatype="html">
+        <source>Engineering Managers</source>
+        <target>Engineering-Manager</target>
+      </trans-unit>
+      <trans-unit id="wbCard2Item1" datatype="html">
+        <source>Reduce onboarding time from weeks to days</source>
+        <target>Onboarding-Zeit von Wochen auf Tage reduzieren</target>
+      </trans-unit>
+      <trans-unit id="wbCard2Item2" datatype="html">
+        <source>Enforce quality standards automatically</source>
+        <target>Qualitätsstandards automatisch durchsetzen</target>
+      </trans-unit>
+      <trans-unit id="wbCard2Item3" datatype="html">
+        <source>Predictable delivery timelines</source>
+        <target>Planbare Lieferzeitpläne</target>
+      </trans-unit>
+      <trans-unit id="wbCard2Item4" datatype="html">
+        <source>Clear dependency boundaries</source>
+        <target>Klare Abhängigkeitsgrenzen</target>
+      </trans-unit>
+      <trans-unit id="wbCard3Title" datatype="html">
+        <source>CTOs &amp; Architects</source>
+        <target>CTOs &amp; Architekt:innen</target>
+      </trans-unit>
+      <trans-unit id="wbCard3Item1" datatype="html">
+        <source>Enterprise-ready from day one</source>
+        <target>Ab Tag eins enterprise-ready</target>
+      </trans-unit>
+      <trans-unit id="wbCard3Item2" datatype="html">
+        <source>Scalable monorepo architecture</source>
+        <target>Skalierbare Monorepo-Architektur</target>
+      </trans-unit>
+      <trans-unit id="wbCard3Item3" datatype="html">
+        <source>Built-in security and compliance</source>
+        <target>Integrierte Sicherheit und Compliance</target>
+      </trans-unit>
+      <trans-unit id="wbCard3Item4" datatype="html">
+        <source>Future-proof technology stack</source>
+        <target>Zukunftssicherer Technologiestack</target>
+      </trans-unit>
+      <trans-unit id="whyTitle" datatype="html">
+        <source>Why TSEF?</source>
+        <target>Warum TSEF?</target>
+      </trans-unit>
+      <trans-unit id="whyDescription" datatype="html">
+        <source> Enterprise development teams face <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>mounting pressure<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> to deliver secure, compliant, and scalable applications at unprecedented speed. Traditional approaches lead to inconsistent quality, slow onboarding, and compliance nightmares that cost millions in technical debt and missed opportunities. </source>
+        <target> Enterprise-Entwicklungsteams stehen unter <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-highlight&quot;&gt;"/>steigendem Druck<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/>, sichere, konforme und skalierbare Anwendungen in beispielloser Geschwindigkeit zu liefern. Traditionelle Ansätze führen zu inkonsistenter Qualität, langsamem Onboarding und Compliance-Albträumen, die Millionen an technischer Schuld und verpassten Chancen kosten. </target>
+      </trans-unit>
+      <trans-unit id="whyCard1Title" datatype="html">
+        <source>Inconsistent Quality</source>
+        <target>Inkonsistente Qualität</target>
+      </trans-unit>
+      <trans-unit id="whyCard1SolutionTitle" datatype="html">
+        <source>The TSEF Solution</source>
+        <target>Die TSEF-Lösung</target>
+      </trans-unit>
+      <trans-unit id="whyCard1SolutionText" datatype="html">
+        <source>200+ enforced rules, 80%+ test coverage minimum</source>
+        <target>200+ durchgesetzte Regeln, mindestens 80% Testabdeckung</target>
+      </trans-unit>
+      <trans-unit id="whyCard2Title" datatype="html">
+        <source>Slow Onboarding</source>
+        <target>Langsames Onboarding</target>
+      </trans-unit>
+      <trans-unit id="whyCard2SolutionTitle" datatype="html">
+        <source>The TSEF Solution</source>
+        <target>Die TSEF-Lösung</target>
+      </trans-unit>
+      <trans-unit id="whyCard2SolutionText" datatype="html">
+        <source>AI agents guide development, 8 generators, zero-config patterns</source>
+        <target>KI-Agents leiten die Entwicklung, 8 Generatoren, Zero-Config-Patterns</target>
+      </trans-unit>
+      <trans-unit id="whyCard3Title" datatype="html">
+        <source>Compliance Burden</source>
+        <target>Compliance-Belastung</target>
+      </trans-unit>
+      <trans-unit id="whyCard3SolutionTitle" datatype="html">
+        <source>The TSEF Solution</source>
+        <target>Die TSEF-Lösung</target>
+      </trans-unit>
+      <trans-unit id="whyCard3SolutionText" datatype="html">
+        <source>Built-in compliance, automated monitoring, enterprise governance rules</source>
+        <target>Integrierte Compliance, automatisiertes Monitoring, Unternehmens-Governance-Regeln</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

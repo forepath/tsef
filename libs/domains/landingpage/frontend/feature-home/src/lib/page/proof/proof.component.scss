@@ -1,0 +1,27 @@
+.proof {
+  background-color: #f8f9fa;
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 48px;
+    left: 48px;
+    aspect-ratio: 1 / 1;
+    height: 50%;
+    background-image: url('assets/background-section-dark.svg');
+    background-position: right bottom;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    z-index: 1;
+    mix-blend-mode: color-burn;
+    opacity: 0.25;
+  }
+
+  > * {
+    position: relative;
+    z-index: 2;
+  }
+}
