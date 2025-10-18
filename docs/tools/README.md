@@ -8,7 +8,7 @@ This section covers the tools, automation, and integrations that power our devel
 
 MCP servers provide AI agents with structured access to development tools and data:
 
-- **[Devkit MCP Server](./devkit/mcp-proxy-architecture.md)** - Workspace insights and diagnostics
+- **[Devkit MCP Server](./devkit/README.md)** - Workspace insights and diagnostics
 - **[GitHub MCP Server](./github-mcp-setup.md)** - GitHub integration and automation
 - **[Nx MCP Server](https://nx.dev/docs/features/enhance-ai#setting-up-nx-mcp)** - Nx workspace management
 - **[Repomix MCP Server](https://repomix.com/guide/)** - Code analysis and documentation
@@ -74,10 +74,10 @@ MCP servers require specific environment variables:
 
 Each tool has its own documentation:
 
-- **[Devkit MCP Server](./devkit/mcp-proxy-architecture.md)** - Workspace management and diagnostics
+- **[Devkit MCP Server](./devkit/README.md)** - Workspace management and diagnostics
 - **[GitHub MCP Server](./github-mcp-setup.md)** - GitHub integration setup and usage
-- **[Development Workflows](../development-workflows/)** - How to use tools in your daily workflow
-- **[Best Practices](../best-practices/)** - Proven approaches for using tools effectively
+- **[Development Workflows](../development-workflows/README.md)** - How to use tools in your daily workflow
+- **[Best Practices](../best-practices/README.md)** - Proven approaches for using tools effectively
 
 ## Troubleshooting
 
