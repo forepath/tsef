@@ -30,7 +30,7 @@ Familiarize yourself with how our code is organized:
 
 Ensure you have the right tools configured:
 
-- **[Development Tools](../tools/)** - Required tooling
+- **[Development Tools](../tools/README.md)** - Required tooling
 - **[GitHub Integration](../tools/github-mcp-setup.md)** - GitHub workflow setup
 
 ## Daily Workflow
@@ -71,7 +71,7 @@ Once you're comfortable with the basics:
 1. **[Dive deeper into operation modes](./operation-modes.md)** - Master the planning and implementation workflows
 2. **[Explore the GitHub workflow](./github-workflow.md)** - Learn our issue and PR process
 3. **[Understand the validation pipeline](./validation-pipeline.md)** - Ensure your code meets quality standards
-4. **[Review best practices](../best-practices/)** - Learn proven approaches for common scenarios
+4. **[Review best practices](../best-practices/README.md)** - Learn proven approaches for common scenarios
 
 ## Pro Tips
 
