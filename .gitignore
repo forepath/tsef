@@ -48,6 +48,6 @@ Thumbs.db
 documentation.json
 
 # AI
-plans/
-!plans/template.md
+.plans/
+!.plans/template.md
 repomix-output.xml
