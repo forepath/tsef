@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.4](https://github.com/forepath/tsef/compare/v1.2.3...v1.2.4) (2025-10-20)
+
+
+
+### Bug Fixes
+
+- conventional changelog ([#17](https://github.com/forepath/tsef/issues/17)) ([d244ae2546c71e879c7c43970d2be6b2c00a029d](///commit/d244ae2546c71e879c7c43970d2be6b2c00a029d))
+
 ## 1.2.3 (2025-10-20)
 
 ## [1.2.2](https://github.com/forepath/tsef/compare/v1.2.1...v1.2.2) (2025-10-20)
