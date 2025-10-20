@@ -57,7 +57,7 @@
     "@typescript-eslint/parser": "7.18.0",
     "@typescript-eslint/utils": "7.18.0",
     "commitlint": "20.1.0",
-    "esbuild": "0.19.12",
+    "esbuild": "0.25.11",
     "eslint": "8.57.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-playwright": "1.8.3",
@@ -77,7 +77,7 @@
     "typescript": "5.8.2",
     "vite": "6.3.6",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "2.1.9"
+    "vitest": "3.2.4"
   },
   "dependencies": {
     "@analogjs/platform": "1.21.1",
@@ -92,7 +92,7 @@
     "@angular/platform-browser-dynamic": "19.2.15",
     "@angular/platform-server": "19.2.15",
     "@angular/router": "19.2.15",
-    "@angular/ssr": "19.2.17",
+    "@angular/ssr": "19.2.18",
     "@capacitor/android": "6.2.1",
     "@capacitor/app": "6.0.2",
     "@capacitor/core": "6.2.1",
@@ -128,7 +128,7 @@
     "reflect-metadata": "0.1.14",
     "rxjs": "7.8.1",
     "vite": "6.3.6",
-    "vitest": "2.1.9",
+    "vitest": "3.2.4",
     "zone.js": "0.15.1"
   }
 }
