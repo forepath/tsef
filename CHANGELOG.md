@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/forepath/tsef/compare/v1.0.0...v1.1.0) (2025-10-20)
+
+
+### Features
+
+* claude ai context generator ([#7](https://github.com/forepath/tsef/issues/7)) ([6dad6fe](https://github.com/forepath/tsef/commit/6dad6fe35523395274ba39db8e0bb501d8dbeed2))
+* husky hooks ([83e7524](https://github.com/forepath/tsef/commit/83e7524ac71f140672d663e82295c76043d951d0))
+
 ## 1.0.0 (2025-10-18)
 
 
