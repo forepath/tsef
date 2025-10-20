@@ -23,7 +23,13 @@
     [
       "@semantic-release/release-notes-generator",
       {
-        "preset": "conventionalcommits"
+        "preset": "conventionalcommits",
+        "writerOpts": {
+          "commitsSort": ["subject", "scope"],
+          "headerPartial": "## {{version}} ({{date}})\n\n",
+          "commitPartial": "- {{#if scope}}**{{scope}}:** {{/if}}{{subject}} {{#if hash}}([{{hash}}]({{host}}/{{owner}}/{{repository}}/commit/{{hash}})){{/if}}\n"
+        },
+        "commitsSort": ["subject", "scope"]
       }
     ],
     [
@@ -38,7 +44,13 @@
       "@semantic-release/changelog",
       {
         "changelogFile": "CHANGELOG.md",
-        "changelogTitle": "# Changelog\n\nAll notable changes to this project will be documented in this file."
+        "changelogTitle": "# Changelog\n\nAll notable changes to this project will be documented in this file.",
+        "writerOpts": {
+          "commitsSort": ["subject", "scope"],
+          "headerPartial": "## {{version}} ({{date}})\n\n",
+          "commitPartial": "- {{#if scope}}**{{scope}}:** {{/if}}{{subject}} {{#if hash}}([{{hash}}]({{host}}/{{owner}}/{{repository}}/commit/{{hash}})){{/if}}\n"
+        },
+        "commitsSort": ["subject", "scope"]
       }
     ],
     [
