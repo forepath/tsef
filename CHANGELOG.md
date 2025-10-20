@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/forepath/tsef/compare/v1.1.0...v1.2.0) (2025-10-20)
+
+
+### Features
+
+* dependabot configuration ([#9](https://github.com/forepath/tsef/issues/9)) ([0ee1db5](https://github.com/forepath/tsef/commit/0ee1db513457d0f6ed7a923544b553239def2bd5))
+
+
+### Bug Fixes
+
+* dependabot configuration ([#10](https://github.com/forepath/tsef/issues/10)) ([5a1d668](https://github.com/forepath/tsef/commit/5a1d668319a15571fdc24f65aa0a9341bc1645ea))
+
 ## [1.1.0](https://github.com/forepath/tsef/compare/v1.0.0...v1.1.0) (2025-10-20)
 
 
