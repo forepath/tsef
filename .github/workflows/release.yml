@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -28,7 +28,7 @@ jobs:
           private_key: ${{ secrets.SEMANTIC_RELEASE_KEY_PEM }}
 
       - name: Semantic release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v5
         id: semantic-release
         with:
           semantic_version: 22.0.5
