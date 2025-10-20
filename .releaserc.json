@@ -37,13 +37,7 @@
             { "type": "build", "section": "Build System" },
             { "type": "ci", "section": "Continuous Integration" }
           ]
-        },
-        "writerOpts": {
-          "commitsSort": ["subject", "scope"],
-          "headerPartial": "## [{{version}}]({{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}) ({{date}})\n\n",
-          "commitPartial": "- {{#if scope}}**{{scope}}:** {{/if}}{{subject}} {{#if hash}}([{{hash}}]({{host}}/{{owner}}/{{repository}}/commit/{{hash}})){{/if}}\n"
-        },
-        "commitsSort": ["subject", "scope"]
+        }
       }
     ],
     [
@@ -72,13 +66,7 @@
             { "type": "build", "section": "Build System" },
             { "type": "ci", "section": "Continuous Integration" }
           ]
-        },
-        "writerOpts": {
-          "commitsSort": ["subject", "scope"],
-          "headerPartial": "## [{{version}}]({{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}) ({{date}})\n\n",
-          "commitPartial": "- {{#if scope}}**{{scope}}:** {{/if}}{{subject}} {{#if hash}}([{{hash}}]({{host}}/{{owner}}/{{repository}}/commit/{{hash}})){{/if}}\n"
-        },
-        "commitsSort": ["subject", "scope"]
+        }
       }
     ],
     [
