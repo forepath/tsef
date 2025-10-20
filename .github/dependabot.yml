@@ -10,9 +10,9 @@ updates:
         patterns:
           - '*'
         update-types:
-          - 'version-update:semver-major'
-          - 'version-update:semver-minor'
-          - 'version-update:semver-patch'
+          - 'major'
+          - 'minor'
+          - 'patch'
     commit-message:
       prefix: 'chore'
       prefix-development: 'chore'
@@ -27,9 +27,9 @@ updates:
         patterns:
           - '*'
         update-types:
-          - 'version-update:semver-major'
-          - 'version-update:semver-minor'
-          - 'version-update:semver-patch'
+          - 'major'
+          - 'minor'
+          - 'patch'
     commit-message:
       prefix: 'chore'
       prefix-development: 'chore'
@@ -44,9 +44,9 @@ updates:
         patterns:
           - '*'
         update-types:
-          - 'version-update:semver-major'
-          - 'version-update:semver-minor'
-          - 'version-update:semver-patch'
+          - 'major'
+          - 'minor'
+          - 'patch'
     commit-message:
       prefix: 'chore'
       prefix-development: 'chore'
