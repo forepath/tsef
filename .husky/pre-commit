@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Pre-commit hook for TSEF Nx monorepo
+# This hook runs before each commit to ensure code quality and consistency
+
+echo "🔍 Running pre-commit checks..."
+
+# 1. Check code formatting with Prettier
+echo "📝 Checking code formatting with Prettier..."
+nx format:check
+if [ $? -ne 0 ]; then
+  echo "❌ Code formatting check failed. Please run 'nx format:write' to fix formatting issues."
+  exit 1
+fi
+
+# 2. Run linting on affected projects
+echo "🔧 Running ESLint on affected projects..."
+nx affected -t lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Please fix linting errors."
+  exit 1
+fi
+
+# 3. Run tests on affected projects
+echo "🧪 Running tests on affected projects..."
+nx affected -t test
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Please fix failing tests."
+  exit 1
+fi
+
+# 4. Build affected projects to ensure they compile
+echo "🏗️  Building affected projects..."
+nx affected -t build
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed. Please fix build errors."
+  exit 1
+fi
+
+echo "✅ All pre-commit checks passed!"
