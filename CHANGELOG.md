@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.5](https://github.com/forepath/tsef/compare/v1.2.4...v1.2.5) (2025-10-20)
+
+
+### Chores
+
+* reset conventional commits writer opts ([#18](https://github.com/forepath/tsef/issues/18)) ([25cc9ba](https://github.com/forepath/tsef/commit/25cc9ba1f79b67d52f301b3904602f64ff12c219))
+
 ## [1.2.4](https://github.com/forepath/tsef/compare/v1.2.3...v1.2.4) (2025-10-20)
 
 
