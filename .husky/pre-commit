@@ -1,5 +1,4 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+#!/bin/bash
 
 # Pre-commit hook for TSEF Nx monorepo
 # This hook runs before each commit to ensure code quality and consistency
