@@ -2,7 +2,9 @@
   "name": "@forepath/nx",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "prepare": "husky"
+  },
   "private": true,
   "type": "module",
   "devDependencies": {
@@ -59,6 +61,7 @@
     "eslint": "8.57.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-playwright": "1.8.3",
+    "husky": "^9.1.7",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "jest-environment-node": "29.7.0",

@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Commit message validation using commitlint
+# This hook validates commit messages against conventional commit format
+
+echo "📝 Validating commit message..."
+
+# Run commitlint to validate the commit message
+npx --no -- commitlint --edit "$1"
+if [ $? -ne 0 ]; then
+  echo "❌ Commit message validation failed."
+  echo "Please follow the conventional commit format:"
+  echo "  feat: add new feature"
+  echo "  fix: fix a bug"
+  echo "  docs: update documentation"
+  echo "  refactor: refactor code"
+  echo "  cleanup: cleanup code"
+  echo "  chore: maintenance tasks"
+  echo "  ci: CI/CD changes"
+  echo ""
+  echo "Examples:"
+  echo "  feat(auth): add login functionality"
+  echo "  fix(api): resolve user validation issue"
+  echo "  docs: update README with setup instructions"
+  exit 1
+fi
+
+echo "✅ Commit message validation passed!"
