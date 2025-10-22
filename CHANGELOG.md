@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0](https://github.com/forepath/tsef/compare/v1.2.5...v1.3.0) (2025-10-22)
+
+
+### Features
+
+* research command support ([#20](https://github.com/forepath/tsef/issues/20)) ([10af69d](https://github.com/forepath/tsef/commit/10af69d3a24782885f32195ae7504081cb44e3fc))
+
 ## [1.2.5](https://github.com/forepath/tsef/compare/v1.2.4...v1.2.5) (2025-10-20)
 
 
