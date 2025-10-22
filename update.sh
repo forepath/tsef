@@ -30,7 +30,7 @@ ${SCRIPT_NAME} - Update TSEF framework from upstream repository
 Options:
   --repo <url>        Upstream repository URL (default: SSH ${REPO_URL_SSH_DEFAULT})
   --remote <name>     Remote name for upstream (default: ${UPSTREAM_REMOTE})
-  --branch <name>     Branch to update from (default: current branch's upstream)
+  --ref <ref>         Git reference to update from (tag, branch, or commit) (default: latest tag)
   --prefix <name>     Branch prefix for update branch (default: ${BRANCH_PREFIX})
   --dry-run           Show what would be done without making changes
   -y, --yes           Assume "yes" for prompts
@@ -39,7 +39,7 @@ EOF
 }
 
 REPO_URL=""
-TARGET_BRANCH=""
+TARGET_REF=""
 BRANCH_NAME=""
 
 while [ "${1-}" != "" ]; do
@@ -48,8 +48,8 @@ while [ "${1-}" != "" ]; do
             REPO_URL="$2"; shift 2 ;;
         --remote)
             UPSTREAM_REMOTE="$2"; shift 2 ;;
-        --branch)
-            TARGET_BRANCH="$2"; shift 2 ;;
+        --ref)
+            TARGET_REF="$2"; shift 2 ;;
         --prefix)
             BRANCH_PREFIX="$2"; shift 2 ;;
         --dry-run)
@@ -65,6 +65,31 @@ done
 
 require_cmd() {
     command -v "$1" >/dev/null 2>&1 || return 1
+}
+
+get_latest_tag() {
+    local repo_url="$1"
+    local temp_dir
+    temp_dir="$(mktemp -d)"
+
+    # Clone with minimal history to get tags
+    git clone --filter=blob:none --no-checkout "${repo_url}" "${temp_dir}" 2>/dev/null || {
+        rm -rf "${temp_dir}"
+        return 1
+    }
+
+    # Get the latest tag
+    local latest_tag
+    latest_tag="$(git -C "${temp_dir}" tag --sort=-version:refname | head -n1)"
+
+    # Clean up
+    rm -rf "${temp_dir}"
+
+    if [ -n "${latest_tag}" ]; then
+        echo "${latest_tag}"
+    else
+        return 1
+    fi
 }
 
 ensure_git_repo() {
@@ -83,26 +108,36 @@ get_upstream_branch() {
     git rev-parse --abbrev-ref "${current_branch}@{upstream}" 2>/dev/null || echo ""
 }
 
-determine_target_branch() {
-    if [ -n "${TARGET_BRANCH}" ]; then
-        echo "${TARGET_BRANCH}"
+determine_target_ref() {
+    if [ -n "${TARGET_REF}" ]; then
+        echo "${TARGET_REF}"
     else
-        local upstream
-        upstream="$(get_upstream_branch)"
-        if [ -n "${upstream}" ]; then
-            echo "${upstream#*/}"
+        # Determine latest tag from upstream
+        local chosen_url
+        if [ -n "${REPO_URL}" ]; then
+            chosen_url="${REPO_URL}"
         else
-            echo "main"
+            chosen_url="${REPO_URL_SSH_DEFAULT}"
         fi
+
+        log_info "No ref specified, determining latest tag from ${chosen_url}..."
+        local latest_tag
+        latest_tag="$(get_latest_tag "${chosen_url}")" || {
+            log_warn "Could not determine latest tag, falling back to main branch"
+            echo "main"
+            return
+        }
+        log_info "Using latest tag: ${latest_tag}"
+        echo "${latest_tag}"
     fi
 }
 
 generate_branch_name() {
-    local target_branch
-    target_branch="$(determine_target_branch)"
+    local target_ref
+    target_ref="$(determine_target_ref)"
     local timestamp
     timestamp="$(date +%Y%m%d-%H%M%S)"
-    echo "${BRANCH_PREFIX}/${target_branch}-${timestamp}"
+    echo "${BRANCH_PREFIX}/${target_ref}-${timestamp}"
 }
 
 setup_upstream_remote() {
@@ -127,12 +162,12 @@ setup_upstream_remote() {
 }
 
 fetch_upstream() {
-    local target_branch
-    target_branch="$(determine_target_branch)"
+    local target_ref
+    target_ref="$(determine_target_ref)"
 
     log_info "Fetching from upstream remote: ${UPSTREAM_REMOTE}"
     if [ "${DRY_RUN}" -eq 0 ]; then
-        git fetch "${UPSTREAM_REMOTE}" "${target_branch}"
+        git fetch "${UPSTREAM_REMOTE}" "${target_ref}"
     fi
 }
 
@@ -148,9 +183,9 @@ create_update_branch() {
 }
 
 merge_upstream_changes() {
-    local target_branch
-    target_branch="$(determine_target_branch)"
-    local upstream_ref="${UPSTREAM_REMOTE}/${target_branch}"
+    local target_ref
+    target_ref="$(determine_target_ref)"
+    local upstream_ref="${UPSTREAM_REMOTE}/${target_ref}"
 
     log_info "Merging changes from ${upstream_ref}"
 
@@ -224,8 +259,8 @@ update_dependencies() {
 }
 
 create_update_commit() {
-    local target_branch
-    target_branch="$(determine_target_branch)"
+    local target_ref
+    target_ref="$(determine_target_ref)"
 
     # Check if there are any changes to commit
     if [ "${DRY_RUN}" -eq 1 ]; then
@@ -257,12 +292,12 @@ Co-authored-by: update.sh <update@devkit>"
 show_summary() {
     local current_branch
     current_branch="$(get_current_branch)"
-    local target_branch
-    target_branch="$(determine_target_branch)"
+    local target_ref
+    target_ref="$(determine_target_ref)"
 
     log_info "Update Summary:"
     log_info "  Current branch: ${current_branch}"
-    log_info "  Target branch: ${target_branch}"
+    log_info "  Target ref: ${target_ref}"
     log_info "  Upstream remote: ${UPSTREAM_REMOTE}"
 
     if [ "${DRY_RUN}" -eq 1 ]; then
