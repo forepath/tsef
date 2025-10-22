@@ -9,8 +9,12 @@ This guide defines the **REQUIRED** steps and best practices for planning new fe
 - You **MUST** review the relevant documentation, domain rules, and architectural guidelines before starting.
 - You **MUST** identify the affected applications, domains, and libraries.
 - You **SHOULD** check for existing issues, RFCs, or related work to avoid duplication.
-- You **MUST** ensure the feature aligns with the monorepo’s dependency and modularity rules.
+- You **MUST** ensure the feature aligns with the monorepo's dependency and modularity rules.
 - You **SHOULD** consult with stakeholders or team members if the feature impacts multiple domains or applications.
+- You **MUST** review any existing research that may inform the planning process.
+  - A research file reference **MAY** be provided within the chat history or as explicit reference.
+  - If research is needed but not available, you **SHOULD** recommend conducting research using [Research Guidelines](./research.md) before proceeding with planning.
+- You **MAY** summarize relevant research findings for context optimization so long as requirements are not lost in the process.
 
 ## 2. Planning
 
