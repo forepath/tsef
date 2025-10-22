@@ -120,24 +120,22 @@ determine_target_ref() {
             chosen_url="${REPO_URL_SSH_DEFAULT}"
         fi
 
-        log_info "No ref specified, determining latest tag from ${chosen_url}..."
+        log_info "No ref specified, determining latest tag from ${chosen_url}..." >&2
         local latest_tag
         latest_tag="$(get_latest_tag "${chosen_url}")" || {
-            log_warn "Could not determine latest tag, falling back to main branch"
+            log_warn "Could not determine latest tag, falling back to main branch" >&2
             echo "main"
             return
         }
-        log_info "Using latest tag: ${latest_tag}"
+        log_info "Using latest tag: ${latest_tag}" >&2
         echo "${latest_tag}"
     fi
 }
 
 generate_branch_name() {
-    local target_ref
-    target_ref="$(determine_target_ref)"
     local timestamp
     timestamp="$(date +%Y%m%d-%H%M%S)"
-    echo "${BRANCH_PREFIX}/${target_ref}-${timestamp}"
+    echo "${BRANCH_PREFIX}/${TARGET_REF_RESOLVED}-${timestamp}"
 }
 
 setup_upstream_remote() {
@@ -162,12 +160,16 @@ setup_upstream_remote() {
 }
 
 fetch_upstream() {
-    local target_ref
-    target_ref="$(determine_target_ref)"
-
     log_info "Fetching from upstream remote: ${UPSTREAM_REMOTE}"
     if [ "${DRY_RUN}" -eq 0 ]; then
-        git fetch "${UPSTREAM_REMOTE}" "${target_ref}"
+        # If it's a tag, we need to fetch tags specifically
+        if git ls-remote --tags "${UPSTREAM_REMOTE}" "${TARGET_REF_RESOLVED}" >/dev/null 2>&1; then
+            log_info "Fetching tag: ${TARGET_REF_RESOLVED}"
+            git fetch "${UPSTREAM_REMOTE}" "refs/tags/${TARGET_REF_RESOLVED}:refs/tags/${TARGET_REF_RESOLVED}"
+        else
+            log_info "Fetching branch/commit: ${TARGET_REF_RESOLVED}"
+            git fetch "${UPSTREAM_REMOTE}" "${TARGET_REF_RESOLVED}"
+        fi
     fi
 }
 
@@ -183,9 +185,13 @@ create_update_branch() {
 }
 
 merge_upstream_changes() {
-    local target_ref
-    target_ref="$(determine_target_ref)"
-    local upstream_ref="${UPSTREAM_REMOTE}/${target_ref}"
+    local upstream_ref
+    # Check if it's a tag and reference it correctly
+    if git ls-remote --tags "${UPSTREAM_REMOTE}" "${TARGET_REF_RESOLVED}" >/dev/null 2>&1; then
+        upstream_ref="${TARGET_REF_RESOLVED}"
+    else
+        upstream_ref="${UPSTREAM_REMOTE}/${TARGET_REF_RESOLVED}"
+    fi
 
     log_info "Merging changes from ${upstream_ref}"
 
@@ -195,7 +201,7 @@ merge_upstream_changes() {
             log_info "Fast-forward merge successful"
         else
             log_info "Fast-forward not possible, creating merge commit"
-            git merge --no-ff "${upstream_ref}" -m "feat: update framework from upstream
+            git merge --no-ff --allow-unrelated-histories "${upstream_ref}" -m "feat: update framework from upstream
 
 - Merge changes from ${upstream_ref}
 - Update TSEF framework to latest version
@@ -259,9 +265,6 @@ update_dependencies() {
 }
 
 create_update_commit() {
-    local target_ref
-    target_ref="$(determine_target_ref)"
-
     # Check if there are any changes to commit
     if [ "${DRY_RUN}" -eq 1 ]; then
         log_info "[DRY RUN] Would create update commit"
@@ -292,12 +295,10 @@ Co-authored-by: update.sh <update@devkit>"
 show_summary() {
     local current_branch
     current_branch="$(get_current_branch)"
-    local target_ref
-    target_ref="$(determine_target_ref)"
 
     log_info "Update Summary:"
     log_info "  Current branch: ${current_branch}"
-    log_info "  Target ref: ${target_ref}"
+    log_info "  Target ref: ${TARGET_REF_RESOLVED}"
     log_info "  Upstream remote: ${UPSTREAM_REMOTE}"
 
     if [ "${DRY_RUN}" -eq 1 ]; then
@@ -312,6 +313,10 @@ trap 'log_error "An error occurred. See logs above."' ERR
 
 log_info "Starting TSEF framework update..."
 ensure_git_repo
+
+# Determine target ref once at the beginning
+TARGET_REF_RESOLVED="$(determine_target_ref)"
+
 setup_upstream_remote
 fetch_upstream
 create_update_branch
