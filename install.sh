@@ -8,7 +8,7 @@ REPO_URL_HTTPS_DEFAULT="https://github.com/forepath/tsef.git"
 NVM_VERSION="v0.40.3"
 NODE_VERSION=""
 CLONE_DIR="devkit"
-BRANCH=""
+REF=""
 RUN_UPDATE=1
 ASSUME_YES=0
 
@@ -32,7 +32,7 @@ ${SCRIPT_NAME} - Multi-distro installer and workspace scaffolder
 Options:
   --repo <url>        Git repository URL to clone (default: SSH ${REPO_URL_SSH_DEFAULT})
   --dir <path>        Directory to clone into (default: ${CLONE_DIR})
-  --branch <name>     Optional branch to checkout after clone
+  --ref <ref>         Git reference to checkout (tag, branch, or commit) (default: latest tag)
   --node <ver>        Node version for nvm (default: workspace .nvmrc or --lts)
   --no-update         Skip system package index update/upgrade
   -y, --yes           Assume "yes" for package manager prompts
@@ -48,8 +48,8 @@ while [ "${1-}" != "" ]; do
             REPO_URL="$2"; shift 2 ;;
         --dir)
             CLONE_DIR="$2"; shift 2 ;;
-        --branch)
-            BRANCH="$2"; shift 2 ;;
+        --ref)
+            REF="$2"; shift 2 ;;
         --node)
             NODE_VERSION="$2"; shift 2 ;;
         --no-update)
@@ -65,6 +65,31 @@ done
 
 require_cmd() {
     command -v "$1" >/dev/null 2>&1 || return 1
+}
+
+get_latest_tag() {
+    local repo_url="$1"
+    local temp_dir
+    temp_dir="$(mktemp -d)"
+
+    # Clone with minimal history to get tags
+    git clone --filter=blob:none --no-checkout "${repo_url}" "${temp_dir}" 2>/dev/null || {
+        rm -rf "${temp_dir}"
+        return 1
+    }
+
+    # Get the latest tag
+    local latest_tag
+    latest_tag="$(git -C "${temp_dir}" tag --sort=-version:refname | head -n1)"
+
+    # Clean up
+    rm -rf "${temp_dir}"
+
+    if [ -n "${latest_tag}" ]; then
+        echo "${latest_tag}"
+    else
+        return 1
+    fi
 }
 
 ensure_sudo() {
@@ -189,12 +214,35 @@ install_nx_and_deps() {
 clone_or_update_repo() {
     if [ -d "${CLONE_DIR}/.git" ]; then
         log_info "Repository exists at ${CLONE_DIR}. Fetching latest..."
-        git -C "${CLONE_DIR}" fetch --all --prune
-        if [ -n "${BRANCH}" ]; then
-            git -C "${CLONE_DIR}" checkout "${BRANCH}"
-            git -C "${CLONE_DIR}" pull --ff-only origin "${BRANCH}" || true
+        git -C "${CLONE_DIR}" fetch --all --prune --tags
+
+        # Determine what to checkout for existing repo
+        local chosen_url
+        if [ -n "${REPO_URL}" ]; then
+            chosen_url="${REPO_URL}"
         else
-            git -C "${CLONE_DIR}" pull --ff-only || true
+            chosen_url="${REPO_URL_SSH_DEFAULT}"
+        fi
+
+        if [ -n "${REF}" ]; then
+            git -C "${CLONE_DIR}" checkout "${REF}" || {
+                log_warn "Failed to checkout ${REF}, trying to fetch it..."
+                git -C "${CLONE_DIR}" fetch origin "${REF}" 2>/dev/null || true
+                git -C "${CLONE_DIR}" checkout "${REF}" || die "Failed to checkout ${REF}"
+            }
+        else
+            # Determine latest tag for existing repo too
+            local checkout_ref
+            checkout_ref="$(get_latest_tag "${chosen_url}")" || {
+                log_warn "Could not determine latest tag, falling back to main branch"
+                checkout_ref="main"
+            }
+            log_info "Using latest tag: ${checkout_ref}"
+            git -C "${CLONE_DIR}" checkout "${checkout_ref}" || {
+                log_warn "Failed to checkout ${checkout_ref}, trying to fetch it..."
+                git -C "${CLONE_DIR}" fetch origin "${checkout_ref}" 2>/dev/null || true
+                git -C "${CLONE_DIR}" checkout "${checkout_ref}" || die "Failed to checkout ${checkout_ref}"
+            }
         fi
     else
         local chosen_url
@@ -221,6 +269,17 @@ clone_or_update_repo() {
             ssh-keyscan -H "$host" 2>/dev/null >> "$HOME/.ssh/known_hosts" || true
         fi
 
+        # Determine what to checkout
+        local checkout_ref="${REF}"
+        if [ -z "${checkout_ref}" ]; then
+            log_info "No ref specified, determining latest tag..."
+            checkout_ref="$(get_latest_tag "${chosen_url}")" || {
+                log_warn "Could not determine latest tag, falling back to main branch"
+                checkout_ref="main"
+            }
+            log_info "Using latest tag: ${checkout_ref}"
+        fi
+
         log_info "Cloning via ${chosen_url}..."
         if ! git clone "${chosen_url}" "${CLONE_DIR}"; then
             if echo "${chosen_url}" | grep -q '^git@'; then
@@ -238,9 +297,14 @@ clone_or_update_repo() {
             fi
         fi
 
-        if [ -n "${BRANCH}" ]; then
-            git -C "${CLONE_DIR}" checkout "${BRANCH}"
-        fi
+        # Fetch tags and checkout the specified ref
+        git -C "${CLONE_DIR}" fetch --tags
+        git -C "${CLONE_DIR}" checkout "${checkout_ref}" || {
+            log_warn "Failed to checkout ${checkout_ref}, trying to fetch it..."
+            git -C "${CLONE_DIR}" fetch origin "${checkout_ref}" 2>/dev/null || true
+            git -C "${CLONE_DIR}" checkout "${checkout_ref}" || die "Failed to checkout ${checkout_ref}"
+        }
+        log_info "Checked out ${checkout_ref}"
     fi
 }
 
