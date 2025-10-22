@@ -50,4 +50,6 @@ documentation.json
 # AI
 .plans/
 !.plans/template.md
+.research/
+!.research/template.md
 repomix-output.xml
