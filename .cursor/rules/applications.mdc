@@ -23,6 +23,7 @@ This document defines the rules and best practices for structuring applications 
 - Frontend applications **SHOULD** rely on `ui`, `feature`, `util`, and `shared` libraries for functionality.
 - Frontend applications **MAY** implement routing, state management, and SSR if needed.
 - Frontend applications **SHOULD** integrate design system libraries consistently.
+- Frontend applications **SHOULD** use SCSS for styling. CSS **MAY** be used only when SCSS is not available or not supported by the build tooling.
 
 ### State Management Guidelines
 
@@ -49,6 +50,8 @@ This document defines the rules and best practices for structuring applications 
 - Frontend applications **SHOULD** use memoized selectors to prevent unnecessary re-renders and computations.
 - Frontend applications **SHOULD** implement state persistence for critical application state when appropriate.
 - Frontend applications **MUST** respect dependency boundaries when implementing state management across domains.
+- Frontend applications **MUST** use facades to abstract state management from components. Components **MUST NOT** directly access the store or dispatch actions. Facades **SHOULD** be provided in `data-access` libraries and expose a type-safe, domain-specific API for components to interact with state.
+- For simple state management patterns (Signals, BehaviorSubjects), components **MAY** interact with state directly through services, but **SHOULD** still use facades for complex state scenarios.
 
 ## Backend Applications (`scope:backend`)
 
