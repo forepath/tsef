@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0](https://github.com/forepath/tsef/compare/v1.4.1...v1.5.0) (2025-10-25)
+
+
+### Features
+
+* ngrx facade pattern ([#24](https://github.com/forepath/tsef/issues/24)) ([2f72d39](https://github.com/forepath/tsef/commit/2f72d39154235feeb89514152cdd588514fc0dde))
+
 ## [1.4.1](https://github.com/forepath/tsef/compare/v1.4.0...v1.4.1) (2025-10-22)
 
 
