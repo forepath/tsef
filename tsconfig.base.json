@@ -16,6 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@forepath/devkit": ["tools/devkit/src/index.ts"],
+      "@forepath/framework/backend": [
+        "libs/domains/framework/backend/index.ts"
+      ],
       "@forepath/identity/backend": ["libs/domains/identity/backend/index.ts"],
       "@forepath/identity/frontend": ["libs/domains/identity/frontend/index.ts"]
     }
