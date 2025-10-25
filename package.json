@@ -109,6 +109,8 @@
     "@nestjs/common": "11.1.6",
     "@nestjs/core": "11.1.6",
     "@nestjs/platform-express": "11.1.6",
+    "@nestjs/platform-socket.io": "11.1.6",
+    "@nestjs/websockets": "11.1.6",
     "@nx/devkit": "21.5.3",
     "@nx/vite": "21.5.3",
     "@popperjs/core": "2.11.8",
