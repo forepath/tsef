@@ -8,11 +8,11 @@ This guide defines the required steps and best practices for the Cursor BugBot t
 
 This guide references the following authoritative rule files. **DO NOT** duplicate rules from these files - always reference them as the source of truth:
 
-- [Agent Guidelines](./rules/agents.mdc) - Nx workflows, PR templates, GitHub workflows
-- [Application Guidelines](./rules/applications.mdc) - Application structure and boundaries
-- [Domain and Library Guidelines](./rules/domains_and_libraries.mdc) - Library organization and dependencies
-- [Conventional Commit Guidelines](./rules/conventional_commits.mdc) - Commit message format
-- [Software Development Principles](./rules/software_develoment_principals.mdc) - Code quality principles
+- [Agent Guidelines](./rules/framework_agents.mdc) - Nx workflows, PR templates, GitHub workflows
+- [Application Guidelines](./rules/framework_applications.mdc) - Application structure and boundaries
+- [Domain and Library Guidelines](./rules/framework_domains_and_libraries.mdc) - Library organization and dependencies
+- [Conventional Commit Guidelines](./rules/framework_conventional_commits.mdc) - Commit message format
+- [Software Development Principles](./rules/framework_software_develoment_principals.mdc) - Code quality principles
 
 ---
 
@@ -25,11 +25,11 @@ This guide references the following authoritative rule files. **DO NOT** duplica
 
 - **Load Ruleset**
   - Load and parse the following rules:
-    - [`.cursor/rules/agents.mdc`](./rules/agents.mdc)
-    - [`.cursor/rules/applications.mdc`](./rules/applications.mdc)
-    - [`.cursor/rules/domains_and_libraries.mdc`](./rules/domains_and_libraries.mdc)
-    - [`.cursor/rules/conventional_commits.mdc`](./rules/conventional_commits.mdc)
-    - [`.cursor/rules/software_develoment_principals.mdc`](./rules/software_develoment_principals.mdc)
+    - [`.cursor/rules/agents.mdc`](./rules/framework_agents.mdc)
+    - [`.cursor/rules/applications.mdc`](./rules/framework_applications.mdc)
+    - [`.cursor/rules/domains_and_libraries.mdc`](./rules/framework_domains_and_libraries.mdc)
+    - [`.cursor/rules/conventional_commits.mdc`](./rules/framework_conventional_commits.mdc)
+    - [`.cursor/rules/software_develoment_principals.mdc`](./rules/framework_software_develoment_principals.mdc)
   - Ensure all referenced rules are up-to-date and applied.
 
 ---
@@ -37,7 +37,7 @@ This guide references the following authoritative rule files. **DO NOT** duplica
 ## 2. Commit Message Compliance
 
 - **Check Conventional Commits**
-  - Each commit **MUST** follow the [Conventional Commit Guidelines](./rules/conventional_commits.mdc)
+  - Each commit **MUST** follow the [Conventional Commit Guidelines](./rules/framework_conventional_commits.mdc)
   - **Reject** PRs with non-compliant commit messages and request amendments
   - Reference the full ruleset for detailed requirements
 
@@ -46,13 +46,13 @@ This guide references the following authoritative rule files. **DO NOT** duplica
 ## 3. Code and Structure Review
 
 - **Application and Library Boundaries**
-  - Verify that all changes respect [Application Guidelines](./rules/applications.mdc)
-  - Check [Domain and Library Guidelines](./rules/domains_and_libraries.mdc)
+  - Verify that all changes respect [Application Guidelines](./rules/framework_applications.mdc)
+  - Check [Domain and Library Guidelines](./rules/framework_domains_and_libraries.mdc)
   - Ensure all new or changed dependencies are allowed by the ruleset
   - Check for circular dependencies and recommend refactoring if found
 
 - **Software Development Principles**
-  - Code **MUST** follow [Software Development Principles](./rules/software_develoment_principals.mdc)
+  - Code **MUST** follow [Software Development Principles](./rules/framework_software_develoment_principals.mdc)
   - Reference the full ruleset for KISS, YAGNI, DRY, and other principles
 
 ---
@@ -60,11 +60,11 @@ This guide references the following authoritative rule files. **DO NOT** duplica
 ## 4. Nx Workflow and Tooling Compliance
 
 - **Nx Usage**
-  - All build, test, lint, and affected analysis steps **MUST** follow [Agent Guidelines](./rules/agents.mdc) for Nx workflows
+  - All build, test, lint, and affected analysis steps **MUST** follow [Agent Guidelines](./rules/framework_agents.mdc) for Nx workflows
   - Reference the full ruleset for specific command requirements and validation steps
 
 - **Validation**
-  - Follow [Testing Changes](./rules/agents.mdc#testing-changes) validation workflow
+  - Follow [Testing Changes](./rules/framework_agents.mdc#testing-changes) validation workflow
   - Confirm all affected projects pass builds, tests, and lint checks
 
 ---
@@ -72,11 +72,11 @@ This guide references the following authoritative rule files. **DO NOT** duplica
 ## 5. Pull Request Description and Template
 
 - **PR Template**
-  - Ensure the PR description follows the [PR Template Requirements](./rules/agents.mdc#pull-request-template-requirements)
+  - Ensure the PR description follows the [PR Template Requirements](./rules/framework_agents.mdc#pull-request-template-requirements)
   - If missing or incomplete, request the contributor to update the PR
 
 - **Issue Linking**
-  - Follow [GitHub Issue Workflow](./rules/agents.mdc#github-issue-workflow) requirements for issue references and "Fixes #ISSUE_NUMBER" format
+  - Follow [GitHub Issue Workflow](./rules/framework_agents.mdc#github-issue-workflow) requirements for issue references and "Fixes #ISSUE_NUMBER" format
 
 ---
 
@@ -84,10 +84,10 @@ This guide references the following authoritative rule files. **DO NOT** duplica
 
 - **Documentation**
   - Check that any new features, changes, or breaking changes are reflected in the documentation
-  - Follow [Internal Documentation Guidelines](./rules/internal_documentation.mdc) for documentation standards
+  - Follow [Internal Documentation Guidelines](./rules/framework_internal_documentation.mdc) for documentation standards
 
 - **Tests**
-  - Follow [Testing Changes](./rules/agents.mdc#testing-changes) requirements
+  - Follow [Testing Changes](./rules/framework_agents.mdc#testing-changes) requirements
   - Ensure new code is covered by appropriate unit, integration, or e2e tests
 
 ---
@@ -106,12 +106,12 @@ This guide references the following authoritative rule files. **DO NOT** duplica
 
 ## 8. Example Review Checklist
 
-- [ ] All commits follow [Conventional Commit Guidelines](./rules/conventional_commits.mdc)
-- [ ] Application/library boundaries and dependencies are valid per [Application](./rules/applications.mdc) and [Domain/Library Guidelines](./rules/domains_and_libraries.mdc)
-- [ ] Code follows [Software Development Principles](./rules/software_develoment_principals.mdc)
-- [ ] Nx workflows are used per [Agent Guidelines](./rules/agents.mdc)
+- [ ] All commits follow [Conventional Commit Guidelines](./rules/framework_conventional_commits.mdc)
+- [ ] Application/library boundaries and dependencies are valid per [Application](./rules/framework_applications.mdc) and [Domain/Library Guidelines](./rules/framework_domains_and_libraries.mdc)
+- [ ] Code follows [Software Development Principles](./rules/framework_software_develoment_principals.mdc)
+- [ ] Nx workflows are used per [Agent Guidelines](./rules/framework_agents.mdc)
 - [ ] All affected projects build, test, and lint successfully
-- [ ] PR description and template are complete per [Agent Guidelines](./rules/agents.mdc#pull-request-template-requirements)
+- [ ] PR description and template are complete per [Agent Guidelines](./rules/framework_agents.mdc#pull-request-template-requirements)
 - [ ] Documentation is updated as needed
 - [ ] Tests are present and sufficient
 - [ ] No circular dependencies or rule violations
