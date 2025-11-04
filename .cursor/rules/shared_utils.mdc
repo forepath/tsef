@@ -7,7 +7,7 @@ alwaysApply: false
 
 This ruleset governs shared, framework-agnostic utilities, types, and schemas used across scopes.
 
-> The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” are as described in RFC 2119.
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are as described in RFC 2119.
 
 ## General
 

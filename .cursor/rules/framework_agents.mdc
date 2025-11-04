@@ -6,7 +6,7 @@ alwaysApply: true
 
 This document defines the rules and best practices for how you interact with this repository and its workflows. It enforces consistency, reliability, and maintainability across all agent-driven tasks.
 
-> The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in RFC 2119.
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
 
 ## General Rules
 
@@ -138,7 +138,7 @@ gh issue list --assignee "@me" --json number,title,body,state --jq '.[]'
 
 ### 5. Pull Request
 
-- You **MUST** include a descriptive title, fill in the PR template, and add “Fixes #ISSUE_NUMBER” where applicable.
+- You **MUST** include a descriptive title, fill in the PR template, and add "Fixes #ISSUE_NUMBER" where applicable.
 - You **SHOULD** summarize key changes and request appropriate reviewers.
 
 ## Pull Request Template Requirements
@@ -146,7 +146,7 @@ gh issue list --assignee "@me" --json number,title,body,state --jq '.[]'
 - You **MUST** fill out `.github/PULL_REQUEST_TEMPLATE.md` completely, including:
   1. Current Behavior
   2. Expected Behavior
-  3. Related Issue(s) (with “Fixes #ISSUE_NUMBER” when applicable)
+  3. Related Issue(s) (with "Fixes #ISSUE_NUMBER" when applicable)
 
 ### Template Format
 

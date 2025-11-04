@@ -7,7 +7,7 @@ alwaysApply: false
 
 This ruleset governs Keycloak theme templates and styles. It focuses on presentation and consistency with frontend branding.
 
-> The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” are as described in RFC 2119.
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are as described in RFC 2119.
 
 ## Separation of Concerns
 

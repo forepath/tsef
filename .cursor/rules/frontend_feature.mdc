@@ -7,7 +7,7 @@ alwaysApply: false
 
 Feature code orchestrates workflows, routing, and facades; components here are container-orientated and coordinate UI + data-access.
 
-> The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” are as described in RFC 2119.
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are as described in RFC 2119.
 
 ## Architecture
 

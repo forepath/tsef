@@ -7,7 +7,7 @@ alwaysApply: false
 
 This ruleset governs frontend data-access libraries including services, facades, and NgRx artifacts (actions, reducers, effects, selectors). It aligns with the monorepo application and testing guidelines.
 
-> The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” are as described in RFC 2119.
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are as described in RFC 2119.
 
 ## Architecture
 
