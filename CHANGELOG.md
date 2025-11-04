@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0](https://github.com/forepath/tsef/compare/v1.5.0...v1.6.0) (2025-11-04)
+
+
+### Features
+
+* code examples and file grouping ([#25](https://github.com/forepath/tsef/issues/25)) ([dd6f153](https://github.com/forepath/tsef/commit/dd6f15390b9f39f57c80b3d8c03ae67efe86c8ca))
+
+
+### Chores
+
+* replace special characters from cursor rule files ([#26](https://github.com/forepath/tsef/issues/26)) ([efae131](https://github.com/forepath/tsef/commit/efae1319cf60597305e9b45f4485cb1ffe94ccc7))
+
 ## [1.5.0](https://github.com/forepath/tsef/compare/v1.4.1...v1.5.0) (2025-10-25)
 
 
