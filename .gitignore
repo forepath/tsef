@@ -53,3 +53,5 @@ documentation.json
 .research/
 !.research/template.md
 repomix-output.xml
+.claude/
+.github/copilot-instructions.md
