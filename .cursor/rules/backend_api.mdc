@@ -7,7 +7,7 @@ alwaysApply: false
 
 This ruleset governs backend API modules, controllers, and services (NestJS). It aligns with domain boundaries and testing/security guidelines.
 
-> The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” are as described in RFC 2119.
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are as described in RFC 2119.
 
 ## Architecture
 
