@@ -15,7 +15,7 @@ This ruleset governs Angular components and their templates/styles. It aligns wi
 - Components **MUST NOT** dispatch to the store or select state directly when a facade is available; use a domain facade from `data-access`.
 - Components **SHOULD** be standalone and import only necessary modules.
 - Templates **MUST** avoid complex logic; prefer pipes, pure functions, or computed values provided by facades.
-- Styles **SHOULD** use SCSS and follow BEM or the project’s chosen convention.
+- Styles **SHOULD** use SCSS and follow BEM or the project's chosen convention.
 
 ## Inputs/Outputs
 

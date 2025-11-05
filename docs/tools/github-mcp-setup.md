@@ -1,6 +1,6 @@
 # GitHub MCP Server Setup
 
-This guide provides step-by-step instructions for configuring and running the GitHub MCP (Monorepo Control Plane) server within your workspace. The GitHub MCP server enables advanced automation, insights, and workflow integration with GitHub, streamlining monorepo management and developer experience. By following these steps, you will ensure a secure, reliable, and maintainable setup that aligns with the monorepo’s best practices.
+This guide provides step-by-step instructions for configuring and running the GitHub MCP (Monorepo Control Plane) server within your workspace. The GitHub MCP server enables advanced automation, insights, and workflow integration with GitHub, streamlining monorepo management and developer experience. By following these steps, you will ensure a secure, reliable, and maintainable setup that aligns with the monorepo's best practices.
 
 ## Overview
 

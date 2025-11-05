@@ -20,7 +20,7 @@ This guide references the following authoritative rule files. **DO NOT** duplica
 
 - **Retrieve PR Details**
   - Fetch the PR description, associated issue(s), and all changed files.
-  - Identify the PR’s scope (bugfix, feature, chore, etc.) and affected projects/libraries.
+  - Identify the PR's scope (bugfix, feature, chore, etc.) and affected projects/libraries.
   - If the PR references an issue, fetch the issue details for context.
 
 - **Load Ruleset**
