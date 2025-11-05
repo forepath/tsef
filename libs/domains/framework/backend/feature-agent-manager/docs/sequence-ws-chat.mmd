@@ -1,0 +1,101 @@
+sequenceDiagram
+    participant WSClient as WebSocket Client
+    participant Gateway as AgentsGateway<br/>(namespace: agents)
+    participant Service as AgentsService
+    participant Repo as AgentsRepository
+    participant DB as Database
+    participant Docker as DockerService
+
+    Note over WSClient,Docker: WebSocket - Connection, Authentication, Chat & Disconnection
+
+    rect rgb(200, 220, 255)
+        Note over WSClient,Docker: Connection
+        WSClient->>Gateway: WebSocket Connect<br/>(namespace: /agents)
+        Gateway->>Gateway: handleConnection(socket)<br/>Log: "Client connected"
+    end
+
+    rect rgb(240, 250, 255)
+        Note over WSClient,Docker: Authentication Flow
+        WSClient->>Gateway: login<br/>{agentId, password}
+        Gateway->>Gateway: findAgentIdByIdentifier(agentId)
+        Gateway->>Repo: findById(agentId)
+        Repo->>DB: SELECT agent WHERE id
+        alt Agent found by ID
+            DB-->>Repo: agent entity
+            Repo-->>Gateway: agent.id (UUID)
+        else Agent not found by ID
+            Gateway->>Repo: findByName(agentId)
+            Repo->>DB: SELECT agent WHERE name
+            alt Agent found by name
+                DB-->>Repo: agent entity
+                Repo-->>Gateway: agent.id (UUID)
+            else Agent not found
+                Repo-->>Gateway: null
+                Gateway-->>WSClient: loginError<br/>{message: "Invalid credentials"}
+            end
+        end
+
+        alt Agent UUID found
+            Gateway->>Service: verifyCredentials(uuid, password)
+            Service->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity
+            Repo-->>Service: agent entity
+            Service->>Service: verifyPassword(password, hash)
+            alt Password valid
+                Service-->>Gateway: isValid: true
+                Gateway->>Gateway: authenticatedClients.set(socket.id, uuid)
+                Gateway->>Service: findOne(uuid)
+                Service->>Repo: findById(uuid)
+                Repo->>DB: SELECT agent WHERE id
+                DB-->>Repo: agent entity
+                Repo-->>Service: agent entity
+                Service-->>Gateway: agent details
+                Gateway-->>WSClient: loginSuccess<br/>{message: "Welcome, {name}!"}
+            else Password invalid
+                Service-->>Gateway: isValid: false
+                Gateway-->>WSClient: loginError<br/>{message: "Invalid credentials"}
+            end
+        end
+    end
+
+    rect rgb(250, 255, 240)
+        Note over WSClient,Docker: Chat Message Flow
+        WSClient->>Gateway: chat<br/>{message: "Hello"}
+        Gateway->>Gateway: uuid = authenticatedClients.get(socket.id)
+        alt Not authenticated
+            Gateway-->>WSClient: error<br/>{message: "Unauthorized. Please login first."}
+        else Authenticated
+            Gateway->>Service: findOne(uuid)
+            Service->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity
+            Repo-->>Service: agent entity
+            Service-->>Gateway: agent details
+            Gateway->>Gateway: server.emit('chatMessage')
+            Gateway-->>WSClient: chatMessage<br/>{from: agentName, text: "Hello"}
+            Note over Gateway: Broadcasts to all connected clients
+
+            Gateway->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity with containerId
+            Repo-->>Gateway: agent entity
+
+            alt Container exists
+                Gateway->>Docker: sendCommandToContainer(containerId, message)
+                Docker->>Docker: Write to container stdin
+            end
+        end
+    end
+
+    rect rgb(255, 220, 220)
+        Note over WSClient,Docker: Disconnection
+        WSClient->>Gateway: WebSocket Disconnect
+        Gateway->>Gateway: handleDisconnect(socket)<br/>Log: "Client disconnected"
+        Gateway->>Gateway: authenticatedClients.delete(socket.id)
+        Gateway->>Gateway: cancel = logStreamCancel.get(socket.id)
+        alt Cancel function exists
+            Gateway->>Gateway: cancel()
+            Gateway->>Gateway: logStreamCancel.delete(socket.id)
+        end
+    end

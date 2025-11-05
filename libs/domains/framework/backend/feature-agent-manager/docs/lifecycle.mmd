@@ -1,0 +1,142 @@
+sequenceDiagram
+    participant User as Client
+    participant HTTP as AgentsController<br/>(/api/agents)
+    participant Service as AgentsService
+    participant Repo as AgentsRepository
+    participant DB as Database
+    participant WS as AgentsGateway<br/>(namespace: /agents)
+    participant Docker as DockerService
+
+    Note over User,Docker: End-to-end lifecycle: create → connect/login → stream logs → send command → disconnect → delete
+
+    rect rgb(230, 240, 255)
+        Note over User,Docker: Step 1 — Create Agent (HTTP)
+        User->>HTTP: POST /api/agents { name, description? }
+        HTTP->>Service: create(createAgentDto)
+        Service->>Service: generatePassword()
+        Service->>Service: hashPassword(password)
+        Service->>Service: generateVolumePath()
+        Service->>Docker: createContainer(name, env, volumes)
+        Note over Docker: Container created with:<br/>- GIT_REPOSITORY_URL<br/>- GIT_USERNAME<br/>- GIT_TOKEN/GIT_PASSWORD<br/>- CURSOR_API_KEY<br/>- Volume: /opt/agents/{uuid} -> /app
+        Docker-->>Service: containerId
+        Service->>Docker: createNetrcFile(containerId)
+        Note over Docker: Creates /root/.netrc with:<br/>machine {domain}<br/>  login {username}<br/>  password {token}
+        Docker-->>Service: .netrc created
+        Service->>Docker: sendCommandToContainer(containerId, "git clone {url} /app")
+        Note over Docker: Clones repository directly<br/>into /app (workdir)
+        Docker-->>Service: repository cloned
+        Service->>Repo: create(entity)
+        Repo->>DB: INSERT agent
+        DB-->>Repo: agent entity
+        Repo-->>Service: agent entity
+        Service-->>HTTP: CreateAgentResponseDto { id, name, password, ... }
+        HTTP-->>User: 201 Created { id, name, password, ... }
+    end
+
+    rect rgb(200, 220, 255)
+        Note over User,Docker: Step 2 — Connect (WebSocket)
+        User->>WS: WebSocket Connect (namespace: /agents)
+        WS->>WS: handleConnection(socket)
+    end
+
+    rect rgb(240, 250, 255)
+        Note over User,Docker: Step 3 — Authenticate (WebSocket)
+        User->>WS: login { agentId: id|name, password }
+        WS->>Repo: findById(id)
+        Repo->>DB: SELECT agent WHERE id
+        alt Found by ID
+            DB-->>Repo: agent entity
+        else Not found by ID
+            Repo-->>WS: null
+            WS->>Repo: findByName(name)
+            Repo->>DB: SELECT agent WHERE name
+            DB-->>Repo: agent entity
+        end
+        Repo-->>WS: agent entity (uuid)
+        WS->>Service: verifyCredentials(uuid, password)
+        Service->>Repo: findById(uuid)
+        Repo->>DB: SELECT agent WHERE id
+        DB-->>Repo: agent entity
+        Repo-->>Service: agent entity
+        Service->>Service: verifyPassword(password, hash)
+        alt Valid
+            Service-->>WS: isValid: true
+            WS->>WS: authenticatedClients.set(socket.id, uuid)
+            WS->>Service: findOne(uuid)
+            Service->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity
+            Repo-->>Service: agent entity
+            Service-->>WS: agent details
+            WS-->>User: loginSuccess { message: "Welcome, {name}!" }
+        else Invalid
+            Service-->>WS: isValid: false
+            WS-->>User: loginError { message: "Invalid credentials" }
+        end
+    end
+
+    rect rgb(230, 240, 250)
+        Note over User,Docker: Step 4 — Start Log Streaming (WebSocket)
+        WS->>Repo: findById(uuid)
+        Repo->>DB: SELECT agent WHERE id
+        DB-->>Repo: agent entity (containerId)
+        Repo-->>WS: agent entity
+        alt Container exists
+            WS->>WS: logStreamCancel.set(socket.id, cancel)
+            WS->>Docker: getContainerLogs(containerId)
+            loop Stream until disconnect/cancel
+                Docker-->>WS: log line
+                WS-->>User: containerLog { text: line }
+            end
+        end
+    end
+
+    rect rgb(250, 255, 240)
+        Note over User,Docker: Step 5 — Send Command / Chat (WebSocket)
+        User->>WS: chat { message }
+        WS->>WS: uuid = authenticatedClients.get(socket.id)
+        alt Not authenticated
+            WS-->>User: error { message: "Unauthorized. Please login first." }
+        else Authenticated
+            WS->>Service: findOne(uuid)
+            Service->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity
+            Repo-->>Service: agent entity
+            Service-->>WS: agent details
+            WS->>WS: server.emit('chatMessage')
+            WS-->>User: chatMessage { from: agentName, text: message }
+            WS->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity (containerId)
+            Repo-->>WS: agent entity
+            alt Container exists
+                WS->>Docker: sendCommandToContainer(containerId, message)
+                Docker->>Docker: Write to container stdin
+            end
+        end
+    end
+
+    rect rgb(255, 220, 220)
+        Note over User,Docker: Step 6 — Disconnect (WebSocket)
+        User->>WS: WebSocket Disconnect
+        WS->>WS: handleDisconnect(socket)
+        WS->>WS: authenticatedClients.delete(socket.id)
+        WS->>WS: cancel = logStreamCancel.get(socket.id)
+        alt Cancel exists
+            WS->>WS: cancel()
+            WS->>WS: logStreamCancel.delete(socket.id)
+        end
+    end
+
+    rect rgb(255, 230, 255)
+        Note over User,DB: Step 7 — Delete Agent (HTTP)
+        User->>HTTP: DELETE /api/agents/{id}
+        HTTP->>Service: remove(id)
+        Service->>Repo: delete(id)
+        Repo->>DB: DELETE agent WHERE id
+        DB-->>Repo: success
+        Repo-->>Service: success
+        Service-->>HTTP: void
+        HTTP-->>User: 204 No Content
+    end

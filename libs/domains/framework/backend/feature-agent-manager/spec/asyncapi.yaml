@@ -1,0 +1,207 @@
+asyncapi: 3.0.0
+info:
+  title: Agent Gateway
+  version: 1.0.0
+  description: WebSocket events for the agents chat gateway (Socket.IO namespace "agents")
+servers:
+  local:
+    host: localhost:8080
+    protocol: ws
+    description: Socket.IO server (namespace /agents)
+channels:
+  agents/login:
+    address: agents/login
+    messages:
+      loginCommand:
+        $ref: '#/components/messages/Login'
+    description: Client sends login command with credentials (agentId or name + password)
+  agents/loginSuccess:
+    address: agents/loginSuccess
+    messages:
+      loginSuccessEvent:
+        $ref: '#/components/messages/LoginSuccess'
+    description: Server acknowledges successful login
+  agents/loginError:
+    address: agents/loginError
+    messages:
+      loginErrorEvent:
+        $ref: '#/components/messages/LoginError'
+    description: Server returns login failure reason
+  agents/chat:
+    address: agents/chat
+    messages:
+      chatCommand:
+        $ref: '#/components/messages/Chat'
+    description: Client sends a chat message (requires prior login)
+  agents/chatMessage:
+    address: agents/chatMessage
+    messages:
+      chatBroadcast:
+        $ref: '#/components/messages/ChatMessage'
+    description: Server broadcasts chat messages to all connected clients
+  agents/containerLog:
+    address: agents/containerLog
+    messages:
+      containerLogEvent:
+        $ref: '#/components/messages/ContainerLog'
+    description: Server streams container log lines to the authenticated client
+  agents/logStreamError:
+    address: agents/logStreamError
+    messages:
+      logStreamErrorEvent:
+        $ref: '#/components/messages/LogStreamError'
+    description: Server notifies client when log streaming fails or cannot be started
+  agents/error:
+    address: agents/error
+    messages:
+      errorEvent:
+        $ref: '#/components/messages/Error'
+    description: Generic error messages for unauthorized or processing failures
+operations:
+  clientSendsLogin:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1login'
+    messages:
+      - $ref: '#/channels/agents~1login/messages/loginCommand'
+  serverEmitsLoginSuccess:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1loginSuccess'
+    messages:
+      - $ref: '#/channels/agents~1loginSuccess/messages/loginSuccessEvent'
+  serverEmitsLoginError:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1loginError'
+    messages:
+      - $ref: '#/channels/agents~1loginError/messages/loginErrorEvent'
+  clientSendsChat:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1chat'
+    messages:
+      - $ref: '#/channels/agents~1chat/messages/chatCommand'
+  serverBroadcastsChatMessage:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1chatMessage'
+    messages:
+      - $ref: '#/channels/agents~1chatMessage/messages/chatBroadcast'
+  serverStreamsContainerLog:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1containerLog'
+    messages:
+      - $ref: '#/channels/agents~1containerLog/messages/containerLogEvent'
+  serverEmitsLogStreamError:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1logStreamError'
+    messages:
+      - $ref: '#/channels/agents~1logStreamError/messages/logStreamErrorEvent'
+  serverEmitsError:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1error'
+    messages:
+      - $ref: '#/channels/agents~1error/messages/errorEvent'
+components:
+  securitySchemes:
+    jwt:
+      type: httpApiKey
+      name: Authorization
+      in: header
+      description: 'Bearer JWT from Keycloak, e.g. Authorization: Bearer <token>'
+  messages:
+    Login:
+      name: Login
+      title: Login command
+      contentType: application/json
+      payload:
+        type: object
+        required: [agentId, password]
+        properties:
+          agentId:
+            type: string
+            description: Agent UUID or name
+          password:
+            type: string
+    LoginSuccess:
+      name: LoginSuccess
+      title: Login success event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          message:
+            type: string
+            description: Welcome message
+    LoginError:
+      name: LoginError
+      title: Login error event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          message:
+            type: string
+    Chat:
+      name: Chat
+      title: Chat command
+      contentType: application/json
+      payload:
+        type: object
+        required: [message]
+        properties:
+          message:
+            type: string
+            description: Message text
+    ChatMessage:
+      name: ChatMessage
+      title: Chat broadcast event
+      contentType: application/json
+      payload:
+        type: object
+        required: [from, text]
+        properties:
+          from:
+            type: string
+          text:
+            type: string
+    ContainerLog:
+      name: ContainerLog
+      title: Container log line event
+      contentType: application/json
+      payload:
+        type: object
+        required: [text]
+        properties:
+          text:
+            type: string
+    LogStreamError:
+      name: LogStreamError
+      title: Log stream error event
+      contentType: application/json
+      payload:
+        type: object
+        required: [message]
+        properties:
+          message:
+            type: string
+            description: Error message describing the failure
+            enum:
+              - 'Log streaming failed'
+              - 'Failed to start log streaming'
+          error:
+            type: string
+            description: Detailed error message from the underlying system
+    Error:
+      name: Error
+      title: Error event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          message:
+            type: string

@@ -55,6 +55,25 @@ To create a new TSEF workspace run:
 - [AI Agent Rules](./docs/reference/rule-index.md) - Complete reference to all guidelines
 - [Troubleshooting](./docs/reference/troubleshooting.md) - Common issues and solutions
 
+## License
+
+This project is licensed under the **MIT License**.
+
+Copyright (c) 2025 IPvX UG (haftungsbeschränkt)
+
+Portions of this software were originally Copyright (c) 2017-2025 Narwhal Technologies Inc.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the MIT License. See the [LICENSE](./LICENSE) file for the full license text.
+
+### Sublicensed Components
+
+The following components are sublicensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**:
+
+- [`apps/backend-agent-manager`](./apps/backend-agent-manager/) - Backend application for agent management
+- [`libs/domains/framework/backend/feature-agent-manager`](./libs/domains/framework/backend/feature-agent-manager/) - Agent management feature library
+
+These components are licensed under AGPL-3.0, which means that any modifications or derivative works must also be licensed under AGPL-3.0 and made available to users, including when accessed over a network. See the respective [backend-agent-manager application LICENSE](./apps/backend-agent-manager/LICENSE) and [feature-agent-manager library LICENSE](./libs/domains/framework/backend/feature-agent-manager/LICENSE) files for the full AGPL-3.0 license text.
+
 ## Contribution
 
 We welcome contributions! Whether you're fixing bugs, adding features, or improving documentation, your input helps make this framework better for everyone.
@@ -62,6 +81,5 @@ We welcome contributions! Whether you're fixing bugs, adding features, or improv
 For detailed information on how to contribute, please see our [Contributing Guide](./CONTRIBUTING.md).
 
 ---
-
 
 _Built with ❤️ for developers who want to build better software, faster._

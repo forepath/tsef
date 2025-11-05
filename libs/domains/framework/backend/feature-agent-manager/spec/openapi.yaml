@@ -1,0 +1,162 @@
+openapi: 3.1.0
+info:
+  title: Agent Manager API
+  version: 1.0.0
+  description: HTTP API for managing agents
+  contact:
+    name: ForePath
+    email: hi@forepath.io
+    url: https://forepath.io
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+security:
+  - bearerAuth: []
+paths:
+  /agents:
+    get:
+      summary: List agents
+      operationId: listAgents
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum number of agents to return (default 10)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of agents to skip (default 0)
+      responses:
+        '200':
+          description: Array of agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentResponseDto'
+    post:
+      summary: Create agent
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentDto'
+      responses:
+        '201':
+          description: Created agent with generated password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAgentResponseDto'
+  /agents/{id}:
+    get:
+      summary: Get agent by id
+      operationId: getAgent
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponseDto'
+    post:
+      summary: Update agent
+      operationId: updateAgent
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAgentDto'
+      responses:
+        '200':
+          description: Updated agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponseDto'
+    delete:
+      summary: Delete agent
+      operationId: deleteAgent
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CreateAgentDto:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+    UpdateAgentDto:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+    AgentResponseDto:
+      type: object
+      required: [id, name, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateAgentResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/AgentResponseDto'
+        - type: object
+          required: [password]
+          properties:
+            password:
+              type: string

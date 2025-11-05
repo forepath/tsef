@@ -6,14 +6,18 @@
 #
 FROM docker.io/debian:trixie
 
+# Environment variables for the git repository
+ENV GIT_REPOSITORY_URL=
+ENV GIT_USERNAME=
+ENV GIT_TOKEN=
+ENV GIT_PASSWORD=
+
 WORKDIR /app
 
-# Copy application code (cursor-agent needs this)
-COPY . /app
-
 # Install required dependencies
-RUN apt-get update && apt-get install -y curl bash ca-certificates && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+  && apt-get install -y curl bash ca-certificates git \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js via nvm
 ENV NVM_DIR=/root/.nvm

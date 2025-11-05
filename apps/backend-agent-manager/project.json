@@ -15,7 +15,10 @@
         "outputPath": "dist/apps/backend-agent-manager",
         "main": "apps/backend-agent-manager/src/main.ts",
         "tsConfig": "apps/backend-agent-manager/tsconfig.app.json",
-        "assets": ["apps/backend-agent-manager/src/assets"],
+        "assets": [
+          "apps/backend-agent-manager/src/assets",
+          "apps/backend-agent-manager/src/migrations"
+        ],
         "webpackConfig": "apps/backend-agent-manager/webpack.config.cjs",
         "generatePackageJson": true
       },
@@ -49,8 +52,19 @@
         "buildTarget": "build"
       }
     },
+    "compile-migrations": {
+      "dependsOn": ["build"],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "mkdir -p dist/apps/backend-agent-manager/src/migrations && npx tsc $(find apps/backend-agent-manager/src/migrations -name '*.ts') --outDir dist/apps/backend-agent-manager/src/migrations --module commonjs --target es2021 --moduleResolution node --esModuleInterop --skipLibCheck --resolveJsonModule --declaration false --rootDir apps/backend-agent-manager/src/migrations"
+      }
+    },
     "prune": {
-      "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
+      "dependsOn": [
+        "prune-lockfile",
+        "copy-workspace-modules",
+        "compile-migrations"
+      ],
       "executor": "nx:noop"
     },
     "serve": {
@@ -88,10 +102,19 @@
       }
     },
     "docker:worker": {
+      "dependsOn": ["build", "prune"],
       "executor": "nx:run-commands",
       "options": {
         "cwd": "dist/apps/backend-agent-manager",
         "command": "docker build . -f ../../../apps/backend-agent-manager/Dockerfile.worker --tag tsef-agent-manager-worker"
+      }
+    },
+    "docker:serve": {
+      "dependsOn": ["docker:api", "docker:worker"],
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/backend-agent-manager",
+        "command": "docker compose up -d"
       }
     }
   }

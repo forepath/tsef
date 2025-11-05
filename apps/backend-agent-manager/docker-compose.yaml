@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agent-manager-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agent-manager-network
+
+  backend-agent-manager:
+    image: tsef-agent-manager-api
+    container_name: agent-manager-api
+    environment:
+      # Backend API configuration
+      HOST: 0.0.0.0
+      PORT: 3000
+      WEBSOCKET_PORT: 8080
+      NODE_ENV: development
+      # Cursor agent configuration
+      CURSOR_API_KEY: ${CURSOR_API_KEY:-}
+      AGENT_DEFAULT_IMAGE: ${AGENT_DEFAULT_IMAGE:-ghcr.io/forepath/cursor-agent:latest}
+      # Database configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: postgres
+      # Static API key authentication configuration
+      STATIC_API_KEY: ${STATIC_API_KEY:-}
+    ports:
+      - '3000:3000'
+      - '8080:8080'
+    volumes:
+      # Mount Docker socket for Docker-in-Docker functionality
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - agent-manager-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  agent-manager-network:
+    driver: bridge
