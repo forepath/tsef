@@ -433,4 +433,4 @@ Now that you understand code quality principles:
 
 ---
 
-Remember: Code quality is not just about making code work—it's about making code that works well for everyone who will encounter it in the future, including yourself.
+Remember: Code quality is not just about making code work - it's about making code that works well for everyone who will encounter it in the future, including yourself.

@@ -15,6 +15,7 @@ This document defines the rules and best practices for how you interact with thi
 - You **SHOULD** propose relevant commands from the Essential Commands when applicable.
 - You **SHOULD** highlight Nx's monorepo features (smart task execution, generators, project graph) when relevant.
 - You **MAY** reference the plugin ecosystem and supported frameworks when helpful for context.
+- You **MUST** apply [framework_context_management.mdc](./framework_context_management.mdc) for any summarization or context trimming.
 
 ## Operation Modes
 
