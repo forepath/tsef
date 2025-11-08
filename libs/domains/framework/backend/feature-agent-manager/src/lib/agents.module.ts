@@ -3,7 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AgentsController } from './agents.controller';
 import { AgentsGateway } from './agents.gateway';
 import { AgentEntity } from './entities/agent.entity';
+import { AgentMessageEntity } from './entities/agent-message.entity';
 import { AgentsRepository } from './repositories/agents.repository';
+import { AgentMessagesRepository } from './repositories/agent-messages.repository';
+import { AgentMessagesService } from './services/agent-messages.service';
 import { AgentsService } from './services/agents.service';
 import { DockerService } from './services/docker.service';
 import { PasswordService } from './services/password.service';
@@ -13,9 +16,17 @@ import { PasswordService } from './services/password.service';
  * Provides controllers, services, and repository for agent CRUD operations.
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([AgentEntity])],
+  imports: [TypeOrmModule.forFeature([AgentEntity, AgentMessageEntity])],
   controllers: [AgentsController],
-  providers: [AgentsGateway, AgentsService, PasswordService, AgentsRepository, DockerService],
-  exports: [AgentsService, AgentsRepository],
+  providers: [
+    AgentsGateway,
+    AgentsService,
+    AgentMessagesService,
+    PasswordService,
+    AgentsRepository,
+    AgentMessagesRepository,
+    DockerService,
+  ],
+  exports: [AgentsService, AgentMessagesService, AgentsRepository, AgentMessagesRepository],
 })
 export class AgentsModule {}

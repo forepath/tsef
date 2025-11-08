@@ -12,8 +12,8 @@ flowchart TB
     subgraph WS["🔶 WebSocket Gateway (namespace: /agents)"]
         direction TB
         WS_USE["Use Case: Real-time Communication<br/>Bidirectional Messages<br/>Persistent Connection"]
-        WS_USE --> WS1["🔐 Authentication & Connection<br/>1. Connect to WebSocket<br/>2. Login with credentials<br/>3. Session established"]
-        WS_USE --> WS2["💬 Chat Messages<br/>1. Send chat message<br/>2. Broadcast to all clients<br/>3. Forward to container stdin<br/>4. Capture and emit agent response"]
+        WS_USE --> WS1["🔐 Authentication & Connection<br/>1. Connect to WebSocket<br/>2. Login with credentials<br/>3. Session established<br/>4. Chat history restored"]
+        WS_USE --> WS2["💬 Chat Messages<br/>1. Send chat message<br/>2. Persist message to database<br/>3. Broadcast to all clients<br/>4. Forward to container stdin<br/>5. Capture and emit agent response<br/>6. Persist agent response to database"]
     end
 
     Start([Agent Manager Feature]) --> HTTP

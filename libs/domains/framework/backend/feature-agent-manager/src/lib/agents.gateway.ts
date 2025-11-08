@@ -10,6 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AgentsRepository } from './repositories/agents.repository';
+import { AgentMessagesService } from './services/agent-messages.service';
 import { AgentsService } from './services/agents.service';
 import { DockerService } from './services/docker.service';
 
@@ -125,6 +126,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly agentsService: AgentsService,
     private readonly agentsRepository: AgentsRepository,
     private readonly dockerService: DockerService,
+    private readonly agentMessagesService: AgentMessagesService,
   ) {}
 
   /**
@@ -208,10 +210,93 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }),
       );
       this.logger.log(`Agent ${agent.name} (${agentUuid}) authenticated on socket ${socket.id}`);
+
+      // Restore chat history
+      await this.restoreChatHistory(agentUuid, socket);
     } catch (error) {
       socket.emit('loginError', createErrorResponse('Invalid credentials', 'LOGIN_ERROR'));
       const err = error as { message?: string; stack?: string };
       this.logger.error(`Login error for agent ${agentId}: ${err.message}`, err.stack);
+    }
+  }
+
+  /**
+   * Restore and re-emit chat history for an agent.
+   * Messages are emitted in chronological order by their creation date.
+   * @param agentUuid - The UUID of the agent
+   * @param socket - The socket instance to emit messages to
+   */
+  private async restoreChatHistory(agentUuid: string, socket: Socket): Promise<void> {
+    try {
+      // Fetch chat history (ordered chronologically by createdAt ASC)
+      const chatHistory = await this.agentMessagesService.getChatHistory(agentUuid, 1000, 0);
+
+      if (chatHistory.length === 0) {
+        this.logger.debug(`No chat history found for agent ${agentUuid}`);
+        return;
+      }
+
+      this.logger.log(`Restoring ${chatHistory.length} messages for agent ${agentUuid}`);
+
+      // Emit each message in chronological order
+      for (const messageEntity of chatHistory) {
+        const timestamp = messageEntity.createdAt.toISOString();
+
+        if (messageEntity.actor === 'user') {
+          // User message: emit with text field
+          socket.emit(
+            'chatMessage',
+            createSuccessResponse<ChatMessageData>({
+              from: ChatActor.USER,
+              text: messageEntity.message,
+              timestamp,
+            }),
+          );
+        } else if (messageEntity.actor === 'agent') {
+          // Agent message: apply the same cleaning and parsing logic as live communication
+          // The stored message might be:
+          // 1. A JSON string (from successful parse) - will parse successfully
+          // 2. A cleaned string (toParse from failed parse) - might parse now or remain as string
+          let toParse = messageEntity.message;
+
+          // Apply the same cleaning logic as in handleChat
+          // Remove everything before the first { in the string
+          const firstBrace = toParse.indexOf('{');
+          if (firstBrace !== -1) {
+            toParse = toParse.slice(firstBrace);
+          }
+          // Remove everything after the last } in the string
+          const lastBrace = toParse.lastIndexOf('}');
+          if (lastBrace !== -1) {
+            toParse = toParse.slice(0, lastBrace + 1);
+          }
+
+          let response: AgentResponseObject | string;
+          try {
+            // Try to parse the cleaned string
+            const parsed = JSON.parse(toParse);
+            response = parsed;
+          } catch {
+            // If parsing fails, use the cleaned string (same as live communication)
+            response = toParse;
+          }
+
+          socket.emit(
+            'chatMessage',
+            createSuccessResponse<ChatMessageData>({
+              from: ChatActor.AGENT,
+              response,
+              timestamp,
+            }),
+          );
+        }
+      }
+
+      this.logger.debug(`Successfully restored ${chatHistory.length} messages for agent ${agentUuid}`);
+    } catch (error) {
+      const err = error as { message?: string; stack?: string };
+      this.logger.warn(`Failed to restore chat history for agent ${agentUuid}: ${err.message}`, err.stack);
+      // Don't fail login if history restoration fails
     }
   }
 
@@ -239,6 +324,16 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const agent = await this.agentsService.findOne(agentUuid);
       this.logger.log(`Agent ${agent.name} (${agentUuid}) says: ${message}`);
       const chatTimestamp = new Date().toISOString();
+
+      // Persist user message
+      try {
+        await this.agentMessagesService.createUserMessage(agentUuid, message);
+      } catch (persistError) {
+        const err = persistError as { message?: string };
+        this.logger.warn(`Failed to persist user message: ${err.message}`);
+        // Continue with message broadcasting even if persistence fails
+      }
+
       this.server.emit(
         'chatMessage',
         createSuccessResponse<ChatMessageData>({
@@ -260,20 +355,32 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           // Emit agent's response if there is any
           if (agentResponse && agentResponse.trim()) {
             const agentResponseTimestamp = new Date().toISOString();
+            // Clean the response: remove everything before first { and after last }
+            let toParse = agentResponse.trim();
+            // Remove everything before the first { in the string
+            const firstBrace = toParse.indexOf('{');
+            if (firstBrace !== -1) {
+              toParse = toParse.slice(firstBrace);
+            }
+            // Remove everything after the last } in the string
+            const lastBrace = toParse.lastIndexOf('}');
+            if (lastBrace !== -1) {
+              toParse = toParse.slice(0, lastBrace + 1);
+            }
+
             try {
               // Parse JSON response from agent
-              let toParse = agentResponse.trim();
-              // Remove everything before the first { in the string
-              const firstBrace = toParse.indexOf('{');
-              if (firstBrace !== -1) {
-                toParse = toParse.slice(firstBrace);
-              }
-              // Remove everything after the last } in the string
-              const lastBrace = toParse.lastIndexOf('}');
-              if (lastBrace !== -1) {
-                toParse = toParse.slice(0, lastBrace + 1);
-              }
               const parsedResponse = JSON.parse(toParse);
+
+              // Persist agent message
+              try {
+                await this.agentMessagesService.createAgentMessage(agentUuid, parsedResponse);
+              } catch (persistError) {
+                const err = persistError as { message?: string };
+                this.logger.warn(`Failed to persist agent message: ${err.message}`);
+                // Continue with message broadcasting even if persistence fails
+              }
+
               this.server.emit(
                 'chatMessage',
                 createSuccessResponse<ChatMessageData>({
@@ -283,14 +390,25 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 }),
               );
             } catch (parseError) {
-              // If JSON parsing fails, log error but still emit the raw response in response field
+              // If JSON parsing fails, log error but still emit the cleaned response in response field
               const parseErr = parseError as { message?: string };
               this.logger.warn(`Failed to parse agent response as JSON: ${parseErr.message}`);
+
+              // Persist agent message (cleaned string - toParse)
+              // This ensures we can attempt to parse it again when restoring chat history
+              try {
+                await this.agentMessagesService.createAgentMessage(agentUuid, toParse);
+              } catch (persistError) {
+                const err = persistError as { message?: string };
+                this.logger.warn(`Failed to persist agent message: ${err.message}`);
+                // Continue with message broadcasting even if persistence fails
+              }
+
               this.server.emit(
                 'chatMessage',
                 createSuccessResponse<ChatMessageData>({
                   from: ChatActor.AGENT,
-                  response: agentResponse.trim(),
+                  response: toParse,
                   timestamp: agentResponseTimestamp,
                 }),
               );

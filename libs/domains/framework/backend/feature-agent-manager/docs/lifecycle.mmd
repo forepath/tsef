@@ -5,6 +5,8 @@ sequenceDiagram
     participant Repo as AgentsRepository
     participant DB as Database
     participant WS as AgentsGateway<br/>(namespace: /agents)
+    participant MsgService as AgentMessagesService
+    participant MsgRepo as AgentMessagesRepository
     participant Docker as DockerService
 
     Note over User,Docker: End-to-end lifecycle: create → connect/login → send command/chat → disconnect → delete
@@ -69,6 +71,26 @@ sequenceDiagram
             Repo-->>Service: agent entity
             Service-->>WS: agent details
             WS-->>User: loginSuccess { success: true, data: {message, agentId, agentName}, timestamp }
+
+            Note over WS,MsgRepo: Chat History Restoration
+            WS->>MsgService: getChatHistory(uuid, 1000, 0)
+            MsgService->>MsgRepo: findByAgentId(uuid, 1000, 0)
+            MsgRepo->>DB: SELECT agent_messages WHERE agent_id ORDER BY created_at ASC
+            DB-->>MsgRepo: message entities
+            MsgRepo-->>MsgService: chat history
+            MsgService-->>WS: chat history
+            loop For each message (chronological order)
+                alt User message
+                    WS-->>User: chatMessage { from: "user", text: message, timestamp }
+                else Agent message
+                    WS->>WS: Clean & parse message
+                    alt JSON valid
+                        WS-->>User: chatMessage { from: "agent", response: {...}, timestamp }
+                    else JSON invalid
+                        WS-->>User: chatMessage { from: "agent", response: toParse, timestamp }
+                    end
+                end
+            end
         else Invalid
             Service-->>WS: isValid: false
             WS-->>User: loginError { success: false, error: {message, code}, timestamp }
@@ -88,6 +110,15 @@ sequenceDiagram
             DB-->>Repo: agent entity
             Repo-->>Service: agent entity
             Service-->>WS: agent details
+
+            Note over WS,MsgRepo: Persist User Message
+            WS->>MsgService: createUserMessage(uuid, message)
+            MsgService->>MsgRepo: create({agentId, actor: "user", message})
+            MsgRepo->>DB: INSERT agent_messages
+            DB-->>MsgRepo: message entity
+            MsgRepo-->>MsgService: message entity
+            MsgService-->>WS: message entity
+
             WS->>WS: server.emit('chatMessage')
             WS-->>User: chatMessage { success: true, data: {from: "user", text: message, timestamp}, timestamp }
             WS->>Repo: findById(uuid)
@@ -99,13 +130,31 @@ sequenceDiagram
                 Docker->>Docker: Execute command and capture output
                 Docker-->>WS: agentResponse (JSON string)
                 alt Response exists
-                    WS->>WS: JSON.parse(agentResponse)
+                    WS->>WS: Clean response (remove before { and after })
+                    WS->>WS: toParse = cleaned string
+                    WS->>WS: Try JSON.parse(toParse)
                     alt JSON valid
+                        Note over WS,MsgRepo: Persist Agent Message (parsed)
+                        WS->>MsgService: createAgentMessage(uuid, parsedResponse)
+                        MsgService->>MsgRepo: create({agentId, actor: "agent", message: JSON.stringify(parsedResponse)})
+                        MsgRepo->>DB: INSERT agent_messages
+                        DB-->>MsgRepo: message entity
+                        MsgRepo-->>MsgService: message entity
+                        MsgService-->>WS: message entity
+
                         WS->>WS: server.emit('chatMessage')
                         WS-->>User: chatMessage { success: true, data: {from: "agent", response: {...}, timestamp}, timestamp }
                     else JSON invalid
+                        Note over WS,MsgRepo: Persist Agent Message (cleaned string)
+                        WS->>MsgService: createAgentMessage(uuid, toParse)
+                        MsgService->>MsgRepo: create({agentId, actor: "agent", message: toParse})
+                        MsgRepo->>DB: INSERT agent_messages
+                        DB-->>MsgRepo: message entity
+                        MsgRepo-->>MsgService: message entity
+                        MsgService-->>WS: message entity
+
                         WS->>WS: server.emit('chatMessage')
-                        WS-->>User: chatMessage { success: true, data: {from: "agent", response: rawString, timestamp}, timestamp }
+                        WS-->>User: chatMessage { success: true, data: {from: "agent", response: toParse, timestamp}, timestamp }
                     end
                 end
             end

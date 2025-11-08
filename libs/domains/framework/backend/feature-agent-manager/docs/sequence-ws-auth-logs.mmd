@@ -4,6 +4,8 @@ sequenceDiagram
     participant Service as AgentsService
     participant Repo as AgentsRepository
     participant DB as Database
+    participant MsgService as AgentMessagesService
+    participant MsgRepo as AgentMessagesRepository
     participant Docker as DockerService
 
     Note over WSClient,Docker: WebSocket - Connection, Login & Disconnection
@@ -52,6 +54,18 @@ sequenceDiagram
                 Repo-->>Service: agent entity
                 Service-->>Gateway: agent details
                 Gateway-->>WSClient: loginSuccess<br/>{success: true, data: {message, agentId, agentName}, timestamp}
+
+                Note over Gateway,MsgRepo: Chat History Restoration
+                Gateway->>MsgService: getChatHistory(uuid, 1000, 0)
+                MsgService->>MsgRepo: findByAgentId(uuid, 1000, 0)
+                MsgRepo->>DB: SELECT agent_messages WHERE agent_id ORDER BY created_at ASC
+                DB-->>MsgRepo: message entities
+                MsgRepo-->>MsgService: chat history
+                MsgService-->>Gateway: chat history
+                loop For each message (chronological order)
+                    Gateway->>Gateway: Apply same cleaning & parsing logic as live
+                    Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from, text|response, timestamp}, timestamp}
+                end
             else Password invalid
                 Service-->>Gateway: isValid: false
                 Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}

@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { AgentsController } from './agents.controller';
 import { AgentsGateway } from './agents.gateway';
 import { AgentEntity } from './entities/agent.entity';
+import { AgentMessageEntity } from './entities/agent-message.entity';
 import { AgentsRepository } from './repositories/agents.repository';
 import { AgentsService } from './services/agents.service';
 import { DockerService } from './services/docker.service';
@@ -26,6 +27,8 @@ describe('AgentsModule', () => {
       imports: [AgentsModule],
     })
       .overrideProvider(getRepositoryToken(AgentEntity))
+      .useValue(mockRepository)
+      .overrideProvider(getRepositoryToken(AgentMessageEntity))
       .useValue(mockRepository)
       .compile();
   });

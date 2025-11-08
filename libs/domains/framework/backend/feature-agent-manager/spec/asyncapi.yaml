@@ -20,7 +20,7 @@ channels:
     messages:
       loginSuccessEvent:
         $ref: '#/components/messages/LoginSuccess'
-    description: Server acknowledges successful login
+    description: Server acknowledges successful login. After this event, chat history is automatically restored via chatMessage events.
   agents/loginError:
     address: agents/loginError
     messages:
@@ -38,7 +38,7 @@ channels:
     messages:
       chatBroadcast:
         $ref: '#/components/messages/ChatMessage'
-    description: Server broadcasts chat messages to all connected clients
+    description: Server broadcasts chat messages to all connected clients. Also used for chat history restoration after successful login (messages are emitted in chronological order to the authenticated client only).
   agents/error:
     address: agents/error
     messages:
@@ -222,7 +222,7 @@ components:
                             type: string
                         description: Parsed JSON response object from agent
                       - type: string
-                        description: Raw string response if JSON parsing fails
+                        description: Cleaned string response if JSON parsing fails (text before first { and after last } is removed)
                   timestamp:
                     type: string
                     description: ISO timestamp

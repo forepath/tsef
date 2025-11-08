@@ -4,6 +4,8 @@ sequenceDiagram
     participant Service as AgentsService
     participant Repo as AgentsRepository
     participant DB as Database
+    participant MsgService as AgentMessagesService
+    participant MsgRepo as AgentMessagesRepository
     participant Docker as DockerService
 
     Note over WSClient,Docker: WebSocket - Connection, Authentication, Chat & Disconnection
@@ -52,6 +54,28 @@ sequenceDiagram
                 Repo-->>Service: agent entity
                 Service-->>Gateway: agent details
                 Gateway-->>WSClient: loginSuccess<br/>{success: true, data: {message, agentId, agentName}, timestamp}
+
+                Note over Gateway,MsgRepo: Chat History Restoration
+                Gateway->>MsgService: getChatHistory(uuid, 1000, 0)
+                MsgService->>MsgRepo: findByAgentId(uuid, 1000, 0)
+                MsgRepo->>DB: SELECT agent_messages WHERE agent_id ORDER BY created_at ASC
+                DB-->>MsgRepo: message entities
+                MsgRepo-->>MsgService: message entities
+                MsgService-->>Gateway: chat history
+                loop For each message in chronological order
+                    alt User message
+                        Gateway->>Gateway: Apply cleaning & parsing logic
+                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "user", text: message, timestamp}, timestamp}
+                    else Agent message
+                        Gateway->>Gateway: Clean message (remove before { and after })
+                        Gateway->>Gateway: Try JSON.parse(toParse)
+                        alt JSON valid
+                            Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: {...}, timestamp}, timestamp}
+                        else JSON invalid
+                            Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: toParse, timestamp}, timestamp}
+                        end
+                    end
+                end
             else Password invalid
                 Service-->>Gateway: isValid: false
                 Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}
@@ -72,6 +96,15 @@ sequenceDiagram
             DB-->>Repo: agent entity
             Repo-->>Service: agent entity
             Service-->>Gateway: agent details
+
+            Note over Gateway,MsgRepo: Persist User Message
+            Gateway->>MsgService: createUserMessage(uuid, message)
+            MsgService->>MsgRepo: create({agentId, actor: "user", message})
+            MsgRepo->>DB: INSERT agent_messages
+            DB-->>MsgRepo: message entity
+            MsgRepo-->>MsgService: message entity
+            MsgService-->>Gateway: message entity
+
             Gateway->>Gateway: server.emit('chatMessage')
             Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "user", text: "Hello", timestamp}, timestamp}
             Note over Gateway: Broadcasts to all connected clients
@@ -86,13 +119,31 @@ sequenceDiagram
                 Docker->>Docker: Execute command and capture output
                 Docker-->>Gateway: agentResponse (JSON string)
                 alt Response exists
-                    Gateway->>Gateway: JSON.parse(agentResponse)
+                    Gateway->>Gateway: Clean response (remove before { and after })
+                    Gateway->>Gateway: toParse = cleaned string
+                    Gateway->>Gateway: Try JSON.parse(toParse)
                     alt JSON valid
+                        Note over Gateway,MsgRepo: Persist Agent Message (parsed)
+                        Gateway->>MsgService: createAgentMessage(uuid, parsedResponse)
+                        MsgService->>MsgRepo: create({agentId, actor: "agent", message: JSON.stringify(parsedResponse)})
+                        MsgRepo->>DB: INSERT agent_messages
+                        DB-->>MsgRepo: message entity
+                        MsgRepo-->>MsgService: message entity
+                        MsgService-->>Gateway: message entity
+
                         Gateway->>Gateway: server.emit('chatMessage')
                         Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: {...}, timestamp}, timestamp}
                     else JSON invalid
+                        Note over Gateway,MsgRepo: Persist Agent Message (cleaned string)
+                        Gateway->>MsgService: createAgentMessage(uuid, toParse)
+                        MsgService->>MsgRepo: create({agentId, actor: "agent", message: toParse})
+                        MsgRepo->>DB: INSERT agent_messages
+                        DB-->>MsgRepo: message entity
+                        MsgRepo-->>MsgService: message entity
+                        MsgService-->>Gateway: message entity
+
                         Gateway->>Gateway: server.emit('chatMessage')
-                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: rawString, timestamp}, timestamp}
+                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: toParse, timestamp}, timestamp}
                     end
                 end
             end
