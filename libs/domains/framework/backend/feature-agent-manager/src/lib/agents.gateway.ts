@@ -58,6 +58,12 @@ interface LoginSuccessData {
   agentName: string;
 }
 
+interface LogoutSuccessData {
+  message: string;
+  agentId: string | null;
+  agentName: string | null;
+}
+
 interface AgentResponseObject {
   type: string;
   subtype?: string;
@@ -424,6 +430,59 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       socket.emit('error', createErrorResponse('Error processing chat message', 'CHAT_ERROR'));
       const err = error as { message?: string; stack?: string };
       this.logger.error(`Chat error for agent ${agentUuid}: ${err.message}`, err.stack);
+    }
+  }
+
+  /**
+   * Handle agent logout.
+   * Removes authenticated session and confirms logout.
+   * @param socket - The socket instance making the request
+   */
+  @SubscribeMessage('logout')
+  async handleLogout(@ConnectedSocket() socket: Socket) {
+    const agentUuid = this.authenticatedClients.get(socket.id);
+
+    if (agentUuid) {
+      // Remove authenticated session
+      this.authenticatedClients.delete(socket.id);
+
+      try {
+        // Get agent details for logging
+        const agent = await this.agentsService.findOne(agentUuid);
+        this.logger.log(`Agent ${agent.name} (${agentUuid}) logged out from socket ${socket.id}`);
+
+        socket.emit(
+          'logoutSuccess',
+          createSuccessResponse<LogoutSuccessData>({
+            message: 'Logged out successfully',
+            agentId: agentUuid,
+            agentName: agent.name,
+          }),
+        );
+      } catch (error) {
+        const err = error as { message?: string; stack?: string };
+        this.logger.warn(`Failed to get agent details during logout: ${err.message}`, err.stack);
+        // Still emit success since session is already cleared
+        socket.emit(
+          'logoutSuccess',
+          createSuccessResponse<LogoutSuccessData>({
+            message: 'Logged out successfully',
+            agentId: agentUuid,
+            agentName: 'Unknown',
+          }),
+        );
+      }
+    } else {
+      // Not authenticated, but still acknowledge logout (idempotent)
+      socket.emit(
+        'logoutSuccess',
+        createSuccessResponse<LogoutSuccessData>({
+          message: 'Logged out successfully',
+          agentId: null,
+          agentName: null,
+        }),
+      );
+      this.logger.debug(`Logout requested for unauthenticated socket ${socket.id}`);
     }
   }
 }

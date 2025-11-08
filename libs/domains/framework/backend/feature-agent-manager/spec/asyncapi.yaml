@@ -45,6 +45,18 @@ channels:
       errorEvent:
         $ref: '#/components/messages/Error'
     description: Generic error messages for unauthorized or processing failures
+  agents/logout:
+    address: agents/logout
+    messages:
+      logoutCommand:
+        $ref: '#/components/messages/Logout'
+    description: Client sends logout command to end authenticated session
+  agents/logoutSuccess:
+    address: agents/logoutSuccess
+    messages:
+      logoutSuccessEvent:
+        $ref: '#/components/messages/LogoutSuccess'
+    description: Server acknowledges successful logout
 operations:
   clientSendsLogin:
     action: send
@@ -82,6 +94,18 @@ operations:
       $ref: '#/channels/agents~1error'
     messages:
       - $ref: '#/channels/agents~1error/messages/errorEvent'
+  clientSendsLogout:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1logout'
+    messages:
+      - $ref: '#/channels/agents~1logout/messages/logoutCommand'
+  serverEmitsLogoutSuccess:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1logoutSuccess'
+    messages:
+      - $ref: '#/channels/agents~1logoutSuccess/messages/logoutSuccessEvent'
 components:
   securitySchemes:
     jwt:
@@ -254,6 +278,42 @@ components:
               details:
                 type: string
                 description: Additional error details (optional)
+          timestamp:
+            type: string
+            description: ISO timestamp
+    Logout:
+      name: Logout
+      title: Logout command
+      contentType: application/json
+      payload:
+        type: object
+        description: Empty payload - no parameters required
+    LogoutSuccess:
+      name: LogoutSuccess
+      title: Logout success event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [message, agentId, agentName]
+            properties:
+              message:
+                type: string
+                description: Success message
+              agentId:
+                type: string
+                nullable: true
+                description: Agent UUID (null if not authenticated)
+              agentName:
+                type: string
+                nullable: true
+                description: Agent name (null if not authenticated)
           timestamp:
             type: string
             description: ISO timestamp

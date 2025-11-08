@@ -731,6 +731,92 @@ describe('AgentsGateway', () => {
     });
   });
 
+  describe('handleLogout', () => {
+    it('should logout authenticated user successfully', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
+
+      await gateway.handleLogout(mockSocket as Socket);
+
+      expect(agentsService.findOne).toHaveBeenCalledWith(mockAgent.id);
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        `Agent ${mockAgent.name} (${mockAgent.id}) logged out from socket ${socketId}`,
+      );
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'logoutSuccess',
+        expect.objectContaining({
+          success: true,
+          data: {
+            message: 'Logged out successfully',
+            agentId: mockAgent.id,
+            agentName: mockAgent.name,
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((gateway as any).authenticatedClients.has(socketId)).toBe(false);
+      loggerLogSpy.mockRestore();
+    });
+
+    it('should handle logout gracefully when agent details fetch fails', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      agentsService.findOne.mockRejectedValue(new Error('Database error'));
+      const loggerWarnSpy = jest.spyOn(gateway['logger'], 'warn').mockImplementation();
+
+      await gateway.handleLogout(mockSocket as Socket);
+
+      // Session should still be cleared
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((gateway as any).authenticatedClients.has(socketId)).toBe(false);
+      // Should still emit success
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'logoutSuccess',
+        expect.objectContaining({
+          success: true,
+          data: {
+            message: 'Logged out successfully',
+            agentId: mockAgent.id,
+            agentName: 'Unknown',
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to get agent details during logout'),
+        expect.any(String),
+      );
+      loggerWarnSpy.mockRestore();
+    });
+
+    it('should handle logout for unauthenticated user (idempotent)', async () => {
+      const loggerDebugSpy = jest.spyOn(gateway['logger'], 'debug').mockImplementation();
+
+      await gateway.handleLogout(mockSocket as Socket);
+
+      expect(agentsService.findOne).not.toHaveBeenCalled();
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'logoutSuccess',
+        expect.objectContaining({
+          success: true,
+          data: {
+            message: 'Logged out successfully',
+            agentId: null,
+            agentName: null,
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      expect(loggerDebugSpy).toHaveBeenCalledWith(`Logout requested for unauthenticated socket ${mockSocket.id}`);
+      loggerDebugSpy.mockRestore();
+    });
+  });
+
   describe('findAgentIdByIdentifier', () => {
     it('should find agent by UUID', async () => {
       agentsRepository.findById.mockResolvedValue(mockAgent);

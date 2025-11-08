@@ -150,6 +150,26 @@ sequenceDiagram
         end
     end
 
+    rect rgb(255, 240, 220)
+        Note over WSClient,Docker: Logout Flow
+        WSClient->>Gateway: logout<br/>{}
+        Gateway->>Gateway: uuid = authenticatedClients.get(socket.id)
+        alt Authenticated
+            Gateway->>Gateway: authenticatedClients.delete(socket.id)
+            Gateway->>Service: findOne(uuid)
+            Service->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity
+            Repo-->>Service: agent entity
+            Service-->>Gateway: agent details
+            Gateway->>Gateway: Log: "Agent logged out"
+            Gateway-->>WSClient: logoutSuccess<br/>{success: true, data: {message, agentId, agentName}, timestamp}
+        else Not authenticated
+            Gateway->>Gateway: Log: "Logout requested for unauthenticated socket"
+            Gateway-->>WSClient: logoutSuccess<br/>{success: true, data: {message, agentId: null, agentName: null}, timestamp}
+        end
+    end
+
     rect rgb(255, 220, 220)
         Note over WSClient,Docker: Disconnection
         WSClient->>Gateway: WebSocket Disconnect
