@@ -39,18 +39,6 @@ channels:
       chatBroadcast:
         $ref: '#/components/messages/ChatMessage'
     description: Server broadcasts chat messages to all connected clients
-  agents/containerLog:
-    address: agents/containerLog
-    messages:
-      containerLogEvent:
-        $ref: '#/components/messages/ContainerLog'
-    description: Server streams container log lines to the authenticated client
-  agents/logStreamError:
-    address: agents/logStreamError
-    messages:
-      logStreamErrorEvent:
-        $ref: '#/components/messages/LogStreamError'
-    description: Server notifies client when log streaming fails or cannot be started
   agents/error:
     address: agents/error
     messages:
@@ -88,18 +76,6 @@ operations:
       $ref: '#/channels/agents~1chatMessage'
     messages:
       - $ref: '#/channels/agents~1chatMessage/messages/chatBroadcast'
-  serverStreamsContainerLog:
-    action: receive
-    channel:
-      $ref: '#/channels/agents~1containerLog'
-    messages:
-      - $ref: '#/channels/agents~1containerLog/messages/containerLogEvent'
-  serverEmitsLogStreamError:
-    action: receive
-    channel:
-      $ref: '#/channels/agents~1logStreamError'
-    messages:
-      - $ref: '#/channels/agents~1logStreamError/messages/logStreamErrorEvent'
   serverEmitsError:
     action: receive
     channel:
@@ -133,19 +109,55 @@ components:
       contentType: application/json
       payload:
         type: object
+        required: [success, data, timestamp]
         properties:
-          message:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [message, agentId, agentName]
+            properties:
+              message:
+                type: string
+                description: Welcome message
+              agentId:
+                type: string
+                description: Agent UUID
+              agentName:
+                type: string
+                description: Agent name
+          timestamp:
             type: string
-            description: Welcome message
+            description: ISO timestamp
     LoginError:
       name: LoginError
       title: Login error event
       contentType: application/json
       payload:
         type: object
+        required: [success, error, timestamp]
         properties:
-          message:
+          success:
+            type: boolean
+            enum: [false]
+          error:
+            type: object
+            required: [message]
+            properties:
+              message:
+                type: string
+                description: Error message
+              code:
+                type: string
+                description: Error code (optional)
+                enum: [INVALID_CREDENTIALS, LOGIN_ERROR]
+              details:
+                type: string
+                description: Additional error details (optional)
+          timestamp:
             type: string
+            description: ISO timestamp
     Chat:
       name: Chat
       title: Chat command
@@ -163,45 +175,85 @@ components:
       contentType: application/json
       payload:
         type: object
-        required: [from, text]
+        required: [success, data, timestamp]
         properties:
-          from:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            oneOf:
+              - type: object
+                required: [from, text, timestamp]
+                properties:
+                  from:
+                    type: string
+                    enum: [user]
+                  text:
+                    type: string
+                    description: Message text
+                  timestamp:
+                    type: string
+                    description: ISO timestamp
+              - type: object
+                required: [from, response, timestamp]
+                properties:
+                  from:
+                    type: string
+                    enum: [agent]
+                  response:
+                    oneOf:
+                      - type: object
+                        properties:
+                          type:
+                            type: string
+                          subtype:
+                            type: string
+                          is_error:
+                            type: boolean
+                          duration_ms:
+                            type: number
+                          duration_api_ms:
+                            type: number
+                          result:
+                            type: string
+                          session_id:
+                            type: string
+                          request_id:
+                            type: string
+                        description: Parsed JSON response object from agent
+                      - type: string
+                        description: Raw string response if JSON parsing fails
+                  timestamp:
+                    type: string
+                    description: ISO timestamp
+          timestamp:
             type: string
-          text:
-            type: string
-    ContainerLog:
-      name: ContainerLog
-      title: Container log line event
-      contentType: application/json
-      payload:
-        type: object
-        required: [text]
-        properties:
-          text:
-            type: string
-    LogStreamError:
-      name: LogStreamError
-      title: Log stream error event
-      contentType: application/json
-      payload:
-        type: object
-        required: [message]
-        properties:
-          message:
-            type: string
-            description: Error message describing the failure
-            enum:
-              - 'Log streaming failed'
-              - 'Failed to start log streaming'
-          error:
-            type: string
-            description: Detailed error message from the underlying system
+            description: ISO timestamp
     Error:
       name: Error
       title: Error event
       contentType: application/json
       payload:
         type: object
+        required: [success, error, timestamp]
         properties:
-          message:
+          success:
+            type: boolean
+            enum: [false]
+          error:
+            type: object
+            required: [message]
+            properties:
+              message:
+                type: string
+                description: Error message
+              code:
+                type: string
+                description: Error code (optional)
+                enum: [UNAUTHORIZED, CHAT_ERROR]
+              details:
+                type: string
+                description: Additional error details (optional)
+          timestamp:
             type: string
+            description: ISO timestamp

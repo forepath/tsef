@@ -576,8 +576,14 @@ describe('DockerService', () => {
 
     beforeEach(() => {
       // Reset stream mock for each test
-      mockStream.on = jest.fn((event: string, callback: () => void) => {
-        if (event === 'end' || event === 'close') {
+      const dataChunks: Buffer[] = [];
+      mockStream.on = jest.fn((event: string, callback: (chunk?: Buffer) => void) => {
+        if (event === 'data') {
+          // Simulate data collection
+          const testData = Buffer.from('test output\n');
+          dataChunks.push(testData);
+          setTimeout(() => callback(testData), 5);
+        } else if (event === 'end' || event === 'close') {
           setTimeout(() => callback(), 10);
         }
         return mockStream;
@@ -591,17 +597,26 @@ describe('DockerService', () => {
       expect(mockContainer.inspect).toHaveBeenCalled();
     });
 
-    it('should execute a command without input', async () => {
+    it('should execute a command without input and return output', async () => {
       mockContainer.inspect.mockResolvedValue({});
+      const outputData = Buffer.from([1, 0, 0, 0, 12, 116, 101, 115, 116, 32, 111, 117, 116, 112, 117, 116]); // Docker format: stdout + "test output"
+      mockStream.on = jest.fn((event: string, callback: (chunk?: Buffer) => void) => {
+        if (event === 'data') {
+          setTimeout(() => callback(outputData), 5);
+        } else if (event === 'end') {
+          setTimeout(() => callback(), 10);
+        }
+        return mockStream;
+      });
 
-      await service.sendCommandToContainer(containerId, 'ls');
+      const result = await service.sendCommandToContainer(containerId, 'ls');
 
       expect(mockContainer.exec).toHaveBeenCalledWith({
         Cmd: ['ls'],
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
       expect(mockExec.start).toHaveBeenCalledWith({
         hijack: true,
@@ -609,6 +624,7 @@ describe('DockerService', () => {
       });
       expect(mockStream.write).not.toHaveBeenCalled();
       expect(mockStream.end).toHaveBeenCalled();
+      expect(result).toBeTruthy();
     });
 
     it('should execute a command with arguments', async () => {
@@ -621,7 +637,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -685,20 +701,53 @@ describe('DockerService', () => {
       await expect(service.sendCommandToContainer(containerId, 'ls')).rejects.toThrow('Stream start failed');
     });
 
-    it('should ignore EPIPE errors when closing stream', async () => {
+    it('should ignore EPIPE errors when closing stream and return output', async () => {
       mockContainer.inspect.mockResolvedValue({});
-      mockStream.on = jest.fn((event: string, callback: (error?: unknown) => void) => {
-        if (event === 'error') {
-          const error = new Error('EPIPE') as any;
-          error.code = 'EPIPE';
-          setTimeout(() => callback(error), 10);
-        } else if (event === 'end' || event === 'close') {
-          setTimeout(() => callback(), 20);
+      const outputData = Buffer.from([1, 0, 0, 0, 11, 116, 101, 115, 116, 32, 111, 117, 116, 112, 117, 116]); // Docker format
+      const handlers: { [key: string]: Array<(arg?: unknown) => void> } = {};
+
+      mockStream.on = jest.fn((event: string, callback: (error?: unknown, chunk?: Buffer) => void) => {
+        if (!handlers[event]) {
+          handlers[event] = [];
         }
+        handlers[event].push(callback as (arg?: unknown) => void);
+
+        // Simulate data event immediately if it's the data handler
+        if (event === 'data') {
+          setTimeout(() => {
+            handlers['data']?.forEach((cb) => cb(outputData));
+          }, 5);
+        }
+
+        // Simulate error event after data
+        if (event === 'error') {
+          setTimeout(() => {
+            const error = new Error('EPIPE') as any;
+            error.code = 'EPIPE';
+            handlers['error']?.forEach((cb) => cb(error));
+          }, 15);
+        }
+
+        // Simulate end event
+        if (event === 'end') {
+          setTimeout(() => {
+            handlers['end']?.forEach((cb) => cb());
+          }, 20);
+        }
+
+        // Simulate close event
+        if (event === 'close') {
+          setTimeout(() => {
+            handlers['close']?.forEach((cb) => cb());
+          }, 25);
+        }
+
         return mockStream;
       });
 
-      await expect(service.sendCommandToContainer(containerId, 'ls')).resolves.not.toThrow();
+      const result = await service.sendCommandToContainer(containerId, 'ls');
+      expect(result).toBeTruthy();
+      expect(result).toContain('test output');
     });
 
     it('should propagate non-EPIPE stream errors', async () => {
@@ -733,7 +782,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -747,7 +796,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -761,7 +810,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -775,7 +824,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -789,7 +838,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -803,7 +852,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -817,7 +866,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -831,7 +880,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -850,7 +899,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -864,7 +913,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
 
@@ -879,7 +928,7 @@ describe('DockerService', () => {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false,
       });
     });
   });

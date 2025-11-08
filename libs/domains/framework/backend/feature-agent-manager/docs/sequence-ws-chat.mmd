@@ -31,7 +31,7 @@ sequenceDiagram
                 Repo-->>Gateway: agent.id (UUID)
             else Agent not found
                 Repo-->>Gateway: null
-                Gateway-->>WSClient: loginError<br/>{message: "Invalid credentials"}
+                Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}
             end
         end
 
@@ -51,10 +51,10 @@ sequenceDiagram
                 DB-->>Repo: agent entity
                 Repo-->>Service: agent entity
                 Service-->>Gateway: agent details
-                Gateway-->>WSClient: loginSuccess<br/>{message: "Welcome, {name}!"}
+                Gateway-->>WSClient: loginSuccess<br/>{success: true, data: {message, agentId, agentName}, timestamp}
             else Password invalid
                 Service-->>Gateway: isValid: false
-                Gateway-->>WSClient: loginError<br/>{message: "Invalid credentials"}
+                Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}
             end
         end
     end
@@ -64,7 +64,7 @@ sequenceDiagram
         WSClient->>Gateway: chat<br/>{message: "Hello"}
         Gateway->>Gateway: uuid = authenticatedClients.get(socket.id)
         alt Not authenticated
-            Gateway-->>WSClient: error<br/>{message: "Unauthorized. Please login first."}
+            Gateway-->>WSClient: error<br/>{success: false, error: {message, code}, timestamp}
         else Authenticated
             Gateway->>Service: findOne(uuid)
             Service->>Repo: findById(uuid)
@@ -73,7 +73,7 @@ sequenceDiagram
             Repo-->>Service: agent entity
             Service-->>Gateway: agent details
             Gateway->>Gateway: server.emit('chatMessage')
-            Gateway-->>WSClient: chatMessage<br/>{from: agentName, text: "Hello"}
+            Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "user", text: "Hello", timestamp}, timestamp}
             Note over Gateway: Broadcasts to all connected clients
 
             Gateway->>Repo: findById(uuid)
@@ -82,8 +82,19 @@ sequenceDiagram
             Repo-->>Gateway: agent entity
 
             alt Container exists
-                Gateway->>Docker: sendCommandToContainer(containerId, message)
-                Docker->>Docker: Write to container stdin
+                Gateway->>Docker: sendCommandToContainer(containerId, command, message)
+                Docker->>Docker: Execute command and capture output
+                Docker-->>Gateway: agentResponse (JSON string)
+                alt Response exists
+                    Gateway->>Gateway: JSON.parse(agentResponse)
+                    alt JSON valid
+                        Gateway->>Gateway: server.emit('chatMessage')
+                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: {...}, timestamp}, timestamp}
+                    else JSON invalid
+                        Gateway->>Gateway: server.emit('chatMessage')
+                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: rawString, timestamp}, timestamp}
+                    end
+                end
             end
         end
     end
@@ -93,9 +104,4 @@ sequenceDiagram
         WSClient->>Gateway: WebSocket Disconnect
         Gateway->>Gateway: handleDisconnect(socket)<br/>Log: "Client disconnected"
         Gateway->>Gateway: authenticatedClients.delete(socket.id)
-        Gateway->>Gateway: cancel = logStreamCancel.get(socket.id)
-        alt Cancel function exists
-            Gateway->>Gateway: cancel()
-            Gateway->>Gateway: logStreamCancel.delete(socket.id)
-        end
     end

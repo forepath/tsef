@@ -43,7 +43,6 @@ describe('AgentsService', () => {
   const mockDockerService = {
     createContainer: jest.fn(),
     deleteContainer: jest.fn(),
-    getContainerLogs: jest.fn(),
     sendCommandToContainer: jest.fn(),
   };
 

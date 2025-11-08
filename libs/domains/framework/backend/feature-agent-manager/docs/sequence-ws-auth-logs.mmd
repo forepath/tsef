@@ -6,7 +6,7 @@ sequenceDiagram
     participant DB as Database
     participant Docker as DockerService
 
-    Note over WSClient,Docker: WebSocket - Connection, Login & Log Streaming
+    Note over WSClient,Docker: WebSocket - Connection, Login & Disconnection
 
     rect rgb(200, 220, 255)
         Note over WSClient,Docker: Connection
@@ -31,7 +31,7 @@ sequenceDiagram
                 Repo-->>Gateway: agent.id (UUID)
             else Agent not found
                 Repo-->>Gateway: null
-                Gateway-->>WSClient: loginError<br/>{message: "Invalid credentials"}
+                Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}
             end
         end
 
@@ -51,40 +51,10 @@ sequenceDiagram
                 DB-->>Repo: agent entity
                 Repo-->>Service: agent entity
                 Service-->>Gateway: agent details
-                Gateway-->>WSClient: loginSuccess<br/>{message: "Welcome, {name}!"}
+                Gateway-->>WSClient: loginSuccess<br/>{success: true, data: {message, agentId, agentName}, timestamp}
             else Password invalid
                 Service-->>Gateway: isValid: false
-                Gateway-->>WSClient: loginError<br/>{message: "Invalid credentials"}
-            end
-        end
-    end
-
-    rect rgb(230, 240, 250)
-        Note over WSClient,Docker: Container Log Streaming
-        Gateway->>Repo: findById(uuid)
-        Repo->>DB: SELECT agent WHERE id
-        DB-->>Repo: agent entity with containerId
-        Repo-->>Gateway: agent entity
-
-        alt Container exists
-            Gateway->>Gateway: logStreamCancel.set(socket.id, cancel)<br/>logStreamPromises.set(socket.id, promise)
-            Gateway->>Docker: getContainerLogs(containerId)
-            alt Log streaming starts successfully
-                loop Log streaming (until cancelled or error)
-                    Docker-->>Gateway: log line
-                    Gateway-->>WSClient: containerLog<br/>{text: logLine}
-                end
-                alt Stream completed normally
-                    Note over Gateway: Stream ended (container stopped)
-                else Stream error during execution
-                    Docker-->>Gateway: Error thrown
-                    Gateway->>Gateway: logger.error()<br/>Cleanup cancel function
-                    Gateway-->>WSClient: logStreamError<br/>{message: "Log streaming failed", error: "..."}
-                end
-            else Failed to start streaming
-                Docker-->>Gateway: Error thrown
-                Gateway->>Gateway: logger.error()
-                Gateway-->>WSClient: logStreamError<br/>{message: "Failed to start log streaming", error: "..."}
+                Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}
             end
         end
     end
@@ -94,10 +64,4 @@ sequenceDiagram
         WSClient->>Gateway: WebSocket Disconnect
         Gateway->>Gateway: handleDisconnect(socket)<br/>Log: "Client disconnected"
         Gateway->>Gateway: authenticatedClients.delete(socket.id)
-        Gateway->>Gateway: cancel = logStreamCancel.get(socket.id)
-        alt Cancel function exists
-            Gateway->>Gateway: cancel()
-            Gateway->>Gateway: logStreamCancel.delete(socket.id)
-        end
-        Gateway->>Gateway: logStreamPromises.delete(socket.id)
     end

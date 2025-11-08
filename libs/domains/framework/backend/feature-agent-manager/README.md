@@ -166,17 +166,30 @@ The `AgentsGateway` provides WebSocket-based real-time communication with databa
 - `chatMessage` - Broadcasted to all connected clients when a chat message is sent
 
   ```typescript
+  // User message
   {
-    from: string; // Agent name
+    from: 'user';
     text: string; // Message text
+    timestamp: string; // ISO timestamp
   }
-  ```
 
-- `containerLog` - Streamed container log lines (only to authenticated client)
-
-  ```typescript
+  // Agent message
   {
-    text: string; // Log line
+    from: 'agent';
+    response: AgentResponseObject | string; // Parsed JSON response object or raw string if parsing fails
+    timestamp: string; // ISO timestamp
+  }
+
+  // AgentResponseObject structure:
+  {
+    type: string;
+    subtype?: string;
+    is_error?: boolean;
+    duration_ms?: number;
+    duration_api_ms?: number;
+    result?: string;
+    session_id?: string;
+    request_id?: string;
   }
   ```
 
@@ -196,9 +209,8 @@ Agents authenticate using their UUID or name along with their password. The gate
 - Supports both UUID and agent name for login (tries UUID first, falls back to name)
 - Stores authenticated sessions using agent UUIDs mapped to socket IDs
 - Validates credentials against the database using bcrypt password verification
-- Automatically starts container log streaming after successful authentication
-- Broadcasts chat messages with agent names to all connected clients
-- Forwards chat messages to container stdin for command execution
+- Broadcasts chat messages with actor type (agent/user) to all connected clients
+- Forwards chat messages to container stdin for command execution and captures responses
 
 ### Example WebSocket Client
 
@@ -217,15 +229,10 @@ socket.on('connect', () => {
 
 socket.on('loginSuccess', (data) => {
   console.log(data.message); // "Welcome, Agent Name!"
-  // Log streaming starts automatically
 });
 
 socket.on('loginError', (data) => {
   console.error(data.message); // "Invalid credentials"
-});
-
-socket.on('containerLog', (data) => {
-  console.log('Log:', data.text); // Real-time container logs
 });
 
 // Send chat message after authentication
@@ -234,7 +241,7 @@ socket.emit('chat', {
 });
 
 socket.on('chatMessage', (data) => {
-  console.log(`${data.from}: ${data.text}`);
+  console.log(`${data.from}: ${data.text}`); // "user: Hello, world!" or "agent: <response>"
 });
 
 socket.on('error', (data) => {

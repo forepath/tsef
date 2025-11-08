@@ -47,7 +47,6 @@ describe('AgentsGateway', () => {
   };
 
   const mockDockerService = {
-    getContainerLogs: jest.fn(),
     sendCommandToContainer: jest.fn(),
   } as unknown as jest.Mocked<DockerService>;
 
@@ -134,29 +133,27 @@ describe('AgentsGateway', () => {
       agentsRepository.findById.mockResolvedValue(mockAgent);
       agentsService.verifyCredentials.mockResolvedValue(true);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
-      // mock logs
-      (dockerService.getContainerLogs as any).mockImplementation(async function* () {
-        yield 'line1';
-        yield 'line2';
-      });
       const socketId = mockSocket.id || 'test-socket-id';
 
       await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
 
-      // Allow async log streaming task to run
-      await new Promise((r) => setTimeout(r, 0));
-
       expect(agentsRepository.findById).toHaveBeenCalledWith(mockAgent.id);
       expect(agentsService.verifyCredentials).toHaveBeenCalledWith(mockAgent.id, 'password123');
       expect(agentsService.findOne).toHaveBeenCalledWith(mockAgent.id);
-      expect(mockSocket.emit).toHaveBeenCalledWith('loginSuccess', {
-        message: `Welcome, ${mockAgent.name}!`,
-      });
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'loginSuccess',
+        expect.objectContaining({
+          success: true,
+          data: {
+            message: `Welcome, ${mockAgent.name}!`,
+            agentId: mockAgent.id,
+            agentName: mockAgent.name,
+          },
+          timestamp: expect.any(String),
+        }),
+      );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((gateway as any).authenticatedClients.get(socketId)).toBe(mockAgent.id);
-      // Ensure container logs streamed to this socket
-      expect(mockSocket.emit).toHaveBeenCalledWith('containerLog', { text: 'line1' });
-      expect(mockSocket.emit).toHaveBeenCalledWith('containerLog', { text: 'line2' });
     });
 
     it('should authenticate successfully with agent name', async () => {
@@ -170,9 +167,18 @@ describe('AgentsGateway', () => {
       expect(agentsRepository.findById).toHaveBeenCalledWith(mockAgent.name);
       expect(agentsRepository.findByName).toHaveBeenCalledWith(mockAgent.name);
       expect(agentsService.verifyCredentials).toHaveBeenCalledWith(mockAgent.id, 'password123');
-      expect(mockSocket.emit).toHaveBeenCalledWith('loginSuccess', {
-        message: `Welcome, ${mockAgent.name}!`,
-      });
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'loginSuccess',
+        expect.objectContaining({
+          success: true,
+          data: {
+            message: `Welcome, ${mockAgent.name}!`,
+            agentId: mockAgent.id,
+            agentName: mockAgent.name,
+          },
+          timestamp: expect.any(String),
+        }),
+      );
     });
 
     it('should reject login with invalid UUID/name', async () => {
@@ -183,9 +189,17 @@ describe('AgentsGateway', () => {
 
       await gateway.handleLogin({ agentId: 'non-existent', password: 'password123' }, mockSocket as Socket);
 
-      expect(mockSocket.emit).toHaveBeenCalledWith('loginError', {
-        message: 'Invalid credentials',
-      });
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'loginError',
+        expect.objectContaining({
+          success: false,
+          error: {
+            message: 'Invalid credentials',
+            code: 'INVALID_CREDENTIALS',
+          },
+          timestamp: expect.any(String),
+        }),
+      );
       expect(loggerWarnSpy).toHaveBeenCalledWith(`Failed login attempt: agent not found (non-existent)`);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((gateway as any).authenticatedClients.has(socketId)).toBe(false);
@@ -201,9 +215,17 @@ describe('AgentsGateway', () => {
       await gateway.handleLogin({ agentId: mockAgent.id, password: 'wrong-password' }, mockSocket as Socket);
 
       expect(agentsService.verifyCredentials).toHaveBeenCalledWith(mockAgent.id, 'wrong-password');
-      expect(mockSocket.emit).toHaveBeenCalledWith('loginError', {
-        message: 'Invalid credentials',
-      });
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'loginError',
+        expect.objectContaining({
+          success: false,
+          error: {
+            message: 'Invalid credentials',
+            code: 'INVALID_CREDENTIALS',
+          },
+          timestamp: expect.any(String),
+        }),
+      );
       expect(loggerWarnSpy).toHaveBeenCalledWith(`Failed login attempt: invalid password for agent ${mockAgent.id}`);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((gateway as any).authenticatedClients.has(socketId)).toBe(false);
@@ -216,35 +238,77 @@ describe('AgentsGateway', () => {
 
       await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
 
-      expect(mockSocket.emit).toHaveBeenCalledWith('loginError', {
-        message: 'Invalid credentials',
-      });
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'loginError',
+        expect.objectContaining({
+          success: false,
+          error: {
+            message: 'Invalid credentials',
+            code: 'LOGIN_ERROR',
+          },
+          timestamp: expect.any(String),
+        }),
+      );
       expect(loggerErrorSpy).toHaveBeenCalled();
       loggerErrorSpy.mockRestore();
     });
   });
 
   describe('handleChat', () => {
-    it('should broadcast chat message for authenticated user', async () => {
+    it('should broadcast chat message for authenticated user and emit agent response', async () => {
       const socketId = mockSocket.id || 'test-socket-id';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
+      const mockAgentResponseJson = JSON.stringify({
+        type: 'result',
+        subtype: 'success',
+        is_error: false,
+        result: 'Hello from agent!',
+      });
+      dockerService.sendCommandToContainer.mockResolvedValue(mockAgentResponseJson);
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
       await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
 
       expect(agentsService.findOne).toHaveBeenCalledWith(mockAgent.id);
       expect(loggerLogSpy).toHaveBeenCalledWith(`Agent ${mockAgent.name} (${mockAgent.id}) says: Hello, world!`);
-      expect(mockServer.emit).toHaveBeenCalledWith('chatMessage', {
-        from: mockAgent.name,
-        text: 'Hello, world!',
-      });
+      // Check user message emission
+      expect(mockServer.emit).toHaveBeenCalledWith(
+        'chatMessage',
+        expect.objectContaining({
+          success: true,
+          data: {
+            from: 'user',
+            text: 'Hello, world!',
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
+      );
       expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
         'container-123',
-        `cursor-agent -p --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
+        `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
         'Hello, world!',
+      );
+      // Check agent response emission with parsed JSON
+      expect(mockServer.emit).toHaveBeenCalledWith(
+        'chatMessage',
+        expect.objectContaining({
+          success: true,
+          data: {
+            from: 'agent',
+            response: {
+              type: 'result',
+              subtype: 'success',
+              is_error: false,
+              result: 'Hello from agent!',
+            },
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
       );
       loggerLogSpy.mockRestore();
     });
@@ -252,9 +316,17 @@ describe('AgentsGateway', () => {
     it('should reject chat message from unauthenticated user', async () => {
       await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
 
-      expect(mockSocket.emit).toHaveBeenCalledWith('error', {
-        message: 'Unauthorized. Please login first.',
-      });
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'error',
+        expect.objectContaining({
+          success: false,
+          error: {
+            message: 'Unauthorized. Please login first.',
+            code: 'UNAUTHORIZED',
+          },
+          timestamp: expect.any(String),
+        }),
+      );
       expect(mockServer.emit).not.toHaveBeenCalled();
     });
 
@@ -300,11 +372,129 @@ describe('AgentsGateway', () => {
 
       await gateway.handleChat({ message: 'Hello!' }, mockSocket as Socket);
 
-      expect(mockSocket.emit).toHaveBeenCalledWith('error', {
-        message: 'Error processing chat message',
-      });
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'error',
+        expect.objectContaining({
+          success: false,
+          error: {
+            message: 'Error processing chat message',
+            code: 'CHAT_ERROR',
+          },
+          timestamp: expect.any(String),
+        }),
+      );
       expect(loggerErrorSpy).toHaveBeenCalled();
       loggerErrorSpy.mockRestore();
+    });
+
+    it('should not emit agent response if response is empty', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      dockerService.sendCommandToContainer.mockResolvedValue('');
+      const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
+
+      await gateway.handleChat({ message: 'Hello!' }, mockSocket as Socket);
+
+      // Should emit user message
+      expect(mockServer.emit).toHaveBeenCalledWith(
+        'chatMessage',
+        expect.objectContaining({
+          success: true,
+          data: {
+            from: 'user',
+            text: 'Hello!',
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      // Should not emit agent response (empty)
+      const agentResponseCalls = (mockServer.emit as jest.Mock).mock.calls.filter(
+        (call) => call[0] === 'chatMessage' && call[1].data?.from === 'agent',
+      );
+      expect(agentResponseCalls.length).toBe(0);
+      loggerLogSpy.mockRestore();
+    });
+
+    it('should fall back to text if JSON parsing fails', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      dockerService.sendCommandToContainer.mockResolvedValue('Invalid JSON response');
+      const loggerWarnSpy = jest.spyOn(gateway['logger'], 'warn').mockImplementation();
+      const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
+
+      await gateway.handleChat({ message: 'Hello!' }, mockSocket as Socket);
+
+      // Should emit user message
+      expect(mockServer.emit).toHaveBeenCalledWith(
+        'chatMessage',
+        expect.objectContaining({
+          success: true,
+          data: {
+            from: 'user',
+            text: 'Hello!',
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      // Should emit agent response with response field (fallback) since JSON parsing failed
+      expect(mockServer.emit).toHaveBeenCalledWith(
+        'chatMessage',
+        expect.objectContaining({
+          success: true,
+          data: {
+            from: 'agent',
+            response: 'Invalid JSON response',
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      // Should log warning about JSON parsing failure
+      expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to parse agent response as JSON'));
+      loggerWarnSpy.mockRestore();
+      loggerLogSpy.mockRestore();
+    });
+
+    it('should handle errors when getting agent response gracefully', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      dockerService.sendCommandToContainer.mockRejectedValue(new Error('Container error'));
+      const loggerErrorSpy = jest.spyOn(gateway['logger'], 'error').mockImplementation();
+      const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
+
+      await gateway.handleChat({ message: 'Hello!' }, mockSocket as Socket);
+
+      // Should still emit user message
+      expect(mockServer.emit).toHaveBeenCalledWith(
+        'chatMessage',
+        expect.objectContaining({
+          success: true,
+          data: {
+            from: 'user',
+            text: 'Hello!',
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      // Should log the error but not fail the chat
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error getting agent response'),
+        expect.any(String),
+      );
+      loggerErrorSpy.mockRestore();
+      loggerLogSpy.mockRestore();
     });
 
     it('should trim message whitespace', async () => {
@@ -316,10 +506,18 @@ describe('AgentsGateway', () => {
 
       await gateway.handleChat({ message: '  Hello, world!  ' }, mockSocket as Socket);
 
-      expect(mockServer.emit).toHaveBeenCalledWith('chatMessage', {
-        from: mockAgent.name,
-        text: 'Hello, world!',
-      });
+      expect(mockServer.emit).toHaveBeenCalledWith(
+        'chatMessage',
+        expect.objectContaining({
+          success: true,
+          data: {
+            from: 'user',
+            text: 'Hello, world!',
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
+      );
       loggerLogSpy.mockRestore();
     });
   });

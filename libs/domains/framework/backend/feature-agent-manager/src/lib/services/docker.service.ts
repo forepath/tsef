@@ -323,9 +323,10 @@ export class DockerService {
    * @param containerId - The ID of the container
    * @param command - The command to execute (e.g., 'bash', 'sh', or a specific command)
    * @param input - Optional input/keystrokes to send to stdin (string or array of strings)
+   * @returns The command output (stdout and stderr combined)
    * @throws NotFoundException if container is not found
    */
-  async sendCommandToContainer(containerId: string, command: string, input?: string | string[]): Promise<void> {
+  async sendCommandToContainer(containerId: string, command: string, input?: string | string[]): Promise<string> {
     try {
       const container = this.docker.getContainer(containerId);
 
@@ -352,7 +353,7 @@ export class DockerService {
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true, // Enable TTY for interactive keystrokes
+        Tty: false, // Disable TTY to properly capture output
       });
 
       // Start the exec
@@ -360,6 +361,13 @@ export class DockerService {
         hijack: true,
         stdin: true,
       })) as NodeJS.ReadWriteStream;
+
+      // Collect output from stdout and stderr
+      const outputChunks: Buffer[] = [];
+
+      stream.on('data', (chunk: Buffer) => {
+        outputChunks.push(chunk);
+      });
 
       // Send input/keystrokes if provided
       if (input !== undefined) {
@@ -374,33 +382,88 @@ export class DockerService {
       // Close stdin to signal end of input
       stream.end();
 
-      // Wait for the stream to finish
-      await new Promise<void>((resolve, reject) => {
+      // Wait for the stream to finish and collect output
+      const output = await new Promise<string>((resolve, reject) => {
         let resolved = false;
-        const resolveOnce = () => {
+        const resolveOnce = (result: string) => {
           if (!resolved) {
             resolved = true;
-            resolve();
+            resolve(result);
           }
         };
 
-        stream.on('end', resolveOnce);
-        stream.on('close', resolveOnce);
+        const rejectOnce = (error: unknown) => {
+          if (!resolved) {
+            resolved = true;
+            reject(error);
+          }
+        };
+
+        stream.on('end', () => {
+          // Combine all output chunks and demultiplex Docker's multiplexed format
+          const combinedBuffer = Buffer.concat(outputChunks);
+          let extractedOutput = '';
+
+          // Docker multiplexed format: [STREAM_TYPE(1 byte)][LENGTH(4 bytes BE)][DATA...]
+          // Stream type: 1 = stdout, 2 = stderr
+          let i = 0;
+          while (i < combinedBuffer.length) {
+            if (i + 5 <= combinedBuffer.length) {
+              const streamType = combinedBuffer[i];
+              const dataLength = combinedBuffer.readUInt32BE(i + 1);
+              const dataStart = i + 5;
+              const dataEnd = dataStart + dataLength;
+
+              if (dataEnd <= combinedBuffer.length && (streamType === 1 || streamType === 2)) {
+                // Valid frame: extract data (both stdout and stderr)
+                const data = combinedBuffer.subarray(dataStart, dataEnd);
+                extractedOutput += data.toString('utf-8');
+                i = dataEnd;
+              } else {
+                // Invalid frame, try to extract remaining as plain text
+                extractedOutput += combinedBuffer.subarray(i).toString('utf-8');
+                break;
+              }
+            } else {
+              // Not enough bytes for a complete frame, append as text
+              extractedOutput += combinedBuffer.subarray(i).toString('utf-8');
+              break;
+            }
+          }
+
+          resolveOnce(extractedOutput.trim());
+        });
+
+        stream.on('close', () => {
+          // If we haven't resolved yet, resolve with collected output
+          if (!resolved) {
+            const combinedBuffer = Buffer.concat(outputChunks);
+            resolveOnce(combinedBuffer.toString('utf-8').trim());
+          }
+        });
+
         stream.on('error', (error: unknown) => {
           const err = error as { code?: string; message?: string };
           // Ignore EPIPE errors (stdin closed) - this is expected when stdin ends
           if (err.code !== 'EPIPE' && err.code !== 'ECONNRESET') {
-            if (!resolved) {
-              resolved = true;
-              reject(error);
-            }
+            rejectOnce(error);
           } else {
-            resolveOnce();
+            // For EPIPE/ECONNRESET, resolve with collected output
+            const combinedBuffer = Buffer.concat(outputChunks);
+            resolveOnce(combinedBuffer.toString('utf-8').trim());
           }
         });
+
         // Set a timeout to prevent hanging (fallback safety)
-        setTimeout(() => resolveOnce(), 30000);
+        setTimeout(() => {
+          if (!resolved) {
+            const combinedBuffer = Buffer.concat(outputChunks);
+            resolveOnce(combinedBuffer.toString('utf-8').trim());
+          }
+        }, 30000);
       });
+
+      return output;
     } catch (error: unknown) {
       if (error instanceof NotFoundException) {
         throw error;
