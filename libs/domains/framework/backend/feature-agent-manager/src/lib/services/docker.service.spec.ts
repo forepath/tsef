@@ -110,7 +110,6 @@ describe('DockerService', () => {
     it('should pull image, create and start container with binds and ports', async () => {
       const result = await service.createContainer({
         image: 'node:22-alpine',
-        name: 'test-container',
         env: { FOO: 'bar' },
         volumes: [
           { hostPath: '/host/a', containerPath: '/cnt/a' },
@@ -125,7 +124,6 @@ describe('DockerService', () => {
       expect((mockDocker as any).pull).toHaveBeenCalledWith('node:22-alpine', expect.any(Function));
       expect((mockDocker as any).createContainer).toHaveBeenCalledWith({
         Image: 'node:22-alpine',
-        name: 'test-container',
         Env: ['FOO=bar'],
         ExposedPorts: {
           '3000/tcp': {},

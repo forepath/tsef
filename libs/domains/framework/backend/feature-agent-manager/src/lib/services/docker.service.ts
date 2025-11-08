@@ -70,7 +70,6 @@ export class DockerService {
     // Create container
     const container = await this.docker.createContainer({
       Image: resolvedImage,
-      name,
       Env: envArray,
       ExposedPorts: Object.keys(exposedPorts).length ? exposedPorts : undefined,
       HostConfig: {
