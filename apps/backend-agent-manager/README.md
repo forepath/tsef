@@ -71,7 +71,7 @@ For complete API endpoint documentation, request/response schemas, and authentic
 
 ## WebSocket Gateway
 
-The WebSocket gateway is available at `ws://localhost:8080/agents` (or configured `WEBSOCKET_PORT`).
+The Socket.IO WebSocket gateway is available at `http://localhost:8080/agents` (or configured `WEBSOCKET_PORT`).
 
 For complete WebSocket event specifications, authentication flow, and usage examples, see the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#websocket-gateway).
 

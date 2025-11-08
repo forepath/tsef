@@ -5,12 +5,16 @@
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DataSource } from 'typeorm';
 import { AppModule } from './app/app.module';
 import { typeormConfig } from './typeorm.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Configure WebSocket adapter for Socket.IO
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // Run migrations automatically on startup if synchronize is disabled
   // Note: If synchronize: true, schema is auto-synced from entities and migrations won't run
@@ -34,6 +38,9 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
   Logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);
+  Logger.log(
+    `🔌 Socket.IO WebSocket gateway is running on: http://localhost:${process.env.WEBSOCKET_PORT || '8080'}/agents`,
+  );
 }
 
 bootstrap();
