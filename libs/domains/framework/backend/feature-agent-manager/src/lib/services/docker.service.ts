@@ -17,7 +17,10 @@ export class DockerService {
 
     // Resolve image: explicit -> env -> default placeholder
     const resolvedImage =
-      image || process.env.AGENT_DEFAULT_IMAGE || process.env.DEFAULT_AGENT_IMAGE || 'ghcr.io/REPLACE_ME/LATER';
+      image ||
+      process.env.AGENT_DEFAULT_IMAGE ||
+      process.env.DEFAULT_AGENT_IMAGE ||
+      'ghcr.io/forepath/cursor-agent:latest';
 
     // Build HostConfig.Binds from volumes
     const binds = volumes.map((v) => `${v.hostPath}:${v.containerPath}${v.readOnly ? ':ro' : ''}`);
