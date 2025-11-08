@@ -98,7 +98,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "dist/apps/backend-agent-manager",
-        "command": "docker build . -f ../../../apps/backend-agent-manager/Dockerfile.api --tag tsef-agent-manager-api"
+        "command": "docker build . -f ../../../apps/backend-agent-manager/Dockerfile.api --tag ghcr.io/forepath/tsef-agent-manager-api:latest"
       }
     },
     "docker:worker": {
@@ -106,7 +106,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "dist/apps/backend-agent-manager",
-        "command": "docker build . -f ../../../apps/backend-agent-manager/Dockerfile.worker --tag tsef-agent-manager-worker"
+        "command": "docker build . -f ../../../apps/backend-agent-manager/Dockerfile.worker --tag ghcr.io/forepath/tsef-agent-manager-worker:latest"
       }
     },
     "docker:serve": {

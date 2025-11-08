@@ -17,7 +17,7 @@ services:
       - agent-manager-network
 
   backend-agent-manager:
-    image: tsef-agent-manager-api
+    image: ghcr.io/forepath/tsef-agent-manager-api:latest
     container_name: agent-manager-api
     environment:
       # Backend API configuration
@@ -27,7 +27,7 @@ services:
       NODE_ENV: development
       # Cursor agent configuration
       CURSOR_API_KEY: ${CURSOR_API_KEY:-}
-      AGENT_DEFAULT_IMAGE: ${AGENT_DEFAULT_IMAGE:-ghcr.io/forepath/cursor-agent:latest}
+      AGENT_DEFAULT_IMAGE: ${AGENT_DEFAULT_IMAGE:-ghcr.io/forepath/tsef-agent-manager-worker:latest}
       # Database configuration
       DB_HOST: postgres
       DB_PORT: 5432
@@ -36,6 +36,11 @@ services:
       DB_DATABASE: postgres
       # Static API key authentication configuration
       STATIC_API_KEY: ${STATIC_API_KEY:-}
+      # GIT repository configuration
+      GIT_REPOSITORY_URL: ${GIT_REPOSITORY_URL:-}
+      GIT_USERNAME: ${GIT_USERNAME:-}
+      GIT_TOKEN: ${GIT_TOKEN:-}
+      GIT_PASSWORD: ${GIT_PASSWORD:-}
     ports:
       - '3000:3000'
       - '8080:8080'
