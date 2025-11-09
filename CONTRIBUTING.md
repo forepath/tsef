@@ -2,18 +2,18 @@
 
 Thank you for your interest in contributing to this framework! This document provides guidelines and information for contributors.
 
-## 🎯 How to Contribute
+## How to Contribute
 
 We welcome contributions of all kinds:
 
-- 🐛 **Bug Reports** - Help us identify and fix issues
-- ✨ **Feature Requests** - Suggest new functionality
-- 📚 **Documentation** - Improve guides and references
-- 🔧 **Code Contributions** - Fix bugs or add features
-- 🧪 **Testing** - Improve test coverage and quality
-- 🎨 **Design** - Enhance user experience and visual design
+- **Bug Reports** - Help us identify and fix issues
+- **Feature Requests** - Suggest new functionality
+- **Documentation** - Improve guides and references
+- **Code Contributions** - Fix bugs or add features
+- **Testing** - Improve test coverage and quality
+- **Design** - Enhance user experience and visual design
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -48,7 +48,7 @@ We welcome contributions of all kinds:
    - Review [Architecture Overview](./docs/architecture/monorepo-structure.md)
    - Check [Development Workflows](./docs/development-workflows/getting-started.md)
 
-## 📋 Development Guidelines
+## Development Guidelines
 
 ### Code Quality Standards
 
@@ -70,7 +70,7 @@ We welcome contributions of all kinds:
 - Use `nx format:write` for code formatting
 - Run `nx prepush` before committing
 
-## 🔄 Contribution Workflow
+## Contribution Workflow
 
 ### 1. Planning
 
@@ -97,7 +97,7 @@ We welcome contributions of all kinds:
 - Ensure all checklist items are completed
 - Request review from maintainers
 
-## 📝 Pull Request Guidelines
+## Pull Request Guidelines
 
 ### Before Submitting
 
@@ -114,7 +114,7 @@ We welcome contributions of all kinds:
 - Update relevant documentation
 - Follow our [Agent Guidelines](./.cursor/rules/agents.mdc)
 
-## 🐛 Bug Reports
+## Bug Reports
 
 When reporting bugs, please:
 
@@ -124,7 +124,7 @@ When reporting bugs, please:
 4. Add screenshots if applicable
 5. Check existing issues first
 
-## ✨ Feature Requests
+## Feature Requests
 
 For feature requests:
 
@@ -133,7 +133,7 @@ For feature requests:
 3. Consider impact on existing functionality
 4. Check our roadmap and existing discussions
 
-## 📚 Documentation Contributions
+## Documentation Contributions
 
 We value documentation improvements:
 
@@ -142,42 +142,42 @@ We value documentation improvements:
 - Improve structure and navigation
 - Translate content (contact us first)
 
-## 🧪 Testing Guidelines
+## Testing Guidelines
 
 - Write unit tests for new functionality
 - Add integration tests for complex features
 - Ensure test coverage doesn't decrease
 - Use descriptive test names
 
-## 🎨 Code Style
+## Code Style
 
 - Follow TypeScript best practices
 - Use Prettier for formatting
 - Follow ESLint rules
 - Write self-documenting code
 
-## 🔒 Security
+## Security
 
 - Don't include sensitive information in issues or PRs
 - Report security vulnerabilities to soc@forepath.io
 - Follow responsible disclosure practices
 
-## 📞 Getting Help
+## Getting Help
 
 ### Community Support
 
-- 💬 [GitHub Discussions](https://github.com/forepath/tsef/discussions)
-- 📚 [Documentation](./docs/README.md)
-- 🐛 [Issue Tracker](https://github.com/forepath/tsef/issues)
+- [GitHub Discussions](https://github.com/forepath/tsef/discussions)
+- [Documentation](./docs/README.md)
+- [Issue Tracker](https://github.com/forepath/tsef/issues)
 
 ### Direct Support
 
-- 📧 **General Questions**: hi@forepath.io
-- 🐛 **Bug Reports**: support@forepath.io
-- 🏢 **Enterprise**: hi@forepath.io
-- 🔒 **Security**: soc@forepath.io
+- **General Questions**: hi@forepath.io
+- **Bug Reports**: support@forepath.io
+- **Enterprise**: hi@forepath.io
+- **Security**: soc@forepath.io
 
-## 🏆 Recognition
+## Recognition
 
 Contributors will be recognized in:
 
@@ -185,11 +185,11 @@ Contributors will be recognized in:
 - Contributors section in documentation
 - Special mentions for exceptional contributions
 
-## 📄 License
+## License
 
 By contributing to this framework, you agree that your contributions will be licensed under the MIT License.
 
-## 🙏 Thank You
+## Thank You
 
 Your contributions help make this framework better for everyone. We appreciate your time and effort!
 

@@ -1,0 +1,178 @@
+sequenceDiagram
+    participant WSClient as WebSocket Client
+    participant Gateway as AgentsGateway<br/>(namespace: agents)
+    participant Service as AgentsService
+    participant Repo as AgentsRepository
+    participant DB as Database
+    participant MsgService as AgentMessagesService
+    participant MsgRepo as AgentMessagesRepository
+    participant Docker as DockerService
+
+    Note over WSClient,Docker: WebSocket - Connection, Authentication, Chat & Disconnection
+
+    rect rgb(200, 220, 255)
+        Note over WSClient,Docker: Connection
+        WSClient->>Gateway: WebSocket Connect<br/>(namespace: /agents)
+        Gateway->>Gateway: handleConnection(socket)<br/>Log: "Client connected"
+    end
+
+    rect rgb(240, 250, 255)
+        Note over WSClient,Docker: Authentication Flow
+        WSClient->>Gateway: login<br/>{agentId, password}
+        Gateway->>Gateway: findAgentIdByIdentifier(agentId)
+        Gateway->>Repo: findById(agentId)
+        Repo->>DB: SELECT agent WHERE id
+        alt Agent found by ID
+            DB-->>Repo: agent entity
+            Repo-->>Gateway: agent.id (UUID)
+        else Agent not found by ID
+            Gateway->>Repo: findByName(agentId)
+            Repo->>DB: SELECT agent WHERE name
+            alt Agent found by name
+                DB-->>Repo: agent entity
+                Repo-->>Gateway: agent.id (UUID)
+            else Agent not found
+                Repo-->>Gateway: null
+                Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}
+            end
+        end
+
+        alt Agent UUID found
+            Gateway->>Service: verifyCredentials(uuid, password)
+            Service->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity
+            Repo-->>Service: agent entity
+            Service->>Service: verifyPassword(password, hash)
+            alt Password valid
+                Service-->>Gateway: isValid: true
+                Gateway->>Gateway: authenticatedClients.set(socket.id, uuid)
+                Gateway->>Service: findOne(uuid)
+                Service->>Repo: findById(uuid)
+                Repo->>DB: SELECT agent WHERE id
+                DB-->>Repo: agent entity
+                Repo-->>Service: agent entity
+                Service-->>Gateway: agent details
+                Gateway-->>WSClient: loginSuccess<br/>{success: true, data: {message, agentId, agentName}, timestamp}
+
+                Note over Gateway,MsgRepo: Chat History Restoration
+                Gateway->>MsgService: getChatHistory(uuid, 1000, 0)
+                MsgService->>MsgRepo: findByAgentId(uuid, 1000, 0)
+                MsgRepo->>DB: SELECT agent_messages WHERE agent_id ORDER BY created_at ASC
+                DB-->>MsgRepo: message entities
+                MsgRepo-->>MsgService: message entities
+                MsgService-->>Gateway: chat history
+                loop For each message in chronological order
+                    alt User message
+                        Gateway->>Gateway: Apply cleaning & parsing logic
+                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "user", text: message, timestamp}, timestamp}
+                    else Agent message
+                        Gateway->>Gateway: Clean message (remove before { and after })
+                        Gateway->>Gateway: Try JSON.parse(toParse)
+                        alt JSON valid
+                            Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: {...}, timestamp}, timestamp}
+                        else JSON invalid
+                            Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: toParse, timestamp}, timestamp}
+                        end
+                    end
+                end
+            else Password invalid
+                Service-->>Gateway: isValid: false
+                Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}
+            end
+        end
+    end
+
+    rect rgb(250, 255, 240)
+        Note over WSClient,Docker: Chat Message Flow
+        WSClient->>Gateway: chat<br/>{message: "Hello"}
+        Gateway->>Gateway: uuid = authenticatedClients.get(socket.id)
+        alt Not authenticated
+            Gateway-->>WSClient: error<br/>{success: false, error: {message, code}, timestamp}
+        else Authenticated
+            Gateway->>Service: findOne(uuid)
+            Service->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity
+            Repo-->>Service: agent entity
+            Service-->>Gateway: agent details
+
+            Note over Gateway,MsgRepo: Persist User Message
+            Gateway->>MsgService: createUserMessage(uuid, message)
+            MsgService->>MsgRepo: create({agentId, actor: "user", message})
+            MsgRepo->>DB: INSERT agent_messages
+            DB-->>MsgRepo: message entity
+            MsgRepo-->>MsgService: message entity
+            MsgService-->>Gateway: message entity
+
+            Gateway->>Gateway: server.emit('chatMessage')
+            Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "user", text: "Hello", timestamp}, timestamp}
+            Note over Gateway: Broadcasts to all connected clients
+
+            Gateway->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity with containerId
+            Repo-->>Gateway: agent entity
+
+            alt Container exists
+                Gateway->>Docker: sendCommandToContainer(containerId, command, message)
+                Docker->>Docker: Execute command and capture output
+                Docker-->>Gateway: agentResponse (JSON string)
+                alt Response exists
+                    Gateway->>Gateway: Clean response (remove before { and after })
+                    Gateway->>Gateway: toParse = cleaned string
+                    Gateway->>Gateway: Try JSON.parse(toParse)
+                    alt JSON valid
+                        Note over Gateway,MsgRepo: Persist Agent Message (parsed)
+                        Gateway->>MsgService: createAgentMessage(uuid, parsedResponse)
+                        MsgService->>MsgRepo: create({agentId, actor: "agent", message: JSON.stringify(parsedResponse)})
+                        MsgRepo->>DB: INSERT agent_messages
+                        DB-->>MsgRepo: message entity
+                        MsgRepo-->>MsgService: message entity
+                        MsgService-->>Gateway: message entity
+
+                        Gateway->>Gateway: server.emit('chatMessage')
+                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: {...}, timestamp}, timestamp}
+                    else JSON invalid
+                        Note over Gateway,MsgRepo: Persist Agent Message (cleaned string)
+                        Gateway->>MsgService: createAgentMessage(uuid, toParse)
+                        MsgService->>MsgRepo: create({agentId, actor: "agent", message: toParse})
+                        MsgRepo->>DB: INSERT agent_messages
+                        DB-->>MsgRepo: message entity
+                        MsgRepo-->>MsgService: message entity
+                        MsgService-->>Gateway: message entity
+
+                        Gateway->>Gateway: server.emit('chatMessage')
+                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: toParse, timestamp}, timestamp}
+                    end
+                end
+            end
+        end
+    end
+
+    rect rgb(255, 240, 220)
+        Note over WSClient,Docker: Logout Flow
+        WSClient->>Gateway: logout<br/>{}
+        Gateway->>Gateway: uuid = authenticatedClients.get(socket.id)
+        alt Authenticated
+            Gateway->>Gateway: authenticatedClients.delete(socket.id)
+            Gateway->>Service: findOne(uuid)
+            Service->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity
+            Repo-->>Service: agent entity
+            Service-->>Gateway: agent details
+            Gateway->>Gateway: Log: "Agent logged out"
+            Gateway-->>WSClient: logoutSuccess<br/>{success: true, data: {message, agentId, agentName}, timestamp}
+        else Not authenticated
+            Gateway->>Gateway: Log: "Logout requested for unauthenticated socket"
+            Gateway-->>WSClient: logoutSuccess<br/>{success: true, data: {message, agentId: null, agentName: null}, timestamp}
+        end
+    end
+
+    rect rgb(255, 220, 220)
+        Note over WSClient,Docker: Disconnection
+        WSClient->>Gateway: WebSocket Disconnect
+        Gateway->>Gateway: handleDisconnect(socket)<br/>Log: "Client disconnected"
+        Gateway->>Gateway: authenticatedClients.delete(socket.id)
+    end

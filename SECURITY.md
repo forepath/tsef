@@ -1,6 +1,6 @@
 # Security Policy
 
-## 🛡️ Supported Versions
+## Supported Versions
 
 We provide security updates for the following versions of this framework:
 
@@ -9,11 +9,11 @@ We provide security updates for the following versions of this framework:
 | 0.x.x   | :white_check_mark: |
 | < 0.x   | :x:                |
 
-## 🚨 Reporting a Vulnerability
+## Reporting a Vulnerability
 
 We take security seriously and appreciate your help in keeping this framework and its users safe.
 
-### 🔒 How to Report Security Issues
+### How to Report Security Issues
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
@@ -23,7 +23,7 @@ Instead, please report security vulnerabilities to our security team:
 - **Subject**: `[SECURITY] Framework Vulnerability Report`
 - **Response Time**: We aim to respond within 48 hours
 
-### 📋 What to Include in Your Report
+### What to Include in Your Report
 
 When reporting a security vulnerability, please include:
 
@@ -34,7 +34,7 @@ When reporting a security vulnerability, please include:
 5. **Suggested Fix** - If you have ideas for how to fix the issue
 6. **Contact Information** - How we can reach you for follow-up
 
-### 🔍 Vulnerability Assessment Process
+### Vulnerability Assessment Process
 
 1. **Initial Response** - We'll acknowledge receipt within 48 hours
 2. **Assessment** - Our security team will assess the vulnerability
@@ -43,7 +43,7 @@ When reporting a security vulnerability, please include:
 5. **Coordination** - We'll coordinate disclosure with you
 6. **Release** - We'll release the fix and security advisory
 
-### 🏆 Recognition
+### Recognition
 
 We believe in recognizing security researchers who help keep this framework secure:
 
@@ -51,7 +51,7 @@ We believe in recognizing security researchers who help keep this framework secu
 - **Responsible Disclosure** - We follow responsible disclosure practices
 - **Collaboration** - We work with researchers to ensure proper fixes
 
-## 🔐 Security Best Practices
+## Security Best Practices
 
 ### For Developers
 
@@ -67,25 +67,25 @@ We believe in recognizing security researchers who help keep this framework secu
 - **Security Monitoring** - Implement security monitoring and alerting
 - **Incident Response** - Have an incident response plan in place
 
-## 🛠️ Security Features
+## Security Features
 
 This framework includes several built-in security features:
 
-### 🔒 Built-in Security
+### Built-in Security
 
 - **Dependency Scanning** - Automated vulnerability scanning in CI/CD
 - **Security Headers** - Default security headers for web applications
 - **Input Validation** - Built-in input validation and sanitization
 - **Authentication Patterns** - Secure authentication and authorization patterns
 
-### 🔍 Security Tools Integration
+### Security Tools Integration
 
 - **npm audit** - Integrated dependency vulnerability scanning
 - **ESLint Security Rules** - Security-focused linting rules
 - **Pre-commit Hooks** - Security checks before code commits
 - **CI/CD Security Gates** - Automated security validation in pipelines
 
-## 📚 Security Resources
+## Security Resources
 
 ### Documentation
 
@@ -99,7 +99,7 @@ This framework includes several built-in security features:
 - [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework) - Cybersecurity best practices
 - [GitHub Security Advisories](https://github.com/advisories) - Security vulnerability database
 
-## 🚨 Incident Response
+## Incident Response
 
 ### If You Discover a Security Issue
 
@@ -117,7 +117,7 @@ This framework includes several built-in security features:
 - **Timely fixes** for confirmed vulnerabilities
 - **Public acknowledgment** of security researchers
 
-## 📞 Contact Information
+## Contact Information
 
 ### Security Team
 
@@ -132,7 +132,7 @@ This framework includes several built-in security features:
 - **Medium Priority**: 1 week
 - **Low Priority**: 2 weeks
 
-## 🙏 Thank You
+## Thank You
 
 Thank you for helping keep this framework and its users secure. Your responsible disclosure helps us maintain the highest security standards and protects the entire community.
 

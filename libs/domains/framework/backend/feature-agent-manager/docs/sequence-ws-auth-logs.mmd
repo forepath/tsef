@@ -1,0 +1,81 @@
+sequenceDiagram
+    participant WSClient as WebSocket Client
+    participant Gateway as AgentsGateway<br/>(namespace: agents)
+    participant Service as AgentsService
+    participant Repo as AgentsRepository
+    participant DB as Database
+    participant MsgService as AgentMessagesService
+    participant MsgRepo as AgentMessagesRepository
+    participant Docker as DockerService
+
+    Note over WSClient,Docker: WebSocket - Connection, Login & Disconnection
+
+    rect rgb(200, 220, 255)
+        Note over WSClient,Docker: Connection
+        WSClient->>Gateway: WebSocket Connect<br/>(namespace: /agents)
+        Gateway->>Gateway: handleConnection(socket)<br/>Log: "Client connected"
+    end
+
+    rect rgb(240, 250, 255)
+        Note over WSClient,Docker: Authentication Flow
+        WSClient->>Gateway: login<br/>{agentId, password}
+        Gateway->>Gateway: findAgentIdByIdentifier(agentId)
+        Gateway->>Repo: findById(agentId)
+        Repo->>DB: SELECT agent WHERE id
+        alt Agent found by ID
+            DB-->>Repo: agent entity
+            Repo-->>Gateway: agent.id (UUID)
+        else Agent not found by ID
+            Gateway->>Repo: findByName(agentId)
+            Repo->>DB: SELECT agent WHERE name
+            alt Agent found by name
+                DB-->>Repo: agent entity
+                Repo-->>Gateway: agent.id (UUID)
+            else Agent not found
+                Repo-->>Gateway: null
+                Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}
+            end
+        end
+
+        alt Agent UUID found
+            Gateway->>Service: verifyCredentials(uuid, password)
+            Service->>Repo: findById(uuid)
+            Repo->>DB: SELECT agent WHERE id
+            DB-->>Repo: agent entity
+            Repo-->>Service: agent entity
+            Service->>Service: verifyPassword(password, hash)
+            alt Password valid
+                Service-->>Gateway: isValid: true
+                Gateway->>Gateway: authenticatedClients.set(socket.id, uuid)
+                Gateway->>Service: findOne(uuid)
+                Service->>Repo: findById(uuid)
+                Repo->>DB: SELECT agent WHERE id
+                DB-->>Repo: agent entity
+                Repo-->>Service: agent entity
+                Service-->>Gateway: agent details
+                Gateway-->>WSClient: loginSuccess<br/>{success: true, data: {message, agentId, agentName}, timestamp}
+
+                Note over Gateway,MsgRepo: Chat History Restoration
+                Gateway->>MsgService: getChatHistory(uuid, 1000, 0)
+                MsgService->>MsgRepo: findByAgentId(uuid, 1000, 0)
+                MsgRepo->>DB: SELECT agent_messages WHERE agent_id ORDER BY created_at ASC
+                DB-->>MsgRepo: message entities
+                MsgRepo-->>MsgService: chat history
+                MsgService-->>Gateway: chat history
+                loop For each message (chronological order)
+                    Gateway->>Gateway: Apply same cleaning & parsing logic as live
+                    Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from, text|response, timestamp}, timestamp}
+                end
+            else Password invalid
+                Service-->>Gateway: isValid: false
+                Gateway-->>WSClient: loginError<br/>{success: false, error: {message, code}, timestamp}
+            end
+        end
+    end
+
+    rect rgb(255, 220, 220)
+        Note over WSClient,Docker: Disconnection
+        WSClient->>Gateway: WebSocket Disconnect
+        Gateway->>Gateway: handleDisconnect(socket)<br/>Log: "Client disconnected"
+        Gateway->>Gateway: authenticatedClients.delete(socket.id)
+    end

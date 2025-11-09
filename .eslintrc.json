@@ -74,6 +74,13 @@
               {
                 "sourceTag": "scope:keycloak",
                 "onlyDependOnLibsWithTags": ["scope:keycloak", "domain:shared"]
+              },
+              {
+                "sourceTag": "domain:framework",
+                "onlyDependOnLibsWithTags": [
+                  "domain:framework",
+                  "domain:shared"
+                ]
               }
             ]
           }

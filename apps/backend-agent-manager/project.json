@@ -1,0 +1,121 @@
+{
+  "name": "backend-agent-manager",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/backend-agent-manager/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:backend"],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/backend-agent-manager",
+        "main": "apps/backend-agent-manager/src/main.ts",
+        "tsConfig": "apps/backend-agent-manager/tsconfig.app.json",
+        "assets": [
+          "apps/backend-agent-manager/src/assets",
+          "apps/backend-agent-manager/src/migrations"
+        ],
+        "webpackConfig": "apps/backend-agent-manager/webpack.config.cjs",
+        "generatePackageJson": true
+      },
+      "configurations": {
+        "development": {
+          "outputHashing": "none"
+        },
+        "production": {}
+      }
+    },
+    "prune-lockfile": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "executor": "@nx/js:prune-lockfile",
+      "outputs": [
+        "{workspaceRoot}/dist/apps/backend-agent-manager/package.json",
+        "{workspaceRoot}/dist/apps/backend-agent-manager/package-lock.json"
+      ],
+      "options": {
+        "buildTarget": "build"
+      }
+    },
+    "copy-workspace-modules": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "outputs": [
+        "{workspaceRoot}/dist/apps/backend-agent-manager/workspace_modules"
+      ],
+      "executor": "@nx/js:copy-workspace-modules",
+      "options": {
+        "buildTarget": "build"
+      }
+    },
+    "compile-migrations": {
+      "dependsOn": ["build"],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "mkdir -p dist/apps/backend-agent-manager/src/migrations && npx tsc $(find apps/backend-agent-manager/src/migrations -name '*.ts') --outDir dist/apps/backend-agent-manager/src/migrations --module commonjs --target es2021 --moduleResolution node --esModuleInterop --skipLibCheck --resolveJsonModule --declaration false --rootDir apps/backend-agent-manager/src/migrations"
+      }
+    },
+    "prune": {
+      "dependsOn": [
+        "prune-lockfile",
+        "copy-workspace-modules",
+        "compile-migrations"
+      ],
+      "executor": "nx:noop"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "backend-agent-manager:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "backend-agent-manager:build:development"
+        },
+        "production": {
+          "buildTarget": "backend-agent-manager:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/backend-agent-manager/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "docker:api": {
+      "dependsOn": ["build", "prune"],
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "dist/apps/backend-agent-manager",
+        "command": "docker build . -f ../../../apps/backend-agent-manager/Dockerfile.api --tag ghcr.io/forepath/tsef-agent-manager-api:latest"
+      }
+    },
+    "docker:worker": {
+      "dependsOn": ["build", "prune"],
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "dist/apps/backend-agent-manager",
+        "command": "docker build . -f ../../../apps/backend-agent-manager/Dockerfile.worker --tag ghcr.io/forepath/tsef-agent-manager-worker:latest"
+      }
+    },
+    "docker:serve": {
+      "dependsOn": ["docker:api", "docker:worker"],
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/backend-agent-manager",
+        "command": "docker compose up -d"
+      }
+    }
+  }
+}

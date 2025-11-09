@@ -1,0 +1,319 @@
+asyncapi: 3.0.0
+info:
+  title: Agent Gateway
+  version: 1.0.0
+  description: WebSocket events for the agents chat gateway (Socket.IO namespace "agents")
+servers:
+  local:
+    host: localhost:8080
+    protocol: ws
+    description: Socket.IO server (namespace /agents)
+channels:
+  agents/login:
+    address: agents/login
+    messages:
+      loginCommand:
+        $ref: '#/components/messages/Login'
+    description: Client sends login command with credentials (agentId or name + password)
+  agents/loginSuccess:
+    address: agents/loginSuccess
+    messages:
+      loginSuccessEvent:
+        $ref: '#/components/messages/LoginSuccess'
+    description: Server acknowledges successful login. After this event, chat history is automatically restored via chatMessage events.
+  agents/loginError:
+    address: agents/loginError
+    messages:
+      loginErrorEvent:
+        $ref: '#/components/messages/LoginError'
+    description: Server returns login failure reason
+  agents/chat:
+    address: agents/chat
+    messages:
+      chatCommand:
+        $ref: '#/components/messages/Chat'
+    description: Client sends a chat message (requires prior login)
+  agents/chatMessage:
+    address: agents/chatMessage
+    messages:
+      chatBroadcast:
+        $ref: '#/components/messages/ChatMessage'
+    description: Server broadcasts chat messages to all connected clients. Also used for chat history restoration after successful login (messages are emitted in chronological order to the authenticated client only).
+  agents/error:
+    address: agents/error
+    messages:
+      errorEvent:
+        $ref: '#/components/messages/Error'
+    description: Generic error messages for unauthorized or processing failures
+  agents/logout:
+    address: agents/logout
+    messages:
+      logoutCommand:
+        $ref: '#/components/messages/Logout'
+    description: Client sends logout command to end authenticated session
+  agents/logoutSuccess:
+    address: agents/logoutSuccess
+    messages:
+      logoutSuccessEvent:
+        $ref: '#/components/messages/LogoutSuccess'
+    description: Server acknowledges successful logout
+operations:
+  clientSendsLogin:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1login'
+    messages:
+      - $ref: '#/channels/agents~1login/messages/loginCommand'
+  serverEmitsLoginSuccess:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1loginSuccess'
+    messages:
+      - $ref: '#/channels/agents~1loginSuccess/messages/loginSuccessEvent'
+  serverEmitsLoginError:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1loginError'
+    messages:
+      - $ref: '#/channels/agents~1loginError/messages/loginErrorEvent'
+  clientSendsChat:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1chat'
+    messages:
+      - $ref: '#/channels/agents~1chat/messages/chatCommand'
+  serverBroadcastsChatMessage:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1chatMessage'
+    messages:
+      - $ref: '#/channels/agents~1chatMessage/messages/chatBroadcast'
+  serverEmitsError:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1error'
+    messages:
+      - $ref: '#/channels/agents~1error/messages/errorEvent'
+  clientSendsLogout:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1logout'
+    messages:
+      - $ref: '#/channels/agents~1logout/messages/logoutCommand'
+  serverEmitsLogoutSuccess:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1logoutSuccess'
+    messages:
+      - $ref: '#/channels/agents~1logoutSuccess/messages/logoutSuccessEvent'
+components:
+  securitySchemes:
+    jwt:
+      type: httpApiKey
+      name: Authorization
+      in: header
+      description: 'Bearer JWT from Keycloak, e.g. Authorization: Bearer <token>'
+  messages:
+    Login:
+      name: Login
+      title: Login command
+      contentType: application/json
+      payload:
+        type: object
+        required: [agentId, password]
+        properties:
+          agentId:
+            type: string
+            description: Agent UUID or name
+          password:
+            type: string
+    LoginSuccess:
+      name: LoginSuccess
+      title: Login success event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [message, agentId, agentName]
+            properties:
+              message:
+                type: string
+                description: Welcome message
+              agentId:
+                type: string
+                description: Agent UUID
+              agentName:
+                type: string
+                description: Agent name
+          timestamp:
+            type: string
+            description: ISO timestamp
+    LoginError:
+      name: LoginError
+      title: Login error event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, error, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [false]
+          error:
+            type: object
+            required: [message]
+            properties:
+              message:
+                type: string
+                description: Error message
+              code:
+                type: string
+                description: Error code (optional)
+                enum: [INVALID_CREDENTIALS, LOGIN_ERROR]
+              details:
+                type: string
+                description: Additional error details (optional)
+          timestamp:
+            type: string
+            description: ISO timestamp
+    Chat:
+      name: Chat
+      title: Chat command
+      contentType: application/json
+      payload:
+        type: object
+        required: [message]
+        properties:
+          message:
+            type: string
+            description: Message text
+    ChatMessage:
+      name: ChatMessage
+      title: Chat broadcast event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            oneOf:
+              - type: object
+                required: [from, text, timestamp]
+                properties:
+                  from:
+                    type: string
+                    enum: [user]
+                  text:
+                    type: string
+                    description: Message text
+                  timestamp:
+                    type: string
+                    description: ISO timestamp
+              - type: object
+                required: [from, response, timestamp]
+                properties:
+                  from:
+                    type: string
+                    enum: [agent]
+                  response:
+                    oneOf:
+                      - type: object
+                        properties:
+                          type:
+                            type: string
+                          subtype:
+                            type: string
+                          is_error:
+                            type: boolean
+                          duration_ms:
+                            type: number
+                          duration_api_ms:
+                            type: number
+                          result:
+                            type: string
+                          session_id:
+                            type: string
+                          request_id:
+                            type: string
+                        description: Parsed JSON response object from agent
+                      - type: string
+                        description: Cleaned string response if JSON parsing fails (text before first { and after last } is removed)
+                  timestamp:
+                    type: string
+                    description: ISO timestamp
+          timestamp:
+            type: string
+            description: ISO timestamp
+    Error:
+      name: Error
+      title: Error event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, error, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [false]
+          error:
+            type: object
+            required: [message]
+            properties:
+              message:
+                type: string
+                description: Error message
+              code:
+                type: string
+                description: Error code (optional)
+                enum: [UNAUTHORIZED, CHAT_ERROR]
+              details:
+                type: string
+                description: Additional error details (optional)
+          timestamp:
+            type: string
+            description: ISO timestamp
+    Logout:
+      name: Logout
+      title: Logout command
+      contentType: application/json
+      payload:
+        type: object
+        description: Empty payload - no parameters required
+    LogoutSuccess:
+      name: LogoutSuccess
+      title: Logout success event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [message, agentId, agentName]
+            properties:
+              message:
+                type: string
+                description: Success message
+              agentId:
+                type: string
+                nullable: true
+                description: Agent UUID (null if not authenticated)
+              agentName:
+                type: string
+                nullable: true
+                description: Agent name (null if not authenticated)
+          timestamp:
+            type: string
+            description: ISO timestamp

@@ -1,0 +1,35 @@
+flowchart TB
+    subgraph HTTP["🔷 HTTP REST API (/api/agents)"]
+        direction TB
+        HTTP_USE["Use Case: CRUD Operations<br/>One-time Requests<br/>Request-Response Pattern"]
+        HTTP_USE --> HTTP1["📝 Create Agent<br/>POST /api/agents<br/>Returns: Agent + Password"]
+        HTTP_USE --> HTTP2["📋 List Agents<br/>GET /api/agents?limit&offset<br/>Returns: Paginated List"]
+        HTTP_USE --> HTTP3["🔍 Get Agent<br/>GET /api/agents/:id<br/>Returns: Agent Details"]
+        HTTP_USE --> HTTP4["✏️ Update Agent<br/>POST /api/agents/:id<br/>Returns: Updated Agent"]
+        HTTP_USE --> HTTP5["🗑️ Delete Agent<br/>DELETE /api/agents/:id<br/>Returns: 204 No Content"]
+    end
+
+    subgraph WS["🔶 WebSocket Gateway (namespace: /agents)"]
+        direction TB
+        WS_USE["Use Case: Real-time Communication<br/>Bidirectional Messages<br/>Persistent Connection"]
+        WS_USE --> WS1["🔐 Authentication & Connection<br/>1. Connect to WebSocket<br/>2. Login with credentials<br/>3. Session established<br/>4. Chat history restored"]
+        WS_USE --> WS2["💬 Chat Messages<br/>1. Send chat message<br/>2. Persist message to database<br/>3. Broadcast to all clients<br/>4. Forward to container stdin<br/>5. Capture and emit agent response<br/>6. Persist agent response to database"]
+    end
+
+    Start([Agent Manager Feature]) --> HTTP
+    Start --> WS
+
+    HTTP -.->|"Stateless<br/>Request-Response"| HTTP_USE
+    WS -.->|"Stateful<br/>Persistent Connection"| WS_USE
+
+    style HTTP fill:#e6f0ff,stroke:#4a90e2,stroke-width:3px
+    style WS fill:#fff4e6,stroke:#ff8c42,stroke-width:3px
+    style HTTP_USE fill:#d6e9ff,stroke:#4a90e2
+    style WS_USE fill:#ffe6cc,stroke:#ff8c42
+    style HTTP1 fill:#f0f7ff,stroke:#4a90e2
+    style HTTP2 fill:#f0f7ff,stroke:#4a90e2
+    style HTTP3 fill:#f0f7ff,stroke:#4a90e2
+    style HTTP4 fill:#f0f7ff,stroke:#4a90e2
+    style HTTP5 fill:#f0f7ff,stroke:#4a90e2
+    style WS1 fill:#fff9f0,stroke:#ff8c42
+    style WS2 fill:#fff9f0,stroke:#ff8c42
