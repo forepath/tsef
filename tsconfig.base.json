@@ -19,6 +19,12 @@
       "@forepath/framework/backend": [
         "libs/domains/framework/backend/index.ts"
       ],
+      "@forepath/framework/backend/feature-agent-controller": [
+        "libs/domains/framework/backend/feature-agent-controller/src/index.ts"
+      ],
+      "@forepath/framework/backend/feature-agent-manager": [
+        "libs/domains/framework/backend/feature-agent-manager/src/index.ts"
+      ],
       "@forepath/identity/backend": ["libs/domains/identity/backend/index.ts"],
       "@forepath/identity/frontend": ["libs/domains/identity/frontend/index.ts"]
     }

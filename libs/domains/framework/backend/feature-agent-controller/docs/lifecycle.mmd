@@ -1,0 +1,144 @@
+sequenceDiagram
+    participant User as Client
+    participant HTTP as ClientsController<br/>(/api/clients)
+    participant Service as ClientsService
+    participant Repo as ClientsRepository
+    participant DB as Database
+    participant Proxy as ClientAgentProxyService
+    participant RemoteHTTP as Remote Agent-Manager<br/>(/api/agents)
+    participant CredService as ClientAgentCredentialsService
+    participant WS as ClientsGateway<br/>(namespace: /clients)
+    participant RemoteWS as Remote Agent-Manager WS<br/>(namespace: /agents)
+
+    Note over User,RemoteWS: End-to-end lifecycle: create client → proxy agent creation → connect WS → forward events → disconnect → delete
+
+    rect rgb(230, 240, 255)
+        Note over User,DB: Step 1 — Create Client (HTTP)
+        User->>HTTP: POST /api/clients<br/>{name, endpoint, authType: API_KEY|KEYCLOAK, ...}
+        HTTP->>Service: create(createClientDto)
+        alt Authentication Type: API_KEY
+            Service->>Service: generateRandomApiKey() (if not provided)
+        else Authentication Type: KEYCLOAK
+            Service->>Service: Validate keycloakClientId & keycloakClientSecret
+        end
+        Service->>Repo: create(entity)
+        Repo->>DB: INSERT client
+        DB-->>Repo: client entity
+        Repo-->>Service: client entity
+        Service-->>HTTP: CreateClientResponseDto<br/>{id, name, apiKey? (if API_KEY), ...}
+        HTTP-->>User: 201 Created<br/>{client with apiKey if applicable}
+    end
+
+    rect rgb(200, 220, 255)
+        Note over User,RemoteHTTP: Step 2 — Create Agent via Proxy (HTTP)
+        User->>HTTP: POST /api/clients/{clientId}/agents<br/>{name, description?}
+        HTTP->>Proxy: createClientAgent(clientId, createAgentDto)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Note over Proxy: Authenticates with API_KEY or Keycloak JWT
+        Proxy->>RemoteHTTP: POST {endpoint}/api/agents<br/>Authorization: Bearer {token/apiKey}<br/>{name, description?}
+        RemoteHTTP-->>Proxy: 201 Created<br/>{id, name, password, ...}
+        Proxy->>CredService: createCredentials(clientId, agentId, password)
+        CredService->>DB: INSERT client_agent_credentials<br/>(client_id, agent_id, password)
+        DB-->>CredService: credential entity
+        CredService-->>Proxy: success
+        Proxy-->>HTTP: CreateAgentResponseDto<br/>{id, name, password, ...}
+        HTTP-->>User: 201 Created<br/>{agent with password}
+        Note over User: Credentials saved for WebSocket auto-login
+    end
+
+    rect rgb(240, 250, 255)
+        Note over User,RemoteWS: Step 3 — Connect WebSocket & Set Client Context
+        User->>WS: WebSocket Connect<br/>(namespace: /clients)
+        WS->>WS: handleConnection(socket)
+        User->>WS: setClient<br/>{clientId}
+        WS->>Repo: findByIdOrThrow(clientId)
+        Repo->>DB: SELECT client WHERE id
+        DB-->>Repo: client entity
+        Repo-->>WS: client entity
+        WS->>WS: getAuthHeader(clientId)
+        Note over WS: Gets API_KEY or Keycloak JWT token
+        WS->>WS: buildAgentsWsUrl(endpoint, agentWsPort)
+        WS->>RemoteWS: Socket.IO Connect<br/>Authorization: Bearer {token/apiKey}
+        RemoteWS-->>WS: connect event
+        WS->>WS: Wire remote.onAny() to socket.emit()
+        WS->>WS: Track remote connection
+        WS-->>User: setClientSuccess<br/>{message: "Client context set", clientId}
+    end
+
+    rect rgb(250, 255, 240)
+        Note over User,RemoteWS: Step 4 — Forward Event with Auto-Login
+        User->>WS: forward<br/>{event: "chat", payload: {message: "Hello"}, agentId}
+        WS->>WS: Check if agentId logged in
+        alt Agent not logged in
+            WS->>CredService: findByClientAndAgent(clientId, agentId)
+            CredService->>DB: SELECT client_agent_credentials<br/>WHERE client_id AND agent_id
+            DB-->>CredService: credential entity
+            CredService-->>WS: credential entity
+            WS->>RemoteWS: login<br/>{agentId, password: credential.password}
+            RemoteWS-->>WS: loginSuccess<br/>(forwarded via onAny)
+            WS-->>User: loginSuccess<br/>{success: true, data: {...}}
+            WS->>WS: Track logged-in agent
+        end
+        WS->>RemoteWS: emit("chat", {message: "Hello"})
+        Note over RemoteWS: Remote processes chat message
+        RemoteWS-->>WS: chatMessage<br/>(forwarded via onAny)
+        WS-->>User: chatMessage<br/>{success: true, data: {...}}
+        WS-->>User: forwardAck<br/>{received: true, event: "chat"}
+    end
+
+    rect rgb(255, 240, 250)
+        Note over User,RemoteWS: Step 5 — Forward Additional Events
+        User->>WS: forward<br/>{event: "chat", payload: {message: "Another message"}, agentId}
+        WS->>WS: Check logged-in agents
+        alt Agent already logged in
+            Note over WS: Skip auto-login (already authenticated)
+        end
+        WS->>RemoteWS: emit("chat", {message: "Another message"})
+        RemoteWS-->>WS: chatMessage<br/>(forwarded via onAny)
+        WS-->>User: chatMessage<br/>{success: true, data: {...}}
+        WS-->>User: forwardAck<br/>{received: true, event: "chat"}
+    end
+
+    rect rgb(255, 220, 220)
+        Note over User,RemoteWS: Step 6 — Disconnect WebSocket
+        User->>WS: WebSocket Disconnect
+        WS->>WS: handleDisconnect(socket)
+        WS->>WS: Clean up selectedClientBySocket
+        WS->>WS: Clean up loggedInAgentsBySocket
+        WS->>RemoteWS: removeAllListeners()
+        WS->>RemoteWS: disconnect()
+        WS->>WS: Clean up remoteSocketBySocket
+    end
+
+    rect rgb(255, 230, 255)
+        Note over User,DB: Step 7 — Delete Agent via Proxy (HTTP)
+        User->>HTTP: DELETE /api/clients/{clientId}/agents/{agentId}
+        HTTP->>Proxy: deleteClientAgent(clientId, agentId)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>RemoteHTTP: DELETE {endpoint}/api/agents/{agentId}<br/>Authorization: Bearer {token/apiKey}
+        RemoteHTTP-->>Proxy: 204 No Content
+        Proxy->>CredService: deleteCredentials(clientId, agentId)
+        CredService->>DB: DELETE client_agent_credentials<br/>WHERE client_id AND agent_id
+        DB-->>CredService: success
+        CredService-->>Proxy: success
+        Proxy-->>HTTP: void
+        HTTP-->>User: 204 No Content
+    end
+
+    rect rgb(255, 240, 240)
+        Note over User,DB: Step 8 — Delete Client (HTTP)
+        User->>HTTP: DELETE /api/clients/{clientId}
+        HTTP->>Service: remove(clientId)
+        Service->>Repo: findById(clientId)
+        Repo->>DB: SELECT client WHERE id
+        DB-->>Repo: client entity
+        alt Client is KEYCLOAK type
+            Service->>Service: Clear Keycloak token cache
+        end
+        Service->>Repo: delete(clientId)
+        Repo->>DB: DELETE client WHERE id<br/>(CASCADE deletes credentials)
+        DB-->>Repo: success
+        Repo-->>Service: success
+        Service-->>HTTP: void
+        HTTP-->>User: 204 No Content
+    end

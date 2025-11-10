@@ -1,0 +1,151 @@
+sequenceDiagram
+    participant WSClient as WebSocket Client
+    participant Gateway as ClientsGateway<br/>(namespace: clients)
+    participant Service as ClientsService
+    participant Repo as ClientsRepository
+    participant DB as Database
+    participant Keycloak as KeycloakTokenService
+    participant CredRepo as ClientAgentCredentialsRepository
+    participant RemoteWS as Remote Agent-Manager WS<br/>(namespace: /agents)
+
+    Note over WSClient,RemoteWS: WebSocket - Client Context Setup & Event Forwarding
+
+    rect rgb(200, 220, 255)
+        Note over WSClient,RemoteWS: Connection
+        WSClient->>Gateway: WebSocket Connect<br/>(namespace: /clients)
+        Gateway->>Gateway: handleConnection(socket)<br/>Log: "Client connected"
+    end
+
+    rect rgb(240, 250, 255)
+        Note over WSClient,RemoteWS: Set Client Context
+        WSClient->>Gateway: setClient<br/>{clientId}
+        Gateway->>Gateway: Validate clientId
+        alt clientId missing
+            Gateway-->>WSClient: error<br/>{message: "clientId is required"}
+        else clientId provided
+            Gateway->>Repo: findByIdOrThrow(clientId)
+            Repo->>DB: SELECT client WHERE id
+            DB-->>Repo: client entity
+            Repo-->>Gateway: client entity
+            Gateway->>Gateway: getAuthHeader(clientId)
+            alt Authentication Type: API_KEY
+                Gateway->>Gateway: Extract apiKey from client entity
+                Gateway->>Gateway: authHeader = "Bearer {apiKey}"
+            else Authentication Type: KEYCLOAK
+                Gateway->>Service: getAccessToken(clientId)
+                Service->>Keycloak: getAccessToken(authServerUrl, realm, clientId, secret)
+                Keycloak->>Keycloak: Check token cache
+                alt Token cached and valid
+                    Keycloak-->>Service: cached token
+                else Token expired or missing
+                    Keycloak->>Keycloak: POST /realms/{realm}/protocol/openid-connect/token<br/>(OAuth2 Client Credentials)
+                    Keycloak->>Keycloak: Cache token with expiration
+                    Keycloak-->>Service: access_token
+                end
+                Service-->>Gateway: JWT token
+                Gateway->>Gateway: authHeader = "Bearer {token}"
+            end
+            Gateway->>Gateway: buildAgentsWsUrl(endpoint, agentWsPort)
+            Note over Gateway: Constructs: {protocol}://{host}:{port}/agents
+            Gateway->>Gateway: io(remoteUrl, {transports: ['websocket'], extraHeaders: {Authorization}})
+            Gateway->>RemoteWS: Socket.IO Connect<br/>Authorization: Bearer {token/apiKey}
+            RemoteWS-->>Gateway: connect event
+            Gateway->>Gateway: Wire remote.onAny() to socket.emit()
+            Gateway->>Gateway: Track remote socket connection
+            Gateway->>Gateway: selectedClientBySocket.set(socket.id, clientId)
+            Gateway->>Gateway: remoteSocketBySocket.set(socket.id, remote)
+            Gateway-->>WSClient: setClientSuccess<br/>{message: "Client context set", clientId}
+        end
+    end
+
+    rect rgb(250, 255, 240)
+        Note over WSClient,RemoteWS: Forward Event (with Auto-Login)
+        WSClient->>Gateway: forward<br/>{event: "chat", payload: {...}, agentId?}
+        Gateway->>Gateway: clientId = selectedClientBySocket.get(socket.id)
+        alt No client selected
+            Gateway-->>WSClient: error<br/>{message: "No client selected. Call setClient first."}
+        else Client selected
+            Gateway->>Gateway: remote = remoteSocketBySocket.get(socket.id)
+            alt Remote not connected
+                Gateway-->>WSClient: error<br/>{message: "Remote connection not established"}
+            else Remote connected
+                Gateway->>Gateway: Validate event
+                alt event missing
+                    Gateway-->>WSClient: error<br/>{message: "event is required"}
+                else event provided
+                    alt event is "login" and agentId provided
+                        Gateway->>Gateway: Always use credentials from database<br/>(ignore user payload)
+                        Gateway->>CredRepo: findByClientAndAgent(clientId, agentId)
+                        CredRepo->>DB: SELECT client_agent_credentials<br/>WHERE client_id AND agent_id
+                        alt Credentials found
+                            DB-->>CredRepo: credential entity
+                            CredRepo-->>Gateway: credential entity
+                            Gateway->>Gateway: Override payload with credentials from database
+                            Gateway->>Gateway: Register once('loginSuccess') and once('loginError') handlers
+                            Gateway->>RemoteWS: login<br/>{agentId, password: credential.password}
+                            RemoteWS->>RemoteWS: Authenticate agent
+                            alt Authentication successful
+                                RemoteWS-->>Gateway: loginSuccess event
+                                Gateway->>Gateway: loggedInAgentsBySocket.set(socket.id, Set with agentId)
+                                Note over Gateway: Wait for loginSuccess before proceeding<br/>Login event already emitted, don't forward again
+                            else Authentication failed
+                                RemoteWS-->>Gateway: loginError event
+                                Gateway-->>WSClient: error<br/>{message: "Login failed"}
+                            end
+                        else Credentials not found
+                            Gateway-->>WSClient: error<br/>{message: "No stored credentials for agent"}
+                        end
+                    else Other event with agentId provided
+                        Gateway->>Gateway: loggedIn = loggedInAgentsBySocket.get(socket.id)
+                        alt Agent not yet logged in
+                            Gateway->>CredRepo: findByClientAndAgent(clientId, agentId)
+                            CredRepo->>DB: SELECT client_agent_credentials<br/>WHERE client_id AND agent_id
+                            alt Credentials found
+                                DB-->>CredRepo: credential entity
+                                CredRepo-->>Gateway: credential entity
+                                Gateway->>Gateway: Register once('loginSuccess') and once('loginError') handlers
+                                Gateway->>RemoteWS: login<br/>{agentId, password: credential.password}
+                                RemoteWS->>RemoteWS: Authenticate agent
+                                alt Authentication successful
+                                    RemoteWS-->>Gateway: loginSuccess event
+                                    Gateway->>Gateway: loggedInAgentsBySocket.set(socket.id, Set with agentId)
+                                    Note over Gateway: Wait for loginSuccess before proceeding
+                                else Authentication failed
+                                    RemoteWS-->>Gateway: loginError event
+                                    Gateway-->>WSClient: error<br/>{message: "Login failed"}
+                                end
+                            else Credentials not found
+                                Gateway->>Gateway: Log warning: "No stored credentials"
+                            end
+                        end
+                        Gateway->>RemoteWS: emit(event, payload)
+                        Note over Gateway: Forwards event to remote agent-manager WebSocket
+                    else Event without agentId
+                        Gateway->>RemoteWS: emit(event, payload)
+                        Note over Gateway: Forwards event to remote agent-manager WebSocket
+                    end
+                    Gateway-->>WSClient: forwardAck<br/>{received: true, event}
+                    Note over RemoteWS: Remote processes event and emits responses<br/>After login, chat history is automatically<br/>restored via chatMessage events
+                    RemoteWS->>Gateway: onAny(event, ...args)
+                    Gateway->>Gateway: socket.emit(event, ...args)
+                    Gateway-->>WSClient: event<br/>{...args}
+                    Note over WSClient: Receives forwarded responses from remote<br/>(e.g., loginSuccess, chatMessage events)
+                end
+            end
+        end
+    end
+
+    rect rgb(255, 240, 220)
+        Note over WSClient,RemoteWS: Disconnection
+        WSClient->>Gateway: WebSocket Disconnect
+        Gateway->>Gateway: handleDisconnect(socket)
+        Gateway->>Gateway: selectedClientBySocket.delete(socket.id)
+        Gateway->>Gateway: loggedInAgentsBySocket.delete(socket.id)
+        Gateway->>Gateway: remote = remoteSocketBySocket.get(socket.id)
+        alt Remote exists
+            Gateway->>RemoteWS: removeAllListeners()
+            Gateway->>RemoteWS: disconnect()
+            Gateway->>Gateway: remoteSocketBySocket.delete(socket.id)
+        end
+        Gateway->>Gateway: Log: "Client disconnected"
+    end

@@ -74,6 +74,13 @@ The following components are sublicensed under the **GNU Affero General Public L
 
 These components are licensed under AGPL-3.0, which means that any modifications or derivative works must also be licensed under AGPL-3.0 and made available to users, including when accessed over a network. See the respective [backend-agent-manager application LICENSE](./apps/backend-agent-manager/LICENSE) and [feature-agent-manager library LICENSE](./libs/domains/framework/backend/feature-agent-manager/LICENSE) files for the full AGPL-3.0 license text.
 
+The following components are sublicensed under the **Business Source License 1.1 (BUSL-1.1)**:
+
+- [`apps/backend-agent-controller`](./apps/backend-agent-controller/) - Backend application for agent controller
+- [`libs/domains/framework/backend/feature-agent-controller`](./libs/domains/framework/backend/feature-agent-controller/) - Agent controller feature library
+
+These components are licensed under BUSL-1.1, which permits non-production use and limited production use (subject to the Additional Use Grant terms). The license will convert to AGPL-3.0 after the Change Date (three years from release date). See the respective [backend-agent-controller application LICENSE](./apps/backend-agent-controller/LICENSE) and [feature-agent-controller library LICENSE](./libs/domains/framework/backend/feature-agent-controller/LICENSE) files for the full BUSL-1.1 license text.
+
 ## Contribution
 
 We welcome contributions! Whether you're fixing bugs, adding features, or improving documentation, your input helps make this framework better for everyone.

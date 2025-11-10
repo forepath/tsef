@@ -1,0 +1,139 @@
+asyncapi: 3.0.0
+info:
+  title: Clients Gateway
+  version: 1.0.0
+  description: Socket.IO events for the clients proxy gateway (Socket.IO namespace "clients")
+servers:
+  local:
+    host: localhost:8081
+    protocol: ws
+    description: Socket.IO server (namespace /clients)
+channels:
+  clients/setClient:
+    address: clients/setClient
+    messages:
+      setClientCommand:
+        $ref: '#/components/messages/SetClient'
+    description: Client selects a client context by UUID
+  clients/setClientSuccess:
+    address: clients/setClientSuccess
+    messages:
+      setClientSuccessEvent:
+        $ref: '#/components/messages/SetClientSuccess'
+    description: Server acknowledges selected client context
+  clients/error:
+    address: clients/error
+    messages:
+      errorEvent:
+        $ref: '#/components/messages/Error'
+    description: Generic error responses
+  clients/forward:
+    address: clients/forward
+    messages:
+      forwardCommand:
+        $ref: '#/components/messages/Forward'
+    description: Forward an arbitrary event to the selected client's agents namespace. When `agentId` is provided, the gateway automatically logs in the agent using stored credentials before forwarding the event. To restore chat history for an agent, forward a "login" event with `agentId` (the payload is automatically overridden with credentials from the database, triggering login and subsequent chat history restoration).
+  clients/forwardAck:
+    address: clients/forwardAck
+    messages:
+      forwardAckEvent:
+        $ref: '#/components/messages/ForwardAck'
+    description: Acknowledgement for forwarded events
+operations:
+  clientSendsSetClient:
+    action: send
+    channel:
+      $ref: '#/channels/clients~1setClient'
+    messages:
+      - $ref: '#/channels/clients~1setClient/messages/setClientCommand'
+  serverEmitsSetClientSuccess:
+    action: receive
+    channel:
+      $ref: '#/channels/clients~1setClientSuccess'
+    messages:
+      - $ref: '#/channels/clients~1setClientSuccess/messages/setClientSuccessEvent'
+  clientForwardsEvent:
+    action: send
+    channel:
+      $ref: '#/channels/clients~1forward'
+    messages:
+      - $ref: '#/channels/clients~1forward/messages/forwardCommand'
+  serverEmitsForwardAck:
+    action: receive
+    channel:
+      $ref: '#/channels/clients~1forwardAck'
+    messages:
+      - $ref: '#/channels/clients~1forwardAck/messages/forwardAckEvent'
+  serverEmitsError:
+    action: receive
+    channel:
+      $ref: '#/channels/clients~1error'
+    messages:
+      - $ref: '#/channels/clients~1error/messages/errorEvent'
+components:
+  messages:
+    SetClient:
+      name: SetClient
+      title: Set client context
+      contentType: application/json
+      payload:
+        type: object
+        required: [clientId]
+        properties:
+          clientId:
+            type: string
+            description: Client UUID (v4)
+    SetClientSuccess:
+      name: SetClientSuccess
+      title: Set client success
+      contentType: application/json
+      payload:
+        type: object
+        required: [message, clientId]
+        properties:
+          message:
+            type: string
+            description: Acknowledgement message
+          clientId:
+            type: string
+            description: Selected client UUID
+    Forward:
+      name: Forward
+      title: Forward an event to agents namespace
+      contentType: application/json
+      payload:
+        type: object
+        required: [event]
+        properties:
+          event:
+            type: string
+            description: Socket.IO event name (e.g., chat, login, logout). When event is "login" and `agentId` is provided, the `payload` field is optional and ignored - credentials are automatically loaded from the database to trigger login and chat history restoration.
+          agentId:
+            type: string
+            description: Agent UUID to target; if provided, the gateway will perform automatic login using stored credentials before forwarding the event. After successful login, the agents gateway automatically restores chat history by emitting `chatMessage` events. When event is "login", the `payload` field is always ignored and credentials are always loaded from the database, regardless of whether the agent is already logged in.
+          payload:
+            description: Arbitrary payload forwarded to the agents namespace. Optional when event is "login" with `agentId` (credentials are loaded from database instead).
+            default: {}
+    ForwardAck:
+      name: ForwardAck
+      title: Forward acknowledgement
+      contentType: application/json
+      payload:
+        type: object
+        required: [received, event]
+        properties:
+          received:
+            type: boolean
+          event:
+            type: string
+    Error:
+      name: Error
+      title: Error event
+      contentType: application/json
+      payload:
+        type: object
+        required: [message]
+        properties:
+          message:
+            type: string
+            description: Error message
