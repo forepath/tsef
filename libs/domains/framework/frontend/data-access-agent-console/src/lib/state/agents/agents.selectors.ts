@@ -1,0 +1,69 @@
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import type { AgentResponseDto } from './agents.types';
+import type { AgentsState } from './agents.reducer';
+
+export const selectAgentsState = createFeatureSelector<AgentsState>('agents');
+
+// Base selectors for the entire agents state
+export const selectAgentsEntities = createSelector(selectAgentsState, (state) => state.entities);
+
+export const selectSelectedAgents = createSelector(selectAgentsState, (state) => state.selectedAgents);
+
+export const selectAgentsLoading = createSelector(selectAgentsState, (state) => state.loading);
+
+export const selectAgentsLoadingAgent = createSelector(selectAgentsState, (state) => state.loadingAgent);
+
+export const selectAgentsCreating = createSelector(selectAgentsState, (state) => state.creating);
+
+export const selectAgentsUpdating = createSelector(selectAgentsState, (state) => state.updating);
+
+export const selectAgentsDeleting = createSelector(selectAgentsState, (state) => state.deleting);
+
+export const selectAgentsErrors = createSelector(selectAgentsState, (state) => state.errors);
+
+// Client-scoped selectors (factory functions that return selectors for a specific clientId)
+export const selectClientAgents = (clientId: string) =>
+  createSelector(selectAgentsEntities, (entities) => entities[clientId] ?? []);
+
+export const selectSelectedClientAgent = (clientId: string) =>
+  createSelector(selectSelectedAgents, (selectedAgents) => selectedAgents[clientId] ?? null);
+
+export const selectClientAgentsLoading = (clientId: string) =>
+  createSelector(selectAgentsLoading, (loading) => loading[clientId] ?? false);
+
+export const selectClientAgentLoading = (clientId: string) =>
+  createSelector(selectAgentsLoadingAgent, (loadingAgent) => loadingAgent[clientId] ?? false);
+
+export const selectClientAgentsCreating = (clientId: string) =>
+  createSelector(selectAgentsCreating, (creating) => creating[clientId] ?? false);
+
+export const selectClientAgentsUpdating = (clientId: string) =>
+  createSelector(selectAgentsUpdating, (updating) => updating[clientId] ?? false);
+
+export const selectClientAgentsDeleting = (clientId: string) =>
+  createSelector(selectAgentsDeleting, (deleting) => deleting[clientId] ?? false);
+
+export const selectClientAgentsError = (clientId: string) =>
+  createSelector(selectAgentsErrors, (errors) => errors[clientId] ?? null);
+
+// Combined loading selector for a specific client (true if any operation is loading)
+export const selectClientAgentsLoadingAny = (clientId: string) =>
+  createSelector(
+    selectClientAgentsLoading(clientId),
+    selectClientAgentLoading(clientId),
+    selectClientAgentsCreating(clientId),
+    selectClientAgentsUpdating(clientId),
+    selectClientAgentsDeleting(clientId),
+    (loading, loadingAgent, creating, updating, deleting) =>
+      loading || loadingAgent || creating || updating || deleting,
+  );
+
+// Derived selectors for a specific client
+export const selectClientAgentsCount = (clientId: string) =>
+  createSelector(selectClientAgents(clientId), (agents) => agents.length);
+
+export const selectClientAgentById = (clientId: string, agentId: string) =>
+  createSelector(selectClientAgents(clientId), (agents) => agents.find((a) => a.id === agentId) ?? null);
+
+export const selectHasClientAgents = (clientId: string) =>
+  createSelector(selectClientAgents(clientId), (agents) => agents.length > 0);

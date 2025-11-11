@@ -141,7 +141,25 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
         // This allows the local socket to remain connected even if remote disconnects
       });
       this.remoteSocketBySocket.set(socket.id, remote);
-      socket.emit('setClientSuccess', { message: 'Client context set', clientId });
+      // Wait for remote connection to be established before emitting setClientSuccess
+      // Check if already connected (socket.io-client can connect synchronously in some cases)
+      if (remote.connected) {
+        socket.emit('setClientSuccess', { message: 'Client context set', clientId });
+      } else {
+        remote.once('connect', () => {
+          socket.emit('setClientSuccess', { message: 'Client context set', clientId });
+        });
+        remote.once('connect_error', (err: Error) => {
+          this.logger.warn(`Remote connection failed for socket ${socket.id}: ${err.message}`);
+          if (socket.connected) {
+            try {
+              socket.emit('error', { message: `Remote connection failed: ${err.message}` });
+            } catch {
+              // Ignore if socket disconnected during emit
+            }
+          }
+        });
+      }
     } catch (err) {
       const message = (err as { message?: string }).message || 'Failed to set client';
       socket.emit('error', { message });

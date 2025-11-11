@@ -72,6 +72,7 @@ jest.mock(
       disconnect,
       removeAllListeners,
       disconnected: false,
+      connected: true, // Default to connected so setClientSuccess emits immediately
       triggerEvent, // Helper to trigger events in tests
     };
     return { io: jest.fn(() => remote) };

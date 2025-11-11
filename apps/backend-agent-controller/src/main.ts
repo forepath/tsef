@@ -13,6 +13,23 @@ import { typeormConfig } from './typeorm.config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Configure CORS (enabled by default with origin: '*', configurable via ENABLE_CORS and CORS_ORIGIN)
+  const enableCors = process.env.ENABLE_CORS === 'true';
+  const corsOrigin = enableCors ? process.env.CORS_ORIGIN || '*' : '*';
+  const origin = corsOrigin === '*' ? '*' : corsOrigin.split(',').map((o) => o.trim());
+
+  app.enableCors({
+    origin,
+    // credentials can only be true when origin is not '*'
+    credentials: origin !== '*',
+  });
+
+  if (enableCors && corsOrigin !== '*') {
+    Logger.log(`🌐 CORS enabled with restricted origin: ${corsOrigin}`);
+  } else {
+    Logger.log('🌐 CORS enabled with origin: * (all origins allowed)');
+  }
+
   // Configure WebSocket adapter for Socket.IO
   app.useWebSocketAdapter(new IoAdapter(app));
 

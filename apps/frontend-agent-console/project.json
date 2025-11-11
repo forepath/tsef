@@ -1,0 +1,115 @@
+{
+  "name": "frontend-agent-console",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/frontend-agent-console/src",
+  "tags": ["type:app", "scope:frontend"],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/frontend-agent-console",
+        "index": "apps/frontend-agent-console/src/index.html",
+        "browser": "apps/frontend-agent-console/src/main.ts",
+        "polyfills": [
+          "zone.js",
+          "apps/frontend-agent-console/src/polyfills.ts"
+        ],
+        "tsConfig": "apps/frontend-agent-console/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/frontend-agent-console/public"
+          }
+        ],
+        "styles": ["apps/frontend-agent-console/src/styles.scss"],
+        "scripts": [
+          "node_modules/@popperjs/core/dist/umd/popper.min.js",
+          "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+        ],
+        "localize": true,
+        "i18nMissingTranslation": "warning"
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        },
+        "en": {
+          "localize": ["en"]
+        },
+        "de": {
+          "localize": ["de"]
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "frontend-agent-console:build:production,en"
+        },
+        "development": {
+          "buildTarget": "frontend-agent-console:build:development,en"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "frontend-agent-console:build",
+        "outputPath": "apps/frontend-agent-console/src/i18n"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/frontend-agent-console/jest.config.ts",
+        "tsConfig": "apps/frontend-agent-console/tsconfig.spec.json"
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "frontend-agent-console:build",
+        "port": 4200,
+        "staticFilePath": "dist/apps/frontend-agent-console/browser",
+        "spa": true
+      }
+    }
+  },
+  "i18n": {
+    "sourceLocale": "en-US",
+    "locales": {
+      "en": "apps/frontend-agent-console/src/i18n/messages.en.xlf",
+      "de": "apps/frontend-agent-console/src/i18n/messages.de.xlf"
+    }
+  }
+}

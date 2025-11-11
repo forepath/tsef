@@ -111,6 +111,8 @@ See the [library documentation](../../libs/domains/framework/backend/feature-age
 
 - `PORT` - HTTP API port (default: `3000`)
 - `NODE_ENV` - Environment mode (`development` or `production`)
+- `ENABLE_CORS` - When set to `true`, enables CORS origin restriction via `CORS_ORIGIN` (default: CORS enabled with origin: `*` allowing all origins)
+- `CORS_ORIGIN` - Allowed CORS origins when `ENABLE_CORS=true` (default: `*`). Can be a single origin or comma-separated list (e.g., `http://localhost:4200,http://localhost:3000`)
 
 ## Docker Deployment
 
