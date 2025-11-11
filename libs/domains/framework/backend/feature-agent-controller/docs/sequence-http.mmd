@@ -1,0 +1,174 @@
+sequenceDiagram
+    participant Client as HTTP Client
+    participant API as ClientsController<br/>(/api/clients)
+    participant Service as ClientsService
+    participant Repo as ClientsRepository
+    participant DB as Database
+    participant Keycloak as KeycloakTokenService
+    participant Proxy as ClientAgentProxyService
+    participant Remote as Remote Agent-Manager<br/>(/api/agents)
+    participant CredService as ClientAgentCredentialsService
+
+    Note over Client,Remote: HTTP API - Client Management & Proxied Agent Operations
+
+    rect rgb(230, 240, 255)
+        Note over Client,DB: Create Client
+        Client->>API: POST /api/clients<br/>{name, endpoint, authType, ...}
+        API->>Service: create(createClientDto)
+        alt Authentication Type: API_KEY
+            Service->>Service: generateRandomApiKey() (if not provided)
+        else Authentication Type: KEYCLOAK
+            Service->>Service: Validate keycloakClientId & keycloakClientSecret
+        end
+        Service->>Repo: create(entity)
+        Repo->>DB: INSERT client
+        DB-->>Repo: client entity
+        Repo-->>Service: client entity
+        Service-->>API: CreateClientResponseDto<br/>{id, name, apiKey? (if API_KEY), ...}
+        API-->>Client: 201 Created<br/>{client with apiKey if applicable}
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Client,DB: List Clients
+        Client->>API: GET /api/clients?limit=10&offset=0
+        API->>Service: findAll(limit, offset)
+        Service->>Repo: findAll(limit, offset)
+        Repo->>DB: SELECT clients LIMIT/OFFSET
+        DB-->>Repo: client entities[]
+        Repo-->>Service: client entities[]
+        Service-->>API: ClientResponseDto[]<br/>(excludes sensitive data)
+        API-->>Client: 200 OK<br/>[clients array]
+    end
+
+    rect rgb(255, 240, 240)
+        Note over Client,DB: Get Client
+        Client->>API: GET /api/clients/{id}
+        API->>Service: findOne(id)
+        Service->>Repo: findById(id)
+        Repo->>DB: SELECT client WHERE id
+        DB-->>Repo: client entity
+        Repo-->>Service: client entity
+        Service-->>API: ClientResponseDto<br/>(excludes sensitive data)
+        API-->>Client: 200 OK<br/>{client}
+    end
+
+    rect rgb(255, 255, 230)
+        Note over Client,Keycloak: Update Client
+        Client->>API: POST /api/clients/{id}<br/>{name?, endpoint?, authType?, ...}
+        API->>Service: update(id, updateClientDto)
+        Service->>Repo: findById(id)
+        Repo->>DB: SELECT client WHERE id
+        DB-->>Repo: client entity
+        Repo-->>Service: client entity
+        alt Changing to KEYCLOAK or updating Keycloak credentials
+            Service->>Keycloak: clearCache(authServerUrl, realm, clientId)
+        end
+        Service->>Repo: update(id, updates)
+        Repo->>DB: UPDATE client
+        DB-->>Repo: updated entity
+        Repo-->>Service: updated entity
+        Service-->>API: ClientResponseDto
+        API-->>Client: 200 OK<br/>{updated client}
+    end
+
+    rect rgb(255, 230, 255)
+        Note over Client,DB: Delete Client
+        Client->>API: DELETE /api/clients/{id}
+        API->>Service: remove(id)
+        Service->>Repo: findById(id)
+        Repo->>DB: SELECT client WHERE id
+        DB-->>Repo: client entity
+        alt Client is KEYCLOAK type
+            Service->>Keycloak: clearCache(authServerUrl, realm, clientId)
+        end
+        Service->>Repo: delete(id)
+        Repo->>DB: DELETE client WHERE id<br/>(CASCADE deletes credentials)
+        DB-->>Repo: success
+        Repo-->>Service: success
+        Service-->>API: void
+        API-->>Client: 204 No Content
+    end
+
+    rect rgb(200, 220, 255)
+        Note over Client,Remote: Create Agent (Proxied)
+        Client->>API: POST /api/clients/{id}/agents<br/>{name, description?}
+        API->>Proxy: createClientAgent(clientId, createAgentDto)
+        Proxy->>Repo: findByIdOrThrow(clientId)
+        Repo->>DB: SELECT client WHERE id
+        DB-->>Repo: client entity
+        Repo-->>Proxy: client entity
+        alt Authentication Type: API_KEY
+            Proxy->>Proxy: getAuthHeader(clientId)<br/>Returns: Bearer {apiKey}
+        else Authentication Type: KEYCLOAK
+            Proxy->>Service: getAccessToken(clientId)
+            Service->>Keycloak: getAccessToken(authServerUrl, realm, clientId, secret)
+            Keycloak->>Keycloak: Check token cache
+            alt Token cached and valid
+                Keycloak-->>Service: cached token
+            else Token expired or missing
+                Keycloak->>Remote: POST /realms/{realm}/protocol/openid-connect/token<br/>(OAuth2 Client Credentials)
+                Remote-->>Keycloak: {access_token, expires_in}
+                Keycloak->>Keycloak: Cache token
+                Keycloak-->>Service: access_token
+            end
+            Service-->>Proxy: JWT token
+            Proxy->>Proxy: getAuthHeader(clientId)<br/>Returns: Bearer {token}
+        end
+        Proxy->>Proxy: buildAgentApiUrl(endpoint)
+        Proxy->>Remote: POST {endpoint}/api/agents<br/>Authorization: Bearer {token/apiKey}<br/>{name, description?}
+        Remote-->>Proxy: 201 Created<br/>{id, name, password, ...}
+        Proxy->>CredService: createCredentials(clientId, agentId, password)
+        CredService->>DB: INSERT client_agent_credentials
+        DB-->>CredService: credential entity
+        CredService-->>Proxy: success
+        Proxy-->>API: CreateAgentResponseDto<br/>{id, name, password, ...}
+        API-->>Client: 201 Created<br/>{agent with password}
+    end
+
+    rect rgb(240, 250, 255)
+        Note over Client,Remote: List Agents (Proxied)
+        Client->>API: GET /api/clients/{id}/agents?limit&offset
+        API->>Proxy: getClientAgents(clientId, limit, offset)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>Remote: GET {endpoint}/api/agents?limit&offset<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>Proxy: 200 OK<br/>[agents array]
+        Proxy-->>API: AgentResponseDto[]
+        API-->>Client: 200 OK<br/>[agents array]
+    end
+
+    rect rgb(255, 240, 250)
+        Note over Client,Remote: Get Agent (Proxied)
+        Client->>API: GET /api/clients/{id}/agents/{agentId}
+        API->>Proxy: getClientAgent(clientId, agentId)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>Remote: GET {endpoint}/api/agents/{agentId}<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>Proxy: 200 OK<br/>{agent}
+        Proxy-->>API: AgentResponseDto
+        API-->>Client: 200 OK<br/>{agent}
+    end
+
+    rect rgb(255, 255, 240)
+        Note over Client,Remote: Update Agent (Proxied)
+        Client->>API: POST /api/clients/{id}/agents/{agentId}<br/>{name?, description?}
+        API->>Proxy: updateClientAgent(clientId, agentId, updateAgentDto)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>Remote: POST {endpoint}/api/agents/{agentId}<br/>Authorization: Bearer {token/apiKey}<br/>{name?, description?}
+        Remote-->>Proxy: 200 OK<br/>{updated agent}
+        Proxy-->>API: AgentResponseDto
+        API-->>Client: 200 OK<br/>{updated agent}
+    end
+
+    rect rgb(255, 230, 240)
+        Note over Client,CredService: Delete Agent (Proxied)
+        Client->>API: DELETE /api/clients/{id}/agents/{agentId}
+        API->>Proxy: deleteClientAgent(clientId, agentId)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>Remote: DELETE {endpoint}/api/agents/{agentId}<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>Proxy: 204 No Content
+        Proxy->>CredService: deleteCredentials(clientId, agentId)
+        CredService->>DB: DELETE client_agent_credentials<br/>WHERE client_id AND agent_id
+        DB-->>CredService: success
+        CredService-->>Proxy: success
+        Proxy-->>API: void
+        API-->>Client: 204 No Content
+    end

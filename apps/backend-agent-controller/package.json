@@ -1,7 +1,7 @@
 {
-  "name": "backend-agent-manager",
+  "name": "backend-agent-controller",
   "version": "0.0.0",
-  "license": "AGPL-3.0-or-later",
+  "license": "BUSL-1.1-or-later",
   "private": true,
   "dependencies": {
     "@nestjs/common": "11.1.6",
@@ -16,7 +16,8 @@
     "dockerode": "4.0.9",
     "nest-keycloak-connect": "2.0.0-alpha.2",
     "typeorm": "0.3.27",
-    "pg": "8.16.3"
+    "pg": "8.16.3",
+    "socket.io-client": "4.8.1"
   },
   "devDependencies": {
     "ts-node": "10.9.1",

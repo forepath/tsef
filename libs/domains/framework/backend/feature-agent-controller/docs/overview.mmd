@@ -1,0 +1,54 @@
+flowchart TB
+    subgraph HTTP["🔷 HTTP REST API (/api/clients)"]
+        direction TB
+        HTTP_USE["Use Case: Client Management<br/>One-time Requests<br/>Request-Response Pattern"]
+        HTTP_USE --> HTTP1["📝 Create Client<br/>POST /api/clients<br/>Returns: Client + API Key (if API_KEY)"]
+        HTTP_USE --> HTTP2["📋 List Clients<br/>GET /api/clients?limit&offset<br/>Returns: Paginated List"]
+        HTTP_USE --> HTTP3["🔍 Get Client<br/>GET /api/clients/:id<br/>Returns: Client Details"]
+        HTTP_USE --> HTTP4["✏️ Update Client<br/>POST /api/clients/:id<br/>Returns: Updated Client"]
+        HTTP_USE --> HTTP5["🗑️ Delete Client<br/>DELETE /api/clients/:id<br/>Returns: 204 No Content"]
+    end
+
+    subgraph PROXY["🔷 HTTP REST API - Proxied Agent Operations (/api/clients/:id/agents)"]
+        direction TB
+        PROXY_USE["Use Case: Agent Management via Client<br/>Proxy to Remote Agent-Manager<br/>Request-Response Pattern"]
+        PROXY_USE --> PROXY1["📝 Create Agent (Proxied)<br/>POST /api/clients/:id/agents<br/>Returns: Agent + Password<br/>Saves credentials for WS"]
+        PROXY_USE --> PROXY2["📋 List Agents (Proxied)<br/>GET /api/clients/:id/agents?limit&offset<br/>Returns: Paginated Agent List"]
+        PROXY_USE --> PROXY3["🔍 Get Agent (Proxied)<br/>GET /api/clients/:id/agents/:agentId<br/>Returns: Agent Details"]
+        PROXY_USE --> PROXY4["✏️ Update Agent (Proxied)<br/>POST /api/clients/:id/agents/:agentId<br/>Returns: Updated Agent"]
+        PROXY_USE --> PROXY5["🗑️ Delete Agent (Proxied)<br/>DELETE /api/clients/:id/agents/:agentId<br/>Returns: 204 No Content"]
+    end
+
+    subgraph WS["🔶 WebSocket Gateway (namespace: /clients)"]
+        direction TB
+        WS_USE["Use Case: Real-time Event Forwarding<br/>Bidirectional Messages<br/>Persistent Connection"]
+        WS_USE --> WS1["🔐 Client Context Setup<br/>1. Connect to WebSocket<br/>2. setClient with clientId<br/>3. Remote connection established<br/>4. Auto-authentication (API_KEY/Keycloak)"]
+        WS_USE --> WS2["📤 Event Forwarding<br/>1. forward event with agentId?<br/>2. Auto-login if agentId provided<br/>3. Forward to remote agent-manager WS<br/>4. Relay responses back to client"]
+    end
+
+    Start([Agent Controller Feature]) --> HTTP
+    Start --> PROXY
+    Start --> WS
+
+    HTTP -.->|"Stateless<br/>Request-Response"| HTTP_USE
+    PROXY -.->|"Proxy to Remote<br/>Agent-Manager"| PROXY_USE
+    WS -.->|"Stateful<br/>Persistent Connection"| WS_USE
+
+    style HTTP fill:#e6f0ff,stroke:#4a90e2,stroke-width:3px
+    style PROXY fill:#e6f0ff,stroke:#4a90e2,stroke-width:3px
+    style WS fill:#fff4e6,stroke:#ff8c42,stroke-width:3px
+    style HTTP_USE fill:#d6e9ff,stroke:#4a90e2
+    style PROXY_USE fill:#d6e9ff,stroke:#4a90e2
+    style WS_USE fill:#ffe6cc,stroke:#ff8c42
+    style HTTP1 fill:#f0f7ff,stroke:#4a90e2
+    style HTTP2 fill:#f0f7ff,stroke:#4a90e2
+    style HTTP3 fill:#f0f7ff,stroke:#4a90e2
+    style HTTP4 fill:#f0f7ff,stroke:#4a90e2
+    style HTTP5 fill:#f0f7ff,stroke:#4a90e2
+    style PROXY1 fill:#f0f7ff,stroke:#4a90e2
+    style PROXY2 fill:#f0f7ff,stroke:#4a90e2
+    style PROXY3 fill:#f0f7ff,stroke:#4a90e2
+    style PROXY4 fill:#f0f7ff,stroke:#4a90e2
+    style PROXY5 fill:#f0f7ff,stroke:#4a90e2
+    style WS1 fill:#fff9f0,stroke:#ff8c42
+    style WS2 fill:#fff9f0,stroke:#ff8c42
