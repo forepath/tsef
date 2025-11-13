@@ -4,6 +4,7 @@ import { CreateClientDto } from '../dto/create-client.dto';
 import { UpdateClientDto } from '../dto/update-client.dto';
 import { AuthenticationType, ClientEntity } from '../entities/client.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
+import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { ClientsService } from './clients.service';
 import { KeycloakTokenService } from './keycloak-token.service';
 
@@ -11,6 +12,7 @@ describe('ClientsService', () => {
   let service: ClientsService;
   let repository: jest.Mocked<ClientsRepository>;
   let keycloakTokenService: jest.Mocked<KeycloakTokenService>;
+  let clientAgentProxyService: jest.Mocked<ClientAgentProxyService>;
 
   const mockClient: ClientEntity = {
     id: 'test-uuid',
@@ -52,6 +54,10 @@ describe('ClientsService', () => {
     clearAllCache: jest.fn(),
   };
 
+  const mockClientAgentProxyService = {
+    getClientConfig: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -64,12 +70,17 @@ describe('ClientsService', () => {
           provide: KeycloakTokenService,
           useValue: mockKeycloakTokenService,
         },
+        {
+          provide: ClientAgentProxyService,
+          useValue: mockClientAgentProxyService,
+        },
       ],
     }).compile();
 
     service = module.get<ClientsService>(ClientsService);
     repository = module.get(ClientsRepository);
     keycloakTokenService = module.get(KeycloakTokenService);
+    clientAgentProxyService = module.get(ClientAgentProxyService);
   });
 
   afterEach(() => {
@@ -246,21 +257,39 @@ describe('ClientsService', () => {
   });
 
   describe('findAll', () => {
-    it('should return array of clients', async () => {
+    it('should return array of clients with config', async () => {
       const clients = [mockClient];
+      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git' };
       mockRepository.findAll.mockResolvedValue(clients);
+      clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
 
       const result = await service.findAll(10, 0);
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(mockClient.id);
       expect(result[0]).not.toHaveProperty('apiKey');
+      expect(result[0].config).toEqual(mockConfig);
+      expect(repository.findAll).toHaveBeenCalledWith(10, 0);
+      expect(clientAgentProxyService.getClientConfig).toHaveBeenCalledWith(mockClient.id);
+    });
+
+    it('should return clients without config if fetch fails', async () => {
+      const clients = [mockClient];
+      mockRepository.findAll.mockResolvedValue(clients);
+      clientAgentProxyService.getClientConfig.mockResolvedValue(undefined);
+
+      const result = await service.findAll(10, 0);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe(mockClient.id);
+      expect(result[0].config).toBeUndefined();
       expect(repository.findAll).toHaveBeenCalledWith(10, 0);
     });
 
     it('should use default pagination values', async () => {
       const clients = [mockClient];
       mockRepository.findAll.mockResolvedValue(clients);
+      clientAgentProxyService.getClientConfig.mockResolvedValue(undefined);
 
       await service.findAll();
 
@@ -269,33 +298,52 @@ describe('ClientsService', () => {
   });
 
   describe('findOne', () => {
-    it('should return client by id', async () => {
+    it('should return client by id with config', async () => {
+      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git' };
       mockRepository.findByIdOrThrow.mockResolvedValue(mockClient);
+      clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
 
       const result = await service.findOne('test-uuid');
 
       expect(result.id).toBe(mockClient.id);
       expect(result).not.toHaveProperty('apiKey');
+      expect(result.config).toEqual(mockConfig);
+      expect(repository.findByIdOrThrow).toHaveBeenCalledWith('test-uuid');
+      expect(clientAgentProxyService.getClientConfig).toHaveBeenCalledWith('test-uuid');
+    });
+
+    it('should return client without config if fetch fails', async () => {
+      mockRepository.findByIdOrThrow.mockResolvedValue(mockClient);
+      clientAgentProxyService.getClientConfig.mockResolvedValue(undefined);
+
+      const result = await service.findOne('test-uuid');
+
+      expect(result.id).toBe(mockClient.id);
+      expect(result.config).toBeUndefined();
       expect(repository.findByIdOrThrow).toHaveBeenCalledWith('test-uuid');
     });
   });
 
   describe('update', () => {
-    it('should update client', async () => {
+    it('should update client with config', async () => {
       const updateDto: UpdateClientDto = {
         name: 'Updated Client',
         description: 'Updated Description',
       };
       const updatedClient = { ...mockClient, ...updateDto };
+      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git' };
 
       mockRepository.findByName.mockResolvedValue(null);
       repository.update.mockResolvedValue(updatedClient);
+      clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
 
       const result = await service.update('test-uuid', updateDto);
 
       expect(result.name).toBe(updateDto.name);
       expect(result.description).toBe(updateDto.description);
+      expect(result.config).toEqual(mockConfig);
       expect(repository.update).toHaveBeenCalled();
+      expect(clientAgentProxyService.getClientConfig).toHaveBeenCalledWith('test-uuid');
     });
 
     it('should update endpoint', async () => {

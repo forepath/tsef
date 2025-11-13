@@ -277,6 +277,9 @@ components:
           minimum: 1
           maximum: 65535
           description: Optional Socket.IO port for the client's agents gateway
+        config:
+          $ref: '#/components/schemas/ConfigResponseDto'
+          description: Configuration from the agent-manager instance (optional, may be undefined if agent-manager is unreachable)
         createdAt:
           type: string
           format: date-time
@@ -390,3 +393,9 @@ components:
           properties:
             password:
               type: string
+    ConfigResponseDto:
+      type: object
+      properties:
+        gitRepositoryUrl:
+          type: [string, 'null']
+          description: Git repository URL used for cloning repositories when creating agents

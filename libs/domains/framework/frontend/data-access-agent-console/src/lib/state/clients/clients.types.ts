@@ -1,6 +1,10 @@
 // Types based on OpenAPI spec
 export type ClientAuthenticationType = 'api_key' | 'keycloak';
 
+export interface ConfigResponseDto {
+  gitRepositoryUrl?: string | null;
+}
+
 export interface ClientResponseDto {
   id: string;
   name: string;
@@ -8,6 +12,7 @@ export interface ClientResponseDto {
   endpoint: string;
   authenticationType: ClientAuthenticationType;
   agentWsPort?: number;
+  config?: ConfigResponseDto;
   createdAt: string;
   updatedAt: string;
 }

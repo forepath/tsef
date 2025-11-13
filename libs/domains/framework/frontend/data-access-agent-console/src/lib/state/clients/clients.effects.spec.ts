@@ -42,6 +42,9 @@ describe('ClientsEffects', () => {
     description: 'Test Description',
     endpoint: 'https://example.com/api',
     authenticationType: 'api_key',
+    config: {
+      gitRepositoryUrl: 'https://github.com/user/repo.git',
+    },
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };

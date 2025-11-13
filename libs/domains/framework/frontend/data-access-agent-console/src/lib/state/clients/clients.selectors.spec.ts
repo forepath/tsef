@@ -26,6 +26,9 @@ describe('Clients Selectors', () => {
     description: 'Test Description',
     endpoint: 'https://example.com/api',
     authenticationType: 'api_key',
+    config: {
+      gitRepositoryUrl: 'https://github.com/user/repo.git',
+    },
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
@@ -35,6 +38,9 @@ describe('Clients Selectors', () => {
     name: 'Test Client 2',
     endpoint: 'https://example2.com/api',
     authenticationType: 'keycloak',
+    config: {
+      gitRepositoryUrl: 'https://github.com/user2/repo2.git',
+    },
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',
   };

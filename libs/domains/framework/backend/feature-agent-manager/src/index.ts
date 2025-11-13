@@ -1,7 +1,9 @@
 export * from './lib/agents.controller';
 export * from './lib/agents.gateway';
 export * from './lib/agents.module';
+export * from './lib/config.controller';
 export * from './lib/dto/agent-response.dto';
+export * from './lib/dto/config-response.dto';
 export * from './lib/dto/create-agent-response.dto';
 export * from './lib/dto/create-agent.dto';
 export * from './lib/dto/update-agent.dto';
@@ -11,5 +13,6 @@ export * from './lib/repositories/agents.repository';
 export * from './lib/repositories/agent-messages.repository';
 export * from './lib/services/agent-messages.service';
 export * from './lib/services/agents.service';
+export * from './lib/services/config.service';
 export * from './lib/services/docker.service';
 export * from './lib/services/password.service';
