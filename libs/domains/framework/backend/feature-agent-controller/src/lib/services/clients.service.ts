@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { ClientResponseDto } from '../dto/client-response.dto';
 import { CreateClientResponseDto } from '../dto/create-client-response.dto';
@@ -6,6 +6,7 @@ import { CreateClientDto } from '../dto/create-client.dto';
 import { UpdateClientDto } from '../dto/update-client.dto';
 import { AuthenticationType, ClientEntity } from '../entities/client.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
+import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { KeycloakTokenService } from './keycloak-token.service';
 
 /**
@@ -19,6 +20,8 @@ export class ClientsService {
   constructor(
     private readonly clientsRepository: ClientsRepository,
     private readonly keycloakTokenService: KeycloakTokenService,
+    @Inject(forwardRef(() => ClientAgentProxyService))
+    private readonly clientAgentProxyService: ClientAgentProxyService,
   ) {}
 
   /**
@@ -94,7 +97,19 @@ export class ClientsService {
    */
   async findAll(limit = 10, offset = 0): Promise<ClientResponseDto[]> {
     const clients = await this.clientsRepository.findAll(limit, offset);
-    return clients.map((client) => this.mapToResponseDto(client));
+    // Fetch config for all clients in parallel, but don't fail if any request fails
+    const clientsWithConfig = await Promise.all(
+      clients.map(async (client) => {
+        const dto = this.mapToResponseDto(client);
+        try {
+          dto.config = await this.clientAgentProxyService.getClientConfig(client.id);
+        } catch (error) {
+          // Config is optional, continue without it
+        }
+        return dto;
+      }),
+    );
+    return clientsWithConfig;
   }
 
   /**
@@ -105,7 +120,14 @@ export class ClientsService {
    */
   async findOne(id: string): Promise<ClientResponseDto> {
     const client = await this.clientsRepository.findByIdOrThrow(id);
-    return this.mapToResponseDto(client);
+    const dto = this.mapToResponseDto(client);
+    // Fetch config from agent-manager, but don't fail if request fails
+    try {
+      dto.config = await this.clientAgentProxyService.getClientConfig(id);
+    } catch (error) {
+      // Config is optional, continue without it
+    }
+    return dto;
   }
 
   /**
@@ -183,7 +205,14 @@ export class ClientsService {
     );
 
     const client = await this.clientsRepository.update(id, updateData);
-    return this.mapToResponseDto(client);
+    const dto = this.mapToResponseDto(client);
+    // Fetch config from agent-manager, but don't fail if request fails
+    try {
+      dto.config = await this.clientAgentProxyService.getClientConfig(id);
+    } catch (error) {
+      // Config is optional, continue without it
+    }
+    return dto;
   }
 
   /**

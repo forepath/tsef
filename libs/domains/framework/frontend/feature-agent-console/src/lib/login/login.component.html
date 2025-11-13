@@ -1,0 +1,108 @@
+<section class="section__row">
+  <div class="section__column d-flex align-items-center justify-content-center bg-body-tertiary h-100">
+    <div class="p-4" style="width: 700px; max-width: 100%">
+      <h1 class="display-5 fw-bold mb-3">Agent Console</h1>
+      <p class="lead mb-4">
+        Manage and interact with your AI agents through a centralized dashboard. Connect to remote agent-manager
+        services and monitor real-time operations.
+      </p>
+      <ul class="list-unstyled">
+        <li class="mb-2 d-flex align-items-center gap-2 bg-body-secondary py-2 px-4 rounded-2">
+          <i class="bi bi-check-circle-fill text-primary me-2 fs-5"></i>
+          <div class="d-flex flex-column">
+            <strong>Client Management</strong>
+            <span class="text-muted small">Connect and manage multiple agent-manager services</span>
+          </div>
+        </li>
+        <li class="mb-2 d-flex align-items-center gap-2 bg-body-secondary py-2 px-3 rounded-2">
+          <i class="bi bi-check-circle-fill text-primary me-2 fs-5"></i>
+          <div class="d-flex flex-column">
+            <strong>Agent Operations</strong>
+            <span class="text-muted small">Create, update, and monitor AI agents</span>
+          </div>
+        </li>
+        <li class="mb-2 d-flex align-items-center gap-2 bg-body-secondary py-2 px-3 rounded-2">
+          <i class="bi bi-check-circle-fill text-primary me-2 fs-5"></i>
+          <div class="d-flex flex-column">
+            <strong>Real-time Communication</strong>
+            <span class="text-muted small">WebSocket-based chat and event streaming</span>
+          </div>
+        </li>
+        <li class="mb-2 d-flex align-items-center gap-2 bg-body-secondary py-2 px-3 rounded-2">
+          <i class="bi bi-check-circle-fill text-primary me-2 fs-5"></i>
+          <div class="d-flex flex-column">
+            <strong>Secure Authentication</strong>
+            <span class="text-muted small">API key and OAuth2 support</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="section__column d-flex align-items-center justify-content-center">
+    <div class="p-4" style="width: 500px; max-width: 100%">
+      <h2 class="section__column-title mb-4 text-center">Login</h2>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
+        <!-- Error Alert -->
+        @if (error$ | async; as error) {
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span>{{ error }}</span>
+            <button type="button" class="btn-close" aria-label="Close" (click)="loginForm.reset()"></button>
+          </div>
+        }
+
+        <!-- API Base Hostname Input -->
+        <div class="mb-3">
+          <label for="apiBaseHostname" class="form-label">Controller API Host</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-globe"></i>
+            </span>
+            <input type="text" class="form-control" id="apiBaseHostname" [value]="apiBaseHostname" readonly disabled />
+          </div>
+        </div>
+
+        <!-- API Key Input -->
+        <div class="mb-3">
+          <label for="apiKey" class="form-label">Controller API Key</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-key-fill"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              [class.is-invalid]="loginForm.get('apiKey')?.invalid && loginForm.get('apiKey')?.touched"
+              id="apiKey"
+              formControlName="apiKey"
+              placeholder="Enter your API key"
+              [disabled]="(loading$ | async) ?? false"
+              autocomplete="off"
+            />
+          </div>
+          @if (loginForm.get('apiKey')?.invalid && loginForm.get('apiKey')?.touched) {
+            <div class="invalid-feedback d-block">API key is required.</div>
+          }
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-grid gap-2">
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-1"
+            [disabled]="loginForm.invalid || ((loading$ | async) ?? false)"
+          >
+            @if ((loading$ | async) ?? false) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <span>Logging in...</span>
+            } @else {
+              <i class="bi bi-box-arrow-in-right me-2"></i>
+              <span>Login</span>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

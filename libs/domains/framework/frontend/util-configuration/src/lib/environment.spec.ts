@@ -1,0 +1,70 @@
+import { environment } from './environment';
+import { Environment } from './environment.interface';
+
+describe('environment', () => {
+  it('should be defined', () => {
+    expect(environment).toBeDefined();
+  });
+
+  it('should be an instance of Environment', () => {
+    expect(environment).toMatchObject<Environment>({
+      production: expect.any(Boolean),
+      authentication: expect.any(Object),
+    });
+  });
+
+  it('should have production property', () => {
+    expect(environment).toHaveProperty('production');
+    expect(typeof environment.production).toBe('boolean');
+  });
+
+  it('should have authentication property', () => {
+    expect(environment).toHaveProperty('authentication');
+    expect(environment.authentication).toBeDefined();
+  });
+
+  it('should have authentication type property', () => {
+    expect(environment.authentication).toHaveProperty('type');
+    expect(['keycloak', 'api-key']).toContain(environment.authentication.type);
+  });
+
+  describe('when authentication type is api-key', () => {
+    it('should have api-key authentication config', () => {
+      if (environment.authentication.type === 'api-key') {
+        expect(environment.authentication).toMatchObject({
+          type: 'api-key',
+        });
+        // apiKey is optional
+        if ('apiKey' in environment.authentication) {
+          expect(typeof environment.authentication.apiKey).toBe('string');
+        }
+      }
+    });
+  });
+
+  describe('when authentication type is keycloak', () => {
+    it('should have keycloak authentication config', () => {
+      if (environment.authentication.type === 'keycloak') {
+        expect(environment.authentication).toMatchObject({
+          type: 'keycloak',
+          authServerUrl: expect.any(String),
+          realm: expect.any(String),
+          clientId: expect.any(String),
+        });
+      }
+    });
+  });
+
+  describe('when controller is defined', () => {
+    it('should have controller with restApiUrl and websocketUrl', () => {
+      if (environment.controller) {
+        expect(environment.controller).toMatchObject({
+          restApiUrl: expect.any(String),
+          websocketUrl: expect.any(String),
+        });
+        expect(environment.controller.restApiUrl).toBeTruthy();
+        expect(environment.controller.websocketUrl).toBeTruthy();
+      }
+    });
+  });
+});

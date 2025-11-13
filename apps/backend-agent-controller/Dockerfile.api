@@ -33,6 +33,13 @@ ENV STATIC_API_KEY=
 # Environment variables for encryption
 ENV ENCRYPTION_KEY=
 
+# Environment variables for CORS
+# CORS is enabled by default with origin: '*' (allows all origins)
+# Set ENABLE_CORS=true to enable origin restriction via CORS_ORIGIN
+# Set CORS_ORIGIN to restrict allowed origins (comma-separated list, e.g., "http://localhost:4200,http://localhost:3000")
+ENV ENABLE_CORS=
+ENV CORS_ORIGIN=
+
 WORKDIR /app
 EXPOSE ${PORT}
 EXPOSE ${WEBSOCKET_PORT}

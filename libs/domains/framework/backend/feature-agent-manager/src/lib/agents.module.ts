@@ -2,12 +2,14 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AgentsController } from './agents.controller';
 import { AgentsGateway } from './agents.gateway';
-import { AgentEntity } from './entities/agent.entity';
+import { ConfigController } from './config.controller';
 import { AgentMessageEntity } from './entities/agent-message.entity';
-import { AgentsRepository } from './repositories/agents.repository';
+import { AgentEntity } from './entities/agent.entity';
 import { AgentMessagesRepository } from './repositories/agent-messages.repository';
+import { AgentsRepository } from './repositories/agents.repository';
 import { AgentMessagesService } from './services/agent-messages.service';
 import { AgentsService } from './services/agents.service';
+import { ConfigService } from './services/config.service';
 import { DockerService } from './services/docker.service';
 import { PasswordService } from './services/password.service';
 
@@ -17,11 +19,12 @@ import { PasswordService } from './services/password.service';
  */
 @Module({
   imports: [TypeOrmModule.forFeature([AgentEntity, AgentMessageEntity])],
-  controllers: [AgentsController],
+  controllers: [AgentsController, ConfigController],
   providers: [
     AgentsGateway,
     AgentsService,
     AgentMessagesService,
+    ConfigService,
     PasswordService,
     AgentsRepository,
     AgentMessagesRepository,

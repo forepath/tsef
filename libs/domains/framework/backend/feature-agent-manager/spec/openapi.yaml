@@ -109,6 +109,17 @@ paths:
       responses:
         '204':
           description: Deleted
+  /config:
+    get:
+      summary: Get configuration parameters
+      operationId: getConfig
+      responses:
+        '200':
+          description: Configuration parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponseDto'
 components:
   securitySchemes:
     bearerAuth:
@@ -160,3 +171,9 @@ components:
           properties:
             password:
               type: string
+    ConfigResponseDto:
+      type: object
+      properties:
+        gitRepositoryUrl:
+          type: [string, 'null']
+          description: Git repository URL used for cloning repositories when creating agents

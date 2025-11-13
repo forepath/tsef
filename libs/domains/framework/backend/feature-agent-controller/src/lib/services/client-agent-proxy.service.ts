@@ -1,5 +1,6 @@
 import {
   AgentResponseDto,
+  ConfigResponseDto,
   CreateAgentDto,
   CreateAgentResponseDto,
   UpdateAgentDto,
@@ -57,6 +58,18 @@ export class ClientAgentProxyService {
     const baseUrl = endpoint.replace(/\/$/, '');
     // Ensure /api/agents path
     return `${baseUrl}/api/agents`;
+  }
+
+  /**
+   * Build the base URL for config API requests.
+   * @param endpoint - The client's endpoint URL
+   * @returns The base URL for config API requests
+   */
+  private buildConfigApiUrl(endpoint: string): string {
+    // Remove trailing slash if present
+    const baseUrl = endpoint.replace(/\/$/, '');
+    // Ensure /api/config path
+    return `${baseUrl}/api/config`;
   }
 
   /**
@@ -207,5 +220,53 @@ export class ClientAgentProxyService {
     });
     // Cleanup stored credentials for this client/agent pair
     await this.clientAgentCredentialsService.deleteCredentials(clientId, agentId);
+  }
+
+  /**
+   * Get configuration from the client's agent-manager service.
+   * Returns undefined if the request fails (e.g., agent-manager is unreachable).
+   * @param clientId - The UUID of the client
+   * @returns The config response DTO, or undefined if the request fails
+   */
+  async getClientConfig(clientId: string): Promise<ConfigResponseDto | undefined> {
+    try {
+      const clientEntity = await this.clientsRepository.findByIdOrThrow(clientId);
+      const authHeader = await this.getAuthHeader(clientId);
+      const baseUrl = this.buildConfigApiUrl(clientEntity.endpoint);
+
+      this.logger.debug(`Fetching config from ${baseUrl} for client ${clientId}`);
+
+      const response = await axios.request<ConfigResponseDto>({
+        method: 'GET',
+        url: baseUrl,
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+        timeout: 5000, // 5 second timeout
+      });
+
+      // Handle error responses
+      if (response.status >= 400) {
+        this.logger.warn(`Failed to fetch config from ${baseUrl} for client ${clientId}: status ${response.status}`);
+        return undefined;
+      }
+
+      return response.data;
+    } catch (error) {
+      // Log but don't throw - config is optional
+      const axiosError = error as AxiosError;
+      if (axiosError.response) {
+        this.logger.warn(
+          `Failed to fetch config for client ${clientId}: ${axiosError.response.status} ${axiosError.message}`,
+        );
+      } else if (axiosError.request) {
+        this.logger.warn(`No response received when fetching config for client ${clientId}: ${axiosError.message}`);
+      } else {
+        this.logger.warn(`Error setting up config request for client ${clientId}: ${axiosError.message}`);
+      }
+      return undefined;
+    }
   }
 }

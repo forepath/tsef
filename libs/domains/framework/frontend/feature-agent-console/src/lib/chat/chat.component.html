@@ -1,0 +1,954 @@
+<section class="section__row">
+  <!-- Column 1: Client list -->
+  <div class="section__column d-flex flex-column border-end">
+    <div class="p-3 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-semibold">Clients</h5>
+      <button
+        type="button"
+        class="btn btn-sm btn-primary"
+        (click)="onAddClientClick()"
+        [disabled]="(clientsCreating$ | async) === true"
+        title="Add client"
+      >
+        <i class="bi bi-plus-circle"></i>
+        Add
+      </button>
+    </div>
+    <div class="flex-grow-1 overflow-auto">
+      @if (clientsLoading$ | async) {
+        <div class="d-flex justify-content-center align-items-center p-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading clients...</span>
+          </div>
+        </div>
+      } @else {
+        @if (clientsError$ | async; as error) {
+          <div class="alert alert-danger m-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error }}
+          </div>
+        }
+        @if (clients$ | async; as clients) {
+          @if (clients.length === 0) {
+            <div class="p-4 text-center text-muted">
+              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+              <p class="mb-0">No clients available</p>
+            </div>
+          } @else {
+            <div class="list-group list-group-flush">
+              @for (client of clients; track client.id) {
+                <div
+                  class="list-group-item rounded-0 border-0 border-bottom d-flex align-items-center"
+                  [class.active]="(activeClientId$ | async) === client.id"
+                >
+                  <button
+                    type="button"
+                    class="list-group-item-action border-0 bg-transparent flex-grow-1 text-start p-0"
+                    (click)="onClientSelect(client.id)"
+                  >
+                    <div class="d-flex flex-column">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-truncate me-2">{{ client.name }}</strong>
+                      </div>
+                      @if (client.description) {
+                        <small class="text-muted text-truncate">{{ client.description }}</small>
+                      }
+                      <small class="text-muted mt-1">
+                        <i class="bi bi-globe me-1"></i>
+                        {{ getHostname(client.endpoint) }}
+                      </small>
+                    </div>
+                  </button>
+                  <div class="btn-group ms-2" role="group">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="onEditClientClick(client); $event.stopPropagation()"
+                      [disabled]="(clientsUpdating$ | async) === true"
+                      title="Edit client"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="onDeleteClientClick(client.id, client.name); $event.stopPropagation()"
+                      [disabled]="(clientsDeleting$ | async) === true"
+                      title="Delete client"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Column 2: Agent list -->
+  @if (activeClientId$ | async) {
+    <div class="section__column d-flex flex-column border-end">
+      <div class="p-3 border-bottom bg-body-tertiary">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0 fw-semibold">Agents</h5>
+          <button
+            type="button"
+            class="btn btn-sm btn-primary"
+            (click)="onAddAgentClick()"
+            [disabled]="!(activeClientId$ | async) || (agentsCreating$ | async) === true"
+            title="Add agent"
+          >
+            <i class="bi bi-plus-circle"></i>
+            Add
+          </button>
+        </div>
+        @if (activeClient$ | async; as activeClient) {
+          <small class="text-muted">{{ activeClient.name }}</small>
+        }
+      </div>
+      <div class="flex-grow-1 overflow-auto">
+        @if (agentsLoading$ | async) {
+          <div class="d-flex justify-content-center align-items-center p-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading agents...</span>
+            </div>
+          </div>
+        } @else {
+          @if (agents$ | async; as agents) {
+            @if (agents.length === 0) {
+              <div class="p-4 text-center text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                <p class="mb-0">No agents available</p>
+              </div>
+            } @else {
+              <div class="list-group list-group-flush">
+                @for (agent of agents; track agent.id) {
+                  <div
+                    class="list-group-item rounded-0 border-0 border-bottom d-flex align-items-center"
+                    [class.active]="(selectedAgent$ | async)?.id === agent.id"
+                  >
+                    <button
+                      type="button"
+                      class="list-group-item-action border-0 bg-transparent flex-grow-1 text-start p-0"
+                      (click)="onAgentSelect(agent.id)"
+                    >
+                      <div class="d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                          <strong class="text-truncate me-2">{{ agent.name }}</strong>
+                        </div>
+                        @if (agent.description) {
+                          <small class="text-muted text-truncate">{{ agent.description }}</small>
+                        }
+                      </div>
+                    </button>
+                    <div class="btn-group ms-2" role="group">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        (click)="onEditAgentClick(agent); $event.stopPropagation()"
+                        [disabled]="(agentsUpdating$ | async) === true"
+                        title="Edit agent"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="onDeleteAgentClick(agent.id, agent.name); $event.stopPropagation()"
+                        [disabled]="(agentsDeleting$ | async) === true"
+                        title="Delete agent"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Column 3: Agent chat controls -->
+  @if (selectedAgent$ | async) {
+    <div class="section__column section__column--chat d-flex flex-column">
+      <div class="p-3 border-bottom bg-body-tertiary">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0 fw-semibold">Chat</h5>
+          <div class="btn-group" role="group">
+            @if (socketConnected$ | async) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-success"
+                [disabled]="socketDisconnecting$ | async"
+                (click)="onDisconnectSocket()"
+              >
+                <i class="bi bi-wifi"></i>
+                <span class="visually-hidden">Connected</span>
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                [disabled]="socketConnecting$ | async"
+                (click)="onConnectSocket()"
+              >
+                @if (socketConnecting$ | async) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                } @else {
+                  <i class="bi bi-wifi-off"></i>
+                }
+                <span class="visually-hidden">Disconnected</span>
+              </button>
+            }
+          </div>
+        </div>
+        @if (selectedAgent$ | async; as selectedAgent) {
+          <small class="text-muted">Agent: {{ selectedAgent.name }}</small>
+        } @else {
+          <small class="text-muted">No agent selected</small>
+        }
+      </div>
+
+      <!-- Chat messages -->
+      <div #chatMessagesContainer class="chat-messages-container flex-grow-1 overflow-auto p-3 bg-body-secondary">
+        @if (chatMessages$ | async; as messages) {
+          @if (messages.length === 0) {
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-chat-dots fs-1 d-block mb-2"></i>
+              <p class="mb-0">No messages yet. Start a conversation!</p>
+            </div>
+          } @else {
+            <div class="d-flex flex-column gap-2">
+              @for (msg of messages; track msg.timestamp) {
+                @if (isUserMessage(msg.payload)) {
+                  @if (getChatMessageData(msg.payload); as messageData) {
+                    <div class="d-flex justify-content-end">
+                      <div class="card bg-primary text-white chat-message-card">
+                        <div class="card-body p-2">
+                          <p class="card-text mb-1">{{ getText(messageData) }}</p>
+                          <small class="opacity-75">{{ formatTimestamp(msg.timestamp) }}</small>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                } @else if (isAgentMessage(msg.payload)) {
+                  @if (getChatMessageData(msg.payload); as messageData) {
+                    <div class="d-flex justify-content-start">
+                      <div class="card bg-white chat-message-card">
+                        <div class="card-body p-2">
+                          @if (parseMarkdown(messageData); as htmlContent) {
+                            <div class="card-text mb-1 markdown-content" [innerHTML]="htmlContent"></div>
+                          }
+                          <small class="text-muted">{{ formatTimestamp(msg.timestamp) }}</small>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                }
+              }
+              <!-- Loading indicator when waiting for agent response -->
+              @if (waitingForResponse$ | async) {
+                <div class="d-flex justify-content-start">
+                  <div class="card bg-white chat-message-card">
+                    <div class="card-body p-2">
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                          <span class="visually-hidden">Waiting for response...</span>
+                        </div>
+                        <small class="text-muted mb-0">Agent is thinking...</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Socket error -->
+      @if (socketError$ | async; as socketError) {
+        <div class="alert alert-danger alert-dismissible m-3 mb-0" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          {{ socketError }}
+        </div>
+      }
+
+      <!-- Chat input -->
+      <div class="p-3 border-top bg-body-tertiary">
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Type a message..."
+            [value]="chatMessage()"
+            (input)="chatMessage.set($any($event.target).value)"
+            (keydown.enter)="onSendMessage()"
+            [disabled]="!(socketConnected$ | async) || (forwarding$ | async) || !(selectedAgent$ | async)"
+          />
+          <button
+            class="btn btn-primary"
+            type="button"
+            [disabled]="
+              !(socketConnected$ | async) || (forwarding$ | async) || !(selectedAgent$ | async) || !chatMessage().trim()
+            "
+            (click)="onSendMessage()"
+          >
+            @if (forwarding$ | async) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            } @else {
+              <i class="bi bi-send"></i>
+            }
+            Send
+          </button>
+        </div>
+        @if (!(socketConnected$ | async)) {
+          <small class="text-muted d-block mt-2">
+            <i class="bi bi-info-circle me-1"></i>
+            Connect to socket to send messages
+          </small>
+        }
+      </div>
+    </div>
+  }
+</section>
+
+<!-- Delete Client Confirmation Modal -->
+<div
+  class="modal fade"
+  id="deleteClientModal"
+  tabindex="-1"
+  aria-labelledby="deleteClientModalLabel"
+  aria-hidden="true"
+  #deleteClientModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteClientModalLabel">Delete Client</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          [disabled]="(clientsDeleting$ | async) === true"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Are you sure you want to delete the client <strong>{{ clientToDeleteName() }}</strong
+          >?
+        </p>
+        <p class="text-danger mb-0">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+          [disabled]="(clientsDeleting$ | async) === true"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="confirmDeleteClient()"
+          [disabled]="(clientsDeleting$ | async) === true"
+        >
+          @if (clientsDeleting$ | async) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          }
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Agent Confirmation Modal -->
+<div
+  class="modal fade"
+  id="deleteAgentModal"
+  tabindex="-1"
+  aria-labelledby="deleteAgentModalLabel"
+  aria-hidden="true"
+  #deleteAgentModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteAgentModalLabel">Delete Agent</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          [disabled]="(agentsDeleting$ | async) === true"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Are you sure you want to delete the agent <strong>{{ agentToDeleteName() }}</strong
+          >?
+        </p>
+        <p class="text-danger mb-0">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+          [disabled]="(agentsDeleting$ | async) === true"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="confirmDeleteAgent()"
+          [disabled]="(agentsDeleting$ | async) === true"
+        >
+          @if (agentsDeleting$ | async) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          }
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Client Modal -->
+<div
+  class="modal fade"
+  id="addClientModal"
+  tabindex="-1"
+  aria-labelledby="addClientModalLabel"
+  aria-hidden="true"
+  #addClientModal
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addClientModalLabel">Add Client</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          [disabled]="(clientsCreating$ | async) === true"
+        ></button>
+      </div>
+      <form #addClientForm="ngForm" (ngSubmit)="onSubmitAddClient()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="clientName" class="form-label">Name <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              id="clientName"
+              name="name"
+              [ngModel]="newClient().name"
+              (ngModelChange)="updateClientField('name', $event)"
+              required
+              [disabled]="(clientsCreating$ | async) === true"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="clientDescription" class="form-label">Description</label>
+            <textarea
+              class="form-control"
+              id="clientDescription"
+              name="description"
+              rows="2"
+              [ngModel]="newClient().description"
+              (ngModelChange)="updateClientField('description', $event)"
+              [disabled]="(clientsCreating$ | async) === true"
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="clientEndpoint" class="form-label">Endpoint <span class="text-danger">*</span></label>
+            <input
+              type="url"
+              class="form-control"
+              id="clientEndpoint"
+              name="endpoint"
+              [ngModel]="newClient().endpoint"
+              (ngModelChange)="updateClientField('endpoint', $event)"
+              required
+              placeholder="https://example.com"
+              [disabled]="(clientsCreating$ | async) === true"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="clientAuthenticationType" class="form-label"
+              >Authentication Type <span class="text-danger">*</span></label
+            >
+            <select
+              class="form-select"
+              id="clientAuthenticationType"
+              name="authenticationType"
+              [ngModel]="newClient().authenticationType"
+              (ngModelChange)="updateClientField('authenticationType', $event); onClientAuthTypeChange()"
+              required
+              [disabled]="(clientsCreating$ | async) === true"
+            >
+              <option value="">Select authentication type</option>
+              <option value="api_key">API Key</option>
+              <option value="keycloak">Keycloak</option>
+            </select>
+          </div>
+
+          <!-- API Key fields (shown when authenticationType is 'api_key') -->
+          @if (newClient().authenticationType === 'api_key') {
+            <div class="mb-3">
+              <label for="clientApiKey" class="form-label">API Key</label>
+              <input
+                type="text"
+                class="form-control"
+                id="clientApiKey"
+                name="apiKey"
+                [ngModel]="newClient().apiKey"
+                (ngModelChange)="updateClientField('apiKey', $event)"
+                placeholder="Leave empty to auto-generate"
+                [disabled]="(clientsCreating$ | async) === true"
+              />
+              <small class="form-text text-muted">Leave empty to auto-generate a secure API key</small>
+            </div>
+          }
+
+          <!-- Keycloak fields (shown when authenticationType is 'keycloak') -->
+          @if (newClient().authenticationType === 'keycloak') {
+            <div class="mb-3">
+              <label for="clientKeycloakClientId" class="form-label"
+                >Keycloak Client ID <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="clientKeycloakClientId"
+                name="keycloakClientId"
+                [ngModel]="newClient().keycloakClientId"
+                (ngModelChange)="updateClientField('keycloakClientId', $event)"
+                required
+                [disabled]="(clientsCreating$ | async) === true"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="clientKeycloakClientSecret" class="form-label"
+                >Keycloak Client Secret <span class="text-danger">*</span></label
+              >
+              <input
+                type="password"
+                class="form-control"
+                id="clientKeycloakClientSecret"
+                name="keycloakClientSecret"
+                [ngModel]="newClient().keycloakClientSecret"
+                (ngModelChange)="updateClientField('keycloakClientSecret', $event)"
+                required
+                [disabled]="(clientsCreating$ | async) === true"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="clientKeycloakRealm" class="form-label">Keycloak Realm</label>
+              <input
+                type="text"
+                class="form-control"
+                id="clientKeycloakRealm"
+                name="keycloakRealm"
+                [ngModel]="newClient().keycloakRealm"
+                (ngModelChange)="updateClientField('keycloakRealm', $event)"
+                [disabled]="(clientsCreating$ | async) === true"
+              />
+            </div>
+          }
+
+          <div class="mb-3">
+            <label for="clientAgentWsPort" class="form-label">Agent WebSocket Port</label>
+            <input
+              type="number"
+              class="form-control"
+              id="clientAgentWsPort"
+              name="agentWsPort"
+              [ngModel]="newClient().agentWsPort"
+              (ngModelChange)="updateClientFieldNumber('agentWsPort', $event)"
+              min="1"
+              max="65535"
+              placeholder="8080"
+              [disabled]="(clientsCreating$ | async) === true"
+            />
+            <small class="form-text text-muted">Optional. Defaults to 8080 if not specified.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+            [disabled]="(clientsCreating$ | async) === true"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!addClientForm.valid || (clientsCreating$ | async) === true"
+          >
+            @if (clientsCreating$ | async) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            }
+            Create Client
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Agent Modal -->
+<div
+  class="modal fade"
+  id="addAgentModal"
+  tabindex="-1"
+  aria-labelledby="addAgentModalLabel"
+  aria-hidden="true"
+  #addAgentModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAgentModalLabel">Add Agent</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          [disabled]="(agentsCreating$ | async) === true"
+        ></button>
+      </div>
+      <form #addAgentForm="ngForm" (ngSubmit)="onSubmitAddAgent()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="agentName" class="form-label">Name <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              id="agentName"
+              name="name"
+              [ngModel]="newAgent().name"
+              (ngModelChange)="updateAgentField('name', $event)"
+              required
+              [disabled]="(agentsCreating$ | async) === true"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="agentDescription" class="form-label">Description</label>
+            <textarea
+              class="form-control"
+              id="agentDescription"
+              name="description"
+              rows="3"
+              [ngModel]="newAgent().description"
+              (ngModelChange)="updateAgentField('description', $event)"
+              [disabled]="(agentsCreating$ | async) === true"
+            ></textarea>
+          </div>
+          <div class="alert alert-info mb-0" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            A password will be auto-generated and shown after creation.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+            [disabled]="(agentsCreating$ | async) === true"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!addAgentForm.valid || (agentsCreating$ | async) === true"
+          >
+            @if (agentsCreating$ | async) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            }
+            Create Agent
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Update Client Modal -->
+<div
+  class="modal fade"
+  id="updateClientModal"
+  tabindex="-1"
+  aria-labelledby="updateClientModalLabel"
+  aria-hidden="true"
+  #updateClientModal
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateClientModalLabel">Update Client</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          [disabled]="(clientsUpdating$ | async) === true"
+        ></button>
+      </div>
+      <form #updateClientForm="ngForm" (ngSubmit)="onSubmitUpdateClient()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="updateClientName" class="form-label">Name <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              id="updateClientName"
+              name="name"
+              [ngModel]="editingClient().name"
+              (ngModelChange)="updateEditingClientField('name', $event)"
+              required
+              [disabled]="(clientsUpdating$ | async) === true"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="updateClientDescription" class="form-label">Description</label>
+            <textarea
+              class="form-control"
+              id="updateClientDescription"
+              name="description"
+              rows="2"
+              [ngModel]="editingClient().description"
+              (ngModelChange)="updateEditingClientField('description', $event)"
+              [disabled]="(clientsUpdating$ | async) === true"
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="updateClientEndpoint" class="form-label">Endpoint <span class="text-danger">*</span></label>
+            <input
+              type="url"
+              class="form-control"
+              id="updateClientEndpoint"
+              name="endpoint"
+              [ngModel]="editingClient().endpoint"
+              (ngModelChange)="updateEditingClientField('endpoint', $event)"
+              required
+              placeholder="https://example.com"
+              [disabled]="(clientsUpdating$ | async) === true"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="updateClientAuthenticationType" class="form-label"
+              >Authentication Type <span class="text-danger">*</span></label
+            >
+            <select
+              class="form-select"
+              id="updateClientAuthenticationType"
+              name="authenticationType"
+              [ngModel]="editingClient().authenticationType"
+              (ngModelChange)="updateEditingClientField('authenticationType', $event); onEditingClientAuthTypeChange()"
+              required
+              [disabled]="(clientsUpdating$ | async) === true"
+            >
+              <option value="">Select authentication type</option>
+              <option value="api_key">API Key</option>
+              <option value="keycloak">Keycloak</option>
+            </select>
+          </div>
+
+          <!-- API Key fields (shown when authenticationType is 'api_key') -->
+          @if (editingClient().authenticationType === 'api_key') {
+            <div class="mb-3">
+              <label for="updateClientApiKey" class="form-label">API Key</label>
+              <input
+                type="text"
+                class="form-control"
+                id="updateClientApiKey"
+                name="apiKey"
+                [ngModel]="editingClient().apiKey"
+                (ngModelChange)="updateEditingClientField('apiKey', $event)"
+                placeholder="Leave empty to keep current or auto-generate"
+                [disabled]="(clientsUpdating$ | async) === true"
+              />
+              <small class="form-text text-muted">Leave empty to keep current API key or auto-generate a new one</small>
+            </div>
+          }
+
+          <!-- Keycloak fields (shown when authenticationType is 'keycloak') -->
+          @if (editingClient().authenticationType === 'keycloak') {
+            <div class="mb-3">
+              <label for="updateClientKeycloakClientId" class="form-label">Keycloak Client ID</label>
+              <input
+                type="text"
+                class="form-control"
+                id="updateClientKeycloakClientId"
+                name="keycloakClientId"
+                [ngModel]="editingClient().keycloakClientId"
+                (ngModelChange)="updateEditingClientField('keycloakClientId', $event)"
+                [disabled]="(clientsUpdating$ | async) === true"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="updateClientKeycloakClientSecret" class="form-label">Keycloak Client Secret</label>
+              <input
+                type="password"
+                class="form-control"
+                id="updateClientKeycloakClientSecret"
+                name="keycloakClientSecret"
+                [ngModel]="editingClient().keycloakClientSecret"
+                (ngModelChange)="updateEditingClientField('keycloakClientSecret', $event)"
+                placeholder="Leave empty to keep current"
+                [disabled]="(clientsUpdating$ | async) === true"
+              />
+              <small class="form-text text-muted">Leave empty to keep current secret</small>
+            </div>
+            <div class="mb-3">
+              <label for="updateClientKeycloakRealm" class="form-label">Keycloak Realm</label>
+              <input
+                type="text"
+                class="form-control"
+                id="updateClientKeycloakRealm"
+                name="keycloakRealm"
+                [ngModel]="editingClient().keycloakRealm"
+                (ngModelChange)="updateEditingClientField('keycloakRealm', $event)"
+                [disabled]="(clientsUpdating$ | async) === true"
+              />
+            </div>
+          }
+
+          <div class="mb-3">
+            <label for="updateClientAgentWsPort" class="form-label">Agent WebSocket Port</label>
+            <input
+              type="number"
+              class="form-control"
+              id="updateClientAgentWsPort"
+              name="agentWsPort"
+              [ngModel]="editingClient().agentWsPort"
+              (ngModelChange)="updateEditingClientFieldNumber('agentWsPort', $event)"
+              min="1"
+              max="65535"
+              placeholder="8080"
+              [disabled]="(clientsUpdating$ | async) === true"
+            />
+            <small class="form-text text-muted">Optional. Defaults to 8080 if not specified.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+            [disabled]="(clientsUpdating$ | async) === true"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!updateClientForm.valid || (clientsUpdating$ | async) === true"
+          >
+            @if (clientsUpdating$ | async) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            }
+            Update Client
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Update Agent Modal -->
+<div
+  class="modal fade"
+  id="updateAgentModal"
+  tabindex="-1"
+  aria-labelledby="updateAgentModalLabel"
+  aria-hidden="true"
+  #updateAgentModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateAgentModalLabel">Update Agent</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          [disabled]="(agentsUpdating$ | async) === true"
+        ></button>
+      </div>
+      <form #updateAgentForm="ngForm" (ngSubmit)="onSubmitUpdateAgent()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="updateAgentName" class="form-label">Name <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              id="updateAgentName"
+              name="name"
+              [ngModel]="editingAgent().name"
+              (ngModelChange)="updateEditingAgentField('name', $event)"
+              required
+              [disabled]="(agentsUpdating$ | async) === true"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="updateAgentDescription" class="form-label">Description</label>
+            <textarea
+              class="form-control"
+              id="updateAgentDescription"
+              name="description"
+              rows="3"
+              [ngModel]="editingAgent().description"
+              (ngModelChange)="updateEditingAgentField('description', $event)"
+              [disabled]="(agentsUpdating$ | async) === true"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+            [disabled]="(agentsUpdating$ | async) === true"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!updateAgentForm.valid || (agentsUpdating$ | async) === true"
+          >
+            @if (agentsUpdating$ | async) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            }
+            Update Agent
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

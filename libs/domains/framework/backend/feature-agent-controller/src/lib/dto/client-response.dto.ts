@@ -1,3 +1,4 @@
+import { ConfigResponseDto } from '@forepath/framework/backend/feature-agent-manager';
 import { AuthenticationType } from '../entities/client.entity';
 
 /**
@@ -10,6 +11,7 @@ export class ClientResponseDto {
   description?: string;
   endpoint!: string;
   authenticationType!: AuthenticationType;
+  config?: ConfigResponseDto;
   createdAt!: Date;
   updatedAt!: Date;
 }

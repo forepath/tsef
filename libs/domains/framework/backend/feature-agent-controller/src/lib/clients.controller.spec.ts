@@ -25,6 +25,9 @@ describe('ClientsController', () => {
     description: 'Test Description',
     endpoint: 'https://example.com/api',
     authenticationType: AuthenticationType.API_KEY,
+    config: {
+      gitRepositoryUrl: 'https://github.com/user/repo.git',
+    },
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
@@ -61,6 +64,7 @@ describe('ClientsController', () => {
     createClientAgent: jest.fn(),
     updateClientAgent: jest.fn(),
     deleteClientAgent: jest.fn(),
+    getClientConfig: jest.fn(),
   };
 
   beforeEach(async () => {

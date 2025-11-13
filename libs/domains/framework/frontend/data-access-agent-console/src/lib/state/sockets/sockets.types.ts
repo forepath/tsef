@@ -1,0 +1,171 @@
+/**
+ * Payload for setting client context
+ */
+export interface SetClientPayload {
+  clientId: string;
+}
+
+/**
+ * Response for successful client context setting
+ */
+export interface SetClientSuccessPayload {
+  message: string;
+  clientId: string;
+}
+
+/**
+ * Available events that can be forwarded to the agents namespace
+ * Based on agents.gateway.ts @SubscribeMessage handlers
+ */
+export enum ForwardableEvent {
+  LOGIN = 'login',
+  CHAT = 'chat',
+  LOGOUT = 'logout',
+}
+
+/**
+ * Payload for forwarding events to agents namespace
+ */
+export interface ForwardPayload {
+  event: ForwardableEvent;
+  payload?: ForwardableEventPayload;
+  agentId?: string;
+}
+
+/**
+ * Union type for all forwardable event payloads
+ * Based on agents.gateway.ts event definitions
+ */
+export type ForwardableEventPayload = ChatPayload | LoginPayload | LogoutPayload;
+
+/**
+ * Chat event payload (from agents.gateway.ts ChatPayload)
+ */
+export interface ChatPayload {
+  message: string;
+}
+
+/**
+ * Login event payload (from agents.gateway.ts LoginPayload)
+ * Note: When forwarding with agentId, the payload is overridden with credentials from database
+ */
+export interface LoginPayload {
+  agentId: string;
+  password: string;
+}
+
+/**
+ * Logout event payload (no payload required)
+ * Using empty object type since logout requires no payload
+ */
+export type LogoutPayload = Record<string, never>;
+
+/**
+ * Acknowledgement for forwarded events
+ */
+export interface ForwardAckPayload {
+  received: boolean;
+  event: string;
+}
+
+/**
+ * Error payload from socket
+ */
+export interface SocketErrorPayload {
+  message: string;
+}
+
+/**
+ * Standardized response interfaces (from agents.gateway.ts)
+ */
+export interface BaseResponse {
+  timestamp: string;
+}
+
+export interface SuccessResponse<T = unknown> extends BaseResponse {
+  success: true;
+  data: T;
+}
+
+export interface ErrorResponse extends BaseResponse {
+  success: false;
+  error: {
+    message: string;
+    code?: string;
+    details?: string;
+  };
+}
+
+/**
+ * Chat actor types (from agents.gateway.ts ChatActor enum)
+ */
+export enum ChatActor {
+  AGENT = 'agent',
+  USER = 'user',
+}
+
+/**
+ * Agent response object structure (from agents.gateway.ts AgentResponseObject)
+ */
+export interface AgentResponseObject {
+  type: string;
+  subtype?: string;
+  is_error?: boolean;
+  duration_ms?: number;
+  duration_api_ms?: number;
+  result?: string;
+  session_id?: string;
+  request_id?: string;
+  [key: string]: unknown; // Allow additional properties
+}
+
+/**
+ * User chat message data (from agents.gateway.ts UserChatMessageData)
+ */
+export interface UserChatMessageData {
+  from: ChatActor.USER;
+  text: string;
+  timestamp: string;
+}
+
+/**
+ * Agent chat message data (from agents.gateway.ts AgentChatMessageData)
+ */
+export interface AgentChatMessageData {
+  from: ChatActor.AGENT;
+  response: AgentResponseObject | string; // Parsed JSON object or raw string if parsing fails
+  timestamp: string;
+}
+
+/**
+ * Chat message data union (from agents.gateway.ts ChatMessageData)
+ */
+export type ChatMessageData = UserChatMessageData | AgentChatMessageData;
+
+/**
+ * Login success data (from agents.gateway.ts LoginSuccessData)
+ */
+export interface LoginSuccessData {
+  message: string;
+  agentId: string;
+  agentName: string;
+}
+
+/**
+ * Logout success data (from agents.gateway.ts LogoutSuccessData)
+ */
+export interface LogoutSuccessData {
+  message: string;
+  agentId: string | null;
+  agentName: string | null;
+}
+
+/**
+ * Typed forwarded event payloads based on event name
+ */
+export type ForwardedEventPayload =
+  | SuccessResponse<LoginSuccessData> // loginSuccess
+  | ErrorResponse // loginError
+  | SuccessResponse<ChatMessageData> // chatMessage
+  | SuccessResponse<LogoutSuccessData> // logoutSuccess
+  | ErrorResponse; // error

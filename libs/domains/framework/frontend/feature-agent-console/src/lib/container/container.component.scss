@@ -1,0 +1,22 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden; // Prevent page-level overflow
+}
+
+.section__container {
+  flex-grow: 1;
+  min-height: 0; // Critical for flex scrolling
+  overflow: hidden; // Prevent page-level overflow
+}
+
+.brand-icon {
+  color: #fff;
+  height: 80px;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
