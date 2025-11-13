@@ -1,0 +1,169 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.file-tree-container {
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--bs-body-bg);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1 1 auto;
+}
+
+.file-tree-header {
+  flex-shrink: 0;
+}
+
+.file-tree-content {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tree-node-wrapper {
+  position: relative;
+}
+
+.tree-node {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background-color: var(--bs-secondary-bg);
+  }
+
+  &.selected {
+    background-color: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary-text-emphasis);
+  }
+
+  &.creating-in {
+    background-color: var(--bs-primary-bg-subtle);
+    border-left: 3px solid var(--bs-primary);
+    animation: creating-pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes creating-pulse {
+  0%,
+  100% {
+    background-color: var(--bs-primary-bg-subtle);
+  }
+  50% {
+    background-color: var(--bs-primary-bg);
+  }
+}
+
+.tree-indent {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.tree-indent-line {
+  width: 20px;
+  position: relative;
+  opacity: 0;
+
+  &.line-visible {
+    opacity: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 9px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: var(--bs-border-color);
+      opacity: 0.2;
+    }
+  }
+}
+
+.tree-node-content {
+  min-width: 0;
+}
+
+.tree-node-icon {
+  flex-shrink: 0;
+}
+
+.tree-children {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--bs-border-color);
+    opacity: 0.3;
+  }
+}
+
+.tree-node-name {
+  font-size: 0.875rem;
+}
+
+// Active state for create buttons
+.btn-link.active {
+  background-color: var(--bs-primary);
+  color: white !important;
+  border-radius: 0.25rem;
+
+  &:hover {
+    background-color: var(--bs-primary-border-subtle);
+    color: white !important;
+  }
+}
+
+.btn-outline-primary.active {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: white;
+
+  &:hover {
+    background-color: var(--bs-primary-border-subtle);
+    border-color: var(--bs-primary-border-subtle);
+    color: white;
+  }
+}
+
+.create-item-input {
+  background-color: var(--bs-secondary-bg);
+  border-radius: 0.25rem;
+  margin: 0.25rem 0;
+}
+
+.context-menu {
+  z-index: 1000;
+  min-width: 180px;
+}
+
+.context-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.file-tree {
+  font-size: 0.875rem;
+}

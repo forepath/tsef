@@ -1,4 +1,5 @@
 export * from './lib/agents.controller';
+export * from './lib/agents-files.controller';
 export * from './lib/agents.gateway';
 export * from './lib/agents.module';
 export * from './lib/config.controller';
@@ -7,6 +8,10 @@ export * from './lib/dto/config-response.dto';
 export * from './lib/dto/create-agent-response.dto';
 export * from './lib/dto/create-agent.dto';
 export * from './lib/dto/update-agent.dto';
+export * from './lib/dto/create-file.dto';
+export * from './lib/dto/file-content.dto';
+export * from './lib/dto/file-node.dto';
+export * from './lib/dto/write-file.dto';
 export * from './lib/entities/agent.entity';
 export * from './lib/entities/agent-message.entity';
 export * from './lib/repositories/agents.repository';

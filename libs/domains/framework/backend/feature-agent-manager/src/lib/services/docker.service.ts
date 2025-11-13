@@ -1,4 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { PassThrough } from 'stream';
 import Docker = require('dockerode');
 
 @Injectable()
@@ -470,6 +471,146 @@ export class DockerService {
       }
       const err = error as { message?: string; stack?: string };
       this.logger.error(`Error sending command to container: ${err.message}`, err.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Read file content from container using demuxStream for proper stream handling.
+   * This method uses Docker's built-in demuxStream to properly separate stdout/stderr,
+   * which eliminates null byte artifacts that can occur with manual parsing.
+   * @param containerId - The container ID
+   * @param filePath - The absolute path to the file in the container
+   * @returns The file content as a string
+   * @throws NotFoundException if container is not found
+   */
+  async readFileFromContainer(containerId: string, filePath: string): Promise<string> {
+    try {
+      const container = this.docker.getContainer(containerId);
+
+      // Check if container exists
+      try {
+        await container.inspect();
+      } catch (error: unknown) {
+        const dockerError = error as { statusCode?: number };
+        if (dockerError.statusCode === 404) {
+          throw new NotFoundException(`Container with ID '${containerId}' not found`);
+        }
+        throw error;
+      }
+
+      // Escape file path for shell usage
+      const escapedPath = filePath.replace(/'/g, "'\\''");
+      const safePath = `'${escapedPath}'`;
+
+      // Create exec instance to read file
+      const exec = await container.exec({
+        Cmd: ['sh', '-c', `cat ${safePath}`],
+        AttachStdin: false,
+        AttachStdout: true,
+        AttachStderr: true,
+        Tty: false,
+      });
+
+      // Start the exec
+      const stream = (await exec.start({
+        hijack: true,
+        stdin: false,
+      })) as NodeJS.ReadWriteStream;
+
+      // Use PassThrough streams and demuxStream to properly handle Docker's multiplexed format
+      const stdoutStream = new PassThrough();
+      const stderrStream = new PassThrough();
+      let stdoutData = '';
+      let stderrData = '';
+
+      // Collect data from stdout
+      stdoutStream.on('data', (chunk: Buffer) => {
+        stdoutData += chunk.toString('utf8');
+      });
+
+      // Collect data from stderr (for error messages)
+      stderrStream.on('data', (chunk: Buffer) => {
+        stderrData += chunk.toString('utf8');
+      });
+
+      // Use Docker's built-in demuxStream to properly separate stdout and stderr
+      container.modem.demuxStream(stream, stdoutStream, stderrStream);
+
+      // Wait for the stream to finish
+      const output = await new Promise<string>((resolve, reject) => {
+        let resolved = false;
+        const resolveOnce = (result: string) => {
+          if (!resolved) {
+            resolved = true;
+            resolve(result);
+          }
+        };
+
+        const rejectOnce = (error: unknown) => {
+          if (!resolved) {
+            resolved = true;
+            reject(error);
+          }
+        };
+
+        stream.on('end', () => {
+          // End the PassThrough streams
+          stdoutStream.end();
+          stderrStream.end();
+
+          // If there's stderr output, it might be an error
+          if (stderrData.trim()) {
+            // Check if it's a file not found error
+            if (stderrData.includes('No such file') || stderrData.includes('not found')) {
+              rejectOnce(new Error(`File not found: ${filePath}`));
+            } else {
+              // Log stderr but still return stdout (some commands write to stderr)
+              this.logger.debug(`Stderr output from file read: ${stderrData}`);
+              resolveOnce(stdoutData);
+            }
+          } else {
+            resolveOnce(stdoutData);
+          }
+        });
+
+        stream.on('close', () => {
+          if (!resolved) {
+            stdoutStream.end();
+            stderrStream.end();
+            resolveOnce(stdoutData);
+          }
+        });
+
+        stream.on('error', (error: unknown) => {
+          const err = error as { code?: string; message?: string };
+          // Ignore EPIPE errors (stdin closed) - this is expected
+          if (err.code !== 'EPIPE' && err.code !== 'ECONNRESET') {
+            rejectOnce(error);
+          } else {
+            stdoutStream.end();
+            stderrStream.end();
+            resolveOnce(stdoutData);
+          }
+        });
+
+        // Set a timeout to prevent hanging (fallback safety)
+        setTimeout(() => {
+          if (!resolved) {
+            stdoutStream.end();
+            stderrStream.end();
+            resolveOnce(stdoutData);
+          }
+        }, 30000);
+      });
+
+      return output.trim();
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error reading file from container: ${err.message}`, err.stack);
       throw error;
     }
   }

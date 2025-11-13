@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientsController } from './clients.controller';
 import { ClientEntity } from './entities/client.entity';
 import { ClientsRepository } from './repositories/clients.repository';
+import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientsService } from './services/clients.service';
 import { KeycloakTokenService } from './services/keycloak-token.service';
@@ -118,6 +119,17 @@ describe('ClientsModule', () => {
 
   it('should export ClientAgentCredentialsService', () => {
     const service = module.get<ClientAgentCredentialsService>(ClientAgentCredentialsService);
+    expect(service).toBeDefined();
+  });
+
+  it('should provide ClientAgentFileSystemProxyService', () => {
+    const service = module.get<ClientAgentFileSystemProxyService>(ClientAgentFileSystemProxyService);
+    expect(service).toBeDefined();
+    expect(service).toBeInstanceOf(ClientAgentFileSystemProxyService);
+  });
+
+  it('should export ClientAgentFileSystemProxyService', () => {
+    const service = module.get<ClientAgentFileSystemProxyService>(ClientAgentFileSystemProxyService);
     expect(service).toBeDefined();
   });
 });

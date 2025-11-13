@@ -29,6 +29,7 @@ import {
   type UpdateClientDto,
 } from '@forepath/framework/frontend/data-access-agent-console';
 import { combineLatest, filter, map, Observable, of, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
+import { FileEditorComponent } from '../file-editor/file-editor.component';
 
 // Type declaration for marked library
 interface Marked {
@@ -37,7 +38,7 @@ interface Marked {
 
 @Component({
   selector: 'framework-agent-console-chat',
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, FileEditorComponent],
   styleUrls: ['./chat.component.scss'],
   templateUrl: './chat.component.html',
   standalone: true,
@@ -69,6 +70,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   @ViewChild('updateAgentModal', { static: false })
   private updateAgentModal!: ElementRef<HTMLDivElement>;
+
+  @ViewChild('fileEditor', { static: false })
+  private fileEditor!: FileEditorComponent;
 
   // Cache for marked instance to avoid repeated async imports
   private markedInstance: Marked | null = null;
@@ -170,11 +174,13 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   // Local state
   chatMessage = signal<string>('');
   selectedAgentId = signal<string | null>(null);
+  editorOpen = signal<boolean>(false);
   private activeClientId: string | null = null;
   private shouldScrollToBottom = false;
   private previousMessageCount = 0;
   private readonly destroy$ = new Subject<void>();
   private lastUserMessageTimestamp = signal<number | null>(null);
+  private lastAgentMessageTimestamp = 0;
 
   // Delete state
   readonly clientToDeleteId = signal<string | null>(null);
@@ -240,10 +246,28 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         this.previousMessageCount = currentMessageCount;
         // Trigger change detection to ensure DOM is updated
         this.cdr.detectChanges();
+
+        // Check for new agent messages and refresh editor if open
+        const newAgentMessages = messages.filter(
+          (msg) => this.isAgentMessage(msg.payload) && msg.timestamp > this.lastAgentMessageTimestamp,
+        );
+        if (newAgentMessages.length > 0) {
+          // Update last agent message timestamp
+          this.lastAgentMessageTimestamp = Math.max(
+            ...newAgentMessages.map((msg) => msg.timestamp),
+            this.lastAgentMessageTimestamp,
+          );
+
+          // Refresh file editor if it's open
+          if (this.editorOpen() && this.fileEditor) {
+            this.fileEditor.refresh();
+          }
+        }
       } else if (currentMessageCount < this.previousMessageCount) {
         // Messages were cleared (e.g., switching clients/agents)
         this.previousMessageCount = currentMessageCount;
         this.lastUserMessageTimestamp.set(null);
+        this.lastAgentMessageTimestamp = 0;
       }
     });
 
@@ -321,6 +345,10 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   onDisconnectSocket(): void {
     this.socketsFacade.disconnect();
+  }
+
+  onToggleEditor(): void {
+    this.editorOpen.update((open) => !open);
   }
 
   onDeleteClientClick(clientId: string, clientName: string): void {
@@ -739,6 +767,48 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     } catch {
       // If URL parsing fails, return the original string
       return url;
+    }
+  }
+
+  /**
+   * Parse git repository URL to extract owner/repo
+   * @param gitUrl - The git repository URL (e.g., "https://github.com/owner/repo.git" or "git@github.com:owner/repo.git")
+   * @returns The owner/repo string (e.g., "owner/repo") or null if parsing fails
+   */
+  parseGitRepository(gitUrl: string | null | undefined): string | null {
+    if (!gitUrl) {
+      return null;
+    }
+
+    try {
+      // Handle HTTPS/HTTP URLs: https://github.com/owner/repo.git
+      if (gitUrl.startsWith('http://') || gitUrl.startsWith('https://')) {
+        const urlObj = new URL(gitUrl);
+        const pathParts = urlObj.pathname.split('/').filter((part) => part.length > 0);
+        if (pathParts.length >= 2) {
+          const owner = pathParts[0];
+          const repo = pathParts[1].replace(/\.git$/, '');
+          return `${owner}/${repo}`;
+        }
+      }
+
+      // Handle SSH URLs: git@github.com:owner/repo.git
+      if (gitUrl.startsWith('git@')) {
+        const match = gitUrl.match(/git@[^:]+:(.+?)(?:\.git)?$/);
+        if (match && match[1]) {
+          return match[1];
+        }
+      }
+
+      // Fallback: try to extract from any URL pattern
+      const match = gitUrl.match(/(?:[/:])([^/]+)\/([^/]+?)(?:\.git)?$/);
+      if (match && match[1] && match[2]) {
+        return `${match[1]}/${match[2]}`;
+      }
+
+      return null;
+    } catch {
+      return null;
     }
   }
 

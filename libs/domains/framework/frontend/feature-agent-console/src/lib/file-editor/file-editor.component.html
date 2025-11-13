@@ -1,0 +1,96 @@
+<div class="file-editor-container d-flex h-100">
+  <!-- File Tree Sidebar -->
+  <div class="file-tree-sidebar border-end">
+    @if (clientId() && agentId()) {
+      <framework-file-tree
+        [clientId]="clientId()!"
+        [agentId]="agentId()!"
+        [expandedPaths]="expandedPaths()"
+        [selectedPath]="selectedFilePath()"
+        (fileSelect)="onFileSelect($event)"
+        (fileCreate)="onFileCreate($event)"
+        (fileDelete)="onFileDelete($event)"
+        (directoryExpand)="onDirectoryExpand($event)"
+        (directoryCollapse)="onDirectoryCollapse($event)"
+      ></framework-file-tree>
+    } @else {
+      <div class="d-flex justify-content-center align-items-center h-100 p-4">
+        <div class="text-center text-muted">
+          <i class="bi bi-exclamation-triangle fs-4 d-block mb-2"></i>
+          <p class="mb-0 small">Please select a client and agent</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Editor Area -->
+  <div class="editor-area flex-grow-1 d-flex flex-column">
+    @if (selectedFilePath()) {
+      <div class="editor-header p-2 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-file-earmark me-2"></i>
+          <span class="fw-semibold">{{ selectedFilePath() }}</span>
+          @if (isDirty()) {
+            <span class="badge bg-warning text-dark ms-2">Unsaved</span>
+          }
+        </div>
+        <div class="btn-group btn-group-sm" role="group">
+          <button
+            type="button"
+            class="btn btn-sm btn-primary"
+            (click)="onSave()"
+            [disabled]="!selectedFilePath() || !isDirty() || (isWritingFile$ | async)"
+            title="Save (Ctrl+S)"
+          >
+            @if (isWritingFile$ | async) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            } @else {
+              <i class="bi bi-save me-1"></i>
+            }
+            Save
+          </button>
+        </div>
+      </div>
+    }
+
+    <div class="editor-content flex-grow-1">
+      @if (selectedFilePath()) {
+        @if (isReadingFile$ | async) {
+          <div class="d-flex justify-content-center align-items-center h-100">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading file...</span>
+            </div>
+          </div>
+        } @else {
+          <!--
+          <p>File content: {{ (selectedFileContent$ | async)?.content }}</p>
+          <p>File encoding: {{ (selectedFileContent$ | async)?.encoding }}</p>
+          <p>File path: {{ selectedFilePath() }}</p>
+          <p>File is dirty: {{ isDirty() }}</p>
+          <p>File is reading: {{ isReadingFile$ | async }}</p>
+          <p>File is writing: {{ isWritingFile$ | async }}</p>
+          <p>File is selected: {{ selectedFilePath() }}</p>
+          <p>File is selected: {{ selectedFilePath() }}</p>
+          -->
+          <framework-monaco-editor-wrapper
+            #monacoEditor
+            [filePath]="selectedFilePath()"
+            [content]="(selectedFileContent$ | async)?.content || null"
+            [encoding]="(selectedFileContent$ | async)?.encoding || 'utf-8'"
+            [isDirty]="isDirty()"
+            (contentChange)="onContentChange($event)"
+            (saveRequest)="onSave()"
+          ></framework-monaco-editor-wrapper>
+        }
+      } @else {
+        <div class="d-flex justify-content-center align-items-center h-100 bg-body-secondary">
+          <div class="text-center text-muted p-4">
+            <i class="bi bi-file-earmark-code fs-1 d-block mb-3"></i>
+            <p class="mb-0">No file selected</p>
+            <small class="text-muted">Select a file from the tree to start editing</small>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -2,7 +2,11 @@ import {
   AgentResponseDto,
   CreateAgentDto,
   CreateAgentResponseDto,
+  CreateFileDto,
+  FileContentDto,
+  FileNodeDto,
   UpdateAgentDto,
+  WriteFileDto,
 } from '@forepath/framework/backend/feature-agent-manager';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientsController } from './clients.controller';
@@ -11,6 +15,7 @@ import { CreateClientResponseDto } from './dto/create-client-response.dto';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { AuthenticationType } from './entities/client.entity';
+import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientsService } from './services/clients.service';
 
@@ -18,6 +23,7 @@ describe('ClientsController', () => {
   let controller: ClientsController;
   let service: jest.Mocked<ClientsService>;
   let proxyService: jest.Mocked<ClientAgentProxyService>;
+  let fileSystemProxyService: jest.Mocked<ClientAgentFileSystemProxyService>;
 
   const mockClientResponse: ClientResponseDto = {
     id: 'test-uuid',
@@ -67,6 +73,14 @@ describe('ClientsController', () => {
     getClientConfig: jest.fn(),
   };
 
+  const mockFileSystemProxyService = {
+    readFile: jest.fn(),
+    writeFile: jest.fn(),
+    listDirectory: jest.fn(),
+    createFileOrDirectory: jest.fn(),
+    deleteFileOrDirectory: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ClientsController],
@@ -79,12 +93,17 @@ describe('ClientsController', () => {
           provide: ClientAgentProxyService,
           useValue: mockProxyService,
         },
+        {
+          provide: ClientAgentFileSystemProxyService,
+          useValue: mockFileSystemProxyService,
+        },
       ],
     }).compile();
 
     controller = module.get<ClientsController>(ClientsController);
     service = module.get(ClientsService);
     proxyService = module.get(ClientAgentProxyService);
+    fileSystemProxyService = module.get(ClientAgentFileSystemProxyService);
   });
 
   afterEach(() => {
@@ -263,6 +282,152 @@ describe('ClientsController', () => {
       await controller.deleteClientAgent('client-uuid', 'agent-uuid');
 
       expect(proxyService.deleteClientAgent).toHaveBeenCalledWith('client-uuid', 'agent-uuid');
+    });
+  });
+
+  describe('readFile', () => {
+    it('should proxy read file request', async () => {
+      const mockFileContent: FileContentDto = {
+        content: Buffer.from('Hello, World!', 'utf-8').toString('base64'),
+        encoding: 'utf-8',
+      };
+      fileSystemProxyService.readFile.mockResolvedValue(mockFileContent);
+
+      const result = await controller.readFile('client-uuid', 'agent-uuid', 'test.txt');
+
+      expect(result).toEqual(mockFileContent);
+      expect(fileSystemProxyService.readFile).toHaveBeenCalledWith('client-uuid', 'agent-uuid', 'test.txt');
+    });
+  });
+
+  describe('writeFile', () => {
+    it('should proxy write file request', async () => {
+      const writeDto: WriteFileDto = {
+        content: Buffer.from('New content', 'utf-8').toString('base64'),
+        encoding: 'utf-8',
+      };
+      fileSystemProxyService.writeFile.mockResolvedValue(undefined);
+
+      await controller.writeFile('client-uuid', 'agent-uuid', 'test.txt', writeDto);
+
+      expect(fileSystemProxyService.writeFile).toHaveBeenCalledWith('client-uuid', 'agent-uuid', 'test.txt', writeDto);
+    });
+  });
+
+  describe('listDirectory', () => {
+    it('should proxy list directory request', async () => {
+      const mockFileNodes: FileNodeDto[] = [
+        {
+          name: 'file1.txt',
+          type: 'file',
+          path: 'file1.txt',
+          size: 1024,
+          modifiedAt: new Date('2024-01-01'),
+        },
+      ];
+      fileSystemProxyService.listDirectory.mockResolvedValue(mockFileNodes);
+
+      const result = await controller.listDirectory('client-uuid', 'agent-uuid', 'test-dir');
+
+      expect(result).toEqual(mockFileNodes);
+      expect(fileSystemProxyService.listDirectory).toHaveBeenCalledWith('client-uuid', 'agent-uuid', 'test-dir');
+    });
+
+    it('should use default path when not provided', async () => {
+      const mockFileNodes: FileNodeDto[] = [];
+      fileSystemProxyService.listDirectory.mockResolvedValue(mockFileNodes);
+
+      await controller.listDirectory('client-uuid', 'agent-uuid');
+
+      expect(fileSystemProxyService.listDirectory).toHaveBeenCalledWith('client-uuid', 'agent-uuid', '.');
+    });
+  });
+
+  describe('createFileOrDirectory', () => {
+    it('should proxy create file request', async () => {
+      const createDto: CreateFileDto = {
+        type: 'file',
+        content: Buffer.from('File content', 'utf-8').toString('base64'),
+      };
+      fileSystemProxyService.createFileOrDirectory.mockResolvedValue(undefined);
+
+      await controller.createFileOrDirectory('client-uuid', 'agent-uuid', 'new-file.txt', createDto);
+
+      expect(fileSystemProxyService.createFileOrDirectory).toHaveBeenCalledWith(
+        'client-uuid',
+        'agent-uuid',
+        'new-file.txt',
+        createDto,
+      );
+    });
+
+    it('should proxy create directory request', async () => {
+      const createDto: CreateFileDto = {
+        type: 'directory',
+      };
+      fileSystemProxyService.createFileOrDirectory.mockResolvedValue(undefined);
+
+      await controller.createFileOrDirectory('client-uuid', 'agent-uuid', 'new-dir', createDto);
+
+      expect(fileSystemProxyService.createFileOrDirectory).toHaveBeenCalledWith(
+        'client-uuid',
+        'agent-uuid',
+        'new-dir',
+        createDto,
+      );
+    });
+
+    it('should handle array path parameter', async () => {
+      const createDto: CreateFileDto = {
+        type: 'file',
+        content: Buffer.from('File content', 'utf-8').toString('base64'),
+      };
+      fileSystemProxyService.createFileOrDirectory.mockResolvedValue(undefined);
+
+      await controller.createFileOrDirectory('client-uuid', 'agent-uuid', ['nested', 'path', 'file.txt'], createDto);
+
+      expect(fileSystemProxyService.createFileOrDirectory).toHaveBeenCalledWith(
+        'client-uuid',
+        'agent-uuid',
+        'nested/path/file.txt',
+        createDto,
+      );
+    });
+
+    it('should throw BadRequestException when path is undefined', async () => {
+      const createDto: CreateFileDto = {
+        type: 'file',
+        content: Buffer.from('File content', 'utf-8').toString('base64'),
+      };
+
+      await expect(controller.createFileOrDirectory('client-uuid', 'agent-uuid', undefined, createDto)).rejects.toThrow(
+        'File path is required',
+      );
+    });
+
+    it('should throw BadRequestException when path is an object', async () => {
+      const createDto: CreateFileDto = {
+        type: 'file',
+        content: Buffer.from('File content', 'utf-8').toString('base64'),
+      };
+
+      await expect(
+        controller.createFileOrDirectory('client-uuid', 'agent-uuid', { invalid: 'path' }, createDto),
+      ).rejects.toThrow('File path must be a string or array, got object');
+    });
+  });
+
+  describe('deleteFileOrDirectory', () => {
+    it('should proxy delete file request', async () => {
+      fileSystemProxyService.deleteFileOrDirectory.mockResolvedValue(undefined);
+
+      await controller.deleteFileOrDirectory('client-uuid', 'agent-uuid', 'file-to-delete.txt');
+
+      expect(fileSystemProxyService.deleteFileOrDirectory).toHaveBeenCalledWith(
+        'client-uuid',
+        'agent-uuid',
+        'file-to-delete.txt',
+      );
     });
   });
 });

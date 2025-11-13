@@ -1,0 +1,43 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.file-editor-container {
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--bs-body-bg);
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  flex: 1 1 auto;
+}
+
+.file-tree-sidebar {
+  flex: 0 0 300px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--bs-body-bg);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.editor-area {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-header {
+  flex-shrink: 0;
+}
+
+.editor-content {
+  min-height: 0;
+  overflow: hidden;
+}

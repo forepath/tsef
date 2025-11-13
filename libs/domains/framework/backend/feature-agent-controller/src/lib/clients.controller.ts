@@ -2,9 +2,14 @@ import {
   AgentResponseDto,
   CreateAgentDto,
   CreateAgentResponseDto,
+  CreateFileDto,
+  FileContentDto,
+  FileNodeDto,
   UpdateAgentDto,
+  WriteFileDto,
 } from '@forepath/framework/backend/feature-agent-manager';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -15,6 +20,7 @@ import {
   ParseIntPipe,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { Resource } from 'nest-keycloak-connect';
@@ -22,6 +28,7 @@ import { ClientResponseDto } from './dto/client-response.dto';
 import { CreateClientResponseDto } from './dto/create-client-response.dto';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientsService } from './services/clients.service';
 
@@ -35,6 +42,7 @@ export class ClientsController {
   constructor(
     private readonly clientsService: ClientsService,
     private readonly clientAgentProxyService: ClientAgentProxyService,
+    private readonly clientAgentFileSystemProxyService: ClientAgentFileSystemProxyService,
   ) {}
 
   /**
@@ -169,5 +177,140 @@ export class ClientsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteClient(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<void> {
     await this.clientsService.remove(id);
+  }
+
+  /**
+   * Read file content from agent container via client proxy.
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param path - The file path (wildcard parameter for nested paths)
+   * @returns File content (base64-encoded) and encoding type
+   */
+  @Get(':id/agents/:agentId/files/*path')
+  async readFile(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('path') path: string | string[] | Record<string, unknown> | undefined,
+  ): Promise<FileContentDto> {
+    // Normalize path: wildcard parameters can be string, array, object, or undefined
+    let normalizedPath: string;
+    if (typeof path === 'string') {
+      normalizedPath = path;
+    } else if (Array.isArray(path)) {
+      normalizedPath = path.join('/');
+    } else if (path && typeof path === 'object') {
+      // If it's an object, try to extract a meaningful path or use default
+      normalizedPath = '.';
+    } else {
+      normalizedPath = '.';
+    }
+    return await this.clientAgentFileSystemProxyService.readFile(id, agentId, normalizedPath);
+  }
+
+  /**
+   * Write file content to agent container via client proxy.
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param path - The file path (wildcard parameter for nested paths)
+   * @param writeFileDto - The file content to write (base64-encoded)
+   */
+  @Put(':id/agents/:agentId/files/*path')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async writeFile(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('path') path: string | string[] | Record<string, unknown> | undefined,
+    @Body() writeFileDto: WriteFileDto,
+  ): Promise<void> {
+    // Normalize path: wildcard parameters can be string, array, object, or undefined
+    let normalizedPath: string | undefined;
+    if (typeof path === 'string') {
+      normalizedPath = path;
+    } else if (Array.isArray(path)) {
+      normalizedPath = path.join('/');
+    } else if (path && typeof path === 'object') {
+      // If it's an object, we can't determine the path - throw error
+      throw new BadRequestException('File path must be a string or array, got object');
+    }
+    if (!normalizedPath) {
+      throw new BadRequestException('File path is required');
+    }
+    await this.clientAgentFileSystemProxyService.writeFile(id, agentId, normalizedPath, writeFileDto);
+  }
+
+  /**
+   * List directory contents in agent container via client proxy.
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param path - Optional directory path (defaults to '.')
+   * @returns Array of file nodes
+   */
+  @Get(':id/agents/:agentId/files')
+  async listDirectory(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Query('path') path?: string,
+  ): Promise<FileNodeDto[]> {
+    return await this.clientAgentFileSystemProxyService.listDirectory(id, agentId, path || '.');
+  }
+
+  /**
+   * Create a file or directory in agent container via client proxy.
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param path - The file path (wildcard parameter for nested paths)
+   * @param createFileDto - The file/directory creation data
+   */
+  @Post(':id/agents/:agentId/files/*path')
+  @HttpCode(HttpStatus.CREATED)
+  async createFileOrDirectory(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('path') path: string | string[] | Record<string, unknown> | undefined,
+    @Body() createFileDto: CreateFileDto,
+  ): Promise<void> {
+    // Normalize path: wildcard parameters can be string, array, object, or undefined
+    let normalizedPath: string | undefined;
+    if (typeof path === 'string') {
+      normalizedPath = path;
+    } else if (Array.isArray(path)) {
+      normalizedPath = path.join('/');
+    } else if (path && typeof path === 'object') {
+      // If it's an object, we can't determine the path - throw error
+      throw new BadRequestException('File path must be a string or array, got object');
+    }
+    if (!normalizedPath) {
+      throw new BadRequestException('File path is required');
+    }
+    await this.clientAgentFileSystemProxyService.createFileOrDirectory(id, agentId, normalizedPath, createFileDto);
+  }
+
+  /**
+   * Delete a file or directory from agent container via client proxy.
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param path - The file path (wildcard parameter for nested paths)
+   */
+  @Delete(':id/agents/:agentId/files/*path')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteFileOrDirectory(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('path') path: string | string[] | Record<string, unknown> | undefined,
+  ): Promise<void> {
+    // Normalize path: wildcard parameters can be string, array, object, or undefined
+    let normalizedPath: string | undefined;
+    if (typeof path === 'string') {
+      normalizedPath = path;
+    } else if (Array.isArray(path)) {
+      normalizedPath = path.join('/');
+    } else if (path && typeof path === 'object') {
+      // If it's an object, we can't determine the path - throw error
+      throw new BadRequestException('File path must be a string or array, got object');
+    }
+    if (!normalizedPath) {
+      throw new BadRequestException('File path is required');
+    }
+    await this.clientAgentFileSystemProxyService.deleteFileOrDirectory(id, agentId, normalizedPath);
   }
 }

@@ -1,0 +1,23 @@
+@if (isBinary()) {
+  <div class="d-flex align-items-center justify-content-center h-100 bg-body-secondary">
+    <div class="text-center text-muted p-4">
+      <i class="bi bi-file-binary fs-1 d-block mb-3"></i>
+      <p class="mb-0">Binary file - cannot edit</p>
+      <small class="text-muted">{{ filePath() }}</small>
+    </div>
+  </div>
+} @else {
+  <div class="monaco-editor-container d-flex flex-column h-100">
+    @if (isDirty()) {
+      <div class="editor-status-bar bg-warning text-dark px-3 py-1 small">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Unsaved changes
+      </div>
+    }
+    <ngx-monaco-editor
+      class="flex-grow-1"
+      [options]="editorOptions"
+      (onInit)="onEditorInit($event)"
+    ></ngx-monaco-editor>
+  </div>
+}

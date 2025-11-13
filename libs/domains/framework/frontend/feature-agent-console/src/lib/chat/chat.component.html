@@ -1,323 +1,362 @@
-<section class="section__row">
-  <!-- Column 1: Client list -->
-  <div class="section__column d-flex flex-column border-end">
-    <div class="p-3 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
-      <h5 class="mb-0 fw-semibold">Clients</h5>
-      <button
-        type="button"
-        class="btn btn-sm btn-primary"
-        (click)="onAddClientClick()"
-        [disabled]="(clientsCreating$ | async) === true"
-        title="Add client"
-      >
-        <i class="bi bi-plus-circle"></i>
-        Add
-      </button>
-    </div>
-    <div class="flex-grow-1 overflow-auto">
-      @if (clientsLoading$ | async) {
-        <div class="d-flex justify-content-center align-items-center p-4">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading clients...</span>
-          </div>
-        </div>
-      } @else {
-        @if (clientsError$ | async; as error) {
-          <div class="alert alert-danger m-3" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            {{ error }}
-          </div>
-        }
-        @if (clients$ | async; as clients) {
-          @if (clients.length === 0) {
-            <div class="p-4 text-center text-muted">
-              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-              <p class="mb-0">No clients available</p>
-            </div>
-          } @else {
-            <div class="list-group list-group-flush">
-              @for (client of clients; track client.id) {
-                <div
-                  class="list-group-item rounded-0 border-0 border-bottom d-flex align-items-center"
-                  [class.active]="(activeClientId$ | async) === client.id"
-                >
-                  <button
-                    type="button"
-                    class="list-group-item-action border-0 bg-transparent flex-grow-1 text-start p-0"
-                    (click)="onClientSelect(client.id)"
-                  >
-                    <div class="d-flex flex-column">
-                      <div class="d-flex justify-content-between align-items-center mb-1">
-                        <strong class="text-truncate me-2">{{ client.name }}</strong>
-                      </div>
-                      @if (client.description) {
-                        <small class="text-muted text-truncate">{{ client.description }}</small>
-                      }
-                      <small class="text-muted mt-1">
-                        <i class="bi bi-globe me-1"></i>
-                        {{ getHostname(client.endpoint) }}
-                      </small>
-                    </div>
-                  </button>
-                  <div class="btn-group ms-2" role="group">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-primary"
-                      (click)="onEditClientClick(client); $event.stopPropagation()"
-                      [disabled]="(clientsUpdating$ | async) === true"
-                      title="Edit client"
-                    >
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-danger"
-                      (click)="onDeleteClientClick(client.id, client.name); $event.stopPropagation()"
-                      [disabled]="(clientsDeleting$ | async) === true"
-                      title="Delete client"
-                    >
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        }
-      }
-    </div>
-  </div>
-
-  <!-- Column 2: Agent list -->
-  @if (activeClientId$ | async) {
-    <div class="section__column d-flex flex-column border-end">
-      <div class="p-3 border-bottom bg-body-tertiary">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="mb-0 fw-semibold">Agents</h5>
+<div class="section__content-wrapper d-flex flex-column">
+  <section class="section__row flex-grow-1">
+    <!-- Column 1: Client list (hidden when editor is open) -->
+    @if (!editorOpen()) {
+      <div class="section__column d-flex flex-column border-end">
+        <div class="p-3 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-semibold">Clients</h5>
           <button
             type="button"
             class="btn btn-sm btn-primary"
-            (click)="onAddAgentClick()"
-            [disabled]="!(activeClientId$ | async) || (agentsCreating$ | async) === true"
-            title="Add agent"
+            (click)="onAddClientClick()"
+            [disabled]="(clientsCreating$ | async) === true"
+            title="Add client"
           >
             <i class="bi bi-plus-circle"></i>
             Add
           </button>
         </div>
-        @if (activeClient$ | async; as activeClient) {
-          <small class="text-muted">{{ activeClient.name }}</small>
-        }
-      </div>
-      <div class="flex-grow-1 overflow-auto">
-        @if (agentsLoading$ | async) {
-          <div class="d-flex justify-content-center align-items-center p-4">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading agents...</span>
-            </div>
-          </div>
-        } @else {
-          @if (agents$ | async; as agents) {
-            @if (agents.length === 0) {
-              <div class="p-4 text-center text-muted">
-                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                <p class="mb-0">No agents available</p>
+        <div class="flex-grow-1 overflow-auto">
+          @if (clientsLoading$ | async) {
+            <div class="d-flex justify-content-center align-items-center p-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading clients...</span>
               </div>
-            } @else {
-              <div class="list-group list-group-flush">
-                @for (agent of agents; track agent.id) {
-                  <div
-                    class="list-group-item rounded-0 border-0 border-bottom d-flex align-items-center"
-                    [class.active]="(selectedAgent$ | async)?.id === agent.id"
-                  >
-                    <button
-                      type="button"
-                      class="list-group-item-action border-0 bg-transparent flex-grow-1 text-start p-0"
-                      (click)="onAgentSelect(agent.id)"
-                    >
-                      <div class="d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                          <strong class="text-truncate me-2">{{ agent.name }}</strong>
-                        </div>
-                        @if (agent.description) {
-                          <small class="text-muted text-truncate">{{ agent.description }}</small>
-                        }
-                      </div>
-                    </button>
-                    <div class="btn-group ms-2" role="group">
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-primary"
-                        (click)="onEditAgentClick(agent); $event.stopPropagation()"
-                        [disabled]="(agentsUpdating$ | async) === true"
-                        title="Edit agent"
-                      >
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        (click)="onDeleteAgentClick(agent.id, agent.name); $event.stopPropagation()"
-                        [disabled]="(agentsDeleting$ | async) === true"
-                        title="Delete agent"
-                      >
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          }
-        }
-      </div>
-    </div>
-  }
-
-  <!-- Column 3: Agent chat controls -->
-  @if (selectedAgent$ | async) {
-    <div class="section__column section__column--chat d-flex flex-column">
-      <div class="p-3 border-bottom bg-body-tertiary">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="mb-0 fw-semibold">Chat</h5>
-          <div class="btn-group" role="group">
-            @if (socketConnected$ | async) {
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-success"
-                [disabled]="socketDisconnecting$ | async"
-                (click)="onDisconnectSocket()"
-              >
-                <i class="bi bi-wifi"></i>
-                <span class="visually-hidden">Connected</span>
-              </button>
-            } @else {
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-danger"
-                [disabled]="socketConnecting$ | async"
-                (click)="onConnectSocket()"
-              >
-                @if (socketConnecting$ | async) {
-                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                } @else {
-                  <i class="bi bi-wifi-off"></i>
-                }
-                <span class="visually-hidden">Disconnected</span>
-              </button>
-            }
-          </div>
-        </div>
-        @if (selectedAgent$ | async; as selectedAgent) {
-          <small class="text-muted">Agent: {{ selectedAgent.name }}</small>
-        } @else {
-          <small class="text-muted">No agent selected</small>
-        }
-      </div>
-
-      <!-- Chat messages -->
-      <div #chatMessagesContainer class="chat-messages-container flex-grow-1 overflow-auto p-3 bg-body-secondary">
-        @if (chatMessages$ | async; as messages) {
-          @if (messages.length === 0) {
-            <div class="text-center text-muted py-5">
-              <i class="bi bi-chat-dots fs-1 d-block mb-2"></i>
-              <p class="mb-0">No messages yet. Start a conversation!</p>
             </div>
           } @else {
-            <div class="d-flex flex-column gap-2">
-              @for (msg of messages; track msg.timestamp) {
-                @if (isUserMessage(msg.payload)) {
-                  @if (getChatMessageData(msg.payload); as messageData) {
-                    <div class="d-flex justify-content-end">
-                      <div class="card bg-primary text-white chat-message-card">
-                        <div class="card-body p-2">
-                          <p class="card-text mb-1">{{ getText(messageData) }}</p>
-                          <small class="opacity-75">{{ formatTimestamp(msg.timestamp) }}</small>
+            @if (clientsError$ | async; as error) {
+              <div class="alert alert-danger m-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ error }}
+              </div>
+            }
+            @if (clients$ | async; as clients) {
+              @if (clients.length === 0) {
+                <div class="p-4 text-center text-muted">
+                  <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                  <p class="mb-0">No clients available</p>
+                </div>
+              } @else {
+                <div class="list-group list-group-flush">
+                  @for (client of clients; track client.id) {
+                    <div
+                      class="list-group-item rounded-0 border-0 border-bottom d-flex align-items-center"
+                      [class.active]="(activeClientId$ | async) === client.id"
+                    >
+                      <button
+                        type="button"
+                        class="list-group-item-action border-0 bg-transparent flex-grow-1 text-start p-0"
+                        (click)="onClientSelect(client.id)"
+                      >
+                        <div class="d-flex flex-column">
+                          <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-truncate me-2">{{ client.name }}</strong>
+                          </div>
+                          @if (client.description) {
+                            <small class="text-muted text-truncate">{{ client.description }}</small>
+                          }
+                          <small class="text-muted mt-1">
+                            <i class="bi bi-globe me-1"></i>
+                            {{ getHostname(client.endpoint) }}
+                            @if (parseGitRepository(client.config?.gitRepositoryUrl); as repo) {
+                              <span class="ms-2">
+                                <i class="bi bi-git me-1"></i>
+                                {{ repo }}
+                              </span>
+                            }
+                          </small>
                         </div>
+                      </button>
+                      <div class="btn-group ms-2" role="group">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          (click)="onEditClientClick(client); $event.stopPropagation()"
+                          [disabled]="(clientsUpdating$ | async) === true"
+                          title="Edit client"
+                        >
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="onDeleteClientClick(client.id, client.name); $event.stopPropagation()"
+                          [disabled]="(clientsDeleting$ | async) === true"
+                          title="Delete client"
+                        >
+                          <i class="bi bi-trash"></i>
+                        </button>
                       </div>
                     </div>
                   }
-                } @else if (isAgentMessage(msg.payload)) {
-                  @if (getChatMessageData(msg.payload); as messageData) {
-                    <div class="d-flex justify-content-start">
-                      <div class="card bg-white chat-message-card">
-                        <div class="card-body p-2">
-                          @if (parseMarkdown(messageData); as htmlContent) {
-                            <div class="card-text mb-1 markdown-content" [innerHTML]="htmlContent"></div>
+                </div>
+              }
+            }
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Column 2: Agent list (hidden when editor is open) -->
+    @if (!editorOpen() && (activeClientId$ | async)) {
+      <div class="section__column d-flex flex-column border-end">
+        <div class="p-3 border-bottom bg-body-tertiary">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0 fw-semibold">Agents</h5>
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              (click)="onAddAgentClick()"
+              [disabled]="!(activeClientId$ | async) || (agentsCreating$ | async) === true"
+              title="Add agent"
+            >
+              <i class="bi bi-plus-circle"></i>
+              Add
+            </button>
+          </div>
+          @if (activeClient$ | async; as activeClient) {
+            <small class="text-muted">{{ activeClient.name }}</small>
+          }
+        </div>
+        <div class="flex-grow-1 overflow-auto">
+          @if (agentsLoading$ | async) {
+            <div class="d-flex justify-content-center align-items-center p-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading agents...</span>
+              </div>
+            </div>
+          } @else {
+            @if (agents$ | async; as agents) {
+              @if (agents.length === 0) {
+                <div class="p-4 text-center text-muted">
+                  <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                  <p class="mb-0">No agents available</p>
+                </div>
+              } @else {
+                <div class="list-group list-group-flush">
+                  @for (agent of agents; track agent.id) {
+                    <div
+                      class="list-group-item rounded-0 border-0 border-bottom d-flex align-items-center"
+                      [class.active]="(selectedAgent$ | async)?.id === agent.id"
+                    >
+                      <button
+                        type="button"
+                        class="list-group-item-action border-0 bg-transparent flex-grow-1 text-start p-0"
+                        (click)="onAgentSelect(agent.id)"
+                      >
+                        <div class="d-flex flex-column">
+                          <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-truncate me-2">{{ agent.name }}</strong>
+                          </div>
+                          @if (agent.description) {
+                            <small class="text-muted text-truncate">{{ agent.description }}</small>
                           }
-                          <small class="text-muted">{{ formatTimestamp(msg.timestamp) }}</small>
                         </div>
+                      </button>
+                      <div class="btn-group ms-2" role="group">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          (click)="onEditAgentClick(agent); $event.stopPropagation()"
+                          [disabled]="(agentsUpdating$ | async) === true"
+                          title="Edit agent"
+                        >
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="onDeleteAgentClick(agent.id, agent.name); $event.stopPropagation()"
+                          [disabled]="(agentsDeleting$ | async) === true"
+                          title="Delete agent"
+                        >
+                          <i class="bi bi-trash"></i>
+                        </button>
                       </div>
                     </div>
+                  }
+                </div>
+              }
+            }
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Column: Editor (shown when editor is open, to the left of chat) -->
+    @if (editorOpen() && (activeClientId$ | async) && (selectedAgent$ | async)) {
+      <div class="section__column section__column--editor d-flex flex-column border-end">
+        <framework-file-editor
+          #fileEditor
+          [clientId]="(activeClientId$ | async)!"
+          [agentId]="(selectedAgent$ | async)!.id"
+        ></framework-file-editor>
+      </div>
+    }
+
+    <!-- Column: Agent chat controls -->
+    @if (selectedAgent$ | async) {
+      <div class="section__column section__column--chat d-flex flex-column">
+        <div class="p-3 border-bottom bg-body-tertiary">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0 fw-semibold">Chat</h5>
+            <div class="btn-group" role="group">
+              @if (socketConnected$ | async) {
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-success"
+                  [disabled]="socketDisconnecting$ | async"
+                  (click)="onDisconnectSocket()"
+                >
+                  <i class="bi bi-wifi"></i>
+                  <span class="visually-hidden">Connected</span>
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  [disabled]="socketConnecting$ | async"
+                  (click)="onConnectSocket()"
+                >
+                  @if (socketConnecting$ | async) {
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  } @else {
+                    <i class="bi bi-wifi-off"></i>
+                  }
+                  <span class="visually-hidden">Disconnected</span>
+                </button>
+              }
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.btn-outline-primary]="!editorOpen()"
+                [class.btn-primary]="editorOpen()"
+                (click)="onToggleEditor()"
+                [title]="editorOpen() ? 'Close Editor' : 'Open Editor'"
+              >
+                <i class="bi bi-code-square"></i>
+                @if (editorOpen()) {
+                  <span class="ms-1">Close Editor</span>
+                } @else {
+                  <span class="ms-1">Open Editor</span>
+                }
+              </button>
+            </div>
+          </div>
+          @if (selectedAgent$ | async; as selectedAgent) {
+            <small class="text-muted">Agent: {{ selectedAgent.name }}</small>
+          } @else {
+            <small class="text-muted">No agent selected</small>
+          }
+        </div>
+
+        <!-- Chat messages -->
+        <div #chatMessagesContainer class="chat-messages-container flex-grow-1 overflow-auto p-3 bg-body-secondary">
+          @if (chatMessages$ | async; as messages) {
+            @if (messages.length === 0) {
+              <div class="text-center text-muted py-5">
+                <i class="bi bi-chat-dots fs-1 d-block mb-2"></i>
+                <p class="mb-0">No messages yet. Start a conversation!</p>
+              </div>
+            } @else {
+              <div class="d-flex flex-column gap-2">
+                @for (msg of messages; track msg.timestamp) {
+                  @if (isUserMessage(msg.payload)) {
+                    @if (getChatMessageData(msg.payload); as messageData) {
+                      <div class="d-flex justify-content-end">
+                        <div class="card bg-primary text-white chat-message-card">
+                          <div class="card-body p-2">
+                            <p class="card-text mb-1">{{ getText(messageData) }}</p>
+                            <small class="opacity-75">{{ formatTimestamp(msg.timestamp) }}</small>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  } @else if (isAgentMessage(msg.payload)) {
+                    @if (getChatMessageData(msg.payload); as messageData) {
+                      <div class="d-flex justify-content-start">
+                        <div class="card bg-white chat-message-card">
+                          <div class="card-body p-2">
+                            @if (parseMarkdown(messageData); as htmlContent) {
+                              <div class="card-text mb-1 markdown-content" [innerHTML]="htmlContent"></div>
+                            }
+                            <small class="text-muted">{{ formatTimestamp(msg.timestamp) }}</small>
+                          </div>
+                        </div>
+                      </div>
+                    }
                   }
                 }
-              }
-              <!-- Loading indicator when waiting for agent response -->
-              @if (waitingForResponse$ | async) {
-                <div class="d-flex justify-content-start">
-                  <div class="card bg-white chat-message-card">
-                    <div class="card-body p-2">
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                          <span class="visually-hidden">Waiting for response...</span>
+                <!-- Loading indicator when waiting for agent response -->
+                @if (waitingForResponse$ | async) {
+                  <div class="d-flex justify-content-start">
+                    <div class="card bg-white chat-message-card">
+                      <div class="card-body p-2">
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Waiting for response...</span>
+                          </div>
+                          <small class="text-muted mb-0">Agent is thinking...</small>
                         </div>
-                        <small class="text-muted mb-0">Agent is thinking...</small>
                       </div>
                     </div>
                   </div>
-                </div>
-              }
-            </div>
-          }
-        }
-      </div>
-
-      <!-- Socket error -->
-      @if (socketError$ | async; as socketError) {
-        <div class="alert alert-danger alert-dismissible m-3 mb-0" role="alert">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          {{ socketError }}
-        </div>
-      }
-
-      <!-- Chat input -->
-      <div class="p-3 border-top bg-body-tertiary">
-        <div class="input-group">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Type a message..."
-            [value]="chatMessage()"
-            (input)="chatMessage.set($any($event.target).value)"
-            (keydown.enter)="onSendMessage()"
-            [disabled]="!(socketConnected$ | async) || (forwarding$ | async) || !(selectedAgent$ | async)"
-          />
-          <button
-            class="btn btn-primary"
-            type="button"
-            [disabled]="
-              !(socketConnected$ | async) || (forwarding$ | async) || !(selectedAgent$ | async) || !chatMessage().trim()
-            "
-            (click)="onSendMessage()"
-          >
-            @if (forwarding$ | async) {
-              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-            } @else {
-              <i class="bi bi-send"></i>
+                }
+              </div>
             }
-            Send
-          </button>
+          }
         </div>
-        @if (!(socketConnected$ | async)) {
-          <small class="text-muted d-block mt-2">
-            <i class="bi bi-info-circle me-1"></i>
-            Connect to socket to send messages
-          </small>
+
+        <!-- Socket error -->
+        @if (socketError$ | async; as socketError) {
+          <div class="alert alert-danger alert-dismissible m-3 mb-0" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ socketError }}
+          </div>
         }
+
+        <!-- Chat input -->
+        <div class="p-3 border-top bg-body-tertiary">
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Type a message..."
+              [value]="chatMessage()"
+              (input)="chatMessage.set($any($event.target).value)"
+              (keydown.enter)="onSendMessage()"
+              [disabled]="!(socketConnected$ | async) || (forwarding$ | async) || !(selectedAgent$ | async)"
+            />
+            <button
+              class="btn btn-primary"
+              type="button"
+              [disabled]="
+                !(socketConnected$ | async) ||
+                (forwarding$ | async) ||
+                !(selectedAgent$ | async) ||
+                !chatMessage().trim()
+              "
+              (click)="onSendMessage()"
+            >
+              @if (forwarding$ | async) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              } @else {
+                <i class="bi bi-send"></i>
+              }
+              Send
+            </button>
+          </div>
+          @if (!(socketConnected$ | async)) {
+            <small class="text-muted d-block mt-2">
+              <i class="bi bi-info-circle me-1"></i>
+              Connect to socket to send messages
+            </small>
+          }
+        </div>
       </div>
-    </div>
-  }
-</section>
+    }
+  </section>
+</div>
 
 <!-- Delete Client Confirmation Modal -->
 <div

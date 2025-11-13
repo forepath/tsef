@@ -1,0 +1,72 @@
+flowchart TB
+    subgraph STATE["📦 NgRx State Management"]
+        direction TB
+        STATE_USE["Use Case: File System State<br/>Reactive State Management<br/>Caching & Loading States"]
+        STATE_USE --> STATE1["📄 File Contents Cache<br/>Key: clientId:agentId:filePath<br/>Value: FileContentDto (base64)"]
+        STATE_USE --> STATE2["📂 Directory Listings Cache<br/>Key: clientId:agentId:directoryPath<br/>Value: FileNodeDto[]"]
+        STATE_USE --> STATE3["⏳ Loading States<br/>reading, writing, listing,<br/>creating, deleting"]
+        STATE_USE --> STATE4["❌ Error States<br/>Key: clientId:agentId:path<br/>Value: error message"]
+    end
+
+    subgraph FACADE["🎭 FilesFacade"]
+        direction TB
+        FACADE_USE["Use Case: Component Interface<br/>Type-safe API<br/>No Direct Store Access"]
+        FACADE_USE --> FACADE1["📖 Read File<br/>readFile()<br/>getFileContent$()"]
+        FACADE_USE --> FACADE2["✍️ Write File<br/>writeFile()<br/>isWritingFile$()"]
+        FACADE_USE --> FACADE3["📂 List Directory<br/>listDirectory()<br/>getDirectoryListing$()"]
+        FACADE_USE --> FACADE4["➕ Create File/Dir<br/>createFileOrDirectory()<br/>isCreatingFile$()"]
+        FACADE_USE --> FACADE5["🗑️ Delete File/Dir<br/>deleteFileOrDirectory()<br/>isDeletingFile$()"]
+        FACADE_USE --> FACADE6["🧹 Cache Management<br/>clearFileContent()<br/>clearDirectoryListing()"]
+    end
+
+    subgraph EFFECTS["⚡ NgRx Effects"]
+        direction TB
+        EFFECTS_USE["Use Case: Side Effects<br/>API Calls<br/>Error Handling"]
+        EFFECTS_USE --> EFFECTS1["readFile$<br/>Calls FilesService.readFile()"]
+        EFFECTS_USE --> EFFECTS2["writeFile$<br/>Calls FilesService.writeFile()"]
+        EFFECTS_USE --> EFFECTS3["listDirectory$<br/>Calls FilesService.listDirectory()"]
+        EFFECTS_USE --> EFFECTS4["createFileOrDirectory$<br/>Calls FilesService.createFileOrDirectory()"]
+        EFFECTS_USE --> EFFECTS5["deleteFileOrDirectory$<br/>Calls FilesService.deleteFileOrDirectory()"]
+    end
+
+    subgraph SERVICE["🌐 FilesService"]
+        direction TB
+        SERVICE_USE["Use Case: HTTP Client<br/>REST API Communication<br/>Base64 Encoding"]
+        SERVICE_USE --> SERVICE1["readFile()<br/>GET /api/clients/{id}/agents/{agentId}/files/{path}"]
+        SERVICE_USE --> SERVICE2["writeFile()<br/>PUT /api/clients/{id}/agents/{agentId}/files/{path}"]
+        SERVICE_USE --> SERVICE3["listDirectory()<br/>GET /api/clients/{id}/agents/{agentId}/files?path="]
+        SERVICE_USE --> SERVICE4["createFileOrDirectory()<br/>POST /api/clients/{id}/agents/{agentId}/files/{path}"]
+        SERVICE_USE --> SERVICE5["deleteFileOrDirectory()<br/>DELETE /api/clients/{id}/agents/{agentId}/files/{path}"]
+    end
+
+    subgraph API["🔷 HTTP REST API"]
+        direction TB
+        API_USE["Use Case: Backend Proxy<br/>Agent File System Operations<br/>Binary Support (base64)"]
+        API_USE --> API1["Read File<br/>Returns: {content: base64, encoding}"]
+        API_USE --> API2["Write File<br/>Accepts: {content: base64, encoding?}"]
+        API_USE --> API3["List Directory<br/>Returns: FileNodeDto[]"]
+        API_USE --> API4["Create File/Directory<br/>Accepts: {type, content?}"]
+        API_USE --> API5["Delete File/Directory<br/>Returns: 204 No Content"]
+    end
+
+    Start([Component]) --> FACADE
+    FACADE --> STATE
+    FACADE --> EFFECTS
+    EFFECTS --> SERVICE
+    SERVICE --> API
+
+    STATE -.->|"Reactive Updates"| FACADE
+    EFFECTS -.->|"Dispatch Actions"| STATE
+    SERVICE -.->|"HTTP Requests"| API
+    API -.->|"HTTP Responses"| SERVICE
+
+    style STATE fill:#e6f0ff,stroke:#4a90e2,stroke-width:3px
+    style FACADE fill:#fff4e6,stroke:#ff8c42,stroke-width:3px
+    style EFFECTS fill:#e6ffe6,stroke:#4a9e2,stroke-width:3px
+    style SERVICE fill:#ffe6f0,stroke:#e24a9e,stroke-width:3px
+    style API fill:#f0f0f0,stroke:#666666,stroke-width:3px
+    style STATE_USE fill:#d6e9ff,stroke:#4a90e2
+    style FACADE_USE fill:#ffe6cc,stroke:#ff8c42
+    style EFFECTS_USE fill:#d6ffd6,stroke:#4a9e2
+    style SERVICE_USE fill:#ffd6e6,stroke:#e24a9e
+    style API_USE fill:#e0e0e0,stroke:#666666

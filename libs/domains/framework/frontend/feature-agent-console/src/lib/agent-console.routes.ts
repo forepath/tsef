@@ -9,9 +9,14 @@ import {
   connectSocket$,
   createClient$,
   createClientAgent$,
+  createFileOrDirectory$,
   deleteClient$,
   deleteClientAgent$,
+  deleteFileOrDirectory$,
   disconnectSocket$,
+  FilesFacade,
+  filesReducer,
+  listDirectory$,
   loadClient$,
   loadClientAgent$,
   loadClientAgents$,
@@ -20,14 +25,17 @@ import {
   loginSuccessRedirect$,
   logout$,
   logoutSuccessRedirect$,
+  readFile$,
   setActiveClient$,
   SocketsFacade,
   socketsReducer,
   updateClient$,
   updateClientAgent$,
+  writeFile$,
 } from '@forepath/framework/frontend/data-access-agent-console';
 import { provideEffects } from '@ngrx/effects';
 import { provideState } from '@ngrx/store';
+import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
 import { AgentConsoleChatComponent } from './chat/chat.component';
 import { AgentConsoleContainerComponent } from './container/container.component';
 import { authGuard } from './guards/auth.guard';
@@ -48,11 +56,13 @@ export const agentConsoleRoutes: Route[] = [
         path: 'login',
         component: AgentConsoleLoginComponent,
         canActivate: [loginGuard],
+        title: 'Login | Agent Console',
       },
       {
         path: 'dashboard',
         component: AgentConsoleChatComponent,
         canActivate: [authGuard],
+        title: 'Manager | Agent Console',
       },
       {
         path: '**',
@@ -64,11 +74,13 @@ export const agentConsoleRoutes: Route[] = [
       AgentsFacade,
       ClientsFacade,
       SocketsFacade,
+      FilesFacade,
       // Feature states - registered at feature level for lazy loading
       provideState('clients', clientsReducer),
       provideState('agents', agentsReducer),
       provideState('sockets', socketsReducer),
       provideState('authentication', authenticationReducer),
+      provideState('files', filesReducer),
       // Effects - only active when this feature route is loaded
       provideEffects({
         loadClients$,
@@ -89,7 +101,13 @@ export const agentConsoleRoutes: Route[] = [
         logout$,
         logoutSuccessRedirect$,
         checkAuthentication$,
+        readFile$,
+        writeFile$,
+        listDirectory$,
+        createFileOrDirectory$,
+        deleteFileOrDirectory$,
       }),
+      provideMonacoEditor(),
     ],
   },
 ];
