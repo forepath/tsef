@@ -101,7 +101,17 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     }
 
     this.editorInstance.set(editorInstance);
+
+    // Update language before setting content to ensure syntax highlighting is enabled
     this.updateBinaryAndLanguage();
+
+    // Always ensure the model has the correct language set for syntax highlighting
+    const model = editorInstance.getModel();
+    if (model) {
+      const currentLanguage = this.language();
+      // Set the model language to enable syntax highlighting
+      monaco.editor.setModelLanguage(model, currentLanguage);
+    }
 
     // Dispose old listener if exists
     if (this.contentChangeDisposable) {
@@ -202,6 +212,7 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     const filePath = this.filePath();
     if (!filePath) {
       this.isBinary.set(false);
+      this.language.set('plaintext');
       return;
     }
 
@@ -263,14 +274,29 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
       rs: 'rust',
       swift: 'swift',
       kt: 'kotlin',
+      kts: 'kotlin',
       vue: 'vue',
       jsx: 'javascript',
       tsx: 'typescript',
       dockerfile: 'dockerfile',
+      toml: 'ini',
+      ini: 'ini',
+      cfg: 'ini',
+      conf: 'ini',
+      config: 'ini',
+      properties: 'ini',
+      props: 'ini',
+      prop: 'ini',
+      propfile: 'ini',
     };
     const newLanguage = langMap[ext || ''] || 'plaintext';
 
-    if (this.language() !== newLanguage) {
+    // Always update the language signal first
+    const previousLanguage = this.language();
+    this.language.set(newLanguage);
+
+    // Update the model language if editor is already initialized
+    if (previousLanguage !== newLanguage) {
       const editor = this.editorInstance();
       if (editor) {
         const model = editor.getModel();
@@ -278,7 +304,6 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
           monaco.editor.setModelLanguage(model, newLanguage);
         }
       }
-      this.language.set(newLanguage);
     }
   }
 
