@@ -2,37 +2,47 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
 
-// Configure Monaco Editor worker paths to use absolute paths
-// This prevents issues with relative paths in workers
+// Create worker URLs that resolve to node_modules during build
+// Use import.meta.url as base and construct path to node_modules
+// From apps/frontend-agent-console/src/main.ts, go up 3 levels to workspace root, then into node_modules
+const getWorkerUrl = (relativePath: string): URL => {
+  // Get the directory of the current file (apps/frontend-agent-console/src/)
+  const currentDir = new URL('.', import.meta.url);
+  // Go up to workspace root: ../../
+  const workspaceRoot = new URL('../../', currentDir);
+  // Go into node_modules/monaco-editor/esm/vs/
+  return new URL(`node_modules/monaco-editor/esm/vs/${relativePath}`, workspaceRoot);
+};
+
+const editorWorker = new Worker(getWorkerUrl('editor/editor.worker.js'), { type: 'module' });
+const tsWorker = new Worker(getWorkerUrl('language/typescript/ts.worker.js'), { type: 'module' });
+const cssWorker = new Worker(getWorkerUrl('language/css/css.worker.js'), { type: 'module' });
+const htmlWorker = new Worker(getWorkerUrl('language/html/html.worker.js'), { type: 'module' });
+const jsonWorker = new Worker(getWorkerUrl('language/json/json.worker.js'), { type: 'module' });
+
+// Configure Monaco Editor workers
+// Simple approach: use getWorkerUrl to return absolute URLs
+// This works regardless of deployment path (subfolder, root, etc.)
 declare const self: Window & {
   MonacoEnvironment?: {
-    getWorkerUrl: (moduleId: string, label: string) => string;
+    getWorker: (moduleId: string, label: string) => Worker;
   };
 };
 
 self.MonacoEnvironment = {
-  getWorkerUrl: (moduleId: string, label: string) => {
-    // Convert relative paths to absolute paths
-    // Monaco workers are located at /assets/monaco/min/vs/
-    const basePath = '/assets/monaco/min/vs';
-
-    // Map worker labels to their file paths
-    // Note: Monaco minified workers use camelCase names (e.g., jsonWorker.js, not json.worker.js)
-    const workerMap: Record<string, string> = {
-      editorWorkerService: `${basePath}/base/worker/workerMain.js`,
-      typescript: `${basePath}/language/typescript/tsWorker.js`,
-      javascript: `${basePath}/language/typescript/tsWorker.js`,
-      css: `${basePath}/language/css/cssWorker.js`,
-      html: `${basePath}/language/html/htmlWorker.js`,
-      json: `${basePath}/language/json/jsonWorker.js`,
+  getWorker: function (moduleId: string, label: string): Worker {
+    // Map worker labels to their file paths in assets
+    const workerPaths: Record<string, Worker> = {
+      editorWorkerService: editorWorker,
+      typescript: tsWorker,
+      javascript: tsWorker,
+      css: cssWorker,
+      html: htmlWorker,
+      json: jsonWorker,
     };
 
-    // Return the mapped worker URL or default to base worker
-    // Use absolute path to prevent relative path issues in workers
-    const workerUrl = workerMap[label] || `${basePath}/base/worker/workerMain.js`;
-
-    // Ensure the URL is absolute (starts with /)
-    return workerUrl.startsWith('/') ? workerUrl : `/${workerUrl}`;
+    // Get the relative path for this worker
+    return workerPaths[label] || workerPaths['editorWorkerService'];
   },
 };
 
