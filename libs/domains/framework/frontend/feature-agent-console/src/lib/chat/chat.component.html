@@ -265,9 +265,9 @@
                     @if (getChatMessageData(msg.payload); as messageData) {
                       <div class="d-flex justify-content-end">
                         <div class="card bg-primary text-white chat-message-card">
-                          <div class="card-body p-2">
-                            <p class="card-text mb-1">{{ getText(messageData) }}</p>
-                            <small class="opacity-75">{{ formatTimestamp(msg.timestamp) }}</small>
+                          <div class="card-body chat-message-body">
+                            <p class="card-text chat-message-text">{{ getText(messageData) }}</p>
+                            <small class="chat-message-timestamp">{{ formatTimestamp(msg.timestamp) }}</small>
                           </div>
                         </div>
                       </div>
@@ -276,11 +276,13 @@
                     @if (getChatMessageData(msg.payload); as messageData) {
                       <div class="d-flex justify-content-start">
                         <div class="card bg-white chat-message-card">
-                          <div class="card-body p-2">
+                          <div class="card-body chat-message-body">
                             @if (parseMarkdown(messageData); as htmlContent) {
-                              <div class="card-text mb-1 markdown-content" [innerHTML]="htmlContent"></div>
+                              <div class="card-text chat-message-text markdown-content" [innerHTML]="htmlContent"></div>
                             }
-                            <small class="text-muted">{{ formatTimestamp(msg.timestamp) }}</small>
+                            <small class="chat-message-timestamp text-muted">{{
+                              formatTimestamp(msg.timestamp)
+                            }}</small>
                           </div>
                         </div>
                       </div>
@@ -291,12 +293,12 @@
                 @if (waitingForResponse$ | async) {
                   <div class="d-flex justify-content-start">
                     <div class="card bg-white chat-message-card">
-                      <div class="card-body p-2">
+                      <div class="card-body chat-message-body">
                         <div class="d-flex align-items-center gap-2">
                           <div class="spinner-border spinner-border-sm text-primary" role="status">
                             <span class="visually-hidden">Waiting for response...</span>
                           </div>
-                          <small class="text-muted mb-0">Agent is thinking...</small>
+                          <small class="chat-message-text text-muted mb-0">Agent is thinking...</small>
                         </div>
                       </div>
                     </div>
