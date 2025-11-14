@@ -61,7 +61,7 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
   }
 
   readonly editorOptions = computed(() => ({
-    theme: 'vs-dark' as const,
+    theme: 'vs-light' as const,
     language: this.language(),
     automaticLayout: true,
     minimap: { enabled: true },
@@ -70,6 +70,14 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     lineNumbers: 'on' as const,
     wordWrap: 'on' as const,
     readOnly: this.isBinary(),
+    // IntelliSense / Autocomplete options
+    quickSuggestions: true,
+    suggestOnTriggerCharacters: true,
+    acceptSuggestionOnEnter: 'on' as const,
+    tabCompletion: 'on' as const,
+    wordBasedSuggestions: true,
+    suggestSelection: 'first' as const,
+    snippetSuggestions: 'top' as const,
   }));
 
   ngOnDestroy(): void {
@@ -247,6 +255,10 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     const ext = filePath.split('.').pop()?.toLowerCase();
     const langMap: Record<string, string> = {
       ts: 'typescript',
+      cts: 'typescript',
+      mts: 'typescript',
+      cjs: 'javascript',
+      mjs: 'javascript',
       js: 'javascript',
       json: 'json',
       html: 'html',
