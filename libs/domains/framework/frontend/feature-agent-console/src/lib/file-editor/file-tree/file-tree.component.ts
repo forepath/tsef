@@ -175,6 +175,9 @@ export class FileTreeComponent implements OnInit {
           this.expandedDirectorySubscriptions.set(path, subscription);
         }
       }
+
+      // Rebuild tree whenever expanded paths change (for both expand and collapse)
+      this.rebuildTree();
     });
   }
 
