@@ -15,6 +15,9 @@ describe('DockerService', () => {
     exec: jest.Mock;
     stop: jest.Mock;
     remove: jest.Mock;
+    modem: {
+      demuxStream: jest.Mock;
+    };
   };
   let mockExec: {
     start: jest.Mock;
@@ -69,6 +72,9 @@ describe('DockerService', () => {
       exec: jest.fn().mockResolvedValue(mockExec),
       stop: jest.fn(),
       remove: jest.fn(),
+      modem: {
+        demuxStream: jest.fn(),
+      },
     };
 
     // Create mock Docker instance
@@ -926,6 +932,108 @@ describe('DockerService', () => {
       expect(mockContainer.exec).toHaveBeenCalledWith({
         Cmd: ['echo', 'path\\with\\backslashes'],
         AttachStdin: true,
+        AttachStdout: true,
+        AttachStderr: true,
+        Tty: false,
+      });
+    });
+  });
+
+  describe('readFileFromContainer', () => {
+    const containerId = 'test-container-id';
+    const filePath = '/app/test-file.txt';
+
+    beforeEach(() => {
+      // Reset stream mock for each test
+      mockStream.on = jest.fn((event: string, callback: () => void) => {
+        if (event === 'end') {
+          setTimeout(() => callback(), 10);
+        } else if (event === 'close') {
+          setTimeout(() => callback(), 15);
+        }
+        return mockStream;
+      });
+
+      // Mock demuxStream to write to PassThrough streams
+      mockContainer.modem.demuxStream = jest.fn((stream, stdout, stderr) => {
+        // Simulate data being written to stdout
+        setTimeout(() => {
+          stdout.write(Buffer.from('file content'));
+          stdout.end();
+          stderr.end();
+        }, 5);
+      });
+    });
+
+    it('should read file content successfully', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+
+      const result = await service.readFileFromContainer(containerId, filePath);
+
+      expect(mockContainer.inspect).toHaveBeenCalled();
+      expect(mockContainer.exec).toHaveBeenCalledWith({
+        Cmd: ['sh', '-c', expect.stringContaining(`cat '${filePath.replace(/'/g, "'\\''")}'`)],
+        AttachStdin: false,
+        AttachStdout: true,
+        AttachStderr: true,
+        Tty: false,
+      });
+      expect(mockExec.start).toHaveBeenCalledWith({
+        hijack: true,
+        stdin: false,
+      });
+      expect(mockContainer.modem.demuxStream).toHaveBeenCalled();
+      expect(result).toBe('file content');
+    });
+
+    it('should throw NotFoundException when container does not exist', async () => {
+      mockContainer.inspect.mockRejectedValue({ statusCode: 404 });
+
+      await expect(service.readFileFromContainer(containerId, filePath)).rejects.toThrow(NotFoundException);
+      expect(mockContainer.inspect).toHaveBeenCalled();
+    });
+
+    it('should handle file not found error from stderr', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      mockContainer.modem.demuxStream = jest.fn((stream, stdout, stderr) => {
+        setTimeout(() => {
+          stderr.write(Buffer.from('cat: /app/nonexistent.txt: No such file or directory'));
+          stdout.end();
+          stderr.end();
+        }, 5);
+      });
+
+      await expect(service.readFileFromContainer(containerId, '/app/nonexistent.txt')).rejects.toThrow(
+        'File not found',
+      );
+    });
+
+    it('should handle stderr output that is not an error', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      mockContainer.modem.demuxStream = jest.fn((stream, stdout, stderr) => {
+        setTimeout(() => {
+          stdout.write(Buffer.from('file content'));
+          stderr.write(Buffer.from('warning: some warning message'));
+          stdout.end();
+          stderr.end();
+        }, 5);
+      });
+
+      const result = await service.readFileFromContainer(containerId, filePath);
+
+      // Should still return stdout content even if there's stderr
+      expect(result).toBe('file content');
+    });
+
+    it('should escape file path with single quotes', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      const pathWithQuotes = "/app/file with 'quotes'.txt";
+
+      await service.readFileFromContainer(containerId, pathWithQuotes);
+
+      expect(mockContainer.exec).toHaveBeenCalledWith({
+        Cmd: ['sh', '-c', expect.stringContaining("cat '/app/file with '\\''quotes'\\''.txt'")],
+        AttachStdin: false,
         AttachStdout: true,
         AttachStderr: true,
         Tty: false,

@@ -23,8 +23,14 @@
           {
             "glob": "**/*",
             "input": "apps/frontend-agent-console/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "node_modules/monaco-editor",
+            "output": "/assets/monaco/"
           }
         ],
+        "externalDependencies": ["monaco-editor"],
         "styles": ["apps/frontend-agent-console/src/styles.scss"],
         "scripts": [
           "node_modules/@popperjs/core/dist/umd/popper.min.js",
@@ -54,6 +60,9 @@
           "extractLicenses": false,
           "sourceMap": true
         },
+        "serve": {
+          "externalDependencies": []
+        },
         "en": {
           "localize": ["en"]
         },
@@ -67,11 +76,11 @@
       "continuous": true,
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
-        "production": {
-          "buildTarget": "frontend-agent-console:build:production,en"
-        },
         "development": {
-          "buildTarget": "frontend-agent-console:build:development,en"
+          "buildTarget": "frontend-agent-console:build:development,serve,en"
+        },
+        "production": {
+          "buildTarget": "frontend-agent-console:build:production,serve,en"
         }
       },
       "defaultConfiguration": "development"

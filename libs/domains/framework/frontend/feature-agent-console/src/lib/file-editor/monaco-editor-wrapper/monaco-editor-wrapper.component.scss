@@ -1,0 +1,15 @@
+.monaco-editor-container {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-status-bar {
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+::ng-deep {
+  .monaco-editor {
+    height: 100%;
+  }
+}

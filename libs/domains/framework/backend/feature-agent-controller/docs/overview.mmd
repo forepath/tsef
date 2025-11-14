@@ -19,6 +19,16 @@ flowchart TB
         PROXY_USE --> PROXY5["🗑️ Delete Agent (Proxied)<br/>DELETE /api/clients/:id/agents/:agentId<br/>Returns: 204 No Content"]
     end
 
+    subgraph FILES["📁 HTTP REST API - Proxied File System (/api/clients/:id/agents/:agentId/files)"]
+        direction TB
+        FILES_USE["Use Case: File System Operations via Client<br/>Proxy to Remote Agent-Manager<br/>Request-Response Pattern"]
+        FILES_USE --> FILES1["📖 Read File (Proxied)<br/>GET /api/clients/:id/agents/:agentId/files/*path<br/>Returns: File Content (base64)"]
+        FILES_USE --> FILES2["✍️ Write File (Proxied)<br/>PUT /api/clients/:id/agents/:agentId/files/*path<br/>Returns: 204 No Content"]
+        FILES_USE --> FILES3["📂 List Directory (Proxied)<br/>GET /api/clients/:id/agents/:agentId/files?path=<br/>Returns: File Nodes"]
+        FILES_USE --> FILES4["➕ Create File/Dir (Proxied)<br/>POST /api/clients/:id/agents/:agentId/files/*path<br/>Returns: 201 Created"]
+        FILES_USE --> FILES5["🗑️ Delete File/Dir (Proxied)<br/>DELETE /api/clients/:id/agents/:agentId/files/*path<br/>Returns: 204 No Content"]
+    end
+
     subgraph WS["🔶 WebSocket Gateway (namespace: /clients)"]
         direction TB
         WS_USE["Use Case: Real-time Event Forwarding<br/>Bidirectional Messages<br/>Persistent Connection"]
@@ -28,17 +38,21 @@ flowchart TB
 
     Start([Agent Controller Feature]) --> HTTP
     Start --> PROXY
+    Start --> FILES
     Start --> WS
 
     HTTP -.->|"Stateless<br/>Request-Response"| HTTP_USE
     PROXY -.->|"Proxy to Remote<br/>Agent-Manager"| PROXY_USE
+    FILES -.->|"Proxy to Remote<br/>Agent-Manager"| FILES_USE
     WS -.->|"Stateful<br/>Persistent Connection"| WS_USE
 
     style HTTP fill:#e6f0ff,stroke:#4a90e2,stroke-width:3px
     style PROXY fill:#e6f0ff,stroke:#4a90e2,stroke-width:3px
+    style FILES fill:#e6ffe6,stroke:#4a9e2,stroke-width:3px
     style WS fill:#fff4e6,stroke:#ff8c42,stroke-width:3px
     style HTTP_USE fill:#d6e9ff,stroke:#4a90e2
     style PROXY_USE fill:#d6e9ff,stroke:#4a90e2
+    style FILES_USE fill:#d6ffd6,stroke:#4a9e2
     style WS_USE fill:#ffe6cc,stroke:#ff8c42
     style HTTP1 fill:#f0f7ff,stroke:#4a90e2
     style HTTP2 fill:#f0f7ff,stroke:#4a90e2
@@ -50,5 +64,10 @@ flowchart TB
     style PROXY3 fill:#f0f7ff,stroke:#4a90e2
     style PROXY4 fill:#f0f7ff,stroke:#4a90e2
     style PROXY5 fill:#f0f7ff,stroke:#4a90e2
+    style FILES1 fill:#f0fff0,stroke:#4a9e2
+    style FILES2 fill:#f0fff0,stroke:#4a9e2
+    style FILES3 fill:#f0fff0,stroke:#4a9e2
+    style FILES4 fill:#f0fff0,stroke:#4a9e2
+    style FILES5 fill:#f0fff0,stroke:#4a9e2
     style WS1 fill:#fff9f0,stroke:#ff8c42
     style WS2 fill:#fff9f0,stroke:#ff8c42

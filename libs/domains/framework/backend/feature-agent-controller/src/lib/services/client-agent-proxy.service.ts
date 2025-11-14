@@ -5,7 +5,7 @@ import {
   CreateAgentResponseDto,
   UpdateAgentDto,
 } from '@forepath/framework/backend/feature-agent-manager';
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { AuthenticationType } from '../entities/client.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
@@ -21,6 +21,7 @@ export class ClientAgentProxyService {
   private readonly logger = new Logger(ClientAgentProxyService.name);
 
   constructor(
+    @Inject(forwardRef(() => ClientsService))
     private readonly clientsService: ClientsService,
     private readonly clientsRepository: ClientsRepository,
     private readonly clientAgentCredentialsService: ClientAgentCredentialsService,

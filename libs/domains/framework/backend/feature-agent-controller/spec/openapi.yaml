@@ -244,6 +244,182 @@ paths:
       responses:
         '204':
           description: Deleted
+  /clients/{id}/agents/{agentId}/files:
+    get:
+      summary: List directory contents (proxied)
+      operationId: listClientAgentDirectory
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: query
+          name: path
+          schema:
+            type: string
+          description: Directory path relative to /app (defaults to '.')
+      responses:
+        '200':
+          description: Array of file nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileNodeDto'
+        '404':
+          description: Client, agent, or directory not found
+  /clients/{id}/agents/{agentId}/files/{path}:
+    get:
+      summary: Read file content (proxied)
+      operationId: readClientAgentFile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+          description: File path relative to /app (supports nested paths)
+      responses:
+        '200':
+          description: File content (base64-encoded)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileContentDto'
+        '400':
+          description: Invalid path
+        '404':
+          description: Client, agent, or file not found
+    put:
+      summary: Write file content (proxied)
+      operationId: writeClientAgentFile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+          description: File path relative to /app (supports nested paths)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WriteFileDto'
+      responses:
+        '204':
+          description: File written successfully
+        '400':
+          description: Invalid path or content too large
+        '404':
+          description: Client or agent not found
+    delete:
+      summary: Delete file or directory (proxied)
+      operationId: deleteClientAgentFileOrDirectory
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+          description: File or directory path relative to /app (supports nested paths)
+      responses:
+        '204':
+          description: File or directory deleted successfully
+        '400':
+          description: Invalid path
+        '404':
+          description: Client, agent, or file/directory not found
+    post:
+      summary: Create file or directory (proxied)
+      operationId: createClientAgentFileOrDirectory
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+          description: File or directory path relative to /app (supports nested paths)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFileDto'
+      responses:
+        '201':
+          description: File or directory created
+        '400':
+          description: Invalid request
+        '404':
+          description: Client or agent not found
 components:
   securitySchemes:
     bearerAuth:
@@ -399,3 +575,57 @@ components:
         gitRepositoryUrl:
           type: [string, 'null']
           description: Git repository URL used for cloning repositories when creating agents
+    FileContentDto:
+      type: object
+      required: [content, encoding]
+      properties:
+        content:
+          type: string
+          description: File content as base64-encoded string (supports both text and binary files)
+        encoding:
+          type: string
+          enum: [utf-8, base64]
+          description: Encoding indicator - 'utf-8' for text files, 'base64' for binary files
+    FileNodeDto:
+      type: object
+      required: [name, type, path]
+      properties:
+        name:
+          type: string
+          description: File or directory name
+        type:
+          type: string
+          enum: [file, directory]
+          description: Node type
+        path:
+          type: string
+          description: Relative path from /app
+        size:
+          type: [integer, 'null']
+          description: File size in bytes (only for files)
+        modifiedAt:
+          type: [string, 'null']
+          format: date-time
+          description: Last modification timestamp
+    WriteFileDto:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          description: File content as base64-encoded string (supports both text and binary files)
+        encoding:
+          type: string
+          enum: [utf-8, base64]
+          description: Optional encoding indicator - 'utf-8' for text files, 'base64' for binary files (defaults to 'utf-8')
+    CreateFileDto:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [file, directory]
+          description: Type of node to create
+        content:
+          type: [string, 'null']
+          description: Optional content for file creation (base64-encoded)

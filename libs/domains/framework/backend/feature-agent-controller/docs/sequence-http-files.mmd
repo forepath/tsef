@@ -1,0 +1,78 @@
+sequenceDiagram
+    participant Client as HTTP Client
+    participant API as ClientsController<br/>(/api/clients/:id/agents/:agentId/files)
+    participant FileProxy as ClientAgentFileSystemProxyService
+    participant Repo as ClientsRepository
+    participant Service as ClientsService
+    participant Keycloak as KeycloakTokenService
+    participant Remote as Remote Agent-Manager<br/>(/api/agents/:agentId/files)
+
+    Note over Client,Remote: HTTP API - Proxied File System Operations
+
+    rect rgb(230, 240, 255)
+        Note over Client,Remote: Read File (Proxied)
+        Client->>API: GET /api/clients/{id}/agents/{agentId}/files/{path}
+        API->>FileProxy: readFile(clientId, agentId, filePath)
+        FileProxy->>Repo: findByIdOrThrow(clientId)
+        Repo-->>FileProxy: client entity
+        alt Authentication Type: API_KEY
+            FileProxy->>FileProxy: getAuthHeader(clientId)<br/>Returns: Bearer {apiKey}
+        else Authentication Type: KEYCLOAK
+            FileProxy->>Service: getAccessToken(clientId)
+            Service->>Keycloak: getAccessToken(...)
+            Keycloak-->>Service: JWT token
+            Service-->>FileProxy: JWT token
+            FileProxy->>FileProxy: getAuthHeader(clientId)<br/>Returns: Bearer {token}
+        end
+        FileProxy->>FileProxy: buildAgentFilesApiUrl(endpoint, agentId)
+        FileProxy->>Remote: GET {endpoint}/api/agents/{agentId}/files/{path}<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>FileProxy: 200 OK<br/>{content: base64, encoding: 'utf-8'|'base64'}
+        FileProxy-->>API: FileContentDto
+        API-->>Client: 200 OK<br/>{file content}
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Client,Remote: Write File (Proxied)
+        Client->>API: PUT /api/clients/{id}/agents/{agentId}/files/{path}<br/>{content: base64, encoding?}
+        API->>FileProxy: writeFile(clientId, agentId, filePath, writeFileDto)
+        FileProxy->>Repo: findByIdOrThrow(clientId)
+        Repo-->>FileProxy: client entity
+        FileProxy->>FileProxy: getAuthHeader(clientId)
+        FileProxy->>Remote: PUT {endpoint}/api/agents/{agentId}/files/{path}<br/>Authorization: Bearer {token/apiKey}<br/>{content: base64, encoding?}
+        Remote-->>FileProxy: 204 No Content
+        FileProxy-->>API: void
+        API-->>Client: 204 No Content
+    end
+
+    rect rgb(255, 240, 240)
+        Note over Client,Remote: List Directory (Proxied)
+        Client->>API: GET /api/clients/{id}/agents/{agentId}/files?path={dir}
+        API->>FileProxy: listDirectory(clientId, agentId, path?)
+        FileProxy->>FileProxy: getAuthHeader(clientId)
+        FileProxy->>Remote: GET {endpoint}/api/agents/{agentId}/files?path={dir}<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>FileProxy: 200 OK<br/>[file nodes]
+        FileProxy-->>API: FileNodeDto[]
+        API-->>Client: 200 OK<br/>[file nodes]
+    end
+
+    rect rgb(255, 255, 230)
+        Note over Client,Remote: Create File/Directory (Proxied)
+        Client->>API: POST /api/clients/{id}/agents/{agentId}/files/{path}<br/>{type, content?}
+        API->>FileProxy: createFileOrDirectory(clientId, agentId, filePath, createFileDto)
+        FileProxy->>FileProxy: getAuthHeader(clientId)
+        FileProxy->>Remote: POST {endpoint}/api/agents/{agentId}/files/{path}<br/>Authorization: Bearer {token/apiKey}<br/>{type, content?}
+        Remote-->>FileProxy: 201 Created
+        FileProxy-->>API: void
+        API-->>Client: 201 Created
+    end
+
+    rect rgb(255, 230, 255)
+        Note over Client,Remote: Delete File/Directory (Proxied)
+        Client->>API: DELETE /api/clients/{id}/agents/{agentId}/files/{path}
+        API->>FileProxy: deleteFileOrDirectory(clientId, agentId, filePath)
+        FileProxy->>FileProxy: getAuthHeader(clientId)
+        FileProxy->>Remote: DELETE {endpoint}/api/agents/{agentId}/files/{path}<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>FileProxy: 204 No Content
+        FileProxy-->>API: void
+        API-->>Client: 204 No Content
+    end

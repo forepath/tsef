@@ -9,6 +9,19 @@
   overflow: hidden;
 }
 
+.section__content-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.section__column--editor {
+  flex: 5;
+}
+
 .section__row {
   flex-wrap: nowrap;
   min-height: 0; // Critical for flex scrolling
@@ -227,5 +240,5 @@ span {
 }
 
 .section__column--chat {
-  flex: 2;
+  flex: 2; // Chat takes more space when editor is closed
 }

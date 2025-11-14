@@ -1,0 +1,310 @@
+<div class="file-tree-container d-flex flex-column h-100">
+  <div class="file-tree-header p-2 border-bottom bg-body-tertiary">
+    <div class="d-flex justify-content-between align-items-center">
+      <h6 class="mb-0 fw-semibold">Files</h6>
+      <div class="btn-group btn-group-sm" role="group">
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-dark"
+          [class.active]="creatingItem()?.path === '.' && creatingItem()?.type === 'file'"
+          (click)="onCreateItem('file')"
+          title="New File"
+        >
+          <i class="bi bi-file-earmark-plus"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-dark"
+          [class.active]="creatingItem()?.path === '.' && creatingItem()?.type === 'directory'"
+          (click)="onCreateItem('directory')"
+          title="New Directory"
+        >
+          <i class="bi bi-folder-plus"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-dark" (click)="onRefreshRoot()" title="Refresh">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="file-tree-content flex-grow-1 overflow-auto p-2">
+    @if (rootLoading$ | async) {
+      <div class="d-flex justify-content-center align-items-center p-4">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    } @else {
+      @if (treeNodes().length === 0) {
+        <div class="text-center text-muted p-4">
+          <i class="bi bi-folder-x fs-4 d-block mb-2"></i>
+          <p class="mb-0 small">No files</p>
+        </div>
+        <!-- Show create input at root level if creating at root and tree is empty -->
+        @if (creatingItem()?.path === '.') {
+          <div class="create-item-input px-2 py-1" [style.padding-left.px]="24">
+            <div class="input-group input-group-sm">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [(ngModel)]="newItemName"
+                (keydown.enter)="onConfirmCreate()"
+                (keydown.escape)="onCancelCreate()"
+                [placeholder]="creatingItem()?.type === 'file' ? 'Enter file name...' : 'Enter folder name...'"
+                autofocus
+              />
+              <button class="btn btn-sm btn-primary" type="button" (click)="onConfirmCreate()">
+                <i class="bi bi-check"></i>
+              </button>
+              <button class="btn btn-sm btn-secondary" type="button" (click)="onCancelCreate()">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+        }
+      } @else {
+        <ul class="file-tree list-unstyled mb-0">
+          <!-- Show create input at root level if creating at root -->
+          @if (creatingItem()?.path === '.') {
+            <li>
+              <div class="create-item-input px-2 py-1" [style.padding-left.px]="24">
+                <div class="input-group input-group-sm">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="newItemName"
+                    (keydown.enter)="onConfirmCreate()"
+                    (keydown.escape)="onCancelCreate()"
+                    [placeholder]="creatingItem()?.type === 'file' ? 'Enter file name...' : 'Enter folder name...'"
+                    autofocus
+                  />
+                  <button class="btn btn-sm btn-primary" type="button" (click)="onConfirmCreate()">
+                    <i class="bi bi-check"></i>
+                  </button>
+                  <button class="btn btn-sm btn-secondary" type="button" (click)="onCancelCreate()">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </div>
+              </div>
+            </li>
+          }
+          @for (node of treeNodes(); track node.path; let isLast = $last; let idx = $index) {
+            <li>
+              <ng-container
+                [ngTemplateOutlet]="treeNodeTemplate"
+                [ngTemplateOutletContext]="{
+                  $implicit: node,
+                  level: 0,
+                  isLast: isLast,
+                  hasSiblings: treeNodes().length > 1,
+                  parentChildren: treeNodes(),
+                }"
+              ></ng-container>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+</div>
+
+<!-- Tree Node Template -->
+<ng-template
+  #treeNodeTemplate
+  let-node
+  let-level="level"
+  let-isLast="isLast"
+  let-hasSiblings="hasSiblings"
+  let-parentChildren="parentChildren"
+>
+  <div class="tree-node-wrapper">
+    <div
+      class="tree-node d-flex align-items-center py-1 px-2 rounded"
+      [class.selected]="selectedPath() === node.path"
+      [class.expanded]="node.expanded"
+      [class.has-children]="node.children && node.children.length > 0"
+      [class.creating-in]="creatingItem()?.path === node.path"
+      (click)="onFileClick(node, $event)"
+      (contextmenu)="onContextMenu($event, node)"
+    >
+      <!-- Tree indentation with visual guides -->
+      @if (level > 0) {
+        <div class="tree-indent" [style.width.px]="level * 20">
+          @for (i of getLevelArray(level); track i; let idx = $index) {
+            <div class="tree-indent-line" [class.line-visible]="hasSiblings || idx < level - 1"></div>
+          }
+        </div>
+      }
+
+      <!-- Node content -->
+      <div class="tree-node-content d-flex align-items-center flex-grow-1">
+        @if (node.type === 'directory') {
+          <i
+            class="bi me-2 tree-node-icon"
+            [class.bi-chevron-right]="!node.expanded"
+            [class.bi-chevron-down]="node.expanded"
+            [class.bi-folder]="!node.expanded"
+            [class.bi-folder2-open]="node.expanded"
+          ></i>
+        } @else {
+          <i class="bi me-2 tree-node-icon" [ngClass]="getIcon(node)"></i>
+        }
+        <span class="tree-node-name flex-grow-1 text-truncate" [title]="node.name">{{ node.name }}</span>
+        <div class="btn-group btn-group-sm ms-2" role="group">
+          @if (node.type === 'directory') {
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-dark py-0 px-1"
+              [class.active]="creatingItem()?.path === node.path && creatingItem()?.type === 'file'"
+              (click)="onCreateItem('file', node.path); $event.stopPropagation()"
+              title="New File"
+            >
+              <i class="bi bi-file-earmark-plus"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-dark py-0 px-1"
+              [class.active]="creatingItem()?.path === node.path && creatingItem()?.type === 'directory'"
+              (click)="onCreateItem('directory', node.path); $event.stopPropagation()"
+              title="New Directory"
+            >
+              <i class="bi bi-folder-plus"></i>
+            </button>
+          }
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-danger py-0 px-1"
+            (click)="onDeleteItem(node.path); $event.stopPropagation()"
+            title="Delete"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Item Input (for nested nodes, root level is handled separately in the main template) -->
+    @if (creatingItem()?.path === node.path && node.path !== '.') {
+      <div class="create-item-input px-2 py-1" [style.padding-left.px]="(level + 1) * 20 + 24">
+        <div class="input-group input-group-sm">
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            [(ngModel)]="newItemName"
+            (keydown.enter)="onConfirmCreate()"
+            (keydown.escape)="onCancelCreate()"
+            [placeholder]="creatingItem()?.type === 'file' ? 'Enter file name...' : 'Enter folder name...'"
+            autofocus
+          />
+          <button class="btn btn-sm btn-primary" type="button" (click)="onConfirmCreate()">
+            <i class="bi bi-check"></i>
+          </button>
+          <button class="btn btn-sm btn-secondary" type="button" (click)="onCancelCreate()">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Children -->
+    @if (node.children && node.children.length > 0) {
+      <ul class="list-unstyled mb-0 tree-children">
+        @for (child of node.children; track child.path; let isLast = $last; let idx = $index) {
+          <li>
+            <ng-container
+              [ngTemplateOutlet]="treeNodeTemplate"
+              [ngTemplateOutletContext]="{
+                $implicit: child,
+                level: level + 1,
+                isLast: isLast,
+                hasSiblings: node.children.length > 1,
+                parentChildren: node.children,
+              }"
+            ></ng-container>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</ng-template>
+
+<!-- Context Menu -->
+@if (contextMenuPath() && contextMenuPosition()) {
+  <div
+    class="context-menu dropdown-menu show"
+    [style.position]="'fixed'"
+    [style.left.px]="contextMenuPosition()!.x"
+    [style.top.px]="contextMenuPosition()!.y"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="dropdown-item" (click)="onCreateItem('file', contextMenuPath() || undefined); onCloseContextMenu()">
+      <i class="bi bi-file-earmark-plus me-2"></i>New File
+    </button>
+    <button
+      class="dropdown-item"
+      (click)="onCreateItem('directory', contextMenuPath() || undefined); onCloseContextMenu()"
+    >
+      <i class="bi bi-folder-plus me-2"></i>New Directory
+    </button>
+    @if (contextMenuPath() && findNodeByPath(contextMenuPath()!)?.type === 'directory') {
+      <div class="dropdown-divider"></div>
+      <button class="dropdown-item" (click)="onRefreshFolder(contextMenuPath()!); onCloseContextMenu()">
+        <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+      </button>
+    }
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item text-danger" (click)="onDeleteItem(contextMenuPath()!)">
+      <i class="bi bi-trash me-2"></i>Delete
+    </button>
+  </div>
+}
+
+<!-- Click outside to close context menu -->
+@if (contextMenuPath()) {
+  <div class="context-menu-overlay" (click)="onCloseContextMenu()"></div>
+}
+
+<!-- Delete File/Directory Confirmation Modal -->
+<div
+  class="modal fade"
+  id="deleteFileModal"
+  tabindex="-1"
+  aria-labelledby="deleteFileModalLabel"
+  aria-hidden="true"
+  #deleteFileModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteFileModalLabel">
+          Delete {{ itemToDelete()?.type === 'directory' ? 'Directory' : 'File' }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="itemToDelete.set(null)"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Are you sure you want to delete the {{ itemToDelete()?.type === 'directory' ? 'directory' : 'file' }}
+          <strong>{{ itemToDelete()?.path }}</strong
+          >?
+        </p>
+        <p class="text-danger mb-0">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="itemToDelete.set(null)">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmDeleteItem()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
