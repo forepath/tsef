@@ -562,6 +562,43 @@ export class AgentFileSystemService {
   }
 
   /**
+   * Move a file or directory in agent container.
+   * @param agentId - The UUID of the agent
+   * @param sourcePath - The relative path to the source file/directory (from /app)
+   * @param destinationPath - The relative path to the destination (from /app)
+   * @throws NotFoundException if agent, source file, or destination directory is not found
+   * @throws BadRequestException if paths are invalid
+   */
+  async moveFileOrDirectory(agentId: string, sourcePath: string, destinationPath: string): Promise<void> {
+    await this.agentsService.findOne(agentId);
+    const agentEntity = await this.agentsRepository.findByIdOrThrow(agentId);
+
+    if (!agentEntity.containerId) {
+      throw new NotFoundException(`Agent ${agentId} has no associated container`);
+    }
+
+    const sourceContainerPath = this.buildContainerPath(sourcePath);
+    const destinationContainerPath = this.buildContainerPath(destinationPath);
+
+    try {
+      // Use mv command to move file or directory
+      await this.dockerService.sendCommandToContainer(
+        agentEntity.containerId,
+        `mv ${this.escapeForShell(sourceContainerPath)} ${this.escapeForShell(destinationContainerPath)}`,
+      );
+
+      this.logger.debug(`Moved: ${sourcePath} to ${destinationPath} for agent ${agentId}`);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      if (err.message?.includes('No such file') || err.message?.includes('not found')) {
+        throw new NotFoundException(`Source file or directory not found: ${sourcePath}`);
+      }
+      this.logger.error(`Error moving ${sourcePath} to ${destinationPath} for agent ${agentId}: ${err.message}`);
+      throw error;
+    }
+  }
+
+  /**
    * Escape a string for safe shell usage.
    * @param str - The string to escape
    * @returns The escaped string safe for shell usage

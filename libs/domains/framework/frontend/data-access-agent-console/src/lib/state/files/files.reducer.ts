@@ -13,6 +13,9 @@ import {
   listDirectory,
   listDirectoryFailure,
   listDirectorySuccess,
+  moveFileOrDirectory,
+  moveFileOrDirectoryFailure,
+  moveFileOrDirectorySuccess,
   moveTabToFront,
   openFileTab,
   pinFileTab,
@@ -42,6 +45,7 @@ export interface FilesState {
   listing: Record<string, boolean>;
   creating: Record<string, boolean>;
   deleting: Record<string, boolean>;
+  moving: Record<string, boolean>;
   // Errors keyed by clientId:agentId:filePath or clientId:agentId:directoryPath
   errors: Record<string, string | null>;
   // Open tabs keyed by clientId:agentId
@@ -56,6 +60,7 @@ export const initialFilesState: FilesState = {
   listing: {},
   creating: {},
   deleting: {},
+  moving: {},
   errors: {},
   openTabs: {},
 };
@@ -234,6 +239,60 @@ export const filesReducer = createReducer(
     return {
       ...state,
       deleting: { ...state.deleting, [key]: false },
+      errors: { ...state.errors, [key]: error },
+    };
+  }),
+  // Move File/Directory
+  on(moveFileOrDirectory, (state, { clientId, agentId, sourcePath }) => {
+    const key = getFileKey(clientId, agentId, sourcePath);
+    return {
+      ...state,
+      moving: { ...state.moving, [key]: true },
+      errors: { ...state.errors, [key]: null },
+    };
+  }),
+  on(moveFileOrDirectorySuccess, (state, { clientId, agentId, sourcePath, destinationPath }) => {
+    const sourceKey = getFileKey(clientId, agentId, sourcePath);
+    const destinationKey = getFileKey(clientId, agentId, destinationPath);
+    // Remove source file content from cache
+    const { [sourceKey]: removedSourceContent, ...fileContents } = state.fileContents;
+    // Move file content to destination if it exists
+    const updatedFileContents = removedSourceContent
+      ? { ...fileContents, [destinationKey]: removedSourceContent }
+      : fileContents;
+    // Remove source and destination directory listings (invalidate cache)
+    const sourceParentPath = sourcePath.split('/').slice(0, -1).join('/') || '.';
+    const sourceParentKey = getFileKey(clientId, agentId, sourceParentPath);
+    const destinationParentPath = destinationPath.split('/').slice(0, -1).join('/') || '.';
+    const destinationParentKey = getFileKey(clientId, agentId, destinationParentPath);
+    const {
+      [sourceParentKey]: removedSourceParent,
+      [destinationParentKey]: removedDestParent,
+      ...directoryListings
+    } = state.directoryListings;
+    // Update open tabs if the moved file is in a tab
+    const clientAgentKey = getClientAgentKey(clientId, agentId);
+    const currentTabs = state.openTabs[clientAgentKey] || [];
+    const updatedTabs = currentTabs.map((tab) =>
+      tab.filePath === sourcePath ? { ...tab, filePath: destinationPath } : tab,
+    );
+    return {
+      ...state,
+      fileContents: updatedFileContents,
+      directoryListings,
+      moving: { ...state.moving, [sourceKey]: false },
+      errors: { ...state.errors, [sourceKey]: null },
+      openTabs: {
+        ...state.openTabs,
+        [clientAgentKey]: updatedTabs,
+      },
+    };
+  }),
+  on(moveFileOrDirectoryFailure, (state, { clientId, agentId, sourcePath, error }) => {
+    const key = getFileKey(clientId, agentId, sourcePath);
+    return {
+      ...state,
+      moving: { ...state.moving, [key]: false },
       errors: { ...state.errors, [key]: error },
     };
   }),

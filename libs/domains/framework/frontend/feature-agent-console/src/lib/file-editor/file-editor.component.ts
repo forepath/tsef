@@ -9,21 +9,23 @@ import {
   inject,
   input,
   OnDestroy,
+  output,
   signal,
   ViewChild,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FilesFacade,
+  moveFileOrDirectorySuccess,
   type CreateFileDto,
   type FileContentDto,
   type OpenTab,
   type WriteFileDto,
 } from '@forepath/framework/frontend/data-access-agent-console';
+import { Actions, ofType } from '@ngrx/effects';
 import { combineLatest, filter, map, Observable, of, switchMap, take } from 'rxjs';
 import { FileTreeComponent } from './file-tree/file-tree.component';
 import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-editor-wrapper.component';
-import { output } from '@angular/core';
 
 @Component({
   selector: 'framework-file-editor',
@@ -35,6 +37,7 @@ import { output } from '@angular/core';
 export class FileEditorComponent implements OnDestroy, AfterViewInit {
   private readonly filesFacade = inject(FilesFacade);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly actions$ = inject(Actions);
 
   @ViewChild('tabsContainer', { static: false }) tabsContainerRef?: ElementRef<HTMLDivElement>;
   @ViewChild('tabsWrapper', { static: false }) tabsWrapperRef?: ElementRef<HTMLDivElement>;
@@ -200,6 +203,37 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
             }, 200);
           });
         });
+      }
+    });
+
+    // Listen for file move/rename success and update selected file if it was moved
+    this.actions$.pipe(ofType(moveFileOrDirectorySuccess), takeUntilDestroyed(this.destroyRef)).subscribe((action) => {
+      const currentSelectedPath = this.selectedFilePath();
+      const clientId = this.clientId();
+      const agentId = this.agentId();
+
+      // Check if the moved file is currently selected
+      if (currentSelectedPath === action.sourcePath && clientId === action.clientId && agentId === action.agentId) {
+        // Update selected file path to the new destination
+        this.selectedFilePath.set(action.destinationPath);
+
+        // Move dirty state from old path to new path if file was dirty
+        const wasDirty = this.dirtyFiles().has(action.sourcePath);
+        if (wasDirty) {
+          this.dirtyFiles.update((dirty) => {
+            const newDirty = new Set(dirty);
+            newDirty.delete(action.sourcePath);
+            newDirty.add(action.destinationPath);
+            return newDirty;
+          });
+        }
+
+        // Update lastLoadedFilePath to trigger content reload
+        this.lastLoadedFilePath.set(null);
+
+        // Load the file content at the new location
+        // The effect will automatically load it when selectedFilePath changes
+        this.filesFacade.readFile(clientId, agentId, action.destinationPath);
       }
     });
   }

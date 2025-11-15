@@ -12,6 +12,9 @@ import {
   listDirectory,
   listDirectoryFailure,
   listDirectorySuccess,
+  moveFileOrDirectory,
+  moveFileOrDirectoryFailure,
+  moveFileOrDirectorySuccess,
   moveTabToFront,
   openFileTab,
   pinFileTab,
@@ -331,6 +334,122 @@ describe('filesReducer', () => {
 
       expect(newState.errors[key]).toBe('Delete failed');
       expect(newState.deleting[key]).toBe(false);
+    });
+  });
+
+  describe('moveFileOrDirectory', () => {
+    it('should set moving to true and clear error', () => {
+      const sourcePath = 'source-file.txt';
+      const key = `${clientId}:${agentId}:${sourcePath}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        errors: { [key]: 'Previous error' },
+      };
+
+      const newState = filesReducer(
+        state,
+        moveFileOrDirectory({
+          clientId,
+          agentId,
+          sourcePath,
+          moveFileDto: { destination: 'dest-file.txt' },
+        }),
+      );
+
+      expect(newState.moving[key]).toBe(true);
+      expect(newState.errors[key]).toBeNull();
+    });
+  });
+
+  describe('moveFileOrDirectorySuccess', () => {
+    it('should move file content to destination and invalidate parent directory listings', () => {
+      const sourcePath = 'source-file.txt';
+      const destinationPath = 'dest-file.txt';
+      const sourceKey = `${clientId}:${agentId}:${sourcePath}`;
+      const destinationKey = `${clientId}:${agentId}:${destinationPath}`;
+      const sourceParentPath = '.';
+      const sourceParentKey = `${clientId}:${agentId}:${sourceParentPath}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        fileContents: { [sourceKey]: mockFileContent },
+        directoryListings: { [sourceParentKey]: mockFileNodes },
+        moving: { [sourceKey]: true },
+      };
+
+      const newState = filesReducer(
+        state,
+        moveFileOrDirectorySuccess({ clientId, agentId, sourcePath, destinationPath }),
+      );
+
+      expect(newState.fileContents[sourceKey]).toBeUndefined();
+      expect(newState.fileContents[destinationKey]).toEqual(mockFileContent);
+      expect(newState.directoryListings[sourceParentKey]).toBeUndefined();
+      expect(newState.moving[sourceKey]).toBe(false);
+      expect(newState.errors[sourceKey]).toBeNull();
+    });
+
+    it('should update open tabs when file is moved', () => {
+      const sourcePath = 'source-file.txt';
+      const destinationPath = 'dest-file.txt';
+      const sourceKey = `${clientId}:${agentId}:${sourcePath}`;
+      const clientAgentKey = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [clientAgentKey]: [{ filePath: sourcePath, pinned: true }],
+        },
+        moving: { [sourceKey]: true },
+      };
+
+      const newState = filesReducer(
+        state,
+        moveFileOrDirectorySuccess({ clientId, agentId, sourcePath, destinationPath }),
+      );
+
+      expect(newState.openTabs[clientAgentKey]).toEqual([{ filePath: destinationPath, pinned: true }]);
+    });
+
+    it('should handle move when file content does not exist in cache', () => {
+      const sourcePath = 'source-file.txt';
+      const destinationPath = 'dest-file.txt';
+      const sourceKey = `${clientId}:${agentId}:${sourcePath}`;
+      const destinationKey = `${clientId}:${agentId}:${destinationPath}`;
+      const sourceParentPath = '.';
+      const sourceParentKey = `${clientId}:${agentId}:${sourceParentPath}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        directoryListings: { [sourceParentKey]: mockFileNodes },
+        moving: { [sourceKey]: true },
+      };
+
+      const newState = filesReducer(
+        state,
+        moveFileOrDirectorySuccess({ clientId, agentId, sourcePath, destinationPath }),
+      );
+
+      expect(newState.fileContents[sourceKey]).toBeUndefined();
+      expect(newState.fileContents[destinationKey]).toBeUndefined();
+      expect(newState.directoryListings[sourceParentKey]).toBeUndefined();
+      expect(newState.moving[sourceKey]).toBe(false);
+    });
+  });
+
+  describe('moveFileOrDirectoryFailure', () => {
+    it('should set error and set moving to false', () => {
+      const sourcePath = 'source-file.txt';
+      const key = `${clientId}:${agentId}:${sourcePath}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        moving: { [key]: true },
+      };
+
+      const newState = filesReducer(
+        state,
+        moveFileOrDirectoryFailure({ clientId, agentId, sourcePath, error: 'Move failed' }),
+      );
+
+      expect(newState.errors[key]).toBe('Move failed');
+      expect(newState.moving[key]).toBe(false);
     });
   });
 

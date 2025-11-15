@@ -5,6 +5,7 @@ import {
   CreateFileDto,
   FileContentDto,
   FileNodeDto,
+  MoveFileDto,
   UpdateAgentDto,
   WriteFileDto,
 } from '@forepath/framework/backend/feature-agent-manager';
@@ -19,6 +20,7 @@ import {
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -312,5 +314,39 @@ export class ClientsController {
       throw new BadRequestException('File path is required');
     }
     await this.clientAgentFileSystemProxyService.deleteFileOrDirectory(id, agentId, normalizedPath);
+  }
+
+  /**
+   * Move a file or directory in agent container via client proxy.
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param path - The source file path (wildcard parameter for nested paths)
+   * @param moveFileDto - The move operation data (destination path)
+   */
+  @Patch(':id/agents/:agentId/files/*path')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async moveFileOrDirectory(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('path') path: string | string[] | Record<string, unknown> | undefined,
+    @Body() moveFileDto: MoveFileDto,
+  ): Promise<void> {
+    // Normalize path: wildcard parameters can be string, array, object, or undefined
+    let normalizedPath: string | undefined;
+    if (typeof path === 'string') {
+      normalizedPath = path;
+    } else if (Array.isArray(path)) {
+      normalizedPath = path.join('/');
+    } else if (path && typeof path === 'object') {
+      // If it's an object, we can't determine the path - throw error
+      throw new BadRequestException('File path must be a string or array, got object');
+    }
+    if (!normalizedPath) {
+      throw new BadRequestException('File path is required');
+    }
+    if (!moveFileDto.destination) {
+      throw new BadRequestException('Destination path is required');
+    }
+    await this.clientAgentFileSystemProxyService.moveFileOrDirectory(id, agentId, normalizedPath, moveFileDto);
   }
 }

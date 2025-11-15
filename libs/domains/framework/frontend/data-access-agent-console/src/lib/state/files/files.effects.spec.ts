@@ -13,6 +13,9 @@ import {
   listDirectory,
   listDirectoryFailure,
   listDirectorySuccess,
+  moveFileOrDirectory,
+  moveFileOrDirectoryFailure,
+  moveFileOrDirectorySuccess,
   readFile,
   readFileFailure,
   readFileSuccess,
@@ -20,8 +23,15 @@ import {
   writeFileFailure,
   writeFileSuccess,
 } from './files.actions';
-import { createFileOrDirectory$, deleteFileOrDirectory$, listDirectory$, readFile$, writeFile$ } from './files.effects';
-import type { CreateFileDto, FileContentDto, FileNodeDto, WriteFileDto } from './files.types';
+import {
+  createFileOrDirectory$,
+  deleteFileOrDirectory$,
+  listDirectory$,
+  moveFileOrDirectory$,
+  readFile$,
+  writeFile$,
+} from './files.effects';
+import type { CreateFileDto, FileContentDto, FileNodeDto, MoveFileDto, WriteFileDto } from './files.types';
 
 describe('FilesEffects', () => {
   let actions$: Actions;
@@ -51,6 +61,7 @@ describe('FilesEffects', () => {
       listDirectory: jest.fn(),
       createFileOrDirectory: jest.fn(),
       deleteFileOrDirectory: jest.fn(),
+      moveFileOrDirectory: jest.fn(),
     } as any;
 
     TestBed.configureTestingModule({
@@ -243,6 +254,48 @@ describe('FilesEffects', () => {
       filesService.deleteFileOrDirectory.mockReturnValue(throwError(() => error));
 
       deleteFileOrDirectory$(actions$, filesService).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        done();
+      });
+    });
+  });
+
+  describe('moveFileOrDirectory$', () => {
+    it('should return moveFileOrDirectorySuccess on success', (done) => {
+      const sourcePath = 'source-file.txt';
+      const moveDto: MoveFileDto = {
+        destination: 'dest-file.txt',
+      };
+      const action = moveFileOrDirectory({ clientId, agentId, sourcePath, moveFileDto: moveDto });
+      const outcome = moveFileOrDirectorySuccess({
+        clientId,
+        agentId,
+        sourcePath,
+        destinationPath: moveDto.destination,
+      });
+
+      actions$ = of(action);
+      filesService.moveFileOrDirectory.mockReturnValue(of(undefined));
+
+      moveFileOrDirectory$(actions$, filesService).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        done();
+      });
+    });
+
+    it('should return moveFileOrDirectoryFailure on error', (done) => {
+      const sourcePath = 'source-file.txt';
+      const moveDto: MoveFileDto = {
+        destination: 'dest-file.txt',
+      };
+      const action = moveFileOrDirectory({ clientId, agentId, sourcePath, moveFileDto: moveDto });
+      const error = new Error('Move failed');
+      const outcome = moveFileOrDirectoryFailure({ clientId, agentId, sourcePath, error: 'Move failed' });
+
+      actions$ = of(action);
+      filesService.moveFileOrDirectory.mockReturnValue(throwError(() => error));
+
+      moveFileOrDirectory$(actions$, filesService).subscribe((result) => {
         expect(result).toEqual(outcome);
         done();
       });

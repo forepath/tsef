@@ -1,5 +1,12 @@
 import { createAction, props } from '@ngrx/store';
-import type { CreateFileDto, FileContentDto, FileNodeDto, ListDirectoryParams, WriteFileDto } from './files.types';
+import type {
+  CreateFileDto,
+  FileContentDto,
+  FileNodeDto,
+  ListDirectoryParams,
+  MoveFileDto,
+  WriteFileDto,
+} from './files.types';
 
 // Read File Actions
 export const readFile = createAction(
@@ -79,6 +86,22 @@ export const deleteFileOrDirectorySuccess = createAction(
 export const deleteFileOrDirectoryFailure = createAction(
   '[Files] Delete File Or Directory Failure',
   props<{ clientId: string; agentId: string; filePath: string; error: string }>(),
+);
+
+// Move File/Directory Actions
+export const moveFileOrDirectory = createAction(
+  '[Files] Move File Or Directory',
+  props<{ clientId: string; agentId: string; sourcePath: string; moveFileDto: MoveFileDto }>(),
+);
+
+export const moveFileOrDirectorySuccess = createAction(
+  '[Files] Move File Or Directory Success',
+  props<{ clientId: string; agentId: string; sourcePath: string; destinationPath: string }>(),
+);
+
+export const moveFileOrDirectoryFailure = createAction(
+  '[Files] Move File Or Directory Failure',
+  props<{ clientId: string; agentId: string; sourcePath: string; error: string }>(),
 );
 
 // Clear file content from cache

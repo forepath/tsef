@@ -25,6 +25,15 @@
   flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+
+  &.drag-over-root {
+    background-color: var(--bs-info-bg-subtle);
+    border: 2px dashed var(--bs-info);
+    border-radius: 0.25rem;
+  }
 }
 
 .tree-node-wrapper {
@@ -52,6 +61,17 @@
     background-color: var(--bs-primary-bg-subtle);
     border-left: 3px solid var(--bs-primary);
     animation: creating-pulse 2s ease-in-out infinite;
+  }
+
+  &.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+  }
+
+  &.drag-over {
+    background-color: var(--bs-info-bg-subtle);
+    border: 2px dashed var(--bs-info);
+    border-radius: 0.25rem;
   }
 }
 
@@ -95,6 +115,11 @@
 
 .tree-node {
   height: 32px;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
 
   .btn-group {
     opacity: 0;
@@ -104,6 +129,13 @@
   &:hover {
     .btn-group {
       opacity: 1;
+    }
+  }
+
+  &.dragging {
+    cursor: grabbing;
+    .btn-group {
+      opacity: 0;
     }
   }
 }

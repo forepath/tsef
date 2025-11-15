@@ -11,6 +11,7 @@ export * from './lib/dto/update-agent.dto';
 export * from './lib/dto/create-file.dto';
 export * from './lib/dto/file-content.dto';
 export * from './lib/dto/file-node.dto';
+export * from './lib/dto/move-file.dto';
 export * from './lib/dto/write-file.dto';
 export * from './lib/entities/agent.entity';
 export * from './lib/entities/agent-message.entity';

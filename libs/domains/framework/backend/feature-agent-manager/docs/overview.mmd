@@ -11,12 +11,13 @@ flowchart TB
 
     subgraph FILES["📁 HTTP REST API - File System (/api/agents/:id/files)"]
         direction TB
-        FILES_USE["Use Case: File System Operations<br/>Read, Write, List, Create, Delete<br/>Container Files at /app"]
+        FILES_USE["Use Case: File System Operations<br/>Read, Write, List, Create, Delete, Move<br/>Container Files at /app"]
         FILES_USE --> FILES1["📖 Read File<br/>GET /api/agents/:id/files/*path<br/>Returns: File Content"]
         FILES_USE --> FILES2["✍️ Write File<br/>PUT /api/agents/:id/files/*path<br/>Returns: 204 No Content"]
         FILES_USE --> FILES3["📂 List Directory<br/>GET /api/agents/:id/files?path=<br/>Returns: File Nodes"]
         FILES_USE --> FILES4["➕ Create File/Dir<br/>POST /api/agents/:id/files/*path<br/>Returns: 201 Created"]
         FILES_USE --> FILES5["🗑️ Delete File/Dir<br/>DELETE /api/agents/:id/files/*path<br/>Returns: 204 No Content"]
+        FILES_USE --> FILES6["📦 Move File/Dir<br/>PATCH /api/agents/:id/files/*path<br/>Returns: 204 No Content"]
     end
 
     subgraph WS["🔶 WebSocket Gateway (namespace: /agents)"]

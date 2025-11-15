@@ -9,6 +9,7 @@ import {
   createFileOrDirectory,
   deleteFileOrDirectory,
   listDirectory,
+  moveFileOrDirectory,
   moveTabToFront,
   openFileTab,
   pinFileTab,
@@ -25,11 +26,19 @@ import {
   selectIsCreatingFile,
   selectIsDeletingFile,
   selectIsListingDirectory,
+  selectIsMovingFile,
   selectIsReadingFile,
   selectIsWritingFile,
   selectOpenTabsForClientAgent,
 } from './files.selectors';
-import type { CreateFileDto, FileContentDto, FileNodeDto, ListDirectoryParams, WriteFileDto } from './files.types';
+import type {
+  CreateFileDto,
+  FileContentDto,
+  FileNodeDto,
+  ListDirectoryParams,
+  MoveFileDto,
+  WriteFileDto,
+} from './files.types';
 import type { OpenTab } from './files.reducer';
 
 /**
@@ -122,6 +131,17 @@ export class FilesFacade {
   }
 
   /**
+   * Get loading state for moving a file/directory.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @param filePath - The file path
+   * @returns Observable of loading state
+   */
+  isMovingFile$(clientId: string, agentId: string, filePath: string): Observable<boolean> {
+    return this.store.select(selectIsMovingFile(clientId, agentId, filePath));
+  }
+
+  /**
    * Get combined loading state for any file operation.
    * @param clientId - The client ID
    * @param agentId - The agent ID
@@ -204,6 +224,17 @@ export class FilesFacade {
    */
   deleteFileOrDirectory(clientId: string, agentId: string, filePath: string): void {
     this.store.dispatch(deleteFileOrDirectory({ clientId, agentId, filePath }));
+  }
+
+  /**
+   * Move a file or directory in agent container.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @param sourcePath - The source file path relative to /app
+   * @param moveFileDto - The move operation data (destination path)
+   */
+  moveFileOrDirectory(clientId: string, agentId: string, sourcePath: string, moveFileDto: MoveFileDto): void {
+    this.store.dispatch(moveFileOrDirectory({ clientId, agentId, sourcePath, moveFileDto }));
   }
 
   /**

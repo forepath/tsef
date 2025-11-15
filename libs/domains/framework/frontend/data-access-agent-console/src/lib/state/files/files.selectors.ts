@@ -12,6 +12,7 @@ export const selectFilesWriting = createSelector(selectFilesState, (state) => st
 export const selectFilesListing = createSelector(selectFilesState, (state) => state.listing);
 export const selectFilesCreating = createSelector(selectFilesState, (state) => state.creating);
 export const selectFilesDeleting = createSelector(selectFilesState, (state) => state.deleting);
+export const selectFilesMoving = createSelector(selectFilesState, (state) => state.moving);
 export const selectFilesErrors = createSelector(selectFilesState, (state) => state.errors);
 
 /**
@@ -66,6 +67,12 @@ export const selectIsDeletingFile = (clientId: string, agentId: string, filePath
     return deleting[key] ?? false;
   });
 
+export const selectIsMovingFile = (clientId: string, agentId: string, filePath: string) =>
+  createSelector(selectFilesMoving, (moving) => {
+    const key = getFileKey(clientId, agentId, filePath);
+    return moving[key] ?? false;
+  });
+
 // Error selectors (factory functions)
 export const selectFileError = (clientId: string, agentId: string, filePath: string) =>
   createSelector(selectFilesErrors, (errors) => {
@@ -80,7 +87,8 @@ export const selectFileOperationLoading = (clientId: string, agentId: string, fi
     selectIsWritingFile(clientId, agentId, filePath),
     selectIsCreatingFile(clientId, agentId, filePath),
     selectIsDeletingFile(clientId, agentId, filePath),
-    (reading, writing, creating, deleting) => reading || writing || creating || deleting,
+    selectIsMovingFile(clientId, agentId, filePath),
+    (reading, writing, creating, deleting, moving) => reading || writing || creating || deleting || moving,
   );
 
 // Combined loading selector for a specific directory operation
