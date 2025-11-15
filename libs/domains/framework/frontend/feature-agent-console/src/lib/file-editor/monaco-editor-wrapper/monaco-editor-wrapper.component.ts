@@ -65,7 +65,7 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     language: this.language(),
     automaticLayout: true,
     minimap: { enabled: true },
-    scrollBeyondLastLine: false,
+    scrollBeyondLastLine: true,
     fontSize: 14,
     lineNumbers: 'on' as const,
     wordWrap: 'on' as const,
