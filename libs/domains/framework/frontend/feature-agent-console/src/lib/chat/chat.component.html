@@ -3,8 +3,12 @@
   @if (editorOpen() && (activeClientId$ | async) && (selectedAgent$ | async)) {
     <div class="editor-toolbar-container border-bottom bg-body-tertiary">
       <div class="editor-toolbar px-2 py-3 d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-          <span class="fw-bold">Agent Cloud IDE</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold text-uppercase">Agenstra</span>
+          <span
+            class="badge bg-primary border border-2 border-primary bg-transparent text-primary text-uppercase small editor-toolbar-badge"
+            >Studio</span
+          >
         </div>
         <div class="d-flex align-items-center gap-2">
           <div class="btn-group btn-group-sm" role="group">
