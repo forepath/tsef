@@ -4,10 +4,16 @@ import { of } from 'rxjs';
 import {
   clearDirectoryListing,
   clearFileContent,
+  clearOpenTabs,
+  closeFileTab,
   createFileOrDirectory,
   deleteFileOrDirectory,
   listDirectory,
+  moveTabToFront,
+  openFileTab,
+  pinFileTab,
   readFile,
+  unpinFileTab,
   writeFile,
 } from './files.actions';
 import { FilesFacade } from './files.facade';
@@ -239,6 +245,67 @@ describe('FilesFacade', () => {
       facade.clearDirectoryListing(clientId, agentId, directoryPath);
 
       expect(store.dispatch).toHaveBeenCalledWith(clearDirectoryListing({ clientId, agentId, directoryPath }));
+    });
+  });
+
+  describe('Tab Management Methods', () => {
+    it('should return open tabs observable', (done) => {
+      const mockTabs = [
+        { filePath: 'file1.txt', pinned: false },
+        { filePath: 'file2.txt', pinned: true },
+      ];
+      store.select.mockReturnValue(of(mockTabs));
+
+      facade.getOpenTabs$(clientId, agentId).subscribe((result) => {
+        expect(result).toEqual(mockTabs);
+        expect(store.select).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('should return empty array when no tabs exist', (done) => {
+      store.select.mockReturnValue(of([]));
+
+      facade.getOpenTabs$(clientId, agentId).subscribe((result) => {
+        expect(result).toEqual([]);
+        done();
+      });
+    });
+
+    it('should dispatch openFileTab action', () => {
+      facade.openFileTab(clientId, agentId, filePath);
+
+      expect(store.dispatch).toHaveBeenCalledWith(openFileTab({ clientId, agentId, filePath }));
+    });
+
+    it('should dispatch closeFileTab action', () => {
+      facade.closeFileTab(clientId, agentId, filePath);
+
+      expect(store.dispatch).toHaveBeenCalledWith(closeFileTab({ clientId, agentId, filePath }));
+    });
+
+    it('should dispatch pinFileTab action', () => {
+      facade.pinFileTab(clientId, agentId, filePath);
+
+      expect(store.dispatch).toHaveBeenCalledWith(pinFileTab({ clientId, agentId, filePath }));
+    });
+
+    it('should dispatch unpinFileTab action', () => {
+      facade.unpinFileTab(clientId, agentId, filePath);
+
+      expect(store.dispatch).toHaveBeenCalledWith(unpinFileTab({ clientId, agentId, filePath }));
+    });
+
+    it('should dispatch moveTabToFront action', () => {
+      facade.moveTabToFront(clientId, agentId, filePath);
+
+      expect(store.dispatch).toHaveBeenCalledWith(moveTabToFront({ clientId, agentId, filePath }));
+    });
+
+    it('should dispatch clearOpenTabs action', () => {
+      facade.clearOpenTabs(clientId, agentId);
+
+      expect(store.dispatch).toHaveBeenCalledWith(clearOpenTabs({ clientId, agentId }));
     });
   });
 

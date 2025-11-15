@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import type { FileContentDto, FileNodeDto } from './files.types';
-import type { FilesState } from './files.reducer';
+import type { FilesState, OpenTab } from './files.reducer';
 
 export const selectFilesState = createFeatureSelector<FilesState>('files');
 
@@ -86,3 +86,18 @@ export const selectFileOperationLoading = (clientId: string, agentId: string, fi
 // Combined loading selector for a specific directory operation
 export const selectDirectoryOperationLoading = (clientId: string, agentId: string, directoryPath: string) =>
   createSelector(selectIsListingDirectory(clientId, agentId, directoryPath), (listing) => listing);
+
+// Open tabs selectors
+export const selectOpenTabs = createSelector(selectFilesState, (state) => state.openTabs);
+
+/**
+ * Get open tabs for a specific client and agent.
+ * @param clientId - The client ID
+ * @param agentId - The agent ID
+ * @returns Selector that returns array of open tabs
+ */
+export const selectOpenTabsForClientAgent = (clientId: string, agentId: string) =>
+  createSelector(selectOpenTabs, (openTabs) => {
+    const key = `${clientId}:${agentId}`;
+    return openTabs[key] || [];
+  });

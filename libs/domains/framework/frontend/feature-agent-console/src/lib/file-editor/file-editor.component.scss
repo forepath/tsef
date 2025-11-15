@@ -33,6 +33,143 @@
   overflow: hidden;
 }
 
+.file-editor-tabs-container {
+  flex-shrink: 0;
+  height: 48px;
+  overflow: visible;
+  background-color: var(--bs-body-bg);
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--bs-border-color);
+    z-index: 0;
+  }
+}
+
+.file-editor-tabs-wrapper {
+  height: 48px;
+  width: 100%;
+  overflow: visible;
+}
+
+.file-editor-tabs {
+  height: 48px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.file-editor-more-button {
+  flex-shrink: 0;
+  height: 48px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: var(--bs-body-color);
+  font-size: 0.875rem;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--bs-primary);
+  border-radius: 0;
+  position: relative;
+  z-index: 1;
+
+  &:hover,
+  &:focus {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-tertiary-bg);
+  }
+
+  &::after {
+    display: none;
+  }
+}
+
+.file-editor-tabs-container {
+  .dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+
+    .dropdown-item {
+      &.active {
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+      }
+
+      .btn-close {
+        opacity: 0.5;
+        transition: opacity 0.15s ease-in-out;
+        font-size: 0.65rem;
+        width: 1rem;
+        height: 1rem;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+.file-editor-tab {
+  display: inline-flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 12px;
+  border-right: 1px solid var(--bs-border-color);
+  border-bottom: 1px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease-in-out;
+  white-space: nowrap;
+  min-width: fit-content;
+
+  &:hover {
+    background-color: var(--bs-body-tertiary-bg);
+  }
+
+  &.active {
+    background-color: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-body-bg);
+    border-top: 1px solid var(--bs-border-color);
+    position: relative;
+    z-index: 1;
+  }
+
+  &.pinned {
+    font-style: normal;
+  }
+
+  span {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-close {
+    opacity: 0.5;
+    transition: opacity 0.15s ease-in-out;
+    font-size: 0.65rem;
+    width: 1rem;
+    height: 1rem;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
 .editor-header {
   flex-shrink: 0;
 }

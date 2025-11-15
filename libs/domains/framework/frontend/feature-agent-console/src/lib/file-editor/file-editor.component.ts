@@ -1,10 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  OnDestroy,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FilesFacade,
   type CreateFileDto,
   type FileContentDto,
+  type OpenTab,
   type WriteFileDto,
 } from '@forepath/framework/frontend/data-access-agent-console';
 import { combineLatest, filter, map, Observable, of, switchMap, take } from 'rxjs';
@@ -18,9 +31,12 @@ import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-edi
   styleUrls: ['./file-editor.component.scss'],
   standalone: true,
 })
-export class FileEditorComponent {
+export class FileEditorComponent implements OnDestroy, AfterViewInit {
   private readonly filesFacade = inject(FilesFacade);
   private readonly destroyRef = inject(DestroyRef);
+
+  @ViewChild('tabsContainer', { static: false }) tabsContainerRef?: ElementRef<HTMLDivElement>;
+  @ViewChild('tabsWrapper', { static: false }) tabsWrapperRef?: ElementRef<HTMLDivElement>;
 
   // Inputs
   clientId = input.required<string>();
@@ -32,6 +48,10 @@ export class FileEditorComponent {
   dirtyFiles = signal<Set<string>>(new Set());
   editorContent = signal<string>('');
   lastLoadedFilePath = signal<string | null>(null);
+  visibleTabs = signal<OpenTab[]>([]);
+  overflowedTabs = signal<OpenTab[]>([]);
+  showMoreFilesDropdown = signal<boolean>(false);
+  private allTabs = signal<OpenTab[]>([]);
 
   // Convert signals to observables
   private readonly selectedFilePath$ = toObservable(this.selectedFilePath);
@@ -97,6 +117,18 @@ export class FileEditorComponent {
     initialValue: null,
   });
 
+  // Open tabs
+  readonly openTabs$: Observable<OpenTab[]> = combineLatest([this.clientId$, this.agentId$]).pipe(
+    switchMap(([clientId, agentId]) => {
+      if (!clientId || !agentId) {
+        return of([]);
+      }
+      return this.filesFacade.getOpenTabs$(clientId, agentId);
+    }),
+  );
+
+  private resizeObserver?: ResizeObserver;
+
   constructor() {
     // Load file when selected
     effect(() => {
@@ -120,6 +152,47 @@ export class FileEditorComponent {
         this.lastLoadedFilePath.set(filePath);
       }
     });
+
+    // Calculate visible tabs when tabs change
+    effect(() => {
+      this.openTabs$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((tabs) => {
+        this.allTabs.set(tabs);
+        // Initially show all tabs, then calculate visible ones after DOM updates
+        this.visibleTabs.set(tabs);
+        // Use requestAnimationFrame to ensure DOM is updated
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            this.calculateVisibleTabs();
+            // If the selected file is in overflowed tabs, move it to front
+            const selectedPath = this.selectedFilePath();
+            if (selectedPath && this.clientId() && this.agentId()) {
+              const overflowed = this.overflowedTabs();
+              const isOverflowed = overflowed.some((tab) => tab.filePath === selectedPath);
+              if (isOverflowed) {
+                this.filesFacade.moveTabToFront(this.clientId(), this.agentId(), selectedPath);
+                // Recalculate after moving
+                setTimeout(() => this.calculateVisibleTabs(), 50);
+              }
+            }
+          }, 0);
+        });
+      });
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Set up ResizeObserver to detect overflow
+    if (this.tabsContainerRef?.nativeElement && this.tabsWrapperRef?.nativeElement) {
+      this.resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(() => {
+          setTimeout(() => this.calculateVisibleTabs(), 0);
+        });
+      });
+      this.resizeObserver.observe(this.tabsContainerRef.nativeElement);
+      this.resizeObserver.observe(this.tabsWrapperRef.nativeElement);
+    }
+    // Initial calculation after view init
+    setTimeout(() => this.calculateVisibleTabs(), 100);
   }
 
   onFileSelect(filePath: string): void {
@@ -135,6 +208,12 @@ export class FileEditorComponent {
       newDirty.delete(currentPath || '');
       return newDirty;
     });
+
+    // Open tab when file is selected
+    // The effect will automatically move it to front if it ends up in overflow
+    if (this.clientId() && this.agentId()) {
+      this.filesFacade.openFileTab(this.clientId(), this.agentId(), filePath);
+    }
   }
 
   onContentChange(content: string | Event): void {
@@ -310,6 +389,146 @@ export class FileEditorComponent {
     // Reload currently selected file if it exists
     if (currentSelectedFile) {
       this.filesFacade.readFile(clientId, agentId, currentSelectedFile);
+    }
+  }
+
+  getFileName(filePath: string): string {
+    return filePath.split('/').pop() || filePath;
+  }
+
+  onTabClick(filePath: string): void {
+    this.selectedFilePath.set(filePath);
+  }
+
+  onTabClickFromDropdown(filePath: string, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Move the tab to the front before selecting it
+    if (this.clientId() && this.agentId()) {
+      this.filesFacade.moveTabToFront(this.clientId(), this.agentId(), filePath);
+    }
+
+    this.onTabClick(filePath);
+
+    // Close Bootstrap dropdown
+    const dropdownElement = (event.target as HTMLElement).closest('.dropdown');
+    if (dropdownElement) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bootstrap = (window as any).bootstrap;
+      const toggleButton = dropdownElement.querySelector('[data-bs-toggle="dropdown"]');
+      if (bootstrap?.Dropdown && toggleButton) {
+        const dropdown = bootstrap.Dropdown.getInstance(toggleButton);
+        if (dropdown) {
+          dropdown.hide();
+        }
+      }
+    }
+
+    // Recalculate visible tabs after moving to front
+    setTimeout(() => this.calculateVisibleTabs(), 100);
+  }
+
+  onTabDoubleClick(filePath: string, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.clientId() && this.agentId()) {
+      this.filesFacade.pinFileTab(this.clientId(), this.agentId(), filePath);
+    }
+  }
+
+  onTabClose(filePath: string, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.clientId() && this.agentId()) {
+      this.filesFacade.closeFileTab(this.clientId(), this.agentId(), filePath);
+      // If the closed tab was selected, select the first remaining tab or clear selection
+      if (this.selectedFilePath() === filePath) {
+        this.openTabs$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe((tabs) => {
+          const remainingTabs = tabs.filter((tab) => tab.filePath !== filePath);
+          if (remainingTabs.length > 0) {
+            this.selectedFilePath.set(remainingTabs[0].filePath);
+          } else {
+            this.selectedFilePath.set(null);
+          }
+        });
+      }
+    }
+  }
+
+  private calculateVisibleTabs(): void {
+    const container = this.tabsContainerRef?.nativeElement;
+    const wrapper = this.tabsWrapperRef?.nativeElement;
+    if (!container || !wrapper) {
+      return;
+    }
+
+    const tabs = this.allTabs();
+    if (tabs.length === 0) {
+      this.visibleTabs.set([]);
+      this.overflowedTabs.set([]);
+      this.showMoreFilesDropdown.set(false);
+      return;
+    }
+
+    const containerWidth = container.clientWidth;
+    const moreButtonWidth = 60; // Approximate width of "more files" button
+    const availableWidth = containerWidth - moreButtonWidth;
+
+    // Get all currently rendered tab elements
+    const tabElements = Array.from(wrapper.querySelectorAll<HTMLElement>('.file-editor-tab'));
+
+    // If we don't have all tabs rendered yet, ensure they're all visible for measurement
+    const currentVisibleCount = this.visibleTabs().length;
+    if (tabElements.length < tabs.length && currentVisibleCount < tabs.length) {
+      // Tabs haven't been rendered yet, wait a bit more
+      setTimeout(() => this.calculateVisibleTabs(), 50);
+      return;
+    }
+
+    if (tabElements.length === 0) {
+      // No tabs rendered yet
+      return;
+    }
+
+    let totalWidth = 0;
+    const visible: OpenTab[] = [];
+    const overflowed: OpenTab[] = [];
+
+    // Measure tabs and determine which fit
+    for (let i = 0; i < Math.min(tabElements.length, tabs.length); i++) {
+      const tabElement = tabElements[i];
+      const tab = tabs[i];
+      const tabWidth = tabElement.offsetWidth || tabElement.getBoundingClientRect().width;
+
+      if (totalWidth + tabWidth <= availableWidth) {
+        visible.push(tab);
+        totalWidth += tabWidth;
+      } else {
+        // This tab and all remaining tabs overflow
+        overflowed.push(...tabs.slice(i));
+        break;
+      }
+    }
+
+    // If we measured fewer tabs than we have, the rest are overflowed
+    if (visible.length < tabs.length && overflowed.length === 0) {
+      overflowed.push(...tabs.slice(visible.length));
+    }
+
+    this.visibleTabs.set(visible);
+    this.overflowedTabs.set(overflowed);
+    this.showMoreFilesDropdown.set(overflowed.length > 0);
+  }
+
+  ngOnDestroy(): void {
+    // Clear all open tabs when component is destroyed
+    if (this.clientId() && this.agentId()) {
+      this.filesFacade.clearOpenTabs(this.clientId(), this.agentId());
+    }
+    // Clean up ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
     }
   }
 }

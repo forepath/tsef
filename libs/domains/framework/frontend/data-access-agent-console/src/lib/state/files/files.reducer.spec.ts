@@ -1,6 +1,8 @@
 import {
   clearDirectoryListing,
   clearFileContent,
+  clearOpenTabs,
+  closeFileTab,
   createFileOrDirectory,
   createFileOrDirectoryFailure,
   createFileOrDirectorySuccess,
@@ -10,9 +12,13 @@ import {
   listDirectory,
   listDirectoryFailure,
   listDirectorySuccess,
+  moveTabToFront,
+  openFileTab,
+  pinFileTab,
   readFile,
   readFileFailure,
   readFileSuccess,
+  unpinFileTab,
   writeFile,
   writeFileFailure,
   writeFileSuccess,
@@ -380,6 +386,510 @@ describe('filesReducer', () => {
       expect(state.reading[key1]).toBe(false);
       expect(state.fileContents[key1]).toEqual(mockFileContent);
       expect(state.reading[key2]).toBe(true); // Second one still loading
+    });
+  });
+
+  describe('openFileTab', () => {
+    it('should add a new tab when opening a file', () => {
+      const newState = filesReducer(initialFilesState, openFileTab({ clientId, agentId, filePath }));
+
+      const key = `${clientId}:${agentId}`;
+      expect(newState.openTabs[key]).toHaveLength(1);
+      expect(newState.openTabs[key][0]).toEqual({ filePath, pinned: false });
+    });
+
+    it('should not add duplicate tabs if tab is already pinned', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: true }] },
+      };
+
+      const newState = filesReducer(state, openFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key]).toHaveLength(1);
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+      expect(newState).toBe(state);
+    });
+
+    it('should replace unpinned tab when opening the same file again', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: false }] },
+      };
+
+      const newState = filesReducer(state, openFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key]).toHaveLength(1);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath);
+      expect(newState.openTabs[key][0].pinned).toBe(false);
+    });
+
+    it('should remove unpinned tabs when opening a new file', () => {
+      const filePath2 = 'other-file.txt';
+      const key = `${clientId}:${agentId}`;
+      let state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: false }] },
+      };
+
+      state = filesReducer(state, openFileTab({ clientId, agentId, filePath: filePath2 }));
+
+      expect(state.openTabs[key]).toHaveLength(1);
+      expect(state.openTabs[key][0].filePath).toBe(filePath2);
+      expect(state.openTabs[key][0].pinned).toBe(false);
+    });
+
+    it('should keep pinned tabs when opening a new file', () => {
+      const filePath2 = 'other-file.txt';
+      const filePath3 = 'third-file.txt';
+      const key = `${clientId}:${agentId}`;
+      let state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: true },
+            { filePath: filePath2, pinned: false },
+          ],
+        },
+      };
+
+      state = filesReducer(state, openFileTab({ clientId, agentId, filePath: filePath3 }));
+
+      expect(state.openTabs[key]).toHaveLength(2);
+      expect(state.openTabs[key][0].filePath).toBe(filePath);
+      expect(state.openTabs[key][0].pinned).toBe(true);
+      expect(state.openTabs[key][1].filePath).toBe(filePath3);
+      expect(state.openTabs[key][1].pinned).toBe(false);
+    });
+  });
+
+  describe('closeFileTab', () => {
+    it('should remove a tab when closing', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: false }] },
+      };
+
+      const newState = filesReducer(state, closeFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key]).toHaveLength(0);
+    });
+
+    it('should only remove the specified tab', () => {
+      const filePath2 = 'other-file.txt';
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: false },
+            { filePath: filePath2, pinned: false },
+          ],
+        },
+      };
+
+      const newState = filesReducer(state, closeFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key]).toHaveLength(1);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath2);
+    });
+
+    it('should not change state when closing a tab that does not exist', () => {
+      const key = `${clientId}:${agentId}`;
+      const nonExistentPath = 'non-existent.txt';
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: false }] },
+      };
+
+      const newState = filesReducer(state, closeFileTab({ clientId, agentId, filePath: nonExistentPath }));
+
+      expect(newState.openTabs[key]).toHaveLength(1);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath);
+    });
+
+    it('should handle closing when no tabs exist', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {},
+      };
+
+      const newState = filesReducer(state, closeFileTab({ clientId, agentId, filePath }));
+
+      // When no tabs exist, the reducer returns an empty array
+      expect(newState.openTabs[key]).toEqual([]);
+    });
+  });
+
+  describe('pinFileTab', () => {
+    it('should pin a tab', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: false }] },
+      };
+
+      const newState = filesReducer(state, pinFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+    });
+
+    it('should only pin the specified tab', () => {
+      const filePath2 = 'other-file.txt';
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: false },
+            { filePath: filePath2, pinned: false },
+          ],
+        },
+      };
+
+      const newState = filesReducer(state, pinFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+      expect(newState.openTabs[key][1].pinned).toBe(false);
+    });
+
+    it('should not change state when pinning a tab that does not exist', () => {
+      const key = `${clientId}:${agentId}`;
+      const nonExistentPath = 'non-existent.txt';
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: false }] },
+      };
+
+      const newState = filesReducer(state, pinFileTab({ clientId, agentId, filePath: nonExistentPath }));
+
+      expect(newState.openTabs[key]).toHaveLength(1);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath);
+      expect(newState.openTabs[key][0].pinned).toBe(false);
+    });
+
+    it('should not change state when pinning an already pinned tab', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: true }] },
+      };
+
+      const newState = filesReducer(state, pinFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+    });
+  });
+
+  describe('unpinFileTab', () => {
+    it('should unpin a tab', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: true }] },
+      };
+
+      const newState = filesReducer(state, unpinFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key][0].pinned).toBe(false);
+    });
+
+    it('should only unpin the specified tab', () => {
+      const filePath2 = 'other-file.txt';
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: true },
+            { filePath: filePath2, pinned: true },
+          ],
+        },
+      };
+
+      const newState = filesReducer(state, unpinFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key][0].pinned).toBe(false);
+      expect(newState.openTabs[key][1].pinned).toBe(true);
+    });
+
+    it('should not change state when unpinning a tab that does not exist', () => {
+      const key = `${clientId}:${agentId}`;
+      const nonExistentPath = 'non-existent.txt';
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: true }] },
+      };
+
+      const newState = filesReducer(state, unpinFileTab({ clientId, agentId, filePath: nonExistentPath }));
+
+      expect(newState.openTabs[key]).toHaveLength(1);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath);
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+    });
+
+    it('should not change state when unpinning an already unpinned tab', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: false }] },
+      };
+
+      const newState = filesReducer(state, unpinFileTab({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key][0].pinned).toBe(false);
+    });
+  });
+
+  describe('moveTabToFront', () => {
+    it('should move a tab to the front of the tabs list', () => {
+      const filePath2 = 'second-file.txt';
+      const filePath3 = 'third-file.txt';
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: false },
+            { filePath: filePath2, pinned: false },
+            { filePath: filePath3, pinned: true },
+          ],
+        },
+      };
+
+      const newState = filesReducer(state, moveTabToFront({ clientId, agentId, filePath: filePath3 }));
+
+      expect(newState.openTabs[key]).toHaveLength(3);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath3);
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+      expect(newState.openTabs[key][1].filePath).toBe(filePath);
+      expect(newState.openTabs[key][2].filePath).toBe(filePath2);
+    });
+
+    it('should not change state if tab is already at front', () => {
+      const filePath2 = 'second-file.txt';
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: false },
+            { filePath: filePath2, pinned: false },
+          ],
+        },
+      };
+
+      const newState = filesReducer(state, moveTabToFront({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key]).toHaveLength(2);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath);
+      expect(newState.openTabs[key][1].filePath).toBe(filePath2);
+      expect(newState).toBe(state);
+    });
+
+    it('should not change state if tab is not found', () => {
+      const filePath2 = 'second-file.txt';
+      const nonExistentPath = 'non-existent.txt';
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: false },
+            { filePath: filePath2, pinned: false },
+          ],
+        },
+      };
+
+      const newState = filesReducer(state, moveTabToFront({ clientId, agentId, filePath: nonExistentPath }));
+
+      expect(newState.openTabs[key]).toHaveLength(2);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath);
+      expect(newState.openTabs[key][1].filePath).toBe(filePath2);
+      expect(newState).toBe(state);
+    });
+
+    it('should preserve tab properties when moving to front', () => {
+      const filePath2 = 'second-file.txt';
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: false },
+            { filePath: filePath2, pinned: true },
+          ],
+        },
+      };
+
+      const newState = filesReducer(state, moveTabToFront({ clientId, agentId, filePath: filePath2 }));
+
+      expect(newState.openTabs[key]).toHaveLength(2);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath2);
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+      expect(newState.openTabs[key][1].filePath).toBe(filePath);
+      expect(newState.openTabs[key][1].pinned).toBe(false);
+    });
+
+    it('should only affect tabs for the specified client/agent', () => {
+      const clientId2 = 'client-2';
+      const agentId2 = 'agent-2';
+      const filePath2 = 'second-file.txt';
+      const key1 = `${clientId}:${agentId}`;
+      const key2 = `${clientId2}:${agentId2}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key1]: [
+            { filePath, pinned: false },
+            { filePath: filePath2, pinned: false },
+          ],
+          [key2]: [
+            { filePath: 'other-file.txt', pinned: false },
+            { filePath: 'another-file.txt', pinned: false },
+          ],
+        },
+      };
+
+      const newState = filesReducer(state, moveTabToFront({ clientId, agentId, filePath: filePath2 }));
+
+      // First client/agent tabs should be reordered
+      expect(newState.openTabs[key1]).toHaveLength(2);
+      expect(newState.openTabs[key1][0].filePath).toBe(filePath2);
+      expect(newState.openTabs[key1][1].filePath).toBe(filePath);
+
+      // Second client/agent tabs should remain unchanged
+      expect(newState.openTabs[key2]).toHaveLength(2);
+      expect(newState.openTabs[key2][0].filePath).toBe('other-file.txt');
+      expect(newState.openTabs[key2][1].filePath).toBe('another-file.txt');
+    });
+  });
+
+  describe('clearOpenTabs', () => {
+    it('should clear all tabs for a client/agent', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: false },
+            { filePath: 'other-file.txt', pinned: true },
+          ],
+        },
+      };
+
+      const newState = filesReducer(state, clearOpenTabs({ clientId, agentId }));
+
+      expect(newState.openTabs[key]).toBeUndefined();
+    });
+
+    it('should only clear tabs for the specified client/agent', () => {
+      const clientId2 = 'client-2';
+      const agentId2 = 'agent-2';
+      const key1 = `${clientId}:${agentId}`;
+      const key2 = `${clientId2}:${agentId2}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key1]: [{ filePath, pinned: false }],
+          [key2]: [{ filePath: 'other-file.txt', pinned: false }],
+        },
+      };
+
+      const newState = filesReducer(state, clearOpenTabs({ clientId, agentId }));
+
+      expect(newState.openTabs[key1]).toBeUndefined();
+      expect(newState.openTabs[key2]).toHaveLength(1);
+    });
+  });
+
+  describe('writeFileSuccess pins tab', () => {
+    it('should pin the tab when a file is saved', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: false }] },
+        writing: { [`${clientId}:${agentId}:${filePath}`]: true },
+      };
+
+      const newState = filesReducer(state, writeFileSuccess({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+    });
+
+    it('should keep tab pinned if already pinned when file is saved', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: { [key]: [{ filePath, pinned: true }] },
+        writing: { [`${clientId}:${agentId}:${filePath}`]: true },
+      };
+
+      const newState = filesReducer(state, writeFileSuccess({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+    });
+
+    it('should create a pinned tab if tab does not exist when file is saved', () => {
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {},
+        writing: { [`${clientId}:${agentId}:${filePath}`]: true },
+      };
+
+      const newState = filesReducer(state, writeFileSuccess({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key]).toHaveLength(1);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath);
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+    });
+
+    it('should preserve other tabs when pinning a saved file', () => {
+      const filePath2 = 'other-file.txt';
+      const key = `${clientId}:${agentId}`;
+      const state: FilesState = {
+        ...initialFilesState,
+        openTabs: {
+          [key]: [
+            { filePath, pinned: false },
+            { filePath: filePath2, pinned: true },
+          ],
+        },
+        writing: { [`${clientId}:${agentId}:${filePath}`]: true },
+      };
+
+      const newState = filesReducer(state, writeFileSuccess({ clientId, agentId, filePath }));
+
+      expect(newState.openTabs[key]).toHaveLength(2);
+      expect(newState.openTabs[key][0].filePath).toBe(filePath);
+      expect(newState.openTabs[key][0].pinned).toBe(true);
+      expect(newState.openTabs[key][1].filePath).toBe(filePath2);
+      expect(newState.openTabs[key][1].pinned).toBe(true);
+    });
+  });
+
+  describe('multiple clients and agents - tabs', () => {
+    it('should handle open tabs independently for different client/agent combinations', () => {
+      const clientId2 = 'client-2';
+      const agentId2 = 'agent-2';
+      const filePath2 = 'other-file.txt';
+      const key1 = `${clientId}:${agentId}`;
+      const key2 = `${clientId2}:${agentId2}`;
+
+      let state = initialFilesState;
+
+      state = filesReducer(state, openFileTab({ clientId, agentId, filePath }));
+      state = filesReducer(state, openFileTab({ clientId: clientId2, agentId: agentId2, filePath: filePath2 }));
+
+      expect(state.openTabs[key1]).toHaveLength(1);
+      expect(state.openTabs[key1][0].filePath).toBe(filePath);
+      expect(state.openTabs[key2]).toHaveLength(1);
+      expect(state.openTabs[key2][0].filePath).toBe(filePath2);
     });
   });
 });
