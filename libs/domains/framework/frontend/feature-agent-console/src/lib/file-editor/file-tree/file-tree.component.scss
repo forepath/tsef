@@ -93,6 +93,21 @@
   }
 }
 
+.tree-node {
+  height: 32px;
+
+  .btn-group {
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+  }
+
+  &:hover {
+    .btn-group {
+      opacity: 1;
+    }
+  }
+}
+
 .tree-node-content {
   min-width: 0;
 }
