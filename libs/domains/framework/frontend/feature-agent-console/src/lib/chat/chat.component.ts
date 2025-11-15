@@ -11,6 +11,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
@@ -72,7 +73,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   private updateAgentModal!: ElementRef<HTMLDivElement>;
 
   @ViewChild('fileEditor', { static: false })
-  private fileEditor!: FileEditorComponent;
+  fileEditor!: FileEditorComponent;
 
   // Cache for marked instance to avoid repeated async imports
   private markedInstance: Marked | null = null;
@@ -147,6 +148,28 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly forwarding$: Observable<boolean> = this.socketsFacade.forwarding$;
   readonly socketError$: Observable<string | null> = this.socketsFacade.error$;
 
+  // Local state
+  chatMessage = signal<string>('');
+  selectedAgentId = signal<string | null>(null);
+  editorOpen = signal<boolean>(false);
+  chatVisible = signal<boolean>(true);
+  private previousAgentId: string | null = null;
+
+  // Computed observable to determine if chat should be visible
+  readonly shouldShowChat$ = combineLatest([
+    this.selectedAgent$,
+    toObservable(this.editorOpen),
+    toObservable(this.chatVisible),
+  ]).pipe(
+    map(([selectedAgent, editorOpen, chatVisible]) => {
+      if (!selectedAgent) {
+        return false;
+      }
+      // Show chat if editor is not open, or if editor is open and chat is visible
+      return !editorOpen || chatVisible;
+    }),
+  );
+
   // Computed signal to determine if we're waiting for an agent response
   readonly waitingForResponse$ = combineLatest([this.forwarding$, this.chatMessages$, this.socketError$]).pipe(
     map(([forwarding, messages, error]) => {
@@ -170,11 +193,6 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       return forwarding || lastUserMsgTimestamp !== null;
     }),
   );
-
-  // Local state
-  chatMessage = signal<string>('');
-  selectedAgentId = signal<string | null>(null);
-  editorOpen = signal<boolean>(false);
   private activeClientId: string | null = null;
   private shouldScrollToBottom = false;
   private previousMessageCount = 0;
@@ -227,6 +245,19 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   ngOnInit(): void {
     // Load clients on init
     this.clientsFacade.loadClients();
+
+    // Reset editor view when selected agent changes
+    this.selectedAgent$.pipe(takeUntil(this.destroy$)).subscribe((agent) => {
+      const currentAgentId = agent?.id || null;
+      if (currentAgentId && currentAgentId !== this.previousAgentId && this.editorOpen()) {
+        // Reset visibility when agent changes and editor is open
+        this.chatVisible.set(true);
+        if (this.fileEditor) {
+          this.fileEditor.fileTreeVisible.set(true);
+        }
+      }
+      this.previousAgentId = currentAgentId;
+    });
 
     // Load agents when active client changes
     this.activeClientId$.pipe(takeUntil(this.destroy$)).subscribe((clientId) => {
@@ -348,7 +379,24 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   }
 
   onToggleEditor(): void {
+    const wasOpen = this.editorOpen();
     this.editorOpen.update((open) => !open);
+
+    // Reset visibility when opening editor for a new agent
+    if (!wasOpen && this.editorOpen()) {
+      this.chatVisible.set(true);
+      if (this.fileEditor) {
+        this.fileEditor.fileTreeVisible.set(true);
+      }
+    }
+  }
+
+  onToggleChat(): void {
+    this.chatVisible.update((visible) => !visible);
+    // Recalculate file editor tabs when chat visibility changes
+    if (this.fileEditor) {
+      this.fileEditor.recalculateTabs();
+    }
   }
 
   onDeleteClientClick(clientId: string, clientName: string): void {

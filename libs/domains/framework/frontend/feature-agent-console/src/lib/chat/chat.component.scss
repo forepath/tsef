@@ -300,3 +300,12 @@ span {
 .section__column--chat {
   flex: 2; // Chat takes more space when editor is closed
 }
+
+.editor-toolbar-container {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.editor-toolbar {
+  flex-shrink: 0;
+}
