@@ -1,8 +1,9 @@
 import { createReducer, on } from '@ngrx/store';
-import type { FileContentDto, FileNodeDto } from './files.types';
 import {
   clearDirectoryListing,
   clearFileContent,
+  clearOpenTabs,
+  closeFileTab,
   createFileOrDirectory,
   createFileOrDirectoryFailure,
   createFileOrDirectorySuccess,
@@ -12,13 +13,23 @@ import {
   listDirectory,
   listDirectoryFailure,
   listDirectorySuccess,
+  moveTabToFront,
+  openFileTab,
+  pinFileTab,
   readFile,
   readFileFailure,
   readFileSuccess,
+  unpinFileTab,
   writeFile,
   writeFileFailure,
   writeFileSuccess,
 } from './files.actions';
+import type { FileContentDto, FileNodeDto } from './files.types';
+
+export interface OpenTab {
+  filePath: string;
+  pinned: boolean;
+}
 
 export interface FilesState {
   // File contents keyed by clientId:agentId:filePath
@@ -33,6 +44,8 @@ export interface FilesState {
   deleting: Record<string, boolean>;
   // Errors keyed by clientId:agentId:filePath or clientId:agentId:directoryPath
   errors: Record<string, string | null>;
+  // Open tabs keyed by clientId:agentId
+  openTabs: Record<string, OpenTab[]>;
 }
 
 export const initialFilesState: FilesState = {
@@ -44,6 +57,7 @@ export const initialFilesState: FilesState = {
   creating: {},
   deleting: {},
   errors: {},
+  openTabs: {},
 };
 
 /**
@@ -51,6 +65,13 @@ export const initialFilesState: FilesState = {
  */
 function getFileKey(clientId: string, agentId: string, path: string): string {
   return `${clientId}:${agentId}:${path}`;
+}
+
+/**
+ * Generate a key for client/agent operations (clientId:agentId)
+ */
+function getClientAgentKey(clientId: string, agentId: string): string {
+  return `${clientId}:${agentId}`;
 }
 
 export const filesReducer = createReducer(
@@ -92,13 +113,29 @@ export const filesReducer = createReducer(
   }),
   on(writeFileSuccess, (state, { clientId, agentId, filePath }) => {
     const key = getFileKey(clientId, agentId, filePath);
+    const clientAgentKey = getClientAgentKey(clientId, agentId);
     // Invalidate cached content after write
     const { [key]: removed, ...fileContents } = state.fileContents;
+    // Pin the tab when file is saved (create tab if it doesn't exist)
+    const currentTabs = state.openTabs[clientAgentKey] || [];
+    const existingTabIndex = currentTabs.findIndex((tab) => tab.filePath === filePath);
+    let updatedTabs: OpenTab[];
+    if (existingTabIndex >= 0) {
+      // Update existing tab to pinned
+      updatedTabs = currentTabs.map((tab) => (tab.filePath === filePath ? { ...tab, pinned: true } : tab));
+    } else {
+      // Create new pinned tab
+      updatedTabs = [...currentTabs, { filePath, pinned: true }];
+    }
     return {
       ...state,
       fileContents,
       writing: { ...state.writing, [key]: false },
       errors: { ...state.errors, [key]: null },
+      openTabs: {
+        ...state.openTabs,
+        [clientAgentKey]: updatedTabs,
+      },
     };
   }),
   on(writeFileFailure, (state, { clientId, agentId, filePath, error }) => {
@@ -216,6 +253,94 @@ export const filesReducer = createReducer(
     return {
       ...state,
       directoryListings,
+    };
+  }),
+  // Open File Tab
+  on(openFileTab, (state, { clientId, agentId, filePath }) => {
+    const key = getClientAgentKey(clientId, agentId);
+    const currentTabs = state.openTabs[key] || [];
+    // Keep only pinned tabs, remove all unpinned tabs
+    const pinnedTabs = currentTabs.filter((tab) => tab.pinned);
+    // Check if the tab being opened already exists (and is pinned)
+    const existingTab = pinnedTabs.find((tab) => tab.filePath === filePath);
+    if (existingTab) {
+      // Tab already exists and is pinned, no change needed
+      return state;
+    }
+    // Add new tab (unpinned by default) - unpinned tabs will be removed when another file is opened
+    return {
+      ...state,
+      openTabs: {
+        ...state.openTabs,
+        [key]: [...pinnedTabs, { filePath, pinned: false }],
+      },
+    };
+  }),
+  // Close File Tab
+  on(closeFileTab, (state, { clientId, agentId, filePath }) => {
+    const key = getClientAgentKey(clientId, agentId);
+    const currentTabs = state.openTabs[key] || [];
+    const updatedTabs = currentTabs.filter((tab) => tab.filePath !== filePath);
+    return {
+      ...state,
+      openTabs: {
+        ...state.openTabs,
+        [key]: updatedTabs,
+      },
+    };
+  }),
+  // Pin File Tab
+  on(pinFileTab, (state, { clientId, agentId, filePath }) => {
+    const key = getClientAgentKey(clientId, agentId);
+    const currentTabs = state.openTabs[key] || [];
+    const updatedTabs = currentTabs.map((tab) => (tab.filePath === filePath ? { ...tab, pinned: true } : tab));
+    return {
+      ...state,
+      openTabs: {
+        ...state.openTabs,
+        [key]: updatedTabs,
+      },
+    };
+  }),
+  // Unpin File Tab
+  on(unpinFileTab, (state, { clientId, agentId, filePath }) => {
+    const key = getClientAgentKey(clientId, agentId);
+    const currentTabs = state.openTabs[key] || [];
+    const updatedTabs = currentTabs.map((tab) => (tab.filePath === filePath ? { ...tab, pinned: false } : tab));
+    return {
+      ...state,
+      openTabs: {
+        ...state.openTabs,
+        [key]: updatedTabs,
+      },
+    };
+  }),
+  // Move Tab To Front
+  on(moveTabToFront, (state, { clientId, agentId, filePath }) => {
+    const key = getClientAgentKey(clientId, agentId);
+    const currentTabs = state.openTabs[key] || [];
+    const tabIndex = currentTabs.findIndex((tab) => tab.filePath === filePath);
+    if (tabIndex === -1 || tabIndex === 0) {
+      // Tab not found or already at front
+      return state;
+    }
+    const tab = currentTabs[tabIndex];
+    const updatedTabs = [tab, ...currentTabs.filter((_, index) => index !== tabIndex)];
+    return {
+      ...state,
+      openTabs: {
+        ...state.openTabs,
+        [key]: updatedTabs,
+      },
+    };
+  }),
+  // Clear Open Tabs
+  on(clearOpenTabs, (state, { clientId, agentId }) => {
+    const key = getClientAgentKey(clientId, agentId);
+    const { [key]: removed, ...openTabs } = state.openTabs;
+    return {
+      ...state,
+      openTabs,
     };
   }),
 );

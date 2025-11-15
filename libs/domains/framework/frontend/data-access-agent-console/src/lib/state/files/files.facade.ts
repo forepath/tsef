@@ -4,10 +4,16 @@ import { Observable } from 'rxjs';
 import {
   clearDirectoryListing,
   clearFileContent,
+  clearOpenTabs,
+  closeFileTab,
   createFileOrDirectory,
   deleteFileOrDirectory,
   listDirectory,
+  moveTabToFront,
+  openFileTab,
+  pinFileTab,
   readFile,
+  unpinFileTab,
   writeFile,
 } from './files.actions';
 import {
@@ -21,8 +27,10 @@ import {
   selectIsListingDirectory,
   selectIsReadingFile,
   selectIsWritingFile,
+  selectOpenTabsForClientAgent,
 } from './files.selectors';
 import type { CreateFileDto, FileContentDto, FileNodeDto, ListDirectoryParams, WriteFileDto } from './files.types';
+import type { OpenTab } from './files.reducer';
 
 /**
  * Facade for file system state management.
@@ -216,5 +224,74 @@ export class FilesFacade {
    */
   clearDirectoryListing(clientId: string, agentId: string, directoryPath: string): void {
     this.store.dispatch(clearDirectoryListing({ clientId, agentId, directoryPath }));
+  }
+
+  /**
+   * Get open tabs for a specific client and agent.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @returns Observable of open tabs array
+   */
+  getOpenTabs$(clientId: string, agentId: string): Observable<OpenTab[]> {
+    return this.store.select(selectOpenTabsForClientAgent(clientId, agentId));
+  }
+
+  /**
+   * Open a file tab.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @param filePath - The file path
+   */
+  openFileTab(clientId: string, agentId: string, filePath: string): void {
+    this.store.dispatch(openFileTab({ clientId, agentId, filePath }));
+  }
+
+  /**
+   * Close a file tab.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @param filePath - The file path
+   */
+  closeFileTab(clientId: string, agentId: string, filePath: string): void {
+    this.store.dispatch(closeFileTab({ clientId, agentId, filePath }));
+  }
+
+  /**
+   * Pin a file tab (make it stay open).
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @param filePath - The file path
+   */
+  pinFileTab(clientId: string, agentId: string, filePath: string): void {
+    this.store.dispatch(pinFileTab({ clientId, agentId, filePath }));
+  }
+
+  /**
+   * Unpin a file tab.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @param filePath - The file path
+   */
+  unpinFileTab(clientId: string, agentId: string, filePath: string): void {
+    this.store.dispatch(unpinFileTab({ clientId, agentId, filePath }));
+  }
+
+  /**
+   * Move a tab to the front of the tabs list.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @param filePath - The file path
+   */
+  moveTabToFront(clientId: string, agentId: string, filePath: string): void {
+    this.store.dispatch(moveTabToFront({ clientId, agentId, filePath }));
+  }
+
+  /**
+   * Clear all open tabs for a client and agent.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   */
+  clearOpenTabs(clientId: string, agentId: string): void {
+    this.store.dispatch(clearOpenTabs({ clientId, agentId }));
   }
 }

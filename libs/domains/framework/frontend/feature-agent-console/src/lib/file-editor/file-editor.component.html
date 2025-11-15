@@ -25,6 +25,72 @@
 
   <!-- Editor Area -->
   <div class="editor-area flex-grow-1 d-flex flex-column">
+    @if (visibleTabs().length > 0) {
+      <!-- Open Files Tabs Bar -->
+      <div class="file-editor-tabs-container" #tabsContainer>
+        <div class="file-editor-tabs-wrapper d-flex align-items-center">
+          <div class="file-editor-tabs d-flex align-items-center flex-nowrap" #tabsWrapper>
+            @for (tab of visibleTabs(); track tab.filePath) {
+              <div
+                class="file-editor-tab"
+                [class.active]="selectedFilePath() === tab.filePath"
+                [class.pinned]="tab.pinned"
+                (click)="onTabClick(tab.filePath)"
+                (dblclick)="onTabDoubleClick(tab.filePath, $event)"
+                [title]="tab.filePath"
+              >
+                <i class="bi bi-file-earmark-code me-1"></i>
+                <span [class.fst-italic]="!tab.pinned">{{ getFileName(tab.filePath) }}</span>
+                <button
+                  type="button"
+                  class="btn-close btn-close-sm ms-2"
+                  (click)="onTabClose(tab.filePath, $event)"
+                  aria-label="Close tab"
+                ></button>
+              </div>
+            }
+          </div>
+          @if (showMoreFilesDropdown()) {
+            <div class="dropdown">
+              <button
+                class="btn btn-sm btn-link text-decoration-none dropdown-toggle border-start bg-primary text-white file-editor-more-button"
+                type="button"
+                id="moreFilesDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                More files
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreFilesDropdown">
+                @for (tab of overflowedTabs(); track tab.filePath) {
+                  <li>
+                    <a
+                      class="dropdown-item d-flex align-items-center justify-content-between"
+                      [class.active]="selectedFilePath() === tab.filePath"
+                      [class.fst-italic]="!tab.pinned"
+                      (click)="onTabClickFromDropdown(tab.filePath, $event)"
+                      [title]="tab.filePath"
+                      href="#"
+                    >
+                      <span class="d-flex align-items-center">
+                        <i class="bi bi-file-earmark-code me-2"></i>
+                        {{ getFileName(tab.filePath) }}
+                      </span>
+                      <button
+                        type="button"
+                        class="btn-close btn-close-sm ms-2"
+                        (click)="onTabClose(tab.filePath, $event)"
+                        aria-label="Close tab"
+                      ></button>
+                    </a>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      </div>
+    }
     @if (selectedFilePath()) {
       <div class="editor-header p-2 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">

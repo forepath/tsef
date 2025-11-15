@@ -92,3 +92,31 @@ export const clearDirectoryListing = createAction(
   '[Files] Clear Directory Listing',
   props<{ clientId: string; agentId: string; directoryPath: string }>(),
 );
+
+// Open Tabs Management Actions
+export const openFileTab = createAction(
+  '[Files] Open File Tab',
+  props<{ clientId: string; agentId: string; filePath: string }>(),
+);
+
+export const closeFileTab = createAction(
+  '[Files] Close File Tab',
+  props<{ clientId: string; agentId: string; filePath: string }>(),
+);
+
+export const pinFileTab = createAction(
+  '[Files] Pin File Tab',
+  props<{ clientId: string; agentId: string; filePath: string }>(),
+);
+
+export const unpinFileTab = createAction(
+  '[Files] Unpin File Tab',
+  props<{ clientId: string; agentId: string; filePath: string }>(),
+);
+
+export const moveTabToFront = createAction(
+  '[Files] Move Tab To Front',
+  props<{ clientId: string; agentId: string; filePath: string }>(),
+);
+
+export const clearOpenTabs = createAction('[Files] Clear Open Tabs', props<{ clientId: string; agentId: string }>());
