@@ -387,6 +387,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       this.chatVisible.set(true);
       if (this.fileEditor) {
         this.fileEditor.fileTreeVisible.set(true);
+        this.fileEditor.autosaveEnabled.set(false);
       }
     }
   }

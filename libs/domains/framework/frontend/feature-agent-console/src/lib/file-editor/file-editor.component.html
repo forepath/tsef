@@ -101,21 +101,33 @@
             <span class="badge bg-warning text-dark ms-2">Unsaved</span>
           }
         </div>
-        <div class="btn-group btn-group-sm" role="group">
-          <button
-            type="button"
-            class="btn btn-sm btn-primary"
-            (click)="onSave()"
-            [disabled]="!selectedFilePath() || !isDirty() || (isWritingFile$ | async)"
-            title="Save (Ctrl+S)"
-          >
-            @if (isWritingFile$ | async) {
-              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-            } @else {
-              <i class="bi bi-save me-1"></i>
-            }
-            Save
-          </button>
+        <div class="d-flex align-items-center gap-3">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="autosaveCheckbox"
+              [checked]="autosaveEnabled()"
+              (change)="autosaveEnabled.set($any($event.target).checked)"
+            />
+            <label class="form-check-label small" for="autosaveCheckbox"> Autosave </label>
+          </div>
+          <div class="btn-group btn-group-sm" role="group">
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              (click)="onSave()"
+              [disabled]="!selectedFilePath() || !isDirty() || (isWritingFile$ | async)"
+              title="Save (Ctrl+S)"
+            >
+              @if (isWritingFile$ | async) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              } @else {
+                <i class="bi bi-save me-1"></i>
+              }
+              Save
+            </button>
+          </div>
         </div>
       </div>
     }
@@ -129,22 +141,13 @@
             </div>
           </div>
         } @else {
-          <!--
-          <p>File content: {{ (selectedFileContent$ | async)?.content }}</p>
-          <p>File encoding: {{ (selectedFileContent$ | async)?.encoding }}</p>
-          <p>File path: {{ selectedFilePath() }}</p>
-          <p>File is dirty: {{ isDirty() }}</p>
-          <p>File is reading: {{ isReadingFile$ | async }}</p>
-          <p>File is writing: {{ isWritingFile$ | async }}</p>
-          <p>File is selected: {{ selectedFilePath() }}</p>
-          <p>File is selected: {{ selectedFilePath() }}</p>
-          -->
           <framework-monaco-editor-wrapper
             #monacoEditor
             [filePath]="selectedFilePath()"
             [content]="(selectedFileContent$ | async)?.content || null"
             [encoding]="(selectedFileContent$ | async)?.encoding || 'utf-8'"
             [isDirty]="isDirty()"
+            [autosaveEnabled]="autosaveEnabled()"
             (contentChange)="onContentChange($event)"
             (saveRequest)="onSave()"
           ></framework-monaco-editor-wrapper>
