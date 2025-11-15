@@ -26,6 +26,18 @@ To create a new TSEF workspace run:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/forepath/tsef/refs/heads/main/install.sh)"
 ```
 
+To activate Cursor hooks for this workspace, run:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/forepath/tsef/refs/heads/main/hooks.sh)"
+```
+
+To update an existing TSEF workspace, run:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/forepath/tsef/refs/heads/main/update.sh)"
+```
+
 ## Documentation
 
 ### Development Workflows
