@@ -1,4 +1,55 @@
 <div class="section__content-wrapper d-flex flex-column">
+  <!-- Toolbar (shown when editor is open, spans editor and chat) -->
+  @if (editorOpen() && (activeClientId$ | async) && (selectedAgent$ | async)) {
+    <div class="editor-toolbar-container border-bottom bg-body-tertiary">
+      <div class="editor-toolbar px-2 py-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <span class="fw-bold">Agent Cloud IDE</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <div class="btn-group btn-group-sm" role="group">
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-outline-primary]="!fileEditor?.fileTreeVisible()"
+              [class.btn-primary]="fileEditor?.fileTreeVisible()"
+              (click)="fileEditor?.onToggleFileTree()"
+              [title]="fileEditor?.fileTreeVisible() ? 'Hide File Tree' : 'Show File Tree'"
+            >
+              <i
+                class="bi"
+                [class.bi-folder]="fileEditor?.fileTreeVisible()"
+                [class.bi-folder-x]="!fileEditor?.fileTreeVisible()"
+              ></i>
+              <span class="ms-1">File Tree</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-outline-primary]="!chatVisible()"
+              [class.btn-primary]="chatVisible()"
+              (click)="onToggleChat()"
+              [title]="chatVisible() ? 'Hide Chat' : 'Show Chat'"
+            >
+              <i class="bi" [class.bi-chat-dots]="chatVisible()" [class.bi-chat-dots-fill]="!chatVisible()"></i>
+              <span class="ms-1">Chat</span>
+            </button>
+          </div>
+          <div class="btn-group btn-group-sm" role="group">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              (click)="onToggleEditor()"
+              title="Close Editor"
+            >
+              <i class="bi bi-x-lg"></i>
+              <span class="ms-1">Close Editor</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
   <section class="section__row flex-grow-1">
     <!-- Column 1: Client list (hidden when editor is open) -->
     @if (!editorOpen()) {
@@ -190,57 +241,59 @@
           #fileEditor
           [clientId]="(activeClientId$ | async)!"
           [agentId]="(selectedAgent$ | async)!.id"
+          [chatVisible]="chatVisible()"
+          (chatToggleRequested)="onToggleChat()"
         ></framework-file-editor>
       </div>
     }
 
     <!-- Column: Agent chat controls -->
-    @if (selectedAgent$ | async) {
+    @if (shouldShowChat$ | async) {
       <div class="section__column section__column--chat d-flex flex-column">
         <div class="p-3 border-bottom bg-body-tertiary">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 class="mb-0 fw-semibold">Chat</h5>
-            <div class="btn-group" role="group">
-              @if (socketConnected$ | async) {
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-success"
-                  [disabled]="socketDisconnecting$ | async"
-                  (click)="onDisconnectSocket()"
-                >
-                  <i class="bi bi-wifi"></i>
-                  <span class="visually-hidden">Connected</span>
-                </button>
-              } @else {
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  [disabled]="socketConnecting$ | async"
-                  (click)="onConnectSocket()"
-                >
-                  @if (socketConnecting$ | async) {
-                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                  } @else {
-                    <i class="bi bi-wifi-off"></i>
-                  }
-                  <span class="visually-hidden">Disconnected</span>
-                </button>
-              }
-              <button
-                type="button"
-                class="btn btn-sm"
-                [class.btn-outline-primary]="!editorOpen()"
-                [class.btn-primary]="editorOpen()"
-                (click)="onToggleEditor()"
-                [title]="editorOpen() ? 'Close Editor' : 'Open Editor'"
-              >
-                <i class="bi bi-code-square"></i>
-                @if (editorOpen()) {
-                  <span class="ms-1">Close Editor</span>
+            <div class="d-flex align-items-center gap-2">
+              <div class="btn-group" role="group">
+                @if (socketConnected$ | async) {
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-success"
+                    [disabled]="socketDisconnecting$ | async"
+                    (click)="onDisconnectSocket()"
+                  >
+                    <i class="bi bi-wifi"></i>
+                    <span class="visually-hidden">Connected</span>
+                  </button>
                 } @else {
-                  <span class="ms-1">Open Editor</span>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    [disabled]="socketConnecting$ | async"
+                    (click)="onConnectSocket()"
+                  >
+                    @if (socketConnecting$ | async) {
+                      <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    } @else {
+                      <i class="bi bi-wifi-off"></i>
+                    }
+                    <span class="visually-hidden">Disconnected</span>
+                  </button>
                 }
-              </button>
+              </div>
+              @if (!editorOpen()) {
+                <div class="btn-group" role="group">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="onToggleEditor()"
+                    title="Open Editor"
+                  >
+                    <i class="bi bi-code-square"></i>
+                    <span class="ms-1">Open Editor</span>
+                  </button>
+                </div>
+              }
             </div>
           </div>
           @if (selectedAgent$ | async; as selectedAgent) {

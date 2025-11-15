@@ -1,6 +1,6 @@
 <div class="file-editor-container d-flex h-100">
   <!-- File Tree Sidebar -->
-  <div class="file-tree-sidebar border-end">
+  <div class="file-tree-sidebar border-end" [class.d-none]="!fileTreeVisible()">
     @if (clientId() && agentId()) {
       <framework-file-tree
         [clientId]="clientId()!"
@@ -91,6 +91,7 @@
         </div>
       </div>
     }
+
     @if (selectedFilePath()) {
       <div class="editor-header p-2 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">

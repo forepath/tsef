@@ -23,6 +23,7 @@ import {
 import { combineLatest, filter, map, Observable, of, switchMap, take } from 'rxjs';
 import { FileTreeComponent } from './file-tree/file-tree.component';
 import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-editor-wrapper.component';
+import { output } from '@angular/core';
 
 @Component({
   selector: 'framework-file-editor',
@@ -41,6 +42,7 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
   // Inputs
   clientId = input.required<string>();
   agentId = input.required<string>();
+  chatVisible = input<boolean>(true);
 
   // Internal state
   selectedFilePath = signal<string | null>(null);
@@ -52,6 +54,12 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
   overflowedTabs = signal<OpenTab[]>([]);
   showMoreFilesDropdown = signal<boolean>(false);
   private allTabs = signal<OpenTab[]>([]);
+
+  // Visibility toggles (exposed for parent component access)
+  readonly fileTreeVisible = signal<boolean>(true);
+
+  // Outputs
+  readonly chatToggleRequested = output<void>();
 
   // Convert signals to observables
   private readonly selectedFilePath$ = toObservable(this.selectedFilePath);
@@ -178,6 +186,22 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
         });
       });
     });
+
+    // Recalculate tabs when file tree visibility changes
+    effect(() => {
+      // Access the signal to create dependency
+      this.fileTreeVisible();
+      // Recalculate after DOM updates - use longer delay to ensure layout is complete
+      if (this.tabsContainerRef?.nativeElement) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              this.calculateVisibleTabs();
+            }, 200);
+          });
+        });
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -193,6 +217,23 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     }
     // Initial calculation after view init
     setTimeout(() => this.calculateVisibleTabs(), 100);
+  }
+
+  /**
+   * Public method to trigger tab recalculation.
+   * Called by parent component when chat visibility changes.
+   */
+  recalculateTabs(): void {
+    // Use double requestAnimationFrame and longer delay to ensure layout is complete
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (this.tabsContainerRef?.nativeElement) {
+            this.calculateVisibleTabs();
+          }
+        }, 200);
+      });
+    });
   }
 
   onFileSelect(filePath: string): void {
@@ -471,23 +512,30 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
       return;
     }
 
+    // First, temporarily show all tabs so we can measure them accurately
+    // This ensures we get correct measurements even if some were previously hidden
+    this.visibleTabs.set(tabs);
+
+    // Force a reflow to ensure all tabs are rendered
+    void container.offsetHeight;
+
+    // Now get the actual container width after layout
     const containerWidth = container.clientWidth;
     const moreButtonWidth = 60; // Approximate width of "more files" button
     const availableWidth = containerWidth - moreButtonWidth;
 
-    // Get all currently rendered tab elements
+    // Get all currently rendered tab elements (should be all tabs now)
     const tabElements = Array.from(wrapper.querySelectorAll<HTMLElement>('.file-editor-tab'));
 
-    // If we don't have all tabs rendered yet, ensure they're all visible for measurement
-    const currentVisibleCount = this.visibleTabs().length;
-    if (tabElements.length < tabs.length && currentVisibleCount < tabs.length) {
-      // Tabs haven't been rendered yet, wait a bit more
+    if (tabElements.length === 0) {
+      // No tabs rendered yet, wait a bit more
       setTimeout(() => this.calculateVisibleTabs(), 50);
       return;
     }
 
-    if (tabElements.length === 0) {
-      // No tabs rendered yet
+    // If we don't have all tabs rendered yet, wait a bit more
+    if (tabElements.length < tabs.length) {
+      setTimeout(() => this.calculateVisibleTabs(), 50);
       return;
     }
 
@@ -496,9 +544,15 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     const overflowed: OpenTab[] = [];
 
     // Measure tabs and determine which fit
-    for (let i = 0; i < Math.min(tabElements.length, tabs.length); i++) {
+    for (let i = 0; i < tabs.length; i++) {
       const tabElement = tabElements[i];
       const tab = tabs[i];
+      if (!tabElement) {
+        // Tab element not found, skip it
+        overflowed.push(tab);
+        continue;
+      }
+
       const tabWidth = tabElement.offsetWidth || tabElement.getBoundingClientRect().width;
 
       if (totalWidth + tabWidth <= availableWidth) {
@@ -516,9 +570,34 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
       overflowed.push(...tabs.slice(visible.length));
     }
 
+    // Check if the selected file is in overflowed tabs - if so, move it to front
+    const selectedPath = this.selectedFilePath();
+    if (selectedPath && this.clientId() && this.agentId()) {
+      const isOverflowed = overflowed.some((tab) => tab.filePath === selectedPath);
+      if (isOverflowed) {
+        // Move selected tab to front and recalculate
+        this.filesFacade.moveTabToFront(this.clientId(), this.agentId(), selectedPath);
+        // The tab order change will trigger a recalculation via the effect
+        // But we also need to recalculate immediately to show the change
+        setTimeout(() => this.calculateVisibleTabs(), 50);
+        return;
+      }
+    }
+
+    // Now set the actual visible/overflowed tabs
     this.visibleTabs.set(visible);
     this.overflowedTabs.set(overflowed);
     this.showMoreFilesDropdown.set(overflowed.length > 0);
+  }
+
+  onToggleFileTree(): void {
+    this.fileTreeVisible.update((visible) => !visible);
+    // Explicitly trigger recalculation after toggling
+    this.recalculateTabs();
+  }
+
+  onToggleChat(): void {
+    this.chatToggleRequested.emit();
   }
 
   ngOnDestroy(): void {
