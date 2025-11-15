@@ -31,6 +31,7 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
   content = input<string | null>(null);
   encoding = input<'utf-8' | 'base64'>('utf-8');
   isDirty = input<boolean>(false);
+  autosaveEnabled = input<boolean>(false);
 
   // Outputs - using output() for modern Angular API
   contentChange = output<string>();

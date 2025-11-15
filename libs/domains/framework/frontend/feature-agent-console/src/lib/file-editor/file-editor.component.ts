@@ -23,7 +23,7 @@ import {
   type WriteFileDto,
 } from '@forepath/framework/frontend/data-access-agent-console';
 import { Actions, ofType } from '@ngrx/effects';
-import { combineLatest, filter, map, Observable, of, switchMap, take } from 'rxjs';
+import { combineLatest, debounceTime, filter, map, Observable, of, Subject, switchMap, take } from 'rxjs';
 import { FileTreeComponent } from './file-tree/file-tree.component';
 import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-editor-wrapper.component';
 
@@ -60,9 +60,13 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
   // Visibility toggles (exposed for parent component access)
   readonly fileTreeVisible = signal<boolean>(true);
+  readonly autosaveEnabled = signal<boolean>(false);
 
   // Outputs
   readonly chatToggleRequested = output<void>();
+
+  // Autosave debounce subject
+  private readonly autosaveTrigger$ = new Subject<void>();
 
   // Convert signals to observables
   private readonly selectedFilePath$ = toObservable(this.selectedFilePath);
@@ -236,6 +240,38 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
         this.filesFacade.readFile(clientId, agentId, action.destinationPath);
       }
     });
+
+    // Autosave: trigger save 1.5 seconds after typing stops (if autosave is enabled and file is dirty)
+    this.autosaveTrigger$
+      .pipe(
+        debounceTime(1500), // 1.5 second delay
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        if (this.autosaveEnabled() && this.isDirty()) {
+          this.onSave();
+        }
+      });
+
+    // Save immediately when autosave is enabled if file is already dirty
+    let previousAutosaveEnabled = false;
+    effect(() => {
+      const autosaveEnabled = this.autosaveEnabled();
+      const isDirty = this.isDirty();
+
+      // Only trigger immediate save when autosave transitions from false to true
+      if (autosaveEnabled && !previousAutosaveEnabled && isDirty) {
+        // Use setTimeout to avoid triggering during signal updates
+        setTimeout(() => {
+          // Double-check conditions in case they changed
+          if (this.autosaveEnabled() && this.isDirty()) {
+            this.onSave();
+          }
+        }, 0);
+      }
+
+      previousAutosaveEnabled = autosaveEnabled;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -312,6 +348,11 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
         newDirty.add(filePath);
         return newDirty;
       });
+
+      // Trigger autosave debounce if autosave is enabled
+      if (this.autosaveEnabled()) {
+        this.autosaveTrigger$.next();
+      }
     }
   }
 
