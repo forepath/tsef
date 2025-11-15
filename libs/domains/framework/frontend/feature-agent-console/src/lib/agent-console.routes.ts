@@ -57,13 +57,13 @@ export const agentConsoleRoutes: Route[] = [
         path: 'login',
         component: AgentConsoleLoginComponent,
         canActivate: [loginGuard],
-        title: 'Login | Agent Console',
+        title: 'Login | Agenstra',
       },
       {
         path: 'dashboard',
         component: AgentConsoleChatComponent,
         canActivate: [authGuard],
-        title: 'Manager | Agent Console',
+        title: 'Manager | Agenstra',
       },
       {
         path: '**',
