@@ -424,6 +424,74 @@ file|file2.txt|2048|1704067200`;
     });
   });
 
+  describe('moveFileOrDirectory', () => {
+    it('should move file successfully', async () => {
+      const sourcePath = 'source-file.txt';
+      const destinationPath = 'destination-file.txt';
+
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
+      dockerService.sendCommandToContainer.mockResolvedValue('');
+
+      await service.moveFileOrDirectory(mockAgentId, sourcePath, destinationPath);
+
+      expect(agentsService.findOne).toHaveBeenCalledWith(mockAgentId);
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(mockContainerId, expect.stringContaining('mv'));
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+        mockContainerId,
+        expect.stringContaining('/app/source-file.txt'),
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+        mockContainerId,
+        expect.stringContaining('/app/destination-file.txt'),
+      );
+    });
+
+    it('should move directory successfully', async () => {
+      const sourcePath = 'source-directory';
+      const destinationPath = 'destination-directory';
+
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
+      dockerService.sendCommandToContainer.mockResolvedValue('');
+
+      await service.moveFileOrDirectory(mockAgentId, sourcePath, destinationPath);
+
+      expect(agentsService.findOne).toHaveBeenCalledWith(mockAgentId);
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when agent not found', async () => {
+      agentsService.findOne.mockRejectedValue(new NotFoundException('Agent not found'));
+
+      await expect(service.moveFileOrDirectory(mockAgentId, 'source.txt', 'dest.txt')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw NotFoundException when source file not found', async () => {
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
+      dockerService.sendCommandToContainer.mockRejectedValue(new Error('No such file'));
+
+      await expect(service.moveFileOrDirectory(mockAgentId, 'nonexistent.txt', 'dest.txt')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw BadRequestException for path traversal attempts in source', async () => {
+      await expect(service.moveFileOrDirectory(mockAgentId, '../etc/passwd', 'dest.txt')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException for path traversal attempts in destination', async () => {
+      await expect(service.moveFileOrDirectory(mockAgentId, 'source.txt', '../etc/passwd')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
   describe('path sanitization', () => {
     it('should reject paths with null bytes', async () => {
       await expect(service.readFile(mockAgentId, 'file\0.txt')).rejects.toThrow(BadRequestException);

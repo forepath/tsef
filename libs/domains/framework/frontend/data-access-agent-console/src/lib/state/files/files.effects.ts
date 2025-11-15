@@ -12,6 +12,9 @@ import {
   listDirectory,
   listDirectoryFailure,
   listDirectorySuccess,
+  moveFileOrDirectory,
+  moveFileOrDirectoryFailure,
+  moveFileOrDirectorySuccess,
   readFile,
   readFileFailure,
   readFileSuccess,
@@ -116,6 +119,30 @@ export const deleteFileOrDirectory$ = createEffect(
           map(() => deleteFileOrDirectorySuccess({ clientId, agentId, filePath })),
           catchError((error) =>
             of(deleteFileOrDirectoryFailure({ clientId, agentId, filePath, error: normalizeError(error) })),
+          ),
+        ),
+      ),
+    );
+  },
+  { functional: true },
+);
+
+export const moveFileOrDirectory$ = createEffect(
+  (actions$ = inject(Actions), filesService = inject(FilesService)) => {
+    return actions$.pipe(
+      ofType(moveFileOrDirectory),
+      exhaustMap(({ clientId, agentId, sourcePath, moveFileDto }) =>
+        filesService.moveFileOrDirectory(clientId, agentId, sourcePath, moveFileDto).pipe(
+          map(() =>
+            moveFileOrDirectorySuccess({
+              clientId,
+              agentId,
+              sourcePath,
+              destinationPath: moveFileDto.destination,
+            }),
+          ),
+          catchError((error) =>
+            of(moveFileOrDirectoryFailure({ clientId, agentId, sourcePath, error: normalizeError(error) })),
           ),
         ),
       ),

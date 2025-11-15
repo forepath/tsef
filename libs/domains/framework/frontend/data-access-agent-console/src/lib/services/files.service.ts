@@ -8,6 +8,7 @@ import type {
   FileContentDto,
   FileNodeDto,
   ListDirectoryParams,
+  MoveFileDto,
   WriteFileDto,
 } from '../state/files/files.types';
 
@@ -26,6 +27,21 @@ export class FilesService {
   }
 
   /**
+   * Encode a file path for use in URL path segments.
+   * Encodes each segment separately to preserve forward slashes,
+   * which are needed for NestJS wildcard path parameter parsing.
+   * @param filePath - The file path to encode
+   * @returns The encoded path with forward slashes preserved
+   */
+  private encodePath(filePath: string): string {
+    // Split by forward slash, encode each segment, then rejoin
+    return filePath
+      .split('/')
+      .map((segment) => encodeURIComponent(segment))
+      .join('/');
+  }
+
+  /**
    * Read file content from agent container.
    * @param clientId - The UUID of the client
    * @param agentId - The UUID of the agent
@@ -33,7 +49,7 @@ export class FilesService {
    * @returns Observable of file content (base64-encoded)
    */
   readFile(clientId: string, agentId: string, filePath: string): Observable<FileContentDto> {
-    const encodedPath = encodeURIComponent(filePath);
+    const encodedPath = this.encodePath(filePath);
     return this.http.get<FileContentDto>(`${this.apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodedPath}`);
   }
 
@@ -46,7 +62,7 @@ export class FilesService {
    * @returns Observable of void
    */
   writeFile(clientId: string, agentId: string, filePath: string, writeFileDto: WriteFileDto): Observable<void> {
-    const encodedPath = encodeURIComponent(filePath);
+    const encodedPath = this.encodePath(filePath);
     return this.http.put<void>(
       `${this.apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodedPath}`,
       writeFileDto,
@@ -85,7 +101,7 @@ export class FilesService {
     filePath: string,
     createFileDto: CreateFileDto,
   ): Observable<void> {
-    const encodedPath = encodeURIComponent(filePath);
+    const encodedPath = this.encodePath(filePath);
     return this.http.post<void>(
       `${this.apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodedPath}`,
       createFileDto,
@@ -100,7 +116,28 @@ export class FilesService {
    * @returns Observable of void
    */
   deleteFileOrDirectory(clientId: string, agentId: string, filePath: string): Observable<void> {
-    const encodedPath = encodeURIComponent(filePath);
+    const encodedPath = this.encodePath(filePath);
     return this.http.delete<void>(`${this.apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodedPath}`);
+  }
+
+  /**
+   * Move a file or directory in agent container.
+   * @param clientId - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param sourcePath - The source file path relative to /app
+   * @param moveFileDto - The move operation data (destination path)
+   * @returns Observable of void
+   */
+  moveFileOrDirectory(
+    clientId: string,
+    agentId: string,
+    sourcePath: string,
+    moveFileDto: MoveFileDto,
+  ): Observable<void> {
+    const encodedPath = this.encodePath(sourcePath);
+    return this.http.patch<void>(
+      `${this.apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodedPath}`,
+      moveFileDto,
+    );
   }
 }

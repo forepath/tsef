@@ -76,3 +76,14 @@ sequenceDiagram
         FileProxy-->>API: void
         API-->>Client: 204 No Content
     end
+
+    rect rgb(240, 230, 255)
+        Note over Client,Remote: Move File/Directory (Proxied)
+        Client->>API: PATCH /api/clients/{id}/agents/{agentId}/files/{path}<br/>{destination}
+        API->>FileProxy: moveFileOrDirectory(clientId, agentId, sourcePath, moveFileDto)
+        FileProxy->>FileProxy: getAuthHeader(clientId)
+        FileProxy->>Remote: PATCH {endpoint}/api/agents/{agentId}/files/{path}<br/>Authorization: Bearer {token/apiKey}<br/>{destination}
+        Remote-->>FileProxy: 204 No Content
+        FileProxy-->>API: void
+        API-->>Client: 204 No Content
+    end

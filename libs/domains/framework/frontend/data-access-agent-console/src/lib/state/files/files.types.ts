@@ -22,6 +22,10 @@ export interface CreateFileDto {
   content?: string; // Optional content for file creation (base64-encoded)
 }
 
+export interface MoveFileDto {
+  destination: string; // Destination path relative to /app (supports nested paths)
+}
+
 export interface ListDirectoryParams {
   path?: string; // Directory path relative to /app (defaults to '.')
 }

@@ -10,6 +10,7 @@ import {
   selectIsCreatingFile,
   selectIsDeletingFile,
   selectIsListingDirectory,
+  selectIsMovingFile,
   selectIsReadingFile,
   selectIsWritingFile,
   selectOpenTabs,
@@ -54,6 +55,7 @@ describe('Files Selectors', () => {
     listing: { [directoryKey]: false },
     creating: { [fileKey]: false },
     deleting: { [fileKey]: false },
+    moving: { [fileKey]: false },
     errors: { [fileKey]: null },
     openTabs: { [clientAgentKey]: mockOpenTabs },
   };
@@ -167,6 +169,21 @@ describe('Files Selectors', () => {
     });
   });
 
+  describe('selectIsMovingFile', () => {
+    it('should return true when file is being moved', () => {
+      const movingState = { [fileKey]: true };
+      const selector = selectIsMovingFile(clientId, agentId, filePath);
+      const result = selector.projector(movingState);
+      expect(result).toBe(true);
+    });
+
+    it('should return false when file is not being moved', () => {
+      const selector = selectIsMovingFile(clientId, agentId, filePath);
+      const result = selector.projector(mockFilesState.moving);
+      expect(result).toBe(false);
+    });
+  });
+
   describe('selectFileError', () => {
     it('should return error when it exists', () => {
       const errorState = { [fileKey]: 'Test error' };
@@ -185,31 +202,37 @@ describe('Files Selectors', () => {
   describe('selectFileOperationLoading', () => {
     it('should return true when any file operation is loading', () => {
       const selector = selectFileOperationLoading(clientId, agentId, filePath);
-      const result = selector.projector(true, false, false, false);
+      const result = selector.projector(true, false, false, false, false);
       expect(result).toBe(true);
     });
 
     it('should return true when writing', () => {
       const selector = selectFileOperationLoading(clientId, agentId, filePath);
-      const result = selector.projector(false, true, false, false);
+      const result = selector.projector(false, true, false, false, false);
       expect(result).toBe(true);
     });
 
     it('should return true when creating', () => {
       const selector = selectFileOperationLoading(clientId, agentId, filePath);
-      const result = selector.projector(false, false, true, false);
+      const result = selector.projector(false, false, true, false, false);
       expect(result).toBe(true);
     });
 
     it('should return true when deleting', () => {
       const selector = selectFileOperationLoading(clientId, agentId, filePath);
-      const result = selector.projector(false, false, false, true);
+      const result = selector.projector(false, false, false, true, false);
+      expect(result).toBe(true);
+    });
+
+    it('should return true when moving', () => {
+      const selector = selectFileOperationLoading(clientId, agentId, filePath);
+      const result = selector.projector(false, false, false, false, true);
       expect(result).toBe(true);
     });
 
     it('should return false when no file operation is loading', () => {
       const selector = selectFileOperationLoading(clientId, agentId, filePath);
-      const result = selector.projector(false, false, false, false);
+      const result = selector.projector(false, false, false, false, false);
       expect(result).toBe(false);
     });
   });

@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -16,12 +17,13 @@ import { Resource } from 'nest-keycloak-connect';
 import { CreateFileDto } from './dto/create-file.dto';
 import { FileContentDto } from './dto/file-content.dto';
 import { FileNodeDto } from './dto/file-node.dto';
+import { MoveFileDto } from './dto/move-file.dto';
 import { WriteFileDto } from './dto/write-file.dto';
 import { AgentFileSystemService } from './services/agent-file-system.service';
 
 /**
  * Controller for agent file system operations.
- * Provides endpoints for reading, writing, listing, creating, and deleting files in agent containers.
+ * Provides endpoints for reading, writing, listing, creating, deleting, and moving files in agent containers.
  */
 @Resource('agents')
 @Controller('agents/:agentId/files')
@@ -156,5 +158,37 @@ export class AgentsFilesController {
       throw new BadRequestException('File path is required');
     }
     await this.agentFileSystemService.deleteFileOrDirectory(agentId, normalizedPath);
+  }
+
+  /**
+   * Move a file or directory in agent container.
+   * @param agentId - The UUID of the agent
+   * @param path - The source file path (wildcard parameter for nested paths)
+   * @param moveFileDto - The move operation data (destination path)
+   */
+  @Patch('*path')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async moveFileOrDirectory(
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('path') path: string | string[] | Record<string, unknown> | undefined,
+    @Body() moveFileDto: MoveFileDto,
+  ): Promise<void> {
+    // Normalize path: wildcard parameters can be string, array, object, or undefined
+    let normalizedPath: string | undefined;
+    if (typeof path === 'string') {
+      normalizedPath = path;
+    } else if (Array.isArray(path)) {
+      normalizedPath = path.join('/');
+    } else if (path && typeof path === 'object') {
+      // If it's an object, we can't determine the path - throw error
+      throw new BadRequestException('File path must be a string or array, got object');
+    }
+    if (!normalizedPath) {
+      throw new BadRequestException('File path is required');
+    }
+    if (!moveFileDto.destination) {
+      throw new BadRequestException('Destination path is required');
+    }
+    await this.agentFileSystemService.moveFileOrDirectory(agentId, normalizedPath, moveFileDto.destination);
   }
 }

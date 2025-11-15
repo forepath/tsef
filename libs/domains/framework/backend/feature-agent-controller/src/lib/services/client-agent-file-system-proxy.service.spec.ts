@@ -2,6 +2,7 @@ import {
   CreateFileDto,
   FileContentDto,
   FileNodeDto,
+  MoveFileDto,
   WriteFileDto,
 } from '@forepath/framework/backend/feature-agent-manager';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
@@ -286,6 +287,93 @@ describe('ClientAgentFileSystemProxyService', () => {
         expect.objectContaining({
           method: 'DELETE',
         }),
+      );
+    });
+  });
+
+  describe('moveFileOrDirectory', () => {
+    it('should proxy move file request successfully with API_KEY auth', async () => {
+      const moveDto: MoveFileDto = {
+        destination: 'new-location/file.txt',
+      };
+
+      clientsRepository.findByIdOrThrow.mockResolvedValue(mockClientEntity);
+      mockedAxios.request.mockResolvedValue({
+        status: 204,
+        data: undefined,
+      } as any);
+
+      await service.moveFileOrDirectory(mockClientId, mockAgentId, mockFilePath, moveDto);
+
+      expect(clientsRepository.findByIdOrThrow).toHaveBeenCalledWith(mockClientId);
+      expect(mockedAxios.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'PATCH',
+          url: expect.stringContaining(`/api/agents/${mockAgentId}/files`),
+          data: moveDto,
+          headers: expect.objectContaining({
+            Authorization: 'Bearer test-api-key',
+          }),
+        }),
+      );
+    });
+
+    it('should proxy move file request successfully with KEYCLOAK auth', async () => {
+      const moveDto: MoveFileDto = {
+        destination: 'new-location/file.txt',
+      };
+      const keycloakClient = {
+        ...mockClientEntity,
+        authenticationType: AuthenticationType.KEYCLOAK,
+        apiKey: undefined,
+      };
+      clientsRepository.findByIdOrThrow.mockResolvedValue(keycloakClient);
+      clientsService.getAccessToken.mockResolvedValue('keycloak-jwt-token');
+      mockedAxios.request.mockResolvedValue({
+        status: 204,
+        data: undefined,
+      } as any);
+
+      await service.moveFileOrDirectory(mockClientId, mockAgentId, mockFilePath, moveDto);
+
+      expect(clientsService.getAccessToken).toHaveBeenCalledWith(mockClientId);
+      expect(mockedAxios.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'PATCH',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer keycloak-jwt-token',
+          }),
+        }),
+      );
+    });
+
+    it('should throw NotFoundException when remote returns 404', async () => {
+      const moveDto: MoveFileDto = {
+        destination: 'new-location/file.txt',
+      };
+      clientsRepository.findByIdOrThrow.mockResolvedValue(mockClientEntity);
+      mockedAxios.request.mockResolvedValue({
+        status: 404,
+        data: { message: 'File not found' },
+      } as any);
+
+      await expect(service.moveFileOrDirectory(mockClientId, mockAgentId, mockFilePath, moveDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw BadRequestException when remote returns 400', async () => {
+      const moveDto: MoveFileDto = {
+        destination: 'new-location/file.txt',
+      };
+      clientsRepository.findByIdOrThrow.mockResolvedValue(mockClientEntity);
+      mockedAxios.request.mockResolvedValue({
+        status: 400,
+        data: { message: 'Invalid path' },
+      } as any);
+
+      await expect(service.moveFileOrDirectory(mockClientId, mockAgentId, mockFilePath, moveDto)).rejects.toThrow(
+        BadRequestException,
       );
     });
   });

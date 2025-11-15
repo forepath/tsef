@@ -42,6 +42,12 @@ export class FileTreeComponent implements OnInit {
   @ViewChild('deleteFileModal', { static: false })
   private deleteFileModal!: ElementRef<HTMLDivElement>;
 
+  @ViewChild('renameFileModal', { static: false })
+  private renameFileModal!: ElementRef<HTMLDivElement>;
+
+  @ViewChild('moveFileModal', { static: false })
+  private moveFileModal!: ElementRef<HTMLDivElement>;
+
   // Inputs
   clientId = input.required<string>();
   agentId = input.required<string>();
@@ -63,6 +69,14 @@ export class FileTreeComponent implements OnInit {
   creatingItem = signal<{ path: string; type: 'file' | 'directory' } | null>(null);
   newItemName = signal<string>('');
   itemToDelete = signal<{ path: string; type: 'file' | 'directory' } | null>(null);
+  itemToRename = signal<{ path: string; type: 'file' | 'directory'; name: string } | null>(null);
+  itemToMove = signal<{ path: string; type: 'file' | 'directory'; name: string } | null>(null);
+  renameNewName = signal<string>('');
+  moveDestinationPath = signal<string>('');
+  // Drag and drop state
+  draggedItem = signal<{ path: string; type: 'file' | 'directory'; name: string } | null>(null);
+  dragOverPath = signal<string | null>(null);
+  private hoverTimeout: ReturnType<typeof setTimeout> | null = null;
   private expandedDirectorySubscriptions = new Map<string, Subscription>();
 
   // Computed observables for directory listings - convert computed signals to observables
@@ -123,6 +137,11 @@ export class FileTreeComponent implements OnInit {
   }
 
   constructor() {
+    // Cleanup hover timeout on component destruction
+    this.destroyRef.onDestroy(() => {
+      this.clearHoverTimeout();
+    });
+
     // Load root directory on init
     effect(() => {
       const clientId = this.clientId();
@@ -246,6 +265,338 @@ export class FileTreeComponent implements OnInit {
     this.contextMenuPosition.set({ x: event.clientX, y: event.clientY });
   }
 
+  onDragStart(event: DragEvent, node: TreeNode): void {
+    if (!event.dataTransfer) {
+      return;
+    }
+    this.draggedItem.set({ path: node.path, type: node.type, name: node.name });
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', node.path);
+    // Set drag image to show what's being dragged
+    if (event.currentTarget instanceof HTMLElement) {
+      const treeNodeContent = event.currentTarget.querySelector('.tree-node-content');
+      if (treeNodeContent) {
+        const dragImage = treeNodeContent.cloneNode(true) as HTMLElement;
+        dragImage.style.position = 'absolute';
+        dragImage.style.top = '-1000px';
+        dragImage.style.opacity = '0.8';
+        dragImage.style.backgroundColor = 'var(--bs-body-bg)';
+        dragImage.style.padding = '4px 8px';
+        dragImage.style.border = '1px solid var(--bs-border-color)';
+        dragImage.style.borderRadius = '4px';
+        document.body.appendChild(dragImage);
+        event.dataTransfer.setDragImage(dragImage, 0, 0);
+        setTimeout(() => {
+          if (document.body.contains(dragImage)) {
+            document.body.removeChild(dragImage);
+          }
+        }, 0);
+      }
+    }
+  }
+
+  onDragEnd(): void {
+    this.draggedItem.set(null);
+    this.dragOverPath.set(null);
+    this.clearHoverTimeout();
+  }
+
+  onDragOver(event: DragEvent, node: TreeNode): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const dragged = this.draggedItem();
+    if (!dragged) {
+      return;
+    }
+
+    // Only allow dropping on directories
+    if (node.type !== 'directory') {
+      return;
+    }
+
+    // Prevent dropping on self or parent
+    if (!this.canDropOn(dragged.path, node.path)) {
+      return;
+    }
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+
+    // Clear root drag-over state if we're over a child node
+    if (this.dragOverPath() === '.') {
+      this.dragOverPath.set(null);
+    }
+
+    // Set drag over path for visual feedback
+    this.dragOverPath.set(node.path);
+
+    // If folder is closed, start hover timeout to expand it
+    if (!node.expanded) {
+      this.startHoverTimeout(node.path);
+    } else {
+      this.clearHoverTimeout();
+    }
+  }
+
+  onDragEnter(event: DragEvent, node: TreeNode): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const dragged = this.draggedItem();
+    if (!dragged) {
+      return;
+    }
+
+    // Only allow dropping on directories
+    if (node.type !== 'directory') {
+      return;
+    }
+
+    // Prevent dropping on self or parent
+    if (!this.canDropOn(dragged.path, node.path)) {
+      return;
+    }
+
+    // Clear root drag-over state if we're entering a child node
+    if (this.dragOverPath() === '.') {
+      this.dragOverPath.set(null);
+    }
+
+    this.dragOverPath.set(node.path);
+
+    // If folder is closed, start hover timeout to expand it
+    if (!node.expanded) {
+      this.startHoverTimeout(node.path);
+    }
+  }
+
+  onDragLeave(event: DragEvent, node: TreeNode): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Only clear if we're actually leaving the node (not just moving to a child)
+    const relatedTarget = event.relatedTarget as HTMLElement | null;
+    if (relatedTarget && event.currentTarget instanceof HTMLElement) {
+      if (event.currentTarget.contains(relatedTarget)) {
+        return; // Still within the node or its children
+      }
+    }
+
+    // Clear drag over state if leaving this specific node
+    if (this.dragOverPath() === node.path) {
+      this.dragOverPath.set(null);
+      this.clearHoverTimeout();
+    }
+  }
+
+  onDrop(event: DragEvent, node: TreeNode): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const dragged = this.draggedItem();
+    if (!dragged) {
+      return;
+    }
+
+    // Only allow dropping on directories
+    if (node.type !== 'directory') {
+      return;
+    }
+
+    // Prevent dropping on self or parent
+    if (!this.canDropOn(dragged.path, node.path)) {
+      return;
+    }
+
+    // Clear drag state
+    this.dragOverPath.set(null);
+    this.clearHoverTimeout();
+
+    // Build destination path
+    const destinationPath = node.path === '.' ? dragged.name : `${node.path}/${dragged.name}`;
+
+    // Don't move if source and destination are the same
+    if (dragged.path === destinationPath) {
+      this.draggedItem.set(null);
+      return;
+    }
+
+    // Use move functionality
+    this.filesFacade.moveFileOrDirectory(this.clientId(), this.agentId(), dragged.path, {
+      destination: destinationPath,
+    });
+
+    this.draggedItem.set(null);
+
+    // Refresh source parent directory
+    const sourceParentPath = this.getParentPath(dragged.path);
+    setTimeout(() => {
+      this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: sourceParentPath });
+    }, 100);
+
+    // Refresh destination directory
+    setTimeout(() => {
+      this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: node.path });
+    }, 200);
+
+    // Expand target path in the tree
+    this.expandPathToDestination(destinationPath);
+  }
+
+  onDragOverRoot(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const dragged = this.draggedItem();
+    if (!dragged) {
+      return;
+    }
+
+    // Prevent dropping root items on root (they're already there)
+    const sourceParentPath = this.getParentPath(dragged.path);
+    if (sourceParentPath === '.') {
+      return;
+    }
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+
+    // Set drag over path for visual feedback
+    this.dragOverPath.set('.');
+  }
+
+  onDragEnterRoot(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const dragged = this.draggedItem();
+    if (!dragged) {
+      return;
+    }
+
+    // Prevent dropping root items on root (they're already there)
+    const sourceParentPath = this.getParentPath(dragged.path);
+    if (sourceParentPath === '.') {
+      return;
+    }
+
+    this.dragOverPath.set('.');
+  }
+
+  onDragLeaveRoot(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Only clear if we're actually leaving the root container
+    const relatedTarget = event.relatedTarget as HTMLElement | null;
+    if (relatedTarget && event.currentTarget instanceof HTMLElement) {
+      if (event.currentTarget.contains(relatedTarget)) {
+        return; // Still within the root container
+      }
+    }
+
+    // Clear drag over state if leaving root
+    if (this.dragOverPath() === '.') {
+      this.dragOverPath.set(null);
+    }
+  }
+
+  onDropRoot(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const dragged = this.draggedItem();
+    if (!dragged) {
+      return;
+    }
+
+    // Prevent dropping root items on root (they're already there)
+    const sourceParentPath = this.getParentPath(dragged.path);
+    if (sourceParentPath === '.') {
+      this.draggedItem.set(null);
+      this.dragOverPath.set(null);
+      return;
+    }
+
+    // Clear drag state
+    this.dragOverPath.set(null);
+    this.clearHoverTimeout();
+
+    // Build destination path (root is '.', so destination is just the name)
+    const destinationPath = dragged.name;
+
+    // Don't move if source and destination are the same
+    if (dragged.path === destinationPath) {
+      this.draggedItem.set(null);
+      return;
+    }
+
+    // Use move functionality
+    this.filesFacade.moveFileOrDirectory(this.clientId(), this.agentId(), dragged.path, {
+      destination: destinationPath,
+    });
+
+    this.draggedItem.set(null);
+
+    // Refresh source parent directory
+    setTimeout(() => {
+      this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: sourceParentPath });
+    }, 100);
+
+    // Refresh root directory
+    setTimeout(() => {
+      this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: '.' });
+    }, 200);
+  }
+
+  /**
+   * Check if an item can be dropped on a target path
+   */
+  private canDropOn(sourcePath: string, targetPath: string): boolean {
+    // Can't drop on self
+    if (sourcePath === targetPath) {
+      return false;
+    }
+
+    // Can't drop a directory into itself or its children
+    if (targetPath.startsWith(sourcePath + '/')) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Start hover timeout to expand a folder after 1 second
+   */
+  private startHoverTimeout(path: string): void {
+    this.clearHoverTimeout();
+    this.hoverTimeout = setTimeout(() => {
+      if (!this.expandedPaths().has(path)) {
+        this.directoryExpand.emit(path);
+        // Load directory if not cached
+        const hasCachedData = this.treeCache().has(path);
+        if (!hasCachedData) {
+          this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path });
+        }
+      }
+      this.hoverTimeout = null;
+    }, 1000); // 1 second delay
+  }
+
+  /**
+   * Clear hover timeout
+   */
+  private clearHoverTimeout(): void {
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
+      this.hoverTimeout = null;
+    }
+  }
+
   onCloseContextMenu(): void {
     this.contextMenuPath.set(null);
     this.contextMenuPosition.set(null);
@@ -295,6 +646,30 @@ export class FileTreeComponent implements OnInit {
     }
   }
 
+  onRenameItem(path: string): void {
+    // Find the node to get its type and name
+    const node = this.findNodeByPath(path);
+    if (node) {
+      this.itemToRename.set({ path, type: node.type, name: node.name });
+      this.renameNewName.set(node.name);
+      this.showModal(this.renameFileModal);
+      this.onCloseContextMenu();
+    }
+  }
+
+  onMoveItem(path: string): void {
+    // Find the node to get its type and name
+    const node = this.findNodeByPath(path);
+    if (node) {
+      this.itemToMove.set({ path, type: node.type, name: node.name });
+      // Set initial destination to parent directory
+      const parentPath = this.getParentPath(path);
+      this.moveDestinationPath.set(parentPath);
+      this.showModal(this.moveFileModal);
+      this.onCloseContextMenu();
+    }
+  }
+
   confirmDeleteItem(): void {
     const item = this.itemToDelete();
     if (item) {
@@ -311,6 +686,121 @@ export class FileTreeComponent implements OnInit {
       // Refresh the parent directory listing to update the tree
       this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: parentPath });
     }
+  }
+
+  confirmRenameItem(): void {
+    const item = this.itemToRename();
+    const newName = this.renameNewName().trim();
+    if (!item || !newName || newName === item.name) {
+      return;
+    }
+
+    // Get parent path
+    const parentPath = this.getParentPath(item.path);
+
+    // Build destination path: parentPath/newName
+    const destinationPath = parentPath === '.' ? newName : `${parentPath}/${newName}`;
+
+    // Use move functionality to rename
+    this.filesFacade.moveFileOrDirectory(this.clientId(), this.agentId(), item.path, {
+      destination: destinationPath,
+    });
+
+    this.hideModal(this.renameFileModal);
+    this.itemToRename.set(null);
+    this.renameNewName.set('');
+
+    // Refresh the parent directory listing to update the tree
+    setTimeout(() => {
+      this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: parentPath });
+    }, 100);
+  }
+
+  confirmMoveItem(): void {
+    const item = this.itemToMove();
+    const destinationPath = this.moveDestinationPath().trim();
+    if (!item || !destinationPath) {
+      return;
+    }
+
+    // Build full destination path
+    const fullDestinationPath = destinationPath === '.' ? item.name : `${destinationPath}/${item.name}`;
+
+    // Don't move if source and destination are the same
+    if (item.path === fullDestinationPath) {
+      this.hideModal(this.moveFileModal);
+      this.itemToMove.set(null);
+      this.moveDestinationPath.set('');
+      return;
+    }
+
+    // Use move functionality
+    this.filesFacade.moveFileOrDirectory(this.clientId(), this.agentId(), item.path, {
+      destination: fullDestinationPath,
+    });
+
+    this.hideModal(this.moveFileModal);
+    this.itemToMove.set(null);
+    this.moveDestinationPath.set('');
+
+    // Refresh source parent directory
+    const sourceParentPath = this.getParentPath(item.path);
+    setTimeout(() => {
+      this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: sourceParentPath });
+    }, 100);
+
+    // Refresh destination directory and expand target path in the tree
+    const destinationParentPath = this.getParentPath(fullDestinationPath);
+    setTimeout(() => {
+      this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: destinationParentPath });
+    }, 200);
+
+    // Expand target path in the tree
+    this.expandPathToDestination(fullDestinationPath);
+  }
+
+  cancelRenameItem(): void {
+    this.hideModal(this.renameFileModal);
+    this.itemToRename.set(null);
+    this.renameNewName.set('');
+  }
+
+  cancelMoveItem(): void {
+    this.hideModal(this.moveFileModal);
+    this.itemToMove.set(null);
+    this.moveDestinationPath.set('');
+  }
+
+  /**
+   * Expands all parent directories leading to the destination path
+   */
+  private expandPathToDestination(destinationPath: string): void {
+    // Build array of all parent paths that need to be expanded
+    const pathsToExpand: string[] = [];
+    let currentPath = destinationPath;
+
+    // Extract all parent directory paths
+    while (currentPath && currentPath !== '.') {
+      const parentPath = this.getParentPath(currentPath);
+      if (parentPath !== '.' && !pathsToExpand.includes(parentPath)) {
+        pathsToExpand.unshift(parentPath); // Add to beginning to expand from root to target
+      }
+      currentPath = parentPath;
+    }
+
+    // Expand each path with a small delay to ensure proper loading
+    pathsToExpand.forEach((path, index) => {
+      setTimeout(() => {
+        if (!this.expandedPaths().has(path)) {
+          this.directoryExpand.emit(path);
+          // Load directory if not cached
+          const hasCachedData = this.treeCache().has(path);
+          if (!hasCachedData) {
+            this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path });
+          }
+        }
+      }, index * 100); // 100ms delay between each expansion
+    });
   }
 
   private getParentPath(path: string): string {

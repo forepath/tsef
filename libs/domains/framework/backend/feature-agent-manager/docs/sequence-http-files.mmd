@@ -94,3 +94,19 @@ sequenceDiagram
         FileService-->>API: void
         API-->>Client: 204 No Content
     end
+
+    rect rgb(240, 230, 255)
+        Note over Client,Container: Move File/Directory
+        Client->>API: PATCH /api/agents/{id}/files/{path}<br/>{destination}
+        API->>FileService: moveFileOrDirectory(agentId, sourcePath, destinationPath)
+        FileService->>FileService: sanitizePath(sourcePath)
+        FileService->>FileService: sanitizePath(destinationPath)
+        FileService->>AgentService: findOne(agentId)
+        AgentService-->>FileService: agent entity
+        FileService->>Docker: sendCommandToContainer(containerId, "mv /app/{sourcePath} /app/{destinationPath}")
+        Docker->>Container: Execute mv command
+        Container-->>Docker: success
+        Docker-->>FileService: success
+        FileService-->>API: void
+        API-->>Client: 204 No Content
+    end

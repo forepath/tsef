@@ -9,6 +9,7 @@ import {
   createFileOrDirectory,
   deleteFileOrDirectory,
   listDirectory,
+  moveFileOrDirectory,
   moveTabToFront,
   openFileTab,
   pinFileTab,
@@ -17,7 +18,7 @@ import {
   writeFile,
 } from './files.actions';
 import { FilesFacade } from './files.facade';
-import type { CreateFileDto, FileContentDto, FileNodeDto, WriteFileDto } from './files.types';
+import type { CreateFileDto, FileContentDto, FileNodeDto, MoveFileDto, WriteFileDto } from './files.types';
 
 describe('FilesFacade', () => {
   let facade: FilesFacade;
@@ -147,6 +148,15 @@ describe('FilesFacade', () => {
       });
     });
 
+    it('should return moving file loading observable', (done) => {
+      store.select.mockReturnValue(of(true));
+
+      facade.isMovingFile$(clientId, agentId, filePath).subscribe((result) => {
+        expect(result).toBe(true);
+        done();
+      });
+    });
+
     it('should return combined file operation loading observable', (done) => {
       store.select.mockReturnValue(of(true));
 
@@ -233,6 +243,17 @@ describe('FilesFacade', () => {
       facade.deleteFileOrDirectory(clientId, agentId, filePath);
 
       expect(store.dispatch).toHaveBeenCalledWith(deleteFileOrDirectory({ clientId, agentId, filePath }));
+    });
+
+    it('should dispatch moveFileOrDirectory action', () => {
+      const moveDto: MoveFileDto = {
+        destination: 'dest-file.txt',
+      };
+      facade.moveFileOrDirectory(clientId, agentId, filePath, moveDto);
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        moveFileOrDirectory({ clientId, agentId, sourcePath: filePath, moveFileDto: moveDto }),
+      );
     });
 
     it('should dispatch clearFileContent action', () => {

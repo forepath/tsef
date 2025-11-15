@@ -2,6 +2,7 @@ import {
   CreateFileDto,
   FileContentDto,
   FileNodeDto,
+  MoveFileDto,
   WriteFileDto,
 } from '@forepath/framework/backend/feature-agent-manager';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
@@ -209,6 +210,27 @@ export class ClientAgentFileSystemProxyService {
     await this.makeRequest<void>(clientId, agentId, {
       method: 'DELETE',
       url: `/${encodedPath}`,
+    });
+  }
+
+  /**
+   * Move a file or directory in agent container via client proxy.
+   * @param clientId - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param sourcePath - The relative path to the source file/directory (from /app)
+   * @param moveFileDto - The move operation data (destination path)
+   */
+  async moveFileOrDirectory(
+    clientId: string,
+    agentId: string,
+    sourcePath: string,
+    moveFileDto: MoveFileDto,
+  ): Promise<void> {
+    const encodedPath = encodeURIComponent(sourcePath);
+    await this.makeRequest<void>(clientId, agentId, {
+      method: 'PATCH',
+      url: `/${encodedPath}`,
+      data: moveFileDto,
     });
   }
 }

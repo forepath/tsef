@@ -250,6 +250,35 @@ paths:
           description: Invalid path
         '404':
           description: Agent or file/directory not found
+    patch:
+      summary: Move file or directory
+      operationId: moveFileOrDirectory
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+          description: Source file or directory path relative to /app (supports nested paths)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveFileDto'
+      responses:
+        '204':
+          description: File or directory moved successfully
+        '400':
+          description: Invalid path or destination
+        '404':
+          description: Agent or source file/directory not found
 components:
   securitySchemes:
     bearerAuth:
@@ -357,3 +386,10 @@ components:
         content:
           type: [string, 'null']
           description: Optional content for file creation
+    MoveFileDto:
+      type: object
+      required: [destination]
+      properties:
+        destination:
+          type: string
+          description: Destination path relative to /app (supports nested paths)

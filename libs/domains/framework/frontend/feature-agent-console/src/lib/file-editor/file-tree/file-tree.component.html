@@ -28,7 +28,14 @@
     </div>
   </div>
 
-  <div class="file-tree-content flex-grow-1 overflow-auto p-2">
+  <div
+    class="file-tree-content flex-grow-1 overflow-auto p-2"
+    [class.drag-over-root]="dragOverPath() === '.'"
+    (dragover)="onDragOverRoot($event)"
+    (dragenter)="onDragEnterRoot($event)"
+    (dragleave)="onDragLeaveRoot($event)"
+    (drop)="onDropRoot($event)"
+  >
     @if (rootLoading$ | async) {
       <div class="d-flex justify-content-center align-items-center p-4">
         <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -125,8 +132,17 @@
       [class.expanded]="node.expanded"
       [class.has-children]="node.children && node.children.length > 0"
       [class.creating-in]="creatingItem()?.path === node.path"
+      [class.dragging]="draggedItem()?.path === node.path"
+      [class.drag-over]="dragOverPath() === node.path && node.type === 'directory'"
+      [draggable]="true"
       (click)="onFileClick(node, $event)"
       (contextmenu)="onContextMenu($event, node)"
+      (dragstart)="onDragStart($event, node)"
+      (dragend)="onDragEnd()"
+      (dragover)="onDragOver($event, node)"
+      (dragenter)="onDragEnter($event, node)"
+      (dragleave)="onDragLeave($event, node)"
+      (drop)="onDrop($event, node)"
     >
       <!-- Tree indentation with visual guides -->
       @if (level > 0) {
@@ -254,6 +270,13 @@
       </button>
     }
     <div class="dropdown-divider"></div>
+    <button class="dropdown-item" (click)="onRenameItem(contextMenuPath()!)">
+      <i class="bi bi-pencil me-2"></i>Rename
+    </button>
+    <button class="dropdown-item" (click)="onMoveItem(contextMenuPath()!)">
+      <i class="bi bi-arrow-right-circle me-2"></i>Move
+    </button>
+    <div class="dropdown-divider"></div>
     <button class="dropdown-item text-danger" (click)="onDeleteItem(contextMenuPath()!)">
       <i class="bi bi-trash me-2"></i>Delete
     </button>
@@ -304,6 +327,134 @@
           Cancel
         </button>
         <button type="button" class="btn btn-danger" (click)="confirmDeleteItem()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rename File/Directory Modal -->
+<div
+  class="modal fade"
+  id="renameFileModal"
+  tabindex="-1"
+  aria-labelledby="renameFileModalLabel"
+  aria-hidden="true"
+  #renameFileModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="renameFileModalLabel">
+          Rename {{ itemToRename()?.type === 'directory' ? 'Directory' : 'File' }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="cancelRenameItem()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Enter a new name for the {{ itemToRename()?.type === 'directory' ? 'directory' : 'file' }}
+          <strong>{{ itemToRename()?.path }}</strong
+          >:
+        </p>
+        <div class="mb-3">
+          <label for="renameNewName" class="form-label">New Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="renameNewName"
+            [(ngModel)]="renameNewName"
+            (keydown.enter)="confirmRenameItem()"
+            (keydown.escape)="cancelRenameItem()"
+            autofocus
+          />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="cancelRenameItem()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="confirmRenameItem()"
+          [disabled]="!renameNewName().trim() || renameNewName().trim() === itemToRename()?.name"
+        >
+          Rename
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Move File/Directory Modal -->
+<div
+  class="modal fade"
+  id="moveFileModal"
+  tabindex="-1"
+  aria-labelledby="moveFileModalLabel"
+  aria-hidden="true"
+  #moveFileModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="moveFileModalLabel">
+          Move {{ itemToMove()?.type === 'directory' ? 'Directory' : 'File' }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="cancelMoveItem()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Move the {{ itemToMove()?.type === 'directory' ? 'directory' : 'file' }}
+          <strong>{{ itemToMove()?.path }}</strong> to:
+        </p>
+        <div class="mb-3">
+          <label for="moveDestinationPath" class="form-label">Destination Path</label>
+          <input
+            type="text"
+            class="form-control"
+            id="moveDestinationPath"
+            [(ngModel)]="moveDestinationPath"
+            (keydown.enter)="confirmMoveItem()"
+            (keydown.escape)="cancelMoveItem()"
+            placeholder="Enter destination path (e.g., 'folder' or 'folder/subfolder')"
+            autofocus
+          />
+          <div class="form-text">
+            Use '.' for root directory, or enter a relative path like 'folder' or 'folder/subfolder'
+          </div>
+        </div>
+        <p class="text-muted small mb-0">
+          <i class="bi bi-info-circle me-1"></i>
+          The {{ itemToMove()?.type === 'directory' ? 'directory' : 'file' }} will be moved to:
+          <strong>{{
+            moveDestinationPath() === '.' ? itemToMove()?.name : moveDestinationPath() + '/' + itemToMove()?.name
+          }}</strong>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="cancelMoveItem()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="confirmMoveItem()"
+          [disabled]="!moveDestinationPath().trim()"
+        >
+          Move
+        </button>
       </div>
     </div>
   </div>

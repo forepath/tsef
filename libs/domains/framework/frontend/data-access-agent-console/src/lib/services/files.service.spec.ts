@@ -1,7 +1,7 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
-import type { CreateFileDto, FileContentDto, FileNodeDto, WriteFileDto } from '../state/files/files.types';
+import type { CreateFileDto, FileContentDto, FileNodeDto, MoveFileDto, WriteFileDto } from '../state/files/files.types';
 import { FilesService } from './files.service';
 
 describe('FilesService', () => {
@@ -67,23 +67,20 @@ describe('FilesService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(
-        `${apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodeURIComponent(filePath)}`,
-      );
+      const req = httpMock.expectOne(`${apiUrl}/clients/${clientId}/agents/${agentId}/files/${filePath}`);
       expect(req.request.method).toBe('GET');
       req.flush(mockFileContent);
     });
 
-    it('should encode file path with special characters', (done) => {
+    it('should encode file path segments separately preserving forward slashes', (done) => {
       const filePath = 'folder/sub folder/file with spaces.txt';
+      const expectedPath = 'folder/sub%20folder/file%20with%20spaces.txt';
 
       service.readFile(clientId, agentId, filePath).subscribe(() => {
         done();
       });
 
-      const req = httpMock.expectOne(
-        `${apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodeURIComponent(filePath)}`,
-      );
+      const req = httpMock.expectOne(`${apiUrl}/clients/${clientId}/agents/${agentId}/files/${expectedPath}`);
       expect(req.request.method).toBe('GET');
       req.flush(mockFileContent);
     });
@@ -101,9 +98,7 @@ describe('FilesService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(
-        `${apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodeURIComponent(filePath)}`,
-      );
+      const req = httpMock.expectOne(`${apiUrl}/clients/${clientId}/agents/${agentId}/files/${filePath}`);
       expect(req.request.method).toBe('PUT');
       expect(req.request.body).toEqual(writeDto);
       req.flush(null);
@@ -149,9 +144,7 @@ describe('FilesService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(
-        `${apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodeURIComponent(filePath)}`,
-      );
+      const req = httpMock.expectOne(`${apiUrl}/clients/${clientId}/agents/${agentId}/files/${filePath}`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(createDto);
       req.flush(null);
@@ -167,9 +160,7 @@ describe('FilesService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(
-        `${apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodeURIComponent(directoryPath)}`,
-      );
+      const req = httpMock.expectOne(`${apiUrl}/clients/${clientId}/agents/${agentId}/files/${directoryPath}`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(createDto);
       req.flush(null);
@@ -184,10 +175,57 @@ describe('FilesService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(
-        `${apiUrl}/clients/${clientId}/agents/${agentId}/files/${encodeURIComponent(filePath)}`,
-      );
+      const req = httpMock.expectOne(`${apiUrl}/clients/${clientId}/agents/${agentId}/files/${filePath}`);
       expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+  });
+
+  describe('moveFileOrDirectory', () => {
+    it('should move a file', (done) => {
+      const sourcePath = 'source-file.txt';
+      const moveDto: MoveFileDto = {
+        destination: 'dest-file.txt',
+      };
+
+      service.moveFileOrDirectory(clientId, agentId, sourcePath, moveDto).subscribe(() => {
+        done();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/clients/${clientId}/agents/${agentId}/files/${sourcePath}`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual(moveDto);
+      req.flush(null);
+    });
+
+    it('should encode source path segments separately preserving forward slashes', (done) => {
+      const sourcePath = 'tools/pAGENTZx.md';
+      const moveDto: MoveFileDto = {
+        destination: 'dest-file.txt',
+      };
+
+      service.moveFileOrDirectory(clientId, agentId, sourcePath, moveDto).subscribe(() => {
+        done();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/clients/${clientId}/agents/${agentId}/files/${sourcePath}`);
+      expect(req.request.method).toBe('PATCH');
+      req.flush(null);
+    });
+
+    it('should encode source path with special characters in segments', (done) => {
+      const sourcePath = 'folder/sub folder/file with spaces.txt';
+      const expectedPath = 'folder/sub%20folder/file%20with%20spaces.txt';
+      const moveDto: MoveFileDto = {
+        destination: 'dest-file.txt',
+      };
+
+      service.moveFileOrDirectory(clientId, agentId, sourcePath, moveDto).subscribe(() => {
+        done();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/clients/${clientId}/agents/${agentId}/files/${expectedPath}`);
+      expect(req.request.method).toBe('PATCH');
       req.flush(null);
     });
   });

@@ -3,6 +3,7 @@ import { AgentsFilesController } from './agents-files.controller';
 import { CreateFileDto } from './dto/create-file.dto';
 import { FileContentDto } from './dto/file-content.dto';
 import { FileNodeDto } from './dto/file-node.dto';
+import { MoveFileDto } from './dto/move-file.dto';
 import { WriteFileDto } from './dto/write-file.dto';
 import { AgentFileSystemService } from './services/agent-file-system.service';
 
@@ -40,6 +41,7 @@ describe('AgentsFilesController', () => {
     listDirectory: jest.fn(),
     createFileOrDirectory: jest.fn(),
     deleteFileOrDirectory: jest.fn(),
+    moveFileOrDirectory: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -185,6 +187,66 @@ describe('AgentsFilesController', () => {
       await controller.deleteFileOrDirectory(mockAgentId, mockFilePath);
 
       expect(service.deleteFileOrDirectory).toHaveBeenCalledWith(mockAgentId, mockFilePath);
+    });
+  });
+
+  describe('moveFileOrDirectory', () => {
+    it('should move file or directory', async () => {
+      const moveDto: MoveFileDto = {
+        destination: 'new-location/file.txt',
+      };
+
+      service.moveFileOrDirectory.mockResolvedValue(undefined);
+
+      await controller.moveFileOrDirectory(mockAgentId, mockFilePath, moveDto);
+
+      expect(service.moveFileOrDirectory).toHaveBeenCalledWith(mockAgentId, mockFilePath, moveDto.destination);
+    });
+
+    it('should handle array path parameter', async () => {
+      const moveDto: MoveFileDto = {
+        destination: 'new-location/file.txt',
+      };
+
+      service.moveFileOrDirectory.mockResolvedValue(undefined);
+
+      await controller.moveFileOrDirectory(mockAgentId, ['nested', 'path', 'file.txt'], moveDto);
+
+      expect(service.moveFileOrDirectory).toHaveBeenCalledWith(
+        mockAgentId,
+        'nested/path/file.txt',
+        moveDto.destination,
+      );
+    });
+
+    it('should throw BadRequestException when path is undefined', async () => {
+      const moveDto: MoveFileDto = {
+        destination: 'new-location/file.txt',
+      };
+
+      await expect(controller.moveFileOrDirectory(mockAgentId, undefined, moveDto)).rejects.toThrow(
+        'File path is required',
+      );
+    });
+
+    it('should throw BadRequestException when path is an object', async () => {
+      const moveDto: MoveFileDto = {
+        destination: 'new-location/file.txt',
+      };
+
+      await expect(controller.moveFileOrDirectory(mockAgentId, { invalid: 'path' }, moveDto)).rejects.toThrow(
+        'File path must be a string or array, got object',
+      );
+    });
+
+    it('should throw BadRequestException when destination is missing', async () => {
+      const moveDto: MoveFileDto = {
+        destination: '',
+      };
+
+      await expect(controller.moveFileOrDirectory(mockAgentId, mockFilePath, moveDto)).rejects.toThrow(
+        'Destination path is required',
+      );
     });
   });
 });
