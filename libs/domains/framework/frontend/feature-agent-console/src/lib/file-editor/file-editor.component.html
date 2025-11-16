@@ -132,33 +132,48 @@
       </div>
     }
 
-    <div class="editor-content flex-grow-1">
-      @if (selectedFilePath()) {
-        @if (isReadingFile$ | async) {
-          <div class="d-flex justify-content-center align-items-center h-100">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading file...</span>
+    <div class="editor-content-wrapper flex-grow-1 d-flex flex-column">
+      <div
+        class="editor-content"
+        [class.flex-grow-1]="!terminalVisible()"
+        [style.flex-basis]="terminalVisible() ? '60%' : '100%'"
+      >
+        @if (selectedFilePath()) {
+          @if (isReadingFile$ | async) {
+            <div class="d-flex justify-content-center align-items-center h-100">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading file...</span>
+              </div>
+            </div>
+          } @else {
+            <framework-monaco-editor-wrapper
+              #monacoEditor
+              [filePath]="selectedFilePath()"
+              [content]="(selectedFileContent$ | async)?.content || null"
+              [encoding]="(selectedFileContent$ | async)?.encoding || 'utf-8'"
+              [isDirty]="isDirty()"
+              [autosaveEnabled]="autosaveEnabled()"
+              (contentChange)="onContentChange($event)"
+              (saveRequest)="onSave()"
+            ></framework-monaco-editor-wrapper>
+          }
+        } @else {
+          <div class="d-flex justify-content-center align-items-center h-100 bg-body-secondary">
+            <div class="text-center text-muted p-4">
+              <i class="bi bi-file-earmark-code fs-1 d-block mb-3"></i>
+              <p class="mb-0">No file selected</p>
+              <small class="text-muted">Select a file from the tree to start editing</small>
             </div>
           </div>
-        } @else {
-          <framework-monaco-editor-wrapper
-            #monacoEditor
-            [filePath]="selectedFilePath()"
-            [content]="(selectedFileContent$ | async)?.content || null"
-            [encoding]="(selectedFileContent$ | async)?.encoding || 'utf-8'"
-            [isDirty]="isDirty()"
-            [autosaveEnabled]="autosaveEnabled()"
-            (contentChange)="onContentChange($event)"
-            (saveRequest)="onSave()"
-          ></framework-monaco-editor-wrapper>
         }
-      } @else {
-        <div class="d-flex justify-content-center align-items-center h-100 bg-body-secondary">
-          <div class="text-center text-muted p-4">
-            <i class="bi bi-file-earmark-code fs-1 d-block mb-3"></i>
-            <p class="mb-0">No file selected</p>
-            <small class="text-muted">Select a file from the tree to start editing</small>
-          </div>
+      </div>
+      @if (terminalVisible()) {
+        <div class="terminal-wrapper border-top" style="flex-basis: 40%; min-height: 200px">
+          <framework-terminal
+            [clientId]="clientId()"
+            [agentId]="agentId()"
+            [visible]="terminalVisible()"
+          ></framework-terminal>
         </div>
       }
     </div>

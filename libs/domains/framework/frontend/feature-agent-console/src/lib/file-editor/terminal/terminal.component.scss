@@ -1,0 +1,64 @@
+.terminal-container {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.terminal-header {
+  min-height: 40px;
+  flex-shrink: 0;
+}
+
+.terminal-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 0; // Important for flex children
+}
+
+// Ensure xterm.js terminal is properly sized and visible
+:host ::ng-deep .xterm {
+  height: 100% !important;
+  width: 100% !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+:host ::ng-deep .xterm-viewport {
+  overflow: hidden !important;
+}
+
+:host ::ng-deep .xterm-screen {
+  position: relative;
+}
+
+:host ::ng-deep .xterm-cursor-layer {
+  position: absolute;
+}
+
+// Terminal close button styling
+.terminal-close-btn {
+  width: 0.75rem;
+  height: 0.75rem;
+  font-size: 0.625rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &.active {
+    // Make the X white for active terminal session
+    // Bootstrap's btn-close uses a background-image, so we use filter to invert it
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

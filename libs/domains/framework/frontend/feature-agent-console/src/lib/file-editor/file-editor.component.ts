@@ -29,10 +29,11 @@ import { Actions, ofType } from '@ngrx/effects';
 import { combineLatest, debounceTime, filter, map, Observable, of, Subject, switchMap, take } from 'rxjs';
 import { FileTreeComponent } from './file-tree/file-tree.component';
 import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-editor-wrapper.component';
+import { TerminalComponent } from './terminal/terminal.component';
 
 @Component({
   selector: 'framework-file-editor',
-  imports: [CommonModule, FileTreeComponent, MonacoEditorWrapperComponent],
+  imports: [CommonModule, FileTreeComponent, MonacoEditorWrapperComponent, TerminalComponent],
   templateUrl: './file-editor.component.html',
   styleUrls: ['./file-editor.component.scss'],
   standalone: true,
@@ -66,6 +67,7 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
   // Visibility toggles (exposed for parent component access)
   readonly fileTreeVisible = signal<boolean>(true);
+  readonly terminalVisible = signal<boolean>(false);
   readonly autosaveEnabled = signal<boolean>(false);
 
   // Outputs
@@ -774,6 +776,10 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     this.fileTreeVisible.update((visible) => !visible);
     // Explicitly trigger recalculation after toggling
     this.recalculateTabs();
+  }
+
+  onToggleTerminal(): void {
+    this.terminalVisible.update((visible) => !visible);
   }
 
   onToggleChat(): void {

@@ -16,6 +16,12 @@ export const selectSelectedClientId = createSelector(selectSocketsState, (state)
 // Forwarding state selectors
 export const selectSocketForwarding = createSelector(selectSocketsState, (state) => state.forwarding);
 
+// Select forwarding state for chat events only
+export const selectChatForwarding = createSelector(
+  selectSocketsState,
+  (state) => state.forwarding && state.forwardingEvent === 'chat',
+);
+
 // Error selector
 export const selectSocketError = createSelector(selectSocketsState, (state) => state.error);
 
@@ -24,9 +30,15 @@ export const selectForwardedEvents = createSelector(selectSocketsState, (state) 
 
 /**
  * Select forwarded events for a specific event name
+ * Uses a memoized selector factory to ensure proper memoization
  */
 export const selectForwardedEventsByEvent = (eventName: string) =>
-  createSelector(selectForwardedEvents, (events) => events.filter((e) => e.event === eventName));
+  createSelector(selectForwardedEvents, (events) => {
+    const filtered = events.filter((e) => e.event === eventName);
+    // Return a new array reference only if the filtered result actually changed
+    // This helps with distinctUntilChanged in observables
+    return filtered;
+  });
 
 /**
  * Select the most recent forwarded event

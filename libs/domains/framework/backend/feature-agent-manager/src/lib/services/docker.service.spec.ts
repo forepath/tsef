@@ -1010,12 +1010,25 @@ describe('DockerService', () => {
 
     it('should handle stderr output that is not an error', async () => {
       mockContainer.inspect.mockResolvedValue({});
+      let endCallback: (() => void) | undefined;
+      mockStream.on = jest.fn((event: string, callback: () => void) => {
+        if (event === 'end') {
+          endCallback = callback;
+        } else if (event === 'close') {
+          setTimeout(() => callback(), 15);
+        }
+        return mockStream;
+      });
       mockContainer.modem.demuxStream = jest.fn((stream, stdout, stderr) => {
         setTimeout(() => {
           stdout.write(Buffer.from('file content'));
           stderr.write(Buffer.from('warning: some warning message'));
           stdout.end();
           stderr.end();
+          // Trigger stream 'end' event after data is written
+          if (endCallback) {
+            setTimeout(() => endCallback(), 5);
+          }
         }, 5);
       });
 
@@ -1038,6 +1051,250 @@ describe('DockerService', () => {
         AttachStderr: true,
         Tty: false,
       });
+    });
+  });
+
+  describe('createTerminalSession', () => {
+    const containerId = 'test-container-id';
+    const sessionId = 'test-session-id';
+
+    beforeEach(() => {
+      mockContainer.inspect.mockResolvedValue({});
+      mockStream.on = jest.fn((event: string, callback: () => void) => {
+        return mockStream;
+      });
+    });
+
+    it('should throw NotFoundException when container does not exist', async () => {
+      mockContainer.inspect.mockRejectedValue({ statusCode: 404 });
+
+      await expect(service.createTerminalSession(containerId, sessionId)).rejects.toThrow(NotFoundException);
+      expect(mockContainer.inspect).toHaveBeenCalled();
+    });
+
+    it('should create a terminal session with TTY enabled', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+
+      const stream = await service.createTerminalSession(containerId, sessionId);
+
+      expect(mockContainer.exec).toHaveBeenCalledWith({
+        Cmd: ['sh'],
+        AttachStdin: true,
+        AttachStdout: true,
+        AttachStderr: true,
+        Tty: true,
+      });
+      expect(mockExec.start).toHaveBeenCalledWith({
+        hijack: true,
+        stdin: true,
+        Tty: true,
+      });
+      expect(stream).toBe(mockStream);
+      expect(service.hasTerminalSession(sessionId)).toBe(true);
+    });
+
+    it('should create a terminal session with custom shell', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+
+      await service.createTerminalSession(containerId, sessionId, 'bash');
+
+      expect(mockContainer.exec).toHaveBeenCalledWith({
+        Cmd: ['bash'],
+        AttachStdin: true,
+        AttachStdout: true,
+        AttachStderr: true,
+        Tty: true,
+      });
+    });
+
+    it('should close existing session if sessionId already exists', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      // Create first session
+      await service.createTerminalSession(containerId, sessionId);
+      // Create second session with same ID
+      await service.createTerminalSession(containerId, sessionId);
+
+      expect(mockStream.end).toHaveBeenCalled();
+      expect(mockContainer.exec).toHaveBeenCalledTimes(2);
+    });
+
+    it('should set up stream event handlers for cleanup', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      let endCallback: (() => void) | undefined;
+      let closeCallback: (() => void) | undefined;
+
+      mockStream.on = jest.fn((event: string, callback: () => void) => {
+        if (event === 'end') {
+          endCallback = callback;
+        } else if (event === 'close') {
+          closeCallback = callback;
+        } else if (event === 'error') {
+          // error callback
+        }
+        return mockStream;
+      });
+
+      await service.createTerminalSession(containerId, sessionId);
+
+      expect(mockStream.on).toHaveBeenCalledWith('end', expect.any(Function));
+      expect(mockStream.on).toHaveBeenCalledWith('close', expect.any(Function));
+      expect(mockStream.on).toHaveBeenCalledWith('error', expect.any(Function));
+
+      // Test cleanup on end
+      if (endCallback) {
+        endCallback();
+        expect(service.hasTerminalSession(sessionId)).toBe(false);
+      }
+
+      // Recreate for close test
+      await service.createTerminalSession(containerId, sessionId);
+      if (closeCallback) {
+        closeCallback();
+        expect(service.hasTerminalSession(sessionId)).toBe(false);
+      }
+    });
+  });
+
+  describe('sendTerminalInput', () => {
+    const containerId = 'test-container-id';
+    const sessionId = 'test-session-id';
+
+    beforeEach(async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      mockStream.on = jest.fn(() => mockStream);
+      await service.createTerminalSession(containerId, sessionId);
+    });
+
+    it('should throw NotFoundException when session does not exist', async () => {
+      await expect(service.sendTerminalInput('non-existent', 'data')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should send string input to terminal session', async () => {
+      await service.sendTerminalInput(sessionId, 'test input');
+
+      expect(mockStream.write).toHaveBeenCalledWith(Buffer.from('test input', 'utf-8'));
+    });
+
+    it('should send Buffer input to terminal session', async () => {
+      const buffer = Buffer.from('test buffer', 'utf-8');
+      await service.sendTerminalInput(sessionId, buffer);
+
+      expect(mockStream.write).toHaveBeenCalledWith(buffer);
+    });
+  });
+
+  describe('closeTerminalSession', () => {
+    const containerId = 'test-container-id';
+    const sessionId = 'test-session-id';
+
+    beforeEach(async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      mockStream.on = jest.fn(() => mockStream);
+      await service.createTerminalSession(containerId, sessionId);
+    });
+
+    it('should throw NotFoundException when session does not exist', async () => {
+      await expect(service.closeTerminalSession('non-existent')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should close terminal session and remove from map', async () => {
+      expect(service.hasTerminalSession(sessionId)).toBe(true);
+
+      await service.closeTerminalSession(sessionId);
+
+      expect(mockStream.end).toHaveBeenCalled();
+      expect(service.hasTerminalSession(sessionId)).toBe(false);
+    });
+
+    it('should remove session from map even if close fails', async () => {
+      (mockStream.end as jest.Mock).mockImplementation(() => {
+        throw new Error('Close failed');
+      });
+
+      await expect(service.closeTerminalSession(sessionId)).rejects.toThrow('Close failed');
+      expect(service.hasTerminalSession(sessionId)).toBe(false);
+    });
+  });
+
+  describe('getTerminalSession', () => {
+    const containerId = 'test-container-id';
+    const sessionId = 'test-session-id';
+
+    beforeEach(async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      mockStream.on = jest.fn(() => mockStream);
+      await service.createTerminalSession(containerId, sessionId);
+    });
+
+    it('should throw NotFoundException when session does not exist', () => {
+      expect(() => service.getTerminalSession('non-existent')).toThrow(NotFoundException);
+    });
+
+    it('should return terminal session stream', () => {
+      const stream = service.getTerminalSession(sessionId);
+      expect(stream).toBe(mockStream);
+    });
+  });
+
+  describe('hasTerminalSession', () => {
+    const containerId = 'test-container-id';
+    const sessionId = 'test-session-id';
+
+    it('should return false when session does not exist', () => {
+      expect(service.hasTerminalSession(sessionId)).toBe(false);
+    });
+
+    it('should return true when session exists', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      mockStream.on = jest.fn(() => mockStream);
+      await service.createTerminalSession(containerId, sessionId);
+
+      expect(service.hasTerminalSession(sessionId)).toBe(true);
+    });
+  });
+
+  describe('getTerminalSessionsForContainer', () => {
+    const containerId1 = 'container-1';
+    const containerId2 = 'container-2';
+    const sessionId1 = 'session-1';
+    const sessionId2 = 'session-2';
+    const sessionId3 = 'session-3';
+
+    beforeEach(async () => {
+      mockContainer.inspect.mockResolvedValue({});
+      mockStream.on = jest.fn(() => mockStream);
+    });
+
+    it('should return empty array when no sessions exist', () => {
+      expect(service.getTerminalSessionsForContainer(containerId1)).toEqual([]);
+    });
+
+    it('should return sessions for specific container', async () => {
+      // Mock getContainer to return different containers
+      const mockContainer1 = { ...mockContainer };
+      const mockContainer2 = { ...mockContainer };
+      (mockDocker.getContainer as jest.Mock).mockImplementation((id: string) => {
+        if (id === containerId1) return mockContainer1;
+        if (id === containerId2) return mockContainer2;
+        return mockContainer;
+      });
+
+      mockContainer1.inspect.mockResolvedValue({});
+      mockContainer2.inspect.mockResolvedValue({});
+
+      await service.createTerminalSession(containerId1, sessionId1);
+      await service.createTerminalSession(containerId1, sessionId2);
+      await service.createTerminalSession(containerId2, sessionId3);
+
+      const sessions1 = service.getTerminalSessionsForContainer(containerId1);
+      const sessions2 = service.getTerminalSessionsForContainer(containerId2);
+
+      expect(sessions1).toContain(sessionId1);
+      expect(sessions1).toContain(sessionId2);
+      expect(sessions1).not.toContain(sessionId3);
+      expect(sessions2).toContain(sessionId3);
+      expect(sessions2).not.toContain(sessionId1);
+      expect(sessions2).not.toContain(sessionId2);
     });
   });
 });

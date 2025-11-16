@@ -69,6 +69,42 @@ channels:
       logoutSuccessEvent:
         $ref: '#/components/messages/LogoutSuccess'
     description: Server acknowledges successful logout
+  agents/createTerminal:
+    address: agents/createTerminal
+    messages:
+      createTerminalCommand:
+        $ref: '#/components/messages/CreateTerminal'
+    description: Client sends create terminal command (requires prior login). Creates a new TTY session for the agent's container.
+  agents/terminalCreated:
+    address: agents/terminalCreated
+    messages:
+      terminalCreatedEvent:
+        $ref: '#/components/messages/TerminalCreated'
+    description: Server acknowledges successful terminal creation. Terminal session is client-specific (socket.id based).
+  agents/terminalInput:
+    address: agents/terminalInput
+    messages:
+      terminalInputCommand:
+        $ref: '#/components/messages/TerminalInput'
+    description: Client sends input data to a terminal session (requires prior login). Only the socket that created the session can send input.
+  agents/terminalOutput:
+    address: agents/terminalOutput
+    messages:
+      terminalOutputEvent:
+        $ref: '#/components/messages/TerminalOutput'
+    description: Server sends terminal output data to the client. Emitted whenever the terminal session produces output.
+  agents/closeTerminal:
+    address: agents/closeTerminal
+    messages:
+      closeTerminalCommand:
+        $ref: '#/components/messages/CloseTerminal'
+    description: Client sends close terminal command (requires prior login). Only the socket that created the session can close it.
+  agents/terminalClosed:
+    address: agents/terminalClosed
+    messages:
+      terminalClosedEvent:
+        $ref: '#/components/messages/TerminalClosed'
+    description: Server acknowledges terminal closure. Also emitted when terminal session ends (e.g., exit command).
 operations:
   clientSendsLogin:
     action: send
@@ -130,6 +166,42 @@ operations:
       $ref: '#/channels/agents~1logoutSuccess'
     messages:
       - $ref: '#/channels/agents~1logoutSuccess/messages/logoutSuccessEvent'
+  clientSendsCreateTerminal:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1createTerminal'
+    messages:
+      - $ref: '#/channels/agents~1createTerminal/messages/createTerminalCommand'
+  serverEmitsTerminalCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1terminalCreated'
+    messages:
+      - $ref: '#/channels/agents~1terminalCreated/messages/terminalCreatedEvent'
+  clientSendsTerminalInput:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1terminalInput'
+    messages:
+      - $ref: '#/channels/agents~1terminalInput/messages/terminalInputCommand'
+  serverEmitsTerminalOutput:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1terminalOutput'
+    messages:
+      - $ref: '#/channels/agents~1terminalOutput/messages/terminalOutputEvent'
+  clientSendsCloseTerminal:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1closeTerminal'
+    messages:
+      - $ref: '#/channels/agents~1closeTerminal/messages/closeTerminalCommand'
+  serverEmitsTerminalClosed:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1terminalClosed'
+    messages:
+      - $ref: '#/channels/agents~1terminalClosed/messages/terminalClosedEvent'
 components:
   securitySchemes:
     jwt:
@@ -299,7 +371,13 @@ components:
                 type: string
                 description: Error code (optional)
                 enum:
-                  [UNAUTHORIZED, CHAT_ERROR, INVALID_PAYLOAD, FILE_UPDATE_ERROR]
+                  [
+                    UNAUTHORIZED,
+                    CHAT_ERROR,
+                    INVALID_PAYLOAD,
+                    FILE_UPDATE_ERROR,
+                    TERMINAL_ERROR,
+                  ]
               details:
                 type: string
                 description: Additional error details (optional)
@@ -377,6 +455,110 @@ components:
                 type: string
                 nullable: true
                 description: Agent name (null if not authenticated)
+          timestamp:
+            type: string
+            description: ISO timestamp
+    CreateTerminal:
+      name: CreateTerminal
+      title: Create terminal command
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          sessionId:
+            type: string
+            description: Optional session ID (will be generated if not provided)
+          shell:
+            type: string
+            description: Optional shell command (defaults to 'sh')
+    TerminalCreated:
+      name: TerminalCreated
+      title: Terminal created event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [sessionId]
+            properties:
+              sessionId:
+                type: string
+                description: Terminal session ID (client-specific, socket.id based)
+          timestamp:
+            type: string
+            description: ISO timestamp
+    TerminalInput:
+      name: TerminalInput
+      title: Terminal input command
+      contentType: application/json
+      payload:
+        type: object
+        required: [sessionId, data]
+        properties:
+          sessionId:
+            type: string
+            description: Terminal session ID
+          data:
+            type: string
+            description: Input data to send to terminal
+    TerminalOutput:
+      name: TerminalOutput
+      title: Terminal output event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [sessionId, data]
+            properties:
+              sessionId:
+                type: string
+                description: Terminal session ID
+              data:
+                type: string
+                description: Terminal output data
+          timestamp:
+            type: string
+            description: ISO timestamp
+    CloseTerminal:
+      name: CloseTerminal
+      title: Close terminal command
+      contentType: application/json
+      payload:
+        type: object
+        required: [sessionId]
+        properties:
+          sessionId:
+            type: string
+            description: Terminal session ID to close
+    TerminalClosed:
+      name: TerminalClosed
+      title: Terminal closed event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [sessionId]
+            properties:
+              sessionId:
+                type: string
+                description: Terminal session ID that was closed
           timestamp:
             type: string
             description: ISO timestamp

@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { distinctUntilChanged, Observable } from 'rxjs';
 import { connectSocket, disconnectSocket, forwardEvent, setClient } from './sockets.actions';
 import { getSocketInstance } from './sockets.effects';
 import {
+  selectChatForwarding,
   selectForwardedEvents,
   selectForwardedEventsByEvent,
   selectMostRecentForwardedEvent,
@@ -34,6 +35,7 @@ export class SocketsFacade {
   readonly disconnecting$: Observable<boolean> = this.store.select(selectSocketDisconnecting);
   readonly selectedClientId$: Observable<string | null> = this.store.select(selectSelectedClientId);
   readonly forwarding$: Observable<boolean> = this.store.select(selectSocketForwarding);
+  readonly chatForwarding$: Observable<boolean> = this.store.select(selectChatForwarding);
   readonly error$: Observable<string | null> = this.store.select(selectSocketError);
   readonly forwardedEvents$: Observable<Array<{ event: string; payload: ForwardedEventPayload; timestamp: number }>> =
     this.store.select(selectForwardedEvents);
@@ -118,6 +120,35 @@ export class SocketsFacade {
   }
 
   /**
+   * Forward a create terminal event
+   * @param sessionId - Optional session ID (will be generated if not provided)
+   * @param shell - Optional shell command (defaults to 'sh')
+   * @param agentId - Agent UUID (required for routing the event to the correct agent)
+   */
+  forwardCreateTerminal(sessionId: string | undefined, shell: string | undefined, agentId: string): void {
+    this.forwardEvent(ForwardableEvent.CREATE_TERMINAL, { sessionId, shell }, agentId);
+  }
+
+  /**
+   * Forward a terminal input event
+   * @param sessionId - The terminal session ID
+   * @param data - The input data to send
+   * @param agentId - Agent UUID (required for routing the event to the correct agent)
+   */
+  forwardTerminalInput(sessionId: string, data: string, agentId: string): void {
+    this.forwardEvent(ForwardableEvent.TERMINAL_INPUT, { sessionId, data }, agentId);
+  }
+
+  /**
+   * Forward a close terminal event
+   * @param sessionId - The terminal session ID
+   * @param agentId - Agent UUID (required for routing the event to the correct agent)
+   */
+  forwardCloseTerminal(sessionId: string, agentId: string): void {
+    this.forwardEvent(ForwardableEvent.CLOSE_TERMINAL, { sessionId }, agentId);
+  }
+
+  /**
    * Get forwarded events for a specific event name
    * @param eventName - The event name to filter by
    * @returns Observable of filtered forwarded events
@@ -125,7 +156,17 @@ export class SocketsFacade {
   getForwardedEventsByEvent$(
     eventName: string,
   ): Observable<Array<{ event: string; payload: ForwardedEventPayload; timestamp: number }>> {
-    return this.store.select(selectForwardedEventsByEvent(eventName));
+    return this.store.select(selectForwardedEventsByEvent(eventName)).pipe(
+      // Use distinctUntilChanged with deep comparison to prevent unnecessary emissions
+      // when the filtered array content hasn't actually changed
+      distinctUntilChanged((prev, curr) => {
+        if (prev.length !== curr.length) {
+          return false;
+        }
+        // Compare by timestamp to detect actual changes
+        return prev.every((p, i) => p.timestamp === curr[i]?.timestamp);
+      }),
+    );
   }
 
   /**
