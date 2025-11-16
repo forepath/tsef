@@ -210,18 +210,7 @@ describe('SocketsFacade', () => {
   });
 
   describe('Helper Methods', () => {
-    it('should forward chat event with typed payload', () => {
-      const message = 'Hello world';
-      facade.forwardChat(message);
-
-      expect(store.dispatch).toHaveBeenCalledWith(forwardEvent({ event: ForwardableEvent.CHAT, payload: { message } }));
-      expect(mockSocket.emit).toHaveBeenCalledWith('forward', {
-        event: ForwardableEvent.CHAT,
-        payload: { message },
-      });
-    });
-
-    it('should forward chat event with agentId', () => {
+    it('should forward chat event with typed payload and agentId', () => {
       const message = 'Hello world';
       const agentId = 'agent-1';
       facade.forwardChat(message, agentId);

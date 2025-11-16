@@ -85,9 +85,9 @@ export class SocketsFacade {
   /**
    * Forward a chat event with typed payload
    * @param message - The chat message text
-   * @param agentId - Optional agent UUID for auto-login
+   * @param agentId - Agent UUID (required for routing the event to the correct agent)
    */
-  forwardChat(message: string, agentId?: string): void {
+  forwardChat(message: string, agentId: string): void {
     this.forwardEvent(ForwardableEvent.CHAT, { message }, agentId);
   }
 
@@ -106,6 +106,15 @@ export class SocketsFacade {
    */
   forwardLogout(): void {
     this.forwardEvent(ForwardableEvent.LOGOUT, {});
+  }
+
+  /**
+   * Forward a file update event
+   * @param filePath - The path to the file that was updated
+   * @param agentId - Agent UUID (required for routing the event to the correct agent)
+   */
+  forwardFileUpdate(filePath: string, agentId: string): void {
+    this.forwardEvent(ForwardableEvent.FILE_UPDATE, { filePath }, agentId);
   }
 
   /**

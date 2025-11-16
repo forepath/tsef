@@ -762,6 +762,192 @@ describe('AgentsGateway', () => {
     });
   });
 
+  describe('handleFileUpdate', () => {
+    it('should broadcast file update notification for authenticated user', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // Store socket reference for broadcasting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
+
+      const filePath = '/path/to/file.ts';
+
+      await gateway.handleFileUpdate({ filePath }, mockSocket as Socket);
+
+      expect(agentsService.findOne).toHaveBeenCalledWith(mockAgent.id);
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        `Agent ${mockAgent.name} (${mockAgent.id}) updated file ${filePath} on socket ${socketId}`,
+      );
+      // Check file update notification emission - now uses socket.emit via broadcastToAgent
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'fileUpdateNotification',
+        expect.objectContaining({
+          success: true,
+          data: {
+            socketId,
+            filePath,
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      loggerLogSpy.mockRestore();
+    });
+
+    it('should reject file update from unauthenticated user', async () => {
+      await gateway.handleFileUpdate({ filePath: '/path/to/file.ts' }, mockSocket as Socket);
+
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'error',
+        expect.objectContaining({
+          success: false,
+          error: {
+            message: 'Unauthorized. Please login first.',
+            code: 'UNAUTHORIZED',
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      expect(agentsService.findOne).not.toHaveBeenCalled();
+      expect(mockSocket.emit).not.toHaveBeenCalledWith('fileUpdateNotification', expect.any(Object));
+    });
+
+    it('should reject file update with missing filePath', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+
+      await gateway.handleFileUpdate({ filePath: '' }, mockSocket as Socket);
+
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'error',
+        expect.objectContaining({
+          success: false,
+          error: {
+            message: 'filePath is required',
+            code: 'INVALID_PAYLOAD',
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      expect(agentsService.findOne).not.toHaveBeenCalled();
+      expect(mockSocket.emit).not.toHaveBeenCalledWith('fileUpdateNotification', expect.any(Object));
+    });
+
+    it('should trim filePath whitespace', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // Store socket reference for broadcasting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
+
+      const filePath = '  /path/to/file.ts  ';
+      const trimmedPath = '/path/to/file.ts';
+
+      await gateway.handleFileUpdate({ filePath }, mockSocket as Socket);
+
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        `Agent ${mockAgent.name} (${mockAgent.id}) updated file ${trimmedPath} on socket ${socketId}`,
+      );
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'fileUpdateNotification',
+        expect.objectContaining({
+          success: true,
+          data: {
+            socketId,
+            filePath: trimmedPath,
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      loggerLogSpy.mockRestore();
+    });
+
+    it('should handle errors when fetching agent details gracefully', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // Store socket reference for broadcasting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+      agentsService.findOne.mockRejectedValue(new Error('Database error'));
+      const loggerErrorSpy = jest.spyOn(gateway['logger'], 'error').mockImplementation();
+
+      await gateway.handleFileUpdate({ filePath: '/path/to/file.ts' }, mockSocket as Socket);
+
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'error',
+        expect.objectContaining({
+          success: false,
+          error: {
+            message: 'Error processing file update',
+            code: 'FILE_UPDATE_ERROR',
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+      expect(loggerErrorSpy).toHaveBeenCalled();
+      loggerErrorSpy.mockRestore();
+    });
+
+    it('should broadcast to multiple clients authenticated to the same agent', async () => {
+      const socketId1 = 'socket-1';
+      const socketId2 = 'socket-2';
+      const mockSocket1 = { id: socketId1, emit: jest.fn(), connected: true } as unknown as Socket;
+      const mockSocket2 = { id: socketId2, emit: jest.fn(), connected: true } as unknown as Socket;
+
+      // Authenticate both sockets to the same agent
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId1, mockAgent.id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId2, mockAgent.id);
+      // Store socket references for broadcasting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId1, mockSocket1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId2, mockSocket2);
+
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
+
+      const filePath = '/path/to/file.ts';
+
+      await gateway.handleFileUpdate({ filePath }, mockSocket1);
+
+      // Both sockets should receive the notification
+      expect(mockSocket1.emit).toHaveBeenCalledWith(
+        'fileUpdateNotification',
+        expect.objectContaining({
+          success: true,
+          data: {
+            socketId: socketId1, // The socket ID of the sender
+            filePath,
+            timestamp: expect.any(String),
+          },
+        }),
+      );
+      expect(mockSocket2.emit).toHaveBeenCalledWith(
+        'fileUpdateNotification',
+        expect.objectContaining({
+          success: true,
+          data: {
+            socketId: socketId1, // The socket ID of the sender (not socket-2)
+            filePath,
+            timestamp: expect.any(String),
+          },
+        }),
+      );
+      loggerLogSpy.mockRestore();
+    });
+  });
+
   describe('handleLogout', () => {
     it('should logout authenticated user successfully', async () => {
       const socketId = mockSocket.id || 'test-socket-id';

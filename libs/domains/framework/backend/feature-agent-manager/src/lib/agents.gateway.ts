@@ -23,6 +23,10 @@ interface ChatPayload {
   message: string;
 }
 
+interface FileUpdatePayload {
+  filePath: string;
+}
+
 enum ChatActor {
   AGENT = 'agent',
   USER = 'user',
@@ -89,6 +93,12 @@ interface AgentChatMessageData {
 }
 
 type ChatMessageData = UserChatMessageData | AgentChatMessageData;
+
+interface FileUpdateNotificationData {
+  socketId: string;
+  filePath: string;
+  timestamp: string;
+}
 
 // Helper functions to create standardized responses
 const createSuccessResponse = <T>(data: T): SuccessResponse<T> => ({
@@ -483,6 +493,55 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       socket.emit('error', createErrorResponse('Error processing chat message', 'CHAT_ERROR'));
       const err = error as { message?: string; stack?: string };
       this.logger.error(`Chat error for agent ${agentUuid}: ${err.message}`, err.stack);
+    }
+  }
+
+  /**
+   * Handle file update notification.
+   * Broadcasts file update to all clients authenticated to the same agent.
+   * Only authenticated agents can send file updates.
+   * @param data - File update payload containing filePath
+   * @param socket - The socket instance making the request
+   */
+  @SubscribeMessage('fileUpdate')
+  async handleFileUpdate(@MessageBody() data: FileUpdatePayload, @ConnectedSocket() socket: Socket) {
+    const agentUuid = this.authenticatedClients.get(socket.id);
+    if (!agentUuid) {
+      socket.emit('error', createErrorResponse('Unauthorized. Please login first.', 'UNAUTHORIZED'));
+      return;
+    }
+
+    const filePath = data?.filePath?.trim();
+
+    // Validate payload
+    if (!filePath) {
+      socket.emit('error', createErrorResponse('filePath is required', 'INVALID_PAYLOAD'));
+      return;
+    }
+
+    try {
+      // Get agent details for logging
+      const agent = await this.agentsService.findOne(agentUuid);
+      this.logger.log(`Agent ${agent.name} (${agentUuid}) updated file ${filePath} on socket ${socket.id}`);
+
+      const updateTimestamp = new Date().toISOString();
+
+      // Broadcast file update notification to all clients authenticated to this agent
+      // The notification includes the socket ID so clients can determine if the update
+      // came from themselves (same socket ID) or another client (different socket ID)
+      this.broadcastToAgent(
+        agentUuid,
+        'fileUpdateNotification',
+        createSuccessResponse<FileUpdateNotificationData>({
+          socketId: socket.id,
+          filePath,
+          timestamp: updateTimestamp,
+        }),
+      );
+    } catch (error) {
+      socket.emit('error', createErrorResponse('Error processing file update', 'FILE_UPDATE_ERROR'));
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`File update error for agent ${agentUuid}: ${err.message}`, err.stack);
     }
   }
 

@@ -45,6 +45,18 @@ channels:
       errorEvent:
         $ref: '#/components/messages/Error'
     description: Generic error messages for unauthorized or processing failures
+  agents/fileUpdate:
+    address: agents/fileUpdate
+    messages:
+      fileUpdateCommand:
+        $ref: '#/components/messages/FileUpdate'
+    description: Client sends file update notification (requires prior login). Broadcasts to all clients authenticated to the same agent.
+  agents/fileUpdateNotification:
+    address: agents/fileUpdateNotification
+    messages:
+      fileUpdateNotificationEvent:
+        $ref: '#/components/messages/FileUpdateNotification'
+    description: Server broadcasts file update notifications to all clients authenticated to the same agent. Includes socket ID to identify the source of the update.
   agents/logout:
     address: agents/logout
     messages:
@@ -94,6 +106,18 @@ operations:
       $ref: '#/channels/agents~1error'
     messages:
       - $ref: '#/channels/agents~1error/messages/errorEvent'
+  clientSendsFileUpdate:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1fileUpdate'
+    messages:
+      - $ref: '#/channels/agents~1fileUpdate/messages/fileUpdateCommand'
+  serverBroadcastsFileUpdateNotification:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1fileUpdateNotification'
+    messages:
+      - $ref: '#/channels/agents~1fileUpdateNotification/messages/fileUpdateNotificationEvent'
   clientSendsLogout:
     action: send
     channel:
@@ -274,10 +298,49 @@ components:
               code:
                 type: string
                 description: Error code (optional)
-                enum: [UNAUTHORIZED, CHAT_ERROR]
+                enum:
+                  [UNAUTHORIZED, CHAT_ERROR, INVALID_PAYLOAD, FILE_UPDATE_ERROR]
               details:
                 type: string
                 description: Additional error details (optional)
+          timestamp:
+            type: string
+            description: ISO timestamp
+    FileUpdate:
+      name: FileUpdate
+      title: File update command
+      contentType: application/json
+      payload:
+        type: object
+        required: [filePath]
+        properties:
+          filePath:
+            type: string
+            description: Path to the file that was updated
+    FileUpdateNotification:
+      name: FileUpdateNotification
+      title: File update notification event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [socketId, filePath, timestamp]
+            properties:
+              socketId:
+                type: string
+                description: Socket ID of the client who made the update. Clients can compare this with their own socket ID to determine if the update came from themselves or another client.
+              filePath:
+                type: string
+                description: Path to the file that was updated
+              timestamp:
+                type: string
+                description: ISO timestamp of the update
           timestamp:
             type: string
             description: ISO timestamp

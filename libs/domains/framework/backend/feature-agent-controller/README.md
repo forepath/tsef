@@ -164,7 +164,7 @@ The `ClientsGateway` provides WebSocket-based real-time event forwarding to remo
 
   ```typescript
   {
-    event: string; // Event name (e.g., "chat", "login", "logout")
+    event: string; // Event name (e.g., "chat", "fileUpdate", "login", "logout")
     payload: unknown; // Event payload
     agentId?: string; // Optional agent UUID for auto-login
   }
@@ -179,6 +179,20 @@ The `ClientsGateway` provides WebSocket-based real-time event forwarding to remo
     // payload is optional and ignored - credentials loaded from database
   });
   ```
+
+  **File Updates**: To notify other clients about file changes, forward a "fileUpdate" event with `agentId`. The payload should contain the file path:
+
+  ```typescript
+  socket.emit('forward', {
+    event: 'fileUpdate',
+    agentId: 'agent-uuid',
+    payload: {
+      filePath: '/path/to/file.ts',
+    },
+  });
+  ```
+
+  The agent-manager gateway will broadcast a `fileUpdateNotification` event to all clients authenticated to that agent. The notification includes the sender's socket ID, allowing clients to determine if the update came from themselves or another client.
 
 #### Server → Client
 
@@ -199,6 +213,22 @@ The `ClientsGateway` provides WebSocket-based real-time event forwarding to remo
     event: string; // Event name that was forwarded
   }
   ```
+
+- `fileUpdateNotification` - File update notification forwarded from agent-manager gateway
+
+  ```typescript
+  {
+    success: true;
+    data: {
+      socketId: string; // Socket ID of the client who made the update
+      filePath: string; // Path to the file that was updated
+      timestamp: string; // ISO timestamp of the update
+    }
+    timestamp: string; // ISO timestamp
+  }
+  ```
+
+  This event is automatically forwarded from the remote agent-manager gateway when a file update occurs. Clients can compare `socketId` with their own socket ID to determine if the update came from themselves (no action needed) or another client (show modal if input is dirty).
 
 - `error` - Emitted on errors
 
