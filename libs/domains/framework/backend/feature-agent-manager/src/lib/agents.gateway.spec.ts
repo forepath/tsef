@@ -97,46 +97,61 @@ describe('AgentsGateway', () => {
     mockSocket = {
       id: 'test-socket-id',
       emit: jest.fn(),
+      connected: true,
     };
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    // Clear authenticated clients map
+    // Clear authenticated clients map and socket references
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (gateway as any).authenticatedClients.clear();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (gateway as any).socketById.clear();
   });
 
   describe('handleConnection', () => {
-    it('should log connection', () => {
+    it('should log connection and store socket reference', () => {
       const loggerSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
       gateway.handleConnection(mockSocket as Socket);
       expect(loggerSpy).toHaveBeenCalledWith(`Client connected: ${mockSocket.id}`);
+      // Verify socket is stored
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((gateway as any).socketById.get(mockSocket.id)).toBe(mockSocket);
       loggerSpy.mockRestore();
     });
   });
 
   describe('handleDisconnect', () => {
-    it('should log disconnection and clean up authenticated session', () => {
+    it('should log disconnection and clean up authenticated session and socket reference', () => {
       const loggerSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
-      // Add authenticated session
+      // Add authenticated session and socket reference
       const socketId = mockSocket.id || 'test-socket-id';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
       gateway.handleDisconnect(mockSocket as Socket);
       expect(loggerSpy).toHaveBeenCalledWith(`Client disconnected: ${socketId}`);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((gateway as any).authenticatedClients.has(socketId)).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((gateway as any).socketById.has(socketId)).toBe(false);
       loggerSpy.mockRestore();
     });
 
     it('should clean up session even if not authenticated', () => {
       const loggerSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
-      gateway.handleDisconnect(mockSocket as Socket);
+      // Store socket reference
       const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+      gateway.handleDisconnect(mockSocket as Socket);
       expect(loggerSpy).toHaveBeenCalledWith(`Client disconnected: ${socketId}`);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((gateway as any).authenticatedClients.has(socketId)).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((gateway as any).socketById.has(socketId)).toBe(false);
       loggerSpy.mockRestore();
     });
   });
@@ -468,6 +483,9 @@ describe('AgentsGateway', () => {
       const socketId = mockSocket.id || 'test-socket-id';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // Store socket reference for broadcasting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
       const mockAgentResponseJson = JSON.stringify({
@@ -483,8 +501,8 @@ describe('AgentsGateway', () => {
 
       expect(agentsService.findOne).toHaveBeenCalledWith(mockAgent.id);
       expect(loggerLogSpy).toHaveBeenCalledWith(`Agent ${mockAgent.name} (${mockAgent.id}) says: Hello, world!`);
-      // Check user message emission
-      expect(mockServer.emit).toHaveBeenCalledWith(
+      // Check user message emission - now uses socket.emit via broadcastToAgent
+      expect(mockSocket.emit).toHaveBeenCalledWith(
         'chatMessage',
         expect.objectContaining({
           success: true,
@@ -501,8 +519,8 @@ describe('AgentsGateway', () => {
         `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
         'Hello, world!',
       );
-      // Check agent response emission with parsed JSON
-      expect(mockServer.emit).toHaveBeenCalledWith(
+      // Check agent response emission with parsed JSON - now uses socket.emit via broadcastToAgent
+      expect(mockSocket.emit).toHaveBeenCalledWith(
         'chatMessage',
         expect.objectContaining({
           success: true,
@@ -600,6 +618,9 @@ describe('AgentsGateway', () => {
       const socketId = mockSocket.id || 'test-socket-id';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // Store socket reference for broadcasting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
       dockerService.sendCommandToContainer.mockResolvedValue('');
@@ -607,8 +628,8 @@ describe('AgentsGateway', () => {
 
       await gateway.handleChat({ message: 'Hello!' }, mockSocket as Socket);
 
-      // Should emit user message
-      expect(mockServer.emit).toHaveBeenCalledWith(
+      // Should emit user message - now uses socket.emit via broadcastToAgent
+      expect(mockSocket.emit).toHaveBeenCalledWith(
         'chatMessage',
         expect.objectContaining({
           success: true,
@@ -621,7 +642,7 @@ describe('AgentsGateway', () => {
         }),
       );
       // Should not emit agent response (empty)
-      const agentResponseCalls = (mockServer.emit as jest.Mock).mock.calls.filter(
+      const agentResponseCalls = (mockSocket.emit as jest.Mock).mock.calls.filter(
         (call) => call[0] === 'chatMessage' && call[1].data?.from === 'agent',
       );
       expect(agentResponseCalls.length).toBe(0);
@@ -632,6 +653,9 @@ describe('AgentsGateway', () => {
       const socketId = mockSocket.id || 'test-socket-id';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // Store socket reference for broadcasting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
       dockerService.sendCommandToContainer.mockResolvedValue('Invalid JSON response');
@@ -640,8 +664,8 @@ describe('AgentsGateway', () => {
 
       await gateway.handleChat({ message: 'Hello!' }, mockSocket as Socket);
 
-      // Should emit user message
-      expect(mockServer.emit).toHaveBeenCalledWith(
+      // Should emit user message - now uses socket.emit via broadcastToAgent
+      expect(mockSocket.emit).toHaveBeenCalledWith(
         'chatMessage',
         expect.objectContaining({
           success: true,
@@ -653,8 +677,8 @@ describe('AgentsGateway', () => {
           timestamp: expect.any(String),
         }),
       );
-      // Should emit agent response with response field (fallback) since JSON parsing failed
-      expect(mockServer.emit).toHaveBeenCalledWith(
+      // Should emit agent response with response field (fallback) since JSON parsing failed - now uses socket.emit via broadcastToAgent
+      expect(mockSocket.emit).toHaveBeenCalledWith(
         'chatMessage',
         expect.objectContaining({
           success: true,
@@ -676,6 +700,9 @@ describe('AgentsGateway', () => {
       const socketId = mockSocket.id || 'test-socket-id';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // Store socket reference for broadcasting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
       dockerService.sendCommandToContainer.mockRejectedValue(new Error('Container error'));
@@ -684,8 +711,8 @@ describe('AgentsGateway', () => {
 
       await gateway.handleChat({ message: 'Hello!' }, mockSocket as Socket);
 
-      // Should still emit user message
-      expect(mockServer.emit).toHaveBeenCalledWith(
+      // Should still emit user message - now uses socket.emit via broadcastToAgent
+      expect(mockSocket.emit).toHaveBeenCalledWith(
         'chatMessage',
         expect.objectContaining({
           success: true,
@@ -710,12 +737,16 @@ describe('AgentsGateway', () => {
       const socketId = mockSocket.id || 'test-socket-id';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // Store socket reference for broadcasting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
       await gateway.handleChat({ message: '  Hello, world!  ' }, mockSocket as Socket);
 
-      expect(mockServer.emit).toHaveBeenCalledWith(
+      // Now uses socket.emit via broadcastToAgent
+      expect(mockSocket.emit).toHaveBeenCalledWith(
         'chatMessage',
         expect.objectContaining({
           success: true,

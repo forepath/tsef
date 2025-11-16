@@ -127,6 +127,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Store authenticated agents by socket.id
   // Maps socket.id -> agent UUID
   private authenticatedClients = new Map<string, string>();
+  // Store socket references by socket.id for reliable broadcasting
+  // Maps socket.id -> Socket instance
+  private socketById = new Map<string, Socket>();
 
   constructor(
     private readonly agentsService: AgentsService,
@@ -141,16 +144,19 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
    */
   handleConnection(socket: Socket) {
     this.logger.log(`Client connected: ${socket.id}`);
+    // Store socket reference for reliable broadcasting
+    this.socketById.set(socket.id, socket);
   }
 
   /**
    * Handle client disconnection.
-   * Cleans up authenticated session.
+   * Cleans up authenticated session and socket reference.
    * @param socket - The disconnected socket instance
    */
   handleDisconnect(socket: Socket) {
     this.logger.log(`Client disconnected: ${socket.id}`);
     this.authenticatedClients.delete(socket.id);
+    this.socketById.delete(socket.id);
   }
 
   /**
@@ -173,6 +179,47 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     return null;
+  }
+
+  /**
+   * Broadcast a message to all clients authenticated to a specific agent.
+   * This ensures agent-specific messages are only sent to clients logged into that agent.
+   * @param agentUuid - The UUID of the agent
+   * @param event - The event name to emit
+   * @param data - The data to send
+   */
+  private broadcastToAgent(agentUuid: string, event: string, data: unknown): void {
+    // Find all socket IDs authenticated to this agent
+    const socketIds: string[] = [];
+    for (const [socketId, authenticatedAgentUuid] of this.authenticatedClients.entries()) {
+      if (authenticatedAgentUuid === agentUuid) {
+        socketIds.push(socketId);
+      }
+    }
+
+    // Emit to each authenticated socket using stored socket references
+    let successCount = 0;
+    for (const socketId of socketIds) {
+      const socket = this.socketById.get(socketId);
+      if (socket && socket.connected) {
+        try {
+          socket.emit(event, data);
+          successCount++;
+        } catch (emitError) {
+          this.logger.warn(`Failed to emit ${event} to socket ${socketId}: ${emitError}`);
+          // Remove stale socket reference if emit fails
+          this.socketById.delete(socketId);
+        }
+      } else if (socket && !socket.connected) {
+        // Clean up disconnected socket reference
+        this.socketById.delete(socketId);
+        this.authenticatedClients.delete(socketId);
+      }
+    }
+
+    if (successCount > 0) {
+      this.logger.debug(`Broadcasted ${event} to ${successCount} client(s) for agent ${agentUuid}`);
+    }
   }
 
   /**
@@ -340,7 +387,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // Continue with message broadcasting even if persistence fails
       }
 
-      this.server.emit(
+      // Broadcast user message only to clients authenticated to this agent
+      this.broadcastToAgent(
+        agentUuid,
         'chatMessage',
         createSuccessResponse<ChatMessageData>({
           from: ChatActor.USER,
@@ -387,7 +436,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 // Continue with message broadcasting even if persistence fails
               }
 
-              this.server.emit(
+              // Broadcast agent response only to clients authenticated to this agent
+              this.broadcastToAgent(
+                agentUuid,
                 'chatMessage',
                 createSuccessResponse<ChatMessageData>({
                   from: ChatActor.AGENT,
@@ -410,7 +461,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 // Continue with message broadcasting even if persistence fails
               }
 
-              this.server.emit(
+              // Broadcast agent response only to clients authenticated to this agent
+              this.broadcastToAgent(
+                agentUuid,
                 'chatMessage',
                 createSuccessResponse<ChatMessageData>({
                   from: ChatActor.AGENT,
