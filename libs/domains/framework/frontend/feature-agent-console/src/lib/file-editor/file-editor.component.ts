@@ -16,9 +16,12 @@ import {
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FilesFacade,
+  getSocketInstance,
   moveFileOrDirectorySuccess,
+  SocketsFacade,
   type CreateFileDto,
   type FileContentDto,
+  type FileUpdateNotificationData,
   type OpenTab,
   type WriteFileDto,
 } from '@forepath/framework/frontend/data-access-agent-console';
@@ -36,11 +39,14 @@ import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-edi
 })
 export class FileEditorComponent implements OnDestroy, AfterViewInit {
   private readonly filesFacade = inject(FilesFacade);
+  private readonly socketsFacade = inject(SocketsFacade);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actions$ = inject(Actions);
 
   @ViewChild('tabsContainer', { static: false }) tabsContainerRef?: ElementRef<HTMLDivElement>;
   @ViewChild('tabsWrapper', { static: false }) tabsWrapperRef?: ElementRef<HTMLDivElement>;
+  @ViewChild('fileUpdateModal', { static: false }) fileUpdateModalRef?: ElementRef<HTMLDivElement>;
+  @ViewChild('saveOverrideModal', { static: false }) saveOverrideModalRef?: ElementRef<HTMLDivElement>;
 
   // Inputs
   clientId = input.required<string>();
@@ -64,6 +70,12 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
   // Outputs
   readonly chatToggleRequested = output<void>();
+
+  // File update notification state
+  readonly showFileUpdateModal = signal<boolean>(false);
+  readonly fileUpdateNotification = signal<FileUpdateNotificationData | null>(null);
+  // Track rejected file updates: filePath -> timestamp of rejected update
+  private readonly rejectedFileUpdates = signal<Map<string, string>>(new Map());
 
   // Autosave debounce subject
   private readonly autosaveTrigger$ = new Subject<void>();
@@ -272,6 +284,26 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
       previousAutosaveEnabled = autosaveEnabled;
     });
+
+    // Subscribe to file update notifications
+    this.socketsFacade
+      .getForwardedEventsByEvent$('fileUpdateNotification')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((events) => {
+        if (events.length === 0) {
+          return;
+        }
+
+        // Get the most recent event
+        const latestEvent = events[events.length - 1];
+        const payload = latestEvent.payload;
+
+        // Check if it's a success response with FileUpdateNotificationData
+        if ('success' in payload && payload.success && 'data' in payload) {
+          const notificationData = payload.data as FileUpdateNotificationData;
+          this.handleFileUpdateNotification(notificationData);
+        }
+      });
   }
 
   ngAfterViewInit(): void {
@@ -368,14 +400,39 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
       return;
     }
 
+    // Check if there are rejected file updates for this file
+    const rejectedTimestamp = this.rejectedFileUpdates().get(filePath);
+    if (rejectedTimestamp) {
+      // Show confirmation modal before overriding newer changes
+      if (this.saveOverrideModalRef) {
+        this.showModal(this.saveOverrideModalRef);
+      }
+      return;
+    }
+
+    // No rejected updates, proceed with save
+    this.performSave(filePath, contentToSave);
+  }
+
+  /**
+   * Actually perform the save operation
+   */
+  private performSave(filePath: string, contentToSave: string): void {
+    const clientId = this.clientId();
+    const agentId = this.agentId();
+    if (!clientId || !agentId) {
+      return;
+    }
+
     const writeDto: WriteFileDto = {
       content: contentToSave, // Already base64-encoded
       encoding: 'utf-8',
     };
 
-    this.filesFacade.writeFile(this.clientId(), this.agentId(), filePath, writeDto);
+    this.filesFacade.writeFile(clientId, agentId, filePath, writeDto);
 
     // Mark as not dirty and sync editorContent after successful save
+    // Also emit file update notification to other clients after successful save
     combineLatest([this.isWritingFile$, this.selectedFileContent$])
       .pipe(
         filter(([writing]) => !writing),
@@ -393,7 +450,55 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
           newDirty.delete(filePath);
           return newDirty;
         });
+        // Clear rejected update tracking for this file (save was successful)
+        this.rejectedFileUpdates.update((rejected) => {
+          const newRejected = new Map(rejected);
+          newRejected.delete(filePath);
+          return newRejected;
+        });
+
+        // Emit file update notification to other clients after successful save
+        // agentId is required for routing the event to the correct agent
+        const agentId = this.agentId();
+        if (!agentId) {
+          // Cannot forward file update notification without an agent selected
+          return;
+        }
+
+        // agentId is required for routing the event to the correct agent
+        this.socketsFacade.forwardFileUpdate(filePath, agentId);
       });
+  }
+
+  /**
+   * Confirm save override - proceed with saving despite rejected newer changes
+   */
+  onConfirmSaveOverride(): void {
+    const filePath = this.selectedFilePath();
+    if (!filePath) {
+      return;
+    }
+
+    // Hide modal
+    if (this.saveOverrideModalRef) {
+      this.hideModal(this.saveOverrideModalRef);
+    }
+
+    // Get content and perform save
+    const contentToSave = this.editorContent();
+    if (contentToSave) {
+      this.performSave(filePath, contentToSave);
+    }
+  }
+
+  /**
+   * Cancel save override - keep local changes without saving
+   */
+  onCancelSaveOverride(): void {
+    // Just hide the modal
+    if (this.saveOverrideModalRef) {
+      this.hideModal(this.saveOverrideModalRef);
+    }
   }
 
   onFileCreate(event: { path: string; type: 'file' | 'directory'; name: string }): void {
@@ -673,6 +778,146 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
   onToggleChat(): void {
     this.chatToggleRequested.emit();
+  }
+
+  /**
+   * Handle file update notification from other clients
+   * - If file is dirty: shows a modal asking user to accept or reject changes, and disables autosave
+   * - If file is not dirty: automatically reloads the file from server
+   */
+  private handleFileUpdateNotification(notification: FileUpdateNotificationData): void {
+    const currentFilePath = this.selectedFilePath();
+    const currentSocketId = getSocketInstance()?.id;
+    const clientId = this.clientId();
+    const agentId = this.agentId();
+
+    // Check conditions:
+    // 1. Socket ID must be different (not our own update)
+    // 2. Current user must be viewing the same file
+    if (
+      currentSocketId &&
+      notification.socketId !== currentSocketId &&
+      currentFilePath === notification.filePath &&
+      clientId &&
+      agentId
+    ) {
+      const isDirty = this.dirtyFiles().has(notification.filePath);
+
+      if (isDirty) {
+        // File has unsaved changes - disable autosave to prevent conflicts and show modal
+        this.autosaveEnabled.set(false);
+        this.fileUpdateNotification.set(notification);
+        this.showFileUpdateModal.set(true);
+        if (this.fileUpdateModalRef) {
+          this.showModal(this.fileUpdateModalRef);
+        }
+      } else {
+        // File is not dirty - automatically reload from server (no need to disable autosave)
+        this.lastLoadedFilePath.set(null);
+        this.filesFacade.readFile(clientId, agentId, notification.filePath);
+      }
+    }
+  }
+
+  /**
+   * Show a Bootstrap modal
+   */
+  private showModal(modalElement: ElementRef<HTMLDivElement>): void {
+    if (modalElement?.nativeElement) {
+      // Use Bootstrap 5 Modal API
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bootstrap = (window as any).bootstrap;
+      const modal = bootstrap?.Modal?.getOrCreateInstance(modalElement.nativeElement);
+      if (modal) {
+        modal.show();
+      } else {
+        // Fallback: create new modal instance
+        const Modal = bootstrap?.Modal;
+        if (Modal) {
+          new Modal(modalElement.nativeElement).show();
+        }
+      }
+    }
+  }
+
+  /**
+   * Hide a Bootstrap modal
+   */
+  private hideModal(modalElement: ElementRef<HTMLDivElement>): void {
+    if (modalElement?.nativeElement) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bootstrap = (window as any).bootstrap;
+      const modal = bootstrap?.Modal?.getInstance(modalElement.nativeElement);
+      if (modal) {
+        modal.hide();
+      }
+    }
+  }
+
+  /**
+   * Accept external file changes - reload the file from server
+   */
+  onAcceptFileUpdate(): void {
+    const notification = this.fileUpdateNotification();
+    if (!notification) {
+      return;
+    }
+
+    const filePath = notification.filePath;
+    const clientId = this.clientId();
+    const agentId = this.agentId();
+
+    if (!filePath || !clientId || !agentId) {
+      return;
+    }
+
+    // Reload the file from server
+    // This will trigger the effect that updates editorContent
+    this.lastLoadedFilePath.set(null);
+    this.filesFacade.readFile(clientId, agentId, filePath);
+
+    // Clear dirty state for this file
+    this.dirtyFiles.update((dirty) => {
+      const newDirty = new Set(dirty);
+      newDirty.delete(filePath);
+      return newDirty;
+    });
+
+    // Clear rejected update tracking (user accepted the changes)
+    this.rejectedFileUpdates.update((rejected) => {
+      const newRejected = new Map(rejected);
+      newRejected.delete(filePath);
+      return newRejected;
+    });
+
+    // Hide modal and clear notification
+    if (this.fileUpdateModalRef) {
+      this.hideModal(this.fileUpdateModalRef);
+    }
+    this.showFileUpdateModal.set(false);
+    this.fileUpdateNotification.set(null);
+  }
+
+  /**
+   * Reject external file changes - keep local changes and allow override
+   */
+  onRejectFileUpdate(): void {
+    const notification = this.fileUpdateNotification();
+    if (notification) {
+      // Track that this file update was rejected (store timestamp for reference)
+      this.rejectedFileUpdates.update((rejected) => {
+        const newRejected = new Map(rejected);
+        newRejected.set(notification.filePath, notification.timestamp);
+        return newRejected;
+      });
+    }
+
+    // Hide modal - keep the file dirty so user can save with CTRL+S or save button
+    if (this.fileUpdateModalRef) {
+      this.hideModal(this.fileUpdateModalRef);
+    }
+    this.showFileUpdateModal.set(false);
+    this.fileUpdateNotification.set(null);
   }
 
   ngOnDestroy(): void {

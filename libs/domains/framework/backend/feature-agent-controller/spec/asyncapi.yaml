@@ -32,7 +32,7 @@ channels:
     messages:
       forwardCommand:
         $ref: '#/components/messages/Forward'
-    description: Forward an arbitrary event to the selected client's agents namespace. When `agentId` is provided, the gateway automatically logs in the agent using stored credentials before forwarding the event. To restore chat history for an agent, forward a "login" event with `agentId` (the payload is automatically overridden with credentials from the database, triggering login and subsequent chat history restoration).
+    description: Forward an arbitrary event to the selected client's agents namespace. When `agentId` is provided, the gateway automatically logs in the agent using stored credentials before forwarding the event. To restore chat history for an agent, forward a "login" event with `agentId` (the payload is automatically overridden with credentials from the database, triggering login and subsequent chat history restoration). Supported events include "chat", "fileUpdate", "logout", etc. The remote agent-manager gateway will process the event and may emit response events (e.g., "chatMessage", "fileUpdateNotification") which are automatically forwarded back to the client.
   clients/forwardAck:
     address: clients/forwardAck
     messages:
@@ -107,12 +107,23 @@ components:
         properties:
           event:
             type: string
-            description: Socket.IO event name (e.g., chat, login, logout). When event is "login" and `agentId` is provided, the `payload` field is optional and ignored - credentials are automatically loaded from the database to trigger login and chat history restoration.
+            description: >
+              Socket.IO event name (e.g., "chat", "fileUpdate", "login", "logout").
+              When event is "login" and agentId is provided, the payload field is optional and ignored -
+              credentials are automatically loaded from the database to trigger login and chat history restoration.
+              When event is "fileUpdate", the payload should contain {filePath: string} which will be forwarded
+              to the agent-manager gateway for broadcasting to all clients authenticated to that agent.
           agentId:
             type: string
-            description: Agent UUID to target; if provided, the gateway will perform automatic login using stored credentials before forwarding the event. After successful login, the agents gateway automatically restores chat history by emitting `chatMessage` events. When event is "login", the `payload` field is always ignored and credentials are always loaded from the database, regardless of whether the agent is already logged in.
+            description: >
+              Agent UUID to target; if provided, the gateway will perform automatic login using stored credentials
+              before forwarding the event. After successful login, the agents gateway automatically restores chat
+              history by emitting chatMessage events. When event is "login", the payload field is always ignored
+              and credentials are always loaded from the database, regardless of whether the agent is already logged in.
           payload:
-            description: Arbitrary payload forwarded to the agents namespace. Optional when event is "login" with `agentId` (credentials are loaded from database instead).
+            description: >
+              Arbitrary payload forwarded to the agents namespace. Optional when event is "login" with agentId
+              (credentials are loaded from database instead).
             default: {}
     ForwardAck:
       name: ForwardAck

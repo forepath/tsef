@@ -21,6 +21,7 @@ export enum ForwardableEvent {
   LOGIN = 'login',
   CHAT = 'chat',
   LOGOUT = 'logout',
+  FILE_UPDATE = 'fileUpdate',
 }
 
 /**
@@ -36,7 +37,7 @@ export interface ForwardPayload {
  * Union type for all forwardable event payloads
  * Based on agents.gateway.ts event definitions
  */
-export type ForwardableEventPayload = ChatPayload | LoginPayload | LogoutPayload;
+export type ForwardableEventPayload = ChatPayload | LoginPayload | LogoutPayload | FileUpdatePayload;
 
 /**
  * Chat event payload (from agents.gateway.ts ChatPayload)
@@ -59,6 +60,13 @@ export interface LoginPayload {
  * Using empty object type since logout requires no payload
  */
 export type LogoutPayload = Record<string, never>;
+
+/**
+ * File update event payload (from agents.gateway.ts FileUpdatePayload)
+ */
+export interface FileUpdatePayload {
+  filePath: string;
+}
 
 /**
  * Acknowledgement for forwarded events
@@ -161,6 +169,15 @@ export interface LogoutSuccessData {
 }
 
 /**
+ * File update notification data (from agents.gateway.ts FileUpdateNotificationData)
+ */
+export interface FileUpdateNotificationData {
+  socketId: string;
+  filePath: string;
+  timestamp: string;
+}
+
+/**
  * Typed forwarded event payloads based on event name
  */
 export type ForwardedEventPayload =
@@ -168,4 +185,5 @@ export type ForwardedEventPayload =
   | ErrorResponse // loginError
   | SuccessResponse<ChatMessageData> // chatMessage
   | SuccessResponse<LogoutSuccessData> // logoutSuccess
+  | SuccessResponse<FileUpdateNotificationData> // fileUpdateNotification
   | ErrorResponse; // error

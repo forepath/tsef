@@ -104,6 +104,7 @@ describe('ClientsGateway', () => {
       id,
       emit: jest.fn((event: string, payload: unknown) => emitted.push({ event, payload })),
       getEmitted: () => emitted,
+      connected: true, // Required for event forwarding in gateway
     } as any;
   };
 
@@ -292,5 +293,88 @@ describe('ClientsGateway', () => {
     expect(remote.emit).toHaveBeenCalledWith('login', { agentId: 'agent-uuid', password: 'password123' });
     expect(remote.emit).toHaveBeenCalledTimes(1);
     expect(socket.emit).toHaveBeenCalledWith('forwardAck', expect.objectContaining({ received: true, event: 'login' }));
+  });
+
+  it('should forward fileUpdate event to remote agent-manager gateway', async () => {
+    const socket = createMockSocket();
+    const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+    const remote = io() as any;
+    mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'client-uuid',
+      endpoint: 'http://localhost:3100/api',
+      authenticationType: 'api_key',
+      apiKey: 'x',
+      agentWsPort: 8099,
+    } as any);
+    mockCredentialsRepo.findByClientAndAgent.mockResolvedValue({
+      id: 'cred-1',
+      clientId: 'client-uuid',
+      agentId: 'agent-uuid',
+      password: 'password123',
+    } as any);
+    await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+    // Forward fileUpdate event with agentId (will auto-login)
+    const forwardPromise = gateway.handleForward(
+      {
+        event: 'fileUpdate',
+        payload: { filePath: '/path/to/file.ts' },
+        agentId: 'agent-uuid',
+      },
+      socket,
+    );
+    // Wait for handlers to be registered
+    await new Promise((resolve) => setImmediate(resolve));
+    // Simulate loginSuccess event
+    remote.triggerEvent('loginSuccess');
+    await forwardPromise;
+    // Should auto-login first
+    expect(remote.emit).toHaveBeenCalledWith('login', { agentId: 'agent-uuid', password: 'password123' });
+    // Should forward fileUpdate event
+    expect(remote.emit).toHaveBeenCalledWith('fileUpdate', { filePath: '/path/to/file.ts' });
+    expect(socket.emit).toHaveBeenCalledWith(
+      'forwardAck',
+      expect.objectContaining({ received: true, event: 'fileUpdate' }),
+    );
+  });
+
+  it('should forward fileUpdateNotification event from remote to local socket', async () => {
+    const socket = createMockSocket();
+    const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+    const remote = io() as any;
+    mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'client-uuid',
+      endpoint: 'http://localhost:3100/api',
+      authenticationType: 'api_key',
+      apiKey: 'x',
+      agentWsPort: 8099,
+    } as any);
+    await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+    // Wait for remote connection to be established and onAny handler to be registered
+    await new Promise((resolve) => setImmediate(resolve));
+    // Simulate remote connection being established (triggers connect event handlers)
+    remote.triggerEvent('connect');
+    // Wait for setClientSuccess to be processed
+    await new Promise((resolve) => setImmediate(resolve));
+    // Clear previous emit calls to isolate this test
+    (socket.emit as jest.Mock).mockClear();
+    // Simulate fileUpdateNotification event from remote agent-manager gateway
+    const fileUpdateNotification = {
+      success: true,
+      data: {
+        socketId: 'remote-socket-id',
+        filePath: '/path/to/file.ts',
+        timestamp: new Date().toISOString(),
+      },
+      timestamp: new Date().toISOString(),
+    };
+    // Trigger the onAny handler manually (simulating remote event)
+    const onAnyHandler = remote.onAny.mock.calls[0]?.[0];
+    if (onAnyHandler) {
+      onAnyHandler('fileUpdateNotification', fileUpdateNotification);
+    }
+    // Wait for event to be processed
+    await new Promise((resolve) => setImmediate(resolve));
+    // Should forward fileUpdateNotification to local socket
+    expect(socket.emit).toHaveBeenCalledWith('fileUpdateNotification', fileUpdateNotification);
   });
 });

@@ -356,11 +356,13 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     }
 
     const agentId = this.selectedAgentId();
-    if (agentId) {
-      this.socketsFacade.forwardChat(message, agentId);
-    } else {
-      this.socketsFacade.forwardChat(message);
+    if (!agentId) {
+      // Cannot send message without an agent selected
+      return;
     }
+
+    // agentId is required for routing the event to the correct agent
+    this.socketsFacade.forwardChat(message, agentId);
 
     // Track when we sent the message to show loading indicator
     this.lastUserMessageTimestamp.set(Date.now());

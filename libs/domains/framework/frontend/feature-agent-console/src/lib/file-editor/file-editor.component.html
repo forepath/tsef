@@ -164,3 +164,81 @@
     </div>
   </div>
 </div>
+
+<!-- File Update Notification Modal -->
+<div
+  class="modal fade"
+  id="fileUpdateModal"
+  tabindex="-1"
+  aria-labelledby="fileUpdateModalLabel"
+  aria-hidden="true"
+  #fileUpdateModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="fileUpdateModalLabel">
+          <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+          External File Changes Detected
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          The file <strong>{{ fileUpdateNotification()?.filePath }}</strong> has been updated by another user while you
+          have unsaved changes.
+        </p>
+        <p class="mb-0">What would you like to do?</p>
+        <ul class="mt-2">
+          <li><strong>Accept:</strong> Reload the file from the server (your unsaved changes will be lost)</li>
+          <li><strong>Reject:</strong> Keep your local changes and override the external changes when you save</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onRejectFileUpdate()" data-bs-dismiss="modal">
+          Reject
+        </button>
+        <button type="button" class="btn btn-primary" (click)="onAcceptFileUpdate()" data-bs-dismiss="modal">
+          Accept
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Save Override Confirmation Modal -->
+<div
+  class="modal fade"
+  id="saveOverrideModal"
+  tabindex="-1"
+  aria-labelledby="saveOverrideModalLabel"
+  aria-hidden="true"
+  #saveOverrideModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="saveOverrideModalLabel">
+          <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+          Override Newer Changes?
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          You previously rejected external changes to <strong>{{ selectedFilePath() }}</strong
+          >. Saving now will override those newer changes.
+        </p>
+        <p class="mb-0">Are you sure you want to proceed?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onCancelSaveOverride()" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-warning" (click)="onConfirmSaveOverride()" data-bs-dismiss="modal">
+          Override and Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
