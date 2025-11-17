@@ -64,8 +64,9 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
   // Track cursor position within input buffer per session
   private readonly inputCursorPosition = new Map<string, number>();
 
-  // Track processed terminal output events by timestamp to prevent duplicate processing
-  private readonly processedTerminalOutputTimestamps = new Set<number>();
+  // Track how many terminal output events have been processed per session
+  // This counter tells us how many messages to skip from the events array
+  private readonly processedEventCount = new Map<string, number>();
 
   constructor() {
     // Automatically create a terminal session when the panel becomes visible and no sessions exist
@@ -120,26 +121,36 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
       .getForwardedEventsByEvent$('terminalOutput')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((events) => {
-        // Filter out events that have already been processed
-        const newEvents = events.filter((event) => !this.processedTerminalOutputTimestamps.has(event.timestamp));
-
-        // Remove processed timestamps from the start of the events array
-        // (events that are no longer in the current events list)
-        const currentTimestamps = new Set(events.map((e) => e.timestamp));
-        for (const timestamp of this.processedTerminalOutputTimestamps) {
-          if (!currentTimestamps.has(timestamp)) {
-            this.processedTerminalOutputTimestamps.delete(timestamp);
+        // Group events by sessionId to process per session
+        const eventsBySession = new Map<string, typeof events>();
+        for (const event of events) {
+          const response = event.payload as SuccessResponse<TerminalOutputData>;
+          if (response.success && response.data) {
+            const sessionId = response.data.sessionId;
+            if (!eventsBySession.has(sessionId)) {
+              eventsBySession.set(sessionId, []);
+            }
+            const sessionEvents = eventsBySession.get(sessionId);
+            if (sessionEvents) {
+              sessionEvents.push(event);
+            }
           }
         }
 
-        // Process only new events
-        for (const event of newEvents) {
-          const response = event.payload as SuccessResponse<TerminalOutputData>;
-          if (response.success && response.data) {
-            this.handleTerminalOutput(response.data.sessionId, response.data.data);
-            // Mark this event as processed
-            this.processedTerminalOutputTimestamps.add(event.timestamp);
+        // Process events per session, skipping already processed ones
+        for (const [sessionId, sessionEvents] of eventsBySession) {
+          const skipCount = this.processedEventCount.get(sessionId) || 0;
+          const eventsToProcess = sessionEvents.slice(skipCount);
+
+          for (const event of eventsToProcess) {
+            const response = event.payload as SuccessResponse<TerminalOutputData>;
+            if (response.success && response.data) {
+              this.handleTerminalOutput(response.data.sessionId, response.data.data);
+            }
           }
+
+          // Update counter: total events for this session
+          this.processedEventCount.set(sessionId, sessionEvents.length);
         }
       });
 
@@ -167,7 +178,7 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
     // Clean up buffers
     this.inputBuffer.clear();
     this.inputCursorPosition.clear();
-    this.processedTerminalOutputTimestamps.clear();
+    this.processedEventCount.clear();
 
     // Disconnect resize observer
     if (this.resizeObserver) {
@@ -435,6 +446,8 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
 
     // Clean up buffers
     this.inputBuffer.delete(sessionId);
+    this.inputCursorPosition.delete(sessionId);
+    this.processedEventCount.delete(sessionId);
 
     // Remove from sessions
     const sessions = new Map(this.sessions());
