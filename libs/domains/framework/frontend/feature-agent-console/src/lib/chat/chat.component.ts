@@ -14,7 +14,7 @@ import {
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   AgentsFacade,
   ClientsFacade,
@@ -29,7 +29,21 @@ import {
   type UpdateAgentDto,
   type UpdateClientDto,
 } from '@forepath/framework/frontend/data-access-agent-console';
-import { combineLatest, filter, map, Observable, of, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
+import {
+  combineLatest,
+  combineLatestWith,
+  delay,
+  filter,
+  map,
+  Observable,
+  of,
+  Subject,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 import { FileEditorComponent } from '../file-editor/file-editor.component';
 
 // Type declaration for marked library
@@ -50,6 +64,8 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   private readonly socketsFacade = inject(SocketsFacade);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   @ViewChild('chatMessagesContainer', { static: false })
   private chatMessagesContainer!: ElementRef<HTMLDivElement>;
@@ -255,9 +271,60 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     description: '',
   });
 
+  private initialRouting: Record<string, boolean> = {
+    client: false,
+    agent: false,
+    editor: false,
+  };
+
   ngOnInit(): void {
     // Load clients on init
     this.clientsFacade.loadClients();
+
+    this.route.params
+      .pipe(
+        combineLatestWith(this.clients$, this.agents$),
+        withLatestFrom(this.route.queryParams),
+        takeUntil(this.destroy$),
+        delay(0),
+      )
+      .subscribe(([[params, clients, agents], queryParams]) => {
+        // Select client from route params
+        if (!this.initialRouting['client'] && clients.length > 0) {
+          const clientId = params['clientId'];
+          if (clientId) {
+            this.onClientSelect(clientId, false);
+            this.initialRouting['client'] = true;
+          }
+        }
+
+        // Select agent from route params
+        if (!this.initialRouting['agent'] && agents.length > 0) {
+          const agentId = params['agentId'];
+          if (agentId) {
+            this.onAgentSelect(agentId, false);
+            this.initialRouting['agent'] = true;
+          }
+        }
+
+        // Select editor from route params
+        if (
+          !this.initialRouting['editor'] &&
+          agents.length > 0 &&
+          this.router.url.includes('/editor') &&
+          !this.editorOpen()
+        ) {
+          // Open editor if route has /editor but editor is closed
+          this.editorOpen.set(true);
+          this.chatVisible.set(true);
+          if (this.fileEditor) {
+            this.fileEditor.fileTreeVisible.set(true);
+            this.fileEditor.terminalVisible.set(false);
+            this.fileEditor.autosaveEnabled.set(false);
+          }
+          this.initialRouting['editor'] = true;
+        }
+      });
 
     // Reset editor view when selected agent changes
     this.selectedAgent$.pipe(takeUntil(this.destroy$)).subscribe((agent) => {
@@ -343,14 +410,22 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     }
   }
 
-  onClientSelect(clientId: string): void {
+  onClientSelect(clientId: string, navigate = true): void {
+    if (navigate) {
+      this.router.navigate(['/clients', clientId]);
+    }
+
     this.clientsFacade.setActiveClient(clientId);
     // Reset message count when switching clients
     this.previousMessageCount = 0;
     this.lastUserMessageTimestamp.set(null);
   }
 
-  onAgentSelect(agentId: string): void {
+  onAgentSelect(agentId: string, navigate = true): void {
+    if (navigate) {
+      this.router.navigate(['/clients', this.activeClientId, 'agents', agentId]);
+    }
+
     this.selectedAgentId.set(agentId);
     const clientId = this.activeClientId;
     if (clientId) {
@@ -394,9 +469,17 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.socketsFacade.disconnect();
   }
 
-  onToggleEditor(): void {
+  onToggleEditor(navigate = true): void {
     const wasOpen = this.editorOpen();
     this.editorOpen.update((open) => !open);
+
+    if (navigate) {
+      this.router.navigate(
+        wasOpen
+          ? ['/clients', this.activeClientId, 'agents', this.selectedAgentId()]
+          : ['/clients', this.activeClientId, 'agents', this.selectedAgentId(), 'editor'],
+      );
+    }
 
     // Reset visibility when opening editor for a new agent
     if (!wasOpen && this.editorOpen()) {
