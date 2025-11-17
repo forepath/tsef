@@ -1,10 +1,11 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter, withRouterConfig } from '@angular/router';
+import { RouteReuseStrategy, provideRouter, withRouterConfig } from '@angular/router';
 import { getAuthInterceptor } from '@forepath/framework/frontend/data-access-agent-console';
 import { environment, provideEnvironment } from '@forepath/framework/frontend/util-configuration';
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { ComponentReuseStrategy } from './strategies/component-reuse.strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -30,6 +31,8 @@ export const appConfig: ApplicationConfig = {
       ],
       withRouterConfig({ paramsInheritanceStrategy: 'always' }),
     ),
+    // Custom RouteReuseStrategy to reuse component instances when navigating between routes with the same component
+    { provide: RouteReuseStrategy, useClass: ComponentReuseStrategy },
     provideEnvironment(),
   ],
 };

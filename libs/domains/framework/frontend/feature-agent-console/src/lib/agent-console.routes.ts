@@ -51,7 +51,7 @@ export const agentConsoleRoutes: Route[] = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'dashboard',
+        redirectTo: 'clients',
       },
       {
         path: 'login',
@@ -60,14 +60,35 @@ export const agentConsoleRoutes: Route[] = [
         title: 'Login | Agenstra',
       },
       {
-        path: 'dashboard',
-        component: AgentConsoleChatComponent,
+        path: 'clients',
         canActivate: [authGuard],
         title: 'Manager | Agenstra',
+        children: [
+          {
+            path: '',
+            component: AgentConsoleChatComponent,
+            pathMatch: 'full',
+          },
+          {
+            path: ':clientId',
+            component: AgentConsoleChatComponent,
+            pathMatch: 'full',
+          },
+          {
+            path: ':clientId/agents/:agentId',
+            component: AgentConsoleChatComponent,
+            pathMatch: 'full',
+          },
+          {
+            path: ':clientId/agents/:agentId/editor',
+            component: AgentConsoleChatComponent,
+            pathMatch: 'full',
+          },
+        ],
       },
       {
         path: '**',
-        redirectTo: 'dashboard',
+        redirectTo: 'clients',
       },
     ],
     providers: [
