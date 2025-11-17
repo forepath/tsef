@@ -21,6 +21,7 @@ export interface SocketsState {
   disconnecting: boolean;
   selectedClientId: string | null;
   forwarding: boolean;
+  forwardingEvent: string | null; // Track which event is currently being forwarded
   error: string | null;
   // Track forwarded events received from remote agents namespace
   forwardedEvents: Array<{
@@ -36,6 +37,7 @@ export const initialSocketsState: SocketsState = {
   disconnecting: false,
   selectedClientId: null,
   forwarding: false,
+  forwardingEvent: null,
   error: null,
   forwardedEvents: [],
 };
@@ -89,19 +91,29 @@ export const socketsReducer = createReducer(
     error,
   })),
   // Forward Event
-  on(forwardEvent, (state) => ({
+  on(forwardEvent, (state, { event }) => ({
     ...state,
     forwarding: true,
+    forwardingEvent: event,
     error: null,
   })),
-  on(forwardEventSuccess, (state) => ({
-    ...state,
-    forwarding: false,
-    error: null,
-  })),
+  on(forwardEventSuccess, (state, { event }) => {
+    // Only clear forwarding if the success event matches the current forwarding event
+    // This prevents clearing forwarding state when a different event succeeds
+    if (state.forwardingEvent === event) {
+      return {
+        ...state,
+        forwarding: false,
+        forwardingEvent: null,
+        error: null,
+      };
+    }
+    return state;
+  }),
   on(forwardEventFailure, (state, { error }) => ({
     ...state,
     forwarding: false,
+    forwardingEvent: null,
     error,
   })),
   // Socket Error

@@ -32,7 +32,7 @@ channels:
     messages:
       forwardCommand:
         $ref: '#/components/messages/Forward'
-    description: Forward an arbitrary event to the selected client's agents namespace. When `agentId` is provided, the gateway automatically logs in the agent using stored credentials before forwarding the event. To restore chat history for an agent, forward a "login" event with `agentId` (the payload is automatically overridden with credentials from the database, triggering login and subsequent chat history restoration). Supported events include "chat", "fileUpdate", "logout", etc. The remote agent-manager gateway will process the event and may emit response events (e.g., "chatMessage", "fileUpdateNotification") which are automatically forwarded back to the client.
+    description: Forward an arbitrary event to the selected client's agents namespace. When `agentId` is provided, the gateway automatically logs in the agent using stored credentials before forwarding the event. To restore chat history for an agent, forward a "login" event with `agentId` (the payload is automatically overridden with credentials from the database, triggering login and subsequent chat history restoration). Supported events include "chat", "fileUpdate", "logout", "createTerminal", "terminalInput", "closeTerminal", etc. The remote agent-manager gateway will process the event and may emit response events (e.g., "chatMessage", "fileUpdateNotification", "terminalCreated", "terminalOutput", "terminalClosed") which are automatically forwarded back to the client.
   clients/forwardAck:
     address: clients/forwardAck
     messages:
@@ -108,11 +108,14 @@ components:
           event:
             type: string
             description: >
-              Socket.IO event name (e.g., "chat", "fileUpdate", "login", "logout").
+              Socket.IO event name (e.g., "chat", "fileUpdate", "login", "logout", "createTerminal", "terminalInput", "closeTerminal").
               When event is "login" and agentId is provided, the payload field is optional and ignored -
               credentials are automatically loaded from the database to trigger login and chat history restoration.
               When event is "fileUpdate", the payload should contain {filePath: string} which will be forwarded
               to the agent-manager gateway for broadcasting to all clients authenticated to that agent.
+              When event is "createTerminal", the payload should contain {sessionId?: string, shell?: string}.
+              When event is "terminalInput", the payload should contain {sessionId: string, data: string}.
+              When event is "closeTerminal", the payload should contain {sessionId: string}.
           agentId:
             type: string
             description: >

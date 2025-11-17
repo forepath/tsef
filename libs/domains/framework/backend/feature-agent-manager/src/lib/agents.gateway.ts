@@ -27,6 +27,20 @@ interface FileUpdatePayload {
   filePath: string;
 }
 
+interface CreateTerminalPayload {
+  sessionId?: string;
+  shell?: string;
+}
+
+interface TerminalInputPayload {
+  sessionId: string;
+  data: string;
+}
+
+interface CloseTerminalPayload {
+  sessionId: string;
+}
+
 enum ChatActor {
   AGENT = 'agent',
   USER = 'user',
@@ -140,6 +154,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Store socket references by socket.id for reliable broadcasting
   // Maps socket.id -> Socket instance
   private socketById = new Map<string, Socket>();
+  // Store terminal sessions: socket.id + sessionId -> sessionId
+  // This ensures terminal sessions are client-specific (socket.id based)
+  private terminalSessionsBySocket = new Map<string, Set<string>>();
 
   constructor(
     private readonly agentsService: AgentsService,
@@ -167,6 +184,19 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Client disconnected: ${socket.id}`);
     this.authenticatedClients.delete(socket.id);
     this.socketById.delete(socket.id);
+    // Clean up all terminal sessions for this socket
+    const sessionIds = this.terminalSessionsBySocket.get(socket.id);
+    if (sessionIds) {
+      for (const sessionId of sessionIds) {
+        try {
+          this.dockerService.closeTerminalSession(sessionId);
+        } catch (error) {
+          const err = error as { message?: string };
+          this.logger.warn(`Failed to close terminal session ${sessionId} on disconnect: ${err.message}`);
+        }
+      }
+      this.terminalSessionsBySocket.delete(socket.id);
+    }
   }
 
   /**
@@ -595,6 +625,207 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }),
       );
       this.logger.debug(`Logout requested for unauthenticated socket ${socket.id}`);
+    }
+  }
+
+  /**
+   * Handle terminal session creation.
+   * Creates a new TTY session for the authenticated agent's container.
+   * Terminal sessions are client-specific (socket.id based).
+   * @param data - Create terminal payload containing optional sessionId and shell
+   * @param socket - The socket instance making the request
+   */
+  @SubscribeMessage('createTerminal')
+  async handleCreateTerminal(@MessageBody() data: CreateTerminalPayload, @ConnectedSocket() socket: Socket) {
+    const agentUuid = this.authenticatedClients.get(socket.id);
+    if (!agentUuid) {
+      socket.emit('error', createErrorResponse('Unauthorized. Please login first.', 'UNAUTHORIZED'));
+      return;
+    }
+
+    try {
+      // Get agent entity to find container
+      const entity = await this.agentsRepository.findById(agentUuid);
+      const containerId = entity?.containerId;
+      if (!containerId) {
+        socket.emit('error', createErrorResponse('Agent container not found', 'TERMINAL_ERROR'));
+        return;
+      }
+
+      // Generate session ID: socket.id + timestamp to ensure uniqueness
+      const sessionId = data.sessionId || `${socket.id}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      // Create terminal session
+      const stream = await this.dockerService.createTerminalSession(containerId, sessionId, data.shell || 'sh');
+
+      // Track session for this socket
+      let sessions = this.terminalSessionsBySocket.get(socket.id);
+      if (!sessions) {
+        sessions = new Set<string>();
+        this.terminalSessionsBySocket.set(socket.id, sessions);
+      }
+      sessions.add(sessionId);
+
+      // Set up stream data handler to forward output to client
+      stream.on('data', (chunk: Buffer) => {
+        if (socket.connected) {
+          try {
+            socket.emit('terminalOutput', createSuccessResponse({ sessionId, data: chunk.toString('utf-8') }));
+          } catch (emitError) {
+            this.logger.warn(`Failed to emit terminal output for session ${sessionId}: ${emitError}`);
+          }
+        }
+      });
+
+      // Handle stream end/close to notify client
+      stream.on('end', () => {
+        if (socket.connected) {
+          try {
+            socket.emit('terminalClosed', createSuccessResponse({ sessionId }));
+          } catch (emitError) {
+            this.logger.warn(`Failed to emit terminal closed for session ${sessionId}: ${emitError}`);
+          }
+        }
+        // Clean up session tracking
+        const socketSessions = this.terminalSessionsBySocket.get(socket.id);
+        if (socketSessions) {
+          socketSessions.delete(sessionId);
+          if (socketSessions.size === 0) {
+            this.terminalSessionsBySocket.delete(socket.id);
+          }
+        }
+      });
+
+      stream.on('close', () => {
+        if (socket.connected) {
+          try {
+            socket.emit('terminalClosed', createSuccessResponse({ sessionId }));
+          } catch (emitError) {
+            this.logger.warn(`Failed to emit terminal closed for session ${sessionId}: ${emitError}`);
+          }
+        }
+        // Clean up session tracking
+        const socketSessions = this.terminalSessionsBySocket.get(socket.id);
+        if (socketSessions) {
+          socketSessions.delete(sessionId);
+          if (socketSessions.size === 0) {
+            this.terminalSessionsBySocket.delete(socket.id);
+          }
+        }
+      });
+
+      // Emit success response
+      socket.emit('terminalCreated', createSuccessResponse({ sessionId }));
+      this.logger.log(`Created terminal session ${sessionId} for agent ${agentUuid} on socket ${socket.id}`);
+    } catch (error) {
+      socket.emit('error', createErrorResponse('Error creating terminal session', 'TERMINAL_ERROR'));
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Terminal creation error for agent ${agentUuid}: ${err.message}`, err.stack);
+    }
+  }
+
+  /**
+   * Handle terminal input.
+   * Sends input data to a terminal session.
+   * Only the socket that created the session can send input (enforced by sessionId format).
+   * @param data - Terminal input payload containing sessionId and data
+   * @param socket - The socket instance making the request
+   */
+  @SubscribeMessage('terminalInput')
+  async handleTerminalInput(@MessageBody() data: TerminalInputPayload, @ConnectedSocket() socket: Socket) {
+    const agentUuid = this.authenticatedClients.get(socket.id);
+    if (!agentUuid) {
+      socket.emit('error', createErrorResponse('Unauthorized. Please login first.', 'UNAUTHORIZED'));
+      return;
+    }
+
+    const { sessionId, data: inputData } = data;
+
+    if (!sessionId || !inputData) {
+      socket.emit('error', createErrorResponse('sessionId and data are required', 'INVALID_PAYLOAD'));
+      return;
+    }
+
+    // Verify session belongs to this socket
+    const socketSessions = this.terminalSessionsBySocket.get(socket.id);
+    if (!socketSessions || !socketSessions.has(sessionId)) {
+      socket.emit('error', createErrorResponse('Terminal session not found or access denied', 'TERMINAL_ERROR'));
+      return;
+    }
+
+    try {
+      await this.dockerService.sendTerminalInput(sessionId, inputData);
+    } catch (error) {
+      const err = error as { message?: string };
+      if (err.message?.includes('not found')) {
+        // Session was closed, clean up tracking
+        if (socketSessions) {
+          socketSessions.delete(sessionId);
+          if (socketSessions.size === 0) {
+            this.terminalSessionsBySocket.delete(socket.id);
+          }
+        }
+        socket.emit('terminalClosed', createSuccessResponse({ sessionId }));
+      } else {
+        socket.emit('error', createErrorResponse('Error sending terminal input', 'TERMINAL_ERROR'));
+        this.logger.error(`Terminal input error for session ${sessionId}: ${err.message}`);
+      }
+    }
+  }
+
+  /**
+   * Handle terminal session closure.
+   * Closes a terminal session.
+   * Only the socket that created the session can close it (enforced by sessionId format).
+   * @param data - Close terminal payload containing sessionId
+   * @param socket - The socket instance making the request
+   */
+  @SubscribeMessage('closeTerminal')
+  async handleCloseTerminal(@MessageBody() data: CloseTerminalPayload, @ConnectedSocket() socket: Socket) {
+    const agentUuid = this.authenticatedClients.get(socket.id);
+    if (!agentUuid) {
+      socket.emit('error', createErrorResponse('Unauthorized. Please login first.', 'UNAUTHORIZED'));
+      return;
+    }
+
+    const { sessionId } = data;
+
+    if (!sessionId) {
+      socket.emit('error', createErrorResponse('sessionId is required', 'INVALID_PAYLOAD'));
+      return;
+    }
+
+    // Verify session belongs to this socket
+    const socketSessions = this.terminalSessionsBySocket.get(socket.id);
+    if (!socketSessions || !socketSessions.has(sessionId)) {
+      socket.emit('error', createErrorResponse('Terminal session not found or access denied', 'TERMINAL_ERROR'));
+      return;
+    }
+
+    try {
+      await this.dockerService.closeTerminalSession(sessionId);
+      // Clean up session tracking
+      socketSessions.delete(sessionId);
+      if (socketSessions.size === 0) {
+        this.terminalSessionsBySocket.delete(socket.id);
+      }
+      socket.emit('terminalClosed', createSuccessResponse({ sessionId }));
+      this.logger.log(`Closed terminal session ${sessionId} for agent ${agentUuid} on socket ${socket.id}`);
+    } catch (error) {
+      const err = error as { message?: string };
+      if (err.message?.includes('not found')) {
+        // Session already closed, clean up tracking
+        if (socketSessions) {
+          socketSessions.delete(sessionId);
+          if (socketSessions.size === 0) {
+            this.terminalSessionsBySocket.delete(socket.id);
+          }
+        }
+        socket.emit('terminalClosed', createSuccessResponse({ sessionId }));
+      } else {
+        socket.emit('error', createErrorResponse('Error closing terminal session', 'TERMINAL_ERROR'));
+        this.logger.error(`Terminal close error for session ${sessionId}: ${err.message}`);
+      }
     }
   }
 }

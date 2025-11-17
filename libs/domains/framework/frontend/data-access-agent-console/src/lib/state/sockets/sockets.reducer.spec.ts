@@ -174,6 +174,7 @@ describe('socketsReducer', () => {
       const state: SocketsState = {
         ...initialSocketsState,
         forwarding: true,
+        forwardingEvent: ForwardableEvent.CHAT,
       };
 
       const newState = socketsReducer(state, forwardEventSuccess({ received: true, event: ForwardableEvent.CHAT }));

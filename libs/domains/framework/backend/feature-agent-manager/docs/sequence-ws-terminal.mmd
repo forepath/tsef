@@ -1,0 +1,98 @@
+sequenceDiagram
+    participant User
+    participant WS as Agents Gateway
+    participant Docker as Docker Service
+    participant Container as Agent Container
+
+    rect rgb(220, 255, 220)
+        Note over User,Container: Step 1 — Create Terminal Session
+
+        User->>WS: createTerminal {sessionId?, shell?}
+        WS->>WS: Verify authentication (socket.id -> agentId)
+        alt Not authenticated
+            WS-->>User: error {UNAUTHORIZED}
+        else Authenticated
+            WS->>WS: Get agent entity (find containerId)
+            alt Container not found
+                WS-->>User: error {TERMINAL_ERROR}
+            else Container found
+                WS->>Docker: createTerminalSession(containerId, sessionId, shell)
+                Docker->>Container: Create exec with TTY=true
+                Container-->>Docker: TTY stream
+                Docker->>Docker: Store session (sessionId -> TerminalSession)
+                Docker-->>WS: Terminal stream
+                WS->>WS: Track session (socket.id -> sessionId)
+                WS->>WS: Set up stream handlers
+                WS-->>User: terminalCreated {sessionId}
+            end
+        end
+    end
+
+    rect rgb(220, 255, 220)
+        Note over User,Container: Step 2 — Send Terminal Input
+
+        User->>WS: terminalInput {sessionId, data}
+        WS->>WS: Verify authentication
+        WS->>WS: Verify session belongs to socket.id
+        alt Session not found or access denied
+            WS-->>User: error {TERMINAL_ERROR}
+        else Session valid
+            WS->>Docker: sendTerminalInput(sessionId, data)
+            Docker->>Docker: Get session stream
+            Docker->>Container: Write data to TTY stream
+            Container-->>Docker: Data written
+            Docker-->>WS: Success
+        end
+    end
+
+    rect rgb(220, 255, 220)
+        Note over User,Container: Step 3 — Receive Terminal Output
+
+        Container->>Docker: TTY stream data event
+        Docker->>WS: Stream data chunk
+        WS->>WS: Format as terminalOutput event
+        WS-->>User: terminalOutput {sessionId, data}
+    end
+
+    rect rgb(220, 255, 220)
+        Note over User,Container: Step 4 — Close Terminal Session
+
+        User->>WS: closeTerminal {sessionId}
+        WS->>WS: Verify authentication
+        WS->>WS: Verify session belongs to socket.id
+        alt Session not found or access denied
+            WS-->>User: error {TERMINAL_ERROR}
+        else Session valid
+            WS->>Docker: closeTerminalSession(sessionId)
+            Docker->>Docker: Get session stream
+            Docker->>Container: End TTY stream
+            Container-->>Docker: Stream closed
+            Docker->>Docker: Remove session from map
+            Docker-->>WS: Success
+            WS->>WS: Remove session tracking
+            WS-->>User: terminalClosed {sessionId}
+        end
+    end
+
+    rect rgb(255, 220, 220)
+        Note over User,Container: Step 5 — Terminal Session Auto-Close (Exit Command)
+
+        Container->>Docker: TTY stream end/close event
+        Docker->>Docker: Remove session from map
+        Docker->>WS: Stream end/close event
+        WS->>WS: Remove session tracking
+        WS-->>User: terminalClosed {sessionId}
+    end
+
+    rect rgb(255, 220, 220)
+        Note over User,Container: Step 6 — Disconnect (WebSocket)
+
+        User->>WS: Disconnect
+        WS->>WS: Get all sessions for socket.id
+        loop For each session
+            WS->>Docker: closeTerminalSession(sessionId)
+            Docker->>Container: End TTY stream
+            Docker->>Docker: Remove session
+        end
+        WS->>WS: Remove socket tracking
+    end

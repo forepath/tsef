@@ -22,6 +22,9 @@ export enum ForwardableEvent {
   CHAT = 'chat',
   LOGOUT = 'logout',
   FILE_UPDATE = 'fileUpdate',
+  CREATE_TERMINAL = 'createTerminal',
+  TERMINAL_INPUT = 'terminalInput',
+  CLOSE_TERMINAL = 'closeTerminal',
 }
 
 /**
@@ -37,7 +40,14 @@ export interface ForwardPayload {
  * Union type for all forwardable event payloads
  * Based on agents.gateway.ts event definitions
  */
-export type ForwardableEventPayload = ChatPayload | LoginPayload | LogoutPayload | FileUpdatePayload;
+export type ForwardableEventPayload =
+  | ChatPayload
+  | LoginPayload
+  | LogoutPayload
+  | FileUpdatePayload
+  | CreateTerminalPayload
+  | TerminalInputPayload
+  | CloseTerminalPayload;
 
 /**
  * Chat event payload (from agents.gateway.ts ChatPayload)
@@ -66,6 +76,29 @@ export type LogoutPayload = Record<string, never>;
  */
 export interface FileUpdatePayload {
   filePath: string;
+}
+
+/**
+ * Create terminal event payload (from agents.gateway.ts CreateTerminalPayload)
+ */
+export interface CreateTerminalPayload {
+  sessionId?: string;
+  shell?: string;
+}
+
+/**
+ * Terminal input event payload (from agents.gateway.ts TerminalInputPayload)
+ */
+export interface TerminalInputPayload {
+  sessionId: string;
+  data: string;
+}
+
+/**
+ * Close terminal event payload (from agents.gateway.ts CloseTerminalPayload)
+ */
+export interface CloseTerminalPayload {
+  sessionId: string;
 }
 
 /**
@@ -178,6 +211,28 @@ export interface FileUpdateNotificationData {
 }
 
 /**
+ * Terminal created data (from agents.gateway.ts)
+ */
+export interface TerminalCreatedData {
+  sessionId: string;
+}
+
+/**
+ * Terminal output data (from agents.gateway.ts)
+ */
+export interface TerminalOutputData {
+  sessionId: string;
+  data: string;
+}
+
+/**
+ * Terminal closed data (from agents.gateway.ts)
+ */
+export interface TerminalClosedData {
+  sessionId: string;
+}
+
+/**
  * Typed forwarded event payloads based on event name
  */
 export type ForwardedEventPayload =
@@ -186,4 +241,7 @@ export type ForwardedEventPayload =
   | SuccessResponse<ChatMessageData> // chatMessage
   | SuccessResponse<LogoutSuccessData> // logoutSuccess
   | SuccessResponse<FileUpdateNotificationData> // fileUpdateNotification
+  | SuccessResponse<TerminalCreatedData> // terminalCreated
+  | SuccessResponse<TerminalOutputData> // terminalOutput
+  | SuccessResponse<TerminalClosedData> // terminalClosed
   | ErrorResponse; // error

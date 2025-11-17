@@ -38,6 +38,21 @@
               <i class="bi" [class.bi-chat-dots]="chatVisible()" [class.bi-chat-dots-fill]="!chatVisible()"></i>
               <span class="ms-1">Chat</span>
             </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-outline-primary]="!fileEditor?.terminalVisible()"
+              [class.btn-primary]="fileEditor?.terminalVisible()"
+              (click)="fileEditor?.onToggleTerminal()"
+              [title]="fileEditor?.terminalVisible() ? 'Hide Terminal' : 'Show Terminal'"
+            >
+              <i
+                class="bi"
+                [class.bi-terminal]="!fileEditor?.terminalVisible()"
+                [class.bi-terminal-fill]="fileEditor?.terminalVisible()"
+              ></i>
+              <span class="ms-1">Terminal</span>
+            </button>
           </div>
           <div class="btn-group btn-group-sm" role="group">
             <button

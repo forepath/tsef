@@ -29,10 +29,11 @@ import { Actions, ofType } from '@ngrx/effects';
 import { combineLatest, debounceTime, filter, map, Observable, of, Subject, switchMap, take } from 'rxjs';
 import { FileTreeComponent } from './file-tree/file-tree.component';
 import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-editor-wrapper.component';
+import { TerminalComponent } from './terminal/terminal.component';
 
 @Component({
   selector: 'framework-file-editor',
-  imports: [CommonModule, FileTreeComponent, MonacoEditorWrapperComponent],
+  imports: [CommonModule, FileTreeComponent, MonacoEditorWrapperComponent, TerminalComponent],
   templateUrl: './file-editor.component.html',
   styleUrls: ['./file-editor.component.scss'],
   standalone: true,
@@ -66,6 +67,7 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
   // Visibility toggles (exposed for parent component access)
   readonly fileTreeVisible = signal<boolean>(true);
+  readonly terminalVisible = signal<boolean>(false);
   readonly autosaveEnabled = signal<boolean>(false);
 
   // Outputs
@@ -76,6 +78,8 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
   readonly fileUpdateNotification = signal<FileUpdateNotificationData | null>(null);
   // Track rejected file updates: filePath -> timestamp of rejected update
   private readonly rejectedFileUpdates = signal<Map<string, string>>(new Map());
+  // Track files we just saved to ignore our own notifications: filePath -> timestamp when saved
+  private readonly recentlySavedFiles = signal<Map<string, number>>(new Map());
 
   // Autosave debounce subject
   private readonly autosaveTrigger$ = new Subject<void>();
@@ -457,6 +461,13 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
           return newRejected;
         });
 
+        // Track that we just saved this file to ignore our own notification
+        this.recentlySavedFiles.update((saved) => {
+          const newSaved = new Map(saved);
+          newSaved.set(filePath, Date.now());
+          return newSaved;
+        });
+
         // Emit file update notification to other clients after successful save
         // agentId is required for routing the event to the correct agent
         const agentId = this.agentId();
@@ -467,6 +478,15 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
         // agentId is required for routing the event to the correct agent
         this.socketsFacade.forwardFileUpdate(filePath, agentId);
+
+        // Clear the tracking after 5 seconds (notification should arrive within this time)
+        setTimeout(() => {
+          this.recentlySavedFiles.update((saved) => {
+            const newSaved = new Map(saved);
+            newSaved.delete(filePath);
+            return newSaved;
+          });
+        }, 5000);
       });
   }
 
@@ -776,6 +796,10 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     this.recalculateTabs();
   }
 
+  onToggleTerminal(): void {
+    this.terminalVisible.update((visible) => !visible);
+  }
+
   onToggleChat(): void {
     this.chatToggleRequested.emit();
   }
@@ -790,6 +814,19 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     const currentSocketId = getSocketInstance()?.id;
     const clientId = this.clientId();
     const agentId = this.agentId();
+
+    // Check if we just saved this file ourselves (ignore our own notifications)
+    const recentlySaved = this.recentlySavedFiles().get(notification.filePath);
+    if (recentlySaved && Date.now() - recentlySaved < 5000) {
+      // We just saved this file within the last 5 seconds, ignore the notification
+      // Clear the tracking since we've received our own notification
+      this.recentlySavedFiles.update((saved) => {
+        const newSaved = new Map(saved);
+        newSaved.delete(notification.filePath);
+        return newSaved;
+      });
+      return;
+    }
 
     // Check conditions:
     // 1. Socket ID must be different (not our own update)

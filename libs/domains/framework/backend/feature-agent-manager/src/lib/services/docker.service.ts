@@ -2,10 +2,19 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PassThrough } from 'stream';
 import Docker = require('dockerode');
 
+interface TerminalSession {
+  exec: Docker.Exec;
+  stream: NodeJS.ReadWriteStream;
+  containerId: string;
+  sessionId: string;
+}
+
 @Injectable()
 export class DockerService {
   private readonly logger = new Logger(DockerService.name);
   private readonly docker = new Docker({ socketPath: '/var/run/docker.sock' });
+  // Store active terminal sessions: sessionId -> TerminalSession
+  private readonly terminalSessions = new Map<string, TerminalSession>();
 
   async createContainer(options: {
     image?: string;
@@ -613,5 +622,174 @@ export class DockerService {
       this.logger.error(`Error reading file from container: ${err.message}`, err.stack);
       throw error;
     }
+  }
+
+  /**
+   * Create a new terminal session (TTY) for a container.
+   * Creates a persistent TTY exec instance that can be used for interactive terminal sessions.
+   * @param containerId - The ID of the container
+   * @param sessionId - Unique session identifier (typically socket.id + timestamp or UUID)
+   * @param shell - Shell command to run (default: 'sh')
+   * @returns The terminal session stream
+   * @throws NotFoundException if container is not found
+   */
+  async createTerminalSession(containerId: string, sessionId: string, shell = 'sh'): Promise<NodeJS.ReadWriteStream> {
+    try {
+      const container = this.docker.getContainer(containerId);
+
+      // Check if container exists
+      try {
+        await container.inspect();
+      } catch (error: unknown) {
+        const dockerError = error as { statusCode?: number };
+        if (dockerError.statusCode === 404) {
+          throw new NotFoundException(`Container with ID '${containerId}' not found`);
+        }
+        throw error;
+      }
+
+      // Check if session already exists
+      if (this.terminalSessions.has(sessionId)) {
+        this.logger.warn(`Terminal session ${sessionId} already exists, closing existing session`);
+        await this.closeTerminalSession(sessionId);
+      }
+
+      // Create exec instance with TTY enabled for proper terminal emulation
+      const exec = await container.exec({
+        Cmd: [shell],
+        AttachStdin: true,
+        AttachStdout: true,
+        AttachStderr: true,
+        Tty: true, // Enable TTY for terminal emulation
+      });
+
+      // Start the exec with TTY
+      const stream = (await exec.start({
+        hijack: true,
+        stdin: true,
+        Tty: true,
+      })) as NodeJS.ReadWriteStream;
+
+      // Store the session
+      this.terminalSessions.set(sessionId, {
+        exec,
+        stream,
+        containerId,
+        sessionId,
+      });
+
+      // Handle stream end/close to clean up session
+      stream.on('end', () => {
+        this.logger.debug(`Terminal session ${sessionId} ended`);
+        this.terminalSessions.delete(sessionId);
+      });
+
+      stream.on('close', () => {
+        this.logger.debug(`Terminal session ${sessionId} closed`);
+        this.terminalSessions.delete(sessionId);
+      });
+
+      stream.on('error', (error: unknown) => {
+        const err = error as { code?: string; message?: string };
+        this.logger.error(`Terminal session ${sessionId} error: ${err.message}`);
+        this.terminalSessions.delete(sessionId);
+      });
+
+      this.logger.log(`Created terminal session ${sessionId} for container ${containerId}`);
+      return stream;
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error creating terminal session: ${err.message}`, err.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Send input to a terminal session.
+   * @param sessionId - The session identifier
+   * @param data - The data to send (string or Buffer)
+   * @throws NotFoundException if session is not found
+   */
+  async sendTerminalInput(sessionId: string, data: string | Buffer): Promise<void> {
+    const session = this.terminalSessions.get(sessionId);
+    if (!session) {
+      throw new NotFoundException(`Terminal session '${sessionId}' not found`);
+    }
+
+    try {
+      const buffer = typeof data === 'string' ? Buffer.from(data, 'utf-8') : data;
+      session.stream.write(buffer);
+    } catch (error: unknown) {
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error sending input to terminal session ${sessionId}: ${err.message}`, err.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Close a terminal session.
+   * @param sessionId - The session identifier
+   * @throws NotFoundException if session is not found
+   */
+  async closeTerminalSession(sessionId: string): Promise<void> {
+    const session = this.terminalSessions.get(sessionId);
+    if (!session) {
+      throw new NotFoundException(`Terminal session '${sessionId}' not found`);
+    }
+
+    try {
+      // End the stream
+      session.stream.end();
+      // Remove from map (cleanup handlers will also remove it, but do it explicitly)
+      this.terminalSessions.delete(sessionId);
+      this.logger.log(`Closed terminal session ${sessionId}`);
+    } catch (error: unknown) {
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error closing terminal session ${sessionId}: ${err.message}`, err.stack);
+      // Remove from map even if close fails
+      this.terminalSessions.delete(sessionId);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a terminal session stream.
+   * @param sessionId - The session identifier
+   * @returns The terminal session stream
+   * @throws NotFoundException if session is not found
+   */
+  getTerminalSession(sessionId: string): NodeJS.ReadWriteStream {
+    const session = this.terminalSessions.get(sessionId);
+    if (!session) {
+      throw new NotFoundException(`Terminal session '${sessionId}' not found`);
+    }
+    return session.stream;
+  }
+
+  /**
+   * Check if a terminal session exists.
+   * @param sessionId - The session identifier
+   * @returns True if session exists, false otherwise
+   */
+  hasTerminalSession(sessionId: string): boolean {
+    return this.terminalSessions.has(sessionId);
+  }
+
+  /**
+   * Get all active terminal sessions for a container.
+   * @param containerId - The container ID
+   * @returns Array of session IDs
+   */
+  getTerminalSessionsForContainer(containerId: string): string[] {
+    const sessionIds: string[] = [];
+    for (const [sessionId, session] of this.terminalSessions.entries()) {
+      if (session.containerId === containerId) {
+        sessionIds.push(sessionId);
+      }
+    }
+    return sessionIds;
   }
 }

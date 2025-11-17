@@ -145,7 +145,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly socketDisconnecting$: Observable<boolean> = this.socketsFacade.disconnecting$;
   readonly selectedClientId$: Observable<string | null> = this.socketsFacade.selectedClientId$;
   readonly chatMessages$ = this.socketsFacade.getForwardedEventsByEvent$('chatMessage');
-  readonly forwarding$: Observable<boolean> = this.socketsFacade.forwarding$;
+  readonly forwarding$: Observable<boolean> = this.socketsFacade.chatForwarding$;
   readonly socketError$: Observable<string | null> = this.socketsFacade.error$;
 
   // Local state
@@ -171,11 +171,20 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   );
 
   // Computed signal to determine if we're waiting for an agent response
+  // Uses chatForwarding$ which only tracks chat events, not terminal or other events
   readonly waitingForResponse$ = combineLatest([this.forwarding$, this.chatMessages$, this.socketError$]).pipe(
     map(([forwarding, messages, error]) => {
+      // Only show waiting if we're forwarding a chat message
+      // forwarding$ is now chatForwarding$, so it only returns true for chat events
+      if (forwarding) {
+        // Only show if we actually have chat messages (not just terminal events)
+        return messages.some((msg) => this.isUserMessage(msg.payload) || this.isAgentMessage(msg.payload));
+      }
+
       const lastUserMsgTimestamp = this.lastUserMessageTimestamp();
       if (!lastUserMsgTimestamp) {
-        return forwarding;
+        // No chat message sent, and not forwarding a chat event
+        return false;
       }
 
       // Check if there's an agent message after the last user message
@@ -184,13 +193,17 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       );
 
       // If we have an agent response or an error occurred, we're no longer waiting
-      if (hasAgentResponse || (error && !forwarding)) {
+      if (hasAgentResponse || error) {
         this.lastUserMessageTimestamp.set(null);
         return false;
       }
 
-      // We're waiting if forwarding is true or if we sent a message but haven't received a response yet
-      return forwarding || lastUserMsgTimestamp !== null;
+      // We're waiting if we sent a chat message but haven't received a response yet
+      // But only if we have actual chat messages (not just terminal events)
+      return (
+        lastUserMsgTimestamp !== null &&
+        messages.some((msg) => this.isUserMessage(msg.payload) || this.isAgentMessage(msg.payload))
+      );
     }),
   );
   private activeClientId: string | null = null;
@@ -254,6 +267,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         this.chatVisible.set(true);
         if (this.fileEditor) {
           this.fileEditor.fileTreeVisible.set(true);
+          this.fileEditor.terminalVisible.set(false);
         }
       }
       this.previousAgentId = currentAgentId;
@@ -389,6 +403,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       this.chatVisible.set(true);
       if (this.fileEditor) {
         this.fileEditor.fileTreeVisible.set(true);
+        this.fileEditor.terminalVisible.set(false);
         this.fileEditor.autosaveEnabled.set(false);
       }
     }
