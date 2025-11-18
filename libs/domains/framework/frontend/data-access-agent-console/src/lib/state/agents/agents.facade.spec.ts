@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import {
+  clearSelectedClientAgent,
   createClientAgent,
   deleteClientAgent,
   loadClientAgent,
@@ -248,6 +249,12 @@ describe('AgentsFacade', () => {
       facade.deleteClientAgent(clientId, agentId);
 
       expect(store.dispatch).toHaveBeenCalledWith(deleteClientAgent({ clientId, agentId }));
+    });
+
+    it('should dispatch clearSelectedClientAgent action', () => {
+      facade.clearSelectedClientAgent(clientId);
+
+      expect(store.dispatch).toHaveBeenCalledWith(clearSelectedClientAgent({ clientId }));
     });
   });
 

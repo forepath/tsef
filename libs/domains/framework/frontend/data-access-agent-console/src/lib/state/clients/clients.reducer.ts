@@ -1,5 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import {
+  clearActiveClient,
   createClient,
   createClientFailure,
   createClientSuccess,
@@ -159,5 +160,11 @@ export const clientsReducer = createReducer(
   on(setActiveClientFailure, (state, { error }) => ({
     ...state,
     error,
+  })),
+  // Clear Active Client
+  on(clearActiveClient, (state) => ({
+    ...state,
+    activeClientId: null,
+    error: null,
   })),
 );

@@ -1,4 +1,5 @@
 import {
+  clearActiveClient,
   createClient,
   createClientFailure,
   createClientSuccess,
@@ -378,6 +379,47 @@ describe('clientsReducer', () => {
       const newState = clientsReducer(state, setActiveClientFailure({ error: 'Set active failed' }));
 
       expect(newState.error).toBe('Set active failed');
+    });
+  });
+
+  describe('clearActiveClient', () => {
+    it('should clear activeClientId', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        activeClientId: 'client-1',
+        error: 'Previous error',
+      };
+
+      const newState = clientsReducer(state, clearActiveClient());
+
+      expect(newState.activeClientId).toBeNull();
+      expect(newState.error).toBeNull();
+    });
+
+    it('should handle clearing when no client is active', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        activeClientId: null,
+      };
+
+      const newState = clientsReducer(state, clearActiveClient());
+
+      expect(newState.activeClientId).toBeNull();
+    });
+
+    it('should not affect other state properties', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        entities: [mockClient, mockClient2],
+        selectedClient: mockClient,
+        activeClientId: 'client-1',
+      };
+
+      const newState = clientsReducer(state, clearActiveClient());
+
+      expect(newState.activeClientId).toBeNull();
+      expect(newState.entities).toEqual([mockClient, mockClient2]);
+      expect(newState.selectedClient).toEqual(mockClient);
     });
   });
 });

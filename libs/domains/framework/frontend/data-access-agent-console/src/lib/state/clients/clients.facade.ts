@@ -2,7 +2,15 @@ import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import type { ClientResponseDto, CreateClientDto, ListClientsParams, UpdateClientDto } from './clients.types';
-import { createClient, deleteClient, loadClient, loadClients, setActiveClient, updateClient } from './clients.actions';
+import {
+  clearActiveClient,
+  createClient,
+  deleteClient,
+  loadClient,
+  loadClients,
+  setActiveClient,
+  updateClient,
+} from './clients.actions';
 import {
   selectActiveClient,
   selectActiveClientId,
@@ -92,6 +100,13 @@ export class ClientsFacade {
    */
   setActiveClient(id: string): void {
     this.store.dispatch(setActiveClient({ id }));
+  }
+
+  /**
+   * Clear the active client.
+   */
+  clearActiveClient(): void {
+    this.store.dispatch(clearActiveClient());
   }
 
   /**

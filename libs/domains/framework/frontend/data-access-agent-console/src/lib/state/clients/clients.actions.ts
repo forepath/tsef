@@ -57,3 +57,6 @@ export const setActiveClient = createAction('[Clients] Set Active Client', props
 export const setActiveClientSuccess = createAction('[Clients] Set Active Client Success', props<{ id: string }>());
 
 export const setActiveClientFailure = createAction('[Clients] Set Active Client Failure', props<{ error: string }>());
+
+// Clear Active Client Actions
+export const clearActiveClient = createAction('[Clients] Clear Active Client');

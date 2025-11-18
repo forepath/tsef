@@ -289,20 +289,27 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         delay(0),
       )
       .subscribe(([[params, clients, agents], queryParams]) => {
-        // Select client from route params
+        // Select client from route params (only on initial load)
         if (!this.initialRouting['client'] && clients.length > 0) {
           const clientId = params['clientId'];
           if (clientId) {
-            this.onClientSelect(clientId, false);
+            // Only select if not already selected to avoid race conditions
+            if (this.activeClientId !== clientId) {
+              this.onClientSelect(clientId, false);
+            }
             this.initialRouting['client'] = true;
           }
         }
 
-        // Select agent from route params
+        // Select agent from route params (only on initial load)
         if (!this.initialRouting['agent'] && agents.length > 0) {
           const agentId = params['agentId'];
           if (agentId) {
-            this.onAgentSelect(agentId, false);
+            // Only select if not already selected to avoid race conditions
+            const currentAgentId = this.selectedAgentId();
+            if (currentAgentId !== agentId) {
+              this.onAgentSelect(agentId, false);
+            }
             this.initialRouting['agent'] = true;
           }
         }
@@ -343,10 +350,32 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     // Load agents when active client changes
     this.activeClientId$.pipe(takeUntil(this.destroy$)).subscribe((clientId) => {
       if (clientId && clientId !== this.activeClientId) {
+        // Switching to a different client - clear agent selection from previous client
+        const previousClientId = this.activeClientId;
+        if (previousClientId) {
+          // Clear agent selection in facade for the previous client
+          this.agentsFacade.clearSelectedClientAgent(previousClientId);
+        }
+        // Clear local agent selection
+        this.selectedAgentId.set(null);
+        // Update active client
         this.activeClientId = clientId;
         this.agentsFacade.loadClientAgents(clientId);
         // Ensure socket is connected before setting client
         this.ensureSocketConnectedAndSetClient(clientId);
+      } else if (!clientId && this.activeClientId) {
+        // Client was cleared, reset local state
+        const previousClientId = this.activeClientId;
+        this.activeClientId = null;
+        // Clear agent selection for the previous client
+        if (previousClientId) {
+          this.agentsFacade.clearSelectedClientAgent(previousClientId);
+        }
+        // Also clear local selected agent if any
+        const currentAgentId = this.selectedAgentId();
+        if (currentAgentId) {
+          this.selectedAgentId.set(null);
+        }
       }
     });
 
@@ -411,30 +440,118 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   }
 
   onClientSelect(clientId: string, navigate = true): void {
-    if (navigate) {
-      this.router.navigate(['/clients', clientId]);
-    }
+    // Use local state for immediate check to avoid race conditions
+    const currentActiveClientId = this.activeClientId;
 
-    this.clientsFacade.setActiveClient(clientId);
-    // Reset message count when switching clients
-    this.previousMessageCount = 0;
-    this.lastUserMessageTimestamp.set(null);
+    if (currentActiveClientId === clientId) {
+      // Client is already selected, unselect it
+      // First, unselect any selected agent (without navigation)
+      const currentAgentId = this.selectedAgentId();
+      if (currentAgentId && this.activeClientId) {
+        this.onAgentUnselect(false);
+      }
+      // Clear active client
+      this.clientsFacade.clearActiveClient();
+      // Disconnect socket if connected
+      this.socketConnected$.pipe(take(1)).subscribe((connected) => {
+        if (connected) {
+          this.socketsFacade.disconnect();
+        }
+      });
+      // Navigate to base route
+      if (navigate) {
+        this.router.navigate(['/']);
+      }
+      // Reset message count
+      this.previousMessageCount = 0;
+      this.lastUserMessageTimestamp.set(null);
+      // Close editor if open
+      if (this.editorOpen()) {
+        this.editorOpen.set(false);
+      }
+    } else {
+      // Select the client
+      // Clear agent selection from previous client if switching
+      const previousClientId = this.activeClientId;
+      if (previousClientId && previousClientId !== clientId) {
+        // Clear agent selection in facade for the previous client
+        this.agentsFacade.clearSelectedClientAgent(previousClientId);
+        // Clear local agent selection
+        this.selectedAgentId.set(null);
+      }
+
+      if (navigate) {
+        this.router.navigate(['/clients', clientId]);
+      }
+
+      this.clientsFacade.setActiveClient(clientId);
+      // Update local state and load agents immediately to avoid race conditions
+      // This ensures agents are loaded even if the subscription doesn't fire due to timing
+      if (this.activeClientId !== clientId) {
+        this.activeClientId = clientId;
+        this.agentsFacade.loadClientAgents(clientId);
+        // Ensure socket is connected before setting client
+        this.ensureSocketConnectedAndSetClient(clientId);
+      }
+      // Reset message count when switching clients
+      this.previousMessageCount = 0;
+      this.lastUserMessageTimestamp.set(null);
+    }
   }
 
   onAgentSelect(agentId: string, navigate = true): void {
-    if (navigate) {
-      this.router.navigate(['/clients', this.activeClientId, 'agents', agentId]);
-    }
+    // Check if this agent is already selected
+    const currentAgentId = this.selectedAgentId();
+    if (currentAgentId === agentId) {
+      // Agent is already selected, unselect it
+      this.onAgentUnselect();
+    } else {
+      // Select the agent
+      if (navigate) {
+        this.router.navigate(['/clients', this.activeClientId, 'agents', agentId]);
+      }
 
-    this.selectedAgentId.set(agentId);
+      this.selectedAgentId.set(agentId);
+      const clientId = this.activeClientId;
+      if (clientId) {
+        this.agentsFacade.loadClientAgent(clientId, agentId);
+        // Reset message count when switching agents
+        this.previousMessageCount = 0;
+        this.lastUserMessageTimestamp.set(null);
+        // Disconnect current socket, then connect and auto-login agent
+        this.disconnectAndReconnectForAgent(clientId, agentId);
+      }
+    }
+  }
+
+  /**
+   * Unselect the current agent and close the websocket if open
+   * @param navigate - Whether to navigate to the client route (default: true)
+   */
+  private onAgentUnselect(navigate = true): void {
     const clientId = this.activeClientId;
     if (clientId) {
-      this.agentsFacade.loadClientAgent(clientId, agentId);
-      // Reset message count when switching agents
-      this.previousMessageCount = 0;
-      this.lastUserMessageTimestamp.set(null);
-      // Disconnect current socket, then connect and auto-login agent
-      this.disconnectAndReconnectForAgent(clientId, agentId);
+      // Clear selected agent in facade
+      this.agentsFacade.clearSelectedClientAgent(clientId);
+    }
+    // Clear local selected agent ID
+    this.selectedAgentId.set(null);
+    // Disconnect socket if connected
+    this.socketConnected$.pipe(take(1)).subscribe((connected) => {
+      if (connected) {
+        this.socketsFacade.disconnect();
+      }
+    });
+    // Navigate to client route (without agent) if requested
+    if (navigate) {
+      this.router.navigate(['/clients', clientId]);
+    }
+    // Reset message count
+    this.previousMessageCount = 0;
+    this.lastUserMessageTimestamp.set(null);
+    // Close editor if open
+    if (this.editorOpen()) {
+      this.editorOpen.set(false);
     }
   }
 
