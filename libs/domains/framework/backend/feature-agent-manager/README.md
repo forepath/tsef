@@ -364,17 +364,24 @@ nx test framework-backend-feature-agent-manager --coverage
 
 These environment variables are required for git repository cloning when creating agents:
 
-- `GIT_REPOSITORY_URL` - HTTPS URL of the git repository to clone (e.g., `https://github.com/user/repo.git`)
-- `GIT_USERNAME` - Git username for authentication (required)
-- `GIT_TOKEN` - Git personal access token for authentication (preferred, or use `GIT_PASSWORD`)
-- `GIT_PASSWORD` - Git password or token (alternative to `GIT_TOKEN`)
+- `GIT_REPOSITORY_URL` - HTTPS or SSH URL of the git repository to clone (e.g., `https://github.com/user/repo.git` or `git@github.com:user/repo.git`)
+- `GIT_USERNAME` - Git username for authentication (**required for HTTPS URLs**)
+- `GIT_TOKEN` - Git personal access token for authentication (preferred for HTTPS, or use `GIT_PASSWORD`)
+- `GIT_PASSWORD` - Git password or token (alternative to `GIT_TOKEN` for HTTPS)
+- `GIT_PRIVATE_KEY` - SSH private key for authentication (**required for SSH URLs**). Must be in PEM or OpenSSH format without a passphrase.
 
-**Note**: When creating an agent, the system will:
+**HTTPS repositories**
 
-1. Create a Docker container with these git environment variables
+1. Create a Docker container with `GIT_REPOSITORY_URL`, `GIT_USERNAME`, and `GIT_TOKEN` (or `GIT_PASSWORD`) environment variables
 2. Create a `.netrc` file in the container for git authentication
 3. Clone the repository directly into the container's `/app` directory (workdir)
-4. The cloned repository is available for cursor-agent to work with
+
+**SSH repositories**
+
+1. Set the `GIT_PRIVATE_KEY` environment variable with a valid SSH private key (PEM or OpenSSH format, no passphrase)
+2. The service detects the key type (RSA, Ed25519, ECDSA, etc.) and writes the key to the appropriate filename in `/root/.ssh/` (e.g., `id_rsa`, `id_ed25519`, `id_ecdsa`) and bootstraps `known_hosts` using `ssh-keyscan`
+3. If `GIT_PRIVATE_KEY` is not set or invalid, agent creation will fail with a `BadRequestException`
+4. The SSH private key must be registered with your git provider (GitHub, GitLab, etc.) as a deploy key or user SSH key
 
 ## License
 

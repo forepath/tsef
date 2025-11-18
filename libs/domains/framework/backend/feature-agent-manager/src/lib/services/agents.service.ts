@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { randomBytes } from 'crypto';
+import * as sshpk from 'sshpk';
 import { v4 as uuidv4 } from 'uuid';
 import { AgentResponseDto } from '../dto/agent-response.dto';
 import { CreateAgentResponseDto } from '../dto/create-agent-response.dto';
@@ -68,6 +69,123 @@ export class AgentsService {
   }
 
   /**
+   * Determine whether the configured git repository uses SSH.
+   */
+  private isSshRepository(url?: string): boolean {
+    if (!url) {
+      return false;
+    }
+    return url.startsWith('git@') || url.startsWith('ssh://');
+  }
+
+  /**
+   * Resolve SSH host information from repository URL.
+   */
+  private getSshHostInfo(url: string): { host: string; port?: number } {
+    if (url.startsWith('ssh://')) {
+      const parsed = new URL(url);
+      return { host: parsed.hostname, port: parsed.port ? Number(parsed.port) : undefined };
+    }
+
+    const scpLikeMatch = url.match(/^[^@]+@([^:]+):/);
+    if (scpLikeMatch?.[1]) {
+      return { host: scpLikeMatch[1] };
+    }
+
+    return { host: this.extractGitDomain(url) };
+  }
+
+  /**
+   * Get the SSH key filename based on key type.
+   * Maps key algorithm to standard SSH key filenames.
+   */
+  private getSshKeyFilename(keyType: string): string {
+    const typeMap: Record<string, string> = {
+      rsa: 'id_rsa',
+      ed25519: 'id_ed25519',
+      ecdsa: 'id_ecdsa',
+      dsa: 'id_dsa',
+    };
+
+    const normalizedType = keyType.toLowerCase();
+    return typeMap[normalizedType] || 'id_rsa'; // Default to RSA if unknown
+  }
+
+  /**
+   * Prepare SSH key pair information.
+   * Returns the private key contents to place inside the container, the public key to share, and the key filename.
+   */
+  private prepareSshKeyPair(providedPrivateKey?: string): {
+    privateKey: string;
+    publicKey: string;
+    keyFilename: string;
+    generated: boolean;
+  } {
+    let key: sshpk.PrivateKey;
+    const generated = false;
+
+    if (providedPrivateKey?.trim()) {
+      try {
+        key = sshpk.parsePrivateKey(providedPrivateKey.trim(), 'auto');
+      } catch (error) {
+        this.logger.debug(`Invalid SSH private key provided: ${(error as Error).message}`);
+        throw new BadRequestException(
+          'Invalid SSH private key. Ensure it is in PEM or OpenSSH format without a passphrase.',
+        );
+      }
+    } else {
+      throw new BadRequestException(
+        'Invalid SSH private key. Ensure it is in PEM or OpenSSH format without a passphrase.',
+      );
+    }
+
+    const privateKey = key.toString('openssh').trimEnd() + '\n';
+    const publicKey = key.toPublic().toString('ssh');
+    const keyType = key.type || 'rsa';
+    const keyFilename = this.getSshKeyFilename(keyType);
+
+    return { privateKey, publicKey, keyFilename, generated };
+  }
+
+  /**
+   * Helper to write multi-line content into the agent container via base64 encoding.
+   */
+  private async writeFileToContainer(containerId: string, filePath: string, contents: string): Promise<void> {
+    const base64Content = Buffer.from(contents, 'utf-8').toString('base64');
+    const escapedBase64 = this.escapeForShell(base64Content);
+    await this.dockerService.sendCommandToContainer(containerId, `echo ${escapedBase64} | base64 -d > ${filePath}`);
+  }
+
+  /**
+   * Configure SSH credentials inside the container and return key metadata for the API response.
+   */
+  private async configureSshAccess(
+    containerId: string,
+    repositoryUrl: string,
+    providedPrivateKey?: string,
+  ): Promise<{ publicKey: string; privateKey?: string }> {
+    const keyPair = this.prepareSshKeyPair(providedPrivateKey);
+    const { host, port } = this.getSshHostInfo(repositoryUrl);
+    const keyPath = `/root/.ssh/${keyPair.keyFilename}`;
+
+    await this.dockerService.sendCommandToContainer(containerId, 'mkdir -p /root/.ssh');
+    await this.dockerService.sendCommandToContainer(containerId, 'chmod 700 /root/.ssh');
+    await this.writeFileToContainer(containerId, keyPath, keyPair.privateKey);
+    await this.dockerService.sendCommandToContainer(containerId, `chmod 600 ${keyPath}`);
+
+    const sshKeyscanCommand = ['ssh-keyscan', port ? `-p ${port}` : '', host, '>> /root/.ssh/known_hosts', '|| true']
+      .filter(Boolean)
+      .join(' ');
+    await this.dockerService.sendCommandToContainer(containerId, sshKeyscanCommand);
+    await this.dockerService.sendCommandToContainer(containerId, 'chmod 600 /root/.ssh/known_hosts || true');
+
+    return {
+      publicKey: keyPair.publicKey,
+      privateKey: keyPair.generated ? keyPair.privateKey : undefined,
+    };
+  }
+
+  /**
    * Create .netrc file in the container for git authentication.
    * @param containerId - The ID of the container
    * @throws Error if git credentials are not configured
@@ -128,16 +246,24 @@ export class AgentsService {
     // Define a folder name for the agent
     const agentVolumePath = `/opt/agents/${uuidv4()}`;
 
+    const repositoryUrl = process.env.GIT_REPOSITORY_URL;
+    if (!repositoryUrl) {
+      throw new BadRequestException('Git repository URL not configured. Please set GIT_REPOSITORY_URL.');
+    }
+
+    const sshRepository = this.isSshRepository(repositoryUrl);
+
     // Create a docker container
     const containerId = await this.dockerService.createContainer({
       name: createAgentDto.name,
       env: {
         AGENT_NAME: createAgentDto.name,
         CURSOR_API_KEY: process.env.CURSOR_API_KEY,
-        GIT_REPOSITORY_URL: process.env.GIT_REPOSITORY_URL,
+        GIT_REPOSITORY_URL: repositoryUrl,
         GIT_USERNAME: process.env.GIT_USERNAME,
         GIT_TOKEN: process.env.GIT_TOKEN,
         GIT_PASSWORD: process.env.GIT_PASSWORD,
+        GIT_PRIVATE_KEY: process.env.GIT_PRIVATE_KEY,
       },
       volumes: [
         {
@@ -149,10 +275,14 @@ export class AgentsService {
     });
 
     try {
-      // Create .netrc file for git authentication
-      await this.createNetrcFile(containerId);
+      if (sshRepository) {
+        await this.configureSshAccess(containerId, repositoryUrl, process.env.GIT_PRIVATE_KEY);
+      } else {
+        // Create .netrc file for git authentication
+        await this.createNetrcFile(containerId);
+      }
 
-      const escapedUrl = this.escapeForShell(process.env.GIT_REPOSITORY_URL);
+      const escapedUrl = this.escapeForShell(repositoryUrl);
 
       // Clone the repository to the agent volume
       await this.dockerService.sendCommandToContainer(containerId, `git clone ${escapedUrl} /app`);

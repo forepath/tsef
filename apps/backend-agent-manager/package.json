@@ -16,7 +16,8 @@
     "dockerode": "4.0.9",
     "nest-keycloak-connect": "2.0.0-alpha.2",
     "typeorm": "0.3.27",
-    "pg": "8.16.3"
+    "pg": "8.16.3",
+    "sshpk": "1.18.0"
   },
   "devDependencies": {
     "ts-node": "10.9.1",

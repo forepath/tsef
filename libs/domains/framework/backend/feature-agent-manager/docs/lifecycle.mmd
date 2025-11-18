@@ -18,12 +18,28 @@ sequenceDiagram
         Service->>Service: generatePassword()
         Service->>Service: hashPassword(password)
         Service->>Service: generateVolumePath()
-        Service->>Docker: createContainer(name, env, volumes)
-        Note over Docker: Container created with:<br/>- GIT_REPOSITORY_URL<br/>- GIT_USERNAME<br/>- GIT_TOKEN/GIT_PASSWORD<br/>- CURSOR_API_KEY<br/>- Volume: /opt/agents/{uuid} -> /app
-        Docker-->>Service: containerId
-        Service->>Docker: createNetrcFile(containerId)
-        Note over Docker: Creates /root/.netrc with:<br/>machine {domain}<br/>  login {username}<br/>  password {token}
-        Docker-->>Service: .netrc created
+        Service->>Service: isSshRepository(GIT_REPOSITORY_URL)
+        alt HTTPS Repository
+            Service->>Docker: createContainer(name, env, volumes)
+            Note over Docker: Container created with:<br/>- GIT_REPOSITORY_URL<br/>- GIT_USERNAME<br/>- GIT_TOKEN/GIT_PASSWORD<br/>- CURSOR_API_KEY<br/>- Volume: /opt/agents/{uuid} -> /app
+            Docker-->>Service: containerId
+            Service->>Docker: createNetrcFile(containerId)
+            Note over Docker: Creates /root/.netrc with:<br/>machine {domain}<br/>  login {username}<br/>  password {token}
+            Docker-->>Service: .netrc created
+        else SSH Repository
+            Service->>Service: prepareSshKeyPair(GIT_PRIVATE_KEY)
+            alt GIT_PRIVATE_KEY not set or invalid
+                Service-->>HTTP: BadRequestException
+                HTTP-->>User: 400 Bad Request
+            else GIT_PRIVATE_KEY valid
+                Service->>Docker: createContainer(name, env, volumes)
+                Note over Docker: Container created with:<br/>- GIT_REPOSITORY_URL<br/>- GIT_PRIVATE_KEY<br/>- CURSOR_API_KEY<br/>- Volume: /opt/agents/{uuid} -> /app
+                Docker-->>Service: containerId
+                Service->>Docker: configureSshAccess(containerId, url, GIT_PRIVATE_KEY)
+                Note over Docker: Detects key type and creates<br/>/root/.ssh/{id_rsa|id_ed25519|id_ecdsa}<br/>and configures known_hosts
+                Docker-->>Service: SSH configured
+            end
+        end
         Service->>Docker: sendCommandToContainer(containerId, "git clone {url} /app")
         Note over Docker: Clones repository directly<br/>into /app (workdir)
         Docker-->>Service: repository cloned

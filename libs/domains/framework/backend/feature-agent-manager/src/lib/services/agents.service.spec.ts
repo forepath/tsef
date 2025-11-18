@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import * as sshpk from 'sshpk';
 import { CreateAgentDto } from '../dto/create-agent.dto';
 import { UpdateAgentDto } from '../dto/update-agent.dto';
 import { AgentEntity } from '../entities/agent.entity';
@@ -78,7 +79,8 @@ describe('AgentsService', () => {
     delete process.env.GIT_TOKEN;
     delete process.env.GIT_PASSWORD;
     delete process.env.GIT_REPOSITORY_URL;
-    delete process.env.GIT_REPOSITORY_URL;
+    delete process.env.GIT_PRIVATE_KEY;
+    delete process.env.CURSOR_API_KEY;
   });
 
   describe('create', () => {
@@ -234,11 +236,11 @@ describe('AgentsService', () => {
         name: 'New Agent',
       };
 
-      // Clear git credentials
+      // Clear git credentials but set repository URL (for HTTPS repo)
       delete process.env.GIT_USERNAME;
       delete process.env.GIT_TOKEN;
       delete process.env.GIT_PASSWORD;
-      delete process.env.GIT_REPOSITORY_URL;
+      process.env.GIT_REPOSITORY_URL = 'https://github.com/user/repo.git';
 
       mockRepository.findByName.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue('hashed-password');
@@ -333,11 +335,11 @@ describe('AgentsService', () => {
       mockRepository.findByName.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue('hashed-password');
       dockerService.createContainer.mockResolvedValue(containerId);
-      // Clear git credentials to cause createNetrcFile to fail
+      // Set repository URL but clear git credentials to cause createNetrcFile to fail
+      process.env.GIT_REPOSITORY_URL = 'https://github.com/user/repo.git';
       delete process.env.GIT_USERNAME;
       delete process.env.GIT_TOKEN;
       delete process.env.GIT_PASSWORD;
-      delete process.env.GIT_REPOSITORY_URL;
       dockerService.deleteContainer.mockResolvedValue(undefined);
 
       await expect(service.create(createDto)).rejects.toThrow(BadRequestException);
@@ -430,6 +432,166 @@ describe('AgentsService', () => {
 
       // Verify cleanup was attempted
       expect(dockerService.deleteContainer).toHaveBeenCalledWith(containerId);
+    });
+
+    it('should create agent with SSH repository using provided private key', async () => {
+      const createDto: CreateAgentDto = {
+        name: 'SSH Agent',
+        description: 'SSH Description',
+      };
+      const hashedPassword = 'hashed-password';
+      const containerId = 'container-id-123';
+      const volumePath = '/opt/agents/test-volume-uuid';
+      const createdAgent = {
+        ...mockAgent,
+        name: createDto.name,
+        description: createDto.description,
+        hashedPassword,
+        containerId,
+        volumePath,
+      };
+
+      // Generate a test SSH key using sshpk (Ed25519 is supported for generation)
+      const key = sshpk.generatePrivateKey('ed25519');
+      const privateKeyPem = key.toString('openssh');
+
+      process.env.GIT_REPOSITORY_URL = 'git@github.com:user/repo.git';
+      process.env.GIT_PRIVATE_KEY = privateKeyPem;
+
+      mockRepository.findByName.mockResolvedValue(null);
+      passwordService.hashPassword.mockResolvedValue(hashedPassword);
+      dockerService.createContainer.mockResolvedValue(containerId);
+      dockerService.sendCommandToContainer.mockResolvedValue(undefined);
+      repository.create.mockResolvedValue(createdAgent);
+
+      const result = await service.create(createDto);
+
+      expect(result.id).toBe(mockAgent.id);
+      expect(result.name).toBe(createDto.name);
+      expect(result.description).toBe(createDto.description);
+      expect(result.password).toBeDefined();
+      expect(dockerService.createContainer).toHaveBeenCalledWith({
+        name: createDto.name,
+        env: {
+          AGENT_NAME: createDto.name,
+          CURSOR_API_KEY: process.env.CURSOR_API_KEY,
+          GIT_REPOSITORY_URL: process.env.GIT_REPOSITORY_URL,
+          GIT_USERNAME: process.env.GIT_USERNAME,
+          GIT_TOKEN: process.env.GIT_TOKEN,
+          GIT_PASSWORD: process.env.GIT_PASSWORD,
+          GIT_PRIVATE_KEY: process.env.GIT_PRIVATE_KEY,
+        },
+        volumes: [
+          {
+            hostPath: expect.stringMatching(/^\/opt\/agents\/[a-f0-9-]+$/),
+            containerPath: '/app',
+            readOnly: false,
+          },
+        ],
+      });
+      // Verify SSH setup commands: mkdir, chmod .ssh, write key, chmod key, ssh-keyscan, chmod known_hosts, git clone
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(7);
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(1, containerId, 'mkdir -p /root/.ssh');
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(2, containerId, 'chmod 700 /root/.ssh');
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        3,
+        containerId,
+        expect.stringMatching(/echo .* \| base64 -d > \/root\/\.ssh\/id_ed25519/),
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        4,
+        containerId,
+        'chmod 600 /root/.ssh/id_ed25519',
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        5,
+        containerId,
+        expect.stringMatching(/ssh-keyscan.*github\.com.*>> \/root\/\.ssh\/known_hosts/),
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        6,
+        containerId,
+        'chmod 600 /root/.ssh/known_hosts || true',
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        7,
+        containerId,
+        expect.stringMatching(/git clone .*git@github\.com:user\/repo\.git.*\/app/),
+      );
+      expect(repository.create).toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when SSH repository URL is missing private key', async () => {
+      const createDto: CreateAgentDto = {
+        name: 'SSH Agent',
+      };
+
+      process.env.GIT_REPOSITORY_URL = 'git@github.com:user/repo.git';
+      delete process.env.GIT_PRIVATE_KEY;
+
+      mockRepository.findByName.mockResolvedValue(null);
+      passwordService.hashPassword.mockResolvedValue('hashed-password');
+      dockerService.createContainer.mockResolvedValue('container-id-123');
+
+      await expect(service.create(createDto)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createDto)).rejects.toThrow(
+        'Invalid SSH private key. Ensure it is in PEM or OpenSSH format without a passphrase.',
+      );
+    });
+
+    it('should throw BadRequestException when SSH private key is invalid', async () => {
+      const createDto: CreateAgentDto = {
+        name: 'SSH Agent',
+      };
+
+      process.env.GIT_REPOSITORY_URL = 'git@github.com:user/repo.git';
+      process.env.GIT_PRIVATE_KEY = 'invalid-key-content';
+
+      mockRepository.findByName.mockResolvedValue(null);
+      passwordService.hashPassword.mockResolvedValue('hashed-password');
+      dockerService.createContainer.mockResolvedValue('container-id-123');
+
+      await expect(service.create(createDto)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createDto)).rejects.toThrow(
+        'Invalid SSH private key. Ensure it is in PEM or OpenSSH format without a passphrase.',
+      );
+    });
+
+    it('should throw BadRequestException when GIT_REPOSITORY_URL is missing', async () => {
+      const createDto: CreateAgentDto = {
+        name: 'New Agent',
+      };
+
+      delete process.env.GIT_REPOSITORY_URL;
+
+      mockRepository.findByName.mockResolvedValue(null);
+      passwordService.hashPassword.mockResolvedValue('hashed-password');
+
+      await expect(service.create(createDto)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createDto)).rejects.toThrow(
+        'Git repository URL not configured. Please set GIT_REPOSITORY_URL.',
+      );
+    });
+
+    it('should clean up container when SSH configuration fails', async () => {
+      const createDto: CreateAgentDto = {
+        name: 'SSH Agent',
+      };
+      const containerId = 'container-id-123';
+
+      process.env.GIT_REPOSITORY_URL = 'git@github.com:user/repo.git';
+      delete process.env.GIT_PRIVATE_KEY;
+
+      mockRepository.findByName.mockResolvedValue(null);
+      passwordService.hashPassword.mockResolvedValue('hashed-password');
+      dockerService.createContainer.mockResolvedValue(containerId);
+      dockerService.deleteContainer.mockResolvedValue(undefined);
+
+      await expect(service.create(createDto)).rejects.toThrow(BadRequestException);
+
+      expect(dockerService.createContainer).toHaveBeenCalled();
+      expect(dockerService.deleteContainer).toHaveBeenCalledWith(containerId);
+      expect(repository.create).not.toHaveBeenCalled();
     });
   });
 
@@ -732,6 +894,312 @@ describe('AgentsService', () => {
         containerId,
         expect.stringContaining("'test-password'"),
       );
+    });
+  });
+
+  describe('escapeForShell', () => {
+    it('should escape strings with single quotes', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).escapeForShell("test'string");
+      expect(result).toBe("'test'\\''string'");
+    });
+
+    it('should wrap simple strings in single quotes', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).escapeForShell('simple-string');
+      expect(result).toBe("'simple-string'");
+    });
+
+    it('should handle empty strings', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).escapeForShell('');
+      expect(result).toBe("''");
+    });
+
+    it('should handle strings with multiple single quotes', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).escapeForShell("a'b'c");
+      expect(result).toBe("'a'\\''b'\\''c'");
+    });
+  });
+
+  describe('isSshRepository', () => {
+    it('should return true for git@ URL', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).isSshRepository('git@github.com:user/repo.git');
+      expect(result).toBe(true);
+    });
+
+    it('should return true for ssh:// URL', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).isSshRepository('ssh://git@github.com/user/repo.git');
+      expect(result).toBe(true);
+    });
+
+    it('should return false for https:// URL', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).isSshRepository('https://github.com/user/repo.git');
+      expect(result).toBe(false);
+    });
+
+    it('should return false for http:// URL', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).isSshRepository('http://github.com/user/repo.git');
+      expect(result).toBe(false);
+    });
+
+    it('should return false for undefined URL', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).isSshRepository(undefined);
+      expect(result).toBe(false);
+    });
+
+    it('should return false for empty string', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).isSshRepository('');
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('getSshHostInfo', () => {
+    it('should extract host from ssh:// URL', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshHostInfo('ssh://git@github.com:22/user/repo.git');
+      expect(result).toEqual({ host: 'github.com', port: 22 });
+    });
+
+    it('should extract host from ssh:// URL without port', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshHostInfo('ssh://git@github.com/user/repo.git');
+      expect(result).toEqual({ host: 'github.com' });
+    });
+
+    it('should extract host from git@ URL', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshHostInfo('git@github.com:user/repo.git');
+      expect(result).toEqual({ host: 'github.com' });
+    });
+
+    it('should fallback to extractGitDomain for other formats', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshHostInfo('https://gitlab.com/user/repo.git');
+      expect(result).toEqual({ host: 'gitlab.com' });
+    });
+  });
+
+  describe('getSshKeyFilename', () => {
+    it('should return id_rsa for RSA keys', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshKeyFilename('rsa');
+      expect(result).toBe('id_rsa');
+    });
+
+    it('should return id_ed25519 for Ed25519 keys', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshKeyFilename('ed25519');
+      expect(result).toBe('id_ed25519');
+    });
+
+    it('should return id_ecdsa for ECDSA keys', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshKeyFilename('ecdsa');
+      expect(result).toBe('id_ecdsa');
+    });
+
+    it('should return id_dsa for DSA keys', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshKeyFilename('dsa');
+      expect(result).toBe('id_dsa');
+    });
+
+    it('should handle uppercase key types', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshKeyFilename('RSA');
+      expect(result).toBe('id_rsa');
+    });
+
+    it('should default to id_rsa for unknown key types', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).getSshKeyFilename('unknown');
+      expect(result).toBe('id_rsa');
+    });
+  });
+
+  describe('prepareSshKeyPair', () => {
+    it('should parse valid Ed25519 private key', () => {
+      const key = sshpk.generatePrivateKey('ed25519');
+      const privateKeyPem = key.toString('openssh');
+      const publicKey = key.toPublic().toString('ssh');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).prepareSshKeyPair(privateKeyPem);
+
+      expect(result.privateKey).toContain('BEGIN');
+      expect(result.privateKey).toContain('END');
+      // Compare public keys by extracting the key part (before any comment)
+      expect(result.publicKey.split(' ').slice(0, 2).join(' ')).toBe(publicKey.split(' ').slice(0, 2).join(' '));
+      expect(result.keyFilename).toBe('id_ed25519');
+      expect(result.generated).toBe(false);
+    });
+
+    it('should parse valid Ed25519 private key', () => {
+      const key = sshpk.generatePrivateKey('ed25519');
+      const privateKeyPem = key.toString('openssh');
+      const publicKey = key.toPublic().toString('ssh');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).prepareSshKeyPair(privateKeyPem);
+
+      expect(result.privateKey).toContain('BEGIN');
+      // Compare public keys by extracting the key part (before any comment)
+      expect(result.publicKey.split(' ').slice(0, 2).join(' ')).toBe(publicKey.split(' ').slice(0, 2).join(' '));
+      expect(result.keyFilename).toBe('id_ed25519');
+      expect(result.generated).toBe(false);
+    });
+
+    it('should throw BadRequestException for invalid private key', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(() => (service as any).prepareSshKeyPair('invalid-key')).toThrow(BadRequestException);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(() => (service as any).prepareSshKeyPair('invalid-key')).toThrow(
+        'Invalid SSH private key. Ensure it is in PEM or OpenSSH format without a passphrase.',
+      );
+    });
+
+    it('should throw BadRequestException when private key is undefined', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(() => (service as any).prepareSshKeyPair(undefined)).toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException when private key is empty string', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(() => (service as any).prepareSshKeyPair('')).toThrow(BadRequestException);
+    });
+
+    it('should trim whitespace from private key', () => {
+      const key = sshpk.generatePrivateKey('ed25519');
+      const privateKeyPem = key.toString('openssh');
+      const publicKey = key.toPublic().toString('ssh');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = (service as any).prepareSshKeyPair(`  ${privateKeyPem}  `);
+
+      // Compare public keys by extracting the key part (before any comment)
+      expect(result.publicKey.split(' ').slice(0, 2).join(' ')).toBe(publicKey.split(' ').slice(0, 2).join(' '));
+      expect(result.keyFilename).toBe('id_ed25519');
+    });
+  });
+
+  describe('writeFileToContainer', () => {
+    it('should write file content to container using base64 encoding', async () => {
+      const containerId = 'container-id-123';
+      const filePath = '/root/.ssh/id_rsa';
+      const contents = 'test file content\nwith newlines';
+
+      dockerService.sendCommandToContainer.mockResolvedValue(undefined);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (service as any).writeFileToContainer(containerId, filePath, contents);
+
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(1);
+      const callArgs = dockerService.sendCommandToContainer.mock.calls[0];
+      expect(callArgs[0]).toBe(containerId);
+      expect(callArgs[1]).toContain('echo');
+      expect(callArgs[1]).toContain('base64 -d');
+      expect(callArgs[1]).toContain(filePath);
+      // Verify base64 encoding
+      const base64Content = Buffer.from(contents, 'utf-8').toString('base64');
+      expect(callArgs[1]).toContain(base64Content);
+    });
+
+    it('should escape base64 content for shell', async () => {
+      const containerId = 'container-id-123';
+      const filePath = '/root/test';
+      const contents = "content with 'quotes'";
+
+      dockerService.sendCommandToContainer.mockResolvedValue(undefined);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (service as any).writeFileToContainer(containerId, filePath, contents);
+
+      const callArgs = dockerService.sendCommandToContainer.mock.calls[0];
+      // Base64 content should be escaped
+      expect(callArgs[1]).toMatch(/echo '.*' \| base64 -d >/);
+    });
+  });
+
+  describe('configureSshAccess', () => {
+    beforeEach(() => {
+      process.env.GIT_REPOSITORY_URL = 'git@github.com:user/repo.git';
+    });
+
+    it('should configure SSH access with Ed25519 key', async () => {
+      const containerId = 'container-id-123';
+      const key = sshpk.generatePrivateKey('ed25519');
+      const privateKeyPem = key.toString('openssh');
+      const publicKey = key.toPublic().toString('ssh');
+
+      dockerService.sendCommandToContainer.mockResolvedValue(undefined);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await (service as any).configureSshAccess(
+        containerId,
+        'git@github.com:user/repo.git',
+        privateKeyPem,
+      );
+
+      // Compare public keys by extracting the key part (before any comment)
+      expect(result.publicKey.split(' ').slice(0, 2).join(' ')).toBe(publicKey.split(' ').slice(0, 2).join(' '));
+      expect(result.privateKey).toBeUndefined(); // generated is false, so privateKey is not returned
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(6);
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(1, containerId, 'mkdir -p /root/.ssh');
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(2, containerId, 'chmod 700 /root/.ssh');
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        3,
+        containerId,
+        expect.stringMatching(/echo .* \| base64 -d > \/root\/\.ssh\/id_ed25519/),
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        4,
+        containerId,
+        'chmod 600 /root/.ssh/id_ed25519',
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        5,
+        containerId,
+        expect.stringMatching(/ssh-keyscan.*github\.com.*>> \/root\/\.ssh\/known_hosts/),
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        6,
+        containerId,
+        'chmod 600 /root/.ssh/known_hosts || true',
+      );
+    });
+
+    it('should handle SSH URL with port', async () => {
+      const containerId = 'container-id-123';
+      const key = sshpk.generatePrivateKey('ed25519');
+      const privateKeyPem = key.toString('openssh');
+
+      dockerService.sendCommandToContainer.mockResolvedValue(undefined);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (service as any).configureSshAccess(containerId, 'ssh://git@github.com:22/user/repo.git', privateKeyPem);
+
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+        containerId,
+        expect.stringMatching(/ssh-keyscan -p 22 github\.com/),
+      );
+    });
+
+    it('should throw BadRequestException for invalid private key', async () => {
+      const containerId = 'container-id-123';
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const serviceAny = service as any;
+      await expect(
+        serviceAny.configureSshAccess(containerId, 'git@github.com:user/repo.git', 'invalid-key'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });
