@@ -138,6 +138,8 @@ Base URL: `/api/clients`
 - `POST /api/clients/:id/agents/:agentId` - Update an existing agent
 - `DELETE /api/clients/:id/agents/:agentId` - Delete an agent (also deletes stored credentials)
 
+**Note**: Agent creation requests are proxied to the remote agent-manager service. SSH repository configuration (including `GIT_PRIVATE_KEY`) must be configured on the agent-manager instance via environment variables, not through the API request. See the [agent-manager documentation](../feature-agent-manager/README.md) for details on SSH repository setup.
+
 See the [OpenAPI specification](./spec/openapi.yaml) for detailed request/response schemas.
 
 ## WebSocket Gateway

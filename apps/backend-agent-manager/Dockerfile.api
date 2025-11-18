@@ -24,6 +24,13 @@ ENV DB_USERNAME=postgres
 ENV DB_PASSWORD=postgres
 ENV DB_DATABASE=postgres
 
+# Environment variables for the git repository
+ENV GIT_REPOSITORY_URL=
+ENV GIT_USERNAME=
+ENV GIT_TOKEN=
+ENV GIT_PASSWORD=
+ENV GIT_PRIVATE_KEY=
+
 # Environment variables for the keycloak server
 ENV KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080
 ENV KEYCLOAK_REALM=forepath

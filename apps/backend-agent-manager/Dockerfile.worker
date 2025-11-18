@@ -11,12 +11,13 @@ ENV GIT_REPOSITORY_URL=
 ENV GIT_USERNAME=
 ENV GIT_TOKEN=
 ENV GIT_PASSWORD=
+ENV GIT_PRIVATE_KEY=
 
 WORKDIR /app
 
 # Install required dependencies
 RUN apt-get update \
-  && apt-get install -y curl bash ca-certificates git \
+  && apt-get install -y curl bash ca-certificates git openssh-client \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js via nvm
