@@ -86,3 +86,9 @@ export const deleteClientAgentFailure = createAction(
   '[Agents] Delete Client Agent Failure',
   props<{ clientId: string; error: string }>(),
 );
+
+// Clear Selected Agent Actions
+export const clearSelectedClientAgent = createAction(
+  '[Agents] Clear Selected Client Agent',
+  props<{ clientId: string }>(),
+);

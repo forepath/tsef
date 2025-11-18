@@ -1,7 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { createClient, deleteClient, loadClient, loadClients, setActiveClient, updateClient } from './clients.actions';
+import {
+  clearActiveClient,
+  createClient,
+  deleteClient,
+  loadClient,
+  loadClients,
+  setActiveClient,
+  updateClient,
+} from './clients.actions';
 import { ClientsFacade } from './clients.facade';
 import type { ClientResponseDto, CreateClientDto, ListClientsParams, UpdateClientDto } from './clients.types';
 
@@ -265,6 +273,12 @@ describe('ClientsFacade', () => {
       facade.setActiveClient(id);
 
       expect(store.dispatch).toHaveBeenCalledWith(setActiveClient({ id }));
+    });
+
+    it('should dispatch clearActiveClient action', () => {
+      facade.clearActiveClient();
+
+      expect(store.dispatch).toHaveBeenCalledWith(clearActiveClient());
     });
   });
 

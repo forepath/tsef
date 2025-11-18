@@ -1,4 +1,5 @@
 import {
+  clearSelectedClientAgent,
   createClientAgent,
   createClientAgentFailure,
   createClientAgentSuccess,
@@ -320,6 +321,53 @@ describe('agentsReducer', () => {
 
       expect(newState.errors[clientId]).toBe('Delete failed');
       expect(newState.deleting[clientId]).toBe(false);
+    });
+  });
+
+  describe('clearSelectedClientAgent', () => {
+    it('should clear selectedAgent for the client', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        entities: { [clientId]: [mockAgent, mockAgent2] },
+        selectedAgents: { [clientId]: mockAgent },
+      };
+
+      const newState = agentsReducer(state, clearSelectedClientAgent({ clientId }));
+
+      expect(newState.selectedAgents[clientId]).toBeNull();
+      // Should not affect other state
+      expect(newState.entities[clientId]).toEqual([mockAgent, mockAgent2]);
+    });
+
+    it('should not affect other clients', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        entities: {
+          [clientId]: [mockAgent],
+          [clientId2]: [mockAgent2],
+        },
+        selectedAgents: {
+          [clientId]: mockAgent,
+          [clientId2]: mockAgent2,
+        },
+      };
+
+      const newState = agentsReducer(state, clearSelectedClientAgent({ clientId }));
+
+      expect(newState.selectedAgents[clientId]).toBeNull();
+      expect(newState.selectedAgents[clientId2]).toEqual(mockAgent2);
+    });
+
+    it('should handle clearing when no agent is selected', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        entities: { [clientId]: [mockAgent] },
+        selectedAgents: { [clientId]: null },
+      };
+
+      const newState = agentsReducer(state, clearSelectedClientAgent({ clientId }));
+
+      expect(newState.selectedAgents[clientId]).toBeNull();
     });
   });
 

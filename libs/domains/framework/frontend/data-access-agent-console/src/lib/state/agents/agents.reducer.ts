@@ -1,5 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import {
+  clearSelectedClientAgent,
   createClientAgent,
   createClientAgentFailure,
   createClientAgentSuccess,
@@ -235,6 +236,13 @@ export const agentsReducer = createReducer(
     updateClientState(state, clientId, () => ({
       deleting: false,
       error,
+    })),
+  ),
+  // Clear Selected Client Agent
+  on(clearSelectedClientAgent, (state, { clientId }) =>
+    updateClientState(state, clientId, (clientState) => ({
+      ...clientState,
+      selectedAgent: null,
     })),
   ),
 );

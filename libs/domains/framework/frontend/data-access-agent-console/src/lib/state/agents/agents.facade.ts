@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import {
+  clearSelectedClientAgent,
   createClientAgent,
   deleteClientAgent,
   loadClientAgent,
@@ -189,5 +190,13 @@ export class AgentsFacade {
    */
   deleteClientAgent(clientId: string, agentId: string): void {
     this.store.dispatch(deleteClientAgent({ clientId, agentId }));
+  }
+
+  /**
+   * Clear the selected agent for a client.
+   * @param clientId - The client ID
+   */
+  clearSelectedClientAgent(clientId: string): void {
+    this.store.dispatch(clearSelectedClientAgent({ clientId }));
   }
 }
