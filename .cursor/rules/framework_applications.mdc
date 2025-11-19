@@ -55,7 +55,7 @@ This document defines the rules and best practices for structuring applications 
 
 ## Backend Applications (`scope:backend`)
 
-- Backend applications **MUST** contain backend framework–specific code (e.g. NestJS).
+- Backend applications **MUST** contain backend framework-specific code (e.g. NestJS).
 - Backend applications **MUST NOT** depend on frontend or native libraries directly, **except via allowed shared libraries** (e.g., REST clients or cross-cutting integration utilities).
 - Backend applications **SHOULD** centralize business logic in `data-access` and `feature` libraries.
 - Backend applications **MAY** expose APIs, services, and workers.

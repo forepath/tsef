@@ -6,7 +6,7 @@ sequenceDiagram
     participant Container as Agent Container
 
     rect rgb(220, 255, 220)
-        Note over User,Container: Step 1 — Set Client Context
+        Note over User,Container: Step 1 - Set Client Context
 
         User->>Controller: setClient {clientId}
         Controller->>Controller: Validate client
@@ -17,7 +17,7 @@ sequenceDiagram
     end
 
     rect rgb(220, 255, 220)
-        Note over User,Container: Step 2 — Forward Create Terminal
+        Note over User,Container: Step 2 - Forward Create Terminal
 
         User->>Controller: forward {event: "createTerminal", payload: {sessionId?, shell?}, agentId}
         Controller->>Controller: Check client selected
@@ -34,7 +34,7 @@ sequenceDiagram
     end
 
     rect rgb(220, 255, 220)
-        Note over User,Container: Step 3 — Forward Terminal Input
+        Note over User,Container: Step 3 - Forward Terminal Input
 
         User->>Controller: forward {event: "terminalInput", payload: {sessionId, data}, agentId}
         Controller->>Manager: terminalInput {sessionId, data}
@@ -47,7 +47,7 @@ sequenceDiagram
     end
 
     rect rgb(220, 255, 220)
-        Note over User,Container: Step 4 — Receive Terminal Output
+        Note over User,Container: Step 4 - Receive Terminal Output
 
         Container->>Docker: TTY stream data event
         Docker->>Manager: Stream data chunk
@@ -57,7 +57,7 @@ sequenceDiagram
     end
 
     rect rgb(220, 255, 220)
-        Note over User,Container: Step 5 — Forward Close Terminal
+        Note over User,Container: Step 5 - Forward Close Terminal
 
         User->>Controller: forward {event: "closeTerminal", payload: {sessionId}, agentId}
         Controller->>Manager: closeTerminal {sessionId}

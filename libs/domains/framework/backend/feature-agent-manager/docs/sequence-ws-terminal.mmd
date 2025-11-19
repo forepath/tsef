@@ -5,7 +5,7 @@ sequenceDiagram
     participant Container as Agent Container
 
     rect rgb(220, 255, 220)
-        Note over User,Container: Step 1 — Create Terminal Session
+        Note over User,Container: Step 1 - Create Terminal Session
 
         User->>WS: createTerminal {sessionId?, shell?}
         WS->>WS: Verify authentication (socket.id -> agentId)
@@ -29,7 +29,7 @@ sequenceDiagram
     end
 
     rect rgb(220, 255, 220)
-        Note over User,Container: Step 2 — Send Terminal Input
+        Note over User,Container: Step 2 - Send Terminal Input
 
         User->>WS: terminalInput {sessionId, data}
         WS->>WS: Verify authentication
@@ -46,7 +46,7 @@ sequenceDiagram
     end
 
     rect rgb(220, 255, 220)
-        Note over User,Container: Step 3 — Receive Terminal Output
+        Note over User,Container: Step 3 - Receive Terminal Output
 
         Container->>Docker: TTY stream data event
         Docker->>WS: Stream data chunk
@@ -55,7 +55,7 @@ sequenceDiagram
     end
 
     rect rgb(220, 255, 220)
-        Note over User,Container: Step 4 — Close Terminal Session
+        Note over User,Container: Step 4 - Close Terminal Session
 
         User->>WS: closeTerminal {sessionId}
         WS->>WS: Verify authentication
@@ -75,7 +75,7 @@ sequenceDiagram
     end
 
     rect rgb(255, 220, 220)
-        Note over User,Container: Step 5 — Terminal Session Auto-Close (Exit Command)
+        Note over User,Container: Step 5 - Terminal Session Auto-Close (Exit Command)
 
         Container->>Docker: TTY stream end/close event
         Docker->>Docker: Remove session from map
@@ -85,7 +85,7 @@ sequenceDiagram
     end
 
     rect rgb(255, 220, 220)
-        Note over User,Container: Step 6 — Disconnect (WebSocket)
+        Note over User,Container: Step 6 - Disconnect (WebSocket)
 
         User->>WS: Disconnect
         WS->>WS: Get all sessions for socket.id
