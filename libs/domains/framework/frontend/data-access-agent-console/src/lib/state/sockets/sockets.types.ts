@@ -54,6 +54,7 @@ export type ForwardableEventPayload =
  */
 export interface ChatPayload {
   message: string;
+  model?: string;
 }
 
 /**

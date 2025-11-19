@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { connectSocket, disconnectSocket, forwardEvent, setClient } from './sockets.actions';
+import { connectSocket, disconnectSocket, forwardEvent, setChatModel, setClient } from './sockets.actions';
 import { getSocketInstance } from './sockets.effects';
 import { SocketsFacade } from './sockets.facade';
 import { ChatActor, ForwardableEvent, type ForwardedEventPayload } from './sockets.types';
@@ -225,6 +225,38 @@ describe('SocketsFacade', () => {
       });
     });
 
+    it('should forward chat event with explicit model override', () => {
+      const message = 'Hello world';
+      const agentId = 'agent-1';
+      const model = 'gpt-4o';
+      facade.forwardChat(message, agentId, model);
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        forwardEvent({ event: ForwardableEvent.CHAT, payload: { message, model }, agentId }),
+      );
+      expect(mockSocket.emit).toHaveBeenCalledWith('forward', {
+        event: ForwardableEvent.CHAT,
+        payload: { message, model },
+        agentId,
+      });
+    });
+
+    it('should forward chat event using stored model when override not provided', () => {
+      (facade as any).currentChatModel = 'stored-model';
+      const message = 'Hello world';
+      const agentId = 'agent-1';
+      facade.forwardChat(message, agentId);
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        forwardEvent({ event: ForwardableEvent.CHAT, payload: { message, model: 'stored-model' }, agentId }),
+      );
+      expect(mockSocket.emit).toHaveBeenCalledWith('forward', {
+        event: ForwardableEvent.CHAT,
+        payload: { message, model: 'stored-model' },
+        agentId,
+      });
+    });
+
     it('should forward login event with agentId', () => {
       const agentId = 'agent-1';
       facade.forwardLogin(agentId);
@@ -247,6 +279,15 @@ describe('SocketsFacade', () => {
         event: ForwardableEvent.LOGOUT,
         payload: {},
       });
+    });
+  });
+
+  describe('Chat Model', () => {
+    it('should dispatch setChatModel action', () => {
+      const model = 'gpt-4o';
+      facade.setChatModel(model);
+
+      expect(store.dispatch).toHaveBeenCalledWith(setChatModel({ model }));
     });
   });
 

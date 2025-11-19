@@ -60,7 +60,7 @@ sequenceDiagram
 
     rect rgb(250, 255, 240)
         Note over WSClient,RemoteWS: Forward Event (with Auto-Login)
-        Note over WSClient: Examples: "chat", "fileUpdate", "logout", etc.
+        Note over WSClient: Examples: "chat" (with payload {message, model?}), "fileUpdate", "logout", etc.
         WSClient->>Gateway: forward<br/>{event: "chat" | "fileUpdate" | ..., payload: {...}, agentId?}
         Gateway->>Gateway: clientId = selectedClientBySocket.get(socket.id)
         alt No client selected
@@ -120,7 +120,7 @@ sequenceDiagram
                             end
                         end
                         Gateway->>RemoteWS: emit(event, payload)
-                        Note over Gateway: Forwards event to remote agent-manager WebSocket
+                        Note over Gateway: Forwards payload as-is (e.g., chat {message, model}) to the remote agent-manager WebSocket
                     else Event without agentId
                         Gateway->>RemoteWS: emit(event, payload)
                         Note over Gateway: Forwards event to remote agent-manager WebSocket

@@ -9,6 +9,7 @@ import { DockerService } from './services/docker.service';
 
 interface ChatPayload {
   message: string;
+  model?: string;
 }
 
 describe('AgentsGateway', () => {
@@ -538,6 +539,25 @@ describe('AgentsGateway', () => {
         }),
       );
       loggerLogSpy.mockRestore();
+    });
+
+    it('should include model flag in container command when provided', async () => {
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      dockerService.sendCommandToContainer.mockResolvedValue('');
+
+      await gateway.handleChat({ message: 'Use custom model', model: 'gpt-4.1' }, mockSocket as Socket);
+
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+        mockAgent.containerId,
+        `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId} --model gpt-4.1`,
+        'Use custom model',
+      );
     });
 
     it('should reject chat message from unauthenticated user', async () => {

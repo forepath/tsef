@@ -13,6 +13,8 @@ export const selectSocketDisconnecting = createSelector(selectSocketsState, (sta
 // Client context selectors
 export const selectSelectedClientId = createSelector(selectSocketsState, (state) => state.selectedClientId);
 
+export const selectChatModel = createSelector(selectSocketsState, (state) => state.chatModel);
+
 // Forwarding state selectors
 export const selectSocketForwarding = createSelector(selectSocketsState, (state) => state.forwarding);
 

@@ -22,6 +22,8 @@ export const setClientSuccess = createAction(
 
 export const setClientFailure = createAction('[Sockets] Set Client Failure', props<{ error: string }>());
 
+export const setChatModel = createAction('[Sockets] Set Chat Model', props<{ model: string | null }>());
+
 // Forward Actions
 export const forwardEvent = createAction(
   '[Sockets] Forward Event',

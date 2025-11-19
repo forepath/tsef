@@ -52,6 +52,7 @@ describe('environment.token', () => {
       expect(factoryResult).toMatchObject<Environment>({
         production: expect.any(Boolean),
         authentication: expect.any(Object),
+        chatModelOptions: expect.any(Object),
       });
     });
 
@@ -65,6 +66,7 @@ describe('environment.token', () => {
       expect(injected).toMatchObject<Environment>({
         production: expect.any(Boolean),
         authentication: expect.any(Object),
+        chatModelOptions: expect.any(Object),
       });
     });
 
@@ -100,6 +102,7 @@ describe('environment.token', () => {
       expect(service.env).toMatchObject<Environment>({
         production: expect.any(Boolean),
         authentication: expect.any(Object),
+        chatModelOptions: expect.any(Object),
       });
     });
   });

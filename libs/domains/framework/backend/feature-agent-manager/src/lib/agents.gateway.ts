@@ -20,6 +20,7 @@ interface LoginPayload {
 }
 
 interface ChatPayload {
+  model?: string;
   message: string;
 }
 
@@ -443,7 +444,11 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const containerId = entity?.containerId;
       if (containerId) {
         // Command to execute: cursor-agent with prompt mode and JSON output
-        const command = `cursor-agent --print --approve-mcps --force --output-format json --resume ${agent.id}-${containerId}`;
+        let command = `cursor-agent --print --approve-mcps --force --output-format json --resume ${agent.id}-${containerId}`;
+        if (data.model) {
+          command += ` --model ${data.model}`;
+        }
+
         // Send the message to STDIN of the command and get the response
         try {
           const agentResponse = await this.dockerService.sendCommandToContainer(containerId, command, message);

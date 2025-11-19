@@ -5,6 +5,7 @@ export interface Environment {
     websocketUrl: string;
   };
   authentication: AuthenticationConfig;
+  chatModelOptions: Record<string, string>;
 }
 
 export type AuthenticationConfig = KeycloakAuthenticationConfig | ApiKeyAuthenticationConfig;

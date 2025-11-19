@@ -1,5 +1,6 @@
 import { createFeatureSelector } from '@ngrx/store';
 import {
+  selectChatModel,
   selectForwardedEvents,
   selectForwardedEventsByEvent,
   selectMostRecentForwardedEvent,
@@ -102,6 +103,24 @@ describe('Sockets Selectors', () => {
       const state = createState({ selectedClientId: null });
       const rootState = { sockets: state };
       const result = selectSelectedClientId(rootState as any);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('selectChatModel', () => {
+    it('should select chatModel value', () => {
+      const state = createState({ chatModel: 'gpt-4o' });
+      const rootState = { sockets: state };
+      const result = selectChatModel(rootState as any);
+
+      expect(result).toBe('gpt-4o');
+    });
+
+    it('should return null when chatModel is not set', () => {
+      const state = createState({ chatModel: null });
+      const rootState = { sockets: state };
+      const result = selectChatModel(rootState as any);
 
       expect(result).toBeNull();
     });

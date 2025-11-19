@@ -67,6 +67,9 @@ describe('loginGuard', () => {
       authentication: {
         type: 'api-key',
       },
+      chatModelOptions: {
+        default: 'Auto',
+      },
     };
 
     mockKeycloakService = {

@@ -224,6 +224,39 @@ describe('ClientsGateway', () => {
     expect(socket.emit).toHaveBeenCalledWith('forwardAck', expect.objectContaining({ received: true, event: 'chat' }));
   });
 
+  it('should forward chat payload with model indicator unchanged', async () => {
+    const socket = createMockSocket();
+    const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+    const remote = io() as any;
+    mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'client-uuid',
+      endpoint: 'http://localhost:3100/api',
+      authenticationType: 'api_key',
+      apiKey: 'x',
+      agentWsPort: 8099,
+    } as any);
+    mockCredentialsRepo.findByClientAndAgent.mockResolvedValue({
+      id: 'cred-1',
+      clientId: 'client-uuid',
+      agentId: 'agent-uuid',
+      password: 'password123',
+    } as any);
+    await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+    const chatPayload = { message: 'hi there', model: 'gpt-4.1-mini' };
+
+    const forwardPromise = gateway.handleForward(
+      { event: 'chat', payload: chatPayload, agentId: 'agent-uuid' },
+      socket,
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+    remote.triggerEvent('loginSuccess');
+    await forwardPromise;
+
+    expect(remote.emit).toHaveBeenCalledWith('login', { agentId: 'agent-uuid', password: 'password123' });
+    expect(remote.emit).toHaveBeenCalledWith('chat', chatPayload);
+    expect(socket.emit).toHaveBeenCalledWith('forwardAck', expect.objectContaining({ event: 'chat' }));
+  });
+
   it('should override login payload with credentials from database when event is login', async () => {
     const socket = createMockSocket();
     const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };

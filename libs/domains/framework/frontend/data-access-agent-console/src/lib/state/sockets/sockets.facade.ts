@@ -1,10 +1,12 @@
-import { Injectable, inject } from '@angular/core';
+import { DestroyRef, inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { distinctUntilChanged, Observable } from 'rxjs';
-import { connectSocket, disconnectSocket, forwardEvent, setClient } from './sockets.actions';
+import { connectSocket, disconnectSocket, forwardEvent, setChatModel, setClient } from './sockets.actions';
 import { getSocketInstance } from './sockets.effects';
 import {
   selectChatForwarding,
+  selectChatModel,
   selectForwardedEvents,
   selectForwardedEventsByEvent,
   selectMostRecentForwardedEvent,
@@ -28,6 +30,8 @@ import { ForwardableEvent, type ForwardableEventPayload, type ForwardedEventPayl
 })
 export class SocketsFacade {
   private readonly store = inject(Store);
+  private readonly destroyRef = inject(DestroyRef);
+  private currentChatModel: string | null = null;
 
   // State observables
   readonly connected$: Observable<boolean> = this.store.select(selectSocketConnected);
@@ -36,9 +40,16 @@ export class SocketsFacade {
   readonly selectedClientId$: Observable<string | null> = this.store.select(selectSelectedClientId);
   readonly forwarding$: Observable<boolean> = this.store.select(selectSocketForwarding);
   readonly chatForwarding$: Observable<boolean> = this.store.select(selectChatForwarding);
+  readonly chatModel$: Observable<string | null> = this.store.select(selectChatModel);
   readonly error$: Observable<string | null> = this.store.select(selectSocketError);
   readonly forwardedEvents$: Observable<Array<{ event: string; payload: ForwardedEventPayload; timestamp: number }>> =
     this.store.select(selectForwardedEvents);
+
+  constructor() {
+    this.chatModel$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((model) => {
+      this.currentChatModel = model;
+    });
+  }
 
   /**
    * Connect to the socket
@@ -89,8 +100,19 @@ export class SocketsFacade {
    * @param message - The chat message text
    * @param agentId - Agent UUID (required for routing the event to the correct agent)
    */
-  forwardChat(message: string, agentId: string): void {
-    this.forwardEvent(ForwardableEvent.CHAT, { message }, agentId);
+  forwardChat(message: string, agentId: string, model?: string | null): void {
+    const effectiveModel = model ?? this.currentChatModel ?? undefined;
+    const payload =
+      effectiveModel !== undefined && effectiveModel !== null ? { message, model: effectiveModel } : { message };
+    this.forwardEvent(ForwardableEvent.CHAT, payload, agentId);
+  }
+
+  /**
+   * Set the preferred chat model (used as default for subsequent chat messages)
+   * @param model - Model identifier or null to clear the preference
+   */
+  setChatModel(model: string | null): void {
+    this.store.dispatch(setChatModel({ model }));
   }
 
   /**
