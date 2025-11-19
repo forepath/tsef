@@ -85,7 +85,7 @@ sequenceDiagram
 
     rect rgb(250, 255, 240)
         Note over WSClient,Docker: Chat Message Flow
-        WSClient->>Gateway: chat<br/>{message: "Hello"}
+        WSClient->>Gateway: chat<br/>{message: "Hello", model?: "custom-model"}
         Gateway->>Gateway: uuid = authenticatedClients.get(socket.id)
         alt Not authenticated
             Gateway-->>WSClient: error<br/>{success: false, error: {message, code}, timestamp}
@@ -115,6 +115,7 @@ sequenceDiagram
             Repo-->>Gateway: agent entity
 
             alt Container exists
+                Gateway->>Gateway: command = baseCommand + (model ? ` --model ${model}` : "")
                 Gateway->>Docker: sendCommandToContainer(containerId, command, message)
                 Docker->>Docker: Execute command and capture output
                 Docker-->>Gateway: agentResponse (JSON string)

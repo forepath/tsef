@@ -8,6 +8,7 @@ import {
   forwardEventFailure,
   forwardEventSuccess,
   forwardedEventReceived,
+  setChatModel,
   setClient,
   setClientFailure,
   setClientSuccess,
@@ -149,6 +150,19 @@ describe('socketsReducer', () => {
       const newState = socketsReducer(state, setClientFailure({ error: 'Set client failed' }));
 
       expect(newState.error).toBe('Set client failed');
+    });
+  });
+
+  describe('setChatModel', () => {
+    it('should update chatModel value', () => {
+      const state: SocketsState = {
+        ...initialSocketsState,
+        chatModel: null,
+      };
+
+      const newState = socketsReducer(state, setChatModel({ model: 'gpt-4o' }));
+
+      expect(newState.chatModel).toBe('gpt-4o');
     });
   });
 

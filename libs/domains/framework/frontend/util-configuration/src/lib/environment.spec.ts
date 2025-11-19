@@ -10,6 +10,7 @@ describe('environment', () => {
     expect(environment).toMatchObject<Environment>({
       production: expect.any(Boolean),
       authentication: expect.any(Object),
+      chatModelOptions: expect.any(Object),
     });
   });
 
@@ -21,6 +22,16 @@ describe('environment', () => {
   it('should have authentication property', () => {
     expect(environment).toHaveProperty('authentication');
     expect(environment.authentication).toBeDefined();
+  });
+
+  it('should have chatModelOptions property with string mappings', () => {
+    expect(environment).toHaveProperty('chatModelOptions');
+    expect(environment.chatModelOptions).toBeDefined();
+    expect(typeof environment.chatModelOptions).toBe('object');
+    Object.entries(environment.chatModelOptions).forEach(([key, value]) => {
+      expect(typeof key).toBe('string');
+      expect(typeof value).toBe('string');
+    });
   });
 
   it('should have authentication type property', () => {

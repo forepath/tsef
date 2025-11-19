@@ -13,6 +13,9 @@ describe('Environment interfaces', () => {
         authentication: {
           type: 'api-key',
         },
+        chatModelOptions: {
+          default: 'Auto',
+        },
       };
       expect(validEnv.production).toBe(true);
     });
@@ -22,6 +25,9 @@ describe('Environment interfaces', () => {
         production: false,
         authentication: {
           type: 'api-key',
+        },
+        chatModelOptions: {
+          default: 'Auto',
         },
       };
       expect(validEnv.authentication).toBeDefined();
@@ -38,6 +44,9 @@ describe('Environment interfaces', () => {
         authentication: {
           type: 'api-key',
         },
+        chatModelOptions: {
+          default: 'Auto',
+        },
       };
       expect(envWithController.controller).toBeDefined();
       expect(envWithController.controller?.restApiUrl).toBe('http://localhost:3100/api');
@@ -50,8 +59,29 @@ describe('Environment interfaces', () => {
         authentication: {
           type: 'api-key',
         },
+        chatModelOptions: {
+          default: 'Auto',
+        },
       };
       expect(envWithoutController.controller).toBeUndefined();
+    });
+
+    it('should require chatModelOptions map', () => {
+      const env: Environment = {
+        production: true,
+        authentication: {
+          type: 'api-key',
+        },
+        chatModelOptions: {
+          default: 'Auto',
+          'gpt-4o': 'GPT-4o',
+        },
+      };
+      expect(env.chatModelOptions).toBeDefined();
+      Object.entries(env.chatModelOptions).forEach(([key, value]) => {
+        expect(typeof key).toBe('string');
+        expect(typeof value).toBe('string');
+      });
     });
   });
 

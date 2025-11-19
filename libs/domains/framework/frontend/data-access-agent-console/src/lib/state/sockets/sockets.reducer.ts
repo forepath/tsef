@@ -9,6 +9,7 @@ import {
   forwardEventFailure,
   forwardEventSuccess,
   forwardedEventReceived,
+  setChatModel,
   setClient,
   setClientFailure,
   setClientSuccess,
@@ -20,6 +21,7 @@ export interface SocketsState {
   connecting: boolean;
   disconnecting: boolean;
   selectedClientId: string | null;
+  chatModel: string | null;
   forwarding: boolean;
   forwardingEvent: string | null; // Track which event is currently being forwarded
   error: string | null;
@@ -36,6 +38,7 @@ export const initialSocketsState: SocketsState = {
   connecting: false,
   disconnecting: false,
   selectedClientId: null,
+  chatModel: null,
   forwarding: false,
   forwardingEvent: null,
   error: null,
@@ -89,6 +92,10 @@ export const socketsReducer = createReducer(
   on(setClientFailure, (state, { error }) => ({
     ...state,
     error,
+  })),
+  on(setChatModel, (state, { model }) => ({
+    ...state,
+    chatModel: model,
   })),
   // Forward Event
   on(forwardEvent, (state, { event }) => ({

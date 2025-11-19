@@ -289,6 +289,9 @@ components:
           message:
             type: string
             description: Message text
+          model:
+            type: string
+            description: Optional model identifier (e.g., gpt-4o) forwarded to the agent container to override the default model for this chat request
     ChatMessage:
       name: ChatMessage
       title: Chat broadcast event

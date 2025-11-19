@@ -29,6 +29,7 @@ import {
   type UpdateAgentDto,
   type UpdateClientDto,
 } from '@forepath/framework/frontend/data-access-agent-console';
+import { ENVIRONMENT, type Environment } from '@forepath/framework/frontend/util-configuration';
 import {
   combineLatest,
   combineLatestWith,
@@ -66,6 +67,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   private readonly sanitizer = inject(DomSanitizer);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly environment = inject<Environment>(ENVIRONMENT);
 
   @ViewChild('chatMessagesContainer', { static: false })
   private chatMessagesContainer!: ElementRef<HTMLDivElement>;
@@ -166,10 +168,16 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   // Local state
   chatMessage = signal<string>('');
+  selectedChatModel = signal<string | null>('auto');
   selectedAgentId = signal<string | null>(null);
   editorOpen = signal<boolean>(false);
   chatVisible = signal<boolean>(true);
   private previousAgentId: string | null = null;
+
+  readonly chatModelOptions = Object.entries(this.environment.chatModelOptions ?? {}).map(([value, label]) => ({
+    value,
+    label,
+  }));
 
   // Computed observable to determine if chat should be visible
   readonly shouldShowChat$ = combineLatest([
@@ -278,6 +286,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   };
 
   ngOnInit(): void {
+    // Default chat model to auto mode on load
+    this.socketsFacade.setChatModel(null);
+
     // Load clients on init
     this.clientsFacade.loadClients();
 
@@ -568,7 +579,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     }
 
     // agentId is required for routing the event to the correct agent
-    this.socketsFacade.forwardChat(message, agentId);
+    this.socketsFacade.forwardChat(message, agentId, this.selectedChatModel());
 
     // Track when we sent the message to show loading indicator
     this.lastUserMessageTimestamp.set(Date.now());
@@ -576,6 +587,19 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.chatMessage.set('');
     // Trigger scroll after sending message
     this.shouldScrollToBottom = true;
+  }
+
+  onChatInputKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      this.onSendMessage();
+    }
+  }
+
+  onChatModelChange(value: string): void {
+    const normalizedValue = value === '' ? null : value;
+    this.selectedChatModel.set(normalizedValue);
+    this.socketsFacade.setChatModel(normalizedValue);
   }
 
   onConnectSocket(): void {

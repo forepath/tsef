@@ -63,6 +63,9 @@ describe('authGuard', () => {
       authentication: {
         type: 'api-key',
       },
+      chatModelOptions: {
+        default: 'Auto',
+      },
     };
 
     mockIsAuthenticated = isAuthenticated as jest.MockedFunction<typeof isAuthenticated>;

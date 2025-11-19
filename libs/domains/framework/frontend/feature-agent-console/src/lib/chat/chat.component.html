@@ -392,15 +392,15 @@
         <!-- Chat input -->
         <div class="p-3 border-top bg-body-tertiary">
           <div class="input-group">
-            <input
-              type="text"
+            <textarea
               class="form-control"
+              rows="3"
               placeholder="Type a message..."
               [value]="chatMessage()"
               (input)="chatMessage.set($any($event.target).value)"
-              (keydown.enter)="onSendMessage()"
+              (keydown)="onChatInputKeydown($event)"
               [disabled]="!(socketConnected$ | async) || (forwarding$ | async) || !(selectedAgent$ | async)"
-            />
+            ></textarea>
             <button
               class="btn btn-primary"
               type="button"
@@ -419,6 +419,21 @@
               }
               Send
             </button>
+          </div>
+          <div class="input-group input-group-sm mt-2">
+            <span class="input-group-text small text-muted">Model</span>
+            <select
+              id="chatModelSelect"
+              class="form-select form-select-sm small text-body"
+              name="chatModelSelect"
+              [ngModel]="selectedChatModel() ?? ''"
+              (ngModelChange)="onChatModelChange($event)"
+            >
+              <option value="auto">Auto</option>
+              @for (model of chatModelOptions; track model.value) {
+                <option [value]="model.value">{{ model.label }}</option>
+              }
+            </select>
           </div>
           @if (!(socketConnected$ | async)) {
             <small class="text-muted d-block mt-2">

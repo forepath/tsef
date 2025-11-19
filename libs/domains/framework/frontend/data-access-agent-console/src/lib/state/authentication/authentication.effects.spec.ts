@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { Actions } from '@ngrx/effects';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { of, throwError } from 'rxjs';
 import type { Environment } from '@forepath/framework/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
+import { Actions } from '@ngrx/effects';
+import { provideMockActions } from '@ngrx/effects/testing';
 import { KeycloakService } from 'keycloak-angular';
+import { of } from 'rxjs';
 import {
   checkAuthentication,
   checkAuthenticationFailure,
@@ -58,6 +58,9 @@ describe('AuthenticationEffects', () => {
       },
       authentication: {
         type: 'api-key',
+      },
+      chatModelOptions: {
+        default: 'Auto',
       },
     };
 
