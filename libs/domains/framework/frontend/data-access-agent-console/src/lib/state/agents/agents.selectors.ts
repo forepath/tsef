@@ -21,6 +21,10 @@ export const selectAgentsDeleting = createSelector(selectAgentsState, (state) =>
 
 export const selectAgentsErrors = createSelector(selectAgentsState, (state) => state.errors);
 
+export const selectAgentsCommands = createSelector(selectAgentsState, (state) => state.commands);
+
+export const selectAgentsLoadingCommands = createSelector(selectAgentsState, (state) => state.loadingCommands);
+
 // Client-scoped selectors (factory functions that return selectors for a specific clientId)
 export const selectClientAgents = (clientId: string) =>
   createSelector(selectAgentsEntities, (entities) => entities[clientId] ?? []);
@@ -67,3 +71,16 @@ export const selectClientAgentById = (clientId: string, agentId: string) =>
 
 export const selectHasClientAgents = (clientId: string) =>
   createSelector(selectClientAgents(clientId), (agents) => agents.length > 0);
+
+// Client:Agent-scoped selectors for commands
+export const selectClientAgentCommands = (clientId: string, agentId: string) =>
+  createSelector(selectAgentsCommands, (commands) => {
+    const key = `${clientId}:${agentId}`;
+    return commands[key] ?? [];
+  });
+
+export const selectClientAgentLoadingCommands = (clientId: string, agentId: string) =>
+  createSelector(selectAgentsLoadingCommands, (loadingCommands) => {
+    const key = `${clientId}:${agentId}`;
+    return loadingCommands[key] ?? false;
+  });

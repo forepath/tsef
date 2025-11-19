@@ -667,13 +667,83 @@ describe('DockerService', () => {
       expect(mockStream.end).toHaveBeenCalled();
     });
 
-    it('should not add newline if input already ends with newline', async () => {
+    it('should split multi-line string input into separate lines', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+
+      await service.sendCommandToContainer(containerId, 'bash', '/plan\n\ntest message');
+
+      expect(mockStream.write).toHaveBeenCalledWith('/plan\n');
+      expect(mockStream.write).toHaveBeenCalledWith('\n');
+      expect(mockStream.write).toHaveBeenCalledWith('test message\n');
+      expect(mockStream.write).toHaveBeenCalledTimes(3);
+      expect(mockStream.end).toHaveBeenCalled();
+    });
+
+    it('should handle multi-line string with Windows line endings', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+
+      await service.sendCommandToContainer(containerId, 'bash', 'line1\r\nline2\r\nline3');
+
+      expect(mockStream.write).toHaveBeenCalledWith('line1\n');
+      expect(mockStream.write).toHaveBeenCalledWith('line2\n');
+      expect(mockStream.write).toHaveBeenCalledWith('line3\n');
+      expect(mockStream.write).toHaveBeenCalledTimes(3);
+      expect(mockStream.end).toHaveBeenCalled();
+    });
+
+    it('should handle string ending with newline (creates empty last line)', async () => {
       mockContainer.inspect.mockResolvedValue({});
 
       await service.sendCommandToContainer(containerId, 'bash', 'echo hello\n');
 
+      // When split, 'echo hello\n' becomes ['echo hello', '']
+      // Each line gets a newline appended
       expect(mockStream.write).toHaveBeenCalledWith('echo hello\n');
-      expect(mockStream.write).toHaveBeenCalledTimes(1);
+      expect(mockStream.write).toHaveBeenCalledWith('\n');
+      expect(mockStream.write).toHaveBeenCalledTimes(2);
+      expect(mockStream.end).toHaveBeenCalled();
+    });
+
+    it('should convert literal \\n strings to actual newlines and split', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+
+      // Test literal \n (backslash + n) that might come over websocket
+      await service.sendCommandToContainer(containerId, 'bash', '/plan\\n\\ntest message');
+
+      // Should convert \\n to \n, then split
+      expect(mockStream.write).toHaveBeenCalledWith('/plan\n');
+      expect(mockStream.write).toHaveBeenCalledWith('\n');
+      expect(mockStream.write).toHaveBeenCalledWith('test message\n');
+      expect(mockStream.write).toHaveBeenCalledTimes(3);
+      expect(mockStream.end).toHaveBeenCalled();
+    });
+
+    it('should handle array with literal \\n strings', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+
+      // Test array with literal \n strings
+      await service.sendCommandToContainer(containerId, 'bash', ['line1\\nmore', 'line2']);
+
+      // Should convert \\n to \n in each array element, then split each element
+      expect(mockStream.write).toHaveBeenCalledWith('line1\n');
+      expect(mockStream.write).toHaveBeenCalledWith('more\n');
+      expect(mockStream.write).toHaveBeenCalledWith('line2\n');
+      expect(mockStream.write).toHaveBeenCalledTimes(3);
+      expect(mockStream.end).toHaveBeenCalled();
+    });
+
+    it('should handle mixed literal \\n and actual newlines', async () => {
+      mockContainer.inspect.mockResolvedValue({});
+
+      // Test mix of literal \n and actual newlines
+      await service.sendCommandToContainer(containerId, 'bash', '/plan\\n\nactual newline');
+
+      // Should convert \\n to \n, then split by both
+      expect(mockStream.write).toHaveBeenCalledWith('/plan\n');
+      expect(mockStream.write).toHaveBeenCalledWith('\n');
+      expect(mockStream.write).toHaveBeenCalledWith('actual newline\n');
+      expect(mockStream.write).toHaveBeenCalledTimes(3);
+      expect(mockStream.end).toHaveBeenCalled();
     });
 
     it('should handle empty input array', async () => {
@@ -1020,15 +1090,20 @@ describe('DockerService', () => {
         return mockStream;
       });
       mockContainer.modem.demuxStream = jest.fn((stream, stdout, stderr) => {
+        // Small delay to ensure event handlers are set up
         setTimeout(() => {
+          // Write data to PassThrough streams (emits 'data' events synchronously)
           stdout.write(Buffer.from('file content'));
           stderr.write(Buffer.from('warning: some warning message'));
+          // End the PassThrough streams
           stdout.end();
           stderr.end();
-          // Trigger stream 'end' event after data is written
-          if (endCallback) {
-            setTimeout(() => endCallback(), 5);
-          }
+          // Use setImmediate to ensure data event handlers have processed before triggering stream 'end'
+          setImmediate(() => {
+            if (endCallback) {
+              endCallback();
+            }
+          });
         }, 5);
       });
 

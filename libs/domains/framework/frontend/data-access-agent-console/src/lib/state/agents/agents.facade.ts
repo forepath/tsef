@@ -11,7 +11,9 @@ import {
 } from './agents.actions';
 import {
   selectClientAgentById,
+  selectClientAgentCommands,
   selectClientAgentLoading,
+  selectClientAgentLoadingCommands,
   selectClientAgents,
   selectClientAgentsCount,
   selectClientAgentsCreating,
@@ -198,5 +200,25 @@ export class AgentsFacade {
    */
   clearSelectedClientAgent(clientId: string): void {
     this.store.dispatch(clearSelectedClientAgent({ clientId }));
+  }
+
+  /**
+   * Get commands for a specific client and agent.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @returns Observable of commands array
+   */
+  getClientAgentCommands$(clientId: string, agentId: string): Observable<string[]> {
+    return this.store.select(selectClientAgentCommands(clientId, agentId));
+  }
+
+  /**
+   * Get loading state for commands for a specific client and agent.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @returns Observable of loading state
+   */
+  getClientAgentLoadingCommands$(clientId: string, agentId: string): Observable<boolean> {
+    return this.store.select(selectClientAgentLoadingCommands(clientId, agentId));
   }
 }

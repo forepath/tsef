@@ -1,23 +1,27 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, map, of, switchMap, exhaustMap } from 'rxjs';
+import { catchError, exhaustMap, filter, map, of, switchMap } from 'rxjs';
 import { AgentsService } from '../../services/agents.service';
+import { listDirectory, listDirectoryFailure, listDirectorySuccess } from '../files/files.actions';
+import type { FileNodeDto } from '../files/files.types';
 import {
-  loadClientAgents,
-  loadClientAgentsFailure,
-  loadClientAgentsSuccess,
-  loadClientAgent,
-  loadClientAgentFailure,
-  loadClientAgentSuccess,
   createClientAgent,
   createClientAgentFailure,
   createClientAgentSuccess,
-  updateClientAgent,
-  updateClientAgentFailure,
-  updateClientAgentSuccess,
   deleteClientAgent,
   deleteClientAgentFailure,
   deleteClientAgentSuccess,
+  loadClientAgent,
+  loadClientAgentCommands,
+  loadClientAgentCommandsSuccess,
+  loadClientAgentFailure,
+  loadClientAgents,
+  loadClientAgentsFailure,
+  loadClientAgentsSuccess,
+  loadClientAgentSuccess,
+  updateClientAgent,
+  updateClientAgentFailure,
+  updateClientAgentSuccess,
 } from './agents.actions';
 
 /**
@@ -106,6 +110,62 @@ export const deleteClientAgent$ = createEffect(
           catchError((error) => of(deleteClientAgentFailure({ clientId, error: normalizeError(error) }))),
         ),
       ),
+    );
+  },
+  { functional: true },
+);
+
+/**
+ * Effect that sets loading state when directory listing for .cursor/commands starts.
+ */
+export const loadClientAgentCommandsLoading$ = createEffect(
+  (actions$ = inject(Actions)) => {
+    return actions$.pipe(
+      ofType(listDirectory),
+      filter(({ params }) => {
+        // Normalize path for comparison (handle both '.cursor/commands' and './.cursor/commands')
+        const path = params?.path || '';
+        const normalized = path.replace(/^\.\//, '').replace(/\/$/, '');
+        return normalized === '.cursor/commands' || normalized === 'cursor/commands';
+      }),
+      map(({ clientId, agentId }) => loadClientAgentCommands({ clientId, agentId })),
+    );
+  },
+  { functional: true },
+);
+
+/**
+ * Effect that listens to files directory listing success/failure for .cursor/commands
+ * and extracts .md files as commands.
+ */
+export const loadClientAgentCommandsFromFiles$ = createEffect(
+  (actions$ = inject(Actions)) => {
+    return actions$.pipe(
+      ofType(listDirectorySuccess, listDirectoryFailure),
+      filter(({ directoryPath }) => {
+        // Normalize path for comparison (handle both '.cursor/commands' and './.cursor/commands')
+        const normalized = directoryPath.replace(/^\.\//, '').replace(/\/$/, '');
+        return normalized === '.cursor/commands' || normalized === 'cursor/commands';
+      }),
+      map((action) => {
+        if (action.type === '[Files] List Directory Success') {
+          const { clientId, agentId, files } = action;
+          // Filter for .md files (type === 'file' and name ends with .md)
+          const commandFiles = files.filter((file: FileNodeDto) => file.type === 'file' && file.name.endsWith('.md'));
+
+          // Extract command names: remove .md extension and prefix with /
+          const commands = commandFiles.map((file: FileNodeDto) => {
+            const commandName = file.name.replace(/\.md$/, '');
+            return `/${commandName}`;
+          });
+
+          return loadClientAgentCommandsSuccess({ clientId, agentId, commands });
+        } else {
+          // If directory listing fails, assume no commands (per requirement)
+          const { clientId, agentId } = action;
+          return loadClientAgentCommandsSuccess({ clientId, agentId, commands: [] });
+        }
+      }),
     );
   },
   { functional: true },

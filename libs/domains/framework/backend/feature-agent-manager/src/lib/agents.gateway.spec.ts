@@ -100,6 +100,9 @@ describe('AgentsGateway', () => {
       emit: jest.fn(),
       connected: true,
     };
+
+    // Setup default mocks
+    agentMessagesService.getChatHistory.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -109,6 +112,11 @@ describe('AgentsGateway', () => {
     (gateway as any).authenticatedClients.clear();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (gateway as any).socketById.clear();
+    // Clear agents with first message sent tracking
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (gateway as any).agentsWithFirstMessageSent.clear();
+    // Reset default mocks
+    agentMessagesService.getChatHistory.mockResolvedValue([]);
   });
 
   describe('handleConnection', () => {
@@ -194,6 +202,7 @@ describe('AgentsGateway', () => {
         {
           id: 'msg-1',
           agentId: mockAgent.id,
+          agent: mockAgent,
           actor: 'user',
           message: 'Hello',
           createdAt: new Date('2024-01-01T10:00:00Z'),
@@ -202,6 +211,7 @@ describe('AgentsGateway', () => {
         {
           id: 'msg-2',
           agentId: mockAgent.id,
+          agent: mockAgent,
           actor: 'agent',
           message: '{"type":"response","result":"Hi there!"}',
           createdAt: new Date('2024-01-01T10:00:01Z'),
@@ -210,6 +220,7 @@ describe('AgentsGateway', () => {
         {
           id: 'msg-3',
           agentId: mockAgent.id,
+          agent: mockAgent,
           actor: 'user',
           message: 'How are you?',
           createdAt: new Date('2024-01-01T10:00:02Z'),
@@ -281,6 +292,7 @@ describe('AgentsGateway', () => {
         {
           id: 'msg-1',
           agentId: mockAgent.id,
+          agent: mockAgent,
           actor: 'agent',
           message: 'Plain text response', // Already cleaned (no { or } to clean)
           createdAt: new Date('2024-01-01T10:00:00Z'),
@@ -319,6 +331,7 @@ describe('AgentsGateway', () => {
         {
           id: 'msg-1',
           agentId: mockAgent.id,
+          agent: mockAgent,
           actor: 'agent',
           message: 'Some prefix text {"type":"response","result":"Success"} some suffix',
           createdAt: new Date('2024-01-01T10:00:00Z'),
@@ -489,6 +502,18 @@ describe('AgentsGateway', () => {
       (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
+      // Mock chat history to return existing messages (so initialization is skipped)
+      agentMessagesService.getChatHistory.mockResolvedValue([
+        {
+          id: 'msg-1',
+          agentId: mockAgent.id,
+          agent: mockAgent,
+          actor: 'user',
+          message: 'Previous message',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
       const mockAgentResponseJson = JSON.stringify({
         type: 'result',
         subtype: 'success',
@@ -549,6 +574,18 @@ describe('AgentsGateway', () => {
       (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
+      // Mock chat history to return existing messages (so initialization is skipped)
+      agentMessagesService.getChatHistory.mockResolvedValue([
+        {
+          id: 'msg-1',
+          agentId: mockAgent.id,
+          agent: mockAgent,
+          actor: 'user',
+          message: 'Previous message',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
       dockerService.sendCommandToContainer.mockResolvedValue('');
 
       await gateway.handleChat({ message: 'Use custom model', model: 'gpt-4.1' }, mockSocket as Socket);
@@ -643,6 +680,18 @@ describe('AgentsGateway', () => {
       (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
+      // Mock chat history to return existing messages (so initialization is skipped)
+      agentMessagesService.getChatHistory.mockResolvedValue([
+        {
+          id: 'msg-1',
+          agentId: mockAgent.id,
+          agent: mockAgent,
+          actor: 'user',
+          message: 'Previous message',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
       dockerService.sendCommandToContainer.mockResolvedValue('');
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
@@ -678,6 +727,18 @@ describe('AgentsGateway', () => {
       (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
+      // Mock chat history to return existing messages (so initialization is skipped)
+      agentMessagesService.getChatHistory.mockResolvedValue([
+        {
+          id: 'msg-1',
+          agentId: mockAgent.id,
+          agent: mockAgent,
+          actor: 'user',
+          message: 'Previous message',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
       dockerService.sendCommandToContainer.mockResolvedValue('Invalid JSON response');
       const loggerWarnSpy = jest.spyOn(gateway['logger'], 'warn').mockImplementation();
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
@@ -725,6 +786,18 @@ describe('AgentsGateway', () => {
       (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findById.mockResolvedValue(mockAgent);
+      // Mock chat history to return existing messages (so initialization is skipped)
+      agentMessagesService.getChatHistory.mockResolvedValue([
+        {
+          id: 'msg-1',
+          agentId: mockAgent.id,
+          agent: mockAgent,
+          actor: 'user',
+          message: 'Previous message',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
       dockerService.sendCommandToContainer.mockRejectedValue(new Error('Container error'));
       const loggerErrorSpy = jest.spyOn(gateway['logger'], 'error').mockImplementation();
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
@@ -761,6 +834,19 @@ describe('AgentsGateway', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (gateway as any).socketById.set(socketId, mockSocket);
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      // Mock chat history to return existing messages (so initialization is skipped)
+      agentMessagesService.getChatHistory.mockResolvedValue([
+        {
+          id: 'msg-1',
+          agentId: mockAgent.id,
+          agent: mockAgent,
+          actor: 'user',
+          message: 'Previous message',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
       await gateway.handleChat({ message: '  Hello, world!  ' }, mockSocket as Socket);
@@ -779,6 +865,183 @@ describe('AgentsGateway', () => {
         }),
       );
       loggerLogSpy.mockRestore();
+    });
+
+    describe('initialization message', () => {
+      it('should send initialization message on first user message when no chat history exists', async () => {
+        const socketId = mockSocket.id || 'test-socket-id';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).socketById.set(socketId, mockSocket);
+        agentsService.findOne.mockResolvedValue(mockAgentResponse);
+        agentsRepository.findById.mockResolvedValue(mockAgent);
+        // Mock empty chat history (first message)
+        agentMessagesService.getChatHistory.mockResolvedValue([]);
+        dockerService.sendCommandToContainer.mockResolvedValue('');
+        const loggerDebugSpy = jest.spyOn(gateway['logger'], 'debug').mockImplementation();
+        const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
+
+        await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
+
+        // Should send initialization message first
+        expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+          mockAgent.containerId,
+          `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
+          expect.stringContaining('You are operating in a codebase with a structured command and rules system'),
+        );
+        expect(loggerDebugSpy).toHaveBeenCalledWith(expect.stringContaining('Sent initialization message to agent'));
+        // Should mark agent as having received first message
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect((gateway as any).agentsWithFirstMessageSent.has(mockAgent.id)).toBe(true);
+        // Should still process the user message normally
+        expect(mockSocket.emit).toHaveBeenCalledWith(
+          'chatMessage',
+          expect.objectContaining({
+            success: true,
+            data: {
+              from: 'user',
+              text: 'Hello, world!',
+              timestamp: expect.any(String),
+            },
+          }),
+        );
+        loggerDebugSpy.mockRestore();
+        loggerLogSpy.mockRestore();
+      });
+
+      it('should not send initialization message if chat history exists', async () => {
+        const socketId = mockSocket.id || 'test-socket-id';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).socketById.set(socketId, mockSocket);
+        agentsService.findOne.mockResolvedValue(mockAgentResponse);
+        agentsRepository.findById.mockResolvedValue(mockAgent);
+        // Mock existing chat history
+        agentMessagesService.getChatHistory.mockResolvedValue([
+          {
+            id: 'msg-1',
+            agentId: mockAgent.id,
+            agent: mockAgent,
+            actor: 'user',
+            message: 'Previous message',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ]);
+        dockerService.sendCommandToContainer.mockResolvedValue('');
+        const loggerDebugSpy = jest.spyOn(gateway['logger'], 'debug').mockImplementation();
+
+        await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
+
+        // Should not send initialization message (only the user message)
+        expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(1);
+        expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+          mockAgent.containerId,
+          `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
+          'Hello, world!',
+        );
+        expect(loggerDebugSpy).not.toHaveBeenCalledWith(expect.stringContaining('Sent initialization message'));
+        // Should mark agent as initialized
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect((gateway as any).agentsWithFirstMessageSent.has(mockAgent.id)).toBe(true);
+        loggerDebugSpy.mockRestore();
+      });
+
+      it('should not send initialization message if already sent for this agent', async () => {
+        const socketId = mockSocket.id || 'test-socket-id';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).socketById.set(socketId, mockSocket);
+        // Mark agent as already initialized
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).agentsWithFirstMessageSent.add(mockAgent.id);
+        agentsService.findOne.mockResolvedValue(mockAgentResponse);
+        agentsRepository.findById.mockResolvedValue(mockAgent);
+        // Mock empty chat history (but agent already initialized)
+        agentMessagesService.getChatHistory.mockResolvedValue([]);
+        dockerService.sendCommandToContainer.mockResolvedValue('');
+        const loggerDebugSpy = jest.spyOn(gateway['logger'], 'debug').mockImplementation();
+
+        await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
+
+        // Should not send initialization message (only the user message)
+        expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(1);
+        expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+          mockAgent.containerId,
+          `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
+          'Hello, world!',
+        );
+        expect(loggerDebugSpy).not.toHaveBeenCalledWith(expect.stringContaining('Sent initialization message'));
+        loggerDebugSpy.mockRestore();
+      });
+
+      it('should handle initialization message send failure gracefully', async () => {
+        const socketId = mockSocket.id || 'test-socket-id';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).socketById.set(socketId, mockSocket);
+        agentsService.findOne.mockResolvedValue(mockAgentResponse);
+        agentsRepository.findById.mockResolvedValue(mockAgent);
+        // Mock empty chat history (first message)
+        agentMessagesService.getChatHistory.mockResolvedValue([]);
+        // First call fails (initialization), second call succeeds (user message)
+        dockerService.sendCommandToContainer
+          .mockRejectedValueOnce(new Error('Initialization failed'))
+          .mockResolvedValueOnce('');
+        const loggerWarnSpy = jest.spyOn(gateway['logger'], 'warn').mockImplementation();
+        const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
+
+        await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
+
+        // Should log warning about initialization failure
+        expect(loggerWarnSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to send initialization message'),
+          expect.any(String),
+        );
+        // Should still process the user message normally
+        expect(mockSocket.emit).toHaveBeenCalledWith(
+          'chatMessage',
+          expect.objectContaining({
+            success: true,
+            data: {
+              from: 'user',
+              text: 'Hello, world!',
+              timestamp: expect.any(String),
+            },
+          }),
+        );
+        // Should mark agent as initialized even if initialization message failed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect((gateway as any).agentsWithFirstMessageSent.has(mockAgent.id)).toBe(true);
+        loggerWarnSpy.mockRestore();
+        loggerLogSpy.mockRestore();
+      });
+
+      it('should include model flag in initialization message when provided', async () => {
+        const socketId = mockSocket.id || 'test-socket-id';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gateway as any).socketById.set(socketId, mockSocket);
+        agentsService.findOne.mockResolvedValue(mockAgentResponse);
+        agentsRepository.findById.mockResolvedValue(mockAgent);
+        // Mock empty chat history (first message)
+        agentMessagesService.getChatHistory.mockResolvedValue([]);
+        dockerService.sendCommandToContainer.mockResolvedValue('');
+
+        await gateway.handleChat({ message: 'Hello, world!', model: 'gpt-4.1' }, mockSocket as Socket);
+
+        // Should send initialization message with model flag
+        expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+          mockAgent.containerId,
+          `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId} --model gpt-4.1`,
+          expect.stringContaining('You are operating in a codebase with a structured command and rules system'),
+        );
+      });
     });
   });
 

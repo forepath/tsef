@@ -18,6 +18,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   AgentsFacade,
   ClientsFacade,
+  FilesFacade,
   SocketsFacade,
   type AgentResponseDto,
   type ChatMessageData,
@@ -63,6 +64,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   private readonly clientsFacade = inject(ClientsFacade);
   private readonly agentsFacade = inject(AgentsFacade);
   private readonly socketsFacade = inject(SocketsFacade);
+  private readonly filesFacade = inject(FilesFacade);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly router = inject(Router);
@@ -157,6 +159,24 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     }),
   );
 
+  // Commands observables (computed based on active client and selected agent)
+  readonly commands$: Observable<string[]> = combineLatest([this.activeClientId$, this.selectedAgent$]).pipe(
+    switchMap(([clientId, agent]) => {
+      if (!clientId || !agent) {
+        return of([]);
+      }
+      return this.agentsFacade.getClientAgentCommands$(clientId, agent.id);
+    }),
+  );
+  readonly commandsLoading$: Observable<boolean> = combineLatest([this.activeClientId$, this.selectedAgent$]).pipe(
+    switchMap(([clientId, agent]) => {
+      if (!clientId || !agent) {
+        return of(false);
+      }
+      return this.agentsFacade.getClientAgentLoadingCommands$(clientId, agent.id);
+    }),
+  );
+
   // Socket observables
   readonly socketConnected$: Observable<boolean> = this.socketsFacade.connected$;
   readonly socketConnecting$: Observable<boolean> = this.socketsFacade.connecting$;
@@ -169,6 +189,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   // Local state
   chatMessage = signal<string>('');
   selectedChatModel = signal<string | null>('auto');
+  selectedCommand = signal<string | null>(null);
   selectedAgentId = signal<string | null>(null);
   editorOpen = signal<boolean>(false);
   chatVisible = signal<boolean>(true);
@@ -344,7 +365,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         }
       });
 
-    // Reset editor view when selected agent changes
+    // Reset editor view when selected agent changes and load commands
     this.selectedAgent$.pipe(takeUntil(this.destroy$)).subscribe((agent) => {
       const currentAgentId = agent?.id || null;
       if (currentAgentId && currentAgentId !== this.previousAgentId && this.editorOpen()) {
@@ -354,6 +375,10 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           this.fileEditor.fileTreeVisible.set(true);
           this.fileEditor.terminalVisible.set(false);
         }
+      }
+      // Load commands when agent is selected
+      if (currentAgentId && this.activeClientId) {
+        this.filesFacade.listDirectory(this.activeClientId, currentAgentId, { path: '.cursor/commands' });
       }
       this.previousAgentId = currentAgentId;
     });
@@ -393,6 +418,15 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     // Subscribe to chat messages and trigger scroll when new messages arrive
     this.chatMessages$.pipe(takeUntil(this.destroy$)).subscribe((messages) => {
       const currentMessageCount = messages.length;
+
+      // Initialize lastAgentMessageTimestamp on first load to prevent treating existing messages as new
+      if (this.previousMessageCount === 0 && currentMessageCount > 0 && this.lastAgentMessageTimestamp === 0) {
+        const agentMessages = messages.filter((msg) => this.isAgentMessage(msg.payload));
+        if (agentMessages.length > 0) {
+          this.lastAgentMessageTimestamp = Math.max(...agentMessages.map((msg) => msg.timestamp));
+        }
+      }
+
       if (currentMessageCount > this.previousMessageCount) {
         this.shouldScrollToBottom = true;
         this.previousMessageCount = currentMessageCount;
@@ -526,6 +560,8 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       const clientId = this.activeClientId;
       if (clientId) {
         this.agentsFacade.loadClientAgent(clientId, agentId);
+        // Load commands for the selected agent
+        this.filesFacade.listDirectory(clientId, agentId, { path: '.cursor/commands' });
         // Reset message count when switching agents
         this.previousMessageCount = 0;
         this.lastUserMessageTimestamp.set(null);
@@ -567,7 +603,14 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   }
 
   onSendMessage(): void {
-    const message = this.chatMessage().trim();
+    let message = this.chatMessage().trim();
+
+    // Append selected command to message if one is selected
+    const selectedCmd = this.selectedCommand();
+    if (selectedCmd) {
+      message = message ? `${selectedCmd}\n${message}` : selectedCmd;
+    }
+
     if (!message) {
       return;
     }
@@ -585,6 +628,8 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.lastUserMessageTimestamp.set(Date.now());
 
     this.chatMessage.set('');
+    // Clear selected command after sending
+    this.selectedCommand.set(null);
     // Trigger scroll after sending message
     this.shouldScrollToBottom = true;
   }
@@ -600,6 +645,11 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     const normalizedValue = value === '' ? null : value;
     this.selectedChatModel.set(normalizedValue);
     this.socketsFacade.setChatModel(normalizedValue);
+  }
+
+  onCommandChange(value: string): void {
+    const normalizedValue = value === '' ? null : value;
+    this.selectedCommand.set(normalizedValue);
   }
 
   onConnectSocket(): void {
@@ -1231,6 +1281,47 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       return messageData.text;
     }
     return null;
+  }
+
+  /**
+   * Format message text with command badge if message starts with a slash command
+   * @param text - The message text
+   * @returns SafeHtml with command wrapped in badge if applicable
+   */
+  formatMessageWithCommandBadge(text: string | null): SafeHtml | null {
+    if (!text) {
+      return null;
+    }
+
+    // Check if message starts with a slash command
+    const commandMatch = text.match(/^(\/[^\s\n]+)(.*)$/s);
+    if (commandMatch) {
+      const command = commandMatch[1];
+      const restOfMessage = commandMatch[2];
+
+      // Escape HTML in the rest of the message
+      const escapedRest = restOfMessage
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\n/g, '<br>');
+
+      // Create HTML with badge (white background with primary text for user messages)
+      const html = `<span class="badge bg-white text-primary me-2">${command}</span>${escapedRest}`;
+      return this.sanitizer.bypassSecurityTrustHtml(html);
+    }
+
+    // No command, return escaped text
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/\n/g, '<br>');
+    return this.sanitizer.bypassSecurityTrustHtml(escaped);
   }
 
   /**

@@ -12,6 +12,9 @@ import {
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
+  loadClientAgentCommands,
+  loadClientAgentCommandsFailure,
+  loadClientAgentCommandsSuccess,
   updateClientAgent,
   updateClientAgentFailure,
   updateClientAgentSuccess,
@@ -389,6 +392,83 @@ describe('agentsReducer', () => {
 
       expect(state.entities[clientId]).toEqual([]);
       expect(state.entities[clientId2]).toEqual([mockAgent2]);
+    });
+  });
+
+  describe('loadClientAgentCommands', () => {
+    const agentId = 'agent-1';
+
+    it('should set loadingCommands to true for the client:agent key', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        loadingCommands: {},
+      };
+
+      const newState = agentsReducer(state, loadClientAgentCommands({ clientId, agentId }));
+
+      expect(newState.loadingCommands[`${clientId}:${agentId}`]).toBe(true);
+    });
+  });
+
+  describe('loadClientAgentCommandsSuccess', () => {
+    const agentId = 'agent-1';
+    const commands = ['/command1', '/command2'];
+
+    it('should set commands for the client:agent key and set loadingCommands to false', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        loadingCommands: { [`${clientId}:${agentId}`]: true },
+      };
+
+      const newState = agentsReducer(state, loadClientAgentCommandsSuccess({ clientId, agentId, commands }));
+
+      expect(newState.commands[`${clientId}:${agentId}`]).toEqual(commands);
+      expect(newState.loadingCommands[`${clientId}:${agentId}`]).toBe(false);
+    });
+
+    it('should handle empty commands array', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        loadingCommands: { [`${clientId}:${agentId}`]: true },
+      };
+
+      const newState = agentsReducer(state, loadClientAgentCommandsSuccess({ clientId, agentId, commands: [] }));
+
+      expect(newState.commands[`${clientId}:${agentId}`]).toEqual([]);
+      expect(newState.loadingCommands[`${clientId}:${agentId}`]).toBe(false);
+    });
+
+    it('should not affect other client:agent keys', () => {
+      const clientId2 = 'client-2';
+      const agentId2 = 'agent-2';
+      const state: AgentsState = {
+        ...initialAgentsState,
+        commands: { [`${clientId2}:${agentId2}`]: ['/other-command'] },
+        loadingCommands: {
+          [`${clientId}:${agentId}`]: true,
+          [`${clientId2}:${agentId2}`]: false,
+        },
+      };
+
+      const newState = agentsReducer(state, loadClientAgentCommandsSuccess({ clientId, agentId, commands }));
+
+      expect(newState.commands[`${clientId}:${agentId}`]).toEqual(commands);
+      expect(newState.commands[`${clientId2}:${agentId2}`]).toEqual(['/other-command']);
+    });
+  });
+
+  describe('loadClientAgentCommandsFailure', () => {
+    const agentId = 'agent-1';
+
+    it('should set loadingCommands to false', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        loadingCommands: { [`${clientId}:${agentId}`]: true },
+      };
+
+      const newState = agentsReducer(state, loadClientAgentCommandsFailure({ clientId, agentId }));
+
+      expect(newState.loadingCommands[`${clientId}:${agentId}`]).toBe(false);
     });
   });
 });

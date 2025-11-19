@@ -381,7 +381,22 @@ export class DockerService {
 
       // Send input/keystrokes if provided
       if (input !== undefined) {
-        const inputArray = Array.isArray(input) ? input : [input];
+        // Normalize input: convert literal \n strings to actual newlines
+        // This handles cases where \n is passed as literal "\\n" over websocket connections
+        let inputArray: string[];
+        if (Array.isArray(input)) {
+          // For arrays: normalize each element, then split each element if it contains newlines
+          inputArray = input.flatMap((line) => {
+            const normalized = line.replace(/\\n/g, '\n');
+            return normalized.split(/\r?\n/);
+          });
+        } else {
+          // For strings: normalize, then split
+          const normalized = input.replace(/\\n/g, '\n');
+          inputArray = normalized.split(/\r?\n/);
+        }
+
+        // Send each line separately
         for (const inputLine of inputArray) {
           // Add newline if not present (simulates Enter key)
           const lineToSend = inputLine.endsWith('\n') ? inputLine : `${inputLine}\n`;

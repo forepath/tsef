@@ -3,6 +3,8 @@ import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { of, throwError } from 'rxjs';
 import { AgentsService } from '../../services/agents.service';
+import { listDirectory, listDirectoryFailure, listDirectorySuccess } from '../files/files.actions';
+import type { FileNodeDto } from '../files/files.types';
 import {
   createClientAgent,
   createClientAgentFailure,
@@ -11,6 +13,8 @@ import {
   deleteClientAgentFailure,
   deleteClientAgentSuccess,
   loadClientAgent,
+  loadClientAgentCommands,
+  loadClientAgentCommandsSuccess,
   loadClientAgentFailure,
   loadClientAgents,
   loadClientAgentsFailure,
@@ -24,6 +28,8 @@ import {
   createClientAgent$,
   deleteClientAgent$,
   loadClientAgent$,
+  loadClientAgentCommandsFromFiles$,
+  loadClientAgentCommandsLoading$,
   loadClientAgents$,
   updateClientAgent$,
 } from './agents.effects';
@@ -296,6 +302,172 @@ describe('AgentsEffects', () => {
       agentsService.listClientAgents.mockReturnValue(throwError(() => error));
 
       loadClientAgents$(actions$, agentsService).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        done();
+      });
+    });
+  });
+
+  describe('loadClientAgentCommandsLoading$', () => {
+    const agentId = 'agent-1';
+
+    it('should dispatch loadClientAgentCommands when listing .cursor/commands directory', (done) => {
+      const action = listDirectory({
+        clientId,
+        agentId,
+        params: { path: '.cursor/commands' },
+      });
+      const outcome = loadClientAgentCommands({ clientId, agentId });
+
+      actions$ = of(action);
+
+      loadClientAgentCommandsLoading$(actions$).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        done();
+      });
+    });
+
+    it('should ignore directory listings for other paths', (done) => {
+      const action = listDirectory({
+        clientId,
+        agentId,
+        params: { path: 'other' },
+      });
+
+      actions$ = of(action);
+      let called = false;
+
+      loadClientAgentCommandsLoading$(actions$).subscribe({
+        next: () => {
+          called = true;
+        },
+        complete: () => {
+          expect(called).toBe(false);
+          done();
+        },
+      });
+    });
+  });
+
+  describe('loadClientAgentCommandsFromFiles$', () => {
+    const agentId = 'agent-1';
+
+    it('should extract commands from .md files in .cursor/commands directory', (done) => {
+      const files: FileNodeDto[] = [
+        { name: 'command1.md', type: 'file', path: '.cursor/commands/command1.md' },
+        { name: 'command2.md', type: 'file', path: '.cursor/commands/command2.md' },
+        { name: 'readme.txt', type: 'file', path: '.cursor/commands/readme.txt' },
+        { name: 'subdir', type: 'directory', path: '.cursor/commands/subdir' },
+      ];
+      const action = listDirectorySuccess({
+        clientId,
+        agentId,
+        directoryPath: '.cursor/commands',
+        files,
+      });
+      const outcome = loadClientAgentCommandsSuccess({
+        clientId,
+        agentId,
+        commands: ['/command1', '/command2'],
+      });
+
+      actions$ = of(action);
+
+      loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        done();
+      });
+    });
+
+    it('should return empty commands array when no .md files exist', (done) => {
+      const files: FileNodeDto[] = [
+        { name: 'readme.txt', type: 'file', path: '.cursor/commands/readme.txt' },
+        { name: 'subdir', type: 'directory', path: '.cursor/commands/subdir' },
+      ];
+      const action = listDirectorySuccess({
+        clientId,
+        agentId,
+        directoryPath: '.cursor/commands',
+        files,
+      });
+      const outcome = loadClientAgentCommandsSuccess({
+        clientId,
+        agentId,
+        commands: [],
+      });
+
+      actions$ = of(action);
+
+      loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        done();
+      });
+    });
+
+    it('should return empty commands array when directory listing fails', (done) => {
+      const action = listDirectoryFailure({
+        clientId,
+        agentId,
+        directoryPath: '.cursor/commands',
+        error: 'Directory not found',
+      });
+      const outcome = loadClientAgentCommandsSuccess({
+        clientId,
+        agentId,
+        commands: [],
+      });
+
+      actions$ = of(action);
+
+      loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        done();
+      });
+    });
+
+    it('should ignore non-.cursor/commands directory listings', (done) => {
+      const files: FileNodeDto[] = [{ name: 'command1.md', type: 'file', path: 'other/command1.md' }];
+      const action = listDirectorySuccess({
+        clientId,
+        agentId,
+        directoryPath: 'other',
+        files,
+      });
+
+      actions$ = of(action);
+      let called = false;
+
+      loadClientAgentCommandsFromFiles$(actions$).subscribe({
+        next: () => {
+          called = true;
+        },
+        complete: () => {
+          expect(called).toBe(false);
+          done();
+        },
+      });
+    });
+
+    it('should handle files with .md extension in subdirectories correctly', (done) => {
+      const files: FileNodeDto[] = [
+        { name: 'command1.md', type: 'file', path: '.cursor/commands/command1.md' },
+        { name: 'subdir', type: 'directory', path: '.cursor/commands/subdir' },
+      ];
+      const action = listDirectorySuccess({
+        clientId,
+        agentId,
+        directoryPath: '.cursor/commands',
+        files,
+      });
+      const outcome = loadClientAgentCommandsSuccess({
+        clientId,
+        agentId,
+        commands: ['/command1'],
+      });
+
+      actions$ = of(action);
+
+      loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
         expect(result).toEqual(outcome);
         done();
       });

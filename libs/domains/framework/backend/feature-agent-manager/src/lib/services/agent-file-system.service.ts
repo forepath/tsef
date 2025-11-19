@@ -370,7 +370,7 @@ export class AgentFileSystemService {
       const escapedPath = this.escapeForShell(containerPath);
 
       // Get list of items using ls -1 (one per line)
-      const listCommand = `sh -c "ls -1 ${escapedPath} 2>/dev/null"`;
+      const listCommand = `sh -c "ls -a -1 ${escapedPath} 2>/dev/null"`;
       let output = await this.dockerService.sendCommandToContainer(agentEntity.containerId, listCommand);
 
       // Remove invalid characters that might come from Docker protocol parsing
@@ -381,6 +381,7 @@ export class AgentFileSystemService {
       const nodes: FileNodeDto[] = [];
       const items = output
         .split('\n')
+        .filter((item) => item.trim().length > 0 && item.trim() !== '.' && item.trim() !== '..')
         .map((item) => this.sanitizeFilesystemString(item))
         .filter((item) => item.length > 0);
 
