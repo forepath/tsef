@@ -158,6 +158,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Store terminal sessions: socket.id + sessionId -> sessionId
   // This ensures terminal sessions are client-specific (socket.id based)
   private terminalSessionsBySocket = new Map<string, Set<string>>();
+  // Track agents that have received their first initialization message
+  // Maps agent UUID -> boolean (true if initialization message was sent)
+  private agentsWithFirstMessageSent = new Set<string>();
 
   constructor(
     private readonly agentsService: AgentsService,
@@ -418,6 +421,65 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const agent = await this.agentsService.findOne(agentUuid);
       this.logger.log(`Agent ${agent.name} (${agentUuid}) says: ${message}`);
       const chatTimestamp = new Date().toISOString();
+
+      // Check if this is the first message for this agent
+      // Send initialization message if agent has no chat history and hasn't received first message
+      if (!this.agentsWithFirstMessageSent.has(agentUuid)) {
+        const chatHistory = await this.agentMessagesService.getChatHistory(agentUuid, 1, 0);
+        if (chatHistory.length === 0) {
+          // This is the first message ever - send dummy initialization message first
+          const entity = await this.agentsRepository.findById(agentUuid);
+          const containerId = entity?.containerId;
+          if (containerId) {
+            // Command to execute: cursor-agent with prompt mode and JSON output
+            let command = `cursor-agent --print --approve-mcps --force --output-format json --resume ${agent.id}-${containerId}`;
+            if (data.model) {
+              command += ` --model ${data.model}`;
+            }
+
+            // Send dummy message to container stdin (not persisted or broadcast)
+            const instructions = `You are operating in a codebase with a structured command and rules system. Follow these guidelines:
+
+COMMAND SYSTEM:
+- Executable commands **CAN** be found in the project folder at .cursor/commands
+- Each command **IS** a Markdown (.md) file
+- The command invocation format **IS** /{filenamewithoutextension} (where filenamewithoutextension is the filename without the .md extension)
+- Example: A file named "ship.md" in .cursor/commands **IS** invoked as /ship
+- Commands **MUST** be at the start of a message to be recognized and executed
+- When you need to execute a command, you **MUST** look for it in .cursor/commands and invoke it using the /{filenamewithoutextension} format at the beginning of your message
+
+RULES SYSTEM:
+- Basic context files **CAN** be found in .cursor/rules
+- Rules files **MAY** contain an "alwaysApply" property (this is optional in the system)
+- If a rules file has "alwaysApply: true", you **MUST** always read and apply that file regardless of context
+- If a rules file has "alwaysApply: false", you **SHALL** only apply that file to files matching the respective "globs:" entries
+- The "globs:" property **CONTAINS** comma-separated glob patterns that specify which files the rules apply to
+- When processing a file, you **MUST** check all rules files with "alwaysApply: true" and all rules files with "alwaysApply: false" whose globs match the current file path
+
+MESSAGE HANDLING:
+- This is a one-time initialization message to establish system context
+- All subsequent messages you receive **WILL** be from users
+- You **MUST** treat all messages after this initialization as user requests, tasks, or questions
+- You **SHALL** respond to user messages as you would in a normal conversation, applying the command and rules system guidelines above`;
+            try {
+              await this.dockerService.sendCommandToContainer(containerId, command, instructions);
+              this.logger.debug(`Sent initialization message to agent ${agentUuid}`);
+            } catch (error) {
+              const err = error as { message?: string; stack?: string };
+              this.logger.warn(
+                `Failed to send initialization message to agent ${agentUuid}: ${err.message}`,
+                err.stack,
+              );
+              // Continue with normal flow even if initialization fails
+            }
+          }
+          // Mark agent as having received first message
+          this.agentsWithFirstMessageSent.add(agentUuid);
+        } else {
+          // Agent has chat history, mark as initialized
+          this.agentsWithFirstMessageSent.add(agentUuid);
+        }
+      }
 
       // Persist user message
       try {

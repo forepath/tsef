@@ -279,4 +279,46 @@ describe('AgentsFacade', () => {
       });
     });
   });
+
+  describe('Commands Observables', () => {
+    const agentId = 'agent-1';
+
+    it('should return client agent commands observable', (done) => {
+      const commands = ['/command1', '/command2'];
+      store.select.mockReturnValue(of(commands));
+
+      facade.getClientAgentCommands$(clientId, agentId).subscribe((result) => {
+        expect(result).toEqual(commands);
+        expect(store.select).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('should return empty array when no commands', (done) => {
+      store.select.mockReturnValue(of([]));
+
+      facade.getClientAgentCommands$(clientId, agentId).subscribe((result) => {
+        expect(result).toEqual([]);
+        done();
+      });
+    });
+
+    it('should return client agent loading commands observable', (done) => {
+      store.select.mockReturnValue(of(true));
+
+      facade.getClientAgentLoadingCommands$(clientId, agentId).subscribe((result) => {
+        expect(result).toBe(true);
+        done();
+      });
+    });
+
+    it('should return false when not loading commands', (done) => {
+      store.select.mockReturnValue(of(false));
+
+      facade.getClientAgentLoadingCommands$(clientId, agentId).subscribe((result) => {
+        expect(result).toBe(false);
+        done();
+      });
+    });
+  });
 });

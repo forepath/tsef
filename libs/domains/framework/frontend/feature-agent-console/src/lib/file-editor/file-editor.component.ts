@@ -84,6 +84,10 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
   // Autosave debounce subject
   private readonly autosaveTrigger$ = new Subject<void>();
 
+  // Refresh debounce subject to prevent multiple rapid refreshes
+  private readonly refreshTrigger$ = new Subject<void>();
+  private isRefreshing = false;
+
   // Convert signals to observables
   private readonly selectedFilePath$ = toObservable(this.selectedFilePath);
   private readonly clientId$ = toObservable(this.clientId);
@@ -267,6 +271,16 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
         if (this.autosaveEnabled() && this.isDirty()) {
           this.onSave();
         }
+      });
+
+    // Debounced refresh: prevent multiple rapid refreshes from chat messages
+    this.refreshTrigger$
+      .pipe(
+        debounceTime(500), // 500ms debounce to batch rapid refresh calls
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.performRefresh();
       });
 
     // Save immediately when autosave is enabled if file is already dirty
@@ -595,17 +609,40 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
    * Refresh the file tree and reload file content while preserving state.
    * This method reloads directory listings and file content without losing
    * the currently selected file or expanded folder state.
+   * Uses debouncing to prevent multiple rapid refreshes.
    */
   refresh(): void {
+    // Trigger debounced refresh
+    this.refreshTrigger$.next();
+  }
+
+  /**
+   * Internal method that performs the actual refresh operation.
+   * Called by the debounced refresh trigger.
+   */
+  private performRefresh(): void {
+    // Prevent concurrent refreshes (debouncing handles most cases, but this is a safety check)
+    if (this.isRefreshing) {
+      return;
+    }
+
     const clientId = this.clientId();
     const agentId = this.agentId();
     if (!clientId || !agentId) {
       return;
     }
 
+    this.isRefreshing = true;
+
     // Save current state
     const currentSelectedFile = this.selectedFilePath();
     const currentExpandedPaths = new Set(this.expandedPaths());
+
+    // Count how many directories we need to reload
+    let directoriesToReload = currentExpandedPaths.size;
+    if (!currentExpandedPaths.has('.')) {
+      directoriesToReload += 1; // Root needs to be reloaded
+    }
 
     // Reload all expanded directories (including root)
     // Use a small delay for root to avoid immediate cancellation from the file tree component's effect
@@ -626,6 +663,12 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
         this.filesFacade.listDirectory(clientId, agentId, { path: '.' });
       }, 50);
     }
+
+    // Reset flag after a short delay to allow all listDirectory calls to be dispatched
+    // The actual API calls are async, but we just need to prevent immediate duplicate calls
+    setTimeout(() => {
+      this.isRefreshing = false;
+    }, 100);
 
     // Reload currently selected file if it exists
     if (currentSelectedFile) {

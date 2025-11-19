@@ -92,3 +92,19 @@ export const clearSelectedClientAgent = createAction(
   '[Agents] Clear Selected Client Agent',
   props<{ clientId: string }>(),
 );
+
+// Load Client Agent Commands Actions
+export const loadClientAgentCommands = createAction(
+  '[Agents] Load Client Agent Commands',
+  props<{ clientId: string; agentId: string }>(),
+);
+
+export const loadClientAgentCommandsSuccess = createAction(
+  '[Agents] Load Client Agent Commands Success',
+  props<{ clientId: string; agentId: string; commands: string[] }>(),
+);
+
+export const loadClientAgentCommandsFailure = createAction(
+  '[Agents] Load Client Agent Commands Failure',
+  props<{ clientId: string; agentId: string }>(),
+);

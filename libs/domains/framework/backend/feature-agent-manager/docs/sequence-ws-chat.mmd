@@ -97,6 +97,34 @@ sequenceDiagram
             Repo-->>Service: agent entity
             Service-->>Gateway: agent details
 
+            Note over Gateway,MsgRepo: Check for Initialization Message
+            Gateway->>Gateway: Check if agentsWithFirstMessageSent.has(uuid)
+            alt First message not sent
+                Gateway->>MsgService: getChatHistory(uuid, 1, 0)
+                MsgService->>MsgRepo: findByAgentId(uuid, 1, 0)
+                MsgRepo->>DB: SELECT agent_messages WHERE agent_id ORDER BY created_at ASC LIMIT 1
+                DB-->>MsgRepo: message entities
+                MsgRepo-->>MsgService: message entities
+                MsgService-->>Gateway: chat history
+                alt No chat history exists
+                    Gateway->>Repo: findById(uuid)
+                    Repo->>DB: SELECT agent WHERE id
+                    DB-->>Repo: agent entity with containerId
+                    Repo-->>Gateway: agent entity
+                    alt Container exists
+                        Gateway->>Gateway: command = baseCommand + (model ? ` --model ${model}` : "")
+                        Gateway->>Docker: sendCommandToContainer(containerId, command, instructions)
+                        Note over Gateway: instructions = system context<br/>(command & rules system, message handling)
+                        Docker->>Docker: Execute command and capture output
+                        Docker-->>Gateway: (response ignored)
+                        Gateway->>Gateway: agentsWithFirstMessageSent.add(uuid)
+                        Gateway->>Gateway: Log: "Sent initialization message"
+                    end
+                else Chat history exists
+                    Gateway->>Gateway: agentsWithFirstMessageSent.add(uuid)
+                end
+            end
+
             Note over Gateway,MsgRepo: Persist User Message
             Gateway->>MsgService: createUserMessage(uuid, message)
             MsgService->>MsgRepo: create({agentId, actor: "user", message})

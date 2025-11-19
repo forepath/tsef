@@ -338,7 +338,9 @@
                       <div class="d-flex justify-content-end">
                         <div class="card bg-primary text-white chat-message-card">
                           <div class="card-body chat-message-body">
-                            <p class="card-text chat-message-text">{{ getText(messageData) }}</p>
+                            @if (formatMessageWithCommandBadge(getText(messageData)); as formattedText) {
+                              <p class="card-text chat-message-text" [innerHTML]="formattedText"></p>
+                            }
                             <small class="chat-message-timestamp">{{ formatTimestamp(msg.timestamp) }}</small>
                           </div>
                         </div>
@@ -390,10 +392,29 @@
         }
 
         <!-- Chat input -->
-        <div class="p-3 border-top bg-body-tertiary">
-          <div class="input-group">
+        <div class="p-3 border-top bg-body-tertiary chat-input-container">
+          <div class="chat-commands-select w-50">
+            <select
+              id="chatCommandsSelect"
+              class="form-select form-select-sm small text-body"
+              name="chatCommandsSelect"
+              [ngModel]="selectedCommand() ?? ''"
+              (ngModelChange)="onCommandChange($event)"
+              [disabled]="!!(!(socketConnected$ | async) || !(selectedAgent$ | async) || (commandsLoading$ | async))"
+            >
+              <option value="">Chat</option>
+              <optgroup label="Commands">
+                @if (commands$ | async; as commands) {
+                  @for (command of commands; track command) {
+                    <option [value]="command">{{ command }}</option>
+                  }
+                }
+              </optgroup>
+            </select>
+          </div>
+          <div class="input-group chat-input-group">
             <textarea
-              class="form-control"
+              class="form-control chat-textarea"
               rows="3"
               placeholder="Type a message..."
               [value]="chatMessage()"

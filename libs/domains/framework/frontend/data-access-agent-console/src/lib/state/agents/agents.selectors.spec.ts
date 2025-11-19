@@ -1,14 +1,17 @@
 import { createFeatureSelector } from '@ngrx/store';
 import {
+  selectAgentsCommands,
   selectAgentsCreating,
   selectAgentsDeleting,
   selectAgentsEntities,
   selectAgentsErrors,
   selectAgentsLoading,
   selectAgentsLoadingAgent,
+  selectAgentsLoadingCommands,
   selectAgentsState,
   selectAgentsUpdating,
   selectClientAgentById,
+  selectClientAgentCommands,
   selectClientAgents,
   selectClientAgentsCount,
   selectClientAgentsCreating,
@@ -17,6 +20,7 @@ import {
   selectClientAgentsLoading,
   selectClientAgentsLoadingAny,
   selectClientAgentLoading,
+  selectClientAgentLoadingCommands,
   selectClientAgentsUpdating,
   selectHasClientAgents,
   selectSelectedAgents,
@@ -356,6 +360,104 @@ describe('Agents Selectors', () => {
       const rootState = { agents: state };
 
       expect(selectAgentsErrors(rootState as any)).toEqual({ [clientId]: 'Error message' });
+    });
+  });
+
+  describe('selectClientAgentCommands', () => {
+    const agentId = 'agent-1';
+    const agentId2 = 'agent-2';
+
+    it('should return commands for a specific client and agent', () => {
+      const commands = ['/command1', '/command2'];
+      const state = createState({
+        commands: { [`${clientId}:${agentId}`]: commands },
+      });
+      const rootState = { agents: state };
+      const selector = selectClientAgentCommands(clientId, agentId);
+      const result = selector(rootState as any);
+
+      expect(result).toEqual(commands);
+    });
+
+    it('should return empty array when no commands exist', () => {
+      const state = createState({
+        commands: {},
+      });
+      const rootState = { agents: state };
+      const selector = selectClientAgentCommands(clientId, agentId);
+      const result = selector(rootState as any);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should not return commands for different client:agent combination', () => {
+      const commands = ['/command1', '/command2'];
+      const state = createState({
+        commands: { [`${clientId}:${agentId}`]: commands },
+      });
+      const rootState = { agents: state };
+      const selector = selectClientAgentCommands(clientId2, agentId2);
+      const result = selector(rootState as any);
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('selectClientAgentLoadingCommands', () => {
+    const agentId = 'agent-1';
+    const agentId2 = 'agent-2';
+
+    it('should return loading state for a specific client and agent', () => {
+      const state = createState({
+        loadingCommands: { [`${clientId}:${agentId}`]: true },
+      });
+      const rootState = { agents: state };
+      const selector = selectClientAgentLoadingCommands(clientId, agentId);
+      const result = selector(rootState as any);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when loading state is not set', () => {
+      const state = createState({
+        loadingCommands: {},
+      });
+      const rootState = { agents: state };
+      const selector = selectClientAgentLoadingCommands(clientId, agentId);
+      const result = selector(rootState as any);
+
+      expect(result).toBe(false);
+    });
+
+    it('should not return loading state for different client:agent combination', () => {
+      const state = createState({
+        loadingCommands: { [`${clientId}:${agentId}`]: true },
+      });
+      const rootState = { agents: state };
+      const selector = selectClientAgentLoadingCommands(clientId2, agentId2);
+      const result = selector(rootState as any);
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('base selectors for commands', () => {
+    it('should select commands', () => {
+      const state = createState({
+        commands: { 'client-1:agent-1': ['/command1'] },
+      });
+      const rootState = { agents: state };
+
+      expect(selectAgentsCommands(rootState as any)).toEqual({ 'client-1:agent-1': ['/command1'] });
+    });
+
+    it('should select loadingCommands', () => {
+      const state = createState({
+        loadingCommands: { 'client-1:agent-1': true },
+      });
+      const rootState = { agents: state };
+
+      expect(selectAgentsLoadingCommands(rootState as any)).toEqual({ 'client-1:agent-1': true });
     });
   });
 });

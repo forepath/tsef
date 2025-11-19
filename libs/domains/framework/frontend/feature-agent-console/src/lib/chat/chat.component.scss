@@ -84,6 +84,51 @@
   margin-top: 0.25rem;
 }
 
+// Chat input container - provides positioning context for commands select
+.chat-input-container {
+  position: relative;
+}
+
+// Input group with commands select overlay
+.chat-input-group {
+  position: relative;
+}
+
+// Commands select - positioned absolutely over the textarea
+.chat-commands-select {
+  position: absolute;
+  // Position to align with textarea inside input-group
+  // The input-group is positioned after the select in DOM flow
+  // We need to align with where the textarea actually renders
+  // Account for: container padding + input-group positioning + textarea border
+  top: calc(0.75rem + 1px + 0.375rem); // Container padding + border + textarea border-radius offset
+  left: calc(0.75rem + 1px + 0.375rem); // Container padding + border + textarea border-radius offset
+  z-index: 10;
+  pointer-events: auto; // Allow interaction with select
+
+  select {
+    width: 100%;
+    // Match model select styling
+    font-size: 0.875rem; // small
+    padding: 0.25rem 0.5rem; // form-select-sm
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    background-color: var(--bs-body-bg, #fff); // Ensure select is visible over textarea
+    border: 1px solid var(--bs-border-color, #dee2e6);
+  }
+}
+
+// Textarea with padding to prevent typing in the rows where select is
+.chat-textarea {
+  // Add padding-top to prevent typing in the rows where select is positioned
+  // Select height is approximately 1.875rem (form-select-sm with padding)
+  // Plus container padding: 0.375rem top + 0.375rem bottom = 0.75rem
+  // Total padding needed: ~2.625rem to cover select + padding
+  padding-top: 2.75rem;
+  min-width: 0; // Allow input to shrink
+  overflow-wrap: break-word;
+}
+
 // Input area - prevent horizontal overflow
 .input-group {
   max-width: 100%;

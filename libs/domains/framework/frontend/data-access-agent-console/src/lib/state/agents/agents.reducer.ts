@@ -13,6 +13,9 @@ import {
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
+  loadClientAgentCommands,
+  loadClientAgentCommandsFailure,
+  loadClientAgentCommandsSuccess,
   updateClientAgent,
   updateClientAgentFailure,
   updateClientAgentSuccess,
@@ -24,9 +27,12 @@ export interface AgentsState {
   entities: Record<string, AgentResponseDto[]>;
   // Selected agent per client
   selectedAgents: Record<string, AgentResponseDto | null>;
+  // Commands per client:agent (keyed by clientId:agentId)
+  commands: Record<string, string[]>;
   // Loading states per client
   loading: Record<string, boolean>;
   loadingAgent: Record<string, boolean>;
+  loadingCommands: Record<string, boolean>;
   creating: Record<string, boolean>;
   updating: Record<string, boolean>;
   deleting: Record<string, boolean>;
@@ -37,13 +43,19 @@ export interface AgentsState {
 export const initialAgentsState: AgentsState = {
   entities: {},
   selectedAgents: {},
+  commands: {},
   loading: {},
   loadingAgent: {},
+  loadingCommands: {},
   creating: {},
   updating: {},
   deleting: {},
   errors: {},
 };
+
+function getClientAgentKey(clientId: string, agentId: string): string {
+  return `${clientId}:${agentId}`;
+}
 
 function updateClientState(
   state: AgentsState,
@@ -245,4 +257,27 @@ export const agentsReducer = createReducer(
       selectedAgent: null,
     })),
   ),
+  // Load Client Agent Commands
+  on(loadClientAgentCommands, (state, { clientId, agentId }) => {
+    const key = getClientAgentKey(clientId, agentId);
+    return {
+      ...state,
+      loadingCommands: { ...state.loadingCommands, [key]: true },
+    };
+  }),
+  on(loadClientAgentCommandsSuccess, (state, { clientId, agentId, commands }) => {
+    const key = getClientAgentKey(clientId, agentId);
+    return {
+      ...state,
+      commands: { ...state.commands, [key]: commands },
+      loadingCommands: { ...state.loadingCommands, [key]: false },
+    };
+  }),
+  on(loadClientAgentCommandsFailure, (state, { clientId, agentId }) => {
+    const key = getClientAgentKey(clientId, agentId);
+    return {
+      ...state,
+      loadingCommands: { ...state.loadingCommands, [key]: false },
+    };
+  }),
 );
