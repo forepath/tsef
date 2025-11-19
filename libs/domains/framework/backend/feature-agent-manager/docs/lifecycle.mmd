@@ -12,7 +12,7 @@ sequenceDiagram
     Note over User,Docker: End-to-end lifecycle: create → connect/login → send command/chat → disconnect → delete
 
     rect rgb(230, 240, 255)
-        Note over User,Docker: Step 1 — Create Agent (HTTP)
+        Note over User,Docker: Step 1 - Create Agent (HTTP)
         User->>HTTP: POST /api/agents { name, description? }
         HTTP->>Service: create(createAgentDto)
         Service->>Service: generatePassword()
@@ -52,13 +52,13 @@ sequenceDiagram
     end
 
     rect rgb(200, 220, 255)
-        Note over User,Docker: Step 2 — Connect (WebSocket)
+        Note over User,Docker: Step 2 - Connect (WebSocket)
         User->>WS: WebSocket Connect (namespace: /agents)
         WS->>WS: handleConnection(socket)
     end
 
     rect rgb(240, 250, 255)
-        Note over User,Docker: Step 3 — Authenticate (WebSocket)
+        Note over User,Docker: Step 3 - Authenticate (WebSocket)
         User->>WS: login { agentId: id|name, password }
         WS->>Repo: findById(id)
         Repo->>DB: SELECT agent WHERE id
@@ -114,7 +114,7 @@ sequenceDiagram
     end
 
     rect rgb(250, 255, 240)
-        Note over User,Docker: Step 5 — Send Command / Chat (WebSocket)
+        Note over User,Docker: Step 5 - Send Command / Chat (WebSocket)
         User->>WS: chat { message }
         WS->>WS: uuid = authenticatedClients.get(socket.id)
         alt Not authenticated
@@ -205,14 +205,14 @@ sequenceDiagram
     end
 
     rect rgb(255, 220, 220)
-        Note over User,Docker: Step 6 — Disconnect (WebSocket)
+        Note over User,Docker: Step 6 - Disconnect (WebSocket)
         User->>WS: WebSocket Disconnect
         WS->>WS: handleDisconnect(socket)
         WS->>WS: authenticatedClients.delete(socket.id)
     end
 
     rect rgb(255, 230, 255)
-        Note over User,DB: Step 7 — Delete Agent (HTTP)
+        Note over User,DB: Step 7 - Delete Agent (HTTP)
         User->>HTTP: DELETE /api/agents/{id}
         HTTP->>Service: remove(id)
         Service->>Repo: delete(id)

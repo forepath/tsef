@@ -13,7 +13,7 @@ sequenceDiagram
     Note over User,RemoteWS: End-to-end lifecycle: create client → proxy agent creation → connect WS → forward events → disconnect → delete
 
     rect rgb(230, 240, 255)
-        Note over User,DB: Step 1 — Create Client (HTTP)
+        Note over User,DB: Step 1 - Create Client (HTTP)
         User->>HTTP: POST /api/clients<br/>{name, endpoint, authType: API_KEY|KEYCLOAK, ...}
         HTTP->>Service: create(createClientDto)
         alt Authentication Type: API_KEY
@@ -30,7 +30,7 @@ sequenceDiagram
     end
 
     rect rgb(200, 220, 255)
-        Note over User,RemoteHTTP: Step 2 — Create Agent via Proxy (HTTP)
+        Note over User,RemoteHTTP: Step 2 - Create Agent via Proxy (HTTP)
         User->>HTTP: POST /api/clients/{clientId}/agents<br/>{name, description?}
         HTTP->>Proxy: createClientAgent(clientId, createAgentDto)
         Proxy->>Proxy: getAuthHeader(clientId)
@@ -47,7 +47,7 @@ sequenceDiagram
     end
 
     rect rgb(240, 250, 255)
-        Note over User,RemoteWS: Step 3 — Connect WebSocket & Set Client Context
+        Note over User,RemoteWS: Step 3 - Connect WebSocket & Set Client Context
         User->>WS: WebSocket Connect<br/>(namespace: /clients)
         WS->>WS: handleConnection(socket)
         User->>WS: setClient<br/>{clientId}
@@ -66,7 +66,7 @@ sequenceDiagram
     end
 
     rect rgb(250, 255, 240)
-        Note over User,RemoteWS: Step 4 — Forward Event with Auto-Login
+        Note over User,RemoteWS: Step 4 - Forward Event with Auto-Login
         User->>WS: forward<br/>{event: "chat", payload: {message: "Hello"}, agentId}
         WS->>WS: Check if agentId logged in
         alt Agent not logged in
@@ -87,7 +87,7 @@ sequenceDiagram
     end
 
     rect rgb(255, 240, 250)
-        Note over User,RemoteWS: Step 5 — Forward Additional Events
+        Note over User,RemoteWS: Step 5 - Forward Additional Events
         User->>WS: forward<br/>{event: "chat", payload: {message: "Another message"}, agentId}
         WS->>WS: Check logged-in agents
         alt Agent already logged in
@@ -100,7 +100,7 @@ sequenceDiagram
     end
 
     rect rgb(255, 220, 220)
-        Note over User,RemoteWS: Step 6 — Disconnect WebSocket
+        Note over User,RemoteWS: Step 6 - Disconnect WebSocket
         User->>WS: WebSocket Disconnect
         WS->>WS: handleDisconnect(socket)
         WS->>WS: Clean up selectedClientBySocket
@@ -111,7 +111,7 @@ sequenceDiagram
     end
 
     rect rgb(255, 230, 255)
-        Note over User,DB: Step 7 — Delete Agent via Proxy (HTTP)
+        Note over User,DB: Step 7 - Delete Agent via Proxy (HTTP)
         User->>HTTP: DELETE /api/clients/{clientId}/agents/{agentId}
         HTTP->>Proxy: deleteClientAgent(clientId, agentId)
         Proxy->>Proxy: getAuthHeader(clientId)
@@ -126,7 +126,7 @@ sequenceDiagram
     end
 
     rect rgb(255, 240, 240)
-        Note over User,DB: Step 8 — Delete Client (HTTP)
+        Note over User,DB: Step 8 - Delete Client (HTTP)
         User->>HTTP: DELETE /api/clients/{clientId}
         HTTP->>Service: remove(clientId)
         Service->>Repo: findById(clientId)

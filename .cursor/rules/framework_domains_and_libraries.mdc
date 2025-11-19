@@ -66,14 +66,14 @@ This document defines the rules and best practices for structuring domains and l
 
 ### Frontend (`scope:frontend`)
 
-- Frontend libraries **MUST** contain only frontend framework–specific code (e.g. Angular).
+- Frontend libraries **MUST** contain only frontend framework-specific code (e.g. Angular).
 - Frontend libraries **MUST NOT** depend on `backend` libraries.
 - Frontend libraries **MUST** be allowed to depend on `shared` libraries.
 - Frontend libraries **SHOULD** use `ui` and `feature` libraries for composition.
 
 ### Backend (`scope:backend`)
 
-- Backend libraries **MUST** contain only backend framework–specific code (e.g. NestJS).
+- Backend libraries **MUST** contain only backend framework-specific code (e.g. NestJS).
 - Backend libraries **MUST NOT** depend on `frontend` libraries.
 - Backend libraries **MUST** be allowed to depend on `shared` libraries.
 - Backend libraries **SHOULD** centralize domain-specific services in `data-access` libraries.

@@ -58,8 +58,8 @@ Agents **SHOULD** summarize or drop first the following items:
 
 ## Token Budgeting
 
-- Agents **SHOULD** allocate ~60–70% of available tokens to “active task” materials (latest ask, open files, diffs, errors).
-- Agents **SHOULD** allocate ~20–30% to essential rules/constraints from the repository ruleset.
+- Agents **SHOULD** allocate ~60-70% of available tokens to “active task” materials (latest ask, open files, diffs, errors).
+- Agents **SHOULD** allocate ~20-30% to essential rules/constraints from the repository ruleset.
 - Agents **SHOULD** use the remaining budget for minimal historical context and alternatives.
 - Summaries **SHOULD** target ≤ 350 tokens unless the user explicitly requests more.
 
@@ -82,9 +82,9 @@ Agents **SHOULD** summarize or drop first the following items:
 
 Agents **MUST** use the following compact structure unless the user explicitly requests a different format:
 
-1. What's changing (1–3 bullets)
-2. Why it matters (1–2 bullets)
-3. Key code references (file:line–line)
+1. What's changing (1-3 bullets)
+2. Why it matters (1-2 bullets)
+3. Key code references (file:line-line)
 4. Errors/risks (first occurrence per unique error)
 5. Rules in effect (short list of links)
 
