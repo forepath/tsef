@@ -14,11 +14,8 @@ const getWorkerUrl = (relativePath: string): URL => {
   return new URL(`node_modules/monaco-editor/esm/vs/${relativePath}`, workspaceRoot);
 };
 
-const editorWorker = new Worker(getWorkerUrl('editor/editor.worker.js'), { type: 'module' });
-const tsWorker = new Worker(getWorkerUrl('language/typescript/ts.worker.js'), { type: 'module' });
-const cssWorker = new Worker(getWorkerUrl('language/css/css.worker.js'), { type: 'module' });
-const htmlWorker = new Worker(getWorkerUrl('language/html/html.worker.js'), { type: 'module' });
-const jsonWorker = new Worker(getWorkerUrl('language/json/json.worker.js'), { type: 'module' });
+// Lazy worker cache to avoid creating workers until they're actually needed
+const workerCache: Record<string, Worker> = {};
 
 // Configure Monaco Editor workers
 // Simple approach: use getWorkerUrl to return absolute URLs
@@ -31,18 +28,22 @@ declare const self: Window & {
 
 self.MonacoEnvironment = {
   getWorker: function (moduleId: string, label: string): Worker {
-    // Map worker labels to their file paths in assets
-    const workerPaths: Record<string, Worker> = {
-      editorWorkerService: editorWorker,
-      typescript: tsWorker,
-      javascript: tsWorker,
-      css: cssWorker,
-      html: htmlWorker,
-      json: jsonWorker,
-    };
+    // Lazy-load workers only when needed to avoid blocking initial render
+    if (!workerCache[label]) {
+      const workerPaths: Record<string, string> = {
+        editorWorkerService: 'editor/editor.worker.js',
+        typescript: 'language/typescript/ts.worker.js',
+        javascript: 'language/typescript/ts.worker.js',
+        css: 'language/css/css.worker.js',
+        html: 'language/html/html.worker.js',
+        json: 'language/json/json.worker.js',
+      };
 
-    // Get the relative path for this worker
-    return workerPaths[label] || workerPaths['editorWorkerService'];
+      const workerPath = workerPaths[label] || workerPaths['editorWorkerService'];
+      workerCache[label] = new Worker(getWorkerUrl(workerPath), { type: 'module' });
+    }
+
+    return workerCache[label];
   },
 };
 
