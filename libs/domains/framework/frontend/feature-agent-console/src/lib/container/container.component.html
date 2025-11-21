@@ -17,9 +17,50 @@
         <img src="assets/images/icon_light.svg" alt="Agenstra" class="brand-icon" />
       </div>
     </div>
-    @if (isAuthenticated$ | async) {
-      <button class="btn btn-primary me-3" (click)="onLogout()">Logout</button>
-    }
+    <div class="d-flex align-items-center gap-2">
+      <!-- Dark Mode Toggle -->
+      <div class="form-check form-switch me-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          role="switch"
+          id="darkModeToggle"
+          [checked]="themeService.isDarkMode()"
+          (change)="themeService.toggleTheme()"
+        />
+        <label class="form-check-label text-white" for="darkModeToggle" title="Toggle dark mode">
+          <i
+            class="bi"
+            [class.bi-moon-fill]="!themeService.isDarkMode()"
+            [class.bi-sun-fill]="themeService.isDarkMode()"
+          ></i>
+        </label>
+      </div>
+      @if (isAuthenticated$ | async) {
+        <button class="btn btn-primary me-3" (click)="onLogout()">Logout</button>
+      }
+    </div>
+  </section>
+} @else {
+  <!-- Dark Mode Toggle for Standalone Mode -->
+  <section class="d-flex align-items-center justify-content-end gap-2 p-2 border-bottom">
+    <div class="form-check form-switch">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        role="switch"
+        id="darkModeToggleStandalone"
+        [checked]="themeService.isDarkMode()"
+        (change)="themeService.toggleTheme()"
+      />
+      <label class="form-check-label" for="darkModeToggleStandalone" title="Toggle dark mode">
+        <i
+          class="bi"
+          [class.bi-moon-fill]="!themeService.isDarkMode()"
+          [class.bi-sun-fill]="themeService.isDarkMode()"
+        ></i>
+      </label>
+    </div>
   </section>
 }
 <section class="section__container">
