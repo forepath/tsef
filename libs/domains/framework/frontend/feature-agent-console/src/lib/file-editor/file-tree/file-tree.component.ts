@@ -265,6 +265,124 @@ export class FileTreeComponent implements OnInit {
     this.contextMenuPosition.set({ x: event.clientX, y: event.clientY });
   }
 
+  onCopyFileLink(path: string): void {
+    const clientId = this.clientId();
+    const agentId = this.agentId();
+    if (!clientId || !agentId) {
+      return;
+    }
+
+    // Build the URL
+    const baseUrl = window.location.origin;
+    const editorPath = `/clients/${clientId}/agents/${agentId}/editor`;
+    const queryParams = new URLSearchParams();
+    queryParams.set('standalone', 'true');
+    queryParams.set('file', encodeURIComponent(path));
+    const url = `${baseUrl}${editorPath}?${queryParams.toString()}`;
+
+    // Copy to clipboard
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        console.log('File link copied to clipboard:', url);
+      })
+      .catch((err) => {
+        console.error('Failed to copy file link to clipboard:', err);
+        // Fallback: try using the older clipboard API
+        this.fallbackCopyToClipboard(url);
+      });
+
+    this.onCloseContextMenu();
+  }
+
+  /**
+   * Fallback method to copy text to clipboard for older browsers
+   */
+  private fallbackCopyToClipboard(text: string): void {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        console.log('File link copied to clipboard (fallback):', text);
+      } else {
+        console.error('Fallback copy command failed');
+      }
+    } catch (err) {
+      console.error('Fallback copy to clipboard failed:', err);
+    } finally {
+      document.body.removeChild(textArea);
+    }
+  }
+
+  onOpenInNewWindow(path: string): void {
+    const clientId = this.clientId();
+    const agentId = this.agentId();
+    if (!clientId || !agentId) {
+      return;
+    }
+
+    // Build the URL
+    const baseUrl = window.location.origin;
+    const editorPath = `/clients/${clientId}/agents/${agentId}/editor`;
+    const queryParams = new URLSearchParams();
+    queryParams.set('standalone', 'true');
+    queryParams.set('file', encodeURIComponent(path));
+    const url = `${baseUrl}${editorPath}?${queryParams.toString()}`;
+
+    // Open new window with minimal controls and maximize if possible
+    // Note: Modern browsers have restrictions on window features, but we try to minimize what's possible
+    // Use screen dimensions to maximize the window
+    const screenWidth = window.screen.availWidth || window.screen.width;
+    const screenHeight = window.screen.availHeight || window.screen.height;
+
+    const windowFeatures = [
+      'menubar=no',
+      'toolbar=no',
+      'location=no', // Attempts to hide address bar (may be ignored by browsers)
+      'status=no',
+      'resizable=yes',
+      'scrollbars=yes',
+      `width=${screenWidth}`,
+      `height=${screenHeight}`,
+      `left=0`,
+      `top=0`,
+    ].join(',');
+
+    const newWindow = window.open(url, '_blank', windowFeatures);
+
+    // Try to maximize after window opens (may be blocked by browser security)
+    if (newWindow) {
+      // Use setTimeout to ensure window is fully loaded before attempting to maximize
+      setTimeout(() => {
+        try {
+          newWindow.moveTo(0, 0);
+          newWindow.resizeTo(screenWidth, screenHeight);
+          // Try to maximize if the browser supports it
+          if (newWindow.screen && 'availWidth' in newWindow.screen) {
+            const availWidth = (newWindow.screen as Screen & { availWidth?: number }).availWidth;
+            const availHeight = (newWindow.screen as Screen & { availHeight?: number }).availHeight;
+            if (availWidth && availHeight) {
+              newWindow.resizeTo(availWidth, availHeight);
+            }
+          }
+        } catch (e) {
+          // Browser may block window manipulation for security reasons
+          console.warn('Could not maximize window:', e);
+        }
+      }, 100);
+    }
+
+    this.onCloseContextMenu();
+  }
+
   onDragStart(event: DragEvent, node: TreeNode): void {
     if (!event.dataTransfer) {
       return;

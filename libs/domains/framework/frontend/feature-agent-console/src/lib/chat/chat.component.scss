@@ -358,3 +358,15 @@ span {
 .editor-toolbar-badge {
   font-size: 0.5rem;
 }
+
+.brand-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-icon {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+}

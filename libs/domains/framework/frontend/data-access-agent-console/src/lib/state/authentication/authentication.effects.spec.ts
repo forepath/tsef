@@ -62,6 +62,9 @@ describe('AuthenticationEffects', () => {
       chatModelOptions: {
         default: 'Auto',
       },
+      editor: {
+        openInNewWindow: true,
+      },
     };
 
     mockKeycloakService = {

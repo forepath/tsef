@@ -16,6 +16,9 @@ describe('Environment interfaces', () => {
         chatModelOptions: {
           default: 'Auto',
         },
+        editor: {
+          openInNewWindow: false,
+        },
       };
       expect(validEnv.production).toBe(true);
     });
@@ -28,6 +31,9 @@ describe('Environment interfaces', () => {
         },
         chatModelOptions: {
           default: 'Auto',
+        },
+        editor: {
+          openInNewWindow: false,
         },
       };
       expect(validEnv.authentication).toBeDefined();
@@ -47,6 +53,9 @@ describe('Environment interfaces', () => {
         chatModelOptions: {
           default: 'Auto',
         },
+        editor: {
+          openInNewWindow: false,
+        },
       };
       expect(envWithController.controller).toBeDefined();
       expect(envWithController.controller?.restApiUrl).toBe('http://localhost:3100/api');
@@ -62,6 +71,9 @@ describe('Environment interfaces', () => {
         chatModelOptions: {
           default: 'Auto',
         },
+        editor: {
+          openInNewWindow: false,
+        },
       };
       expect(envWithoutController.controller).toBeUndefined();
     });
@@ -75,6 +87,9 @@ describe('Environment interfaces', () => {
         chatModelOptions: {
           default: 'Auto',
           'gpt-4o': 'GPT-4o',
+        },
+        editor: {
+          openInNewWindow: false,
         },
       };
       expect(env.chatModelOptions).toBeDefined();

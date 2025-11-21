@@ -172,6 +172,23 @@
 
 .editor-header {
   flex-shrink: 0;
+
+  a {
+    color: var(--bs-link-color);
+    opacity: 0.7;
+    transition: opacity 0.15s ease-in-out;
+
+    &:hover {
+      opacity: 1;
+      color: var(--bs-link-hover-color);
+    }
+
+    &.open-in-new-window-link {
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
 }
 
 .editor-content {

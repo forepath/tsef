@@ -1,6 +1,6 @@
 import { Injector, runInInjectionContext } from '@angular/core';
-import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
+import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import type { Environment } from '@forepath/framework/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
 import { KeycloakService } from 'keycloak-angular';
@@ -69,6 +69,9 @@ describe('loginGuard', () => {
       },
       chatModelOptions: {
         default: 'Auto',
+      },
+      editor: {
+        openInNewWindow: true,
       },
     };
 

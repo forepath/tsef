@@ -66,6 +66,9 @@ describe('authGuard', () => {
       chatModelOptions: {
         default: 'Auto',
       },
+      editor: {
+        openInNewWindow: true,
+      },
     };
 
     mockIsAuthenticated = isAuthenticated as jest.MockedFunction<typeof isAuthenticated>;

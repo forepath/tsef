@@ -740,6 +740,92 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  /**
+   * Open the currently selected file in a new window and close it from the current window
+   */
+  onOpenInNewWindow(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const filePath = this.selectedFilePath();
+    const clientId = this.clientId();
+    const agentId = this.agentId();
+
+    if (!filePath || !clientId || !agentId) {
+      return;
+    }
+
+    // Build the URL
+    const baseUrl = window.location.origin;
+    const editorPath = `/clients/${clientId}/agents/${agentId}/editor`;
+    const queryParams = new URLSearchParams();
+    queryParams.set('standalone', 'true');
+    queryParams.set('file', encodeURIComponent(filePath));
+    const url = `${baseUrl}${editorPath}?${queryParams.toString()}`;
+
+    // Open new window with minimal controls and maximize if possible
+    // Note: Modern browsers have restrictions on window features, but we try to minimize what's possible
+    // Use screen dimensions to maximize the window
+    const screenWidth = window.screen.availWidth || window.screen.width;
+    const screenHeight = window.screen.availHeight || window.screen.height;
+
+    const windowFeatures = [
+      'menubar=no',
+      'toolbar=no',
+      'location=no', // Attempts to hide address bar (may be ignored by browsers)
+      'status=no',
+      'resizable=yes',
+      'scrollbars=yes',
+      `width=${screenWidth}`,
+      `height=${screenHeight}`,
+      `left=0`,
+      `top=0`,
+    ].join(',');
+
+    const newWindow = window.open(url, '_blank', windowFeatures);
+
+    // Try to maximize after window opens (may be blocked by browser security)
+    if (newWindow) {
+      // Use setTimeout to ensure window is fully loaded before attempting to maximize
+      setTimeout(() => {
+        try {
+          newWindow.moveTo(0, 0);
+          newWindow.resizeTo(screenWidth, screenHeight);
+          // Try to maximize if the browser supports it
+          if (newWindow.screen && 'availWidth' in newWindow.screen) {
+            const availWidth = (newWindow.screen as Screen & { availWidth?: number }).availWidth;
+            const availHeight = (newWindow.screen as Screen & { availHeight?: number }).availHeight;
+            if (availWidth && availHeight) {
+              newWindow.resizeTo(availWidth, availHeight);
+            }
+          }
+        } catch (e) {
+          // Browser may block window manipulation for security reasons
+          console.warn('Could not maximize window:', e);
+        }
+      }, 100);
+    }
+
+    // Close the file from the current window
+    // Wait a bit to ensure the new window has opened before closing the tab
+    setTimeout(() => {
+      if (this.clientId() && this.agentId()) {
+        this.filesFacade.closeFileTab(this.clientId(), this.agentId(), filePath);
+        // If the closed tab was selected, select the first remaining tab or clear selection
+        if (this.selectedFilePath() === filePath) {
+          this.openTabs$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe((tabs) => {
+            const remainingTabs = tabs.filter((tab) => tab.filePath !== filePath);
+            if (remainingTabs.length > 0) {
+              this.selectedFilePath.set(remainingTabs[0].filePath);
+            } else {
+              this.selectedFilePath.set(null);
+            }
+          });
+        }
+      }
+    }, 200);
+  }
+
   private calculateVisibleTabs(): void {
     const container = this.tabsContainerRef?.nativeElement;
     const wrapper = this.tabsWrapperRef?.nativeElement;
