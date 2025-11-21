@@ -6,6 +6,16 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" sizes="any" type="image/svg+xml" href="assets/images/favicon.svg" />
+    <!-- Apply theme early to prevent flash -->
+    <script>
+      (function () {
+        const stored = localStorage.getItem('theme-preference');
+        const isDark =
+          stored === 'dark' ||
+          (stored === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+      })();
+    </script>
     <!-- Loading indicator styles to show immediately -->
     <style>
       app-root:empty::before {

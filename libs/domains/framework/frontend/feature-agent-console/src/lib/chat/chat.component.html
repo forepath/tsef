@@ -371,7 +371,7 @@
                   } @else if (isAgentMessage(msg.payload)) {
                     @if (getChatMessageData(msg.payload); as messageData) {
                       <div class="d-flex justify-content-start">
-                        <div class="card bg-white chat-message-card">
+                        <div class="card bg-body chat-message-card">
                           <div class="card-body chat-message-body">
                             @if (parseMarkdown(messageData); as htmlContent) {
                               <div class="card-text chat-message-text markdown-content" [innerHTML]="htmlContent"></div>
@@ -388,7 +388,7 @@
                 <!-- Loading indicator when waiting for agent response -->
                 @if (waitingForResponse$ | async) {
                   <div class="d-flex justify-content-start">
-                    <div class="card bg-white chat-message-card">
+                    <div class="card bg-body chat-message-card">
                       <div class="card-body chat-message-body">
                         <div class="d-flex align-items-center gap-2">
                           <div class="spinner-border spinner-border-sm text-primary" role="status">

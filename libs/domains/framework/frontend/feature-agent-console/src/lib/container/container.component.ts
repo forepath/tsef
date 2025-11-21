@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthenticationFacade } from '@forepath/framework/frontend/data-access-agent-console';
 import { map } from 'rxjs';
 import { StandaloneLoadingService } from '../standalone-loading.service';
+import { ThemeService } from '../theme.service';
 
 @Component({
   selector: 'framework-agent-console-container',
@@ -17,6 +18,7 @@ export class AgentConsoleContainerComponent implements OnInit {
   private readonly authenticationFacade = inject(AuthenticationFacade);
   private readonly route = inject(ActivatedRoute);
   private readonly standaloneLoadingService = inject(StandaloneLoadingService);
+  protected readonly themeService = inject(ThemeService);
 
   /**
    * Observable indicating whether the user is authenticated
