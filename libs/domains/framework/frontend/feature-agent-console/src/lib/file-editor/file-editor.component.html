@@ -97,6 +97,14 @@
         <div class="d-flex align-items-center">
           <i class="bi bi-file-earmark me-2"></i>
           <span class="fw-semibold">{{ selectedFilePath() }}</span>
+          <a
+            href="#"
+            class="ms-2 text-decoration-none open-in-new-window-link"
+            (click)="onOpenInNewWindow($event)"
+            title="Open in a new window"
+          >
+            <i class="bi bi-box-arrow-up-right"></i>
+          </a>
           @if (isDirty()) {
             <span class="badge bg-warning text-dark ms-2">Unsaved</span>
           }

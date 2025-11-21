@@ -2,8 +2,16 @@
   <!-- Toolbar (shown when editor is open, spans editor and chat) -->
   @if (editorOpen() && (activeClientId$ | async) && (selectedAgent$ | async)) {
     <div class="editor-toolbar-container border-bottom bg-body-tertiary">
-      <div class="editor-toolbar px-2 py-3 d-flex justify-content-between align-items-center">
+      <div class="editor-toolbar ps-2 pe-3 py-3 d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
+          @if (standaloneMode()) {
+            <div
+              class="brand-icon-container me-2 fs-3 bg-primary p-3"
+              style="margin-left: -0.5rem; margin-top: -1rem; margin-bottom: -1rem"
+            >
+              <img src="assets/images/icon_light.svg" alt="Agenstra" class="brand-icon" />
+            </div>
+          }
           <span class="fw-bold text-uppercase">Agenstra</span>
           <span
             class="badge bg-primary border border-2 border-primary bg-transparent text-primary text-uppercase small editor-toolbar-badge"
@@ -54,17 +62,31 @@
               <span class="ms-1">Terminal</span>
             </button>
           </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-primary"
-              (click)="onToggleEditor()"
-              title="Close Editor"
-            >
-              <i class="bi bi-x-lg"></i>
-              <span class="ms-1">Close Editor</span>
-            </button>
-          </div>
+          <button
+            #shareFileLinkButton
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            [disabled]="!fileEditor?.selectedFilePath()"
+            (click)="onShareFileLink()"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="Share file link"
+          >
+            <i class="bi bi-share"></i>
+          </button>
+          @if (!fileOnlyMode() && !standaloneMode()) {
+            <div class="btn-group btn-group-sm" role="group">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                (click)="onToggleEditor()"
+                title="Close Editor"
+              >
+                <i class="bi bi-x-lg"></i>
+                <span class="ms-1">Close Editor</span>
+              </button>
+            </div>
+          }
         </div>
       </div>
     </div>
@@ -305,8 +327,8 @@
                   <button
                     type="button"
                     class="btn btn-sm btn-outline-primary"
-                    (click)="onToggleEditor()"
-                    title="Open Editor"
+                    (click)="onToggleEditor(true, getOpenInNewWindow())"
+                    [title]="getOpenInNewWindow() ? 'Open Editor in New Window' : 'Open Editor'"
                   >
                     <i class="bi bi-code-square"></i>
                     <span class="ms-1">Open Editor</span>

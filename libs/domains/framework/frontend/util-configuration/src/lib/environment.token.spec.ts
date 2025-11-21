@@ -53,6 +53,7 @@ describe('environment.token', () => {
         production: expect.any(Boolean),
         authentication: expect.any(Object),
         chatModelOptions: expect.any(Object),
+        editor: expect.any(Object),
       });
     });
 
@@ -67,6 +68,7 @@ describe('environment.token', () => {
         production: expect.any(Boolean),
         authentication: expect.any(Object),
         chatModelOptions: expect.any(Object),
+        editor: expect.any(Object),
       });
     });
 
@@ -103,6 +105,7 @@ describe('environment.token', () => {
         production: expect.any(Boolean),
         authentication: expect.any(Object),
         chatModelOptions: expect.any(Object),
+        editor: expect.any(Object),
       });
     });
   });

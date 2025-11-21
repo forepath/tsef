@@ -285,7 +285,7 @@ export class AgentsService {
       const escapedUrl = this.escapeForShell(repositoryUrl);
 
       // Clone the repository to the agent volume
-      await this.dockerService.sendCommandToContainer(containerId, `git clone ${escapedUrl} /app`);
+      await this.dockerService.sendCommandToContainer(containerId, `sh -c "git clone ${escapedUrl} /app"`);
 
       // Create the agent entity
       const agent = await this.agentsRepository.create({

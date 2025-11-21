@@ -11,6 +11,7 @@ describe('environment', () => {
       production: expect.any(Boolean),
       authentication: expect.any(Object),
       chatModelOptions: expect.any(Object),
+      editor: expect.any(Object),
     });
   });
 

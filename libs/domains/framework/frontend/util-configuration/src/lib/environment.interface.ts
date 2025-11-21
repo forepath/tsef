@@ -6,6 +6,9 @@ export interface Environment {
   };
   authentication: AuthenticationConfig;
   chatModelOptions: Record<string, string>;
+  editor: {
+    openInNewWindow: boolean;
+  };
 }
 
 export type AuthenticationConfig = KeycloakAuthenticationConfig | ApiKeyAuthenticationConfig;

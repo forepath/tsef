@@ -164,7 +164,7 @@ describe('AgentsService', () => {
       expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
         5,
         containerId,
-        `git clone '${process.env.GIT_REPOSITORY_URL}' /app`,
+        `sh -c "git clone '${process.env.GIT_REPOSITORY_URL}' /app"`,
       );
       expect(repository.create).toHaveBeenCalledWith({
         name: createDto.name,
@@ -516,7 +516,7 @@ describe('AgentsService', () => {
       expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
         7,
         containerId,
-        expect.stringMatching(/git clone .*git@github\.com:user\/repo\.git.*\/app/),
+        expect.stringMatching(/sh -c "git clone .*git@github\.com:user\/repo\.git.*\/app"/),
       );
       expect(repository.create).toHaveBeenCalled();
     });

@@ -23,4 +23,7 @@ export const environment: Environment = {
     'opus-4.1': 'Claude Opus 4.1',
     grok: 'Grok',
   },
+  editor: {
+    openInNewWindow: true,
+  },
 };

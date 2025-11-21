@@ -39,6 +39,7 @@ import {
   map,
   Observable,
   of,
+  skip,
   Subject,
   switchMap,
   take,
@@ -47,6 +48,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 import { FileEditorComponent } from '../file-editor/file-editor.component';
+import { StandaloneLoadingService } from '../standalone-loading.service';
 
 // Type declaration for marked library
 interface Marked {
@@ -70,6 +72,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly environment = inject<Environment>(ENVIRONMENT);
+  private readonly standaloneLoadingService = inject(StandaloneLoadingService);
 
   @ViewChild('chatMessagesContainer', { static: false })
   private chatMessagesContainer!: ElementRef<HTMLDivElement>;
@@ -94,6 +97,11 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   @ViewChild('fileEditor', { static: false })
   fileEditor!: FileEditorComponent;
+
+  @ViewChild('shareFileLinkButton', { static: false })
+  shareFileLinkButton!: ElementRef<HTMLButtonElement>;
+
+  private shareButtonTooltip: any = null;
 
   // Cache for marked instance to avoid repeated async imports
   private markedInstance: Marked | null = null;
@@ -194,6 +202,12 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   editorOpen = signal<boolean>(false);
   chatVisible = signal<boolean>(true);
   private previousAgentId: string | null = null;
+  readonly fileOnlyMode = signal<boolean>(false);
+  readonly standaloneMode = signal<boolean>(false);
+  private standaloneFileLoaded = false;
+
+  // Convert signals to observables (must be in field initializer for injection context)
+  private readonly standaloneMode$ = toObservable(this.standaloneMode);
 
   readonly chatModelOptions = Object.entries(this.environment.chatModelOptions ?? {}).map(([value, label]) => ({
     value,
@@ -305,6 +319,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     agent: false,
     editor: false,
   };
+  private fileOpenedFromQuery = false;
 
   ngOnInit(): void {
     // Default chat model to auto mode on load
@@ -353,15 +368,93 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           this.router.url.includes('/editor') &&
           !this.editorOpen()
         ) {
+          // Check if file query parameter is set
+          const filePath = queryParams['file'];
+          const isFileOnlyMode = !!filePath;
+          this.fileOnlyMode.set(isFileOnlyMode);
+
+          // Check if standalone query parameter is set
+          const isStandaloneMode = !!queryParams['standalone'];
+          this.standaloneMode.set(isStandaloneMode);
+          if (isStandaloneMode && isFileOnlyMode) {
+            // Loading spinner is shown by container component
+            this.standaloneFileLoaded = false;
+          }
+
           // Open editor if route has /editor but editor is closed
           this.editorOpen.set(true);
-          this.chatVisible.set(true);
-          if (this.fileEditor) {
-            this.fileEditor.fileTreeVisible.set(true);
-            this.fileEditor.terminalVisible.set(false);
-            this.fileEditor.autosaveEnabled.set(false);
+
+          if (isFileOnlyMode) {
+            // Hide file tree and chat by default in file-only mode
+            this.chatVisible.set(false);
+            if (this.fileEditor) {
+              this.fileEditor.fileTreeVisible.set(false);
+              this.fileEditor.terminalVisible.set(false);
+              this.fileEditor.autosaveEnabled.set(false);
+            }
+          } else {
+            // Normal editor mode
+            this.chatVisible.set(true);
+            if (this.fileEditor) {
+              this.fileEditor.fileTreeVisible.set(true);
+              this.fileEditor.terminalVisible.set(false);
+              this.fileEditor.autosaveEnabled.set(false);
+            }
           }
+
           this.initialRouting['editor'] = true;
+
+          // Open file if file query parameter is set
+          if (isFileOnlyMode && filePath) {
+            // Decode the file path (in case it's URL encoded)
+            // Use try-catch to handle cases where path is already decoded
+            let decodedFilePath: string;
+            try {
+              decodedFilePath = decodeURIComponent(filePath);
+            } catch {
+              decodedFilePath = filePath;
+            }
+            this.openFileWhenReady(decodedFilePath);
+          }
+        }
+      });
+
+    // Subscribe to query parameter changes to handle file-only mode (only for updates after initial load)
+    // Use skip(1) to skip the first emission which is handled in initial routing
+    this.route.queryParams
+      .pipe(
+        takeUntil(this.destroy$),
+        skip(1), // Skip first emission (handled in initial routing)
+      )
+      .subscribe((queryParams) => {
+        const filePath = queryParams['file'];
+        const isFileOnlyMode = !!filePath;
+        this.fileOnlyMode.set(isFileOnlyMode);
+
+        // Check if standalone query parameter is set
+        const isStandaloneMode = !!queryParams['standalone'];
+        this.standaloneMode.set(isStandaloneMode);
+
+        // If file query parameter is set and editor is open, open the file
+        if (isFileOnlyMode && filePath && this.editorOpen()) {
+          // Decode the file path (in case it's URL encoded)
+          let decodedFilePath: string;
+          try {
+            decodedFilePath = decodeURIComponent(filePath);
+          } catch {
+            decodedFilePath = filePath;
+          }
+          // Only open if it's a different file and we haven't already opened it
+          if (this.fileEditor) {
+            const currentPath = this.fileEditor.selectedFilePath();
+            if (currentPath !== decodedFilePath && !this.fileOpenedFromQuery) {
+              this.fileOpenedFromQuery = false; // Reset flag for new file
+              this.openFileWhenReady(decodedFilePath);
+            }
+          }
+        } else if (!isFileOnlyMode) {
+          // Reset flag when file query parameter is removed
+          this.fileOpenedFromQuery = false;
         }
       });
 
@@ -369,11 +462,34 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.selectedAgent$.pipe(takeUntil(this.destroy$)).subscribe((agent) => {
       const currentAgentId = agent?.id || null;
       if (currentAgentId && currentAgentId !== this.previousAgentId && this.editorOpen()) {
-        // Reset visibility when agent changes and editor is open
-        this.chatVisible.set(true);
-        if (this.fileEditor) {
-          this.fileEditor.fileTreeVisible.set(true);
-          this.fileEditor.terminalVisible.set(false);
+        // Reset visibility when agent changes and editor is open (unless in file-only mode)
+        if (!this.fileOnlyMode()) {
+          this.chatVisible.set(true);
+          if (this.fileEditor) {
+            this.fileEditor.fileTreeVisible.set(true);
+            this.fileEditor.terminalVisible.set(false);
+          }
+        } else {
+          // Reset file opened flag when agent changes in file-only mode
+          // This allows the file to be opened again for the new agent
+          this.fileOpenedFromQuery = false;
+          // Reset standalone loading state when switching agents
+          this.standaloneFileLoaded = false;
+          if (this.standaloneMode() && this.route.snapshot.queryParams['file']) {
+            this.standaloneLoadingService.setLoading(true);
+          }
+          // Check if we still have a file query parameter and open it
+          const filePath = this.route.snapshot.queryParams['file'];
+          if (filePath) {
+            // Decode the file path (in case it's URL encoded)
+            let decodedFilePath: string;
+            try {
+              decodedFilePath = decodeURIComponent(filePath);
+            } catch {
+              decodedFilePath = filePath;
+            }
+            this.openFileWhenReady(decodedFilePath);
+          }
         }
       }
       // Load commands when agent is selected
@@ -470,11 +586,71 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.loadMarked().catch(() => {
       // Silently fail - will use plain text fallback
     });
+
+    // Watch for file content loading in standalone mode
+    combineLatest([this.standaloneMode$, this.selectedAgent$, this.activeClientId$, this.route.queryParams])
+      .pipe(
+        filter(([standalone, agent, clientId]) => {
+          // Show loading if standalone mode is active and we have agent/client
+          // If no file is specified, we'll hide loading immediately
+          return standalone && !!agent && !!clientId && !this.standaloneFileLoaded;
+        }),
+        switchMap(([, agent, clientId, queryParams]) => {
+          // TypeScript guard: agent and clientId are checked in filter, but we need to assert here
+          if (!agent || !clientId) {
+            return of(false);
+          }
+          // At this point, TypeScript knows agent and clientId are non-null
+          const nonNullAgent = agent;
+          const nonNullClientId = clientId;
+
+          const filePathParam = queryParams?.['file'];
+          // If no file is specified, hide loading immediately
+          if (!filePathParam || typeof filePathParam !== 'string') {
+            return of(true); // Return true to indicate we can hide loading (no file to wait for)
+          }
+          const filePath: string = filePathParam;
+          // Decode the file path
+          const decodedFilePath: string = (() => {
+            try {
+              return decodeURIComponent(filePath);
+            } catch {
+              return filePath;
+            }
+          })();
+          // Watch for file content to be loaded
+          // Use combineLatest to watch both loading state and content
+          return combineLatest([
+            this.filesFacade.isReadingFile$(nonNullClientId, nonNullAgent.id, decodedFilePath),
+            this.filesFacade.getFileContent$(nonNullClientId, nonNullAgent.id, decodedFilePath),
+          ]).pipe(
+            // Wait until file is not loading AND content is available
+            filter(([isLoading, content]) => !isLoading && content !== null),
+            take(1),
+            map(() => true), // Just emit a value to indicate loading is complete
+          );
+        }),
+        filter((result) => result === true), // Filter out false results
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => {
+        // File content is loaded (or no file to load), hide the loading spinner (only on initial load)
+        if (!this.standaloneFileLoaded) {
+          this.standaloneLoadingService.setLoading(false);
+          this.standaloneFileLoaded = true;
+        }
+      });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+
+    // Dispose tooltip if it exists
+    if (this.shareButtonTooltip) {
+      this.shareButtonTooltip.dispose();
+      this.shareButtonTooltip = null;
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -541,6 +717,13 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       // Reset message count when switching clients
       this.previousMessageCount = 0;
       this.lastUserMessageTimestamp.set(null);
+      // Reset file opened flag when switching clients
+      this.fileOpenedFromQuery = false;
+      // Reset standalone loading state when switching clients
+      this.standaloneFileLoaded = false;
+      if (this.standaloneMode() && this.route.snapshot.queryParams['file']) {
+        this.standaloneLoadingService.setLoading(true);
+      }
     }
   }
 
@@ -660,20 +843,36 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.socketsFacade.disconnect();
   }
 
-  onToggleEditor(navigate = true): void {
+  onToggleEditor(navigate = true, openInNewWindow = false): void {
     const wasOpen = this.editorOpen();
+
+    // If opening in new window and editor is not open, open new window
+    if (openInNewWindow && !wasOpen) {
+      this.openEditorInNewWindow();
+      return;
+    }
+
     this.editorOpen.update((open) => !open);
 
     if (navigate) {
-      this.router.navigate(
-        wasOpen
-          ? ['/clients', this.activeClientId, 'agents', this.selectedAgentId()]
-          : ['/clients', this.activeClientId, 'agents', this.selectedAgentId(), 'editor'],
-      );
+      // Check if we're in file-only mode
+      const filePath = this.route.snapshot.queryParams['file'];
+      if (filePath && !wasOpen) {
+        // Navigate with file query parameter
+        this.router.navigate(['/clients', this.activeClientId, 'agents', this.selectedAgentId(), 'editor'], {
+          queryParams: { file: filePath },
+        });
+      } else {
+        this.router.navigate(
+          wasOpen
+            ? ['/clients', this.activeClientId, 'agents', this.selectedAgentId()]
+            : ['/clients', this.activeClientId, 'agents', this.selectedAgentId(), 'editor'],
+        );
+      }
     }
 
-    // Reset visibility when opening editor for a new agent
-    if (!wasOpen && this.editorOpen()) {
+    // Reset visibility when opening editor for a new agent (unless in file-only mode)
+    if (!wasOpen && this.editorOpen() && !this.fileOnlyMode()) {
       this.chatVisible.set(true);
       if (this.fileEditor) {
         this.fileEditor.fileTreeVisible.set(true);
@@ -683,11 +882,241 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     }
   }
 
+  /**
+   * Get whether to open editor in new window from environment configuration
+   */
+  getOpenInNewWindow(): boolean {
+    return this.environment.editor?.openInNewWindow ?? false;
+  }
+
+  /**
+   * Open editor in a new window with minimal browser controls in standalone mode
+   */
+  private openEditorInNewWindow(): void {
+    const clientId = this.activeClientId;
+    const agentId = this.selectedAgentId();
+    if (!clientId || !agentId) {
+      return;
+    }
+
+    // Get currently selected file path if editor is open and file is selected
+    let filePath: string | undefined;
+    if (this.fileEditor) {
+      filePath = this.fileEditor.selectedFilePath() || undefined;
+    }
+
+    // Build the URL
+    const baseUrl = window.location.origin;
+    const editorPath = `/clients/${clientId}/agents/${agentId}/editor`;
+    const queryParams = new URLSearchParams();
+    queryParams.set('standalone', 'true');
+    if (filePath) {
+      queryParams.set('file', encodeURIComponent(filePath));
+    }
+    const url = `${baseUrl}${editorPath}?${queryParams.toString()}`;
+
+    // Open new window with minimal controls and maximize if possible
+    // Note: Modern browsers have restrictions on window features, but we try to minimize what's possible
+    // Use screen dimensions to maximize the window
+    const screenWidth = window.screen.availWidth || window.screen.width;
+    const screenHeight = window.screen.availHeight || window.screen.height;
+
+    const windowFeatures = [
+      'menubar=no',
+      'toolbar=no',
+      'location=no', // Attempts to hide address bar (may be ignored by browsers)
+      'status=no',
+      'resizable=yes',
+      'scrollbars=yes',
+      `width=${screenWidth}`,
+      `height=${screenHeight}`,
+      `left=0`,
+      `top=0`,
+    ].join(',');
+
+    const newWindow = window.open(url, '_blank', windowFeatures);
+
+    // Try to maximize after window opens (may be blocked by browser security)
+    if (newWindow) {
+      // Use setTimeout to ensure window is fully loaded before attempting to maximize
+      setTimeout(() => {
+        try {
+          newWindow.moveTo(0, 0);
+          newWindow.resizeTo(screenWidth, screenHeight);
+          // Try to maximize if the browser supports it
+          if (newWindow.screen && 'availWidth' in newWindow.screen) {
+            const availWidth = (newWindow.screen as Screen & { availWidth?: number }).availWidth;
+            const availHeight = (newWindow.screen as Screen & { availHeight?: number }).availHeight;
+            if (availWidth && availHeight) {
+              newWindow.resizeTo(availWidth, availHeight);
+            }
+          }
+        } catch (e) {
+          // Browser may block window manipulation for security reasons
+          console.warn('Could not maximize window:', e);
+        }
+      }, 100);
+    }
+  }
+
   onToggleChat(): void {
     this.chatVisible.update((visible) => !visible);
     // Recalculate file editor tabs when chat visibility changes
     if (this.fileEditor) {
       this.fileEditor.recalculateTabs();
+    }
+  }
+
+  /**
+   * Share the currently selected file link by copying it to clipboard
+   */
+  onShareFileLink(): void {
+    const filePath = this.fileEditor?.selectedFilePath();
+    const clientId = this.activeClientId;
+    const agentId = this.selectedAgentId();
+
+    if (!filePath || !clientId || !agentId) {
+      return;
+    }
+
+    // Build the URL
+    const baseUrl = window.location.origin;
+    const editorPath = `/clients/${clientId}/agents/${agentId}/editor`;
+    const queryParams = new URLSearchParams();
+    queryParams.set('standalone', 'true');
+    queryParams.set('file', encodeURIComponent(filePath));
+    const url = `${baseUrl}${editorPath}?${queryParams.toString()}`;
+
+    // Copy to clipboard
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        console.log('File link copied to clipboard:', url);
+        this.showShareTooltip('Link copied');
+      })
+      .catch((err) => {
+        console.error('Failed to copy file link to clipboard:', err);
+        // Fallback: try using the older clipboard API
+        const success = this.fallbackCopyToClipboard(url);
+        if (success) {
+          this.showShareTooltip('Link copied');
+        }
+      });
+  }
+
+  /**
+   * Show tooltip with message and hide it after a couple seconds.
+   * Temporarily disables hover trigger to prevent tooltip from appearing on hover after click.
+   */
+  private showShareTooltip(message: string): void {
+    if (!this.shareFileLinkButton?.nativeElement) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bootstrap = (window as any).bootstrap;
+    if (!bootstrap?.Tooltip) {
+      console.warn('Bootstrap Tooltip not available');
+      return;
+    }
+
+    // Store original values
+    const originalTitle = this.shareFileLinkButton.nativeElement.getAttribute('title') || 'Share file link';
+    const originalTrigger = this.shareFileLinkButton.nativeElement.getAttribute('data-bs-trigger') || 'hover focus';
+
+    // Dispose existing tooltip if it exists
+    if (this.shareButtonTooltip) {
+      try {
+        this.shareButtonTooltip.dispose();
+      } catch (e) {
+        // Tooltip might already be disposed
+      }
+    }
+
+    // Temporarily change trigger to 'manual' to prevent hover from showing tooltip
+    this.shareFileLinkButton.nativeElement.setAttribute('data-bs-trigger', 'manual');
+    this.shareFileLinkButton.nativeElement.setAttribute('title', message);
+    this.shareFileLinkButton.nativeElement.setAttribute('data-bs-original-title', message);
+
+    // Create new tooltip instance with manual trigger
+    this.shareButtonTooltip = new bootstrap.Tooltip(this.shareFileLinkButton.nativeElement, {
+      trigger: 'manual',
+      title: message,
+      placement: 'bottom',
+    });
+
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+      if (this.shareButtonTooltip) {
+        this.shareButtonTooltip.show();
+      }
+    }, 0);
+
+    // Hide tooltip after 2 seconds and restore hover behavior
+    setTimeout(() => {
+      if (this.shareButtonTooltip && this.shareFileLinkButton?.nativeElement) {
+        this.shareButtonTooltip.hide();
+
+        // Restore original title
+        this.shareFileLinkButton.nativeElement.setAttribute('title', originalTitle);
+        this.shareFileLinkButton.nativeElement.setAttribute('data-bs-original-title', originalTitle);
+
+        // Restore original trigger after a short delay to ensure tooltip is fully hidden
+        setTimeout(() => {
+          if (this.shareFileLinkButton?.nativeElement) {
+            // Dispose current tooltip
+            if (this.shareButtonTooltip) {
+              try {
+                this.shareButtonTooltip.dispose();
+              } catch (e) {
+                // Tooltip might already be disposed
+              }
+              this.shareButtonTooltip = null;
+            }
+
+            // Restore original trigger
+            this.shareFileLinkButton.nativeElement.setAttribute('data-bs-trigger', originalTrigger);
+
+            // Recreate tooltip with original trigger for hover behavior
+            this.shareButtonTooltip = new bootstrap.Tooltip(this.shareFileLinkButton.nativeElement, {
+              trigger: originalTrigger,
+              title: originalTitle,
+              placement: 'bottom',
+            });
+          }
+        }, 100);
+      }
+    }, 2000);
+  }
+
+  /**
+   * Fallback method to copy text to clipboard for older browsers
+   * Returns true if successful, false otherwise
+   */
+  private fallbackCopyToClipboard(text: string): boolean {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        console.log('File link copied to clipboard (fallback):', text);
+        return true;
+      } else {
+        console.error('Fallback copy command failed');
+        return false;
+      }
+    } catch (err) {
+      console.error('Fallback copy to clipboard failed:', err);
+      return false;
+    } finally {
+      document.body.removeChild(textArea);
     }
   }
 
@@ -1365,6 +1794,44 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         }),
       )
       .subscribe();
+  }
+
+  /**
+   * Open a file when the file editor is ready
+   * @param filePath - The file path to open
+   */
+  private openFileWhenReady(filePath: string): void {
+    if (this.fileOpenedFromQuery) {
+      // Already opened this file, skip
+      return;
+    }
+
+    // Wait for agent to be selected and editor to be open
+    this.selectedAgent$
+      .pipe(
+        filter((agent) => !!agent && this.editorOpen()),
+        take(1),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => {
+        // Use multiple requestAnimationFrame calls and setTimeout to ensure file editor is fully initialized
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              if (this.fileEditor && !this.fileOpenedFromQuery) {
+                // Check if file is already selected to avoid unnecessary reloads
+                const currentPath = this.fileEditor.selectedFilePath();
+                if (currentPath !== filePath) {
+                  this.fileEditor.onFileSelect(filePath);
+                  this.fileOpenedFromQuery = true;
+                } else {
+                  this.fileOpenedFromQuery = true;
+                }
+              }
+            }, 200);
+          });
+        });
+      });
   }
 
   /**

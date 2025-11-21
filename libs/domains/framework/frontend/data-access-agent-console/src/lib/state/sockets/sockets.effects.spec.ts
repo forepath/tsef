@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import {
   connectSocket,
@@ -10,12 +10,12 @@ import {
   connectSocketSuccess,
   disconnectSocket,
   disconnectSocketSuccess,
-  forwardEventSuccess,
   forwardedEventReceived,
+  forwardEventSuccess,
   setClientSuccess,
   socketError,
 } from './sockets.actions';
-import { connectSocket$, disconnectSocket$, getSocketInstance } from './sockets.effects';
+import { connectSocket$, disconnectSocket$ } from './sockets.effects';
 import { ChatActor, type ForwardedEventPayload } from './sockets.types';
 
 // Mock socket.io-client
@@ -68,6 +68,9 @@ describe('SocketsEffects', () => {
       authentication: {
         type: 'api-key',
         apiKey: 'test-api-key',
+      },
+      editor: {
+        openInNewWindow: true,
       },
     };
 
