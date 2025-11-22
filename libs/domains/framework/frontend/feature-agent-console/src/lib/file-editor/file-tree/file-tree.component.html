@@ -5,7 +5,7 @@
       <div class="btn-group btn-group-sm" role="group">
         <button
           type="button"
-          class="btn btn-sm btn-outline-dark"
+          class="btn btn-sm btn-outline-secondary"
           [class.active]="creatingItem()?.path === '.' && creatingItem()?.type === 'file'"
           (click)="onCreateItem('file')"
           title="New File"
@@ -14,14 +14,14 @@
         </button>
         <button
           type="button"
-          class="btn btn-sm btn-outline-dark"
+          class="btn btn-sm btn-outline-secondary"
           [class.active]="creatingItem()?.path === '.' && creatingItem()?.type === 'directory'"
           (click)="onCreateItem('directory')"
           title="New Directory"
         >
           <i class="bi bi-folder-plus"></i>
         </button>
-        <button type="button" class="btn btn-sm btn-outline-dark" (click)="onRefreshRoot()" title="Refresh">
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onRefreshRoot()" title="Refresh">
           <i class="bi bi-arrow-clockwise"></i>
         </button>
       </div>
@@ -171,7 +171,7 @@
           @if (node.type === 'directory') {
             <button
               type="button"
-              class="btn btn-sm btn-outline-dark py-0 px-1"
+              class="btn btn-sm btn-outline-secondary py-0 px-1"
               [class.active]="creatingItem()?.path === node.path && creatingItem()?.type === 'file'"
               (click)="onCreateItem('file', node.path); $event.stopPropagation()"
               title="New File"
@@ -180,7 +180,7 @@
             </button>
             <button
               type="button"
-              class="btn btn-sm btn-outline-dark py-0 px-1"
+              class="btn btn-sm btn-outline-secondary py-0 px-1"
               [class.active]="creatingItem()?.path === node.path && creatingItem()?.type === 'directory'"
               (click)="onCreateItem('directory', node.path); $event.stopPropagation()"
               title="New Directory"
