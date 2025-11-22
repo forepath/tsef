@@ -89,8 +89,8 @@ sequenceDiagram
             WS-->>User: loginSuccess { success: true, data: {message, agentId, agentName}, timestamp }
 
             Note over WS,MsgRepo: Chat History Restoration
-            WS->>MsgService: getChatHistory(uuid, 1000, 0)
-            MsgService->>MsgRepo: findByAgentId(uuid, 1000, 0)
+            WS->>MsgService: getChatHistory(uuid, 20, 0)
+            MsgService->>MsgRepo: findByAgentId(uuid, 20, 0)
             MsgRepo->>DB: SELECT agent_messages WHERE agent_id ORDER BY created_at ASC
             DB-->>MsgRepo: message entities
             MsgRepo-->>MsgService: chat history
