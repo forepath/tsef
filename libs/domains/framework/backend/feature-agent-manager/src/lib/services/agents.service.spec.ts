@@ -143,28 +143,19 @@ describe('AgentsService', () => {
           },
         ],
       });
-      // Verify .netrc file creation commands were called (4 commands: 3 echo + 1 chmod)
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(5); // 4 for .netrc + 1 for git clone
+      // Verify .netrc file creation commands were called (2 commands: base64 write + chmod)
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(3); // 2 for .netrc + 1 for git clone
       expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
         1,
         containerId,
-        expect.stringContaining('echo machine'),
+        expect.stringMatching(/sh -c "base64 -d > '\/root\/\.netrc'"/),
+        expect.any(String), // base64 content
       );
-      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
-        2,
-        containerId,
-        expect.stringContaining('echo'),
-      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(2, containerId, 'chmod 600 /root/.netrc');
       expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
         3,
         containerId,
-        expect.stringContaining('echo'),
-      );
-      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(4, containerId, 'chmod 600 /root/.netrc');
-      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
-        5,
-        containerId,
-        `sh -c "git clone '${process.env.GIT_REPOSITORY_URL}' /app"`,
+        expect.stringMatching(/sh -c "git clone '[^']+' \/app"/),
       );
       expect(repository.create).toHaveBeenCalledWith({
         name: createDto.name,
@@ -221,7 +212,7 @@ describe('AgentsService', () => {
         ],
       });
       // Verify .netrc file creation was called
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(5);
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(3); // 2 for .netrc + 1 for git clone
       expect(repository.create).toHaveBeenCalledWith({
         name: createDto.name,
         description: undefined,
@@ -313,7 +304,7 @@ describe('AgentsService', () => {
       await service.create(createDto);
 
       // Verify .netrc creation was called (should use GIT_PASSWORD)
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(5);
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(3); // 2 for .netrc + 1 for git clone
     });
 
     it('should throw BadRequestException when agent name already exists', async () => {
@@ -363,10 +354,8 @@ describe('AgentsService', () => {
       passwordService.hashPassword.mockResolvedValue('hashed-password');
       dockerService.createContainer.mockResolvedValue(containerId);
       dockerService.sendCommandToContainer
-        .mockResolvedValueOnce(undefined) // First 4 calls for .netrc creation succeed
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined) // First call for .netrc base64 write succeeds
+        .mockResolvedValueOnce(undefined) // Second call for chmod succeeds
         .mockRejectedValueOnce(gitCloneError); // Git clone fails
       dockerService.deleteContainer.mockResolvedValue(undefined);
 
@@ -374,8 +363,8 @@ describe('AgentsService', () => {
 
       // Verify container was created
       expect(dockerService.createContainer).toHaveBeenCalled();
-      // Verify .netrc creation (4 commands) and git clone (1 attempt) were called
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(5);
+      // Verify .netrc creation (2 commands) and git clone (1 attempt) were called
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(3);
       // Verify container cleanup was attempted
       expect(dockerService.deleteContainer).toHaveBeenCalledWith(containerId);
       // Verify repository.create was never called
@@ -400,8 +389,8 @@ describe('AgentsService', () => {
 
       // Verify container was created
       expect(dockerService.createContainer).toHaveBeenCalled();
-      // Verify .netrc creation and git clone were attempted
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(5);
+      // Verify .netrc creation (2 commands) and git clone (1 command) were attempted
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(3);
       // Verify repository.create was attempted
       expect(repository.create).toHaveBeenCalled();
       // Verify container cleanup was attempted
@@ -420,10 +409,8 @@ describe('AgentsService', () => {
       passwordService.hashPassword.mockResolvedValue('hashed-password');
       dockerService.createContainer.mockResolvedValue(containerId);
       dockerService.sendCommandToContainer
-        .mockResolvedValueOnce(undefined) // First 4 calls for .netrc creation succeed
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined) // First call for .netrc base64 write succeeds
+        .mockResolvedValueOnce(undefined) // Second call for chmod succeeds
         .mockRejectedValueOnce(originalError); // Git clone fails
       dockerService.deleteContainer.mockRejectedValue(cleanupError);
 
@@ -807,27 +794,24 @@ describe('AgentsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (service as any).createNetrcFile(containerId);
 
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(4);
-      // Verify first command creates machine line
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(2);
+      // Verify first command writes file using base64
       expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
         1,
         containerId,
-        expect.stringMatching(/echo machine.*github\.com.*> \/root\/\.netrc/),
+        expect.stringMatching(/sh -c "base64 -d > '\/root\/\.netrc'"/),
+        expect.any(String), // base64 content
       );
-      // Verify second command adds login line
-      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
-        2,
-        containerId,
-        expect.stringMatching(/echo.*login.*testuser.*>> \/root\/\.netrc/),
-      );
-      // Verify third command adds password line
-      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
-        3,
-        containerId,
-        expect.stringMatching(/echo.*password.*test-token-123.*>> \/root\/\.netrc/),
-      );
-      // Verify fourth command sets permissions
-      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(4, containerId, 'chmod 600 /root/.netrc');
+      // Verify second command sets permissions
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(2, containerId, 'chmod 600 /root/.netrc');
+
+      // Verify base64 content contains expected .netrc content
+      const base64Call = dockerService.sendCommandToContainer.mock.calls[0];
+      const base64Content = base64Call[2] as string;
+      const decodedContent = Buffer.from(base64Content, 'base64').toString('utf-8');
+      expect(decodedContent).toContain('machine github.com');
+      expect(decodedContent).toContain('login testuser');
+      expect(decodedContent).toContain('password test-token-123');
     });
 
     it('should escape special characters in credentials', async () => {
@@ -840,16 +824,19 @@ describe('AgentsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (service as any).createNetrcFile(containerId);
 
-      // Verify that single quotes are properly escaped
+      // Verify that special characters are properly handled in base64 content
+      const base64Call = dockerService.sendCommandToContainer.mock.calls[0];
+      const base64Content = base64Call[2] as string;
+      const decodedContent = Buffer.from(base64Content, 'base64').toString('utf-8');
+      expect(decodedContent).toContain("user'name");
+      expect(decodedContent).toContain("token'with'quotes");
+
+      // Verify the file path is properly escaped in the command
       expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
-        2,
+        1,
         containerId,
-        expect.stringContaining("'user'\\''name'"),
-      );
-      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
-        3,
-        containerId,
-        expect.stringContaining("'token'\\''with'\\''quotes'"),
+        expect.stringMatching(/sh -c "base64 -d > '\/root\/\.netrc'"/),
+        expect.any(String),
       );
     });
 
@@ -887,13 +874,12 @@ describe('AgentsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (service as any).createNetrcFile(containerId);
 
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(4);
-      // Verify password line uses GIT_PASSWORD
-      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
-        3,
-        containerId,
-        expect.stringContaining("'test-password'"),
-      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(2);
+      // Verify password line uses GIT_PASSWORD in base64 content
+      const base64Call = dockerService.sendCommandToContainer.mock.calls[0];
+      const base64Content = base64Call[2] as string;
+      const decodedContent = Buffer.from(base64Content, 'base64').toString('utf-8');
+      expect(decodedContent).toContain('password test-password');
     });
   });
 

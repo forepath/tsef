@@ -203,25 +203,23 @@ export class AgentsService {
 
     const gitDomain = this.extractGitDomain(repositoryUrl);
 
-    const escapedUsername = this.escapeForShell(gitUsername);
-    const escapedToken = this.escapeForShell(gitToken);
-    const escapedDomain = this.escapeForShell(gitDomain);
+    // Construct the entire .netrc file content
+    const netrcContent = `machine ${gitDomain}
+  login ${gitUsername}
+  password ${gitToken}
+`;
 
-    // Create .netrc file line by line using echo commands
-    // This approach works better with the command splitting in sendCommandToContainer
-    // Note: Values are already escaped and wrapped in single quotes by escapeForShell
-    // The shell will naturally add a space between the double-quoted string and the escaped value
-    const commands = [
-      `echo machine ${escapedDomain} > /root/.netrc`,
-      `echo "  login" ${escapedUsername} >> /root/.netrc`,
-      `echo "  password" ${escapedToken} >> /root/.netrc`,
-      `chmod 600 /root/.netrc`,
-    ];
+    // Encode content to base64
+    const base64Content = Buffer.from(netrcContent, 'utf-8').toString('base64');
+    const escapedPath = this.escapeForShell('/root/.netrc');
 
-    // Execute commands sequentially
-    for (const cmd of commands) {
-      await this.dockerService.sendCommandToContainer(containerId, cmd);
-    }
+    // Write file using base64 decode with stdin input (same approach as agent-file-system.service)
+    // Use sh -c to run the command in a shell so redirection works
+    // The base64 content is sent to stdin, which base64 -d reads and decodes
+    await this.dockerService.sendCommandToContainer(containerId, `sh -c "base64 -d > ${escapedPath}"`, base64Content);
+
+    // Set proper permissions
+    await this.dockerService.sendCommandToContainer(containerId, 'chmod 600 /root/.netrc');
   }
 
   /**
