@@ -1,4 +1,25 @@
-@if (isBinary()) {
+@if (isImage()) {
+  <!-- Image Preview - Full Width, No Editor -->
+  <div class="monaco-editor-container d-flex flex-column h-100">
+    <div class="preview-section d-flex flex-column h-100 w-100">
+      <div class="preview-header d-flex align-items-center justify-content-between p-2 border-bottom bg-body-tertiary">
+        <span class="small fw-semibold">Image Preview</span>
+      </div>
+      <div class="preview-content flex-grow-1 p-3 overflow-auto">
+        @if (imagePreviewUrl(); as imageUrl) {
+          <div class="d-flex align-items-center justify-content-center h-100">
+            <img
+              [src]="imageUrl"
+              [alt]="filePath() || 'Preview'"
+              class="img-fluid"
+              style="max-height: 100%; object-fit: contain"
+            />
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+} @else if (isBinary()) {
   <div class="d-flex align-items-center justify-content-center h-100 bg-body-secondary">
     <div class="text-center text-muted p-4">
       <i class="bi bi-file-binary fs-1 d-block mb-3"></i>
@@ -14,10 +35,54 @@
         <span class="fw-bold me-1">Unsaved changes</span> Switching files will discard any unsaved changes!
       </div>
     }
-    <ngx-monaco-editor
-      class="flex-grow-1"
-      [options]="editorOptions()"
-      (onInit)="onEditorInit($event)"
-    ></ngx-monaco-editor>
+    <div class="editor-preview-wrapper d-flex flex-grow-1" [class.preview-active]="previewVisible()">
+      <!-- Editor Section -->
+      <div
+        class="editor-section d-flex flex-column"
+        [class.w-50]="previewVisible()"
+        [class.flex-grow-1]="!previewVisible()"
+      >
+        <div class="editor-toolbar d-flex align-items-center justify-content-end p-2 border-bottom bg-body-tertiary">
+          @if (isPreviewable()) {
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-outline-secondary]="!previewVisible()"
+              [class.btn-secondary]="previewVisible()"
+              (click)="togglePreview()"
+              title="Toggle preview"
+            >
+              <i class="bi bi-search"></i>
+            </button>
+          }
+        </div>
+        <ngx-monaco-editor
+          class="flex-grow-1"
+          [options]="editorOptions()"
+          (onInit)="onEditorInit($event)"
+        ></ngx-monaco-editor>
+      </div>
+      <!-- Preview Section -->
+      @if (previewVisible() && isPreviewable()) {
+        <div class="preview-section d-flex flex-column h-100 border-start w-50">
+          <div
+            class="preview-header d-flex align-items-center justify-content-between p-2 border-bottom bg-body-tertiary"
+          >
+            <span class="small fw-semibold">Preview</span>
+            <button
+              type="button"
+              class="btn btn-sm btn-close"
+              (click)="closePreview()"
+              aria-label="Close preview"
+            ></button>
+          </div>
+          <div class="preview-content flex-grow-1 p-3 overflow-auto">
+            @if (isMarkdown() && markdownPreviewHtml(); as markdownHtml) {
+              <div class="markdown-preview markdown-content" [innerHTML]="markdownHtml"></div>
+            }
+          </div>
+        </div>
+      }
+    </div>
   </div>
 }

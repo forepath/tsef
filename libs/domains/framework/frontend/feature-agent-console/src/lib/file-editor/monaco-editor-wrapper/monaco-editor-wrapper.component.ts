@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectorRef,
   Component,
   computed,
   DoCheck,
@@ -10,12 +11,19 @@ import {
   NgZone,
   OnDestroy,
   output,
+  SecurityContext,
   signal,
 } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import type { editor } from 'monaco-editor';
 import * as monaco from 'monaco-editor';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { ThemeService } from '../../theme.service';
+
+// Type declaration for marked library
+interface Marked {
+  parse(markdown: string, options?: { breaks?: boolean; gfm?: boolean }): string;
+}
 
 @Component({
   selector: 'framework-monaco-editor-wrapper',
@@ -27,6 +35,13 @@ import { ThemeService } from '../../theme.service';
 export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
   private readonly ngZone = inject(NgZone);
   private readonly themeService = inject(ThemeService);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  // Cache for marked instance
+  private markedInstance: Marked | null = null;
+  private markedLoadPromise: Promise<Marked> | null = null;
+  private markedLoaded = signal<boolean>(false);
 
   // Inputs
   filePath = input<string | null>(null);
@@ -43,6 +58,8 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
   editorInstance = signal<editor.IStandaloneCodeEditor | null>(null);
   isBinary = signal<boolean>(false);
   language = signal<string>('plaintext');
+  previewVisible = signal<boolean>(false);
+  private currentEditorContent = signal<string>(''); // Track live editor content for preview
   private contentChangeDisposable: { dispose: () => void } | null = null;
   private lastContent: string | null = null;
   private isSettingInitialContent = false;
@@ -60,6 +77,16 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
 
       // Update binary status whenever filePath or encoding changes
       this.updateBinaryAndLanguage();
+    });
+
+    // Preload marked library if markdown file is detected
+    effect(() => {
+      if (this.isMarkdown() && !this.markedInstance) {
+        this.loadMarked().then(() => {
+          this.markedLoaded.set(true);
+          this.cdr.detectChanges();
+        });
+      }
     });
 
     // Watch for theme changes and update Monaco editor theme
@@ -164,6 +191,9 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
         const value = currentEditor.getValue();
         const base64 = btoa(value);
 
+        // Update current editor content for live preview
+        this.currentEditorContent.set(value);
+
         // Ensure emit happens in Angular zone
         this.ngZone.run(() => {
           this.contentChange.emit(base64);
@@ -182,12 +212,41 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     const content = this.content();
     const editor = this.editorInstance();
 
-    if (!editor || !content || this.isBinary()) {
+    // Store current preview visibility state before updating
+    const wasPreviewVisible = this.previewVisible();
+
+    // For binary files (including images), only handle preview state preservation
+    if (this.isBinary()) {
+      // Skip if same content
+      if (this.lastContent === content) {
+        // If content is the same but preview was open and is previewable, keep it open
+        if (wasPreviewVisible && this.isPreviewable()) {
+          this.previewVisible.set(true);
+        }
+        return;
+      }
+
+      // For binary files, just track content changes for preview state
+      this.lastContent = content;
+
+      // If preview was visible and the file is still previewable, keep it open
+      if (wasPreviewVisible && this.isPreviewable()) {
+        this.previewVisible.set(true);
+      }
+      return;
+    }
+
+    // For text files, handle editor content updates
+    if (!editor || !content) {
       return;
     }
 
     // Skip if same content
     if (this.lastContent === content) {
+      // If content is the same but preview was open and is previewable, keep it open
+      if (wasPreviewVisible && this.isPreviewable()) {
+        this.previewVisible.set(true);
+      }
       return;
     }
 
@@ -201,6 +260,8 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
         this.isSettingInitialContent = true;
         const position = editor.getPosition();
         editor.setValue(decoded);
+        // Update current editor content when setting initial content
+        this.currentEditorContent.set(decoded);
         if (position) {
           editor.setPosition(position);
         }
@@ -211,6 +272,11 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
       }
 
       this.lastContent = content;
+
+      // If preview was visible and the file is still previewable, keep it open
+      if (wasPreviewVisible && this.isPreviewable()) {
+        this.previewVisible.set(true);
+      }
     } catch (error) {
       this.isSettingInitialContent = false;
     }
@@ -219,8 +285,15 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
   // Watch for content input changes
   ngDoCheck(): void {
     const content = this.content();
-    if (content !== this.lastContent && this.editorInstance()) {
-      this.updateContent();
+    // Update content for both text files (with editor) and binary files (images)
+    if (content !== this.lastContent) {
+      if (this.isBinary()) {
+        // For binary files, update content to handle preview state
+        this.updateContent();
+      } else if (this.editorInstance()) {
+        // For text files, update editor content
+        this.updateContent();
+      }
     }
 
     // Also check for filePath and encoding changes (fallback for effect)
@@ -356,5 +429,183 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     } catch (error) {
       return null;
     }
+  }
+
+  /**
+   * Check if the current file is previewable (markdown only - images are handled separately)
+   */
+  readonly isPreviewable = computed(() => {
+    return this.isMarkdown();
+  });
+
+  /**
+   * Check if the current file is markdown
+   */
+  readonly isMarkdown = computed(() => {
+    const filePath = this.filePath();
+    if (!filePath) {
+      return false;
+    }
+    const lowerPath = filePath.toLowerCase();
+    return lowerPath.endsWith('.md') || lowerPath.endsWith('.markdown');
+  });
+
+  /**
+   * Check if the current file is an image
+   */
+  readonly isImage = computed(() => {
+    const filePath = this.filePath();
+    if (!filePath) {
+      return false;
+    }
+    const lowerPath = filePath.toLowerCase();
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.svg', '.ico', '.webp'];
+    return imageExtensions.some((ext) => lowerPath.endsWith(ext));
+  });
+
+  /**
+   * Get image preview data URL
+   * Uses base64 content directly from server without decoding/re-encoding
+   */
+  readonly imagePreviewUrl = computed<string | null>(() => {
+    if (!this.isImage()) {
+      return null;
+    }
+
+    const content = this.content();
+    if (!content) {
+      return null;
+    }
+
+    // Determine MIME type from file extension
+    const filePath = this.filePath();
+    if (!filePath) {
+      return null;
+    }
+
+    const lowerPath = filePath.toLowerCase();
+    let mimeType = 'image/png'; // default
+
+    if (lowerPath.endsWith('.jpg') || lowerPath.endsWith('.jpeg')) {
+      mimeType = 'image/jpeg';
+    } else if (lowerPath.endsWith('.gif')) {
+      mimeType = 'image/gif';
+    } else if (lowerPath.endsWith('.bmp')) {
+      mimeType = 'image/bmp';
+    } else if (lowerPath.endsWith('.svg')) {
+      mimeType = 'image/svg+xml';
+    } else if (lowerPath.endsWith('.ico')) {
+      mimeType = 'image/x-icon';
+    } else if (lowerPath.endsWith('.webp')) {
+      mimeType = 'image/webp';
+    } else if (lowerPath.endsWith('.png')) {
+      mimeType = 'image/png';
+    }
+
+    // Build data URL directly with base64 content from server
+    return `data:${mimeType};base64,${content}`;
+  });
+
+  /**
+   * Get markdown preview HTML
+   * Uses live editor content for real-time preview, falls back to input content if editor not available
+   */
+  readonly markdownPreviewHtml = computed<SafeHtml | null>(() => {
+    if (!this.isMarkdown()) {
+      return null;
+    }
+
+    // Read markedLoaded to trigger recomputation when marked loads
+    this.markedLoaded();
+
+    // Use current editor content for live preview, or fall back to input content
+    const editorContent = this.currentEditorContent();
+    const inputContent = this.content();
+
+    // Prefer editor content if available (for live preview), otherwise use input content
+    let markdownText: string | null = null;
+
+    if (editorContent) {
+      // Editor content is already decoded (plain text)
+      markdownText = editorContent;
+    } else if (inputContent) {
+      // Input content is base64 encoded, need to decode
+      try {
+        markdownText = atob(inputContent);
+      } catch (error) {
+        return null;
+      }
+    } else {
+      return null;
+    }
+
+    if (!markdownText) {
+      return null;
+    }
+
+    try {
+      if (this.markedInstance) {
+        try {
+          const html = this.markedInstance.parse(markdownText, {
+            breaks: true,
+            gfm: true,
+          });
+          const sanitized = this.sanitizer.sanitize(SecurityContext.HTML, html);
+          return this.sanitizer.bypassSecurityTrustHtml(sanitized || '');
+        } catch (error) {
+          console.warn('Error parsing markdown:', error);
+          const escaped = markdownText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return this.sanitizer.bypassSecurityTrustHtml(escaped);
+        }
+      } else {
+        // Return escaped text as fallback while marked is loading
+        const escaped = markdownText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return this.sanitizer.bypassSecurityTrustHtml(escaped);
+      }
+    } catch (error) {
+      return null;
+    }
+  });
+
+  /**
+   * Toggle preview visibility
+   */
+  togglePreview(): void {
+    this.previewVisible.set(!this.previewVisible());
+  }
+
+  /**
+   * Close preview
+   */
+  closePreview(): void {
+    this.previewVisible.set(false);
+  }
+
+  /**
+   * Load marked library asynchronously
+   */
+  private async loadMarked(): Promise<Marked> {
+    if (this.markedInstance) {
+      return this.markedInstance;
+    }
+
+    if (this.markedLoadPromise) {
+      return this.markedLoadPromise;
+    }
+
+    this.markedLoadPromise = (async () => {
+      try {
+        const markedModule = await import('marked');
+        const marked = markedModule.marked;
+        this.markedInstance = marked;
+        this.markedLoaded.set(true);
+        return marked;
+      } catch (error) {
+        this.markedLoadPromise = null;
+        throw error;
+      }
+    })();
+
+    return this.markedLoadPromise;
   }
 }

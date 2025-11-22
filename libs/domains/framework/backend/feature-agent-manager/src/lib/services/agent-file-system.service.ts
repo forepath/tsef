@@ -91,18 +91,44 @@ export class AgentFileSystemService {
       if (this.isLikelyBinaryFile(filePath)) {
         let base64Content = await this.dockerService.sendCommandToContainer(
           agentEntity.containerId,
-          `sh -c "base64 ${escapedPath} | tr -d '\\n'"`,
+          `sh -c "base64 ${escapedPath} 2>/dev/null | tr -d '\\n'"`,
         );
 
         // Clean up base64 content - remove any non-base64 characters that might come from Docker output
-        // But be more careful - only remove whitespace and control characters, keep valid base64 chars
+        // First, remove all whitespace
         base64Content = base64Content.replace(/[\s\r\n\t]/g, '').trim();
 
+        // Remove any non-base64 characters (A-Z, a-z, 0-9, +, /, = only)
+        // This handles cases where Docker output might include prefixes/suffixes or error messages
+        const cleanedBase64 = base64Content.replace(/[^A-Za-z0-9+/=]/g, '');
+
+        // Only use cleaned version if it's significantly different (likely had invalid chars)
+        // Otherwise, the original might be correct
+        if (cleanedBase64.length < base64Content.length * 0.9) {
+          this.logger.warn(
+            `Significant base64 cleaning needed for ${filePath}: ${base64Content.length} -> ${cleanedBase64.length} chars`,
+          );
+          base64Content = cleanedBase64;
+        } else {
+          base64Content = cleanedBase64;
+        }
+
         // Validate base64 format (should only contain A-Z, a-z, 0-9, +, /, =)
-        if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Content)) {
-          this.logger.warn(`Invalid base64 content detected for ${filePath}, attempting to clean`);
-          // Remove invalid characters but keep the structure
-          base64Content = base64Content.replace(/[^A-Za-z0-9+/=]/g, '');
+        if (!/^[A-Za-z0-9+/]+={0,2}$/.test(base64Content) || base64Content.length === 0) {
+          this.logger.error(
+            `Invalid base64 content after cleaning for ${filePath}, length: ${base64Content.length}, first 50 chars: ${base64Content.substring(0, 50)}`,
+          );
+          throw new BadRequestException(`Failed to read binary file ${filePath}: invalid base64 content`);
+        }
+
+        // Test if base64 can actually be decoded (catches corruption issues)
+        try {
+          Buffer.from(base64Content, 'base64');
+        } catch (decodeError) {
+          this.logger.error(
+            `Base64 content cannot be decoded for ${filePath}: ${decodeError}, first 50 chars: ${base64Content.substring(0, 50)}`,
+          );
+          throw new BadRequestException(`Failed to read binary file ${filePath}: base64 content is corrupted`);
         }
 
         // Check file size (base64 is ~33% larger than original)
