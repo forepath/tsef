@@ -15,6 +15,7 @@ import {
 import type { editor } from 'monaco-editor';
 import * as monaco from 'monaco-editor';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import { ThemeService } from '../../theme.service';
 
 @Component({
   selector: 'framework-monaco-editor-wrapper',
@@ -25,6 +26,7 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 })
 export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
   private readonly ngZone = inject(NgZone);
+  private readonly themeService = inject(ThemeService);
 
   // Inputs
   filePath = input<string | null>(null);
@@ -59,10 +61,20 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
       // Update binary status whenever filePath or encoding changes
       this.updateBinaryAndLanguage();
     });
+
+    // Watch for theme changes and update Monaco editor theme
+    effect(() => {
+      const isDarkMode = this.themeService.isDarkMode();
+      const editor = this.editorInstance();
+      if (editor) {
+        const theme = isDarkMode ? 'vs-dark' : 'vs-light';
+        monaco.editor.setTheme(theme);
+      }
+    });
   }
 
   readonly editorOptions = computed(() => ({
-    theme: 'vs-light' as const,
+    theme: this.themeService.isDarkMode() ? 'vs-dark' : 'vs-light',
     language: this.language(),
     automaticLayout: true,
     minimap: { enabled: true },
@@ -121,6 +133,10 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
       // Set the model language to enable syntax highlighting
       monaco.editor.setModelLanguage(model, currentLanguage);
     }
+
+    // Set initial theme based on current dark mode state
+    const theme = this.themeService.isDarkMode() ? 'vs-dark' : 'vs-light';
+    monaco.editor.setTheme(theme);
 
     // Dispose old listener if exists
     if (this.contentChangeDisposable) {
