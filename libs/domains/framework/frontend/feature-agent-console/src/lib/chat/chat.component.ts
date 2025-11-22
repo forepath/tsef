@@ -230,39 +230,57 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   );
 
   // Computed signal to determine if we're waiting for an agent response
-  // Uses chatForwarding$ which only tracks chat events, not terminal or other events
-  readonly waitingForResponse$ = combineLatest([this.forwarding$, this.chatMessages$, this.socketError$]).pipe(
-    map(([forwarding, messages, error]) => {
-      // Only show waiting if we're forwarding a chat message
-      // forwarding$ is now chatForwarding$, so it only returns true for chat events
-      if (forwarding) {
-        // Only show if we actually have chat messages (not just terminal events)
-        return messages.some((msg) => this.isUserMessage(msg.payload) || this.isAgentMessage(msg.payload));
-      }
-
-      const lastUserMsgTimestamp = this.lastUserMessageTimestamp();
-      if (!lastUserMsgTimestamp) {
-        // No chat message sent, and not forwarding a chat event
-        return false;
-      }
-
-      // Check if there's an agent message after the last user message
-      const hasAgentResponse = messages.some(
-        (msg) => msg.timestamp > lastUserMsgTimestamp && this.isAgentMessage(msg.payload),
-      );
-
-      // If we have an agent response or an error occurred, we're no longer waiting
-      if (hasAgentResponse || error) {
+  // Works across windows by checking chat messages rather than just forwarding state
+  readonly waitingForResponse$ = combineLatest([this.chatMessages$, this.socketError$]).pipe(
+    map(([messages, error]) => {
+      // If there's an error, we're not waiting
+      if (error) {
         this.lastUserMessageTimestamp.set(null);
         return false;
       }
 
-      // We're waiting if we sent a chat message but haven't received a response yet
-      // But only if we have actual chat messages (not just terminal events)
-      return (
-        lastUserMsgTimestamp !== null &&
-        messages.some((msg) => this.isUserMessage(msg.payload) || this.isAgentMessage(msg.payload))
+      // Filter to only chat messages (user and agent messages)
+      const chatMessages = messages.filter(
+        (msg) => this.isUserMessage(msg.payload) || this.isAgentMessage(msg.payload),
       );
+
+      // Determine the timestamp of the last user message
+      // Use the most recent user message from the array, or fall back to lastUserMessageTimestamp signal
+      // if we've sent a message but it hasn't appeared in the array yet
+      const userMessages = chatMessages.filter((msg) => this.isUserMessage(msg.payload));
+      let lastUserMessageTimestamp: number | null = null;
+
+      if (userMessages.length > 0) {
+        const lastUserMessage = userMessages.reduce((latest, msg) => (msg.timestamp > latest.timestamp ? msg : latest));
+        lastUserMessageTimestamp = lastUserMessage.timestamp;
+      } else {
+        // Check if we've sent a message but it's not yet in the messages array
+        const sentMessageTimestamp = this.lastUserMessageTimestamp();
+        if (sentMessageTimestamp) {
+          lastUserMessageTimestamp = sentMessageTimestamp;
+        }
+      }
+
+      // If we have no user message timestamp, we're not waiting
+      if (!lastUserMessageTimestamp) {
+        return false;
+      }
+
+      // Check if there's an agent message after the last user message
+      const hasAgentResponse = chatMessages.some(
+        (msg) => this.isAgentMessage(msg.payload) && msg.timestamp > lastUserMessageTimestamp,
+      );
+
+      // If we have an agent response, we're no longer waiting
+      if (hasAgentResponse) {
+        // Clear the timestamp if it was set
+        this.lastUserMessageTimestamp.set(null);
+        return false;
+      }
+
+      // We're waiting if there's a user message without a corresponding agent response
+      // This works across windows since all windows receive the same chat messages
+      return true;
     }),
   );
   private activeClientId: string | null = null;
