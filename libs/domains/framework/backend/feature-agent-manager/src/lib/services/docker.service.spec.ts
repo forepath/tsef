@@ -1095,14 +1095,17 @@ describe('DockerService', () => {
           // Write data to PassThrough streams (emits 'data' events synchronously)
           stdout.write(Buffer.from('file content'));
           stderr.write(Buffer.from('warning: some warning message'));
-          // End the PassThrough streams
-          stdout.end();
-          stderr.end();
-          // Use setImmediate to ensure data event handlers have processed before triggering stream 'end'
+          // Use setImmediate to ensure data event handlers have processed before ending streams
           setImmediate(() => {
-            if (endCallback) {
-              endCallback();
-            }
+            // End the PassThrough streams after data has been processed
+            stdout.end();
+            stderr.end();
+            // Trigger stream 'end' event after streams are ended
+            setImmediate(() => {
+              if (endCallback) {
+                endCallback();
+              }
+            });
           });
         }, 5);
       });
