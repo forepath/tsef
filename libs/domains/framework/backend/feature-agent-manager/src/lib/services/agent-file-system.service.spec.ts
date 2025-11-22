@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import * as fs from 'fs';
 import { AgentResponseDto } from '../dto/agent-response.dto';
 import { FileNodeDto } from '../dto/file-node.dto';
 import { AgentEntity } from '../entities/agent.entity';
@@ -43,6 +44,7 @@ describe('AgentFileSystemService', () => {
   const mockDockerService = {
     sendCommandToContainer: jest.fn(),
     readFileFromContainer: jest.fn(),
+    copyFileFromContainer: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -72,6 +74,7 @@ describe('AgentFileSystemService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('readFile', () => {
@@ -80,18 +83,29 @@ describe('AgentFileSystemService', () => {
       const fileContent = 'Hello, World!';
       const base64Content = Buffer.from(fileContent, 'utf-8').toString('base64');
 
+      // Setup mocks
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.readFileFromContainer.mockResolvedValue(fileContent);
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      // Mock filesystem operations
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: fileContent.length } as fs.Stats);
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from(fileContent, 'utf-8'));
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       const result = await service.readFile(mockAgentId, filePath);
 
       expect(result.content).toBe(base64Content);
       expect(result.encoding).toBe('utf-8');
       expect(agentsService.findOne).toHaveBeenCalledWith(mockAgentId);
-      expect(dockerService.readFileFromContainer).toHaveBeenCalledWith(
+      expect(dockerService.copyFileFromContainer).toHaveBeenCalledWith(
         mockContainerId,
         expect.stringContaining('/app/test-file.txt'),
+        expect.stringContaining('test-file.txt'),
       );
     });
 
@@ -102,13 +116,21 @@ describe('AgentFileSystemService', () => {
 
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.readFileFromContainer.mockResolvedValue(fileContent);
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: fileContent.length } as fs.Stats);
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from(fileContent, 'utf-8'));
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       const result = await service.readFile(mockAgentId, filePath);
 
       expect(result.content).toBe(base64Content);
       expect(result.encoding).toBe('utf-8');
-      expect(dockerService.readFileFromContainer).toHaveBeenCalled();
+      expect(dockerService.copyFileFromContainer).toHaveBeenCalled();
     });
 
     it('should read Kotlin file as text', async () => {
@@ -118,13 +140,21 @@ describe('AgentFileSystemService', () => {
 
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.readFileFromContainer.mockResolvedValue(fileContent);
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: fileContent.length } as fs.Stats);
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from(fileContent, 'utf-8'));
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       const result = await service.readFile(mockAgentId, filePath);
 
       expect(result.content).toBe(base64Content);
       expect(result.encoding).toBe('utf-8');
-      expect(dockerService.readFileFromContainer).toHaveBeenCalled();
+      expect(dockerService.copyFileFromContainer).toHaveBeenCalled();
     });
 
     it('should read YAML file as text', async () => {
@@ -134,31 +164,46 @@ describe('AgentFileSystemService', () => {
 
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.readFileFromContainer.mockResolvedValue(fileContent);
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: fileContent.length } as fs.Stats);
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from(fileContent, 'utf-8'));
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       const result = await service.readFile(mockAgentId, filePath);
 
       expect(result.content).toBe(base64Content);
       expect(result.encoding).toBe('utf-8');
-      expect(dockerService.readFileFromContainer).toHaveBeenCalled();
+      expect(dockerService.copyFileFromContainer).toHaveBeenCalled();
     });
 
     it('should treat file with high control character percentage as binary', async () => {
       const filePath = 'suspicious.txt';
       // Create content with >10% control characters
       const fileContent = '\x01\x02\x03\x04\x05'.repeat(20) + 'normal text'.repeat(10);
-      const base64Content = Buffer.from('binary content').toString('base64');
+      const base64Content = Buffer.from(fileContent, 'utf-8').toString('base64');
 
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.readFileFromContainer.mockResolvedValue(fileContent);
-      dockerService.sendCommandToContainer.mockResolvedValue(base64Content);
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: fileContent.length } as fs.Stats);
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from(fileContent, 'utf-8'));
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       const result = await service.readFile(mockAgentId, filePath);
 
+      expect(result.content).toBe(base64Content);
       expect(result.encoding).toBe('base64');
-      expect(dockerService.readFileFromContainer).toHaveBeenCalled();
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalled();
+      expect(dockerService.copyFileFromContainer).toHaveBeenCalled();
     });
 
     it('should read binary file content successfully', async () => {
@@ -169,11 +214,19 @@ describe('AgentFileSystemService', () => {
 
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.sendCommandToContainer.mockResolvedValue(base64Content);
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: binaryContent.length } as fs.Stats);
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(binaryContent);
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       const result = await service.readFile(mockAgentId, filePath);
 
-      expect(result.content).toBe(base64Content.trim());
+      expect(result.content).toBe(base64Content);
       expect(result.encoding).toBe('base64');
       expect(agentsService.findOne).toHaveBeenCalledWith(mockAgentId);
     });
@@ -187,25 +240,39 @@ describe('AgentFileSystemService', () => {
     it('should throw NotFoundException when file not found', async () => {
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.readFileFromContainer.mockRejectedValue(new Error('File not found: /app/nonexistent.txt'));
+      dockerService.copyFileFromContainer.mockRejectedValue(
+        new NotFoundException('File not found in container: /app/nonexistent.txt'),
+      );
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 
       await expect(service.readFile(mockAgentId, 'nonexistent.txt')).rejects.toThrow(NotFoundException);
     });
 
     it('should fall back to base64 when text read fails', async () => {
       const filePath = 'test-file.txt';
-      const base64Content = Buffer.from('fallback content', 'utf-8').toString('base64');
+      const fileContent = 'fallback content';
+      const base64Content = Buffer.from(fileContent, 'utf-8').toString('base64');
 
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.readFileFromContainer.mockRejectedValue(new Error('Read failed'));
-      dockerService.sendCommandToContainer.mockResolvedValue(base64Content);
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: fileContent.length } as fs.Stats);
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from(fileContent, 'utf-8'));
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       const result = await service.readFile(mockAgentId, filePath);
 
-      expect(result.encoding).toBe('base64');
-      expect(dockerService.readFileFromContainer).toHaveBeenCalled();
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalled();
+      expect(result.content).toBe(base64Content);
+      expect(result.encoding).toBe('utf-8');
+      expect(dockerService.copyFileFromContainer).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException for path traversal attempts', async () => {
@@ -224,27 +291,33 @@ describe('AgentFileSystemService', () => {
 
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      // Mock readFileFromContainer to return large text content
-      dockerService.readFileFromContainer.mockResolvedValue(largeTextContent);
-      // Explicitly ensure sendCommandToContainer is not called (should throw before reaching it)
-      dockerService.sendCommandToContainer.mockImplementation(() => {
-        throw new Error('sendCommandToContainer should not be called');
-      });
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: largeTextContent.length } as fs.Stats);
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       await expect(service.readFile(mockAgentId, 'large-file.txt')).rejects.toThrow(BadRequestException);
-      expect(dockerService.readFileFromContainer).toHaveBeenCalled();
-      // Should not fall back to base64 for text files - should throw before that
-      expect(dockerService.sendCommandToContainer).not.toHaveBeenCalled();
+      expect(dockerService.copyFileFromContainer).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when binary file size exceeds limit', async () => {
-      // Create base64 content that when decoded exceeds 10MB
-      // Base64 is ~33% larger, so 11MB original ≈ 14.67MB base64
-      const largeBase64Content = 'x'.repeat(Math.ceil((11 * 1024 * 1024 * 4) / 3)); // ~14.67MB base64
+      // Create binary content that exceeds 10MB
+      const largeBinaryContent = Buffer.alloc(11 * 1024 * 1024); // 11MB
 
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.sendCommandToContainer.mockResolvedValue(largeBase64Content);
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: largeBinaryContent.length } as fs.Stats);
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       await expect(service.readFile(mockAgentId, 'large-image.png')).rejects.toThrow(BadRequestException);
     });
@@ -501,7 +574,15 @@ file|file2.txt|2048|1704067200`;
       const fileContent = 'test content';
       agentsService.findOne.mockResolvedValue(mockAgentResponse);
       agentsRepository.findByIdOrThrow.mockResolvedValue(mockAgentEntity);
-      dockerService.readFileFromContainer.mockResolvedValue(fileContent);
+      dockerService.copyFileFromContainer.mockResolvedValue(undefined);
+
+      const mockTempDir = '/tmp/agent-file-read-abc123';
+      jest.spyOn(fs, 'mkdtempSync').mockReturnValue(mockTempDir);
+      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      jest.spyOn(fs, 'statSync').mockReturnValue({ size: fileContent.length } as fs.Stats);
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from(fileContent, 'utf-8'));
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'rmSync').mockImplementation(jest.fn());
 
       await expect(service.readFile(mockAgentId, 'valid/path/file.txt')).resolves.toBeDefined();
       await expect(service.readFile(mockAgentId, 'file-with-dashes.txt')).resolves.toBeDefined();
