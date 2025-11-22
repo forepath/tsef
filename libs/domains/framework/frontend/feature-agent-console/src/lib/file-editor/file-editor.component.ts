@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import {
   AfterViewInit,
   Component,
@@ -43,6 +43,7 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
   private readonly socketsFacade = inject(SocketsFacade);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actions$ = inject(Actions);
+  private readonly location = inject(Location);
 
   @ViewChild('tabsContainer', { static: false }) tabsContainerRef?: ElementRef<HTMLDivElement>;
   @ViewChild('tabsWrapper', { static: false }) tabsWrapperRef?: ElementRef<HTMLDivElement>;
@@ -322,6 +323,19 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
           this.handleFileUpdateNotification(notificationData);
         }
       });
+
+    // Update query parameter when file path changes (silently, without navigation)
+    effect(() => {
+      const filePath = this.selectedFilePath();
+      const clientId = this.clientId();
+      const agentId = this.agentId();
+
+      if (filePath && clientId && agentId) {
+        this.updateQueryParameter(filePath);
+      } else {
+        this.updateQueryParameter(null);
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -337,6 +351,9 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     }
     // Initial calculation after view init
     setTimeout(() => this.calculateVisibleTabs(), 100);
+
+    // Restore file from query parameter on initialization
+    this.restoreFileFromQueryParameter();
   }
 
   /**
@@ -1084,6 +1101,40 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     }
     this.showFileUpdateModal.set(false);
     this.fileUpdateNotification.set(null);
+  }
+
+  /**
+   * Update the query parameter silently (without triggering navigation)
+   */
+  private updateQueryParameter(filePath: string | null): void {
+    const url = new URL(window.location.href);
+    if (filePath) {
+      url.searchParams.set('file', encodeURIComponent(filePath));
+    } else {
+      url.searchParams.delete('file');
+    }
+    // Use replaceState to update URL without triggering navigation
+    this.location.replaceState(url.pathname + url.search + url.hash);
+  }
+
+  /**
+   * Restore file from query parameter on component initialization
+   */
+  private restoreFileFromQueryParameter(): void {
+    const url = new URL(window.location.href);
+    const fileParam = url.searchParams.get('file');
+    if (fileParam && this.clientId() && this.agentId()) {
+      try {
+        const decodedPath = decodeURIComponent(fileParam);
+        // Only restore if no file is currently selected
+        if (!this.selectedFilePath()) {
+          this.onFileSelect(decodedPath);
+        }
+      } catch (error) {
+        // Invalid encoding, ignore
+        console.warn('Failed to decode file path from query parameter:', error);
+      }
+    }
   }
 
   ngOnDestroy(): void {

@@ -1,4 +1,7 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { FileContentDto } from '../dto/file-content.dto';
 import { FileNodeDto } from '../dto/file-node.dto';
 import { AgentsRepository } from '../repositories/agents.repository';
@@ -65,14 +68,13 @@ export class AgentFileSystemService {
 
   /**
    * Read file content from agent container.
-   * Returns content as base64-encoded string to support both text and binary files.
-   * Text files are read as plain text and then properly encoded to base64.
-   * Binary files are read directly as base64.
+   * Uses docker cp to copy the file to a temporary location, then reads it as base64.
+   * This approach avoids corruption issues that can occur with shell commands, especially for binary files.
    * @param agentId - The UUID of the agent
    * @param filePath - The relative path to the file (from /app)
    * @returns File content (base64-encoded) and encoding type
    * @throws NotFoundException if agent or file is not found
-   * @throws BadRequestException if path is invalid
+   * @throws BadRequestException if path is invalid or file is too large
    */
   async readFile(agentId: string, filePath: string): Promise<FileContentDto> {
     await this.agentsService.findOne(agentId);
@@ -83,201 +85,104 @@ export class AgentFileSystemService {
     }
 
     const containerPath = this.buildContainerPath(filePath);
-    const escapedPath = this.escapeForShell(containerPath);
+    let tempFilePath: string | null = null;
 
     try {
-      // First, check if file is likely binary based on extension
-      // If so, read directly as base64 without trying text first
-      if (this.isLikelyBinaryFile(filePath)) {
-        let base64Content = await this.dockerService.sendCommandToContainer(
-          agentEntity.containerId,
-          `sh -c "base64 ${escapedPath} | tr -d '\\n'"`,
-        );
+      // Create a temporary file path
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-file-read-'));
+      const fileName = path.basename(filePath) || 'file';
+      tempFilePath = path.join(tempDir, fileName);
 
-        // Clean up base64 content - remove any non-base64 characters that might come from Docker output
-        // But be more careful - only remove whitespace and control characters, keep valid base64 chars
-        base64Content = base64Content.replace(/[\s\r\n\t]/g, '').trim();
+      // Copy file from container to temporary location using docker cp
+      await this.dockerService.copyFileFromContainer(agentEntity.containerId, containerPath, tempFilePath);
 
-        // Validate base64 format (should only contain A-Z, a-z, 0-9, +, /, =)
-        if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Content)) {
-          this.logger.warn(`Invalid base64 content detected for ${filePath}, attempting to clean`);
-          // Remove invalid characters but keep the structure
-          base64Content = base64Content.replace(/[^A-Za-z0-9+/=]/g, '');
-        }
-
-        // Check file size (base64 is ~33% larger than original)
-        const approximateOriginalSize = (base64Content.length * 3) / 4;
-        if (approximateOriginalSize > this.MAX_FILE_SIZE) {
-          throw new BadRequestException(`File size exceeds maximum allowed size of ${this.MAX_FILE_SIZE} bytes`);
-        }
-
-        return {
-          content: base64Content,
-          encoding: 'base64',
-        };
+      // Check if file exists
+      if (!fs.existsSync(tempFilePath)) {
+        throw new NotFoundException(`File not found: ${filePath}`);
       }
 
-      // For files that might be text, try reading as plain text first
-      // This approach is more reliable than guessing from file extension
+      // Get file stats to check size
+      const stats = fs.statSync(tempFilePath);
+      if (stats.size > this.MAX_FILE_SIZE) {
+        throw new BadRequestException(`File size exceeds maximum allowed size of ${this.MAX_FILE_SIZE} bytes`);
+      }
+
+      // Read file as binary buffer
+      const fileBuffer = fs.readFileSync(tempFilePath);
+
+      // Encode to base64
+      const base64Content = fileBuffer.toString('base64');
+
+      // Try to determine if it's text by attempting to decode as UTF-8
+      // If it decodes successfully and has reasonable text content, mark as utf-8
+      let encoding: 'utf-8' | 'base64' = 'base64';
       try {
-        // Use the dedicated readFileFromContainer method which uses demuxStream
-        // This properly handles Docker's multiplexed format and eliminates null byte artifacts
-        const textContent = await this.dockerService.readFileFromContainer(agentEntity.containerId, containerPath);
-
-        // Check if content has a high percentage of non-printable control characters
-        // This would indicate it's actually binary, not just parsing artifacts
+        const textContent = fileBuffer.toString('utf-8');
+        // Check if it's likely text: low percentage of control characters (excluding common whitespace)
         const sampleSize = Math.min(512, textContent.length);
-        const sample = textContent.substring(0, sampleSize);
-        let controlCharCount = 0;
-        for (let i = 0; i < sample.length; i++) {
-          const charCode = sample.charCodeAt(i);
-          // Count control characters (excluding common whitespace: tab, LF, CR)
-          if (
-            (charCode >= 0 && charCode <= 8) || // Null, bell, backspace, etc.
-            charCode === 11 || // Vertical tab
-            charCode === 12 || // Form feed
-            (charCode >= 14 && charCode <= 31) || // Other control chars (excluding CR/LF)
-            (charCode >= 127 && charCode <= 159) // DEL and C1 control chars
-          ) {
-            controlCharCount++;
-          }
-        }
-
-        // If more than 10% of characters are control characters, it's likely binary
-        // This is a higher threshold to avoid false positives
-        const controlCharThreshold = 0.1;
-        if (controlCharCount / sampleSize > controlCharThreshold) {
-          this.logger.debug(
-            `File ${filePath} has high percentage of control characters (${((controlCharCount / sampleSize) * 100).toFixed(1)}%), treating as binary`,
-          );
-          // Read as base64
-          let base64Content = await this.dockerService.sendCommandToContainer(
-            agentEntity.containerId,
-            `sh -c "base64 ${escapedPath} | tr -d '\\n'"`,
-          );
-
-          // Clean up base64 content
-          base64Content = base64Content.replace(/[\s\r\n\t]/g, '').trim();
-
-          // Validate base64 format
-          if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Content)) {
-            this.logger.warn(`Invalid base64 content detected for ${filePath}, attempting to clean`);
-            base64Content = base64Content.replace(/[^A-Za-z0-9+/=]/g, '');
+        if (sampleSize > 0) {
+          const sample = textContent.substring(0, sampleSize);
+          let controlCharCount = 0;
+          for (let i = 0; i < sample.length; i++) {
+            const charCode = sample.charCodeAt(i);
+            // Count control characters (excluding common whitespace: tab, LF, CR)
+            if (
+              (charCode >= 0 && charCode <= 8) || // Null, bell, backspace, etc.
+              charCode === 11 || // Vertical tab
+              charCode === 12 || // Form feed
+              (charCode >= 14 && charCode <= 31) || // Other control chars (excluding CR/LF)
+              (charCode >= 127 && charCode <= 159) // DEL and C1 control chars
+            ) {
+              controlCharCount++;
+            }
           }
 
-          // Check file size
-          const approximateOriginalSize = (base64Content.length * 3) / 4;
-          if (approximateOriginalSize > this.MAX_FILE_SIZE) {
-            throw new BadRequestException(`File size exceeds maximum allowed size of ${this.MAX_FILE_SIZE} bytes`);
+          // If less than 10% are control characters, it's likely text
+          const controlCharThreshold = 0.1;
+          if (controlCharCount / sampleSize <= controlCharThreshold) {
+            encoding = 'utf-8';
+            this.logger.debug(`File ${filePath} detected as text (${stats.size} bytes)`);
+          } else {
+            this.logger.debug(
+              `File ${filePath} detected as binary (${stats.size} bytes, ${((controlCharCount / sampleSize) * 100).toFixed(1)}% control chars)`,
+            );
           }
-
-          return {
-            content: base64Content,
-            encoding: 'base64',
-          };
         }
-
-        // It's text - check file size
-        const textSize = Buffer.byteLength(textContent, 'utf-8');
-        if (textSize > this.MAX_FILE_SIZE) {
-          throw new BadRequestException(`File size exceeds maximum allowed size of ${this.MAX_FILE_SIZE} bytes`);
-        }
-
-        // Encode text to base64 properly using Node.js Buffer
-        const base64Content = Buffer.from(textContent, 'utf-8').toString('base64');
-
-        this.logger.debug(`File ${filePath} read as text (${textSize} bytes), encoded to base64`);
-        return {
-          content: base64Content,
-          encoding: 'utf-8',
-        };
-      } catch (textReadError: unknown) {
-        // If text read fails, it might be because:
-        // 1. The file is actually binary and cat fails
-        // 2. There's a Docker/permission issue
-        // 3. The file doesn't exist (but we should have caught that earlier)
-        // 4. A BadRequestException was thrown (e.g., file size exceeded) - rethrow it
-        if (textReadError instanceof BadRequestException) {
-          throw textReadError;
-        }
-
-        const errorMessage = (textReadError as Error).message || String(textReadError);
-        this.logger.debug(`Text read failed for ${filePath}, falling back to base64: ${errorMessage}`);
-
-        // Only fall back to base64 if it's not a "file not found" error
-        // (which should have been caught earlier, but just in case)
-        if (errorMessage.includes('No such file') || errorMessage.includes('not found')) {
-          throw new NotFoundException(`File not found: ${filePath}`);
-        }
-
-        let base64Content = await this.dockerService.sendCommandToContainer(
-          agentEntity.containerId,
-          `sh -c "base64 ${escapedPath} | tr -d '\\n'"`,
-        );
-
-        // Clean up base64 content
-        base64Content = base64Content.replace(/[\s\r\n\t]/g, '').trim();
-
-        // Validate base64 format
-        if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Content)) {
-          this.logger.warn(`Invalid base64 content detected for ${filePath}, attempting to clean`);
-          base64Content = base64Content.replace(/[^A-Za-z0-9+/=]/g, '');
-        }
-
-        // Check file size
-        const approximateOriginalSize = (base64Content.length * 3) / 4;
-        if (approximateOriginalSize > this.MAX_FILE_SIZE) {
-          throw new BadRequestException(`File size exceeds maximum allowed size of ${this.MAX_FILE_SIZE} bytes`);
-        }
-
-        this.logger.debug(`File ${filePath} read as base64 (fallback from text read failure)`);
-        return {
-          content: base64Content,
-          encoding: 'base64',
-        };
+      } catch {
+        // If UTF-8 decoding fails, it's definitely binary
+        encoding = 'base64';
+        this.logger.debug(`File ${filePath} detected as binary (${stats.size} bytes, UTF-8 decode failed)`);
       }
+
+      return {
+        content: base64Content,
+        encoding,
+      };
     } catch (error: unknown) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
       const err = error as { message?: string };
       if (err.message?.includes('No such file') || err.message?.includes('not found')) {
         throw new NotFoundException(`File not found: ${filePath}`);
       }
       this.logger.error(`Error reading file ${filePath} for agent ${agentId}: ${err.message}`);
       throw error;
+    } finally {
+      // Clean up temporary file and directory
+      if (tempFilePath && fs.existsSync(tempFilePath)) {
+        try {
+          const tempDir = path.dirname(tempFilePath);
+          fs.unlinkSync(tempFilePath);
+          if (fs.existsSync(tempDir)) {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+          }
+        } catch (cleanupError: unknown) {
+          const cleanupErr = cleanupError as { message?: string };
+          this.logger.warn(`Failed to clean up temporary file ${tempFilePath}: ${cleanupErr.message}`);
+        }
+      }
     }
-  }
-
-  /**
-   * Determine if a file is likely binary based on its extension.
-   * @param filePath - The file path
-   * @returns True if file is likely binary
-   */
-  private isLikelyBinaryFile(filePath: string): boolean {
-    const binaryExtensions = [
-      '.png',
-      '.jpg',
-      '.jpeg',
-      '.gif',
-      '.bmp',
-      '.svg',
-      '.ico',
-      '.webp',
-      '.pdf',
-      '.zip',
-      '.tar',
-      '.gz',
-      '.exe',
-      '.dll',
-      '.so',
-      '.dylib',
-      '.bin',
-      '.woff',
-      '.woff2',
-      '.ttf',
-      '.eot',
-      '.otf',
-    ];
-    const lowerPath = filePath.toLowerCase();
-    return binaryExtensions.some((ext) => lowerPath.endsWith(ext));
   }
 
   /**
