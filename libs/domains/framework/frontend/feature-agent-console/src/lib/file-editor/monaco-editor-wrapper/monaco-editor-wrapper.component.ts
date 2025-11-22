@@ -72,6 +72,15 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
       // Read signals to establish dependency tracking - effect will re-run when these change
       // The values are read again inside updateBinaryAndLanguage(), but we need to read them
       // here for the effect to track changes to these signals
+      const filePath = this.filePath();
+      const previousFilePath = this.lastFilePath;
+
+      // Reset lastContent when file path changes to ensure content updates are detected
+      // This is critical when switching from images (binary) to text files
+      if (filePath !== previousFilePath) {
+        this.lastContent = null;
+      }
+
       this.filePath();
       this.encoding();
 
@@ -204,6 +213,9 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     });
 
     // Set initial content
+    // Reset lastContent to null before updating to ensure content is always set on init
+    // This is important when switching from images to text files
+    this.lastContent = null;
     this.updateContent();
   }
 
@@ -241,8 +253,9 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
       return;
     }
 
-    // Skip if same content
-    if (this.lastContent === content) {
+    // Skip if same content (but only if lastContent is not null - null means we need to update)
+    // This ensures content is always set when switching from images to text files
+    if (this.lastContent !== null && this.lastContent === content) {
       // If content is the same but preview was open and is previewable, keep it open
       if (wasPreviewVisible && this.isPreviewable()) {
         this.previewVisible.set(true);
