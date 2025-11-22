@@ -1,6 +1,13 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { exec } from 'child_process';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { PassThrough } from 'stream';
+import { promisify } from 'util';
 import Docker = require('dockerode');
+
+const execAsync = promisify(exec);
 
 interface TerminalSession {
   exec: Docker.Exec;
@@ -806,5 +813,111 @@ export class DockerService {
       }
     }
     return sessionIds;
+  }
+
+  /**
+   * Copy a file from container to host filesystem using docker cp (via getArchive).
+   * This method uses Docker's getArchive API to copy files reliably, especially for binary files.
+   * @param containerId - The container ID
+   * @param containerPath - The absolute path to the file in the container
+   * @param hostPath - The path on the host filesystem where the file should be copied
+   * @throws NotFoundException if container or file is not found
+   */
+  async copyFileFromContainer(containerId: string, containerPath: string, hostPath: string): Promise<void> {
+    try {
+      const container = this.docker.getContainer(containerId);
+
+      // Check if container exists
+      try {
+        await container.inspect();
+      } catch (error: unknown) {
+        const dockerError = error as { statusCode?: number };
+        if (dockerError.statusCode === 404) {
+          throw new NotFoundException(`Container with ID '${containerId}' not found`);
+        }
+        throw error;
+      }
+
+      // Get the file as a tar archive stream
+      const tarStream = await container.getArchive({ path: containerPath });
+
+      // Create directory for the host path if it doesn't exist
+      const hostDir = path.dirname(hostPath);
+      if (!fs.existsSync(hostDir)) {
+        fs.mkdirSync(hostDir, { recursive: true });
+      }
+
+      // Write tar stream to a temporary file
+      const tempTarPath = `${hostPath}.tar`;
+      const writeStream = fs.createWriteStream(tempTarPath);
+      tarStream.pipe(writeStream);
+
+      // Wait for the tar file to be written
+      await new Promise<void>((resolve, reject) => {
+        writeStream.on('finish', resolve);
+        writeStream.on('error', reject);
+        tarStream.on('error', reject);
+      });
+
+      // Extract the file from the tar archive
+      // The tar archive from getArchive contains the file at the specified path
+      // We need to extract it to the host path
+      try {
+        // Extract the tar file to a temporary directory first
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-cp-'));
+        const extractCommand = `tar -xf ${tempTarPath} -C ${tempDir} 2>&1`;
+        const { stderr: extractStderr } = await execAsync(extractCommand);
+
+        // Check for extraction errors
+        if (extractStderr && !extractStderr.includes('Removing leading')) {
+          this.logger.warn(`Tar extraction warnings: ${extractStderr}`);
+        }
+
+        // Find the extracted file (it will be in the temp directory with the same structure as container)
+        // The tar archive preserves the full path, so we need to find the file
+        const findCommand = `find ${tempDir} -type f | head -1`;
+        const { stdout: foundFile } = await execAsync(findCommand);
+        const extractedFilePath = foundFile.trim();
+
+        if (!extractedFilePath || !fs.existsSync(extractedFilePath)) {
+          // Try alternative: the file might be at the root of tempDir if path was stripped
+          const fileName = path.basename(containerPath);
+          const alternativePath = path.join(tempDir, fileName);
+          if (fs.existsSync(alternativePath)) {
+            fs.copyFileSync(alternativePath, hostPath);
+          } else {
+            throw new NotFoundException(`File not found in container: ${containerPath}`);
+          }
+        } else {
+          // Copy the extracted file to the final host path
+          fs.copyFileSync(extractedFilePath, hostPath);
+        }
+
+        // Clean up: remove temp tar and temp directory
+        fs.unlinkSync(tempTarPath);
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      } catch (extractError: unknown) {
+        // Clean up temp tar file on error
+        if (fs.existsSync(tempTarPath)) {
+          try {
+            fs.unlinkSync(tempTarPath);
+          } catch {
+            // Ignore cleanup errors
+          }
+        }
+        const err = extractError as { message?: string; code?: string };
+        if (err.code === 'ENOENT' || err.message?.includes('No such file') || err.message?.includes('not found')) {
+          throw new NotFoundException(`File not found in container: ${containerPath}`);
+        }
+        throw extractError;
+      }
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error copying file from container: ${err.message}`, err.stack);
+      throw error;
+    }
   }
 }
