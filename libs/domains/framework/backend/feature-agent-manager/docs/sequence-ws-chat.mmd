@@ -56,8 +56,8 @@ sequenceDiagram
                 Gateway-->>WSClient: loginSuccess<br/>{success: true, data: {message, agentId, agentName}, timestamp}
 
                 Note over Gateway,MsgRepo: Chat History Restoration
-                Gateway->>MsgService: getChatHistory(uuid, 1000, 0)
-                MsgService->>MsgRepo: findByAgentId(uuid, 1000, 0)
+                Gateway->>MsgService: getChatHistory(uuid, 20, 0)
+                MsgService->>MsgRepo: findByAgentId(uuid, 20, 0)
                 MsgRepo->>DB: SELECT agent_messages WHERE agent_id ORDER BY created_at ASC
                 DB-->>MsgRepo: message entities
                 MsgRepo-->>MsgService: message entities

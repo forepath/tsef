@@ -233,7 +233,7 @@ describe('AgentsGateway', () => {
       await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
 
       // Verify chat history was fetched
-      expect(agentMessagesService.getChatHistory).toHaveBeenCalledWith(mockAgent.id, 1000, 0);
+      expect(agentMessagesService.getChatHistory).toHaveBeenCalledWith(mockAgent.id, 20, 0);
 
       // Verify messages were emitted in chronological order
       expect(mockSocket.emit).toHaveBeenCalledTimes(4); // loginSuccess + 3 chat messages
@@ -367,7 +367,7 @@ describe('AgentsGateway', () => {
       await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
 
       // Verify chat history was fetched
-      expect(agentMessagesService.getChatHistory).toHaveBeenCalledWith(mockAgent.id, 1000, 0);
+      expect(agentMessagesService.getChatHistory).toHaveBeenCalledWith(mockAgent.id, 20, 0);
 
       // Only loginSuccess should be emitted
       expect(mockSocket.emit).toHaveBeenCalledTimes(1);

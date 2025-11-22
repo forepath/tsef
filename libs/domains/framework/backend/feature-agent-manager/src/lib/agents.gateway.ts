@@ -326,7 +326,8 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private async restoreChatHistory(agentUuid: string, socket: Socket): Promise<void> {
     try {
       // Fetch chat history (ordered chronologically by createdAt ASC)
-      const chatHistory = await this.agentMessagesService.getChatHistory(agentUuid, 1000, 0);
+      // Only restore the most recent 20 messages
+      const chatHistory = await this.agentMessagesService.getChatHistory(agentUuid, 20, 0);
 
       if (chatHistory.length === 0) {
         this.logger.debug(`No chat history found for agent ${agentUuid}`);
