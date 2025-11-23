@@ -145,7 +145,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/backend-agent-manager",
-        "command": "docker compose up -d"
+        "command": "docker compose up -d --force-recreate --remove-orphans"
       }
     }
   }
