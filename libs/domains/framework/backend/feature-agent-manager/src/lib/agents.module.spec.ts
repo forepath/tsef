@@ -2,13 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AgentsController } from './agents.controller';
 import { AgentsGateway } from './agents.gateway';
-import { AgentEntity } from './entities/agent.entity';
+import { AgentsModule } from './agents.module';
 import { AgentMessageEntity } from './entities/agent-message.entity';
+import { AgentEntity } from './entities/agent.entity';
+import { AgentProviderFactory } from './providers/agent-provider.factory';
+import { CursorAgentProvider } from './providers/cursor-agent.provider';
 import { AgentsRepository } from './repositories/agents.repository';
 import { AgentsService } from './services/agents.service';
 import { DockerService } from './services/docker.service';
 import { PasswordService } from './services/password.service';
-import { AgentsModule } from './agents.module';
 
 describe('AgentsModule', () => {
   let module: TestingModule;
@@ -85,5 +87,32 @@ describe('AgentsModule', () => {
   it('should export AgentsRepository', () => {
     const repository = module.get<AgentsRepository>(AgentsRepository);
     expect(repository).toBeDefined();
+  });
+
+  it('should provide AgentProviderFactory', () => {
+    const factory = module.get<AgentProviderFactory>(AgentProviderFactory);
+    expect(factory).toBeDefined();
+    expect(factory).toBeInstanceOf(AgentProviderFactory);
+  });
+
+  it('should provide CursorAgentProvider', () => {
+    const provider = module.get<CursorAgentProvider>(CursorAgentProvider);
+    expect(provider).toBeDefined();
+    expect(provider).toBeInstanceOf(CursorAgentProvider);
+  });
+
+  it('should register CursorAgentProvider via AGENT_PROVIDER_INIT factory', () => {
+    const factory = module.get<AgentProviderFactory>(AgentProviderFactory);
+    const cursorProvider = module.get<CursorAgentProvider>(CursorAgentProvider);
+
+    // Verify the provider is registered
+    expect(factory.hasProvider('cursor')).toBe(true);
+    expect(factory.getProvider('cursor')).toBe(cursorProvider);
+    expect(cursorProvider.getType()).toBe('cursor');
+  });
+
+  it('should initialize AGENT_PROVIDER_INIT factory', () => {
+    const initValue = module.get<boolean>('AGENT_PROVIDER_INIT');
+    expect(initValue).toBe(true);
   });
 });

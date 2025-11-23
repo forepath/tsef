@@ -259,7 +259,7 @@ describe('ClientsService', () => {
   describe('findAll', () => {
     it('should return array of clients with config', async () => {
       const clients = [mockClient];
-      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git' };
+      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git', agentTypes: ['cursor'] };
       mockRepository.findAll.mockResolvedValue(clients);
       clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
 
@@ -299,7 +299,7 @@ describe('ClientsService', () => {
 
   describe('findOne', () => {
     it('should return client by id with config', async () => {
-      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git' };
+      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git', agentTypes: ['cursor'] };
       mockRepository.findByIdOrThrow.mockResolvedValue(mockClient);
       clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
 
@@ -331,7 +331,7 @@ describe('ClientsService', () => {
         description: 'Updated Description',
       };
       const updatedClient = { ...mockClient, ...updateDto };
-      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git' };
+      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git', agentTypes: ['cursor'] };
 
       mockRepository.findByName.mockResolvedValue(null);
       repository.update.mockResolvedValue(updatedClient);

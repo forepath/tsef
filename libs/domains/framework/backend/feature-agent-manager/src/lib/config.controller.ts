@@ -14,12 +14,13 @@ export class ConfigController {
 
   /**
    * Get configuration parameters.
-   * @returns Configuration response DTO
+   * @returns Configuration response DTO including Git repository URL and available agent types
    */
   @Get()
   async getConfig(): Promise<ConfigResponseDto> {
     return {
       gitRepositoryUrl: this.configService.getGitRepositoryUrl(),
+      agentTypes: this.configService.getAvailableAgentTypes(),
     };
   }
 }

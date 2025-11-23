@@ -24,6 +24,9 @@ export class AgentEntity {
   @Column({ type: 'varchar', length: 255, nullable: true, name: 'volume_path' })
   volumePath?: string;
 
+  @Column({ type: 'varchar', length: 50, default: 'cursor', name: 'agent_type' })
+  agentType!: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

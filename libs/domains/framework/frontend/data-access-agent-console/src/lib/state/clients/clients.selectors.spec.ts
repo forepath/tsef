@@ -1,4 +1,4 @@
-import { createFeatureSelector } from '@ngrx/store';
+import { initialClientsState, type ClientsState } from './clients.reducer';
 import {
   selectActiveClient,
   selectActiveClientId,
@@ -16,7 +16,6 @@ import {
   selectHasClients,
   selectSelectedClient,
 } from './clients.selectors';
-import { initialClientsState, type ClientsState } from './clients.reducer';
 import type { ClientResponseDto } from './clients.types';
 
 describe('Clients Selectors', () => {
@@ -28,6 +27,7 @@ describe('Clients Selectors', () => {
     authenticationType: 'api_key',
     config: {
       gitRepositoryUrl: 'https://github.com/user/repo.git',
+      agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
     },
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
@@ -40,6 +40,7 @@ describe('Clients Selectors', () => {
     authenticationType: 'keycloak',
     config: {
       gitRepositoryUrl: 'https://github.com/user2/repo2.git',
+      agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
     },
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',

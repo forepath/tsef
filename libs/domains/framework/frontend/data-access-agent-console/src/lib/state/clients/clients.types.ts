@@ -1,8 +1,14 @@
 // Types based on OpenAPI spec
 export type ClientAuthenticationType = 'api_key' | 'keycloak';
 
+export interface AgentTypeInfo {
+  type: string;
+  displayName: string;
+}
+
 export interface ConfigResponseDto {
   gitRepositoryUrl?: string | null;
+  agentTypes: AgentTypeInfo[];
 }
 
 export interface ClientResponseDto {

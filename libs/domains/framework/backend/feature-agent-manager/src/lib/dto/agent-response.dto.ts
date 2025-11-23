@@ -6,6 +6,7 @@ export class AgentResponseDto {
   id!: string;
   name!: string;
   description?: string;
+  agentType!: string;
   createdAt!: Date;
   updatedAt!: Date;
 }

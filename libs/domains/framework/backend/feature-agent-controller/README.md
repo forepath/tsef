@@ -43,7 +43,7 @@ The library follows Domain-Driven Design (DDD) principles with clear separation 
 - **DTOs**: Data transfer objects for API boundaries
   - `CreateClientDto` - Input validation for creating clients
   - `UpdateClientDto` - Input validation for updating clients
-  - `ClientResponseDto` - Safe API responses (excludes sensitive data)
+  - `ClientResponseDto` - Safe API responses (excludes sensitive data, includes proxied config with agent types from remote agent-manager)
   - `CreateClientResponseDto` - Response when creating client (includes API key if applicable)
 - **Controllers**: `ClientsController` - HTTP endpoints for client and proxied agent management (protected by Keycloak)
 - **Gateways**: `ClientsGateway` - WebSocket gateway for forwarding events to remote agent-manager WebSocket endpoints
@@ -139,6 +139,21 @@ Base URL: `/api/clients`
 - `DELETE /api/clients/:id/agents/:agentId` - Delete an agent (also deletes stored credentials)
 
 **Note**: Agent creation requests are proxied to the remote agent-manager service. SSH repository configuration (including `GIT_PRIVATE_KEY`) must be configured on the agent-manager instance via environment variables, not through the API request. See the [agent-manager documentation](../feature-agent-manager/README.md) for details on SSH repository setup.
+
+### Client Configuration
+
+Client responses include a `config` field that is automatically fetched from the remote agent-manager service. This configuration includes:
+
+- `gitRepositoryUrl` - The Git repository URL configured on the agent-manager instance (if set)
+- `agentTypes` - Array of available agent provider types registered on the agent-manager instance (e.g., `['cursor']`, `['cursor', 'openai']`)
+
+The config field is optional and may be `undefined` if:
+
+- The agent-manager service is unreachable
+- The request to fetch config fails
+- The agent-manager service doesn't respond within the timeout period
+
+This allows clients to discover which agent types are available on each remote agent-manager instance.
 
 See the [OpenAPI specification](./spec/openapi.yaml) for detailed request/response schemas.
 

@@ -16,6 +16,7 @@ describe('AgentsRepository', () => {
     hashedPassword: 'hashed-password',
     containerId: 'container-id-123',
     volumePath: '/opt/agents/test-volume-uuid',
+    agentType: 'cursor',
     createdAt: new Date(),
     updatedAt: new Date(),
   };

@@ -311,6 +311,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly newAgent = signal<Partial<CreateAgentDto>>({
     name: '',
     description: '',
+    agentType: undefined,
   });
 
   // Edit state
@@ -1352,6 +1353,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         this.newAgent.set({
           name: '',
           description: '',
+          agentType: undefined,
         });
       });
   }
@@ -1555,6 +1557,21 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       // If URL parsing fails, return the original string
       return url;
     }
+  }
+
+  /**
+   * Get the display name for an agent type from a client's config.
+   * @param agentType - The agent type identifier (e.g., 'cursor')
+   * @param client - The client response DTO (optional, will use active client if not provided)
+   * @returns The display name (e.g., 'Cursor') or the type itself if not found
+   */
+  getAgentTypeDisplayName(agentType: string | undefined, client?: ClientResponseDto | null): string {
+    if (!agentType) {
+      return '';
+    }
+    const clientToUse = client;
+    const agentTypeInfo = clientToUse?.config?.agentTypes?.find((at) => at.type === agentType);
+    return agentTypeInfo?.displayName || agentType;
   }
 
   /**

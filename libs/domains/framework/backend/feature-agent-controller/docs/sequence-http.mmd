@@ -29,27 +29,37 @@ sequenceDiagram
     end
 
     rect rgb(240, 255, 240)
-        Note over Client,DB: List Clients
+        Note over Client,Remote: List Clients
         Client->>API: GET /api/clients?limit=10&offset=0
         API->>Service: findAll(limit, offset)
         Service->>Repo: findAll(limit, offset)
         Repo->>DB: SELECT clients LIMIT/OFFSET
         DB-->>Repo: client entities[]
         Repo-->>Service: client entities[]
-        Service-->>API: ClientResponseDto[]<br/>(excludes sensitive data)
-        API-->>Client: 200 OK<br/>[clients array]
+        loop For each client
+            Service->>Proxy: getClientConfig(clientId)
+            Proxy->>Remote: GET {endpoint}/api/config<br/>Authorization: Bearer {token/apiKey}
+            Remote-->>Proxy: 200 OK<br/>{gitRepositoryUrl?, agentTypes}
+            Proxy-->>Service: ConfigResponseDto
+        end
+        Service-->>API: ClientResponseDto[]<br/>(includes config with agentTypes)
+        API-->>Client: 200 OK<br/>[clients array with config]
     end
 
     rect rgb(255, 240, 240)
-        Note over Client,DB: Get Client
+        Note over Client,Remote: Get Client
         Client->>API: GET /api/clients/{id}
         API->>Service: findOne(id)
         Service->>Repo: findById(id)
         Repo->>DB: SELECT client WHERE id
         DB-->>Repo: client entity
         Repo-->>Service: client entity
-        Service-->>API: ClientResponseDto<br/>(excludes sensitive data)
-        API-->>Client: 200 OK<br/>{client}
+        Service->>Proxy: getClientConfig(clientId)
+        Proxy->>Remote: GET {endpoint}/api/config<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>Proxy: 200 OK<br/>{gitRepositoryUrl?, agentTypes}
+        Proxy-->>Service: ConfigResponseDto
+        Service-->>API: ClientResponseDto<br/>(includes config with agentTypes)
+        API-->>Client: 200 OK<br/>{client with config}
     end
 
     rect rgb(255, 255, 230)
@@ -67,8 +77,12 @@ sequenceDiagram
         Repo->>DB: UPDATE client
         DB-->>Repo: updated entity
         Repo-->>Service: updated entity
-        Service-->>API: ClientResponseDto
-        API-->>Client: 200 OK<br/>{updated client}
+        Service->>Proxy: getClientConfig(clientId)
+        Proxy->>Remote: GET {endpoint}/api/config<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>Proxy: 200 OK<br/>{gitRepositoryUrl?, agentTypes}
+        Proxy-->>Service: ConfigResponseDto
+        Service-->>API: ClientResponseDto<br/>(includes config with agentTypes)
+        API-->>Client: 200 OK<br/>{updated client with config}
     end
 
     rect rgb(255, 230, 255)

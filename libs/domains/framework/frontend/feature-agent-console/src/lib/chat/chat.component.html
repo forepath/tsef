@@ -243,6 +243,12 @@
                           @if (agent.description) {
                             <small class="text-muted text-truncate">{{ agent.description }}</small>
                           }
+                          @if (activeClient$ | async; as activeClient) {
+                            <small class="text-muted mt-1">
+                              <i class="bi bi-robot me-1"></i>
+                              {{ getAgentTypeDisplayName(agent.agentType, activeClient) }}
+                            </small>
+                          }
                         </div>
                       </button>
                       <div class="btn-group ms-2" role="group">
@@ -837,6 +843,28 @@
               [disabled]="(agentsCreating$ | async) === true"
             ></textarea>
           </div>
+          @if (activeClient$ | async; as activeClient) {
+            @if (activeClient.config?.agentTypes; as agentTypes) {
+              @if (agentTypes.length > 0) {
+                <div class="mb-3">
+                  <label for="agentType" class="form-label">Agent Type</label>
+                  <select
+                    class="form-select"
+                    id="agentType"
+                    name="agentType"
+                    [ngModel]="newAgent().agentType"
+                    (ngModelChange)="updateAgentField('agentType', $event)"
+                    [disabled]="(agentsCreating$ | async) === true"
+                  >
+                    <option [value]="undefined">Default (Cursor)</option>
+                    @for (agentType of agentTypes; track agentType.type) {
+                      <option [value]="agentType.type">{{ agentType.displayName }}</option>
+                    }
+                  </select>
+                </div>
+              }
+            }
+          }
           <div class="alert alert-info mb-0" role="alert">
             <i class="bi bi-info-circle me-2"></i>
             A password will be auto-generated and shown after creation.

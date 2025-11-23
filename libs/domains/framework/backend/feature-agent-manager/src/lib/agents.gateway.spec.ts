@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 import { AgentsGateway } from './agents.gateway';
 import { AgentEntity } from './entities/agent.entity';
+import { AgentProviderFactory } from './providers/agent-provider.factory';
+import { AgentProvider } from './providers/agent-provider.interface';
 import { AgentsRepository } from './repositories/agents.repository';
 import { AgentMessagesService } from './services/agent-messages.service';
 import { AgentsService } from './services/agents.service';
@@ -18,6 +20,7 @@ describe('AgentsGateway', () => {
   let agentsRepository: jest.Mocked<AgentsRepository>;
   let dockerService: jest.Mocked<DockerService>;
   let agentMessagesService: jest.Mocked<AgentMessagesService>;
+  let agentProviderFactory: jest.Mocked<AgentProviderFactory>;
   let mockServer: Partial<Server>;
   let mockSocket: Partial<Socket>;
 
@@ -27,6 +30,7 @@ describe('AgentsGateway', () => {
     description: 'Test Description',
     hashedPassword: 'hashed-password',
     containerId: 'container-123',
+    agentType: 'cursor',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
@@ -35,6 +39,7 @@ describe('AgentsGateway', () => {
     id: mockAgent.id,
     name: mockAgent.name,
     description: mockAgent.description,
+    agentType: mockAgent.agentType,
     createdAt: mockAgent.createdAt,
     updatedAt: mockAgent.updatedAt,
   };
@@ -59,6 +64,21 @@ describe('AgentsGateway', () => {
     getChatHistory: jest.fn(),
   };
 
+  const mockAgentProvider: jest.Mocked<AgentProvider> = {
+    getType: jest.fn().mockReturnValue('cursor'),
+    getDisplayName: jest.fn().mockReturnValue('Cursor'),
+    getDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/tsef-agent-manager-worker:latest'),
+    sendMessage: jest.fn(),
+    sendInitialization: jest.fn(),
+  };
+
+  const mockAgentProviderFactory = {
+    getProvider: jest.fn().mockReturnValue(mockAgentProvider),
+    registerProvider: jest.fn(),
+    hasProvider: jest.fn(),
+    getRegisteredTypes: jest.fn(),
+  } as unknown as jest.Mocked<AgentProviderFactory>;
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -79,6 +99,10 @@ describe('AgentsGateway', () => {
           provide: AgentMessagesService,
           useValue: mockAgentMessagesService,
         },
+        {
+          provide: AgentProviderFactory,
+          useValue: mockAgentProviderFactory,
+        },
       ],
     }).compile();
 
@@ -87,6 +111,7 @@ describe('AgentsGateway', () => {
     agentsRepository = module.get(AgentsRepository);
     dockerService = module.get(DockerService);
     agentMessagesService = module.get(AgentMessagesService);
+    agentProviderFactory = module.get(AgentProviderFactory);
 
     // Setup mock server
     mockServer = {
@@ -520,7 +545,7 @@ describe('AgentsGateway', () => {
         is_error: false,
         result: 'Hello from agent!',
       });
-      dockerService.sendCommandToContainer.mockResolvedValue(mockAgentResponseJson);
+      mockAgentProvider.sendMessage.mockResolvedValue(mockAgentResponseJson);
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
       await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
@@ -540,11 +565,8 @@ describe('AgentsGateway', () => {
           timestamp: expect.any(String),
         }),
       );
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
-        'container-123',
-        `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
-        'Hello, world!',
-      );
+      expect(agentProviderFactory.getProvider).toHaveBeenCalledWith('cursor');
+      expect(mockAgentProvider.sendMessage).toHaveBeenCalledWith(mockAgent.id, 'container-123', 'Hello, world!', {});
       // Check agent response emission with parsed JSON - now uses socket.emit via broadcastToAgent
       expect(mockSocket.emit).toHaveBeenCalledWith(
         'chatMessage',
@@ -586,14 +608,15 @@ describe('AgentsGateway', () => {
           updatedAt: new Date(),
         },
       ]);
-      dockerService.sendCommandToContainer.mockResolvedValue('');
+      mockAgentProvider.sendMessage.mockResolvedValue('');
 
       await gateway.handleChat({ message: 'Use custom model', model: 'gpt-4.1' }, mockSocket as Socket);
 
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+      expect(mockAgentProvider.sendMessage).toHaveBeenCalledWith(
+        mockAgent.id,
         mockAgent.containerId,
-        `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId} --model gpt-4.1`,
         'Use custom model',
+        { model: 'gpt-4.1' },
       );
     });
 
@@ -692,7 +715,7 @@ describe('AgentsGateway', () => {
           updatedAt: new Date(),
         },
       ]);
-      dockerService.sendCommandToContainer.mockResolvedValue('');
+      mockAgentProvider.sendMessage.mockResolvedValue('');
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
       await gateway.handleChat({ message: 'Hello!' }, mockSocket as Socket);
@@ -739,7 +762,7 @@ describe('AgentsGateway', () => {
           updatedAt: new Date(),
         },
       ]);
-      dockerService.sendCommandToContainer.mockResolvedValue('Invalid JSON response');
+      mockAgentProvider.sendMessage.mockResolvedValue('Invalid JSON response');
       const loggerWarnSpy = jest.spyOn(gateway['logger'], 'warn').mockImplementation();
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
@@ -798,7 +821,7 @@ describe('AgentsGateway', () => {
           updatedAt: new Date(),
         },
       ]);
-      dockerService.sendCommandToContainer.mockRejectedValue(new Error('Container error'));
+      mockAgentProvider.sendMessage.mockRejectedValue(new Error('Container error'));
       const loggerErrorSpy = jest.spyOn(gateway['logger'], 'error').mockImplementation();
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
@@ -878,18 +901,15 @@ describe('AgentsGateway', () => {
         agentsRepository.findById.mockResolvedValue(mockAgent);
         // Mock empty chat history (first message)
         agentMessagesService.getChatHistory.mockResolvedValue([]);
-        dockerService.sendCommandToContainer.mockResolvedValue('');
+        mockAgentProvider.sendInitialization.mockResolvedValue();
+        mockAgentProvider.sendMessage.mockResolvedValue('');
         const loggerDebugSpy = jest.spyOn(gateway['logger'], 'debug').mockImplementation();
         const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
         await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
 
         // Should send initialization message first
-        expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
-          mockAgent.containerId,
-          `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
-          expect.stringContaining('You are operating in a codebase with a structured command and rules system'),
-        );
+        expect(mockAgentProvider.sendInitialization).toHaveBeenCalledWith(mockAgent.id, mockAgent.containerId, {});
         expect(loggerDebugSpy).toHaveBeenCalledWith(expect.stringContaining('Sent initialization message to agent'));
         // Should mark agent as having received first message
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -930,17 +950,19 @@ describe('AgentsGateway', () => {
             updatedAt: new Date(),
           },
         ]);
-        dockerService.sendCommandToContainer.mockResolvedValue('');
+        mockAgentProvider.sendMessage.mockResolvedValue('');
         const loggerDebugSpy = jest.spyOn(gateway['logger'], 'debug').mockImplementation();
 
         await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
 
         // Should not send initialization message (only the user message)
-        expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(1);
-        expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+        expect(mockAgentProvider.sendInitialization).not.toHaveBeenCalled();
+        expect(mockAgentProvider.sendMessage).toHaveBeenCalledTimes(1);
+        expect(mockAgentProvider.sendMessage).toHaveBeenCalledWith(
+          mockAgent.id,
           mockAgent.containerId,
-          `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
           'Hello, world!',
+          {},
         );
         expect(loggerDebugSpy).not.toHaveBeenCalledWith(expect.stringContaining('Sent initialization message'));
         // Should mark agent as initialized
@@ -962,17 +984,19 @@ describe('AgentsGateway', () => {
         agentsRepository.findById.mockResolvedValue(mockAgent);
         // Mock empty chat history (but agent already initialized)
         agentMessagesService.getChatHistory.mockResolvedValue([]);
-        dockerService.sendCommandToContainer.mockResolvedValue('');
+        mockAgentProvider.sendMessage.mockResolvedValue('');
         const loggerDebugSpy = jest.spyOn(gateway['logger'], 'debug').mockImplementation();
 
         await gateway.handleChat({ message: 'Hello, world!' }, mockSocket as Socket);
 
         // Should not send initialization message (only the user message)
-        expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(1);
-        expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+        expect(mockAgentProvider.sendInitialization).not.toHaveBeenCalled();
+        expect(mockAgentProvider.sendMessage).toHaveBeenCalledTimes(1);
+        expect(mockAgentProvider.sendMessage).toHaveBeenCalledWith(
+          mockAgent.id,
           mockAgent.containerId,
-          `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId}`,
           'Hello, world!',
+          {},
         );
         expect(loggerDebugSpy).not.toHaveBeenCalledWith(expect.stringContaining('Sent initialization message'));
         loggerDebugSpy.mockRestore();
@@ -989,9 +1013,8 @@ describe('AgentsGateway', () => {
         // Mock empty chat history (first message)
         agentMessagesService.getChatHistory.mockResolvedValue([]);
         // First call fails (initialization), second call succeeds (user message)
-        dockerService.sendCommandToContainer
-          .mockRejectedValueOnce(new Error('Initialization failed'))
-          .mockResolvedValueOnce('');
+        mockAgentProvider.sendInitialization.mockRejectedValueOnce(new Error('Initialization failed'));
+        mockAgentProvider.sendMessage.mockResolvedValueOnce('');
         const loggerWarnSpy = jest.spyOn(gateway['logger'], 'warn').mockImplementation();
         const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
@@ -1031,16 +1054,15 @@ describe('AgentsGateway', () => {
         agentsRepository.findById.mockResolvedValue(mockAgent);
         // Mock empty chat history (first message)
         agentMessagesService.getChatHistory.mockResolvedValue([]);
-        dockerService.sendCommandToContainer.mockResolvedValue('');
+        mockAgentProvider.sendInitialization.mockResolvedValue();
+        mockAgentProvider.sendMessage.mockResolvedValue('');
 
         await gateway.handleChat({ message: 'Hello, world!', model: 'gpt-4.1' }, mockSocket as Socket);
 
         // Should send initialization message with model flag
-        expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
-          mockAgent.containerId,
-          `cursor-agent --print --approve-mcps --force --output-format json --resume ${mockAgent.id}-${mockAgent.containerId} --model gpt-4.1`,
-          expect.stringContaining('You are operating in a codebase with a structured command and rules system'),
-        );
+        expect(mockAgentProvider.sendInitialization).toHaveBeenCalledWith(mockAgent.id, mockAgent.containerId, {
+          model: 'gpt-4.1',
+        });
       });
     });
   });

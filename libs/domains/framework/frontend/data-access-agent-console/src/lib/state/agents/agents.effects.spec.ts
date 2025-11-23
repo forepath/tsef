@@ -44,6 +44,7 @@ describe('AgentsEffects', () => {
     id: 'agent-1',
     name: 'Test Agent',
     description: 'Test Description',
+    agentType: 'cursor',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
