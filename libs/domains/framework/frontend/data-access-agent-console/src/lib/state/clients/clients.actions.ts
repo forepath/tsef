@@ -17,6 +17,11 @@ export const loadClientsSuccess = createAction(
 
 export const loadClientsFailure = createAction('[Clients] Load Clients Failure', props<{ error: string }>());
 
+export const loadClientsBatch = createAction(
+  '[Clients] Load Clients Batch',
+  props<{ offset: number; accumulatedClients: ClientResponseDto[] }>(),
+);
+
 // Get Client by ID Actions
 export const loadClient = createAction('[Clients] Load Client', props<{ id: string }>());
 

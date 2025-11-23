@@ -9,6 +9,7 @@ import {
   loadClient,
   loadClientFailure,
   loadClients,
+  loadClientsBatch,
   loadClientsFailure,
   loadClientsSuccess,
   loadClientSuccess,
@@ -60,14 +61,33 @@ describe('clientsReducer', () => {
   });
 
   describe('loadClients', () => {
-    it('should set loading to true and clear error', () => {
+    it('should set loading to true, clear existing clients, and clear error', () => {
       const state: ClientsState = {
         ...initialClientsState,
+        entities: [mockClient],
         error: 'Previous error',
       };
 
       const newState = clientsReducer(state, loadClients({}));
 
+      expect(newState.loading).toBe(true);
+      expect(newState.entities).toEqual([]);
+      expect(newState.error).toBeNull();
+    });
+  });
+
+  describe('loadClientsBatch', () => {
+    it('should accumulate clients and keep loading true', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        loading: true,
+        entities: [mockClient],
+      };
+
+      const accumulatedClients = [mockClient, mockClient2];
+      const newState = clientsReducer(state, loadClientsBatch({ offset: 10, accumulatedClients }));
+
+      expect(newState.entities).toEqual(accumulatedClients);
       expect(newState.loading).toBe(true);
       expect(newState.error).toBeNull();
     });

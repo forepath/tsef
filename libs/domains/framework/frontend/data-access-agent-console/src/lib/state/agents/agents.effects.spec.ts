@@ -17,6 +17,7 @@ import {
   loadClientAgentCommandsSuccess,
   loadClientAgentFailure,
   loadClientAgents,
+  loadClientAgentsBatch,
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
@@ -31,6 +32,7 @@ import {
   loadClientAgentCommandsFromFiles$,
   loadClientAgentCommandsLoading$,
   loadClientAgents$,
+  loadClientAgentsBatch$,
   updateClientAgent$,
 } from './agents.effects';
 import type { AgentResponseDto, CreateAgentDto, CreateAgentResponseDto, UpdateAgentDto } from './agents.types';
@@ -77,7 +79,22 @@ describe('AgentsEffects', () => {
   });
 
   describe('loadClientAgents$', () => {
-    it('should return loadClientAgentsSuccess on success', (done) => {
+    it('should return loadClientAgentsSuccess when batch is empty', (done) => {
+      const agents: AgentResponseDto[] = [];
+      const action = loadClientAgents({ clientId });
+      const outcome = loadClientAgentsSuccess({ clientId, agents: [] });
+
+      actions$ = of(action);
+      agentsService.listClientAgents.mockReturnValue(of(agents));
+
+      loadClientAgents$(actions$, agentsService).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 0 });
+        done();
+      });
+    });
+
+    it('should return loadClientAgentsSuccess when batch is partial (< 10)', (done) => {
       const agents: AgentResponseDto[] = [mockAgent];
       const action = loadClientAgents({ clientId });
       const outcome = loadClientAgentsSuccess({ clientId, agents });
@@ -87,6 +104,39 @@ describe('AgentsEffects', () => {
 
       loadClientAgents$(actions$, agentsService).subscribe((result) => {
         expect(result).toEqual(outcome);
+        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 0 });
+        done();
+      });
+    });
+
+    it('should return loadClientAgentsBatch when batch is full (10 entries)', (done) => {
+      const agents: AgentResponseDto[] = Array.from({ length: 10 }, (_, i) => ({
+        ...mockAgent,
+        id: `agent-${i}`,
+      }));
+      const action = loadClientAgents({ clientId });
+      const outcome = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents: agents });
+
+      actions$ = of(action);
+      agentsService.listClientAgents.mockReturnValue(of(agents));
+
+      loadClientAgents$(actions$, agentsService).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 0 });
+        done();
+      });
+    });
+
+    it('should ignore user params and use batch params', (done) => {
+      const params = { limit: 5, offset: 20 };
+      const action = loadClientAgents({ clientId, params });
+      const agents: AgentResponseDto[] = [mockAgent];
+
+      actions$ = of(action);
+      agentsService.listClientAgents.mockReturnValue(of(agents));
+
+      loadClientAgents$(actions$, agentsService).subscribe(() => {
+        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 0 });
         done();
       });
     });
@@ -104,17 +154,78 @@ describe('AgentsEffects', () => {
         done();
       });
     });
+  });
 
-    it('should pass params to service', (done) => {
-      const params = { limit: 10, offset: 20 };
-      const action = loadClientAgents({ clientId, params });
-      const agents: AgentResponseDto[] = [mockAgent];
+  describe('loadClientAgentsBatch$', () => {
+    it('should return loadClientAgentsSuccess when batch is empty', (done) => {
+      const accumulatedAgents: AgentResponseDto[] = [mockAgent];
+      const newAgents: AgentResponseDto[] = [];
+      const action = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents });
+      const outcome = loadClientAgentsSuccess({ clientId, agents: accumulatedAgents });
 
       actions$ = of(action);
-      agentsService.listClientAgents.mockReturnValue(of(agents));
+      agentsService.listClientAgents.mockReturnValue(of(newAgents));
 
-      loadClientAgents$(actions$, agentsService).subscribe(() => {
-        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, params);
+      loadClientAgentsBatch$(actions$, agentsService).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 10 });
+        done();
+      });
+    });
+
+    it('should return loadClientAgentsSuccess when batch is partial (< 10)', (done) => {
+      const accumulatedAgents: AgentResponseDto[] = [mockAgent];
+      const newAgents: AgentResponseDto[] = [{ ...mockAgent, id: 'agent-2' }];
+      const action = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents });
+      const outcome = loadClientAgentsSuccess({ clientId, agents: [...accumulatedAgents, ...newAgents] });
+
+      actions$ = of(action);
+      agentsService.listClientAgents.mockReturnValue(of(newAgents));
+
+      loadClientAgentsBatch$(actions$, agentsService).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 10 });
+        done();
+      });
+    });
+
+    it('should return loadClientAgentsBatch when batch is full (10 entries)', (done) => {
+      const accumulatedAgents: AgentResponseDto[] = Array.from({ length: 10 }, (_, i) => ({
+        ...mockAgent,
+        id: `agent-${i}`,
+      }));
+      const newAgents: AgentResponseDto[] = Array.from({ length: 10 }, (_, i) => ({
+        ...mockAgent,
+        id: `agent-${i + 10}`,
+      }));
+      const action = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents });
+      const outcome = loadClientAgentsBatch({
+        clientId,
+        offset: 20,
+        accumulatedAgents: [...accumulatedAgents, ...newAgents],
+      });
+
+      actions$ = of(action);
+      agentsService.listClientAgents.mockReturnValue(of(newAgents));
+
+      loadClientAgentsBatch$(actions$, agentsService).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 10 });
+        done();
+      });
+    });
+
+    it('should return loadClientAgentsFailure on error', (done) => {
+      const accumulatedAgents: AgentResponseDto[] = [mockAgent];
+      const action = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents });
+      const error = new Error('Load failed');
+      const outcome = loadClientAgentsFailure({ clientId, error: 'Load failed' });
+
+      actions$ = of(action);
+      agentsService.listClientAgents.mockReturnValue(throwError(() => error));
+
+      loadClientAgentsBatch$(actions$, agentsService).subscribe((result) => {
+        expect(result).toEqual(outcome);
         done();
       });
     });
