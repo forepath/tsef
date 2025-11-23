@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigResponseDto } from '@forepath/framework/backend/feature-agent-manager';
 import { CreateClientDto } from '../dto/create-client.dto';
 import { UpdateClientDto } from '../dto/update-client.dto';
 import { AuthenticationType, ClientEntity } from '../entities/client.entity';
@@ -259,7 +260,10 @@ describe('ClientsService', () => {
   describe('findAll', () => {
     it('should return array of clients with config', async () => {
       const clients = [mockClient];
-      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git', agentTypes: ['cursor'] };
+      const mockConfig: ConfigResponseDto = {
+        gitRepositoryUrl: 'https://github.com/user/repo.git',
+        agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
+      };
       mockRepository.findAll.mockResolvedValue(clients);
       clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
 
@@ -299,7 +303,10 @@ describe('ClientsService', () => {
 
   describe('findOne', () => {
     it('should return client by id with config', async () => {
-      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git', agentTypes: ['cursor'] };
+      const mockConfig: ConfigResponseDto = {
+        gitRepositoryUrl: 'https://github.com/user/repo.git',
+        agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
+      };
       mockRepository.findByIdOrThrow.mockResolvedValue(mockClient);
       clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
 
@@ -331,7 +338,10 @@ describe('ClientsService', () => {
         description: 'Updated Description',
       };
       const updatedClient = { ...mockClient, ...updateDto };
-      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git', agentTypes: ['cursor'] };
+      const mockConfig: ConfigResponseDto = {
+        gitRepositoryUrl: 'https://github.com/user/repo.git',
+        agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
+      };
 
       mockRepository.findByName.mockResolvedValue(null);
       repository.update.mockResolvedValue(updatedClient);

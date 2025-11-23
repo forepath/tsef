@@ -7,6 +7,10 @@ jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -38,3 +42,19 @@ jobs:
             conventional-changelog-conventionalcommits@7.0.2
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+
+      - name: 'Login to container registry'
+        if: steps.semantic-release.outputs.new_release_published
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish container images
+        if: steps.semantic-release.outputs.new_release_published
+        env:
+          VERSION: ${{ steps.semantic-release.outputs.new_release_version }}
+        run: |
+          npx nx run-many --target=api-container-image --configuration=release --parallel=3 || echo "No projects for api container image build"
+          npx nx run-many --target=worker-container-image --configuration=release --parallel=3 || echo "No projects for worker container image build"

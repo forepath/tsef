@@ -93,16 +93,27 @@
         "passWithNoTests": true
       }
     },
-    "docker:api": {
-      "dependsOn": ["build", "prune"],
-      "executor": "nx:run-commands",
+    "api-container-image": {
+      "executor": "@nx-tools/nx-container:build",
       "options": {
-        "cwd": "dist/apps/backend-agent-controller",
-        "command": "docker build . -f ../../../apps/backend-agent-controller/Dockerfile.api --tag ghcr.io/forepath/tsef-agent-controller-api:latest"
+        "engine": "docker",
+        "file": "apps/backend-agent-controller/Dockerfile.api"
+      },
+      "configurations": {
+        "test": {
+          "tags": ["ghcr.io/forepath/tsef-agent-controller-api:latest"]
+        },
+        "release": {
+          "push": true,
+          "tags": [
+            "ghcr.io/forepath/tsef-agent-controller-api:latest",
+            "ghcr.io/forepath/tsef-agent-controller-api:$VERSION"
+          ]
+        }
       }
     },
-    "docker:serve": {
-      "dependsOn": ["docker:api"],
+    "start-containers": {
+      "dependsOn": ["api-container-image:test"],
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/backend-agent-controller",
