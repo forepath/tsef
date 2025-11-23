@@ -606,12 +606,28 @@ components:
           properties:
             password:
               type: string
+    AgentTypeInfo:
+      type: object
+      required: [type, displayName]
+      properties:
+        type:
+          type: string
+          description: The unique type identifier (e.g., 'cursor', 'openai', 'anthropic')
+        displayName:
+          type: string
+          description: Human-readable display name (e.g., 'Cursor', 'OpenAI', 'Anthropic Claude')
     ConfigResponseDto:
       type: object
+      required: [agentTypes]
       properties:
         gitRepositoryUrl:
           type: [string, 'null']
           description: Git repository URL used for cloning repositories when creating agents
+        agentTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentTypeInfo'
+          description: Array of available agent provider types with display names
     FileContentDto:
       type: object
       required: [content, encoding]

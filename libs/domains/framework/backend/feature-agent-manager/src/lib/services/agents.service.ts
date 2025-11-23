@@ -7,6 +7,7 @@ import { CreateAgentResponseDto } from '../dto/create-agent-response.dto';
 import { CreateAgentDto } from '../dto/create-agent.dto';
 import { UpdateAgentDto } from '../dto/update-agent.dto';
 import { AgentEntity } from '../entities/agent.entity';
+import { AgentProviderFactory } from '../providers/agent-provider.factory';
 import { AgentsRepository } from '../repositories/agents.repository';
 import { DockerService } from './docker.service';
 import { PasswordService } from './password.service';
@@ -24,6 +25,7 @@ export class AgentsService {
     private readonly agentsRepository: AgentsRepository,
     private readonly dockerService: DockerService,
     private readonly passwordService: PasswordService,
+    private readonly agentProviderFactory: AgentProviderFactory,
   ) {}
 
   /**
@@ -251,8 +253,16 @@ export class AgentsService {
 
     const sshRepository = this.isSshRepository(repositoryUrl);
 
+    // Determine agent type (default to 'cursor' for backward compatibility)
+    const agentType = createAgentDto.agentType || 'cursor';
+
+    // Get the provider for this agent type to retrieve the Docker image
+    const provider = this.agentProviderFactory.getProvider(agentType);
+    const dockerImage = provider.getDockerImage();
+
     // Create a docker container
     const containerId = await this.dockerService.createContainer({
+      image: dockerImage,
       name: createAgentDto.name,
       env: {
         AGENT_NAME: createAgentDto.name,
@@ -292,6 +302,7 @@ export class AgentsService {
         hashedPassword,
         containerId: containerId,
         volumePath: agentVolumePath,
+        agentType: createAgentDto.agentType || 'cursor',
       });
 
       return {
@@ -360,6 +371,7 @@ export class AgentsService {
     const updateData: Partial<AgentEntity> = {
       name: updateAgentDto.name,
       description: updateAgentDto.description,
+      ...(updateAgentDto.agentType !== undefined && { agentType: updateAgentDto.agentType }),
     };
 
     // Remove undefined fields
@@ -411,6 +423,7 @@ export class AgentsService {
       id: agent.id,
       name: agent.name,
       description: agent.description,
+      agentType: agent.agentType,
       createdAt: agent.createdAt,
       updatedAt: agent.updatedAt,
     };

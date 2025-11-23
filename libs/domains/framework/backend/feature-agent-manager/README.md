@@ -23,6 +23,8 @@ Agents are entities that can be created, authenticated, and interacted with thro
 - ✅ Chat message broadcasting
 - ✅ Container command forwarding
 - ✅ Support for UUID or name-based agent identification
+- ✅ **Plugin-based agent provider system** - Support for multiple agent implementations (cursor-agent, OpenAI, Anthropic, etc.) through a unified interface
+- ✅ **Extensible architecture** - Easy to add new agent providers by implementing the `AgentProvider` interface
 
 ## Architecture
 
@@ -34,10 +36,14 @@ The library follows Domain-Driven Design (DDD) principles with clear separation 
   - `AgentsService` - Business logic orchestration
   - `PasswordService` - Password hashing and verification
   - `DockerService` - Container log streaming and command execution
+- **Providers**: Plugin-based agent provider system
+  - `AgentProvider` - Interface for agent implementations
+  - `AgentProviderFactory` - Factory for getting the appropriate provider based on agent type
+  - `CursorAgentProvider` - Cursor-agent implementation
 - **DTOs**: Data transfer objects for API boundaries
-  - `CreateAgentDto` - Input validation for creating agents
-  - `UpdateAgentDto` - Input validation for updating agents
-  - `AgentResponseDto` - Safe API responses (excludes password hash)
+  - `CreateAgentDto` - Input validation for creating agents (includes optional `agentType`)
+  - `UpdateAgentDto` - Input validation for updating agents (includes optional `agentType`)
+  - `AgentResponseDto` - Safe API responses (excludes password hash, includes `agentType`)
   - `CreateAgentResponseDto` - Response when creating agent (includes auto-generated password)
 - **Controllers**: `AgentsController` - HTTP endpoints for agent management (protected by Keycloak)
 - **Gateways**: `AgentsGateway` - WebSocket gateway for agent chat with database-backed authentication
@@ -114,6 +120,10 @@ Base URL: `/api/agents`
 - `POST /api/agents` - Create a new agent (returns auto-generated password)
 - `POST /api/agents/:id` - Update an existing agent
 - `DELETE /api/agents/:id` - Delete an agent
+
+Base URL: `/api/config`
+
+- `GET /api/config` - Get configuration parameters including Git repository URL and available agent types with display names
 
 See the [OpenAPI specification](./spec/openapi.yaml) for detailed request/response schemas.
 
@@ -321,8 +331,77 @@ The `AgentEntity` includes:
 - `hashedPassword` (string, bcrypt hash)
 - `containerId` (string, optional - Docker container ID for agent container)
 - `volumePath` (string, optional - Host path to agent volume where git repository is cloned)
+- `agentType` (string, default: 'cursor' - Type identifier for the agent provider plugin)
 - `createdAt` (timestamp)
 - `updatedAt` (timestamp)
+
+### Agent Provider Plugin System
+
+The library uses a plugin-based architecture to support multiple agent implementations. Each agent has an `agentType` field that determines which provider implementation is used for communication.
+
+#### Available Providers
+
+- **cursor** (default) - Cursor-agent binary running in Docker containers
+
+#### Adding New Providers
+
+To add a new agent provider:
+
+1. Implement the `AgentProvider` interface:
+
+   ```typescript
+   import { AgentProvider, AgentProviderOptions } from './providers/agent-provider.interface';
+
+   @Injectable()
+   export class MyAgentProvider implements AgentProvider {
+     getType(): string {
+       return 'my-agent';
+     }
+
+     getDisplayName(): string {
+       return 'My Agent Provider';
+     }
+
+     getDockerImage(): string {
+       // Return the Docker image (including tag) for this provider
+       return process.env.MY_AGENT_DOCKER_IMAGE || 'my-registry/my-agent:latest';
+     }
+
+     async sendMessage(agentId: string, containerId: string, message: string, options?: AgentProviderOptions): Promise<string> {
+       // Implementation
+     }
+
+     async sendInitialization(agentId: string, containerId: string, options?: AgentProviderOptions): Promise<void> {
+       // Implementation
+     }
+   }
+   ```
+
+2. Register the provider in `AgentsModule`:
+
+   ```typescript
+   providers: [
+     // ... existing providers
+     MyAgentProvider,
+     {
+       provide: 'AGENT_PROVIDER_INIT',
+       useFactory: (factory: AgentProviderFactory, myProvider: MyAgentProvider) => {
+         factory.registerProvider(myProvider);
+         return true;
+       },
+       inject: [AgentProviderFactory, MyAgentProvider],
+     },
+   ],
+   ```
+
+3. Update the DTO validation to include the new type:
+
+   ```typescript
+   @IsIn(['cursor', 'my-agent'], { message: 'Agent type must be one of: cursor, my-agent' })
+   agentType?: string;
+   ```
+
+4. Create a database migration if needed (the `agentType` field already exists in the schema)
 
 ## Testing
 
@@ -359,6 +438,7 @@ nx test framework-backend-feature-agent-manager --coverage
 - `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret (required for HTTP authentication when `STATIC_API_KEY` is not set)
 - `STATIC_API_KEY` - Static API key for HTTP authentication (optional). If set, the API uses API key authentication only (no Keycloak fallback, no anonymous access). If not set, Keycloak authentication is used. The API key can be provided in the `Authorization` header using either `Bearer <key>` or `ApiKey <key>` format.
 - `CURSOR_API_KEY` - Cursor API key for agent communication (required for agent containers)
+- `CURSOR_AGENT_DOCKER_IMAGE` - Docker image (including tag) for cursor-agent containers (optional, defaults to `ghcr.io/forepath/tsef-agent-manager-worker:latest`)
 
 ### Git Repository Environment Variables
 

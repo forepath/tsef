@@ -37,6 +37,7 @@ describe('Agents Selectors', () => {
     id: 'agent-1',
     name: 'Test Agent',
     description: 'Test Description',
+    agentType: 'cursor',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
@@ -44,6 +45,7 @@ describe('Agents Selectors', () => {
   const mockAgent2: AgentResponseDto = {
     id: 'agent-2',
     name: 'Test Agent 2',
+    agentType: 'cursor',
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',
   };

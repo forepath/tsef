@@ -294,6 +294,10 @@ components:
           type: string
         description:
           type: [string, 'null']
+        agentType:
+          type: string
+          enum: [cursor]
+          description: Agent provider type (defaults to 'cursor' if not provided)
     UpdateAgentDto:
       type: object
       properties:
@@ -301,9 +305,13 @@ components:
           type: [string, 'null']
         description:
           type: [string, 'null']
+        agentType:
+          type: string
+          enum: [cursor]
+          description: Agent provider type
     AgentResponseDto:
       type: object
-      required: [id, name, createdAt, updatedAt]
+      required: [id, name, agentType, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -312,6 +320,9 @@ components:
           type: string
         description:
           type: [string, 'null']
+        agentType:
+          type: string
+          description: Agent provider type identifier
         createdAt:
           type: string
           format: date-time
@@ -326,12 +337,28 @@ components:
           properties:
             password:
               type: string
+    AgentTypeInfo:
+      type: object
+      required: [type, displayName]
+      properties:
+        type:
+          type: string
+          description: The unique type identifier (e.g., 'cursor', 'openai', 'anthropic')
+        displayName:
+          type: string
+          description: Human-readable display name (e.g., 'Cursor', 'OpenAI', 'Anthropic Claude')
     ConfigResponseDto:
       type: object
+      required: [agentTypes]
       properties:
         gitRepositoryUrl:
           type: [string, 'null']
           description: Git repository URL used for cloning repositories when creating agents
+        agentTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentTypeInfo'
+          description: Array of available agent provider types with display names
     FileContentDto:
       type: object
       required: [content, encoding]

@@ -22,6 +22,7 @@ describe('AgentFileSystemService', () => {
     id: mockAgentId,
     name: 'Test Agent',
     description: 'Test Description',
+    agentType: 'cursor',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };

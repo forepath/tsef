@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 /**
  * DTO for creating a new agent.
@@ -12,4 +12,9 @@ export class CreateAgentDto {
   @IsOptional()
   @IsString({ message: 'Description must be a string' })
   description?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Agent type must be a string' })
+  @IsIn(['cursor'], { message: 'Agent type must be one of: cursor' })
+  agentType?: string;
 }

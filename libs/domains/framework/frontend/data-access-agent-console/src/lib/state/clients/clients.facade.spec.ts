@@ -25,6 +25,7 @@ describe('ClientsFacade', () => {
     authenticationType: 'api_key',
     config: {
       gitRepositoryUrl: 'https://github.com/user/repo.git',
+      agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
     },
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
@@ -37,6 +38,7 @@ describe('ClientsFacade', () => {
     authenticationType: 'keycloak',
     config: {
       gitRepositoryUrl: 'https://github.com/user2/repo2.git',
+      agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
     },
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',

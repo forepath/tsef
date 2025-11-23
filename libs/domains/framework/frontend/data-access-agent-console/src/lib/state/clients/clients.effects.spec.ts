@@ -44,6 +44,7 @@ describe('ClientsEffects', () => {
     authenticationType: 'api_key',
     config: {
       gitRepositoryUrl: 'https://github.com/user/repo.git',
+      agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
     },
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',

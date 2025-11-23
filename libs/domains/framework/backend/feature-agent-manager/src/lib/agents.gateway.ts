@@ -9,6 +9,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { AgentProviderFactory } from './providers/agent-provider.factory';
 import { AgentsRepository } from './repositories/agents.repository';
 import { AgentMessagesService } from './services/agent-messages.service';
 import { AgentsService } from './services/agents.service';
@@ -167,6 +168,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly agentsRepository: AgentsRepository,
     private readonly dockerService: DockerService,
     private readonly agentMessagesService: AgentMessagesService,
+    private readonly agentProviderFactory: AgentProviderFactory,
   ) {}
 
   /**
@@ -417,11 +419,25 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
+    // Create timestamp immediately for consistent message ordering
+    const chatTimestamp = new Date().toISOString();
+
+    // Broadcast user message immediately so UI shows "agent thinking" right away
+    // This is especially important when agent is instantiating
+    this.broadcastToAgent(
+      agentUuid,
+      'chatMessage',
+      createSuccessResponse<ChatMessageData>({
+        from: ChatActor.USER,
+        text: message,
+        timestamp: chatTimestamp,
+      }),
+    );
+
     try {
       // Get agent details for display
       const agent = await this.agentsService.findOne(agentUuid);
       this.logger.log(`Agent ${agent.name} (${agentUuid}) says: ${message}`);
-      const chatTimestamp = new Date().toISOString();
 
       // Check if this is the first message for this agent
       // Send initialization message if agent has no chat history and hasn't received first message
@@ -432,38 +448,10 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           const entity = await this.agentsRepository.findById(agentUuid);
           const containerId = entity?.containerId;
           if (containerId) {
-            // Command to execute: cursor-agent with prompt mode and JSON output
-            let command = `cursor-agent --print --approve-mcps --force --output-format json --resume ${agent.id}-${containerId}`;
-            if (data.model) {
-              command += ` --model ${data.model}`;
-            }
-
-            // Send dummy message to container stdin (not persisted or broadcast)
-            const instructions = `You are operating in a codebase with a structured command and rules system. Follow these guidelines:
-
-COMMAND SYSTEM:
-- Executable commands **CAN** be found in the project folder at .cursor/commands
-- Each command **IS** a Markdown (.md) file
-- The command invocation format **IS** /{filenamewithoutextension} (where filenamewithoutextension is the filename without the .md extension)
-- Example: A file named "ship.md" in .cursor/commands **IS** invoked as /ship
-- Commands **MUST** be at the start of a message to be recognized and executed
-- When you need to execute a command, you **MUST** look for it in .cursor/commands and invoke it using the /{filenamewithoutextension} format at the beginning of your message
-
-RULES SYSTEM:
-- Basic context files **CAN** be found in .cursor/rules
-- Rules files **MAY** contain an "alwaysApply" property (this is optional in the system)
-- If a rules file has "alwaysApply: true", you **MUST** always read and apply that file regardless of context
-- If a rules file has "alwaysApply: false", you **SHALL** only apply that file to files matching the respective "globs:" entries
-- The "globs:" property **CONTAINS** comma-separated glob patterns that specify which files the rules apply to
-- When processing a file, you **MUST** check all rules files with "alwaysApply: true" and all rules files with "alwaysApply: false" whose globs match the current file path
-
-MESSAGE HANDLING:
-- This is a one-time initialization message to establish system context
-- All subsequent messages you receive **WILL** be from users
-- You **MUST** treat all messages after this initialization as user requests, tasks, or questions
-- You **SHALL** respond to user messages as you would in a normal conversation, applying the command and rules system guidelines above`;
             try {
-              await this.dockerService.sendCommandToContainer(containerId, command, instructions);
+              // Get the appropriate provider based on agent type
+              const provider = this.agentProviderFactory.getProvider(entity.agentType || 'cursor');
+              await provider.sendInitialization(agent.id, containerId, { model: data.model });
               this.logger.debug(`Sent initialization message to agent ${agentUuid}`);
             } catch (error) {
               const err = error as { message?: string; stack?: string };
@@ -491,30 +479,16 @@ MESSAGE HANDLING:
         // Continue with message broadcasting even if persistence fails
       }
 
-      // Broadcast user message only to clients authenticated to this agent
-      this.broadcastToAgent(
-        agentUuid,
-        'chatMessage',
-        createSuccessResponse<ChatMessageData>({
-          from: ChatActor.USER,
-          text: message,
-          timestamp: chatTimestamp,
-        }),
-      );
-
       // Forward message to the agent's container stdin
       const entity = await this.agentsRepository.findById(agentUuid);
       const containerId = entity?.containerId;
       if (containerId) {
-        // Command to execute: cursor-agent with prompt mode and JSON output
-        let command = `cursor-agent --print --approve-mcps --force --output-format json --resume ${agent.id}-${containerId}`;
-        if (data.model) {
-          command += ` --model ${data.model}`;
-        }
-
-        // Send the message to STDIN of the command and get the response
+        // Get the appropriate provider based on agent type
         try {
-          const agentResponse = await this.dockerService.sendCommandToContainer(containerId, command, message);
+          const provider = this.agentProviderFactory.getProvider(entity.agentType || 'cursor');
+          const agentResponse = await provider.sendMessage(agent.id, containerId, message, {
+            model: data.model,
+          });
           // Emit agent's response if there is any
           if (agentResponse && agentResponse.trim()) {
             const agentResponseTimestamp = new Date().toISOString();

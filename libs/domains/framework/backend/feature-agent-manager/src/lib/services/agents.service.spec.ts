@@ -4,6 +4,8 @@ import * as sshpk from 'sshpk';
 import { CreateAgentDto } from '../dto/create-agent.dto';
 import { UpdateAgentDto } from '../dto/update-agent.dto';
 import { AgentEntity } from '../entities/agent.entity';
+import { AgentProviderFactory } from '../providers/agent-provider.factory';
+import { AgentProvider } from '../providers/agent-provider.interface';
 import { AgentsRepository } from '../repositories/agents.repository';
 import { AgentsService } from './agents.service';
 import { DockerService } from './docker.service';
@@ -14,6 +16,7 @@ describe('AgentsService', () => {
   let repository: jest.Mocked<AgentsRepository>;
   let passwordService: jest.Mocked<PasswordService>;
   let dockerService: jest.Mocked<DockerService>;
+  let agentProviderFactory: jest.Mocked<AgentProviderFactory>;
 
   const mockAgent: AgentEntity = {
     id: 'test-uuid',
@@ -22,6 +25,7 @@ describe('AgentsService', () => {
     hashedPassword: 'hashed-password',
     containerId: 'container-id-123',
     volumePath: '/opt/agents/test-volume-uuid',
+    agentType: 'cursor',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
@@ -47,6 +51,21 @@ describe('AgentsService', () => {
     sendCommandToContainer: jest.fn(),
   };
 
+  const mockAgentProvider: jest.Mocked<AgentProvider> = {
+    getType: jest.fn().mockReturnValue('cursor'),
+    getDisplayName: jest.fn().mockReturnValue('Cursor'),
+    getDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/tsef-agent-manager-worker:latest'),
+    sendMessage: jest.fn(),
+    sendInitialization: jest.fn(),
+  };
+
+  const mockAgentProviderFactory = {
+    getProvider: jest.fn().mockReturnValue(mockAgentProvider),
+    registerProvider: jest.fn(),
+    hasProvider: jest.fn(),
+    getRegisteredTypes: jest.fn(),
+  } as unknown as jest.Mocked<AgentProviderFactory>;
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -63,6 +82,10 @@ describe('AgentsService', () => {
           provide: DockerService,
           useValue: mockDockerService,
         },
+        {
+          provide: AgentProviderFactory,
+          useValue: mockAgentProviderFactory,
+        },
       ],
     }).compile();
 
@@ -70,6 +93,7 @@ describe('AgentsService', () => {
     repository = module.get(AgentsRepository);
     passwordService = module.get(PasswordService);
     dockerService = module.get(DockerService);
+    agentProviderFactory = module.get(AgentProviderFactory);
   });
 
   afterEach(() => {
@@ -125,7 +149,10 @@ describe('AgentsService', () => {
       expect(typeof result.password).toBe('string');
       expect(repository.findByName).toHaveBeenCalledWith(createDto.name);
       expect(passwordService.hashPassword).toHaveBeenCalled();
+      expect(agentProviderFactory.getProvider).toHaveBeenCalledWith('cursor');
+      expect(mockAgentProvider.getDockerImage).toHaveBeenCalled();
       expect(dockerService.createContainer).toHaveBeenCalledWith({
+        image: 'ghcr.io/forepath/tsef-agent-manager-worker:latest',
         name: createDto.name,
         env: {
           AGENT_NAME: createDto.name,
@@ -163,6 +190,7 @@ describe('AgentsService', () => {
         hashedPassword,
         containerId,
         volumePath: expect.stringMatching(/^\/opt\/agents\/[a-f0-9-]+$/),
+        agentType: 'cursor',
       });
     });
 
@@ -179,6 +207,7 @@ describe('AgentsService', () => {
         hashedPassword,
         containerId,
         volumePath,
+        agentType: 'cursor',
         createdAt: mockAgent.createdAt,
         updatedAt: mockAgent.updatedAt,
       };
@@ -193,7 +222,10 @@ describe('AgentsService', () => {
 
       expect(result.name).toBe(createDto.name);
       expect(result.description).toBeUndefined();
+      expect(agentProviderFactory.getProvider).toHaveBeenCalledWith('cursor');
+      expect(mockAgentProvider.getDockerImage).toHaveBeenCalled();
       expect(dockerService.createContainer).toHaveBeenCalledWith({
+        image: 'ghcr.io/forepath/tsef-agent-manager-worker:latest',
         name: createDto.name,
         env: {
           AGENT_NAME: createDto.name,
@@ -216,6 +248,7 @@ describe('AgentsService', () => {
       expect(repository.create).toHaveBeenCalledWith({
         name: createDto.name,
         description: undefined,
+        agentType: 'cursor',
         hashedPassword,
         containerId,
         volumePath: expect.stringMatching(/^\/opt\/agents\/[a-f0-9-]+$/),
@@ -457,7 +490,10 @@ describe('AgentsService', () => {
       expect(result.name).toBe(createDto.name);
       expect(result.description).toBe(createDto.description);
       expect(result.password).toBeDefined();
+      expect(agentProviderFactory.getProvider).toHaveBeenCalledWith('cursor');
+      expect(mockAgentProvider.getDockerImage).toHaveBeenCalled();
       expect(dockerService.createContainer).toHaveBeenCalledWith({
+        image: 'ghcr.io/forepath/tsef-agent-manager-worker:latest',
         name: createDto.name,
         env: {
           AGENT_NAME: createDto.name,

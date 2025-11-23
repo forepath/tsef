@@ -3,6 +3,7 @@ export interface AgentResponseDto {
   id: string;
   name: string;
   description?: string;
+  agentType: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -10,6 +11,7 @@ export interface AgentResponseDto {
 export interface CreateAgentDto {
   name: string;
   description?: string;
+  agentType?: string;
 }
 
 export interface UpdateAgentDto {
