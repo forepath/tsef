@@ -147,49 +147,29 @@ export class ClientAgentProxyService {
 
   /**
    * Get all agents for a specific client with pagination.
-   * Filters out agents that don't have credentials (created directly against agent-manager).
    * @param clientId - The UUID of the client
    * @param limit - Maximum number of agents to return
    * @param offset - Number of agents to skip
-   * @returns Array of agent response DTOs (only agents with credentials)
+   * @returns Array of agent response DTOs
    */
   async getClientAgents(clientId: string, limit = 10, offset = 0): Promise<AgentResponseDto[]> {
-    const agents = await this.makeRequest<AgentResponseDto[]>(clientId, {
+    return await this.makeRequest<AgentResponseDto[]>(clientId, {
       method: 'GET',
       params: { limit, offset },
     });
-
-    // Get all agent IDs that have credentials for this client (batch query)
-    const agentIdsWithCredentials = await this.clientAgentCredentialsService.getAgentIdsWithCredentials(clientId);
-    const credentialsSet = new Set(agentIdsWithCredentials);
-
-    // Filter out agents that don't have credentials
-    return agents.filter((agent) => credentialsSet.has(agent.id));
   }
 
   /**
    * Get a single agent for a specific client by agent ID.
-   * Throws NotFoundException if the agent doesn't have credentials (created directly against agent-manager).
    * @param clientId - The UUID of the client
    * @param agentId - The UUID of the agent
    * @returns The agent response DTO
-   * @throws NotFoundException if agent doesn't have credentials
    */
   async getClientAgent(clientId: string, agentId: string): Promise<AgentResponseDto> {
-    const agent = await this.makeRequest<AgentResponseDto>(clientId, {
+    return await this.makeRequest<AgentResponseDto>(clientId, {
       method: 'GET',
       url: `/${agentId}`,
     });
-
-    // Check if agent has credentials
-    const hasCredentials = await this.clientAgentCredentialsService.hasCredentials(clientId, agentId);
-    if (!hasCredentials) {
-      throw new NotFoundException(
-        `Agent ${agentId} does not have credentials. Agents created directly against agent-manager are not accessible through this endpoint.`,
-      );
-    }
-
-    return agent;
   }
 
   /**

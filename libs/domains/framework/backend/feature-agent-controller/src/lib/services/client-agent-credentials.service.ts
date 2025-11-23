@@ -12,13 +12,4 @@ export class ClientAgentCredentialsService {
   async deleteCredentials(clientId: string, agentId: string): Promise<void> {
     await this.repo.deleteByClientAndAgent(clientId, agentId);
   }
-
-  async hasCredentials(clientId: string, agentId: string): Promise<boolean> {
-    const credential = await this.repo.findByClientAndAgent(clientId, agentId);
-    return credential !== null;
-  }
-
-  async getAgentIdsWithCredentials(clientId: string): Promise<string[]> {
-    return await this.repo.findAgentIdsByClient(clientId);
-  }
 }

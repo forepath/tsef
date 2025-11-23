@@ -1,4 +1,3 @@
-import { ConfigResponseDto } from '@forepath/framework/backend/feature-agent-manager';
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateClientDto } from '../dto/create-client.dto';
@@ -260,10 +259,7 @@ describe('ClientsService', () => {
   describe('findAll', () => {
     it('should return array of clients with config', async () => {
       const clients = [mockClient];
-      const mockConfig: ConfigResponseDto = {
-        gitRepositoryUrl: 'https://github.com/user/repo.git',
-        agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
-      };
+      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git', agentTypes: ['cursor'] };
       mockRepository.findAll.mockResolvedValue(clients);
       clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
 
@@ -303,10 +299,7 @@ describe('ClientsService', () => {
 
   describe('findOne', () => {
     it('should return client by id with config', async () => {
-      const mockConfig: ConfigResponseDto = {
-        gitRepositoryUrl: 'https://github.com/user/repo.git',
-        agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
-      };
+      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git', agentTypes: ['cursor'] };
       mockRepository.findByIdOrThrow.mockResolvedValue(mockClient);
       clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
 
@@ -338,10 +331,7 @@ describe('ClientsService', () => {
         description: 'Updated Description',
       };
       const updatedClient = { ...mockClient, ...updateDto };
-      const mockConfig: ConfigResponseDto = {
-        gitRepositoryUrl: 'https://github.com/user/repo.git',
-        agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
-      };
+      const mockConfig = { gitRepositoryUrl: 'https://github.com/user/repo.git', agentTypes: ['cursor'] };
 
       mockRepository.findByName.mockResolvedValue(null);
       repository.update.mockResolvedValue(updatedClient);

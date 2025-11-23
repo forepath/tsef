@@ -13,7 +13,6 @@ describe('ClientAgentCredentialsRepository', () => {
     create: jest.fn(),
     save: jest.fn(),
     findOne: jest.fn(),
-    find: jest.fn(),
     remove: jest.fn(),
   };
 
@@ -73,20 +72,5 @@ describe('ClientAgentCredentialsRepository', () => {
     ormRepo.findOne.mockResolvedValue(null as any);
     await repo.deleteByClientAndAgent('c', 'a');
     expect(ormRepo.remove).not.toHaveBeenCalled();
-  });
-
-  it('should find agent IDs by client', async () => {
-    const credentials = [
-      { agentId: 'agent-1' } as ClientAgentCredentialEntity,
-      { agentId: 'agent-2' } as ClientAgentCredentialEntity,
-      { agentId: 'agent-3' } as ClientAgentCredentialEntity,
-    ];
-    ormRepo.find.mockResolvedValue(credentials);
-    const result = await repo.findAgentIdsByClient('c-uuid');
-    expect(ormRepo.find).toHaveBeenCalledWith({
-      where: { clientId: 'c-uuid' },
-      select: ['agentId'],
-    });
-    expect(result).toEqual(['agent-1', 'agent-2', 'agent-3']);
   });
 });

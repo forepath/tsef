@@ -1,16 +1,16 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import axios, { AxiosError } from 'axios';
 import {
   AgentResponseDto,
   CreateAgentDto,
   CreateAgentResponseDto,
   UpdateAgentDto,
 } from '@forepath/framework/backend/feature-agent-manager';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import axios, { AxiosError } from 'axios';
 import { AuthenticationType, ClientEntity } from '../entities/client.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
-import { ClientAgentCredentialsService } from './client-agent-credentials.service';
 import { ClientAgentProxyService } from './client-agent-proxy.service';
+import { ClientAgentCredentialsService } from './client-agent-credentials.service';
 import { ClientsService } from './clients.service';
 
 // Mock axios
@@ -72,8 +72,6 @@ describe('ClientAgentProxyService', () => {
   const mockCredentialsService = {
     saveCredentials: jest.fn(),
     deleteCredentials: jest.fn(),
-    hasCredentials: jest.fn(),
-    getAgentIdsWithCredentials: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -110,7 +108,7 @@ describe('ClientAgentProxyService', () => {
   });
 
   describe('getClientAgents', () => {
-    it('should return array of agents for API_KEY client with credentials', async () => {
+    it('should return array of agents for API_KEY client', async () => {
       clientsRepository.findByIdOrThrow.mockResolvedValue(mockClientEntity);
       mockedAxios.request.mockResolvedValue({
         data: [mockAgentResponse],
@@ -119,13 +117,11 @@ describe('ClientAgentProxyService', () => {
         headers: {},
         config: {} as any,
       });
-      mockCredentialsService.getAgentIdsWithCredentials.mockResolvedValue([mockAgentResponse.id]);
 
       const result = await service.getClientAgents('client-uuid', 10, 0);
 
       expect(result).toEqual([mockAgentResponse]);
       expect(clientsRepository.findByIdOrThrow).toHaveBeenCalledWith('client-uuid');
-      expect(mockCredentialsService.getAgentIdsWithCredentials).toHaveBeenCalledWith('client-uuid');
       expect(mockedAxios.request).toHaveBeenCalledWith(
         expect.objectContaining({
           method: 'GET',
@@ -139,7 +135,7 @@ describe('ClientAgentProxyService', () => {
       );
     });
 
-    it('should return array of agents for KEYCLOAK client with credentials', async () => {
+    it('should return array of agents for KEYCLOAK client', async () => {
       clientsRepository.findByIdOrThrow.mockResolvedValue(mockKeycloakClientEntity);
       clientsService.getAccessToken.mockResolvedValue('keycloak-jwt-token');
       mockedAxios.request.mockResolvedValue({
@@ -149,13 +145,11 @@ describe('ClientAgentProxyService', () => {
         headers: {},
         config: {} as any,
       });
-      mockCredentialsService.getAgentIdsWithCredentials.mockResolvedValue([mockAgentResponse.id]);
 
       const result = await service.getClientAgents('client-uuid', 10, 0);
 
       expect(result).toEqual([mockAgentResponse]);
       expect(clientsService.getAccessToken).toHaveBeenCalledWith('client-uuid');
-      expect(mockCredentialsService.getAgentIdsWithCredentials).toHaveBeenCalledWith('client-uuid');
       expect(mockedAxios.request).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -163,41 +157,6 @@ describe('ClientAgentProxyService', () => {
           }),
         }),
       );
-    });
-
-    it('should filter out agents without credentials', async () => {
-      const agentWithCredentials: AgentResponseDto = {
-        id: 'agent-with-credentials',
-        name: 'Agent With Credentials',
-        description: 'Has credentials',
-        agentType: 'cursor',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      };
-      const agentWithoutCredentials: AgentResponseDto = {
-        id: 'agent-without-credentials',
-        name: 'Agent Without Credentials',
-        description: 'No credentials',
-        agentType: 'cursor',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      };
-
-      clientsRepository.findByIdOrThrow.mockResolvedValue(mockClientEntity);
-      mockedAxios.request.mockResolvedValue({
-        data: [agentWithCredentials, agentWithoutCredentials],
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      });
-      mockCredentialsService.getAgentIdsWithCredentials.mockResolvedValue([agentWithCredentials.id]);
-
-      const result = await service.getClientAgents('client-uuid', 10, 0);
-
-      expect(result).toEqual([agentWithCredentials]);
-      expect(result).not.toContain(agentWithoutCredentials);
-      expect(mockCredentialsService.getAgentIdsWithCredentials).toHaveBeenCalledWith('client-uuid');
     });
 
     it('should handle 404 error', async () => {
@@ -214,8 +173,6 @@ describe('ClientAgentProxyService', () => {
 
       await expect(service.getClientAgents('client-uuid', 10, 0)).rejects.toThrow(NotFoundException);
       await expect(service.getClientAgents('client-uuid', 10, 0)).rejects.toThrow('Agent not found');
-      // Should not call credentials service if request fails
-      expect(mockCredentialsService.getAgentIdsWithCredentials).not.toHaveBeenCalled();
     });
 
     it('should handle 400 error', async () => {
@@ -247,7 +204,7 @@ describe('ClientAgentProxyService', () => {
   });
 
   describe('getClientAgent', () => {
-    it('should return single agent with credentials', async () => {
+    it('should return single agent', async () => {
       clientsRepository.findByIdOrThrow.mockResolvedValue(mockClientEntity);
       mockedAxios.request.mockResolvedValue({
         data: mockAgentResponse,
@@ -256,12 +213,10 @@ describe('ClientAgentProxyService', () => {
         headers: {},
         config: {} as any,
       });
-      mockCredentialsService.hasCredentials.mockResolvedValue(true);
 
       const result = await service.getClientAgent('client-uuid', 'agent-uuid');
 
       expect(result).toEqual(mockAgentResponse);
-      expect(mockCredentialsService.hasCredentials).toHaveBeenCalledWith('client-uuid', 'agent-uuid');
       expect(mockedAxios.request).toHaveBeenCalledWith(
         expect.objectContaining({
           method: 'GET',
@@ -270,23 +225,7 @@ describe('ClientAgentProxyService', () => {
       );
     });
 
-    it('should throw NotFoundException when agent does not have credentials', async () => {
-      clientsRepository.findByIdOrThrow.mockResolvedValue(mockClientEntity);
-      mockedAxios.request.mockResolvedValue({
-        data: mockAgentResponse,
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      });
-      mockCredentialsService.hasCredentials.mockResolvedValue(false);
-
-      await expect(service.getClientAgent('client-uuid', 'agent-uuid')).rejects.toThrow(NotFoundException);
-      await expect(service.getClientAgent('client-uuid', 'agent-uuid')).rejects.toThrow('does not have credentials');
-      expect(mockCredentialsService.hasCredentials).toHaveBeenCalledWith('client-uuid', 'agent-uuid');
-    });
-
-    it('should handle 404 error from API', async () => {
+    it('should handle 404 error', async () => {
       clientsRepository.findByIdOrThrow.mockResolvedValue(mockClientEntity);
       mockedAxios.request.mockResolvedValue({
         data: { message: 'Agent not found' },
@@ -297,8 +236,6 @@ describe('ClientAgentProxyService', () => {
       });
 
       await expect(service.getClientAgent('client-uuid', 'agent-uuid')).rejects.toThrow(NotFoundException);
-      // Should not check credentials if API returns 404
-      expect(mockCredentialsService.hasCredentials).not.toHaveBeenCalled();
     });
   });
 
