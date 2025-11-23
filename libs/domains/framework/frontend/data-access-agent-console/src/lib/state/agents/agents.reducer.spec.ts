@@ -9,6 +9,7 @@ import {
   loadClientAgent,
   loadClientAgentFailure,
   loadClientAgents,
+  loadClientAgentsBatch,
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
@@ -53,14 +54,33 @@ describe('agentsReducer', () => {
   });
 
   describe('loadClientAgents', () => {
-    it('should set loading to true for the client and clear error', () => {
+    it('should set loading to true for the client, clear existing agents, and clear error', () => {
       const state: AgentsState = {
         ...initialAgentsState,
+        entities: { [clientId]: [mockAgent] },
         errors: { [clientId]: 'Previous error' },
       };
 
       const newState = agentsReducer(state, loadClientAgents({ clientId, params: {} }));
 
+      expect(newState.loading[clientId]).toBe(true);
+      expect(newState.entities[clientId]).toEqual([]);
+      expect(newState.errors[clientId]).toBeNull();
+    });
+  });
+
+  describe('loadClientAgentsBatch', () => {
+    it('should accumulate agents and keep loading true', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        loading: { [clientId]: true },
+        entities: { [clientId]: [mockAgent] },
+      };
+
+      const accumulatedAgents = [mockAgent, mockAgent2];
+      const newState = agentsReducer(state, loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents }));
+
+      expect(newState.entities[clientId]).toEqual(accumulatedAgents);
       expect(newState.loading[clientId]).toBe(true);
       expect(newState.errors[clientId]).toBeNull();
     });

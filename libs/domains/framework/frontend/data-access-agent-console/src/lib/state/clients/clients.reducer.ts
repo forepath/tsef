@@ -10,6 +10,7 @@ import {
   loadClient,
   loadClientFailure,
   loadClients,
+  loadClientsBatch,
   loadClientsFailure,
   loadClientsSuccess,
   loadClientSuccess,
@@ -51,7 +52,14 @@ export const clientsReducer = createReducer(
   // Load Clients
   on(loadClients, (state) => ({
     ...state,
+    entities: [], // Clear existing clients when starting new load
     loading: true,
+    error: null,
+  })),
+  on(loadClientsBatch, (state, { accumulatedClients }) => ({
+    ...state,
+    entities: accumulatedClients,
+    loading: true, // Keep loading true during batch loading
     error: null,
   })),
   on(loadClientsSuccess, (state, { clients }) => ({

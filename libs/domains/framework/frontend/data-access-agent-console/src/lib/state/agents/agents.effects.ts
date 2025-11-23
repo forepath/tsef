@@ -16,6 +16,7 @@ import {
   loadClientAgentCommandsSuccess,
   loadClientAgentFailure,
   loadClientAgents,
+  loadClientAgentsBatch,
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
@@ -40,16 +41,63 @@ function normalizeError(error: unknown): string {
   return 'An unexpected error occurred';
 }
 
+const BATCH_SIZE = 10;
+
 export const loadClientAgents$ = createEffect(
   (actions$ = inject(Actions), agentsService = inject(AgentsService)) => {
     return actions$.pipe(
       ofType(loadClientAgents),
-      switchMap(({ clientId, params }) =>
-        agentsService.listClientAgents(clientId, params).pipe(
-          map((agents) => loadClientAgentsSuccess({ clientId, agents })),
+      switchMap(({ clientId }) => {
+        // Start with offset 0, limit 10, ignore user params for batch loading
+        const batchParams = { limit: BATCH_SIZE, offset: 0 };
+        return agentsService.listClientAgents(clientId, batchParams).pipe(
+          switchMap((agents) => {
+            if (agents.length === 0) {
+              // No entries, dispatch success with empty array
+              return of(loadClientAgentsSuccess({ clientId, agents: [] }));
+            }
+            // Has entries, check if we got a full batch (might be more)
+            if (agents.length < BATCH_SIZE) {
+              // Partial batch, we're done
+              return of(loadClientAgentsSuccess({ clientId, agents }));
+            }
+            // Full batch, load next batch
+            return of(loadClientAgentsBatch({ clientId, offset: BATCH_SIZE, accumulatedAgents: agents }));
+          }),
           catchError((error) => of(loadClientAgentsFailure({ clientId, error: normalizeError(error) }))),
-        ),
-      ),
+        );
+      }),
+    );
+  },
+  { functional: true },
+);
+
+export const loadClientAgentsBatch$ = createEffect(
+  (actions$ = inject(Actions), agentsService = inject(AgentsService)) => {
+    return actions$.pipe(
+      ofType(loadClientAgentsBatch),
+      switchMap(({ clientId, offset, accumulatedAgents }) => {
+        const batchParams = { limit: BATCH_SIZE, offset };
+        return agentsService.listClientAgents(clientId, batchParams).pipe(
+          switchMap((agents) => {
+            const newAccumulated = [...accumulatedAgents, ...agents];
+            if (agents.length === 0) {
+              // No more entries, dispatch success with all accumulated
+              return of(loadClientAgentsSuccess({ clientId, agents: newAccumulated }));
+            }
+            // Has entries, check if we got a full batch (might be more)
+            if (agents.length < BATCH_SIZE) {
+              // Partial batch, we're done
+              return of(loadClientAgentsSuccess({ clientId, agents: newAccumulated }));
+            }
+            // Full batch, load next batch
+            return of(
+              loadClientAgentsBatch({ clientId, offset: offset + BATCH_SIZE, accumulatedAgents: newAccumulated }),
+            );
+          }),
+          catchError((error) => of(loadClientAgentsFailure({ clientId, error: normalizeError(error) }))),
+        );
+      }),
     );
   },
   { functional: true },

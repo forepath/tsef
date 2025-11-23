@@ -480,6 +480,22 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     // Reset editor view when selected agent changes and load commands
     this.selectedAgent$.pipe(takeUntil(this.destroy$)).subscribe((agent) => {
       const currentAgentId = agent?.id || null;
+      const localSelectedAgentId = this.selectedAgentId();
+
+      // If agent was automatically selected (not via manual click), trigger cleanup
+      // This happens when a new agent is created and automatically selected by the reducer
+      if (currentAgentId && currentAgentId !== localSelectedAgentId && this.activeClientId) {
+        // Update local selected agent ID
+        this.selectedAgentId.set(currentAgentId);
+        // Navigate to the agent route
+        this.router.navigate(['/clients', this.activeClientId, 'agents', currentAgentId]);
+        // Reset message count when switching agents
+        this.previousMessageCount = 0;
+        this.lastUserMessageTimestamp.set(null);
+        // Disconnect current socket, then connect and auto-login agent
+        this.disconnectAndReconnectForAgent(this.activeClientId, currentAgentId);
+      }
+
       if (currentAgentId && currentAgentId !== this.previousAgentId && this.editorOpen()) {
         // Reset visibility when agent changes and editor is open (unless in file-only mode)
         if (!this.fileOnlyMode()) {

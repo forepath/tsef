@@ -413,7 +413,7 @@
 
         <!-- Socket error -->
         @if (socketError$ | async; as socketError) {
-          <div class="alert alert-danger alert-dismissible m-3 mb-0" role="alert">
+          <div class="alert alert-danger alert-dismissible m-3" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             {{ socketError }}
           </div>

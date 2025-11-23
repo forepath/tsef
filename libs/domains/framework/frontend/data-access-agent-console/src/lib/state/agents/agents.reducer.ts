@@ -10,6 +10,7 @@ import {
   loadClientAgent,
   loadClientAgentFailure,
   loadClientAgents,
+  loadClientAgentsBatch,
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
@@ -136,7 +137,15 @@ export const agentsReducer = createReducer(
   on(loadClientAgents, (state, { clientId }) =>
     updateClientState(state, clientId, (clientState) => ({
       ...clientState,
+      agents: [], // Clear existing agents when starting new load
       loading: true,
+      error: null,
+    })),
+  ),
+  on(loadClientAgentsBatch, (state, { clientId, accumulatedAgents }) =>
+    updateClientState(state, clientId, () => ({
+      agents: accumulatedAgents,
+      loading: true, // Keep loading true during batch loading
       error: null,
     })),
   ),

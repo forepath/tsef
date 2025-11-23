@@ -23,6 +23,11 @@ export const loadClientAgentsFailure = createAction(
   props<{ clientId: string; error: string }>(),
 );
 
+export const loadClientAgentsBatch = createAction(
+  '[Agents] Load Client Agents Batch',
+  props<{ clientId: string; offset: number; accumulatedAgents: AgentResponseDto[] }>(),
+);
+
 // Get Client Agent by ID Actions
 export const loadClientAgent = createAction(
   '[Agents] Load Client Agent',
