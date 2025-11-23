@@ -34,7 +34,7 @@ export class CursorAgentProvider implements AgentProvider {
    * @returns The Docker image string
    */
   getDockerImage(): string {
-    return process.env.CURSOR_AGENT_DOCKER_IMAGE || 'ghcr.io/forepath/tsef-agent-manager-worker:latest';
+    return process.env.CURSOR_AGENT_DOCKER_IMAGE || 'ghcr.io/forepath/agenstra-manager-worker:latest';
   }
 
   /**

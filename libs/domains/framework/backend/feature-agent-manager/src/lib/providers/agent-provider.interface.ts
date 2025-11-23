@@ -20,7 +20,7 @@ export interface AgentProvider {
 
   /**
    * Get the Docker image (including tag) to use for containers created for this provider.
-   * @returns The Docker image string (e.g., 'ghcr.io/forepath/tsef-agent-manager-worker:latest')
+   * @returns The Docker image string (e.g., 'ghcr.io/forepath/agenstra-manager-worker:latest')
    */
   getDockerImage(): string;
 

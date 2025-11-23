@@ -67,7 +67,7 @@ describe('AgentsGateway', () => {
   const mockAgentProvider: jest.Mocked<AgentProvider> = {
     getType: jest.fn().mockReturnValue('cursor'),
     getDisplayName: jest.fn().mockReturnValue('Cursor'),
-    getDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/tsef-agent-manager-worker:latest'),
+    getDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-worker:latest'),
     sendMessage: jest.fn(),
     sendInitialization: jest.fn(),
   };

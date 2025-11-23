@@ -101,13 +101,13 @@
       },
       "configurations": {
         "test": {
-          "tags": ["ghcr.io/forepath/tsef-agent-controller-api:latest"]
+          "tags": ["ghcr.io/forepath/agenstra-controller-api:latest"]
         },
         "release": {
           "push": true,
           "tags": [
-            "ghcr.io/forepath/tsef-agent-controller-api:latest",
-            "ghcr.io/forepath/tsef-agent-controller-api:$VERSION"
+            "ghcr.io/forepath/agenstra-controller-api:latest",
+            "ghcr.io/forepath/agenstra-controller-api:$VERSION"
           ]
         }
       }

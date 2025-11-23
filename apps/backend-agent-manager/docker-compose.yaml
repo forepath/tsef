@@ -17,7 +17,7 @@ services:
       - agent-manager-network
 
   backend-agent-manager:
-    image: ghcr.io/forepath/tsef-agent-manager-api:latest
+    image: ghcr.io/forepath/agenstra-manager-api:latest
     container_name: agent-manager-api
     environment:
       # Backend API configuration
@@ -27,7 +27,7 @@ services:
       NODE_ENV: development
       # Cursor agent configuration
       CURSOR_API_KEY: ${CURSOR_API_KEY:-}
-      AGENT_DEFAULT_IMAGE: ${AGENT_DEFAULT_IMAGE:-ghcr.io/forepath/tsef-agent-manager-worker:latest}
+      AGENT_DEFAULT_IMAGE: ${AGENT_DEFAULT_IMAGE:-ghcr.io/forepath/agenstra-manager-worker:latest}
       # Database configuration
       DB_HOST: postgres
       DB_PORT: 5432

@@ -438,7 +438,7 @@ nx test framework-backend-feature-agent-manager --coverage
 - `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret (required for HTTP authentication when `STATIC_API_KEY` is not set)
 - `STATIC_API_KEY` - Static API key for HTTP authentication (optional). If set, the API uses API key authentication only (no Keycloak fallback, no anonymous access). If not set, Keycloak authentication is used. The API key can be provided in the `Authorization` header using either `Bearer <key>` or `ApiKey <key>` format.
 - `CURSOR_API_KEY` - Cursor API key for agent communication (required for agent containers)
-- `CURSOR_AGENT_DOCKER_IMAGE` - Docker image (including tag) for cursor-agent containers (optional, defaults to `ghcr.io/forepath/tsef-agent-manager-worker:latest`)
+- `CURSOR_AGENT_DOCKER_IMAGE` - Docker image (including tag) for cursor-agent containers (optional, defaults to `ghcr.io/forepath/agenstra-manager-worker:latest`)
 
 ### Git Repository Environment Variables
 

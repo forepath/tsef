@@ -48,7 +48,7 @@ describe('CursorAgentProvider', () => {
 
       const image = provider.getDockerImage();
 
-      expect(image).toBe('ghcr.io/forepath/tsef-agent-manager-worker:latest');
+      expect(image).toBe('ghcr.io/forepath/agenstra-manager-worker:latest');
     });
 
     it('should return custom image from CURSOR_AGENT_DOCKER_IMAGE environment variable', () => {
