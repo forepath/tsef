@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1](https://github.com/forepath/tsef/compare/v1.7.0...v1.7.1) (2025-11-23)
+
+
+### Bug Fixes
+
+* docker image builds ([#72](https://github.com/forepath/tsef/issues/72)) ([9c0c386](https://github.com/forepath/tsef/commit/9c0c386975536e8703b96d6762b334bf9294c936))
+
 ## [1.7.0](https://github.com/forepath/tsef/compare/v1.6.0...v1.7.0) (2025-11-23)
 
 
