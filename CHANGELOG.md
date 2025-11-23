@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.2](https://github.com/forepath/tsef/compare/v1.7.1...v1.7.2) (2025-11-23)
+
+
+### Bug Fixes
+
+* set proper default configuration ([#74](https://github.com/forepath/tsef/issues/74)) ([c893ab0](https://github.com/forepath/tsef/commit/c893ab0de18e92f8704531ba80bfc9f7cdbed45f))
+
+
+### Chores
+
+* improve start containers target ([#73](https://github.com/forepath/tsef/issues/73)) ([6744d0f](https://github.com/forepath/tsef/commit/6744d0fc97ad56f3797aa8e883648b4f99d5b997))
+
 ## [1.7.1](https://github.com/forepath/tsef/compare/v1.7.0...v1.7.1) (2025-11-23)
 
 
