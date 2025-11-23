@@ -33,8 +33,7 @@ export class DockerService {
     const { image, name, env, volumes = [], ports = [] } = options;
 
     // Resolve image: explicit -> env -> default placeholder
-    const resolvedImage =
-      image || process.env.AGENT_DEFAULT_IMAGE || 'ghcr.io/forepath/tsef-agent-manager-worker:latest';
+    const resolvedImage = image || process.env.AGENT_DEFAULT_IMAGE || 'ghcr.io/forepath/agenstra-manager-worker:latest';
 
     // Build HostConfig.Binds from volumes
     const binds = volumes.map((v) => `${v.hostPath}:${v.containerPath}${v.readOnly ? ':ro' : ''}`);

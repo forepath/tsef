@@ -17,7 +17,7 @@ services:
       - agent-controller-network
 
   backend-agent-controller:
-    image: ghcr.io/forepath/tsef-agent-controller-api:latest
+    image: ghcr.io/forepath/agenstra-controller-api:latest
     container_name: agent-controller-api
     environment:
       # Backend API configuration

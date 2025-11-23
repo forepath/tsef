@@ -101,13 +101,13 @@
       },
       "configurations": {
         "test": {
-          "tags": ["ghcr.io/forepath/tsef-agent-manager-api:latest"]
+          "tags": ["ghcr.io/forepath/agenstra-manager-api:latest"]
         },
         "release": {
           "push": true,
           "tags": [
-            "ghcr.io/forepath/tsef-agent-manager-api:latest",
-            "ghcr.io/forepath/tsef-agent-manager-api:$VERSION"
+            "ghcr.io/forepath/agenstra-manager-api:latest",
+            "ghcr.io/forepath/agenstra-manager-api:$VERSION"
           ]
         }
       }
@@ -120,13 +120,13 @@
       },
       "configurations": {
         "test": {
-          "tags": ["ghcr.io/forepath/tsef-agent-manager-worker:latest"]
+          "tags": ["ghcr.io/forepath/agenstra-manager-worker:latest"]
         },
         "release": {
           "push": true,
           "tags": [
-            "ghcr.io/forepath/tsef-agent-manager-worker:latest",
-            "ghcr.io/forepath/tsef-agent-manager-worker:$VERSION"
+            "ghcr.io/forepath/agenstra-manager-worker:latest",
+            "ghcr.io/forepath/agenstra-manager-worker:$VERSION"
           ]
         }
       }
