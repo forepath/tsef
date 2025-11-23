@@ -100,8 +100,7 @@
       "options": {
         "engine": "docker",
         "file": "apps/backend-agent-controller/Dockerfile.api",
-        "context": "dist/apps/backend-agent-controller",
-        "defaultConfiguration": "test"
+        "context": "dist/apps/backend-agent-controller"
       },
       "configurations": {
         "test": {
@@ -114,7 +113,8 @@
             "ghcr.io/forepath/agenstra-controller-api:$VERSION"
           ]
         }
-      }
+      },
+      "defaultConfiguration": "test"
     },
     "start-containers": {
       "dependsOn": ["api-container-image"],
