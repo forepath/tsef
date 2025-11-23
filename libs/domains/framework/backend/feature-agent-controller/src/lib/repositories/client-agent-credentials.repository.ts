@@ -25,4 +25,12 @@ export class ClientAgentCredentialsRepository {
       await this.repository.remove(existing);
     }
   }
+
+  async findAgentIdsByClient(clientId: string): Promise<string[]> {
+    const credentials = await this.repository.find({
+      where: { clientId },
+      select: ['agentId'],
+    });
+    return credentials.map((cred) => cred.agentId);
+  }
 }
