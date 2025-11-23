@@ -2,6 +2,62 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0](https://github.com/forepath/tsef/compare/v1.6.0...v1.7.0) (2025-11-23)
+
+
+### Features
+
+* agent ssh key support ([#50](https://github.com/forepath/tsef/issues/50)) ([3d9847f](https://github.com/forepath/tsef/commit/3d9847f301679c3ec44c0478a12a3014e3af93ff))
+* collaborative editor ([#45](https://github.com/forepath/tsef/issues/45)) ([8b53d0a](https://github.com/forepath/tsef/commit/8b53d0a13cfd3516a26a338b063e1ea42ba82e91))
+* collapsable editor elements ([#39](https://github.com/forepath/tsef/issues/39)) ([1b2f38f](https://github.com/forepath/tsef/commit/1b2f38f77d23b2048d22ee96018a4a75af1b04ae))
+* cursor agent controller ([#30](https://github.com/forepath/tsef/issues/30)) ([0d91c32](https://github.com/forepath/tsef/commit/0d91c32ede6c6c2a1ab6018a3937a82deb593376))
+* cursor agent controller console ([#31](https://github.com/forepath/tsef/issues/31)) ([493dcd8](https://github.com/forepath/tsef/commit/493dcd8de5446c38c30ed3484c7ae53345b568d9))
+* cursor agent manager ([#23](https://github.com/forepath/tsef/issues/23)) ([ce9e9dc](https://github.com/forepath/tsef/commit/ce9e9dcf5c76cecf8c73ea6b10aa8ef7cfe8aafa))
+* cursor command selection ([#54](https://github.com/forepath/tsef/issues/54)) ([27e6324](https://github.com/forepath/tsef/commit/27e6324a5851d6a9c847a686be6d9434aa6e056b))
+* cursor command selection ([#55](https://github.com/forepath/tsef/issues/55)) ([fe8c7d2](https://github.com/forepath/tsef/commit/fe8c7d270773fba908fc6e93f04e8dca112472c2))
+* cursor hooks preparation script ([#29](https://github.com/forepath/tsef/issues/29)) ([675d289](https://github.com/forepath/tsef/commit/675d289a4b9ec56c25b75f1d9755c27598b11bd2))
+* custom ai context management rules ([#28](https://github.com/forepath/tsef/issues/28)) ([2d5c5f6](https://github.com/forepath/tsef/commit/2d5c5f624343be29ee40d7d89565fbb5b47d1047))
+* docker image publishing mechanism ([#70](https://github.com/forepath/tsef/issues/70)) ([9e5466d](https://github.com/forepath/tsef/commit/9e5466db0f667720a893a18f0570fde75d0aa415))
+* editor content autosave after 1500ms ([#42](https://github.com/forepath/tsef/issues/42)) ([9130b2e](https://github.com/forepath/tsef/commit/9130b2e9a9de8996524bdc3d070e5ba887786576))
+* explicit model selection ([#53](https://github.com/forepath/tsef/issues/53)) ([827e5d1](https://github.com/forepath/tsef/commit/827e5d1933526b95f2f1f7b631464fa396e9cf61))
+* file previews ([#63](https://github.com/forepath/tsef/issues/63)) ([49a9540](https://github.com/forepath/tsef/commit/49a9540c95a387ddf52b08098def86efc079b332))
+* file rename and move action ([#40](https://github.com/forepath/tsef/issues/40)) ([7646ba2](https://github.com/forepath/tsef/commit/7646ba26e732f30bd79dfe78854063f9938cb3cd))
+* monaco editor autocomplete filetype mappings ([#34](https://github.com/forepath/tsef/issues/34)) ([99b613b](https://github.com/forepath/tsef/commit/99b613bf4e462c60b5341113a017813c0d18e02b))
+* monaco editor integration ([#32](https://github.com/forepath/tsef/issues/32)) ([8542234](https://github.com/forepath/tsef/commit/8542234e0b209fc9b03fa9afc0acbbb262c78e43))
+* multi-agent type support ([#68](https://github.com/forepath/tsef/issues/68)) ([51ce264](https://github.com/forepath/tsef/commit/51ce264e390c68c05abba62ce43429311e1630a4))
+* native darkmode support incl. system preference recognition ([#60](https://github.com/forepath/tsef/issues/60)) ([f7df90c](https://github.com/forepath/tsef/commit/f7df90c9f62af9be8ceac5e7d2cd5062e0b9c44a))
+* open files list for editor ([#37](https://github.com/forepath/tsef/issues/37)) ([946046a](https://github.com/forepath/tsef/commit/946046aadae3574e9ee904a807ad70ac4ffb391a))
+* restore view by route ([#47](https://github.com/forepath/tsef/issues/47)) ([b14aaea](https://github.com/forepath/tsef/commit/b14aaeaab871041b04a4279b8eb2b1d79c61d847))
+* standalone editors ([#59](https://github.com/forepath/tsef/issues/59)) ([da8500d](https://github.com/forepath/tsef/commit/da8500d620ce0029f5bae007c647411273c7eb61))
+* xterm agent console ([#46](https://github.com/forepath/tsef/issues/46)) ([3a7afe6](https://github.com/forepath/tsef/commit/3a7afe6cc94c4e2281eba3ed72a4e1418333718c))
+
+
+### Bug Fixes
+
+* agent message streaming security ([#44](https://github.com/forepath/tsef/issues/44)) ([7d07167](https://github.com/forepath/tsef/commit/7d07167e556cff489b48e698ac8e3fce63ce1c95))
+* ai review rule references ([#27](https://github.com/forepath/tsef/issues/27)) ([54aa092](https://github.com/forepath/tsef/commit/54aa0922f5e8efbaf8b5823b8cce9eb8b49f1dde))
+* automatic editor darkmode switching ([#62](https://github.com/forepath/tsef/issues/62)) ([7106837](https://github.com/forepath/tsef/commit/710683736e0e151759c723390879f1e77458ba45))
+* batched data loading ([#69](https://github.com/forepath/tsef/issues/69)) ([daa91f3](https://github.com/forepath/tsef/commit/daa91f376dc6f62cc9604240ccd7d053dc028764))
+* chat bubble content styling ([#33](https://github.com/forepath/tsef/issues/33)) ([20b2053](https://github.com/forepath/tsef/commit/20b20532da53de9d34c8db2644cc30df41ba303b))
+* distributed agent thinking indicator ([#64](https://github.com/forepath/tsef/issues/64)) ([f315f17](https://github.com/forepath/tsef/commit/f315f17f61f0cf02dd261f6390788a3b505a2e09))
+* file tree folder collapsing ([#35](https://github.com/forepath/tsef/issues/35)) ([403eff0](https://github.com/forepath/tsef/commit/403eff08dea05b1eac1f15b991738c91ceb230dd))
+* filetree action buttons visibility ([#61](https://github.com/forepath/tsef/issues/61)) ([32e679f](https://github.com/forepath/tsef/commit/32e679f4835dc1a73b58288698b4d5e29d861d8c))
+* monaco editor autocomplete ([#36](https://github.com/forepath/tsef/issues/36)) ([c37cf4a](https://github.com/forepath/tsef/commit/c37cf4aa832736966472efb224d2b2da91c63318))
+* monaco editor render blocking ([#56](https://github.com/forepath/tsef/issues/56)) ([a36de54](https://github.com/forepath/tsef/commit/a36de54f5460aa8969b14896d072a818915be45b))
+* netrc file creation ([#67](https://github.com/forepath/tsef/issues/67)) ([8846455](https://github.com/forepath/tsef/commit/884645569787d9d2adf42ca68ba26ff81dab3508))
+* panel selection behaviour ([#52](https://github.com/forepath/tsef/issues/52)) ([09fab61](https://github.com/forepath/tsef/commit/09fab6176a2828f21053fd7c46a581f03821678b))
+* speed up chat history restauration ([#65](https://github.com/forepath/tsef/issues/65)) ([39a0067](https://github.com/forepath/tsef/commit/39a00676582e80549a9d0e3b854dc0641ced98f8))
+* swap between binaries and utf8 files ([#66](https://github.com/forepath/tsef/issues/66)) ([74f5b9b](https://github.com/forepath/tsef/commit/74f5b9b59763251c5f0335c3f83b89f11a81c279))
+
+
+### Chores
+
+* agenstra agent console branding ([#43](https://github.com/forepath/tsef/issues/43)) ([382d312](https://github.com/forepath/tsef/commit/382d312d7b7b2a3dab12f453ba6b051bdd79810e))
+* disable home route navigation ([#48](https://github.com/forepath/tsef/issues/48)) ([58f9829](https://github.com/forepath/tsef/commit/58f9829a3b8cabd42e123d66a73186b771dc3275))
+* file tree actions cleanup ([#38](https://github.com/forepath/tsef/issues/38)) ([ad054f9](https://github.com/forepath/tsef/commit/ad054f9001a04a665dbe43b5218e619e64788e21))
+* rename docker images ([#71](https://github.com/forepath/tsef/issues/71)) ([c3ca3e1](https://github.com/forepath/tsef/commit/c3ca3e114fe760e5ff8f5268b9aa96099b365db9))
+* updated value propositions and removal of en and em dashes ([#57](https://github.com/forepath/tsef/issues/57)) ([2a2c1e2](https://github.com/forepath/tsef/commit/2a2c1e287a96a051c26ba2cb9197a162d67b7e0e))
+
 ## [1.6.0](https://github.com/forepath/tsef/compare/v1.5.0...v1.6.0) (2025-11-04)
 
 
