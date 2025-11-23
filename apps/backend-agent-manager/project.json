@@ -100,8 +100,7 @@
       "options": {
         "engine": "docker",
         "file": "apps/backend-agent-manager/Dockerfile.api",
-        "context": "dist/apps/backend-agent-manager",
-        "defaultConfiguration": "test"
+        "context": "dist/apps/backend-agent-manager"
       },
       "configurations": {
         "test": {
@@ -114,7 +113,8 @@
             "ghcr.io/forepath/agenstra-manager-api:$VERSION"
           ]
         }
-      }
+      },
+      "defaultConfiguration": "test"
     },
     "worker-container-image": {
       "dependsOn": ["prune"],
@@ -123,8 +123,7 @@
       "options": {
         "engine": "docker",
         "file": "apps/backend-agent-manager/Dockerfile.worker",
-        "context": "dist/apps/backend-agent-manager",
-        "defaultConfiguration": "test"
+        "context": "dist/apps/backend-agent-manager"
       },
       "configurations": {
         "test": {
@@ -137,7 +136,8 @@
             "ghcr.io/forepath/agenstra-manager-worker:$VERSION"
           ]
         }
-      }
+      },
+      "defaultConfiguration": "test"
     },
     "start-containers": {
       "dependsOn": ["api-container-image", "worker-container-image"],
