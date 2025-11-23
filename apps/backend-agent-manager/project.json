@@ -94,10 +94,14 @@
       }
     },
     "api-container-image": {
+      "dependsOn": ["prune"],
+      "cache": false,
       "executor": "@nx-tools/nx-container:build",
       "options": {
         "engine": "docker",
-        "file": "apps/backend-agent-manager/Dockerfile.api"
+        "file": "apps/backend-agent-manager/Dockerfile.api",
+        "context": "dist/apps/backend-agent-manager",
+        "defaultConfiguration": "test"
       },
       "configurations": {
         "test": {
@@ -113,10 +117,14 @@
       }
     },
     "worker-container-image": {
+      "dependsOn": ["prune"],
+      "cache": false,
       "executor": "@nx-tools/nx-container:build",
       "options": {
         "engine": "docker",
-        "file": "apps/backend-agent-manager/Dockerfile.worker"
+        "file": "apps/backend-agent-manager/Dockerfile.worker",
+        "context": "dist/apps/backend-agent-manager",
+        "defaultConfiguration": "test"
       },
       "configurations": {
         "test": {
@@ -132,7 +140,8 @@
       }
     },
     "start-containers": {
-      "dependsOn": ["api-container-image:test", "worker-container-image:test"],
+      "dependsOn": ["api-container-image", "worker-container-image"],
+      "cache": false,
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/backend-agent-manager",

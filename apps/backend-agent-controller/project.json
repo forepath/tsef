@@ -94,10 +94,14 @@
       }
     },
     "api-container-image": {
+      "dependsOn": ["prune"],
+      "cache": false,
       "executor": "@nx-tools/nx-container:build",
       "options": {
         "engine": "docker",
-        "file": "apps/backend-agent-controller/Dockerfile.api"
+        "file": "apps/backend-agent-controller/Dockerfile.api",
+        "context": "dist/apps/backend-agent-controller",
+        "defaultConfiguration": "test"
       },
       "configurations": {
         "test": {
@@ -113,7 +117,8 @@
       }
     },
     "start-containers": {
-      "dependsOn": ["api-container-image:test"],
+      "dependsOn": ["api-container-image"],
+      "cache": false,
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/backend-agent-controller",
