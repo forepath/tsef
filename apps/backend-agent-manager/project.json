@@ -93,24 +93,46 @@
         "passWithNoTests": true
       }
     },
-    "docker:api": {
-      "dependsOn": ["build", "prune"],
-      "executor": "nx:run-commands",
+    "api-container-image": {
+      "executor": "@nx-tools/nx-container:build",
       "options": {
-        "cwd": "dist/apps/backend-agent-manager",
-        "command": "docker build . -f ../../../apps/backend-agent-manager/Dockerfile.api --tag ghcr.io/forepath/tsef-agent-manager-api:latest"
+        "engine": "docker",
+        "file": "apps/backend-agent-manager/Dockerfile.api"
+      },
+      "configurations": {
+        "test": {
+          "tags": ["ghcr.io/forepath/tsef-agent-manager-api:latest"]
+        },
+        "release": {
+          "push": true,
+          "tags": [
+            "ghcr.io/forepath/tsef-agent-manager-api:latest",
+            "ghcr.io/forepath/tsef-agent-manager-api:$VERSION"
+          ]
+        }
       }
     },
-    "docker:worker": {
-      "dependsOn": ["build", "prune"],
-      "executor": "nx:run-commands",
+    "worker-container-image": {
+      "executor": "@nx-tools/nx-container:build",
       "options": {
-        "cwd": "dist/apps/backend-agent-manager",
-        "command": "docker build . -f ../../../apps/backend-agent-manager/Dockerfile.worker --tag ghcr.io/forepath/tsef-agent-manager-worker:latest"
+        "engine": "docker",
+        "file": "apps/backend-agent-manager/Dockerfile.worker"
+      },
+      "configurations": {
+        "test": {
+          "tags": ["ghcr.io/forepath/tsef-agent-manager-worker:latest"]
+        },
+        "release": {
+          "push": true,
+          "tags": [
+            "ghcr.io/forepath/tsef-agent-manager-worker:latest",
+            "ghcr.io/forepath/tsef-agent-manager-worker:$VERSION"
+          ]
+        }
       }
     },
-    "docker:serve": {
-      "dependsOn": ["docker:api", "docker:worker"],
+    "start-containers": {
+      "dependsOn": ["api-container-image:test", "worker-container-image:test"],
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/backend-agent-manager",

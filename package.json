@@ -122,6 +122,7 @@
     "@ngrx/entity": "19.2.1",
     "@ngrx/router-store": "19.2.1",
     "@ngrx/store": "19.2.1",
+    "@nx-tools/nx-container": "7.2.0",
     "@nx/devkit": "21.5.3",
     "@nx/vite": "21.5.3",
     "@popperjs/core": "2.11.8",
