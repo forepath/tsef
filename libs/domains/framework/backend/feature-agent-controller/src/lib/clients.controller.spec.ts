@@ -9,22 +9,30 @@ import {
   UpdateAgentDto,
   WriteFileDto,
 } from '@forepath/framework/backend/feature-agent-manager';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientsController } from './clients.controller';
 import { ClientResponseDto } from './dto/client-response.dto';
 import { CreateClientResponseDto } from './dto/create-client-response.dto';
 import { CreateClientDto } from './dto/create-client.dto';
+import { ProvisionServerDto } from './dto/provision-server.dto';
+import { ProvisionedServerResponseDto } from './dto/provisioned-server-response.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { AuthenticationType } from './entities/client.entity';
+import { ProvisioningProviderFactory } from './providers/provisioning-provider.factory';
+import { ProvisioningProvider } from './providers/provisioning-provider.interface';
 import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientsService } from './services/clients.service';
+import { ProvisioningService } from './services/provisioning.service';
 
 describe('ClientsController', () => {
   let controller: ClientsController;
   let service: jest.Mocked<ClientsService>;
   let proxyService: jest.Mocked<ClientAgentProxyService>;
   let fileSystemProxyService: jest.Mocked<ClientAgentFileSystemProxyService>;
+  let provisioningService: jest.Mocked<ProvisioningService>;
+  let provisioningProviderFactory: jest.Mocked<ProvisioningProviderFactory>;
 
   const mockClientResponse: ClientResponseDto = {
     id: 'test-uuid',
@@ -85,6 +93,19 @@ describe('ClientsController', () => {
     moveFileOrDirectory: jest.fn(),
   };
 
+  const mockProvisioningService = {
+    provisionServer: jest.fn(),
+    deleteProvisionedServer: jest.fn(),
+    getServerInfo: jest.fn(),
+  };
+
+  const mockProvisioningProviderFactory = {
+    getAllProviders: jest.fn(),
+    hasProvider: jest.fn(),
+    getProvider: jest.fn(),
+    getRegisteredTypes: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ClientsController],
@@ -101,6 +122,14 @@ describe('ClientsController', () => {
           provide: ClientAgentFileSystemProxyService,
           useValue: mockFileSystemProxyService,
         },
+        {
+          provide: ProvisioningService,
+          useValue: mockProvisioningService,
+        },
+        {
+          provide: ProvisioningProviderFactory,
+          useValue: mockProvisioningProviderFactory,
+        },
       ],
     }).compile();
 
@@ -108,6 +137,8 @@ describe('ClientsController', () => {
     service = module.get(ClientsService);
     proxyService = module.get(ClientAgentProxyService);
     fileSystemProxyService = module.get(ClientAgentFileSystemProxyService);
+    provisioningService = module.get(ProvisioningService);
+    provisioningProviderFactory = module.get(ProvisioningProviderFactory);
   });
 
   afterEach(() => {
@@ -496,6 +527,133 @@ describe('ClientsController', () => {
       await expect(controller.moveFileOrDirectory('client-uuid', 'agent-uuid', 'source.txt', moveDto)).rejects.toThrow(
         'Destination path is required',
       );
+    });
+  });
+
+  describe('getProvisioningProviders', () => {
+    it('should return array of provisioning providers', async () => {
+      const mockProvider: ProvisioningProvider = {
+        getType: jest.fn().mockReturnValue('hetzner'),
+        getDisplayName: jest.fn().mockReturnValue('Hetzner Cloud'),
+        getServerTypes: jest.fn(),
+        provisionServer: jest.fn(),
+        deleteServer: jest.fn(),
+        getServerInfo: jest.fn(),
+      };
+      provisioningProviderFactory.getAllProviders.mockReturnValue([mockProvider]);
+
+      const result = await controller.getProvisioningProviders();
+
+      expect(result).toEqual([
+        {
+          type: 'hetzner',
+          displayName: 'Hetzner Cloud',
+        },
+      ]);
+      expect(provisioningProviderFactory.getAllProviders).toHaveBeenCalled();
+    });
+  });
+
+  describe('getServerTypes', () => {
+    it('should return server types for a provider', async () => {
+      const mockServerTypes = [
+        {
+          id: 'cx11',
+          name: 'CX11',
+          cores: 1,
+          memory: 2,
+          disk: 20,
+          priceMonthly: 3.29,
+          priceHourly: 0.01,
+        },
+      ];
+      const mockProvider: ProvisioningProvider = {
+        getType: jest.fn().mockReturnValue('hetzner'),
+        getDisplayName: jest.fn().mockReturnValue('Hetzner Cloud'),
+        getServerTypes: jest.fn().mockResolvedValue(mockServerTypes),
+        provisionServer: jest.fn(),
+        deleteServer: jest.fn(),
+        getServerInfo: jest.fn(),
+      };
+
+      provisioningProviderFactory.hasProvider.mockReturnValue(true);
+      provisioningProviderFactory.getProvider.mockReturnValue(mockProvider);
+
+      const result = await controller.getServerTypes('hetzner');
+
+      expect(result).toEqual(mockServerTypes);
+      expect(provisioningProviderFactory.hasProvider).toHaveBeenCalledWith('hetzner');
+      expect(provisioningProviderFactory.getProvider).toHaveBeenCalledWith('hetzner');
+      expect(mockProvider.getServerTypes).toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when provider is not available', async () => {
+      provisioningProviderFactory.hasProvider.mockReturnValue(false);
+      provisioningProviderFactory.getRegisteredTypes.mockReturnValue(['hetzner']);
+
+      await expect(controller.getServerTypes('invalid-provider')).rejects.toThrow(BadRequestException);
+      expect(provisioningProviderFactory.hasProvider).toHaveBeenCalledWith('invalid-provider');
+    });
+  });
+
+  describe('provisionServer', () => {
+    it('should provision a server and create a client', async () => {
+      const provisionDto: ProvisionServerDto = {
+        providerType: 'hetzner',
+        serverType: 'cx11',
+        name: 'test-server',
+        description: 'Test server',
+        location: 'fsn1',
+        authenticationType: AuthenticationType.API_KEY,
+        agentWsPort: 8080,
+      };
+
+      const mockResponse: ProvisionedServerResponseDto = {
+        ...mockClientResponse,
+        providerType: 'hetzner',
+        serverId: 'server-123',
+        serverName: 'test-server',
+        publicIp: '1.2.3.4',
+        privateIp: '10.0.0.1',
+        serverStatus: 'running',
+      };
+
+      provisioningService.provisionServer.mockResolvedValue(mockResponse);
+
+      const result = await controller.provisionServer(provisionDto);
+
+      expect(result).toEqual(mockResponse);
+      expect(provisioningService.provisionServer).toHaveBeenCalledWith(provisionDto);
+    });
+  });
+
+  describe('getServerInfo', () => {
+    it('should return server information for a provisioned client', async () => {
+      const mockServerInfo = {
+        serverId: 'server-123',
+        serverName: 'test-server',
+        publicIp: '1.2.3.4',
+        privateIp: '10.0.0.1',
+        serverStatus: 'running',
+        providerType: 'hetzner',
+      };
+
+      provisioningService.getServerInfo.mockResolvedValue(mockServerInfo);
+
+      const result = await controller.getServerInfo('client-uuid');
+
+      expect(result).toEqual(mockServerInfo);
+      expect(provisioningService.getServerInfo).toHaveBeenCalledWith('client-uuid');
+    });
+  });
+
+  describe('deleteProvisionedServer', () => {
+    it('should delete a provisioned server and its client', async () => {
+      provisioningService.deleteProvisionedServer.mockResolvedValue(undefined);
+
+      await controller.deleteProvisionedServer('client-uuid');
+
+      expect(provisioningService.deleteProvisionedServer).toHaveBeenCalledWith('client-uuid');
     });
   });
 });

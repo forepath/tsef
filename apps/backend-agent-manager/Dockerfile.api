@@ -15,7 +15,7 @@ ENV NODE_ENV=development
 
 # Environment variables for the cursor-agent
 ENV CURSOR_API_KEY=
-ENV AGENT_DEFAULT_IMAGE=ghcr.io/forepath/cursor-agent:latest
+ENV AGENT_DEFAULT_IMAGE=ghcr.io/forepath/agenstra-manager-worker:latest
 
 # Environment variables for the database
 ENV DB_HOST=postgres

@@ -1,0 +1,48 @@
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant ProvisioningService
+    participant ProviderFactory
+    participant HetznerProvider
+    participant HetznerAPI
+    participant Server
+    participant ClientsService
+    participant Database
+
+    Client->>Controller: POST /provisioning/provision
+    Controller->>ProvisioningService: provisionServer(dto)
+
+    ProvisioningService->>ProviderFactory: getProvider(type)
+    ProviderFactory-->>ProvisioningService: HetznerProvider
+
+    ProvisioningService->>ProvisioningService: Generate Auth Config
+    ProvisioningService->>ProvisioningService: Generate User Data Script
+
+    ProvisioningService->>HetznerProvider: provisionServer(options)
+    HetznerProvider->>HetznerAPI: POST /servers (create server)
+    HetznerAPI-->>HetznerProvider: Server Created
+    HetznerProvider->>HetznerProvider: waitForServerReady()
+
+    loop Poll Server Status
+        HetznerProvider->>HetznerAPI: GET /servers/:id
+        HetznerAPI-->>HetznerProvider: Server Status
+    end
+
+    Note over Server: Server boots and runs user data script
+    Note over Server: Installs Docker CE
+    Note over Server: Starts Agent-Manager container
+
+    HetznerProvider->>HetznerAPI: GET /servers/:id (get IP)
+    HetznerAPI-->>HetznerProvider: Server Info with IP
+    HetznerProvider-->>ProvisioningService: ProvisionedServer
+
+    ProvisioningService->>ClientsService: create(clientDto)
+    ClientsService->>Database: INSERT INTO clients
+    Database-->>ClientsService: Client Entity
+    ClientsService-->>ProvisioningService: Client Response
+
+    ProvisioningService->>Database: INSERT INTO provisioning_references
+    Database-->>ProvisioningService: Provisioning Reference
+
+    ProvisioningService-->>Controller: ProvisionedServerResponseDto
+    Controller-->>Client: 201 Created

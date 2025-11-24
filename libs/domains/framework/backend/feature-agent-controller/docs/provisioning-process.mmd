@@ -1,0 +1,27 @@
+flowchart TD
+    A[Client Request: Provision Server] --> B{Validate Request}
+    B -->|Invalid| C[Return 400 Bad Request]
+    B -->|Valid| D[Get Provisioning Provider]
+    D --> E{Provider Available?}
+    E -->|No| F[Return 400 Provider Not Found]
+    E -->|Yes| G[Generate Authentication Config]
+    G --> H{Authentication Type?}
+    H -->|API_KEY| I[Generate API Key]
+    H -->|KEYCLOAK| J[Validate Keycloak Credentials]
+    I --> K[Create User Data Script]
+    J --> K
+    K --> L[Call Provider.provisionServer]
+    L --> M[Provider Creates Server Instance]
+    M --> N[Provider Installs Docker CE]
+    N --> O[Provider Configures Agent-Manager]
+    O --> P[Provider Starts Container]
+    P --> Q[Wait for Server Ready]
+    Q --> R[Get Server IP Address]
+    R --> S[Create Client in Database]
+    S --> T[Create Provisioning Reference]
+    T --> U[Return Provisioned Server Response]
+
+    style A fill:#e1f5ff
+    style U fill:#c8e6c9
+    style C fill:#ffcdd2
+    style F fill:#ffcdd2

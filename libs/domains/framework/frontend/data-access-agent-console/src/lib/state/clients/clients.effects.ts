@@ -1,4 +1,5 @@
 import { inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, exhaustMap, map, of, switchMap } from 'rxjs';
 import { ClientsService } from '../../services/clients.service';
@@ -9,6 +10,9 @@ import {
   deleteClient,
   deleteClientFailure,
   deleteClientSuccess,
+  deleteProvisionedServer,
+  deleteProvisionedServerFailure,
+  deleteProvisionedServerSuccess,
   loadClient,
   loadClientFailure,
   loadClients,
@@ -16,6 +20,18 @@ import {
   loadClientsFailure,
   loadClientsSuccess,
   loadClientSuccess,
+  loadProvisioningProviders,
+  loadProvisioningProvidersFailure,
+  loadProvisioningProvidersSuccess,
+  loadServerInfo,
+  loadServerInfoFailure,
+  loadServerInfoSuccess,
+  loadServerTypes,
+  loadServerTypesFailure,
+  loadServerTypesSuccess,
+  provisionServer,
+  provisionServerFailure,
+  provisionServerSuccess,
   setActiveClient,
   setActiveClientSuccess,
   updateClient,
@@ -168,6 +184,106 @@ export const setActiveClient$ = createEffect(
         // If it requires an API call in the future, inject the service here
         return of(setActiveClientSuccess({ id }));
       }),
+    );
+  },
+  { functional: true },
+);
+
+// Provisioning Effects
+export const loadProvisioningProviders$ = createEffect(
+  (actions$ = inject(Actions), clientsService = inject(ClientsService)) => {
+    return actions$.pipe(
+      ofType(loadProvisioningProviders),
+      exhaustMap(() =>
+        clientsService.listProvisioningProviders().pipe(
+          map((providers) => loadProvisioningProvidersSuccess({ providers })),
+          catchError((error) => of(loadProvisioningProvidersFailure({ error: normalizeError(error) }))),
+        ),
+      ),
+    );
+  },
+  { functional: true },
+);
+
+export const loadServerTypes$ = createEffect(
+  (actions$ = inject(Actions), clientsService = inject(ClientsService)) => {
+    return actions$.pipe(
+      ofType(loadServerTypes),
+      exhaustMap(({ providerType }) =>
+        clientsService.getServerTypes(providerType).pipe(
+          map((serverTypes) => loadServerTypesSuccess({ providerType, serverTypes })),
+          catchError((error) => of(loadServerTypesFailure({ error: normalizeError(error) }))),
+        ),
+      ),
+    );
+  },
+  { functional: true },
+);
+
+export const provisionServer$ = createEffect(
+  (actions$ = inject(Actions), clientsService = inject(ClientsService)) => {
+    return actions$.pipe(
+      ofType(provisionServer),
+      exhaustMap(({ dto }) =>
+        clientsService.provisionServer(dto).pipe(
+          map((server) => provisionServerSuccess({ server })),
+          catchError((error) => of(provisionServerFailure({ error: normalizeError(error) }))),
+        ),
+      ),
+    );
+  },
+  { functional: true },
+);
+
+export const loadServerInfo$ = createEffect(
+  (actions$ = inject(Actions), clientsService = inject(ClientsService)) => {
+    return actions$.pipe(
+      ofType(loadServerInfo),
+      exhaustMap(({ clientId }) =>
+        clientsService.getServerInfo(clientId).pipe(
+          map((serverInfo) => loadServerInfoSuccess({ clientId, serverInfo })),
+          catchError((error) => {
+            // Handle 404 gracefully - client doesn't have provisioning, this is expected
+            if (error instanceof HttpErrorResponse && error.status === 404) {
+              // Silently ignore 404 - client doesn't have provisioning
+              // Don't set error state, just mark loading as complete
+              return of(loadServerInfoFailure({ error: '' }));
+            }
+            // For other errors, set the error message
+            return of(loadServerInfoFailure({ error: normalizeError(error) }));
+          }),
+        ),
+      ),
+    );
+  },
+  { functional: true },
+);
+
+// Automatically load server info after successful provisioning
+export const loadServerInfoAfterProvisioning$ = createEffect(
+  (actions$ = inject(Actions)) => {
+    return actions$.pipe(
+      ofType(provisionServerSuccess),
+      map(({ server }) => {
+        // Extract client ID from the server response
+        // The server response is a ProvisionedServerResponseDto which extends ClientResponseDto
+        return loadServerInfo({ clientId: server.id });
+      }),
+    );
+  },
+  { functional: true },
+);
+
+export const deleteProvisionedServer$ = createEffect(
+  (actions$ = inject(Actions), clientsService = inject(ClientsService)) => {
+    return actions$.pipe(
+      ofType(deleteProvisionedServer),
+      exhaustMap(({ clientId }) =>
+        clientsService.deleteProvisionedServer(clientId).pipe(
+          map(() => deleteProvisionedServerSuccess({ clientId })),
+          catchError((error) => of(deleteProvisionedServerFailure({ error: normalizeError(error) }))),
+        ),
+      ),
     );
   },
   { functional: true },

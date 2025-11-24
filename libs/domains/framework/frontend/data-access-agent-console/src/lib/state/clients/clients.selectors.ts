@@ -46,3 +46,25 @@ export const selectClientById = (id: string) =>
   createSelector(selectClients, (clients) => clients.find((c) => c.id === id) ?? null);
 
 export const selectHasClients = createSelector(selectClients, (clients) => clients.length > 0);
+
+// Provisioning selectors
+export const selectProvisioningProviders = createSelector(selectClientsState, (state) => state.provisioningProviders);
+
+export const selectLoadingProviders = createSelector(selectClientsState, (state) => state.loadingProviders);
+
+export const selectServerTypes = (providerType: string) =>
+  createSelector(selectClientsState, (state) => state.serverTypes[providerType] ?? []);
+
+export const selectLoadingServerTypes = (providerType: string) =>
+  createSelector(selectClientsState, (state) => state.loadingServerTypes[providerType] ?? false);
+
+export const selectProvisioning = createSelector(selectClientsState, (state) => state.provisioning);
+
+export const selectServerInfo = (clientId: string) =>
+  createSelector(selectClientsState, (state) => state.serverInfo[clientId]);
+
+export const selectLoadingServerInfo = (clientId: string) =>
+  createSelector(selectClientsState, (state) => state.loadingServerInfo[clientId] ?? false);
+
+export const selectDeletingProvisionedServer = (clientId: string) =>
+  createSelector(selectClientsState, (state) => state.deletingProvisionedServer[clientId] ?? false);

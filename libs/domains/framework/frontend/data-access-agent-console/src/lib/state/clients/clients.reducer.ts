@@ -7,6 +7,9 @@ import {
   deleteClient,
   deleteClientFailure,
   deleteClientSuccess,
+  deleteProvisionedServer,
+  deleteProvisionedServerFailure,
+  deleteProvisionedServerSuccess,
   loadClient,
   loadClientFailure,
   loadClients,
@@ -14,6 +17,18 @@ import {
   loadClientsFailure,
   loadClientsSuccess,
   loadClientSuccess,
+  loadProvisioningProviders,
+  loadProvisioningProvidersFailure,
+  loadProvisioningProvidersSuccess,
+  loadServerInfo,
+  loadServerInfoFailure,
+  loadServerInfoSuccess,
+  loadServerTypes,
+  loadServerTypesFailure,
+  loadServerTypesSuccess,
+  provisionServer,
+  provisionServerFailure,
+  provisionServerSuccess,
   setActiveClient,
   setActiveClientFailure,
   setActiveClientSuccess,
@@ -21,7 +36,7 @@ import {
   updateClientFailure,
   updateClientSuccess,
 } from './clients.actions';
-import type { ClientResponseDto } from './clients.types';
+import type { ClientResponseDto, ProvisioningProviderInfo, ServerInfo, ServerType } from './clients.types';
 
 export interface ClientsState {
   entities: ClientResponseDto[];
@@ -33,6 +48,15 @@ export interface ClientsState {
   updating: boolean;
   deleting: boolean;
   error: string | null;
+  // Provisioning state
+  provisioningProviders: ProvisioningProviderInfo[];
+  loadingProviders: boolean;
+  serverTypes: Record<string, ServerType[]>; // keyed by providerType
+  loadingServerTypes: Record<string, boolean>; // keyed by providerType
+  provisioning: boolean;
+  serverInfo: Record<string, ServerInfo>; // keyed by clientId
+  loadingServerInfo: Record<string, boolean>; // keyed by clientId
+  deletingProvisionedServer: Record<string, boolean>; // keyed by clientId
 }
 
 export const initialClientsState: ClientsState = {
@@ -45,6 +69,14 @@ export const initialClientsState: ClientsState = {
   updating: false,
   deleting: false,
   error: null,
+  provisioningProviders: [],
+  loadingProviders: false,
+  serverTypes: {},
+  loadingServerTypes: {},
+  provisioning: false,
+  serverInfo: {},
+  loadingServerInfo: {},
+  deletingProvisionedServer: {},
 };
 
 export const clientsReducer = createReducer(
@@ -174,5 +206,115 @@ export const clientsReducer = createReducer(
     ...state,
     activeClientId: null,
     error: null,
+  })),
+  // Provisioning Providers
+  on(loadProvisioningProviders, (state) => ({
+    ...state,
+    loadingProviders: true,
+    error: null,
+  })),
+  on(loadProvisioningProvidersSuccess, (state, { providers }) => ({
+    ...state,
+    provisioningProviders: providers,
+    loadingProviders: false,
+    error: null,
+  })),
+  on(loadProvisioningProvidersFailure, (state, { error }) => ({
+    ...state,
+    loadingProviders: false,
+    error,
+  })),
+  // Server Types
+  on(loadServerTypes, (state, { providerType }) => ({
+    ...state,
+    loadingServerTypes: { ...state.loadingServerTypes, [providerType]: true },
+    error: null,
+  })),
+  on(loadServerTypesSuccess, (state, { providerType, serverTypes }) => ({
+    ...state,
+    serverTypes: { ...state.serverTypes, [providerType]: serverTypes },
+    loadingServerTypes: { ...state.loadingServerTypes, [providerType]: false },
+    error: null,
+  })),
+  on(loadServerTypesFailure, (state, { error }) => ({
+    ...state,
+    loadingServerTypes: Object.keys(state.loadingServerTypes).reduce(
+      (acc, key) => ({ ...acc, [key]: false }),
+      {} as Record<string, boolean>,
+    ),
+    error,
+  })),
+  // Provision Server
+  on(provisionServer, (state) => ({
+    ...state,
+    provisioning: true,
+    error: null,
+  })),
+  on(provisionServerSuccess, (state, { server }) => {
+    // Strip provisioning-specific fields to store as ClientResponseDto
+    const { providerType, serverId, serverName, publicIp, privateIp, serverStatus, ...clientResponse } = server;
+    return {
+      ...state,
+      entities: [...state.entities, clientResponse],
+      selectedClient: clientResponse,
+      provisioning: false,
+      error: null,
+    };
+  }),
+  on(provisionServerFailure, (state, { error }) => ({
+    ...state,
+    provisioning: false,
+    error,
+  })),
+  // Server Info
+  on(loadServerInfo, (state, { clientId }) => ({
+    ...state,
+    loadingServerInfo: { ...state.loadingServerInfo, [clientId]: true },
+    error: null,
+  })),
+  on(loadServerInfoSuccess, (state, { clientId, serverInfo }) => ({
+    ...state,
+    serverInfo: { ...state.serverInfo, [clientId]: serverInfo },
+    loadingServerInfo: { ...state.loadingServerInfo, [clientId]: false },
+    error: null,
+  })),
+  on(loadServerInfoFailure, (state, { error }) => ({
+    ...state,
+    loadingServerInfo: Object.keys(state.loadingServerInfo).reduce(
+      (acc, key) => ({ ...acc, [key]: false }),
+      {} as Record<string, boolean>,
+    ),
+    // Only set error state if error message is not empty (404 errors are handled gracefully)
+    // If error is empty (404 case), preserve existing error state; otherwise set new error
+    error: error ? error : state.error,
+  })),
+  // Delete Provisioned Server
+  on(deleteProvisionedServer, (state, { clientId }) => ({
+    ...state,
+    deletingProvisionedServer: { ...state.deletingProvisionedServer, [clientId]: true },
+    error: null,
+  })),
+  on(deleteProvisionedServerSuccess, (state, { clientId }) => {
+    const { [clientId]: removed, ...restServerInfo } = state.serverInfo;
+    const { [clientId]: removedLoading, ...restLoadingServerInfo } = state.loadingServerInfo;
+    const { [clientId]: removedDeleting, ...restDeletingProvisionedServer } = state.deletingProvisionedServer;
+    return {
+      ...state,
+      entities: state.entities.filter((c) => c.id !== clientId),
+      selectedClient: state.selectedClient?.id === clientId ? null : state.selectedClient,
+      activeClientId: state.activeClientId === clientId ? null : state.activeClientId,
+      serverInfo: restServerInfo,
+      loadingServerInfo: restLoadingServerInfo,
+      deletingProvisionedServer: restDeletingProvisionedServer,
+      error: null,
+    };
+  }),
+  on(deleteProvisionedServerFailure, (state, { error }) => ({
+    ...state,
+    deletingProvisionedServer: Object.keys(state.deletingProvisionedServer).reduce(
+      (acc, key) => ({ ...acc, [key]: false }),
+      {} as Record<string, boolean>,
+    ),
+    error,
   })),
 );

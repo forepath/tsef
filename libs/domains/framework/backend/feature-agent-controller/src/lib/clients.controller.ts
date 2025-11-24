@@ -29,10 +29,14 @@ import { Resource } from 'nest-keycloak-connect';
 import { ClientResponseDto } from './dto/client-response.dto';
 import { CreateClientResponseDto } from './dto/create-client-response.dto';
 import { CreateClientDto } from './dto/create-client.dto';
+import { ProvisionServerDto } from './dto/provision-server.dto';
+import { ProvisionedServerResponseDto } from './dto/provisioned-server-response.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { ProvisioningProviderFactory } from './providers/provisioning-provider.factory';
 import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientsService } from './services/clients.service';
+import { ProvisioningService } from './services/provisioning.service';
 
 /**
  * Controller for client management endpoints.
@@ -45,6 +49,8 @@ export class ClientsController {
     private readonly clientsService: ClientsService,
     private readonly clientAgentProxyService: ClientAgentProxyService,
     private readonly clientAgentFileSystemProxyService: ClientAgentFileSystemProxyService,
+    private readonly provisioningService: ProvisioningService,
+    private readonly provisioningProviderFactory: ProvisioningProviderFactory,
   ) {}
 
   /**
@@ -173,12 +179,30 @@ export class ClientsController {
 
   /**
    * Delete a client by ID.
+   * If the client has a provisioning reference, the provisioned server will also be deleted.
    * @param id - The UUID of the client to delete
    */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteClient(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<void> {
-    await this.clientsService.remove(id);
+    // Check if client has provisioning - if so, delete the server from the provider
+    try {
+      await this.provisioningService.deleteProvisionedServer(id);
+      // deleteProvisionedServer already deletes the client, so we're done
+      return;
+    } catch (error) {
+      // If no provisioning reference exists, continue with regular client deletion
+      // BadRequestException with "No provisioning reference" means no provisioning - that's fine
+      if (
+        error instanceof BadRequestException &&
+        (error.message.includes('No provisioning reference') || error.message.includes('provisioning reference'))
+      ) {
+        await this.clientsService.remove(id);
+        return;
+      }
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   /**
@@ -348,5 +372,63 @@ export class ClientsController {
       throw new BadRequestException('Destination path is required');
     }
     await this.clientAgentFileSystemProxyService.moveFileOrDirectory(id, agentId, normalizedPath, moveFileDto);
+  }
+
+  /**
+   * Get all available provisioning providers.
+   * @returns Array of provider information
+   */
+  @Get('provisioning/providers')
+  async getProvisioningProviders(): Promise<Array<{ type: string; displayName: string }>> {
+    return this.provisioningProviderFactory.getAllProviders().map((provider) => ({
+      type: provider.getType(),
+      displayName: provider.getDisplayName(),
+    }));
+  }
+
+  /**
+   * Get available server types for a provisioning provider.
+   * @param providerType - The provider type (e.g., 'hetzner')
+   * @returns Array of server types with specifications and pricing
+   */
+  @Get('provisioning/providers/:providerType/server-types')
+  async getServerTypes(@Param('providerType') providerType: string) {
+    if (!this.provisioningProviderFactory.hasProvider(providerType)) {
+      throw new BadRequestException(
+        `Provider type '${providerType}' is not available. Available types: ${this.provisioningProviderFactory.getRegisteredTypes().join(', ')}`,
+      );
+    }
+    const provider = this.provisioningProviderFactory.getProvider(providerType);
+    return await provider.getServerTypes();
+  }
+
+  /**
+   * Provision a new server and create a client.
+   * @param provisionServerDto - Provisioning options
+   * @returns Provisioned server response with client information
+   */
+  @Post('provisioning/provision')
+  async provisionServer(@Body() provisionServerDto: ProvisionServerDto): Promise<ProvisionedServerResponseDto> {
+    return await this.provisioningService.provisionServer(provisionServerDto);
+  }
+
+  /**
+   * Get server information for a provisioned client.
+   * @param id - The UUID of the client
+   * @returns Server information
+   */
+  @Get(':id/provisioning/info')
+  async getServerInfo(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return await this.provisioningService.getServerInfo(id);
+  }
+
+  /**
+   * Delete a provisioned server and its associated client.
+   * @param id - The UUID of the client
+   */
+  @Delete(':id/provisioning')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteProvisionedServer(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<void> {
+    await this.provisioningService.deleteProvisionedServer(id);
   }
 }

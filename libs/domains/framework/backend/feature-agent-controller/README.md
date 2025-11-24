@@ -24,6 +24,7 @@ Clients are entities that represent remote agent-manager services. The controlle
 - ✅ Automatic agent login using stored credentials
 - ✅ Support for configurable agent WebSocket ports per client
 - ✅ Credential storage for proxied agent operations
+- ✅ **Server Provisioning** - Automated cloud server provisioning with Docker and agent-manager deployment
 
 ## Architecture
 
@@ -139,6 +140,72 @@ Base URL: `/api/clients`
 - `DELETE /api/clients/:id/agents/:agentId` - Delete an agent (also deletes stored credentials)
 
 **Note**: Agent creation requests are proxied to the remote agent-manager service. SSH repository configuration (including `GIT_PRIVATE_KEY`) must be configured on the agent-manager instance via environment variables, not through the API request. See the [agent-manager documentation](../feature-agent-manager/README.md) for details on SSH repository setup.
+
+### Server Provisioning
+
+- `GET /api/clients/provisioning/providers` - List available provisioning providers (e.g., Hetzner Cloud)
+- `GET /api/clients/provisioning/providers/:providerType/server-types` - Get available server types for a provider
+- `POST /api/clients/provisioning/provision` - Provision a new server and create a client
+- `GET /api/clients/:id/provisioning/info` - Get server information for a provisioned client
+- `DELETE /api/clients/:id/provisioning` - Delete a provisioned server and its associated client
+
+#### Provisioning Request
+
+The provisioning endpoint accepts a `ProvisionServerDto` with the following fields:
+
+**Required Fields:**
+
+- `providerType` - Provider identifier (e.g., `"hetzner"`)
+- `serverType` - Server type identifier (e.g., `"cx11"`)
+- `name` - Server name (auto-generated if not provided)
+- `authenticationType` - Authentication type (`"api_key"` or `"keycloak"`)
+
+**Optional Fields:**
+
+- `description` - Server description
+- `location` - Datacenter location (e.g., `"fsn1"`, `"nbg1"`)
+- `apiKey` - API key for API_KEY authentication (auto-generated if not provided)
+- `keycloakClientId` - Keycloak client ID (required for KEYCLOAK authentication)
+- `keycloakClientSecret` - Keycloak client secret (required for KEYCLOAK authentication)
+- `keycloakRealm` - Keycloak realm (optional, defaults to environment variable)
+- `keycloakAuthServerUrl` - Keycloak auth server URL (optional, defaults to environment variable)
+- `agentWsPort` - Agent WebSocket port (defaults to 8080)
+- `gitRepositoryUrl` - Git repository URL for agent workspace
+- `gitUsername` - Git username for repository access
+- `gitToken` - Git token/personal access token for repository access
+- `gitPassword` - Git password for repository access (alternative to token)
+- `cursorApiKey` - Cursor API key for agent configuration
+- `agentDefaultImage` - Default Docker image for cursor agents (defaults to `ghcr.io/forepath/agenstra-manager-worker:latest`)
+
+#### Provisioning Process
+
+When provisioning a server:
+
+1. **Server Creation**: The provider creates a cloud server instance (e.g., Hetzner Cloud)
+2. **Docker Installation**: The server automatically installs Docker CE via user data script
+3. **Database Setup**: PostgreSQL container is started with health checks
+4. **Agent-Manager Deployment**: Agent-manager container is deployed with:
+   - Authentication configuration (API key or Keycloak)
+   - Database connection to PostgreSQL
+   - Git repository configuration (if provided)
+   - Cursor agent configuration (if provided)
+5. **Client Creation**: A client entity is created in the database with the server's endpoint
+6. **Reference Storage**: A provisioning reference links the client to the cloud server
+
+The provisioned server exposes:
+
+- **HTTP API**: Port 3000 (agent-manager REST API)
+- **WebSocket**: Port 8080 (agent-manager WebSocket gateway)
+
+#### Environment Variables Interpolation
+
+All configuration values are properly interpolated into the docker-compose.yml file on the provisioned server:
+
+- **Authentication**: `STATIC_API_KEY` or Keycloak variables (`KEYCLOAK_AUTH_SERVER_URL`, `KEYCLOAK_REALM`, `KEYCLOAK_CLIENT_ID`, `KEYCLOAK_CLIENT_SECRET`)
+- **Git Configuration**: `GIT_REPOSITORY_URL`, `GIT_USERNAME`, `GIT_TOKEN`, `GIT_PASSWORD`
+- **Cursor Agent**: `CURSOR_API_KEY`, `AGENT_DEFAULT_IMAGE`
+
+Values are securely passed from the frontend through the backend to the user data script, which generates the docker-compose.yml with all environment variables properly set.
 
 ### Client Configuration
 

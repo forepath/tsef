@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientsController } from './clients.controller';
 import { ClientEntity } from './entities/client.entity';
+import { ProvisioningReferenceEntity } from './entities/provisioning-reference.entity';
 import { ClientsRepository } from './repositories/clients.repository';
 import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
@@ -32,6 +33,8 @@ describe('ClientsModule', () => {
       .overrideProvider(getRepositoryToken(ClientEntity))
       .useValue(mockRepository)
       .overrideProvider(getRepositoryToken(ClientAgentCredentialEntity))
+      .useValue(mockRepository)
+      .overrideProvider(getRepositoryToken(ProvisioningReferenceEntity))
       .useValue(mockRepository)
       .compile();
   });

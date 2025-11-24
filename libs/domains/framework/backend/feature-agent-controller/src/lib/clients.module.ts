@@ -11,13 +11,18 @@ import { ClientAgentFileSystemProxyService } from './services/client-agent-file-
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientsService } from './services/clients.service';
 import { KeycloakTokenService } from './services/keycloak-token.service';
+import { ProvisioningService } from './services/provisioning.service';
+import { ProvisioningProviderFactory } from './providers/provisioning-provider.factory';
+import { HetznerProvider } from './providers/hetzner.provider';
+import { ProvisioningReferenceEntity } from './entities/provisioning-reference.entity';
+import { ProvisioningReferencesRepository } from './repositories/provisioning-references.repository';
 
 /**
  * Module for agent clients feature.
  * Provides controllers, services, and repository for agent CRUD operations and file system operations.
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([ClientEntity, ClientAgentCredentialEntity])],
+  imports: [TypeOrmModule.forFeature([ClientEntity, ClientAgentCredentialEntity, ProvisioningReferenceEntity])],
   controllers: [ClientsController],
   providers: [
     ClientsService,
@@ -28,6 +33,18 @@ import { KeycloakTokenService } from './services/keycloak-token.service';
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,
     ClientsGateway,
+    ProvisioningService,
+    ProvisioningProviderFactory,
+    ProvisioningReferencesRepository,
+    HetznerProvider,
+    {
+      provide: 'PROVISIONING_PROVIDERS',
+      useFactory: (factory: ProvisioningProviderFactory, hetzner: HetznerProvider) => {
+        factory.registerProvider(hetzner);
+        return factory;
+      },
+      inject: [ProvisioningProviderFactory, HetznerProvider],
+    },
   ],
   exports: [
     ClientsService,
@@ -38,6 +55,8 @@ import { KeycloakTokenService } from './services/keycloak-token.service';
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,
     ClientsGateway,
+    ProvisioningService,
+    ProvisioningProviderFactory,
   ],
 })
 export class ClientsModule {}

@@ -1,13 +1,26 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import type { ClientResponseDto, CreateClientDto, ListClientsParams, UpdateClientDto } from './clients.types';
+import type {
+  ClientResponseDto,
+  CreateClientDto,
+  ListClientsParams,
+  ProvisionServerDto,
+  ServerInfo,
+  ServerType,
+  UpdateClientDto,
+} from './clients.types';
 import {
   clearActiveClient,
   createClient,
   deleteClient,
+  deleteProvisionedServer,
   loadClient,
   loadClients,
+  loadProvisioningProviders,
+  loadServerInfo,
+  loadServerTypes,
+  provisionServer,
   setActiveClient,
   updateClient,
 } from './clients.actions';
@@ -24,8 +37,16 @@ import {
   selectClientsError,
   selectClientsLoading,
   selectClientsLoadingAny,
+  selectDeletingProvisionedServer,
   selectHasClients,
+  selectLoadingProviders,
+  selectLoadingServerInfo,
+  selectLoadingServerTypes,
+  selectProvisioning,
+  selectProvisioningProviders,
   selectSelectedClient,
+  selectServerInfo,
+  selectServerTypes,
 } from './clients.selectors';
 
 /**
@@ -116,5 +137,95 @@ export class ClientsFacade {
    */
   getClientById$(id: string): Observable<ClientResponseDto | null> {
     return this.store.select(selectClientById(id));
+  }
+
+  // Provisioning state observables
+  readonly provisioningProviders$: Observable<Array<{ type: string; displayName: string }>> =
+    this.store.select(selectProvisioningProviders);
+  readonly loadingProviders$: Observable<boolean> = this.store.select(selectLoadingProviders);
+  readonly provisioning$: Observable<boolean> = this.store.select(selectProvisioning);
+
+  /**
+   * Get server types for a provider as an observable.
+   * @param providerType - The provider type
+   * @returns Observable of server types array
+   */
+  getServerTypes$(providerType: string): Observable<ServerType[]> {
+    return this.store.select(selectServerTypes(providerType));
+  }
+
+  /**
+   * Get loading state for server types as an observable.
+   * @param providerType - The provider type
+   * @returns Observable of loading state
+   */
+  getLoadingServerTypes$(providerType: string): Observable<boolean> {
+    return this.store.select(selectLoadingServerTypes(providerType));
+  }
+
+  /**
+   * Get server info for a client as an observable.
+   * @param clientId - The client ID
+   * @returns Observable of server info or undefined
+   */
+  getServerInfo$(clientId: string): Observable<ServerInfo | undefined> {
+    return this.store.select(selectServerInfo(clientId));
+  }
+
+  /**
+   * Get loading state for server info as an observable.
+   * @param clientId - The client ID
+   * @returns Observable of loading state
+   */
+  getLoadingServerInfo$(clientId: string): Observable<boolean> {
+    return this.store.select(selectLoadingServerInfo(clientId));
+  }
+
+  /**
+   * Get deleting state for provisioned server as an observable.
+   * @param clientId - The client ID
+   * @returns Observable of deleting state
+   */
+  getDeletingProvisionedServer$(clientId: string): Observable<boolean> {
+    return this.store.select(selectDeletingProvisionedServer(clientId));
+  }
+
+  /**
+   * Load all available provisioning providers.
+   */
+  loadProvisioningProviders(): void {
+    this.store.dispatch(loadProvisioningProviders());
+  }
+
+  /**
+   * Load server types for a specific provider.
+   * @param providerType - The provider type (e.g., 'hetzner')
+   */
+  loadServerTypes(providerType: string): void {
+    this.store.dispatch(loadServerTypes({ providerType }));
+  }
+
+  /**
+   * Provision a new server and create a client.
+   * @param dto - Provisioning options
+   */
+  provisionServer(dto: ProvisionServerDto): void {
+    this.store.dispatch(provisionServer({ dto }));
+  }
+
+  /**
+   * Load server information for a provisioned client.
+   * @param clientId - The client ID
+   */
+  loadServerInfo(clientId: string): void {
+    this.store.dispatch(loadServerInfo({ clientId }));
+  }
+
+  /**
+   * Delete a provisioned server and its associated client.
+   * @param clientId - The client ID
+   */
+  deleteProvisionedServer(clientId: string): void {
+    this.store.dispatch(deleteProvisionedServer({ clientId }));
   }
 }

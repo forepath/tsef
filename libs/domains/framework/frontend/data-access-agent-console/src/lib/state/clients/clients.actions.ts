@@ -4,6 +4,11 @@ import type {
   CreateClientDto,
   CreateClientResponseDto,
   ListClientsParams,
+  ProvisionServerDto,
+  ProvisionedServerResponseDto,
+  ProvisioningProviderInfo,
+  ServerInfo,
+  ServerType,
   UpdateClientDto,
 } from './clients.types';
 
@@ -65,3 +70,58 @@ export const setActiveClientFailure = createAction('[Clients] Set Active Client 
 
 // Clear Active Client Actions
 export const clearActiveClient = createAction('[Clients] Clear Active Client');
+
+// Provisioning Actions
+export const loadProvisioningProviders = createAction('[Clients] Load Provisioning Providers');
+
+export const loadProvisioningProvidersSuccess = createAction(
+  '[Clients] Load Provisioning Providers Success',
+  props<{ providers: ProvisioningProviderInfo[] }>(),
+);
+
+export const loadProvisioningProvidersFailure = createAction(
+  '[Clients] Load Provisioning Providers Failure',
+  props<{ error: string }>(),
+);
+
+export const loadServerTypes = createAction('[Clients] Load Server Types', props<{ providerType: string }>());
+
+export const loadServerTypesSuccess = createAction(
+  '[Clients] Load Server Types Success',
+  props<{ providerType: string; serverTypes: ServerType[] }>(),
+);
+
+export const loadServerTypesFailure = createAction('[Clients] Load Server Types Failure', props<{ error: string }>());
+
+export const provisionServer = createAction('[Clients] Provision Server', props<{ dto: ProvisionServerDto }>());
+
+export const provisionServerSuccess = createAction(
+  '[Clients] Provision Server Success',
+  props<{ server: ProvisionedServerResponseDto }>(),
+);
+
+export const provisionServerFailure = createAction('[Clients] Provision Server Failure', props<{ error: string }>());
+
+export const loadServerInfo = createAction('[Clients] Load Server Info', props<{ clientId: string }>());
+
+export const loadServerInfoSuccess = createAction(
+  '[Clients] Load Server Info Success',
+  props<{ clientId: string; serverInfo: ServerInfo }>(),
+);
+
+export const loadServerInfoFailure = createAction('[Clients] Load Server Info Failure', props<{ error: string }>());
+
+export const deleteProvisionedServer = createAction(
+  '[Clients] Delete Provisioned Server',
+  props<{ clientId: string }>(),
+);
+
+export const deleteProvisionedServerSuccess = createAction(
+  '[Clients] Delete Provisioned Server Success',
+  props<{ clientId: string }>(),
+);
+
+export const deleteProvisionedServerFailure = createAction(
+  '[Clients] Delete Provisioned Server Failure',
+  props<{ error: string }>(),
+);
