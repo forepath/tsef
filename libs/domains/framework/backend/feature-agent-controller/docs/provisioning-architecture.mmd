@@ -1,0 +1,45 @@
+graph TB
+    subgraph "Client Controller"
+        CC[ClientsController]
+        CC --> |GET /provisioning/providers| PPF[ProvisioningProviderFactory]
+        CC --> |GET /provisioning/providers/:type/server-types| PPF
+        CC --> |POST /provisioning/provision| PS[ProvisioningService]
+        CC --> |GET /:id/provisioning/info| PS
+        CC --> |DELETE /:id/provisioning| PS
+    end
+
+    subgraph "Provisioning Service"
+        PS --> |Uses| PPF
+        PS --> |Creates| CS[ClientsService]
+        PS --> |Stores| PRR[ProvisioningReferencesRepository]
+    end
+
+    subgraph "Provider Factory"
+        PPF --> |Manages| HP[HetznerProvider]
+        PPF --> |Manages| FP[Future Providers...]
+    end
+
+    subgraph "Hetzner Provider"
+        HP --> |Calls| HCA[Hetzner Cloud API]
+        HCA --> |Returns| SI[Server Info]
+    end
+
+    subgraph "Database"
+        PRR --> |Stores| PRE[ProvisioningReferenceEntity]
+        CS --> |Stores| CE[ClientEntity]
+        PRE -.->|References| CE
+    end
+
+    subgraph "Provisioned Server"
+        SI --> |SSH| PS2[Ubuntu Server]
+        PS2 --> |Runs| DC[Docker CE]
+        DC --> |Runs| AM[Agent-Manager Container]
+        AM --> |Exposes| API[Port 3100 API]
+        AM --> |Exposes| WS[Port 8080 WebSocket]
+    end
+
+    style CC fill:#e1f5ff
+    style PS fill:#fff9c4
+    style PPF fill:#f3e5f5
+    style HP fill:#e8f5e9
+    style AM fill:#c8e6c9

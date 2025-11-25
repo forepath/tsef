@@ -32,7 +32,15 @@ export interface CreateClientDto {
   keycloakClientId?: string;
   keycloakClientSecret?: string;
   keycloakRealm?: string;
+  keycloakAuthServerUrl?: string;
   agentWsPort?: number;
+  gitRepositoryUrl?: string;
+  gitUsername?: string;
+  gitToken?: string;
+  gitPassword?: string;
+  gitPrivateKey?: string;
+  cursorApiKey?: string;
+  agentDefaultImage?: string;
 }
 
 export interface UpdateClientDto {
@@ -54,4 +62,61 @@ export interface CreateClientResponseDto extends ClientResponseDto {
 export interface ListClientsParams {
   limit?: number;
   offset?: number;
+}
+
+// Provisioning types
+export interface ProvisioningProviderInfo {
+  type: string;
+  displayName: string;
+}
+
+export interface ServerType {
+  id: string;
+  name: string;
+  cores: number;
+  memory: number;
+  disk: number;
+  priceMonthly?: number;
+  priceHourly?: number;
+  description?: string;
+}
+
+export interface ProvisionServerDto {
+  providerType: string;
+  serverType: string;
+  name: string;
+  description?: string;
+  location?: string;
+  authenticationType: ClientAuthenticationType;
+  apiKey?: string;
+  keycloakClientId?: string;
+  keycloakClientSecret?: string;
+  keycloakRealm?: string;
+  keycloakAuthServerUrl?: string;
+  agentWsPort?: number;
+  gitRepositoryUrl?: string;
+  gitUsername?: string;
+  gitToken?: string;
+  gitPassword?: string;
+  gitPrivateKey?: string;
+  cursorApiKey?: string;
+  agentDefaultImage?: string;
+}
+
+export interface ProvisionedServerResponseDto extends ClientResponseDto {
+  providerType: string;
+  serverId: string;
+  serverName: string;
+  publicIp: string;
+  privateIp?: string;
+  serverStatus: string;
+}
+
+export interface ServerInfo {
+  serverId: string;
+  serverName?: string;
+  publicIp?: string;
+  privateIp?: string;
+  serverStatus?: string;
+  providerType: string;
 }

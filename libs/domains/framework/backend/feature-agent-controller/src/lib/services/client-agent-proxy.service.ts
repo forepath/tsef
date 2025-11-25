@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import {
   AgentResponseDto,
   ConfigResponseDto,
@@ -98,6 +99,11 @@ export class ClientAgentProxyService {
           'Content-Type': 'application/json',
         },
         validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+        httpsAgent: baseUrl.startsWith('https://')
+          ? new (require('https').Agent)({
+              rejectUnauthorized: false, // Ignore self-signed certificates
+            })
+          : undefined,
       });
 
       // Handle error responses
@@ -246,6 +252,11 @@ export class ClientAgentProxyService {
         },
         validateStatus: (status) => status < 500, // Don't throw on 4xx errors
         timeout: 5000, // 5 second timeout
+        httpsAgent: baseUrl.startsWith('https://')
+          ? new (require('https').Agent)({
+              rejectUnauthorized: false, // Ignore self-signed certificates
+            })
+          : undefined,
       });
 
       // Handle error responses

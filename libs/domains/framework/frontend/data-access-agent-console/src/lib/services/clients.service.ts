@@ -8,6 +8,11 @@ import type {
   CreateClientDto,
   CreateClientResponseDto,
   ListClientsParams,
+  ProvisionServerDto,
+  ProvisionedServerResponseDto,
+  ProvisioningProviderInfo,
+  ServerInfo,
+  ServerType,
   UpdateClientDto,
 } from '../state/clients/clients.types';
 
@@ -68,5 +73,40 @@ export class ClientsService {
    */
   deleteClient(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/clients/${id}`);
+  }
+
+  /**
+   * List all available provisioning providers.
+   */
+  listProvisioningProviders(): Observable<ProvisioningProviderInfo[]> {
+    return this.http.get<ProvisioningProviderInfo[]>(`${this.apiUrl}/clients/provisioning/providers`);
+  }
+
+  /**
+   * Get available server types for a provisioning provider.
+   */
+  getServerTypes(providerType: string): Observable<ServerType[]> {
+    return this.http.get<ServerType[]>(`${this.apiUrl}/clients/provisioning/providers/${providerType}/server-types`);
+  }
+
+  /**
+   * Provision a new server and create a client.
+   */
+  provisionServer(dto: ProvisionServerDto): Observable<ProvisionedServerResponseDto> {
+    return this.http.post<ProvisionedServerResponseDto>(`${this.apiUrl}/clients/provisioning/provision`, dto);
+  }
+
+  /**
+   * Get server information for a provisioned client.
+   */
+  getServerInfo(clientId: string): Observable<ServerInfo> {
+    return this.http.get<ServerInfo>(`${this.apiUrl}/clients/${clientId}/provisioning/info`);
+  }
+
+  /**
+   * Delete a provisioned server and its associated client.
+   */
+  deleteProvisionedServer(clientId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/clients/${clientId}/provisioning`);
   }
 }

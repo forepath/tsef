@@ -144,6 +144,7 @@ describe('SocketsEffects', () => {
       connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
         expect(io).toHaveBeenCalledWith('http://localhost:8081/clients', {
           transports: ['websocket'],
+          rejectUnauthorized: false,
           extraHeaders: { Authorization: 'Bearer test-api-key' },
         });
         expect(result).toEqual(connectSocketSuccess());
@@ -190,6 +191,7 @@ describe('SocketsEffects', () => {
       connectSocket$(actions$, TestBed.inject(ENVIRONMENT), TestBed.inject(KeycloakService)).subscribe((result) => {
         expect(io).toHaveBeenCalledWith('http://localhost:8081/clients', {
           transports: ['websocket'],
+          rejectUnauthorized: false,
           extraHeaders: { Authorization: 'Bearer keycloak-token-123' },
         });
         expect(result).toEqual(connectSocketSuccess());

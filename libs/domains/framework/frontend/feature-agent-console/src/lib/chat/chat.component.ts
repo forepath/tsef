@@ -27,11 +27,13 @@ import {
   type CreateAgentDto,
   type CreateClientDto,
   type ForwardedEventPayload,
+  type ProvisionServerDto,
   type UpdateAgentDto,
   type UpdateClientDto,
 } from '@forepath/framework/frontend/data-access-agent-console';
 import { ENVIRONMENT, type Environment } from '@forepath/framework/frontend/util-configuration';
 import {
+  catchError,
   combineLatest,
   combineLatestWith,
   delay,
@@ -40,6 +42,7 @@ import {
   Observable,
   of,
   skip,
+  startWith,
   Subject,
   switchMap,
   take,
@@ -63,7 +66,7 @@ interface Marked {
   standalone: true,
 })
 export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDestroy {
-  private readonly clientsFacade = inject(ClientsFacade);
+  readonly clientsFacade = inject(ClientsFacade);
   private readonly agentsFacade = inject(AgentsFacade);
   private readonly socketsFacade = inject(SocketsFacade);
   private readonly filesFacade = inject(FilesFacade);
@@ -293,6 +296,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   // Delete state
   readonly clientToDeleteId = signal<string | null>(null);
   readonly clientToDeleteName = signal<string>('');
+  readonly clientToDeleteHasProvisioning = signal<boolean>(false);
   readonly agentToDeleteId = signal<string | null>(null);
   readonly agentToDeleteName = signal<string>('');
 
@@ -308,6 +312,34 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     keycloakRealm: undefined,
     agentWsPort: undefined,
   });
+
+  // Provisioning state
+  readonly useProvisioning = signal<boolean>(false);
+  readonly selectedProvider = signal<string>('');
+  readonly selectedServerType = signal<string>('');
+  readonly selectedLocation = signal<string>('');
+  readonly provisioningProviders$ = this.clientsFacade.provisioningProviders$;
+  readonly loadingProviders$ = this.clientsFacade.loadingProviders$;
+  readonly provisioning$ = this.clientsFacade.provisioning$;
+
+  // Computed observables for server types based on selected provider
+  readonly serverTypes$ = toObservable(this.selectedProvider).pipe(
+    switchMap((providerType) => {
+      if (!providerType) {
+        return of([]);
+      }
+      return this.clientsFacade.getServerTypes$(providerType);
+    }),
+  );
+
+  readonly loadingServerTypes$ = toObservable(this.selectedProvider).pipe(
+    switchMap((providerType) => {
+      if (!providerType) {
+        return of(false);
+      }
+      return this.clientsFacade.getLoadingServerTypes$(providerType);
+    }),
+  );
   readonly newAgent = signal<Partial<CreateAgentDto>>({
     name: '',
     description: '',
@@ -346,6 +378,23 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
     // Load clients on init
     this.clientsFacade.loadClients();
+
+    // Load provisioning providers on init (needed for displaying provider names)
+    this.clientsFacade.loadProvisioningProviders();
+
+    // Preload serverInfo for all clients to show provisioning provider names
+    this.clients$
+      .pipe(
+        filter((clients) => clients.length > 0),
+        take(1),
+        takeUntil(this.destroy$),
+      )
+      .subscribe((clients) => {
+        // Load serverInfo for each client (will fail silently if no provisioning exists)
+        clients.forEach((client) => {
+          this.clientsFacade.loadServerInfo(client.id);
+        });
+      });
 
     this.route.params
       .pipe(
@@ -1158,7 +1207,33 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   onDeleteClientClick(clientId: string, clientName: string): void {
     this.clientToDeleteId.set(clientId);
     this.clientToDeleteName.set(clientName);
-    this.showModal(this.deleteClientModal);
+    // Check if serverInfo already exists in store
+    this.clientsFacade
+      .getServerInfo$(clientId)
+      .pipe(take(1), takeUntil(this.destroy$))
+      .subscribe((serverInfo) => {
+        if (serverInfo) {
+          // ServerInfo exists, client has provisioning
+          this.clientToDeleteHasProvisioning.set(true);
+          this.showModal(this.deleteClientModal);
+        } else {
+          // Try to load serverInfo to check if provisioning exists
+          this.clientsFacade.loadServerInfo(clientId);
+          // Wait for loading to complete, then check result
+          this.clientsFacade
+            .getLoadingServerInfo$(clientId)
+            .pipe(
+              filter((loading) => !loading), // Wait for loading to finish
+              switchMap(() => this.clientsFacade.getServerInfo$(clientId)),
+              take(1),
+              takeUntil(this.destroy$),
+            )
+            .subscribe((info) => {
+              this.clientToDeleteHasProvisioning.set(!!info);
+              this.showModal(this.deleteClientModal);
+            });
+        }
+      });
   }
 
   onDeleteAgentClick(agentId: string, agentName: string): void {
@@ -1182,6 +1257,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           this.hideModal(this.deleteClientModal);
           this.clientToDeleteId.set(null);
           this.clientToDeleteName.set('');
+          this.clientToDeleteHasProvisioning.set(false);
         });
     }
   }
@@ -1248,8 +1324,22 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       keycloakClientId: undefined,
       keycloakClientSecret: undefined,
       keycloakRealm: undefined,
+      keycloakAuthServerUrl: undefined,
       agentWsPort: undefined,
+      gitRepositoryUrl: undefined,
+      gitUsername: undefined,
+      gitToken: undefined,
+      gitPassword: undefined,
+      gitPrivateKey: undefined,
+      cursorApiKey: undefined,
+      agentDefaultImage: undefined,
     });
+    this.useProvisioning.set(false);
+    this.selectedProvider.set('');
+    this.selectedServerType.set('');
+    this.selectedLocation.set('');
+    // Load providers when opening modal
+    this.clientsFacade.loadProvisioningProviders();
     this.showModal(this.addClientModal);
   }
 
@@ -1274,67 +1364,200 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     });
   }
 
+  onProvisioningToggle(enabled: boolean): void {
+    this.useProvisioning.set(enabled);
+    if (enabled) {
+      // Auto-fill name when provisioning is enabled
+      this.autoFillProvisioningName();
+      // Set default WebSocket port to 8443 for provisioned servers
+      if (!this.newClient().agentWsPort) {
+        this.updateClientFieldNumber('agentWsPort', 8443);
+      }
+    }
+  }
+
+  onProviderChange(providerType: string): void {
+    this.selectedProvider.set(providerType);
+    this.selectedServerType.set('');
+    if (providerType) {
+      this.clientsFacade.loadServerTypes(providerType);
+    }
+    // Auto-fill name when provider is selected and provisioning is enabled
+    if (this.useProvisioning()) {
+      this.autoFillProvisioningName();
+    }
+  }
+
   onSubmitAddClient(): void {
-    const clientData = this.newClient();
-    if (!clientData.name || !clientData.endpoint || !clientData.authenticationType) {
-      return;
-    }
+    let clientData = this.newClient();
+    const useProvisioning = this.useProvisioning();
 
-    // Build the DTO, only including defined values
-    const createDto: CreateClientDto = {
-      name: clientData.name,
-      endpoint: clientData.endpoint,
-      authenticationType: clientData.authenticationType,
-    };
-
-    if (clientData.description) {
-      createDto.description = clientData.description;
-    }
-
-    if (clientData.authenticationType === 'api_key' && clientData.apiKey) {
-      createDto.apiKey = clientData.apiKey;
-    }
-
-    if (clientData.authenticationType === 'keycloak') {
-      if (clientData.keycloakClientId) {
-        createDto.keycloakClientId = clientData.keycloakClientId;
+    if (useProvisioning) {
+      // Auto-fill name if empty
+      if (!clientData.name?.trim()) {
+        this.autoFillProvisioningName();
+        // Get the updated data after auto-fill
+        clientData = this.newClient();
+        if (!clientData.name?.trim()) {
+          return; // Still empty after generation, should not happen but safety check
+        }
       }
-      if (clientData.keycloakClientSecret) {
-        createDto.keycloakClientSecret = clientData.keycloakClientSecret;
+
+      // Provisioning flow
+      if (
+        !clientData.name ||
+        !clientData.authenticationType ||
+        !this.selectedProvider() ||
+        !this.selectedServerType()
+      ) {
+        return;
       }
-      if (clientData.keycloakRealm) {
-        createDto.keycloakRealm = clientData.keycloakRealm;
+
+      const provisionDto: ProvisionServerDto = {
+        providerType: this.selectedProvider(),
+        serverType: this.selectedServerType(),
+        name: clientData.name,
+        authenticationType: clientData.authenticationType,
+      };
+
+      if (clientData.description) {
+        provisionDto.description = clientData.description;
       }
-    }
 
-    if (clientData.agentWsPort) {
-      createDto.agentWsPort = clientData.agentWsPort;
-    }
+      if (this.selectedLocation()) {
+        provisionDto.location = this.selectedLocation();
+      }
 
-    this.clientsFacade.createClient(createDto);
+      if (clientData.authenticationType === 'api_key' && clientData.apiKey) {
+        provisionDto.apiKey = clientData.apiKey;
+      }
 
-    // Subscribe to creation completion to close modal
-    this.clientsCreating$
-      .pipe(
-        filter((creating) => !creating),
-        take(1),
-        takeUntil(this.destroy$),
-      )
-      .subscribe(() => {
-        this.hideModal(this.addClientModal);
-        // Reset form
-        this.newClient.set({
-          name: '',
-          description: '',
-          endpoint: '',
-          authenticationType: undefined,
-          apiKey: undefined,
-          keycloakClientId: undefined,
-          keycloakClientSecret: undefined,
-          keycloakRealm: undefined,
-          agentWsPort: undefined,
+      if (clientData.authenticationType === 'keycloak') {
+        if (clientData.keycloakClientId) {
+          provisionDto.keycloakClientId = clientData.keycloakClientId;
+        }
+        if (clientData.keycloakClientSecret) {
+          provisionDto.keycloakClientSecret = clientData.keycloakClientSecret;
+        }
+        if (clientData.keycloakRealm) {
+          provisionDto.keycloakRealm = clientData.keycloakRealm;
+        }
+        if (clientData.keycloakAuthServerUrl) {
+          provisionDto.keycloakAuthServerUrl = clientData.keycloakAuthServerUrl;
+        }
+      }
+
+      if (clientData.agentWsPort) {
+        provisionDto.agentWsPort = clientData.agentWsPort;
+      }
+
+      // GIT configuration
+      if (clientData.gitRepositoryUrl) {
+        provisionDto.gitRepositoryUrl = clientData.gitRepositoryUrl;
+      }
+      if (clientData.gitUsername) {
+        provisionDto.gitUsername = clientData.gitUsername;
+      }
+      if (clientData.gitToken) {
+        provisionDto.gitToken = clientData.gitToken;
+      }
+      if (clientData.gitPassword) {
+        provisionDto.gitPassword = clientData.gitPassword;
+      }
+      if (clientData.gitPrivateKey) {
+        provisionDto.gitPrivateKey = clientData.gitPrivateKey;
+      }
+
+      // Cursor agent configuration
+      if (clientData.cursorApiKey) {
+        provisionDto.cursorApiKey = clientData.cursorApiKey;
+      }
+      if (clientData.agentDefaultImage) {
+        provisionDto.agentDefaultImage = clientData.agentDefaultImage;
+      }
+
+      this.clientsFacade.provisionServer(provisionDto);
+
+      // Subscribe to provisioning completion to close modal
+      this.provisioning$
+        .pipe(
+          filter((provisioning) => !provisioning),
+          take(1),
+          takeUntil(this.destroy$),
+        )
+        .subscribe(() => {
+          this.hideModal(this.addClientModal);
+          this.resetClientForm();
         });
-      });
+    } else {
+      // Manual client creation flow
+      if (!clientData.name || !clientData.endpoint || !clientData.authenticationType) {
+        return;
+      }
+
+      // Build the DTO, only including defined values
+      const createDto: CreateClientDto = {
+        name: clientData.name,
+        endpoint: clientData.endpoint,
+        authenticationType: clientData.authenticationType,
+      };
+
+      if (clientData.description) {
+        createDto.description = clientData.description;
+      }
+
+      if (clientData.authenticationType === 'api_key' && clientData.apiKey) {
+        createDto.apiKey = clientData.apiKey;
+      }
+
+      if (clientData.authenticationType === 'keycloak') {
+        if (clientData.keycloakClientId) {
+          createDto.keycloakClientId = clientData.keycloakClientId;
+        }
+        if (clientData.keycloakClientSecret) {
+          createDto.keycloakClientSecret = clientData.keycloakClientSecret;
+        }
+        if (clientData.keycloakRealm) {
+          createDto.keycloakRealm = clientData.keycloakRealm;
+        }
+      }
+
+      if (clientData.agentWsPort) {
+        createDto.agentWsPort = clientData.agentWsPort;
+      }
+
+      this.clientsFacade.createClient(createDto);
+
+      // Subscribe to creation completion to close modal
+      this.clientsCreating$
+        .pipe(
+          filter((creating) => !creating),
+          take(1),
+          takeUntil(this.destroy$),
+        )
+        .subscribe(() => {
+          this.hideModal(this.addClientModal);
+          this.resetClientForm();
+        });
+    }
+  }
+
+  private resetClientForm(): void {
+    this.newClient.set({
+      name: '',
+      description: '',
+      endpoint: '',
+      authenticationType: undefined,
+      apiKey: undefined,
+      keycloakClientId: undefined,
+      keycloakClientSecret: undefined,
+      keycloakRealm: undefined,
+      agentWsPort: undefined,
+    });
+    this.useProvisioning.set(false);
+    this.selectedProvider.set('');
+    this.selectedServerType.set('');
+    this.selectedLocation.set('');
   }
 
   onSubmitAddAgent(): void {
@@ -1372,6 +1595,71 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           agentType: undefined,
         });
       });
+  }
+
+  /**
+   * Generate a random cool name in DigitalOcean node naming style.
+   * Format: adjective-noun-number (e.g., "stellar-nova-42", "cosmic-dream-17")
+   */
+  private generateCoolName(): string {
+    const adjectives = [
+      'stellar',
+      'cosmic',
+      'quantum',
+      'nebula',
+      'galactic',
+      'stellar',
+      'lunar',
+      'solar',
+      'atomic',
+      'digital',
+      'virtual',
+      'cloud',
+      'azure',
+      'crimson',
+      'emerald',
+      'sapphire',
+      'amber',
+      'violet',
+      'silver',
+      'golden',
+    ];
+    const nouns = [
+      'nova',
+      'dream',
+      'leap',
+      'pulse',
+      'wave',
+      'stream',
+      'node',
+      'core',
+      'edge',
+      'flux',
+      'spark',
+      'beam',
+      'ray',
+      'star',
+      'moon',
+      'sun',
+      'orbit',
+      'comet',
+      'meteor',
+      'planet',
+    ];
+    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const number = Math.floor(Math.random() * 100);
+    return `${adjective}-${noun}-${number}`;
+  }
+
+  /**
+   * Auto-fill the client name with a generated cool name if provisioning is enabled and name is empty.
+   */
+  private autoFillProvisioningName(): void {
+    if (this.useProvisioning() && !this.newClient().name?.trim()) {
+      const generatedName = this.generateCoolName();
+      this.updateClientField('name', generatedName);
+    }
   }
 
   // Helper methods to update signal values for form binding
@@ -1557,6 +1845,22 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   }
 
   /**
+   * Format a price value to 2 decimal places with currency symbol
+   * @param price - The price value (can be number, string, null, or undefined)
+   * @returns Formatted price string (e.g., "10.50") or empty string if invalid
+   */
+  formatPrice(price: number | string | null | undefined): string {
+    if (price == null) {
+      return '';
+    }
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    if (isNaN(numPrice)) {
+      return '';
+    }
+    return numPrice.toFixed(2);
+  }
+
+  /**
    * Extract hostname and port from a URL string
    * @param url - The full URL string
    * @returns The hostname with port if present (e.g., "example.com:8080") or just hostname if no port, or the original string if parsing fails
@@ -1588,6 +1892,47 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     const clientToUse = client;
     const agentTypeInfo = clientToUse?.config?.agentTypes?.find((at) => at.type === agentType);
     return agentTypeInfo?.displayName || agentType;
+  }
+
+  /**
+   * Get the display name for a provisioning provider type.
+   * @param providerType - The provider type (e.g., 'hetzner')
+   * @param providers - Array of provisioning provider info
+   * @returns The display name (e.g., 'Hetzner Cloud') or null if not found
+   */
+  getProviderDisplayName(
+    providerType: string | undefined,
+    providers: Array<{ type: string; displayName: string }>,
+  ): string | null {
+    if (!providerType) {
+      return null;
+    }
+    const provider = providers.find((p) => p.type === providerType);
+    return provider?.displayName || null;
+  }
+
+  /**
+   * Get the provider display name observable for a client.
+   * @param clientId - The client ID
+   * @returns Observable of provider display name or null
+   */
+  getClientProviderDisplayName$(clientId: string): Observable<string | null> {
+    return this.provisioningProviders$.pipe(
+      switchMap((providers): Observable<string | null> => {
+        return this.clientsFacade.getServerInfo$(clientId).pipe(
+          map((serverInfo): string | null => {
+            if (!serverInfo || !serverInfo.providerType || !providers || providers.length === 0) {
+              return null;
+            }
+            const displayName = this.getProviderDisplayName(serverInfo.providerType, providers);
+            return displayName;
+          }),
+          // Handle errors gracefully - if serverInfo doesn't exist (404), return null
+          catchError(() => of(null as string | null)),
+        );
+      }),
+      startWith(null as string | null),
+    );
   }
 
   /**
