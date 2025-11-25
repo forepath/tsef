@@ -1369,6 +1369,10 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     if (enabled) {
       // Auto-fill name when provisioning is enabled
       this.autoFillProvisioningName();
+      // Set default WebSocket port to 8443 for provisioned servers
+      if (!this.newClient().agentWsPort) {
+        this.updateClientFieldNumber('agentWsPort', 8443);
+      }
     }
   }
 

@@ -133,7 +133,7 @@ export class HetznerProvider implements ProvisioningProvider {
         name: server.name,
         publicIp: serverInfo.publicIp,
         privateIp: serverInfo.privateIp,
-        endpoint: `http://${serverInfo.publicIp}:3000`,
+        endpoint: `https://${serverInfo.publicIp}:3000`,
         status: serverInfo.status,
         metadata: {
           location: server.datacenter.location.name,
@@ -313,6 +313,10 @@ log "Updating system packages..."
 apt-get update -qq
 apt-get upgrade -y -qq
 
+# Install openssl for SSL certificate generation
+log "Installing openssl..."
+apt-get install -y openssl
+
 # Install Docker using the convenience script
 # Official method: https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
 log "Installing prerequisites for Docker installation..."
@@ -359,6 +363,19 @@ docker pull ghcr.io/forepath/agenstra-manager-api:latest || {
 log "Creating agent-manager directory..."
 mkdir -p /opt/agent-manager
 
+# Generate self-signed SSL certificate for nginx
+log "Generating self-signed SSL certificate..."
+mkdir -p /opt/agent-manager/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\
+    -keyout /opt/agent-manager/ssl/nginx-selfsigned.key \\
+    -out /opt/agent-manager/ssl/nginx-selfsigned.crt \\
+    -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost" \\
+    -addext "subjectAltName=IP:127.0.0.1,DNS:localhost" 2>/dev/null || {
+    log "WARNING: Failed to generate SSL certificate, nginx will not work properly"
+}
+chmod 600 /opt/agent-manager/ssl/nginx-selfsigned.key
+chmod 644 /opt/agent-manager/ssl/nginx-selfsigned.crt
+
 # Create initial docker-compose.yml (will be overwritten by additional user data if provided)
 log "Creating initial docker-compose.yml..."
 cat > /opt/agent-manager/docker-compose.yml << 'DOCKER_COMPOSE_EOF'
@@ -396,15 +413,30 @@ services:
       DB_PASSWORD: postgres
       DB_DATABASE: postgres
       # Authentication, GIT, and cursor agent configuration will be added by additional user data
-    ports:
-      - "3000:3000"
-      - "8080:8080"
+    expose:
+      - "3000"
+      - "8080"
     volumes:
       # Mount Docker socket for Docker-in-Docker functionality
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - agent-manager-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: agent-manager-nginx
+    ports:
+      - "3000:3000"
+      - "8443:8443"
+    volumes:
+      - /opt/agent-manager/ssl:/etc/nginx/ssl:ro
+      - /opt/agent-manager/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend-agent-manager
     networks:
       - agent-manager-network
     restart: unless-stopped
@@ -431,6 +463,87 @@ if [ ! -f /opt/agent-manager/docker-compose.yml ]; then
     exit 1
 fi
 
+# Create nginx configuration
+log "Creating nginx configuration..."
+cat > /opt/agent-manager/nginx.conf << 'NGINX_CONF_EOF'
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream backend {
+        server backend-agent-manager:3000;
+    }
+
+    upstream websocket {
+        server backend-agent-manager:8080;
+    }
+
+    # HTTP to HTTPS redirect
+    server {
+        listen 80;
+        server_name _;
+        return 301 https://$host$request_uri;
+    }
+
+    # HTTPS server for API (port 3000)
+    server {
+        listen 3000 ssl http2;
+        server_name _;
+
+        ssl_certificate /etc/nginx/ssl/nginx-selfsigned.crt;
+        ssl_certificate_key /etc/nginx/ssl/nginx-selfsigned.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+
+        # API proxy
+        location /api/ {
+            proxy_pass http://backend;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        # Health check
+        location /health {
+            access_log off;
+            return 200 "healthy\\n";
+            add_header Content-Type text/plain;
+        }
+    }
+
+    # HTTPS server for Socket.IO WebSocket (port 8443)
+    server {
+        listen 8443 ssl http2;
+        server_name _;
+
+        ssl_certificate /etc/nginx/ssl/nginx-selfsigned.crt;
+        ssl_certificate_key /etc/nginx/ssl/nginx-selfsigned.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+
+        location ~* \\.io {
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $http_host;
+          proxy_set_header X-NginX-Proxy false;
+
+          proxy_pass http://websocket;
+          proxy_redirect off;
+
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+        }
+    }
+}
+NGINX_CONF_EOF
+
 # Start agent-manager container
 log "Starting agent-manager container..."
 cd /opt/agent-manager
@@ -448,9 +561,9 @@ log "Waiting for postgres to be healthy..."
 sleep 5
 
 # Verify containers are running
-if docker ps | grep -q agent-manager-postgres && docker ps | grep -q agent-manager-api; then
+if docker ps | grep -q agent-manager-postgres && docker ps | grep -q agent-manager-api && docker ps | grep -q agent-manager-nginx; then
     log "SUCCESS: All containers are running"
-    docker ps | grep -E "(agent-manager-postgres|agent-manager-api)"
+    docker ps | grep -E "(agent-manager-postgres|agent-manager-api|agent-manager-nginx)"
 else
     log "ERROR: One or more containers are not running"
     docker compose ps || true

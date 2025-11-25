@@ -97,6 +97,7 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const remote = io(remoteUrl, {
         transports: ['websocket'],
         extraHeaders: { Authorization: authHeader },
+        rejectUnauthorized: false,
       });
       // Wire remote->local: forward application events back to the original socket
       // SECURITY: Each remote socket connection is isolated to its specific local socket via closure.

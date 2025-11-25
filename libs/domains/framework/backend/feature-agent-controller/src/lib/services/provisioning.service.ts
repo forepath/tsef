@@ -110,6 +110,105 @@ export class ProvisioningService {
     return `
 # Configure agent-manager with authentication, GIT, and cursor agent configuration
 # Update docker-compose.yml with environment variables
+
+# Generate self-signed SSL certificate for nginx (if not already generated)
+if [ ! -f /opt/agent-manager/ssl/nginx-selfsigned.crt ]; then
+    log "Generating self-signed SSL certificate..."
+    mkdir -p /opt/agent-manager/ssl
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\
+        -keyout /opt/agent-manager/ssl/nginx-selfsigned.key \\
+        -out /opt/agent-manager/ssl/nginx-selfsigned.crt \\
+        -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost" \\
+        -addext "subjectAltName=IP:127.0.0.1,DNS:localhost" 2>/dev/null || {
+        log "WARNING: Failed to generate SSL certificate, nginx will not work properly"
+    }
+    chmod 600 /opt/agent-manager/ssl/nginx-selfsigned.key
+    chmod 644 /opt/agent-manager/ssl/nginx-selfsigned.crt
+fi
+
+# Create nginx configuration (if not already created)
+if [ ! -f /opt/agent-manager/nginx.conf ]; then
+    log "Creating nginx configuration..."
+    cat > /opt/agent-manager/nginx.conf << 'NGINX_CONF_EOF'
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream backend {
+        server backend-agent-manager:3000;
+    }
+
+    upstream websocket {
+        server backend-agent-manager:8080;
+    }
+
+    # HTTP to HTTPS redirect
+    server {
+        listen 80;
+        server_name _;
+        return 301 https://$host$request_uri;
+    }
+
+    # HTTPS server for API (port 3000)
+    server {
+        listen 3000 ssl http2;
+        server_name _;
+
+        ssl_certificate /etc/nginx/ssl/nginx-selfsigned.crt;
+        ssl_certificate_key /etc/nginx/ssl/nginx-selfsigned.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+
+        # API proxy
+        location /api/ {
+            proxy_pass http://backend;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        # Health check
+        location /health {
+            access_log off;
+            return 200 "healthy\\n";
+            add_header Content-Type text/plain;
+        }
+    }
+
+    # HTTPS server for Socket.IO WebSocket (port 8443)
+    server {
+        listen 8443 ssl http2;
+        server_name _;
+
+        ssl_certificate /etc/nginx/ssl/nginx-selfsigned.crt;
+        ssl_certificate_key /etc/nginx/ssl/nginx-selfsigned.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+
+        location ~* \\.io {
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $http_host;
+          proxy_set_header X-NginX-Proxy false;
+
+          proxy_pass http://websocket;
+          proxy_redirect off;
+
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+        }
+    }
+}
+NGINX_CONF_EOF
+fi
+
 cat > /opt/agent-manager/docker-compose.yml << 'DOCKER_COMPOSE_EOF'
 services:
   postgres:
@@ -150,15 +249,30 @@ ${
 ${allEnvVars.map((line) => `      ${line}`).join('\n')}`
     : ''
 }
-    ports:
-      - "3000:3000"
-      - "8080:8080"
+    expose:
+      - "3000"
+      - "8080"
     volumes:
       # Mount Docker socket for Docker-in-Docker functionality
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - agent-manager-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: agent-manager-nginx
+    ports:
+      - "3000:3000"
+      - "8443:8443"
+    volumes:
+      - /opt/agent-manager/ssl:/etc/nginx/ssl:ro
+      - /opt/agent-manager/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend-agent-manager
     networks:
       - agent-manager-network
     restart: unless-stopped
@@ -200,8 +314,8 @@ DOCKER_COMPOSE_EOF
       apiKey,
       provisionServerDto.authenticationType === AuthenticationType.KEYCLOAK
         ? {
-            clientId: provisionServerDto.keycloakClientId!,
-            clientSecret: provisionServerDto.keycloakClientSecret!,
+            clientId: provisionServerDto.keycloakClientId || '',
+            clientSecret: provisionServerDto.keycloakClientSecret || '',
             realm: provisionServerDto.keycloakRealm,
             authServerUrl: provisionServerDto.keycloakAuthServerUrl,
           }
@@ -248,7 +362,7 @@ DOCKER_COMPOSE_EOF
       keycloakClientId: provisionServerDto.keycloakClientId,
       keycloakClientSecret: provisionServerDto.keycloakClientSecret,
       keycloakRealm: provisionServerDto.keycloakRealm,
-      agentWsPort: provisionServerDto.agentWsPort || 8080,
+      agentWsPort: provisionServerDto.agentWsPort || 8443,
     });
 
     // Create provisioning reference

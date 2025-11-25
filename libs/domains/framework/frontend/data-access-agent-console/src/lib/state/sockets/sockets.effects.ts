@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
 import type { Environment } from '@forepath/framework/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { KeycloakService } from 'keycloak-angular';
-import { catchError, from, map, of, switchMap, tap, fromEvent, merge, Observable } from 'rxjs';
+import { catchError, from, fromEvent, map, merge, Observable, of, switchMap, tap } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import {
   connectSocket,
@@ -11,8 +11,8 @@ import {
   connectSocketSuccess,
   disconnectSocket,
   disconnectSocketSuccess,
-  forwardEventSuccess,
   forwardedEventReceived,
+  forwardEventSuccess,
   setClientSuccess,
   socketError,
 } from './sockets.actions';
@@ -100,6 +100,7 @@ export const connectSocket$ = createEffect(
             // Create socket connection
             socketInstance = io(websocketUrl, {
               transports: ['websocket'],
+              rejectUnauthorized: false,
               ...(authHeader && { extraHeaders: { Authorization: authHeader } }),
             });
 
