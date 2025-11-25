@@ -13,6 +13,9 @@ import {
   loadClientsFailure,
   loadClientsSuccess,
   loadClientSuccess,
+  loadServerInfo,
+  loadServerInfoFailure,
+  loadServerInfoSuccess,
   setActiveClient,
   setActiveClientFailure,
   setActiveClientSuccess,
@@ -21,7 +24,7 @@ import {
   updateClientSuccess,
 } from './clients.actions';
 import { clientsReducer, initialClientsState, type ClientsState } from './clients.reducer';
-import type { ClientResponseDto } from './clients.types';
+import type { ClientResponseDto, ServerInfo } from './clients.types';
 
 describe('clientsReducer', () => {
   const mockClient: ClientResponseDto = {
@@ -442,6 +445,122 @@ describe('clientsReducer', () => {
       expect(newState.activeClientId).toBeNull();
       expect(newState.entities).toEqual([mockClient, mockClient2]);
       expect(newState.selectedClient).toEqual(mockClient);
+    });
+  });
+
+  describe('loadServerInfo', () => {
+    it('should set loadingServerInfo to true for specific clientId', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        loadingServerInfo: {},
+      };
+
+      const newState = clientsReducer(state, loadServerInfo({ clientId: 'client-1' }));
+
+      expect(newState.loadingServerInfo['client-1']).toBe(true);
+      expect(newState.error).toBeNull();
+    });
+
+    it('should preserve loading state for other clients', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        loadingServerInfo: { 'client-2': true },
+      };
+
+      const newState = clientsReducer(state, loadServerInfo({ clientId: 'client-1' }));
+
+      expect(newState.loadingServerInfo['client-1']).toBe(true);
+      expect(newState.loadingServerInfo['client-2']).toBe(true);
+    });
+  });
+
+  describe('loadServerInfoSuccess', () => {
+    it('should set serverInfo for specific clientId and set loading to false', () => {
+      const mockServerInfo: ServerInfo = {
+        serverId: 'server-1',
+        serverName: 'Test Server',
+        publicIp: '1.2.3.4',
+        providerType: 'hetzner',
+      };
+      const state: ClientsState = {
+        ...initialClientsState,
+        loadingServerInfo: { 'client-1': true },
+        serverInfo: {},
+      };
+
+      const newState = clientsReducer(
+        state,
+        loadServerInfoSuccess({ clientId: 'client-1', serverInfo: mockServerInfo }),
+      );
+
+      expect(newState.serverInfo['client-1']).toEqual(mockServerInfo);
+      expect(newState.loadingServerInfo['client-1']).toBe(false);
+      expect(newState.error).toBeNull();
+    });
+
+    it('should preserve serverInfo for other clients', () => {
+      const existingServerInfo: ServerInfo = {
+        serverId: 'server-2',
+        providerType: 'hetzner',
+      };
+      const newServerInfo: ServerInfo = {
+        serverId: 'server-1',
+        providerType: 'hetzner',
+      };
+      const state: ClientsState = {
+        ...initialClientsState,
+        loadingServerInfo: { 'client-1': true, 'client-2': false },
+        serverInfo: { 'client-2': existingServerInfo },
+      };
+
+      const newState = clientsReducer(
+        state,
+        loadServerInfoSuccess({ clientId: 'client-1', serverInfo: newServerInfo }),
+      );
+
+      expect(newState.serverInfo['client-1']).toEqual(newServerInfo);
+      expect(newState.serverInfo['client-2']).toEqual(existingServerInfo);
+    });
+  });
+
+  describe('loadServerInfoFailure', () => {
+    it('should set loadingServerInfo to false for specific clientId', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        loadingServerInfo: { 'client-1': true, 'client-2': true },
+      };
+
+      const newState = clientsReducer(state, loadServerInfoFailure({ clientId: 'client-1', error: 'Load failed' }));
+
+      expect(newState.loadingServerInfo['client-1']).toBe(false);
+      expect(newState.loadingServerInfo['client-2']).toBe(true); // Other client still loading
+      expect(newState.error).toBe('Load failed');
+    });
+
+    it('should preserve existing error state when error is empty (404 case)', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        loadingServerInfo: { 'client-1': true },
+        error: 'Previous error',
+      };
+
+      const newState = clientsReducer(state, loadServerInfoFailure({ clientId: 'client-1', error: '' }));
+
+      expect(newState.loadingServerInfo['client-1']).toBe(false);
+      expect(newState.error).toBe('Previous error'); // Preserved
+    });
+
+    it('should set error when error message is provided', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        loadingServerInfo: { 'client-1': true },
+        error: null,
+      };
+
+      const newState = clientsReducer(state, loadServerInfoFailure({ clientId: 'client-1', error: 'Network error' }));
+
+      expect(newState.loadingServerInfo['client-1']).toBe(false);
+      expect(newState.error).toBe('Network error');
     });
   });
 });

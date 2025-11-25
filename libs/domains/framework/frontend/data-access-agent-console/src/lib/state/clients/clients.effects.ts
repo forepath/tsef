@@ -1,7 +1,7 @@
-import { inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, exhaustMap, map, of, switchMap } from 'rxjs';
+import { catchError, exhaustMap, map, mergeMap, of, switchMap } from 'rxjs';
 import { ClientsService } from '../../services/clients.service';
 import {
   createClient,
@@ -239,7 +239,7 @@ export const loadServerInfo$ = createEffect(
   (actions$ = inject(Actions), clientsService = inject(ClientsService)) => {
     return actions$.pipe(
       ofType(loadServerInfo),
-      exhaustMap(({ clientId }) =>
+      mergeMap(({ clientId }) =>
         clientsService.getServerInfo(clientId).pipe(
           map((serverInfo) => loadServerInfoSuccess({ clientId, serverInfo })),
           catchError((error) => {
@@ -247,10 +247,10 @@ export const loadServerInfo$ = createEffect(
             if (error instanceof HttpErrorResponse && error.status === 404) {
               // Silently ignore 404 - client doesn't have provisioning
               // Don't set error state, just mark loading as complete
-              return of(loadServerInfoFailure({ error: '' }));
+              return of(loadServerInfoFailure({ clientId, error: '' }));
             }
             // For other errors, set the error message
-            return of(loadServerInfoFailure({ error: normalizeError(error) }));
+            return of(loadServerInfoFailure({ clientId, error: normalizeError(error) }));
           }),
         ),
       ),

@@ -278,12 +278,9 @@ export const clientsReducer = createReducer(
     loadingServerInfo: { ...state.loadingServerInfo, [clientId]: false },
     error: null,
   })),
-  on(loadServerInfoFailure, (state, { error }) => ({
+  on(loadServerInfoFailure, (state, { clientId, error }) => ({
     ...state,
-    loadingServerInfo: Object.keys(state.loadingServerInfo).reduce(
-      (acc, key) => ({ ...acc, [key]: false }),
-      {} as Record<string, boolean>,
-    ),
+    loadingServerInfo: { ...state.loadingServerInfo, [clientId]: false },
     // Only set error state if error message is not empty (404 errors are handled gracefully)
     // If error is empty (404 case), preserve existing error state; otherwise set new error
     error: error ? error : state.error,

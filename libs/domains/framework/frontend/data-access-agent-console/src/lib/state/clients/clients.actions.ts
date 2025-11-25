@@ -109,7 +109,10 @@ export const loadServerInfoSuccess = createAction(
   props<{ clientId: string; serverInfo: ServerInfo }>(),
 );
 
-export const loadServerInfoFailure = createAction('[Clients] Load Server Info Failure', props<{ error: string }>());
+export const loadServerInfoFailure = createAction(
+  '[Clients] Load Server Info Failure',
+  props<{ clientId: string; error: string }>(),
+);
 
 export const deleteProvisionedServer = createAction(
   '[Clients] Delete Provisioned Server',
