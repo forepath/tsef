@@ -238,10 +238,14 @@ describe('ClientsController', () => {
 
   describe('deleteClient', () => {
     it('should delete client', async () => {
+      provisioningService.deleteProvisionedServer.mockRejectedValue(
+        new BadRequestException('No provisioning reference for client'),
+      );
       service.remove.mockResolvedValue(undefined);
 
       await controller.deleteClient('test-uuid');
 
+      expect(provisioningService.deleteProvisionedServer).toHaveBeenCalledWith('test-uuid');
       expect(service.remove).toHaveBeenCalledWith('test-uuid');
     });
   });
