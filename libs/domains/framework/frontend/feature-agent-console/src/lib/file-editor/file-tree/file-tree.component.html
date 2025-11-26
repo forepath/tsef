@@ -114,6 +114,15 @@
       }
     }
   </div>
+
+  @if (clientRepositoryName$ | async; as repoName) {
+    <div class="file-tree-repo px-2 py-1 border-top bg-body-tertiary">
+      <small class="text-muted d-flex align-items-center gap-2 text-truncate" [title]="repoName">
+        <i class="bi bi-git me-1"></i>
+        <span class="text-truncate">{{ repoName }}</span>
+      </small>
+    </div>
+  }
 </div>
 
 <!-- Tree Node Template -->
