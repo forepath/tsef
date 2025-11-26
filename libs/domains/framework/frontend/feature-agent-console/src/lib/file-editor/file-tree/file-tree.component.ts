@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { FilesFacade, type FileNodeDto } from '@forepath/framework/frontend/data-access-agent-console';
+import { ClientsFacade, FilesFacade, type FileNodeDto } from '@forepath/framework/frontend/data-access-agent-console';
 import { combineLatest, filter, map, Observable, of, Subscription, switchMap, take } from 'rxjs';
 
 interface TreeNode {
@@ -37,6 +37,7 @@ interface TreeNode {
 })
 export class FileTreeComponent implements OnInit {
   private readonly filesFacade = inject(FilesFacade);
+  private readonly clientsFacade = inject(ClientsFacade);
   private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('deleteFileModal', { static: false })
@@ -124,6 +125,16 @@ export class FileTreeComponent implements OnInit {
         }),
       );
     }),
+  );
+
+  readonly clientRepositoryName$: Observable<string | null> = toObservable(this.clientId).pipe(
+    switchMap((clientId) => {
+      if (!clientId) {
+        return of(null);
+      }
+      return this.clientsFacade.getClientById$(clientId);
+    }),
+    map((client) => this.parseGitRepository(client?.config?.gitRepositoryUrl)),
   );
 
   // Helper to get directory listing observable
@@ -963,6 +974,43 @@ export class FileTreeComponent implements OnInit {
     // Update cache and rebuild tree immediately to reflect the removal
     this.treeCache.set(cache);
     this.rebuildTree();
+  }
+
+  /**
+   * Parse git repository URL to extract owner/repo
+   */
+  parseGitRepository(gitUrl: string | null | undefined): string | null {
+    if (!gitUrl) {
+      return null;
+    }
+
+    try {
+      if (gitUrl.startsWith('http://') || gitUrl.startsWith('https://')) {
+        const urlObj = new URL(gitUrl);
+        const pathParts = urlObj.pathname.split('/').filter((part) => part.length > 0);
+        if (pathParts.length >= 2) {
+          const owner = pathParts[0];
+          const repo = pathParts[1].replace(/\.git$/, '');
+          return `${owner}/${repo}`;
+        }
+      }
+
+      if (gitUrl.startsWith('git@')) {
+        const match = gitUrl.match(/git@[^:]+:(.+?)(?:\.git)?$/);
+        if (match && match[1]) {
+          return match[1];
+        }
+      }
+
+      const match = gitUrl.match(/(?:[/:])([^/]+)\/([^/]+?)(?:\.git)?$/);
+      if (match && match[1] && match[2]) {
+        return `${match[1]}/${match[2]}`;
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
   }
 
   findNodeByPath(path: string): TreeNode | null {
