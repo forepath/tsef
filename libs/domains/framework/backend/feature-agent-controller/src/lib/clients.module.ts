@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClientsController } from './clients.controller';
+import { ClientsVcsController } from './clients-vcs.controller';
 import { ClientEntity } from './entities/client.entity';
 import { ClientsRepository } from './repositories/clients.repository';
 import { ClientAgentCredentialEntity } from './entities/client-agent-credential.entity';
@@ -9,6 +10,7 @@ import { ClientAgentCredentialsService } from './services/client-agent-credentia
 import { ClientsGateway } from './clients.gateway';
 import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
+import { ClientAgentVcsProxyService } from './services/client-agent-vcs-proxy.service';
 import { ClientsService } from './services/clients.service';
 import { KeycloakTokenService } from './services/keycloak-token.service';
 import { ProvisioningService } from './services/provisioning.service';
@@ -23,13 +25,14 @@ import { ProvisioningReferencesRepository } from './repositories/provisioning-re
  */
 @Module({
   imports: [TypeOrmModule.forFeature([ClientEntity, ClientAgentCredentialEntity, ProvisioningReferenceEntity])],
-  controllers: [ClientsController],
+  controllers: [ClientsController, ClientsVcsController],
   providers: [
     ClientsService,
     ClientsRepository,
     KeycloakTokenService,
     ClientAgentProxyService,
     ClientAgentFileSystemProxyService,
+    ClientAgentVcsProxyService,
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,
     ClientsGateway,
@@ -52,6 +55,7 @@ import { ProvisioningReferencesRepository } from './repositories/provisioning-re
     KeycloakTokenService,
     ClientAgentProxyService,
     ClientAgentFileSystemProxyService,
+    ClientAgentVcsProxyService,
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,
     ClientsGateway,

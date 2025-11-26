@@ -1,0 +1,171 @@
+sequenceDiagram
+    participant Client as HTTP Client
+    participant API as AgentsVcsController<br/>(/api/agents/:id/vcs)
+    participant VcsService as AgentsVcsService
+    participant AgentService as AgentsService
+    participant Docker as DockerService
+    participant Container as Agent Container<br/>(/app)
+
+    Note over Client,Container: HTTP API - Agent VCS Operations
+
+    rect rgb(230, 240, 255)
+        Note over Client,Container: Get Git Status
+        Client->>API: GET /api/agents/{id}/vcs/status
+        API->>VcsService: getStatus(agentId)
+        VcsService->>AgentService: findOne(agentId)
+        AgentService-->>VcsService: agent entity
+        VcsService->>Docker: sendCommandToContainer(containerId, "git status --porcelain")
+        Docker->>Container: Execute git status
+        Container-->>Docker: status output
+        Docker-->>VcsService: output string
+        VcsService->>Docker: sendCommandToContainer(containerId, "git branch --show-current")
+        Docker->>Container: Execute git branch
+        Container-->>Docker: branch name
+        Docker-->>VcsService: branch name
+        VcsService->>Docker: sendCommandToContainer(containerId, "git rev-list --count @{u}..HEAD")
+        Docker->>Container: Execute git rev-list
+        Container-->>Docker: ahead count
+        Docker-->>VcsService: ahead count
+        VcsService->>VcsService: parse status output to GitStatusDto
+        VcsService-->>API: GitStatusDto
+        API-->>Client: 200 OK<br/>{status, branches, files}
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Client,Container: List Branches
+        Client->>API: GET /api/agents/{id}/vcs/branches
+        API->>VcsService: getBranches(agentId)
+        VcsService->>AgentService: findOne(agentId)
+        AgentService-->>VcsService: agent entity
+        VcsService->>Docker: sendCommandToContainer(containerId, "git branch -a")
+        Docker->>Container: Execute git branch
+        Container-->>Docker: branch list
+        Docker-->>VcsService: branch list
+        VcsService->>VcsService: parse branches to GitBranchDto[]
+        VcsService-->>API: GitBranchDto[]
+        API-->>Client: 200 OK<br/>[branches]
+    end
+
+    rect rgb(255, 240, 240)
+        Note over Client,Container: Get File Diff
+        Client->>API: GET /api/agents/{id}/vcs/diff?path={filePath}
+        API->>VcsService: getFileDiff(agentId, filePath)
+        VcsService->>AgentService: findOne(agentId)
+        AgentService-->>VcsService: agent entity
+        VcsService->>Docker: sendCommandToContainer(containerId, "git diff --no-color {filePath}")
+        Docker->>Container: Execute git diff
+        Container-->>Docker: diff output
+        Docker-->>VcsService: diff output
+        alt Binary file detected
+            VcsService->>Docker: sendCommandToContainer(containerId, "stat -c%s {filePath}")
+            Docker->>Container: Execute stat
+            Container-->>Docker: file size
+            Docker-->>VcsService: file size
+            VcsService->>VcsService: create GitDiffDto with size info only
+        else Text file
+            VcsService->>VcsService: parse diff, encode content to base64
+            VcsService->>VcsService: create GitDiffDto with content
+        end
+        VcsService-->>API: GitDiffDto
+        API-->>Client: 200 OK<br/>{diff}
+    end
+
+    rect rgb(255, 255, 230)
+        Note over Client,Container: Stage Files
+        Client->>API: POST /api/agents/{id}/vcs/stage<br/>{files: []}
+        API->>VcsService: stageFiles(agentId, files)
+        VcsService->>AgentService: findOne(agentId)
+        AgentService-->>VcsService: agent entity
+        alt files.length === 0
+            VcsService->>Docker: sendCommandToContainer(containerId, "git add -A")
+        else
+            VcsService->>Docker: sendCommandToContainer(containerId, "git add {files}")
+        end
+        Docker->>Container: Execute git add
+        Container-->>Docker: success
+        Docker-->>VcsService: success
+        VcsService-->>API: void
+        API-->>Client: 204 No Content
+    end
+
+    rect rgb(255, 230, 255)
+        Note over Client,Container: Commit Changes
+        Client->>API: POST /api/agents/{id}/vcs/commit<br/>{message: "..."}
+        API->>VcsService: commit(agentId, message)
+        VcsService->>AgentService: findOne(agentId)
+        AgentService-->>VcsService: agent entity
+        VcsService->>VcsService: get commit author from ENV (GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL)
+        VcsService->>Docker: sendCommandToContainer(containerId, "git -c user.name='{name}' -c user.email='{email}' commit -m '{message}'")
+        Docker->>Container: Execute git commit
+        Container-->>Docker: success
+        Docker-->>VcsService: success
+        VcsService-->>API: void
+        API-->>Client: 204 No Content
+    end
+
+    rect rgb(240, 230, 255)
+        Note over Client,Container: Push Changes
+        Client->>API: POST /api/agents/{id}/vcs/push<br/>{force?: boolean}
+        API->>VcsService: push(agentId, force)
+        VcsService->>AgentService: findOne(agentId)
+        AgentService-->>VcsService: agent entity
+        VcsService->>Docker: sendCommandToContainer(containerId, "git push [--force-with-lease] [-u] origin {branch}")
+        Docker->>Container: Execute git push<br/>(uses .netrc or SSH key)
+        Container-->>Docker: success
+        Docker-->>VcsService: success
+        VcsService-->>API: void
+        API-->>Client: 204 No Content
+    end
+
+    rect rgb(230, 255, 240)
+        Note over Client,Container: Create Branch
+        Client->>API: POST /api/agents/{id}/vcs/branches<br/>{name, useConventionalPrefix, conventionalType}
+        API->>VcsService: createBranch(agentId, dto)
+        VcsService->>AgentService: findOne(agentId)
+        AgentService-->>VcsService: agent entity
+        VcsService->>VcsService: build branch name with prefix if needed
+        VcsService->>Docker: sendCommandToContainer(containerId, "git checkout -b {branchName}")
+        Docker->>Container: Execute git checkout
+        Container-->>Docker: success
+        Docker-->>VcsService: success
+        VcsService-->>API: void
+        API-->>Client: 201 Created
+    end
+
+    rect rgb(255, 240, 230)
+        Note over Client,Container: Switch Branch
+        Client->>API: POST /api/agents/{id}/vcs/branches/{branch}/switch
+        API->>VcsService: switchBranch(agentId, branch)
+        VcsService->>AgentService: findOne(agentId)
+        AgentService-->>VcsService: agent entity
+        VcsService->>Docker: sendCommandToContainer(containerId, "git checkout {branch}")
+        Docker->>Container: Execute git checkout
+        Container-->>Docker: success
+        Docker-->>VcsService: success
+        VcsService-->>API: void
+        API-->>Client: 204 No Content
+    end
+
+    rect rgb(240, 240, 255)
+        Note over Client,Container: Resolve Conflict
+        Client->>API: POST /api/agents/{id}/vcs/conflicts/resolve<br/>{path, strategy}
+        API->>VcsService: resolveConflict(agentId, dto)
+        VcsService->>AgentService: findOne(agentId)
+        AgentService-->>VcsService: agent entity
+        alt strategy === 'yours'
+            VcsService->>Docker: sendCommandToContainer(containerId, "git checkout --theirs {path}")
+        else if strategy === 'mine'
+            VcsService->>Docker: sendCommandToContainer(containerId, "git checkout --ours {path}")
+        else if strategy === 'both'
+            VcsService->>Docker: sendCommandToContainer(containerId, "git checkout --conflict=diff3 {path}")
+        end
+        Docker->>Container: Execute git checkout
+        Container-->>Docker: success
+        Docker-->>VcsService: success
+        VcsService->>Docker: sendCommandToContainer(containerId, "git add {path}")
+        Docker->>Container: Execute git add
+        Container-->>Docker: success
+        Docker-->>VcsService: success
+        VcsService-->>API: void
+        API-->>Client: 204 No Content
+    end

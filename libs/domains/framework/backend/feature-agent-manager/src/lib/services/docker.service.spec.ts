@@ -1065,16 +1065,32 @@ describe('DockerService', () => {
 
     it('should handle file not found error from stderr', async () => {
       mockContainer.inspect.mockResolvedValue({});
+      let endCallback: (() => void) | undefined;
+      let closeCallback: (() => void) | undefined;
+      mockStream.on = jest.fn((event: string, callback: () => void) => {
+        if (event === 'end') {
+          endCallback = callback;
+        } else if (event === 'close') {
+          closeCallback = callback;
+        }
+        return mockStream;
+      });
       mockContainer.modem.demuxStream = jest.fn((stream, stdout, stderr) => {
         setTimeout(() => {
           stderr.write(Buffer.from('cat: /app/nonexistent.txt: No such file or directory'));
           stdout.end();
           stderr.end();
+          if (endCallback) {
+            endCallback();
+          }
+          if (closeCallback) {
+            closeCallback();
+          }
         }, 5);
       });
 
       await expect(service.readFileFromContainer(containerId, '/app/nonexistent.txt')).rejects.toThrow(
-        'File not found',
+        /File not found/,
       );
     });
 

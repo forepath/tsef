@@ -19,6 +19,7 @@ import {
   getSocketInstance,
   moveFileOrDirectorySuccess,
   SocketsFacade,
+  VcsFacade,
   type CreateFileDto,
   type FileContentDto,
   type FileUpdateNotificationData,
@@ -27,13 +28,22 @@ import {
 } from '@forepath/framework/frontend/data-access-agent-console';
 import { Actions, ofType } from '@ngrx/effects';
 import { combineLatest, debounceTime, filter, map, Observable, of, Subject, switchMap, take } from 'rxjs';
+import { GitDiffViewerComponent } from './git-diff-viewer/git-diff-viewer.component';
+import { GitManagerComponent } from './git-manager/git-manager.component';
 import { FileTreeComponent } from './file-tree/file-tree.component';
 import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-editor-wrapper.component';
 import { TerminalComponent } from './terminal/terminal.component';
 
 @Component({
   selector: 'framework-file-editor',
-  imports: [CommonModule, FileTreeComponent, MonacoEditorWrapperComponent, TerminalComponent],
+  imports: [
+    CommonModule,
+    FileTreeComponent,
+    MonacoEditorWrapperComponent,
+    TerminalComponent,
+    GitManagerComponent,
+    GitDiffViewerComponent,
+  ],
   templateUrl: './file-editor.component.html',
   styleUrls: ['./file-editor.component.scss'],
   standalone: true,
@@ -41,6 +51,7 @@ import { TerminalComponent } from './terminal/terminal.component';
 export class FileEditorComponent implements OnDestroy, AfterViewInit {
   private readonly filesFacade = inject(FilesFacade);
   private readonly socketsFacade = inject(SocketsFacade);
+  private readonly vcsFacade = inject(VcsFacade);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actions$ = inject(Actions);
   private readonly location = inject(Location);
@@ -69,6 +80,9 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
   // Visibility toggles (exposed for parent component access)
   readonly fileTreeVisible = signal<boolean>(true);
   readonly terminalVisible = signal<boolean>(false);
+  readonly gitManagerVisible = signal<boolean>(false);
+  readonly gitDiffViewerVisible = signal<boolean>(false);
+  readonly gitDiffFilePath = signal<string | null>(null);
   readonly autosaveEnabled = signal<boolean>(false);
 
   // Outputs
@@ -236,6 +250,13 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
       const currentSelectedPath = this.selectedFilePath();
       const clientId = this.clientId();
       const agentId = this.agentId();
+
+      // Reload git status after file move
+      if (clientId === action.clientId && agentId === action.agentId) {
+        setTimeout(() => {
+          this.vcsFacade.loadStatus(clientId, agentId);
+        }, 500);
+      }
 
       // Check if the moved file is currently selected
       if (currentSelectedPath === action.sourcePath && clientId === action.clientId && agentId === action.agentId) {
@@ -425,7 +446,9 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
   onSave(): void {
     const filePath = this.selectedFilePath();
-    if (!filePath || !this.clientId() || !this.agentId()) {
+    const clientId = this.clientId();
+    const agentId = this.agentId();
+    if (!filePath || !clientId || !agentId) {
       return;
     }
 
@@ -499,6 +522,11 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
           return newSaved;
         });
 
+        // Reload git status after file save
+        setTimeout(() => {
+          this.vcsFacade.loadStatus(clientId, agentId);
+        }, 300);
+
         // Emit file update notification to other clients after successful save
         // agentId is required for routing the event to the correct agent
         const agentId = this.agentId();
@@ -563,6 +591,11 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     // Refresh directory listing
     this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: event.path });
 
+    // Reload git status after file creation
+    setTimeout(() => {
+      this.vcsFacade.loadStatus(this.clientId(), this.agentId());
+    }, 500);
+
     // If it's a file, select it
     if (event.type === 'file') {
       setTimeout(() => {
@@ -594,6 +627,11 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
     // Refresh root directory listing
     this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: '.' });
+
+    // Reload git status after file deletion
+    setTimeout(() => {
+      this.vcsFacade.loadStatus(this.clientId(), this.agentId());
+    }, 500);
   }
 
   onDirectoryExpand(path: string | Event): void {
@@ -946,6 +984,20 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     this.terminalVisible.update((visible) => !visible);
   }
 
+  onToggleGitManager(): void {
+    this.gitManagerVisible.update((visible) => !visible);
+  }
+
+  onShowGitDiff(filePath: string): void {
+    this.gitDiffFilePath.set(filePath);
+    this.gitDiffViewerVisible.set(true);
+  }
+
+  onCloseGitDiff(): void {
+    this.gitDiffViewerVisible.set(false);
+    this.gitDiffFilePath.set(null);
+  }
+
   onToggleChat(): void {
     this.chatToggleRequested.emit();
   }
@@ -1079,6 +1131,11 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     }
     this.showFileUpdateModal.set(false);
     this.fileUpdateNotification.set(null);
+
+    // Reload git status after accepting file update
+    setTimeout(() => {
+      this.vcsFacade.loadStatus(clientId, agentId);
+    }, 500);
   }
 
   /**

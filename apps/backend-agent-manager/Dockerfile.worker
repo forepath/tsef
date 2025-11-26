@@ -45,5 +45,11 @@ ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
 # Install nx globally
 RUN npm install -g nx
 
+# Install curl with .netrc support
+RUN echo "deb http://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list \
+  && apt-get update \
+  && apt-get install -y -t bookworm curl --reinstall \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Keep container running (use docker exec to get bash session)
 CMD [ "tail", "-f", "/dev/null" ]

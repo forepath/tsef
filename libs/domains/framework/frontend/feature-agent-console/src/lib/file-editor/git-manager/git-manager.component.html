@@ -1,0 +1,222 @@
+<div class="git-manager-container d-flex flex-column h-100">
+  <div class="git-manager-header p-2 border-bottom bg-body-tertiary">
+    <div class="d-flex justify-content-between align-items-center">
+      <h6 class="mb-0 fw-semibold">Version Control</h6>
+      <div class="btn-group btn-group-sm" role="group">
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-outline-secondary]="!(fetchError$ | async)"
+          [class.btn-danger]="fetchError$ | async"
+          (click)="onFetch()"
+          [disabled]="(fetching$ | async) || (fetchError$ | async) || (anyError$ | async)"
+          title="Fetch from remote"
+        >
+          @if (fetching$ | async) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+          } @else if (fetchError$ | async) {
+            <i class="bi bi-x-circle"></i>
+          } @else {
+            <i class="bi bi-download"></i>
+          }
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-outline-secondary]="!(pullError$ | async)"
+          [class.btn-danger]="pullError$ | async"
+          (click)="onPull()"
+          [disabled]="(pulling$ | async) || (pullError$ | async) || (anyError$ | async)"
+          title="Pull from remote"
+        >
+          @if (pulling$ | async) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+          } @else if (pullError$ | async) {
+            <i class="bi bi-x-circle"></i>
+          } @else {
+            <i class="bi bi-arrow-down-circle"></i>
+          }
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-outline-secondary]="!(pushError$ | async)"
+          [class.btn-danger]="pushError$ | async"
+          (click)="onPush()"
+          [disabled]="
+            (pushing$ | async) || (pushError$ | async) || (anyError$ | async) || !(hasUnpushedCommits$ | async)
+          "
+          title="Push to remote"
+        >
+          @if (pushing$ | async) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+          } @else if (pushError$ | async) {
+            <i class="bi bi-x-circle"></i>
+          } @else {
+            <i class="bi bi-arrow-up-circle"></i>
+          }
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          (click)="onForcePush()"
+          [disabled]="(pushing$ | async) || (pushError$ | async) || (anyError$ | async)"
+          title="Force push (--force-with-lease)"
+        >
+          <i class="bi bi-lightning-charge"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="git-manager-content flex-grow-1 overflow-auto">
+    @if (showLoadingSpinner$ | async) {
+      <div class="d-flex justify-content-center align-items-center p-4">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    } @else {
+      @if (status$ | async; as status) {
+        @if (status.isClean && !status.hasUnpushedCommits) {
+          <div class="text-center text-muted p-4">
+            <i class="bi bi-check-circle fs-4 d-block mb-2 text-success"></i>
+            <p class="mb-0 small">Working tree is clean</p>
+          </div>
+        } @else {
+          <!-- Commit Section -->
+          @if ((stagedFiles$ | async)?.length && (stagedFiles$ | async)!.length > 0) {
+            <div
+              class="git-section-header px-2 py-1 border-bottom bg-body-tertiary"
+              [class.border-top]="hasCommitTopBorder$ | async"
+            >
+              <label for="commitMessage" class="form-label fw-semibold small mb-0">Commit Message</label>
+            </div>
+            <div class="px-2 pt-3 pb-3">
+              <div class="input-group mb-2">
+                <textarea
+                  class="form-control form-control-sm"
+                  id="commitMessage"
+                  rows="3"
+                  [(ngModel)]="commitMessage"
+                  placeholder="Enter commit message..."
+                  (keydown.ctrl.enter)="onCommit()"
+                  (keydown.meta.enter)="onCommit()"
+                ></textarea>
+              </div>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary w-100"
+                (click)="onCommit()"
+                [disabled]="!commitMessage().trim() || (isAnyOperationInProgress$ | async)"
+              >
+                @if (committing$ | async) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                }
+                Commit Changes
+              </button>
+            </div>
+          }
+
+          <!-- Staged Changes -->
+          @if (stagedFiles$ | async; as stagedFiles) {
+            @if (stagedFiles.length > 0) {
+              <div
+                class="git-section-header px-2 py-1 border-bottom bg-body-tertiary"
+                [class.border-top]="hasStagedTopBorder$ | async"
+              >
+                <div class="d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0 fw-semibold text-success small">
+                    <i class="bi bi-check-circle me-1"></i>Staged Changes
+                  </h6>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary py-0 px-2"
+                    (click)="onUnstageAll()"
+                    [disabled]="isAnyOperationInProgress$ | async"
+                    title="Unstage all"
+                  >
+                    Unstage All
+                  </button>
+                </div>
+              </div>
+              <div class="git-file-list p-2">
+                @for (file of stagedFiles; track file.path) {
+                  <div class="git-file-item d-flex align-items-center rounded" (click)="onFileClick(file.path)">
+                    <div class="git-file-content d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                      <i class="bi git-file-icon" [ngClass]="[getStatusIcon(file)]"></i>
+                      <span class="git-file-name text-truncate" [title]="file.path">{{ file.path }}</span>
+                      @if (file.isBinary) {
+                        <span class="badge bg-secondary badge-sm">Binary</span>
+                      }
+                    </div>
+                    <div class="btn-group btn-group-sm ms-2" role="group">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary py-0 px-1"
+                        (click)="onUnstageFile(file.path); $event.stopPropagation()"
+                        [disabled]="isAnyOperationInProgress$ | async"
+                        title="Unstage"
+                      >
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          <!-- Unstaged Changes -->
+          @if (unstagedFiles$ | async; as unstagedFiles) {
+            @if (unstagedFiles.length > 0) {
+              <div
+                class="git-section-header px-2 py-1 border-bottom bg-body-tertiary"
+                [class.border-top]="hasUnstagedTopBorder$ | async"
+              >
+                <div class="d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0 fw-semibold text-warning small">
+                    <i class="bi bi-exclamation-circle me-1"></i>Unstaged Changes
+                  </h6>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary py-0 px-2"
+                    (click)="onStageAll()"
+                    [disabled]="isAnyOperationInProgress$ | async"
+                    title="Stage all"
+                  >
+                    Stage All
+                  </button>
+                </div>
+              </div>
+              <div class="git-file-list p-2">
+                @for (file of unstagedFiles; track file.path) {
+                  <div class="git-file-item d-flex align-items-center rounded" (click)="onFileClick(file.path)">
+                    <div class="git-file-content d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                      <i class="bi git-file-icon" [ngClass]="[getStatusIcon(file)]"></i>
+                      <span class="git-file-name text-truncate" [title]="file.path">{{ file.path }}</span>
+                      @if (file.isBinary) {
+                        <span class="badge bg-secondary badge-sm">Binary</span>
+                      }
+                    </div>
+                    <div class="btn-group btn-group-sm ms-2" role="group">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-success py-0 px-1"
+                        (click)="onStageFile(file.path); $event.stopPropagation()"
+                        [disabled]="isAnyOperationInProgress$ | async"
+                        title="Stage"
+                      >
+                        <i class="bi bi-plus-circle"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        }
+      }
+    }
+  </div>
+</div>

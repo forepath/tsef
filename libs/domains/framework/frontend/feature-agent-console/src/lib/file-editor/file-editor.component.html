@@ -1,18 +1,39 @@
 <div class="file-editor-container d-flex h-100">
-  <!-- File Tree Sidebar -->
-  <div class="file-tree-sidebar border-end" [class.d-none]="!fileTreeVisible()">
+  <!-- File Tree Sidebar with Git Manager below -->
+  <div class="file-tree-sidebar border-end d-flex flex-column" [class.d-none]="!fileTreeVisible()">
     @if (clientId() && agentId()) {
-      <framework-file-tree
-        [clientId]="clientId()!"
-        [agentId]="agentId()!"
-        [expandedPaths]="expandedPaths()"
-        [selectedPath]="selectedFilePath()"
-        (fileSelect)="onFileSelect($event)"
-        (fileCreate)="onFileCreate($event)"
-        (fileDelete)="onFileDelete($event)"
-        (directoryExpand)="onDirectoryExpand($event)"
-        (directoryCollapse)="onDirectoryCollapse($event)"
-      ></framework-file-tree>
+      <!-- File Tree -->
+      <div
+        class="file-tree-wrapper"
+        [class.flex-grow-1]="!gitManagerVisible()"
+        [style.flex-basis]="gitManagerVisible() ? '60%' : '100%'"
+      >
+        <framework-file-tree
+          [clientId]="clientId()!"
+          [agentId]="agentId()!"
+          [expandedPaths]="expandedPaths()"
+          [selectedPath]="selectedFilePath()"
+          [gitManagerVisible]="gitManagerVisible()"
+          (fileSelect)="onFileSelect($event)"
+          (fileCreate)="onFileCreate($event)"
+          (fileDelete)="onFileDelete($event)"
+          (directoryExpand)="onDirectoryExpand($event)"
+          (directoryCollapse)="onDirectoryCollapse($event)"
+          (toggleGitManager)="onToggleGitManager()"
+        ></framework-file-tree>
+      </div>
+
+      <!-- Git Manager below File Tree -->
+      @if (gitManagerVisible()) {
+        <div class="git-manager-wrapper border-top" style="flex-basis: 50%; min-height: 200px">
+          <framework-git-manager
+            [clientId]="clientId()!"
+            [agentId]="agentId()!"
+            (fileSelected)="onFileSelect($event)"
+            (showDiff)="onShowGitDiff($event)"
+          ></framework-git-manager>
+        </div>
+      }
     } @else {
       <div class="d-flex justify-content-center align-items-center h-100 p-4">
         <div class="text-center text-muted">
@@ -141,40 +162,52 @@
     }
 
     <div class="editor-content-wrapper flex-grow-1 d-flex flex-column">
-      <div
-        class="editor-content"
-        [class.flex-grow-1]="!terminalVisible()"
-        [style.flex-basis]="terminalVisible() ? '60%' : '100%'"
-      >
-        @if (selectedFilePath()) {
-          @if (isReadingFile$ | async) {
-            <div class="d-flex justify-content-center align-items-center h-100">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading file...</span>
+      @if (gitDiffViewerVisible()) {
+        <div class="git-diff-viewer-wrapper flex-grow-1">
+          <framework-git-diff-viewer
+            [clientId]="clientId()"
+            [agentId]="agentId()"
+            [filePath]="gitDiffFilePath()"
+            [visible]="gitDiffViewerVisible()"
+            (closed)="onCloseGitDiff()"
+          ></framework-git-diff-viewer>
+        </div>
+      } @else {
+        <div
+          class="editor-content"
+          [class.flex-grow-1]="!terminalVisible()"
+          [style.flex-basis]="terminalVisible() ? '60%' : '100%'"
+        >
+          @if (selectedFilePath()) {
+            @if (isReadingFile$ | async) {
+              <div class="d-flex justify-content-center align-items-center h-100">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading file...</span>
+                </div>
+              </div>
+            } @else {
+              <framework-monaco-editor-wrapper
+                #monacoEditor
+                [filePath]="selectedFilePath()"
+                [content]="(selectedFileContent$ | async)?.content || null"
+                [encoding]="(selectedFileContent$ | async)?.encoding || 'utf-8'"
+                [isDirty]="isDirty()"
+                [autosaveEnabled]="autosaveEnabled()"
+                (contentChange)="onContentChange($event)"
+                (saveRequest)="onSave()"
+              ></framework-monaco-editor-wrapper>
+            }
+          } @else {
+            <div class="d-flex justify-content-center align-items-center h-100 bg-body-secondary">
+              <div class="text-center text-muted p-4">
+                <i class="bi bi-file-earmark-code fs-1 d-block mb-3"></i>
+                <p class="mb-0">No file selected</p>
+                <small class="text-muted">Select a file from the tree to start editing</small>
               </div>
             </div>
-          } @else {
-            <framework-monaco-editor-wrapper
-              #monacoEditor
-              [filePath]="selectedFilePath()"
-              [content]="(selectedFileContent$ | async)?.content || null"
-              [encoding]="(selectedFileContent$ | async)?.encoding || 'utf-8'"
-              [isDirty]="isDirty()"
-              [autosaveEnabled]="autosaveEnabled()"
-              (contentChange)="onContentChange($event)"
-              (saveRequest)="onSave()"
-            ></framework-monaco-editor-wrapper>
           }
-        } @else {
-          <div class="d-flex justify-content-center align-items-center h-100 bg-body-secondary">
-            <div class="text-center text-muted p-4">
-              <i class="bi bi-file-earmark-code fs-1 d-block mb-3"></i>
-              <p class="mb-0">No file selected</p>
-              <small class="text-muted">Select a file from the tree to start editing</small>
-            </div>
-          </div>
-        }
-      </div>
+        </div>
+      }
       @if (terminalVisible()) {
         <div class="terminal-wrapper border-top" style="flex-basis: 40%; min-height: 200px">
           <framework-terminal

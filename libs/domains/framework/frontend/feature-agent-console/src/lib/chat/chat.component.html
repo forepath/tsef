@@ -61,6 +61,17 @@
               ></i>
               <span class="ms-1">Terminal</span>
             </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-outline-primary]="!fileEditor?.gitManagerVisible()"
+              [class.btn-primary]="fileEditor?.gitManagerVisible()"
+              (click)="fileEditor?.onToggleGitManager()"
+              [title]="fileEditor?.gitManagerVisible() ? 'Hide Version Control' : 'Show Version Control'"
+            >
+              <i class="bi bi-git"></i>
+              <span class="ms-1">Version Control</span>
+            </button>
           </div>
           <button
             #shareFileLinkButton

@@ -14,8 +14,14 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { ClientsFacade, FilesFacade, type FileNodeDto } from '@forepath/framework/frontend/data-access-agent-console';
+import {
+  ClientsFacade,
+  FilesFacade,
+  VcsFacade,
+  type FileNodeDto,
+} from '@forepath/framework/frontend/data-access-agent-console';
 import { combineLatest, filter, map, Observable, of, Subscription, switchMap, take } from 'rxjs';
+import { GitBranchModalComponent } from '../git-branch-modal/git-branch-modal.component';
 
 interface TreeNode {
   name: string;
@@ -30,7 +36,7 @@ interface TreeNode {
 
 @Component({
   selector: 'framework-file-tree',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, GitBranchModalComponent],
   templateUrl: './file-tree.component.html',
   styleUrls: ['./file-tree.component.scss'],
   standalone: true,
@@ -38,6 +44,7 @@ interface TreeNode {
 export class FileTreeComponent implements OnInit {
   private readonly filesFacade = inject(FilesFacade);
   private readonly clientsFacade = inject(ClientsFacade);
+  private readonly vcsFacade = inject(VcsFacade);
   private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('deleteFileModal', { static: false })
@@ -54,6 +61,7 @@ export class FileTreeComponent implements OnInit {
   agentId = input.required<string>();
   expandedPaths = input<Set<string>>(new Set());
   selectedPath = input<string | null>(null);
+  gitManagerVisible = input<boolean>(false);
 
   // Outputs
   fileSelect = output<string>();
@@ -61,6 +69,7 @@ export class FileTreeComponent implements OnInit {
   fileDelete = output<string>();
   directoryExpand = output<string>();
   directoryCollapse = output<string>();
+  toggleGitManager = output<void>();
 
   // Internal state
   treeNodes = signal<TreeNode[]>([]);
@@ -137,6 +146,55 @@ export class FileTreeComponent implements OnInit {
     map((client) => this.parseGitRepository(client?.config?.gitRepositoryUrl)),
   );
 
+  // Git status observables
+  readonly gitStatus$ = this.vcsFacade.status$;
+  readonly currentBranch$ = this.vcsFacade.currentBranch$;
+  readonly statusIndicator$ = this.vcsFacade.statusIndicator$;
+  readonly loadingStatus$ = this.vcsFacade.loadingStatus$;
+  readonly staging$ = this.vcsFacade.staging$;
+  readonly unstaging$ = this.vcsFacade.unstaging$;
+  readonly committing$ = this.vcsFacade.committing$;
+
+  // Track if content has been loaded (for spinner display)
+  private hasLoadedContent = signal<boolean>(false);
+  readonly hasLoadedContent$ = toObservable(this.hasLoadedContent);
+  private isReloadingAfterOperation = signal<boolean>(false);
+  readonly isReloadingAfterOperation$ = toObservable(this.isReloadingAfterOperation);
+
+  // Combined observable: true if any operation is in progress OR status is loading OR reloading after operation
+  readonly isAnyOperationInProgress$ = combineLatest([
+    this.staging$,
+    this.unstaging$,
+    this.committing$,
+    this.loadingStatus$,
+    this.isReloadingAfterOperation$,
+  ]).pipe(
+    map(
+      ([staging, unstaging, committing, loadingStatus, isReloading]) =>
+        staging || unstaging || committing || loadingStatus || isReloading,
+    ),
+  );
+
+  // Show spinner only when reloading after an operation (not on initial load or when panel opens)
+  // Track if we've had a successful operation that triggered a reload
+  private hasHadOperation = signal<boolean>(false);
+  readonly hasHadOperation$ = toObservable(this.hasHadOperation);
+
+  readonly showStatusIndicatorSpinner$ = combineLatest([
+    this.isAnyOperationInProgress$,
+    this.hasHadOperation$,
+    this.statusIndicator$,
+  ]).pipe(
+    map(([isInProgress, hasHadOp, indicator]) => {
+      // Show spinner only if:
+      // 1. Operation is in progress (staging/unstaging/committing/reloading)
+      // 2. AND we've had an operation before (user has performed staging/unstaging/committing)
+      // 3. AND status indicator exists (content is visible)
+      // This ensures it doesn't show when panel first opens or on initial load
+      return isInProgress && hasHadOp && indicator !== null;
+    }),
+  );
+
   // Helper to get directory listing observable
   getDirectoryListing$(path: string): Observable<FileNodeDto[] | null> {
     return this.filesFacade.getDirectoryListing$(this.clientId(), this.agentId(), path);
@@ -158,9 +216,82 @@ export class FileTreeComponent implements OnInit {
       const clientId = this.clientId();
       const agentId = this.agentId();
       if (clientId && agentId) {
+        // Reset flags when client/agent changes (new agent = first load)
+        this.hasLoadedContent.set(false);
+        this.hasHadOperation.set(false);
+        this.isReloadingAfterOperation.set(false);
         this.filesFacade.listDirectory(clientId, agentId, { path: '.' });
+        // Load git status
+        this.vcsFacade.loadStatus(clientId, agentId);
       }
     });
+
+    // Reset hasHadOperation when panel closes
+    effect(() => {
+      const visible = this.gitManagerVisible();
+      if (!visible) {
+        // Panel is closed - reset operation flag so spinner doesn't show on next open
+        this.hasHadOperation.set(false);
+      }
+    });
+
+    // Track when operations start - mark that we've had an operation
+    combineLatest([this.staging$, this.unstaging$, this.committing$])
+      .pipe(
+        filter(([staging, unstaging, committing]) => {
+          // Mark when any operation starts (user has interacted)
+          return staging || unstaging || committing;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        // User has performed an operation - mark this so spinner can show on reload
+        if (!this.hasHadOperation()) {
+          this.hasHadOperation.set(true);
+        }
+      });
+
+    // Track when operations complete - mark as reloading to prevent flicker
+    // This bridges the gap between operation completion and reload start
+    combineLatest([this.staging$, this.unstaging$, this.committing$])
+      .pipe(
+        filter(([staging, unstaging, committing]) => {
+          // Only trigger when transitioning from true to false (operation just completed)
+          return !staging && !unstaging && !committing;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        // Mark as reloading immediately to prevent flicker
+        // Only if we've had an operation (user has interacted)
+        if (this.hasHadOperation() && !this.isReloadingAfterOperation()) {
+          this.isReloadingAfterOperation.set(true);
+        }
+      });
+
+    // Mark as loaded once first load completes (status available and not loading)
+    combineLatest([this.loadingStatus$, this.gitStatus$])
+      .pipe(
+        filter(([loading, status]) => !loading && status !== null && !this.hasLoadedContent()),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        // First load completed - mark as loaded
+        this.hasLoadedContent.set(true);
+      });
+
+    // Clear reloading flag when status loading completes
+    combineLatest([this.loadingStatus$, this.gitStatus$])
+      .pipe(
+        filter(([loading, status]) => !loading && status !== null && this.isReloadingAfterOperation()),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        // Clear the flag after a brief delay to ensure smooth transition
+        setTimeout(() => {
+          this.isReloadingAfterOperation.set(false);
+        }, 100);
+      });
 
     // Subscribe to all expanded directory listings to rebuild tree when they change
     effect(() => {
@@ -1162,6 +1293,21 @@ export class FileTreeComponent implements OnInit {
         this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path });
       }, index * 50); // 50ms delay between each call
     });
+  }
+
+  branchModalOpen = signal<boolean>(false);
+
+  onOpenBranchModal(): void {
+    this.branchModalOpen.set(true);
+  }
+
+  onBranchModalClosed(): void {
+    this.branchModalOpen.set(false);
+  }
+
+  onStatusIndicatorClick(event: MouseEvent): void {
+    event.stopPropagation(); // Prevent triggering the branch modal
+    this.toggleGitManager.emit();
   }
 
   onRefreshFolder(folderPath: string): void {
