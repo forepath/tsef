@@ -234,6 +234,51 @@ export interface TerminalClosedData {
 }
 
 /**
+ * Container stats payload (from agents.gateway.ts ContainerStatsPayload)
+ */
+export interface ContainerStatsPayload {
+  stats: {
+    read: string;
+    preread: string;
+    pids_stats?: {
+      current?: number;
+    };
+    blkio_stats?: Record<string, unknown>;
+    num_procs?: number;
+    storage_stats?: Record<string, unknown>;
+    cpu_stats?: {
+      cpu_usage?: {
+        total_usage?: number;
+        percpu_usage?: number[];
+        usage_in_kernelmode?: number;
+        usage_in_usermode?: number;
+      };
+      system_cpu_usage?: number;
+      online_cpus?: number;
+      throttled_data?: Record<string, unknown>;
+    };
+    precpu_stats?: {
+      cpu_usage?: {
+        total_usage?: number;
+        percpu_usage?: number[];
+        usage_in_kernelmode?: number;
+        usage_in_usermode?: number;
+      };
+      system_cpu_usage?: number;
+      online_cpus?: number;
+      throttled_data?: Record<string, unknown>;
+    };
+    memory_stats?: {
+      usage?: number;
+      max_usage?: number;
+      stats?: Record<string, unknown>;
+    };
+    networks?: Record<string, unknown>;
+  };
+  timestamp: string;
+}
+
+/**
  * Typed forwarded event payloads based on event name
  */
 export type ForwardedEventPayload =
@@ -245,4 +290,5 @@ export type ForwardedEventPayload =
   | SuccessResponse<TerminalCreatedData> // terminalCreated
   | SuccessResponse<TerminalOutputData> // terminalOutput
   | SuccessResponse<TerminalClosedData> // terminalClosed
+  | SuccessResponse<ContainerStatsPayload> // containerStats
   | ErrorResponse; // error

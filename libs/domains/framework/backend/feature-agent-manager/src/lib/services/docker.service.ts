@@ -967,4 +967,49 @@ export class DockerService {
       throw error;
     }
   }
+
+  /**
+   * Get container statistics (CPU, memory, network, etc.).
+   * Returns a single snapshot of current container stats.
+   * @param containerId - The container ID
+   * @returns Container stats object
+   * @throws NotFoundException if container is not found
+   */
+  async getContainerStats(containerId: string): Promise<Docker.ContainerStats> {
+    try {
+      const container = this.docker.getContainer(containerId);
+
+      // Check if container exists
+      try {
+        await container.inspect();
+      } catch (error: unknown) {
+        const dockerError = error as { statusCode?: number };
+        if (dockerError.statusCode === 404) {
+          throw new NotFoundException(`Container with ID '${containerId}' not found`);
+        }
+        throw error;
+      }
+
+      // Get stats (stream: false to get a single snapshot)
+      // dockerode's stats() with stream: false uses callback pattern
+      const stats = await new Promise<Docker.ContainerStats>((resolve, reject) => {
+        container.stats({ stream: false }, (err: unknown, statsData: Docker.ContainerStats) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(statsData);
+          }
+        });
+      });
+
+      return stats;
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error getting container stats: ${err.message}`, err.stack);
+      throw error;
+    }
+  }
 }

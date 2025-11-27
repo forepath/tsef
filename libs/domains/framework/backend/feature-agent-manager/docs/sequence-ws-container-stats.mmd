@@ -1,0 +1,64 @@
+sequenceDiagram
+    participant Client
+    participant Gateway as AgentsGateway<br/>(namespace: /agents)
+    participant Docker as DockerService
+    participant Container as Docker Container
+
+    Note over Client,Container: Container Stats Broadcasting Flow
+
+    rect rgb(230, 240, 255)
+        Note over Client,Container: Step 1 - Login and Initial Stats
+        Client->>Gateway: login { agentId, password }
+        Gateway->>Gateway: Verify credentials
+        Gateway->>Gateway: Store authenticated session
+        Gateway->>Client: loginSuccess
+        Gateway->>Gateway: startStatsBroadcasting(agentUuid)
+        Gateway->>Docker: getContainerStats(containerId)
+        Docker->>Container: stats({ stream: false })
+        Container-->>Docker: Container stats data
+        Docker-->>Gateway: Container stats object
+        Gateway->>Client: containerStats { stats, timestamp }
+        Note over Gateway: First stats sent immediately<br/>after successful login
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Client,Container: Step 2 - Periodic Stats Broadcasting (every 5 seconds)
+        loop Every 5 seconds while authenticated
+            Gateway->>Docker: getContainerStats(containerId)
+            Docker->>Container: stats({ stream: false })
+            Container-->>Docker: Container stats data
+            Docker-->>Gateway: Container stats object
+            Gateway->>Client: containerStats { stats, timestamp }
+        end
+    end
+
+    rect rgb(255, 240, 240)
+        Note over Client,Container: Step 3 - Cleanup on Disconnect/Logout
+        alt Client Disconnects
+            Client->>Gateway: (disconnect)
+            Gateway->>Gateway: cleanupStatsIntervalIfNeeded(agentUuid)
+            Gateway->>Gateway: clearInterval(agentUuid)
+            Note over Gateway: Stats broadcasting stopped
+        else Client Logs Out
+            Client->>Gateway: logout
+            Gateway->>Gateway: Remove authenticated session
+            Gateway->>Gateway: cleanupStatsIntervalIfNeeded(agentUuid)
+            Gateway->>Gateway: clearInterval(agentUuid)
+            Gateway->>Client: logoutSuccess
+            Note over Gateway: Stats broadcasting stopped
+        end
+    end
+
+    rect rgb(255, 255, 240)
+        Note over Client,Container: Error Handling
+        alt Stats Fetch Fails
+            Gateway->>Docker: getContainerStats(containerId)
+            Docker-->>Gateway: Error
+            Gateway->>Gateway: Log warning
+            Note over Gateway: Continue periodic broadcasting<br/>(retry on next interval)
+        else No Container Found
+            Gateway->>Gateway: startStatsBroadcasting(agentUuid)
+            Gateway->>Gateway: No containerId found
+            Note over Gateway: Skip stats broadcasting<br/>(no error, just skip)
+        end
+    end

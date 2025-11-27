@@ -33,6 +33,7 @@ import { GitManagerComponent } from './git-manager/git-manager.component';
 import { FileTreeComponent } from './file-tree/file-tree.component';
 import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-editor-wrapper.component';
 import { TerminalComponent } from './terminal/terminal.component';
+import { ContainerStatsStatusBarComponent } from './container-stats-status-bar/container-stats-status-bar.component';
 
 @Component({
   selector: 'framework-file-editor',
@@ -43,6 +44,7 @@ import { TerminalComponent } from './terminal/terminal.component';
     TerminalComponent,
     GitManagerComponent,
     GitDiffViewerComponent,
+    ContainerStatsStatusBarComponent,
   ],
   templateUrl: './file-editor.component.html',
   styleUrls: ['./file-editor.component.scss'],

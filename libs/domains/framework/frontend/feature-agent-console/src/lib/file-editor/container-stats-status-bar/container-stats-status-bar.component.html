@@ -1,0 +1,47 @@
+@if (statsWithPrevious$ | async; as statsData) {
+  @if (statsData.current; as stats) {
+    <div class="container-stats-status-bar px-2 py-1 border-top bg-primary text-white">
+      <div class="d-flex align-items-center gap-3">
+        <!-- CPU Usage -->
+        <div class="d-flex align-items-center gap-1">
+          <i class="bi bi-cpu small"></i>
+          <small>
+            CPU:
+            <span class="fw-semibold"> {{ statsData.cpuPercent | number: '1.1-1' }}% </span>
+          </small>
+        </div>
+
+        <!-- Memory Usage -->
+        <div class="d-flex align-items-center gap-1">
+          <i class="bi bi-memory small"></i>
+          <small>
+            Memory:
+            <span class="fw-semibold">{{ statsData.memoryUsageFormatted }}</span>
+            @if (statsData.memoryLimit > 0) {
+              /
+              <span>{{ statsData.memoryLimitFormatted }}</span>
+              <span class="ms-1"> ({{ statsData.memoryUsagePercent | number: '1.1-1' }}%) </span>
+            }
+          </small>
+        </div>
+
+        <!-- Timestamp -->
+        <div class="d-flex align-items-center gap-1 ms-auto">
+          <small>
+            <i class="bi bi-clock small me-1"></i>
+            {{ stats.timestamp | date: 'HH:mm:ss' }}
+          </small>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="container-stats-status-bar px-2 py-1 border-top bg-primary text-white">
+      <div class="d-flex align-items-center gap-2">
+        <small>
+          <i class="bi bi-hourglass-split small me-1"></i>
+          Waiting for container stats...
+        </small>
+      </div>
+    </div>
+  }
+}

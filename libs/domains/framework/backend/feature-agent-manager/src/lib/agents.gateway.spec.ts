@@ -128,6 +128,8 @@ describe('AgentsGateway', () => {
 
     // Setup default mocks
     agentMessagesService.getChatHistory.mockResolvedValue([]);
+    // Mock getContainerStats
+    dockerService.getContainerStats = jest.fn();
   });
 
   afterEach(() => {
@@ -140,6 +142,15 @@ describe('AgentsGateway', () => {
     // Clear agents with first message sent tracking
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (gateway as any).agentsWithFirstMessageSent.clear();
+    // Clear stats intervals
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const statsIntervals = (gateway as any).statsIntervalsByAgent;
+    if (statsIntervals) {
+      for (const interval of statsIntervals.values()) {
+        clearInterval(interval);
+      }
+      statsIntervals.clear();
+    }
     // Reset default mocks
     agentMessagesService.getChatHistory.mockResolvedValue([]);
   });
@@ -1371,6 +1382,295 @@ describe('AgentsGateway', () => {
       const result = await (gateway as any).findAgentIdByIdentifier('non-existent');
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('container stats broadcasting', () => {
+    const mockStats = {
+      read: '2024-01-01T00:00:00.000000000Z',
+      preread: '2024-01-01T00:00:00.000000000Z',
+      pids_stats: { current: 1 },
+      blkio_stats: {
+        io_service_bytes_recursive: [],
+        io_serviced_recursive: [],
+        io_queue_recursive: [],
+        io_service_time_recursive: [],
+        io_wait_time_recursive: [],
+        io_merged_recursive: [],
+        io_time_recursive: [],
+        sectors_recursive: [],
+      },
+      num_procs: 0,
+      storage_stats: {},
+      cpu_stats: {
+        cpu_usage: {
+          total_usage: 1000000000,
+          percpu_usage: [1000000000],
+          usage_in_kernelmode: 100000000,
+          usage_in_usermode: 900000000,
+        },
+        system_cpu_usage: 2000000000,
+        online_cpus: 1,
+        throttling_data: {
+          periods: 0,
+          throttled_periods: 0,
+          throttled_time: 0,
+        },
+      },
+      precpu_stats: {
+        cpu_usage: {
+          total_usage: 0,
+          percpu_usage: [],
+          usage_in_kernelmode: 0,
+          usage_in_usermode: 0,
+        },
+        system_cpu_usage: 0,
+        online_cpus: 1,
+        throttling_data: {
+          periods: 0,
+          throttled_periods: 0,
+          throttled_time: 0,
+        },
+      },
+      memory_stats: {
+        usage: 1000000,
+        max_usage: 2000000,
+        stats: {
+          total_pgmajfault: 0,
+          cache: 0,
+          mapped_file: 0,
+          total_inactive_file: 0,
+          pgpgout: 0,
+          rss: 0,
+          total_mapped_file: 0,
+          writeback: 0,
+          unevictable: 0,
+          pgpgin: 0,
+          total_active_file: 0,
+          active_anon: 0,
+          total_active_anon: 0,
+          total_inactive_anon: 0,
+          inactive_anon: 0,
+          active_file: 0,
+          inactive_file: 0,
+          total_unevictable: 0,
+          total_rss: 0,
+          total_rss_huge: 0,
+          total_writeback: 0,
+          total_cache: 0,
+          rss_huge: 0,
+          total_pgpgin: 0,
+          total_pgpgout: 0,
+          total_pgfault: 0,
+          pgfault: 0,
+          pgmajfault: 0,
+          hierarchical_memory_limit: 0,
+        },
+      },
+      networks: {},
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should start stats broadcasting after successful login and send first stats immediately', async () => {
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      (dockerService.getContainerStats as jest.Mock).mockResolvedValue(mockStats);
+
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
+
+      // Verify stats were fetched and broadcast immediately
+      expect(dockerService.getContainerStats).toHaveBeenCalledWith(mockAgent.containerId);
+      // Verify stats were emitted via broadcastToAgent (which uses socket.emit)
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'containerStats',
+        expect.objectContaining({
+          success: true,
+          data: {
+            stats: mockStats,
+            timestamp: expect.any(String),
+          },
+          timestamp: expect.any(String),
+        }),
+      );
+    });
+
+    it('should send stats periodically after login', async () => {
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      (dockerService.getContainerStats as jest.Mock).mockResolvedValue(mockStats);
+
+      const socketId = mockSocket.id || 'test-socket-id';
+      // Ensure socket is connected and in the maps
+      mockSocket.connected = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
+
+      // Clear initial call
+      (dockerService.getContainerStats as jest.Mock).mockClear();
+      const emitSpy = jest.fn();
+      mockSocket.emit = emitSpy;
+      // Update socket reference after resetting emit
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+      // Ensure socket is still connected
+      mockSocket.connected = true;
+      // Ensure authenticated clients map still has the socket
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+
+      // Advance timer by 5 seconds (interval period)
+      jest.advanceTimersByTime(5000);
+
+      // Wait for async operations to complete
+      // Use flushPromises equivalent - wait for all pending promises
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Verify stats were fetched again
+      expect(dockerService.getContainerStats).toHaveBeenCalledWith(mockAgent.containerId);
+      // Verify stats were emitted
+      expect(emitSpy).toHaveBeenCalledWith(
+        'containerStats',
+        expect.objectContaining({
+          success: true,
+          data: {
+            stats: mockStats,
+            timestamp: expect.any(String),
+          },
+        }),
+      );
+    }, 10000);
+
+    it('should not start stats broadcasting if agent has no container', async () => {
+      const agentWithoutContainer = { ...mockAgent, containerId: null };
+      agentsRepository.findById.mockResolvedValue(agentWithoutContainer);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+
+      await gateway.handleLogin({ agentId: agentWithoutContainer.id, password: 'password123' }, mockSocket as Socket);
+
+      // Verify stats were not fetched
+      expect(dockerService.getContainerStats).not.toHaveBeenCalled();
+    });
+
+    it('should clean up stats interval on disconnect when no more authenticated clients', async () => {
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      (dockerService.getContainerStats as jest.Mock).mockResolvedValue(mockStats);
+
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
+
+      // Verify interval exists
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const statsIntervals = (gateway as any).statsIntervalsByAgent;
+      expect(statsIntervals.has(mockAgent.id)).toBe(true);
+
+      // Disconnect
+      gateway.handleDisconnect(mockSocket as Socket);
+
+      // Verify interval was cleaned up
+      expect(statsIntervals.has(mockAgent.id)).toBe(false);
+    });
+
+    it('should clean up stats interval on logout when no more authenticated clients', async () => {
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      (dockerService.getContainerStats as jest.Mock).mockResolvedValue(mockStats);
+
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
+
+      // Verify interval exists
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const statsIntervals = (gateway as any).statsIntervalsByAgent;
+      expect(statsIntervals.has(mockAgent.id)).toBe(true);
+
+      // Logout
+      await gateway.handleLogout(mockSocket as Socket);
+
+      // Verify interval was cleaned up
+      expect(statsIntervals.has(mockAgent.id)).toBe(false);
+    });
+
+    it('should continue broadcasting even if stats fetch fails', async () => {
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      (dockerService.getContainerStats as jest.Mock).mockRejectedValue(new Error('Stats error'));
+
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
+
+      // Verify interval still exists (broadcasting continues)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const statsIntervals = (gateway as any).statsIntervalsByAgent;
+      expect(statsIntervals.has(mockAgent.id)).toBe(true);
+
+      // Advance timer and verify it tries again
+      jest.advanceTimersByTime(5000);
+      expect(dockerService.getContainerStats).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not create duplicate intervals for the same agent', async () => {
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+      (dockerService.getContainerStats as jest.Mock).mockResolvedValue(mockStats);
+
+      const socketId = mockSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).socketById.set(socketId, mockSocket);
+
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
+
+      // Verify interval exists
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const statsIntervals = (gateway as any).statsIntervalsByAgent;
+      expect(statsIntervals.has(mockAgent.id)).toBe(true);
+      const firstInterval = statsIntervals.get(mockAgent.id);
+
+      // Login again (simulate second socket for same agent)
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
+
+      // Verify same interval is used (not duplicated)
+      expect(statsIntervals.has(mockAgent.id)).toBe(true);
+      expect(statsIntervals.get(mockAgent.id)).toBe(firstInterval);
     });
   });
 });

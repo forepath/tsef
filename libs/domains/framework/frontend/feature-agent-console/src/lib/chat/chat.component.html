@@ -502,6 +502,14 @@
             </small>
           }
         </div>
+
+        <!-- Container Stats Status Bar (shown when editor is closed) -->
+        @if (!editorOpen() && (activeClientId$ | async) && (selectedAgent$ | async)) {
+          <framework-container-stats-status-bar
+            [clientId]="(activeClientId$ | async)!"
+            [agentId]="(selectedAgent$ | async)!.id"
+          ></framework-container-stats-status-bar>
+        }
       </div>
     }
   </section>
