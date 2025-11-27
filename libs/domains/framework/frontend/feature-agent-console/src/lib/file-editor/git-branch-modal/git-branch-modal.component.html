@@ -1,0 +1,275 @@
+<div
+  class="modal fade"
+  id="gitBranchModal"
+  tabindex="-1"
+  aria-labelledby="gitBranchModalLabel"
+  aria-hidden="true"
+  #branchModal
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="gitBranchModalLabel"><i class="bi bi-diagram-3 me-2"></i>Git Branches</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="onClose()"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Current Branch - Show immediately (doesn't depend on branches list) -->
+        @if (currentBranch$ | async; as currentBranch) {
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Current Branch</label>
+            <div class="input-group">
+              <span class="input-group-text bg-primary text-white">
+                <i class="bi bi-check-circle-fill"></i>
+              </span>
+              <input type="text" class="form-control" [value]="currentBranch" readonly />
+            </div>
+          </div>
+        }
+
+        <!-- Quick Switch - Allows manual branch checkout before lists load -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Quick Switch to Branch</label>
+          <small class="text-muted d-block mb-2"
+            >Enter the name (e.g. <code>feature/new-ui</code>) or a remote ref (e.g.
+            <code>origin/feature/new-ui</code>).</small
+          >
+          <div class="input-group input-group-sm">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Enter branch name or remote ref"
+              [(ngModel)]="manualSwitchBranchName"
+              (keydown.enter)="onManualSwitchBranch()"
+              [disabled]="!!(switchingBranch$ | async)"
+            />
+            <button
+              class="btn btn-outline-primary"
+              type="button"
+              (click)="onManualSwitchBranch()"
+              [disabled]="!manualSwitchBranchName().trim() || !!(switchingBranch$ | async)"
+            >
+              @if (manualSwitchInProgress()) {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+              } @else {
+                <i class="bi bi-arrow-repeat"></i>
+                <span class="ms-1">Switch</span>
+              }
+            </button>
+          </div>
+        </div>
+
+        <!-- Local Branches - Show immediately, loading state only for the list -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Local Branches</label>
+          <div class="list-group" style="max-height: 300px; overflow-y: auto">
+            @if (loadingBranches$ | async) {
+              <div class="list-group-item text-center text-muted py-3">
+                <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                  <span class="visually-hidden">Loading branches...</span>
+                </div>
+                <span>Loading branches...</span>
+              </div>
+            } @else {
+              @if (localBranches$ | async; as localBranches) {
+                @if (localBranches.length === 0) {
+                  <div class="list-group-item text-muted text-center">No local branches</div>
+                } @else {
+                  @for (branch of localBranches; track branch.name) {
+                    <div
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                      [class.active]="branch.isCurrent"
+                    >
+                      <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2">
+                          @if (branch.isCurrent) {
+                            <i class="bi bi-check-circle-fill text-primary"></i>
+                          }
+                          <span class="fw-semibold">{{ branch.name }}</span>
+                          @if (branch.aheadCount && branch.aheadCount > 0) {
+                            <span class="badge bg-success">+{{ branch.aheadCount }}</span>
+                          }
+                          @if (branch.behindCount && branch.behindCount > 0) {
+                            <span class="badge bg-warning">-{{ branch.behindCount }}</span>
+                          }
+                        </div>
+                        @if (branch.message) {
+                          <small class="text-muted d-block mt-1">{{ branch.message }}</small>
+                        }
+                      </div>
+                      <div class="btn-group btn-group-sm" role="group">
+                        @if (!branch.isCurrent) {
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            (click)="onSwitchBranch(branch)"
+                            [disabled]="switchingBranch() === branch.name || (switchingBranch$ | async)"
+                            title="Switch to this branch"
+                          >
+                            @if (switchingBranch() === branch.name) {
+                              <span class="spinner-border spinner-border-sm" role="status"></span>
+                            } @else {
+                              <i class="bi bi-arrow-right-circle"></i>
+                            }
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            (click)="onDeleteBranch(branch)"
+                            [disabled]="deletingBranch() === branch.name || (deletingBranch$ | async)"
+                            title="Delete branch"
+                          >
+                            @if (deletingBranch() === branch.name) {
+                              <span class="spinner-border spinner-border-sm" role="status"></span>
+                            } @else {
+                              <i class="bi bi-trash"></i>
+                            }
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Remote Branches - Show immediately, loading state only for the list -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Remote Branches</label>
+          <div class="list-group" style="max-height: 200px; overflow-y: auto">
+            @if (loadingBranches$ | async) {
+              <div class="list-group-item text-center text-muted py-3">
+                <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                  <span class="visually-hidden">Loading branches...</span>
+                </div>
+                <span>Loading branches...</span>
+              </div>
+            } @else {
+              @if (remoteBranches$ | async; as remoteBranches) {
+                @if (remoteBranches.length === 0) {
+                  <div class="list-group-item text-muted text-center">No remote branches</div>
+                } @else {
+                  @for (branch of remoteBranches; track branch.ref) {
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="bi bi-cloud text-muted"></i>
+                          <span>{{ branch.name }}</span>
+                          @if (branch.remote) {
+                            <small class="text-muted">({{ branch.remote }})</small>
+                          }
+                        </div>
+                        @if (branch.message) {
+                          <small class="text-muted d-block mt-1">{{ branch.message }}</small>
+                        }
+                      </div>
+                      <div class="btn-group btn-group-sm" role="group">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          (click)="onSwitchBranch(branch)"
+                          [disabled]="switchingBranch() === branch.name || (switchingBranch$ | async)"
+                          title="Checkout and create local tracking branch"
+                        >
+                          @if (switchingBranch() === branch.name) {
+                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                          } @else {
+                            <i class="bi bi-download"></i>
+                            <span class="ms-1">Checkout</span>
+                          }
+                        </button>
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Create New Branch - Show immediately (doesn't depend on branches list) -->
+        <div class="border-top pt-3">
+          <label class="form-label fw-semibold">Create New Branch</label>
+          <div class="mb-2">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="useConventionalPrefix"
+                [(ngModel)]="useConventionalPrefix"
+              />
+              <label class="form-check-label" for="useConventionalPrefix">
+                Use conventional commit prefix (feat/, fix/, chore/, etc.)
+              </label>
+            </div>
+          </div>
+          @if (useConventionalPrefix()) {
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <label for="conventionalType" class="form-label">Type</label>
+                <select class="form-select form-select-sm" id="conventionalType" [(ngModel)]="conventionalType">
+                  <option value="feat">feat</option>
+                  <option value="fix">fix</option>
+                  <option value="chore">chore</option>
+                  <option value="docs">docs</option>
+                  <option value="style">style</option>
+                  <option value="refactor">refactor</option>
+                  <option value="test">test</option>
+                  <option value="perf">perf</option>
+                </select>
+              </div>
+              <div class="col-md-8">
+                <label for="customBranchName" class="form-label">Branch Name</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">{{ conventionalType() }}/</span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="customBranchName"
+                    [(ngModel)]="customBranchName"
+                    placeholder="branch-name"
+                    (keydown.enter)="onCreateBranch()"
+                  />
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="mb-2">
+              <label for="customBranchNameFull" class="form-label">Branch Name</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                id="customBranchNameFull"
+                [(ngModel)]="customBranchName"
+                placeholder="Enter branch name"
+                (keydown.enter)="onCreateBranch()"
+              />
+            </div>
+          }
+          <div class="d-flex align-items-center gap-2">
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              (click)="onCreateBranch()"
+              [disabled]="!customBranchName().trim() || (creatingBranch$ | async)"
+            >
+              @if (creatingBranch$ | async) {
+                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              }
+              Create Branch
+            </button>
+            @if (branchName()) {
+              <small class="text-muted"
+                >Will create: <code>{{ branchName() }}</code></small
+              >
+            }
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="onClose()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -339,10 +339,17 @@ export class DockerService {
    * @param containerId - The ID of the container
    * @param command - The command to execute (e.g., 'bash', 'sh', or a specific command)
    * @param input - Optional input/keystrokes to send to stdin (string or array of strings)
+   * @param checkExitCode - If true, check exit code and throw error if non-zero (default: false)
    * @returns The command output (stdout and stderr combined)
    * @throws NotFoundException if container is not found
+   * @throws Error if checkExitCode is true and command exits with non-zero code
    */
-  async sendCommandToContainer(containerId: string, command: string, input?: string | string[]): Promise<string> {
+  async sendCommandToContainer(
+    containerId: string,
+    command: string,
+    input?: string | string[],
+    checkExitCode = false,
+  ): Promise<string> {
     try {
       const container = this.docker.getContainer(containerId);
 
@@ -364,7 +371,7 @@ export class DockerService {
       const args = commandParts.slice(1);
 
       // Create exec instance with stdin enabled for keystrokes
-      const exec = await container.exec({
+      const execInstance = await container.exec({
         Cmd: [executable, ...args],
         AttachStdin: true,
         AttachStdout: true,
@@ -373,7 +380,7 @@ export class DockerService {
       });
 
       // Start the exec
-      const stream = (await exec.start({
+      const stream = (await execInstance.start({
         hijack: true,
         stdin: true,
       })) as NodeJS.ReadWriteStream;
@@ -416,6 +423,8 @@ export class DockerService {
       // Wait for the stream to finish and collect output
       const output = await new Promise<string>((resolve, reject) => {
         let resolved = false;
+        let extractedOutput = ''; // Declare outside event handlers for scope
+
         const resolveOnce = (result: string) => {
           if (!resolved) {
             resolved = true;
@@ -433,7 +442,6 @@ export class DockerService {
         stream.on('end', () => {
           // Combine all output chunks and demultiplex Docker's multiplexed format
           const combinedBuffer = Buffer.concat(outputChunks);
-          let extractedOutput = '';
 
           // Docker multiplexed format: [STREAM_TYPE(1 byte)][LENGTH(4 bytes BE)][DATA...]
           // Stream type: 1 = stdout, 2 = stderr
@@ -462,14 +470,51 @@ export class DockerService {
             }
           }
 
-          resolveOnce(extractedOutput.trim());
+          // If exit code checking is disabled, resolve immediately (backward compatible)
+          // Otherwise, wait for close event to check exit code
+          if (!checkExitCode) {
+            resolveOnce(extractedOutput.trim());
+          }
         });
 
         stream.on('close', () => {
-          // If we haven't resolved yet, resolve with collected output
-          if (!resolved) {
+          if (resolved) return;
+
+          // Extract output if not already extracted
+          let finalOutput = '';
+          if (extractedOutput) {
+            finalOutput = extractedOutput.trim();
+          } else {
             const combinedBuffer = Buffer.concat(outputChunks);
-            resolveOnce(combinedBuffer.toString('utf-8').trim());
+            finalOutput = combinedBuffer.toString('utf-8').trim();
+          }
+
+          // If exit code checking is enabled, check the exit code
+          if (checkExitCode) {
+            execInstance
+              .inspect()
+              .then((execInspect) => {
+                const exitCode = execInspect.ExitCode;
+
+                if (exitCode !== 0 && exitCode !== null) {
+                  // Command failed - reject with error including output
+                  const errorMessage = finalOutput || `Command failed with exit code ${exitCode}`;
+                  this.logger.error(`Command failed with exit code ${exitCode}: ${errorMessage}`);
+                  rejectOnce(new Error(errorMessage));
+                } else {
+                  // Command succeeded
+                  resolveOnce(finalOutput);
+                }
+              })
+              .catch((inspectError) => {
+                // If we can't inspect, log warning but resolve with output
+                const err = inspectError as { message?: string };
+                this.logger.warn(`Failed to inspect exec exit code: ${err.message}`);
+                resolveOnce(finalOutput);
+              });
+          } else {
+            // No exit code checking - resolve with output (backward compatible behavior)
+            resolveOnce(finalOutput);
           }
         });
 
@@ -485,11 +530,14 @@ export class DockerService {
           }
         });
 
-        // Set a timeout to prevent hanging (fallback safety)
+        // Set a timeout to prevent hanging (reject if command takes too long)
         setTimeout(() => {
           if (!resolved) {
             const combinedBuffer = Buffer.concat(outputChunks);
-            resolveOnce(combinedBuffer.toString('utf-8').trim());
+            const timeoutOutput = combinedBuffer.toString('utf-8').trim();
+            rejectOnce(
+              new Error(`Command timed out after 30 seconds${timeoutOutput ? `\nOutput: ${timeoutOutput}` : ''}`),
+            );
           }
         }, 30000);
       });

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AgentsFilesController } from './agents-files.controller';
+import { AgentsVcsController } from './agents-vcs.controller';
 import { AgentsController } from './agents.controller';
 import { AgentsGateway } from './agents.gateway';
 import { ConfigController } from './config.controller';
@@ -13,6 +14,7 @@ import { AgentsRepository } from './repositories/agents.repository';
 import { AgentFileSystemService } from './services/agent-file-system.service';
 import { AgentMessagesService } from './services/agent-messages.service';
 import { AgentsService } from './services/agents.service';
+import { AgentsVcsService } from './services/agents-vcs.service';
 import { ConfigService } from './services/config.service';
 import { DockerService } from './services/docker.service';
 import { PasswordService } from './services/password.service';
@@ -23,12 +25,13 @@ import { PasswordService } from './services/password.service';
  */
 @Module({
   imports: [TypeOrmModule.forFeature([AgentEntity, AgentMessageEntity])],
-  controllers: [AgentsController, AgentsFilesController, ConfigController],
+  controllers: [AgentsController, AgentsFilesController, AgentsVcsController, ConfigController],
   providers: [
     AgentsGateway,
     AgentsService,
     AgentMessagesService,
     AgentFileSystemService,
+    AgentsVcsService,
     ConfigService,
     PasswordService,
     AgentsRepository,

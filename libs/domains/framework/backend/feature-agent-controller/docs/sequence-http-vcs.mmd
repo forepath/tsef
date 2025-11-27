@@ -1,0 +1,91 @@
+sequenceDiagram
+    participant Client as HTTP Client
+    participant ControllerAPI as ClientsVcsController<br/>(/api/clients/:id/agents/:agentId/vcs)
+    participant ProxyService as ClientAgentVcsProxyService
+    participant ManagerAPI as AgentsVcsController<br/>(Remote Agent Manager)
+    participant Container as Agent Container<br/>(/app)
+
+    Note over Client,Container: HTTP API - Proxied VCS Operations
+
+    rect rgb(230, 240, 255)
+        Note over Client,Container: Get Git Status (Proxied)
+        Client->>ControllerAPI: GET /api/clients/{id}/agents/{agentId}/vcs/status
+        ControllerAPI->>ProxyService: getStatus(clientId, agentId)
+        ProxyService->>ProxyService: getClientAgentCredentials(clientId, agentId)
+        ProxyService->>ProxyService: build request to agent-manager
+        ProxyService->>ManagerAPI: GET {endpoint}/api/agents/{agentId}/vcs/status<br/>(with auth headers)
+        ManagerAPI->>Container: Execute git status
+        Container-->>ManagerAPI: GitStatusDto
+        ManagerAPI-->>ProxyService: GitStatusDto
+        ProxyService-->>ControllerAPI: GitStatusDto
+        ControllerAPI-->>Client: 200 OK<br/>{status}
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Client,Container: Stage Files (Proxied)
+        Client->>ControllerAPI: POST /api/clients/{id}/agents/{agentId}/vcs/stage<br/>{files: []}
+        ControllerAPI->>ProxyService: stageFiles(clientId, agentId, dto)
+        ProxyService->>ProxyService: getClientAgentCredentials(clientId, agentId)
+        ProxyService->>ProxyService: build request to agent-manager
+        ProxyService->>ManagerAPI: POST {endpoint}/api/agents/{agentId}/vcs/stage<br/>(with auth headers)
+        ManagerAPI->>Container: Execute git add
+        Container-->>ManagerAPI: success
+        ManagerAPI-->>ProxyService: 204 No Content
+        ProxyService-->>ControllerAPI: void
+        ControllerAPI-->>Client: 204 No Content
+    end
+
+    rect rgb(255, 240, 240)
+        Note over Client,Container: Commit Changes (Proxied)
+        Client->>ControllerAPI: POST /api/clients/{id}/agents/{agentId}/vcs/commit<br/>{message: "..."}
+        ControllerAPI->>ProxyService: commit(clientId, agentId, dto)
+        ProxyService->>ProxyService: getClientAgentCredentials(clientId, agentId)
+        ProxyService->>ProxyService: build request to agent-manager
+        ProxyService->>ManagerAPI: POST {endpoint}/api/agents/{agentId}/vcs/commit<br/>(with auth headers)
+        ManagerAPI->>Container: Execute git commit<br/>(with ENV author config)
+        Container-->>ManagerAPI: success
+        ManagerAPI-->>ProxyService: 204 No Content
+        ProxyService-->>ControllerAPI: void
+        ControllerAPI-->>Client: 204 No Content
+    end
+
+    rect rgb(255, 255, 230)
+        Note over Client,Container: Push Changes (Proxied)
+        Client->>ControllerAPI: POST /api/clients/{id}/agents/{agentId}/vcs/push
+        ControllerAPI->>ProxyService: push(clientId, agentId)
+        ProxyService->>ProxyService: getClientAgentCredentials(clientId, agentId)
+        ProxyService->>ProxyService: build request to agent-manager
+        ProxyService->>ManagerAPI: POST {endpoint}/api/agents/{agentId}/vcs/push<br/>(with auth headers)
+        ManagerAPI->>Container: Execute git push<br/>(uses .netrc or SSH key)
+        Container-->>ManagerAPI: success
+        ManagerAPI-->>ProxyService: 204 No Content
+        ProxyService-->>ControllerAPI: void
+        ControllerAPI-->>Client: 204 No Content
+    end
+
+    rect rgb(255, 230, 255)
+        Note over Client,Container: Create Branch (Proxied)
+        Client->>ControllerAPI: POST /api/clients/{id}/agents/{agentId}/vcs/branches<br/>{name, useConventionalPrefix, conventionalType}
+        ControllerAPI->>ProxyService: createBranch(clientId, agentId, dto)
+        ProxyService->>ProxyService: getClientAgentCredentials(clientId, agentId)
+        ProxyService->>ProxyService: build request to agent-manager
+        ProxyService->>ManagerAPI: POST {endpoint}/api/agents/{agentId}/vcs/branches<br/>(with auth headers)
+        ManagerAPI->>Container: Execute git checkout -b<br/>(with conventional prefix if enabled)
+        Container-->>ManagerAPI: success
+        ManagerAPI-->>ProxyService: 201 Created
+        ProxyService-->>ControllerAPI: void
+        ControllerAPI-->>Client: 201 Created
+    end
+
+    rect rgb(240, 230, 255)
+        Note over Client,Container: Error Handling
+        Client->>ControllerAPI: POST /api/clients/{id}/agents/{agentId}/vcs/push
+        ControllerAPI->>ProxyService: push(clientId, agentId)
+        ProxyService->>ManagerAPI: POST {endpoint}/api/agents/{agentId}/vcs/push
+        ManagerAPI->>Container: Execute git push
+        Container-->>ManagerAPI: error (e.g., authentication failed)
+        ManagerAPI-->>ProxyService: 400 Bad Request<br/>{error message}
+        ProxyService->>ProxyService: translate error
+        ProxyService-->>ControllerAPI: 400 Bad Request<br/>{translated error}
+        ControllerAPI-->>Client: 400 Bad Request<br/>{error message}
+    end

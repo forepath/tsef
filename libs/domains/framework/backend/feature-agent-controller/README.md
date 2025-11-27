@@ -63,6 +63,7 @@ All diagrams are available in the [`docs/`](./docs/) directory:
 
 - **[Overview Diagram](./docs/overview.mmd)** - High-level flowchart showing HTTP REST API for clients, proxied agent operations, and WebSocket event forwarding
 - **[HTTP Sequence Diagram](./docs/sequence-http.mmd)** - Detailed sequence diagram for all HTTP CRUD operations (client management and proxied agent operations)
+- **[HTTP VCS Sequence Diagram](./docs/sequence-http-vcs.mmd)** - Detailed sequence diagram for proxied VCS (Git) operations
 - **[WebSocket Forwarding Diagram](./docs/sequence-ws-forward.mmd)** - Sequence diagram for WebSocket connection, client context setup, event forwarding, and auto-login
 - **[Lifecycle Diagram](./docs/lifecycle.mmd)** - End-to-end sequence diagram showing the complete lifecycle from client creation through proxied agent operations to WebSocket event forwarding
 
@@ -140,6 +141,32 @@ Base URL: `/api/clients`
 - `DELETE /api/clients/:id/agents/:agentId` - Delete an agent (also deletes stored credentials)
 
 **Note**: Agent creation requests are proxied to the remote agent-manager service. SSH repository configuration (including `GIT_PRIVATE_KEY`) must be configured on the agent-manager instance via environment variables, not through the API request. See the [agent-manager documentation](../feature-agent-manager/README.md) for details on SSH repository setup.
+
+### Proxied Agent File Operations
+
+- `GET /api/clients/:id/agents/:agentId/files` - List directory contents (proxied)
+- `GET /api/clients/:id/agents/:agentId/files/:path` - Read file content (proxied)
+- `POST /api/clients/:id/agents/:agentId/files/:path` - Create file or directory (proxied)
+- `PUT /api/clients/:id/agents/:agentId/files/:path` - Write file content (proxied)
+- `DELETE /api/clients/:id/agents/:agentId/files/:path` - Delete file or directory (proxied)
+- `PATCH /api/clients/:id/agents/:agentId/files/:path` - Move file or directory (proxied)
+
+### Proxied Agent VCS Operations
+
+- `GET /api/clients/:id/agents/:agentId/vcs/status` - Get git status (proxied)
+- `GET /api/clients/:id/agents/:agentId/vcs/branches` - List all branches (proxied)
+- `GET /api/clients/:id/agents/:agentId/vcs/diff?path={filePath}` - Get file diff (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/stage` - Stage files (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/unstage` - Unstage files (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/commit` - Commit staged changes (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/push` - Push changes to remote (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/pull` - Pull changes from remote (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/fetch` - Fetch changes from remote (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/rebase` - Rebase current branch (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/branches/:branch/switch` - Switch to a branch (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/branches` - Create a new branch (proxied)
+- `DELETE /api/clients/:id/agents/:agentId/vcs/branches/:branch` - Delete a branch (proxied)
+- `POST /api/clients/:id/agents/:agentId/vcs/conflicts/resolve` - Resolve merge conflicts (proxied)
 
 ### Server Provisioning
 

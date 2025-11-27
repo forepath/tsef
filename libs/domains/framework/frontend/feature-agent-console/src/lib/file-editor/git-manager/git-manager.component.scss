@@ -1,0 +1,73 @@
+:host {
+  min-height: 0;
+}
+
+.git-manager-container {
+  background-color: var(--bs-body-bg);
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-size: 0.875rem;
+}
+
+.git-manager-header {
+  flex-shrink: 0;
+}
+
+.git-manager-content {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.git-section-header {
+  flex-shrink: 0;
+}
+
+.git-file-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.git-file-item {
+  height: 32px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+  position: relative;
+
+  &:hover {
+    background-color: var(--bs-secondary-bg);
+
+    .btn-group {
+      opacity: 1;
+    }
+  }
+
+  .btn-group {
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+    flex-shrink: 0;
+  }
+}
+
+.git-file-content {
+  min-width: 0;
+}
+
+.git-file-icon {
+  flex-shrink: 0;
+}
+
+.git-file-name {
+  font-size: 0.875rem;
+}
+
+.badge-sm {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.35rem;
+}
