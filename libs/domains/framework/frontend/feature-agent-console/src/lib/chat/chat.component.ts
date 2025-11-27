@@ -209,6 +209,12 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly standaloneMode = signal<boolean>(false);
   private standaloneFileLoaded = false;
 
+  // Local signals to mirror fileEditor's visibility states
+  // These prevent ExpressionChangedAfterItHasBeenCheckedError by avoiding direct access
+  readonly fileTreeVisible = signal<boolean>(false);
+  readonly terminalVisible = signal<boolean>(false);
+  readonly gitManagerVisible = signal<boolean>(false);
+
   // Convert signals to observables (must be in field initializer for injection context)
   private readonly standaloneMode$ = toObservable(this.standaloneMode);
 
@@ -470,6 +476,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
             }
           }
 
+          // Sync visibility signals after editor opens
+          setTimeout(() => this.syncFileEditorVisibility(), 0);
+
           this.initialRouting['editor'] = true;
 
           // Open file if file query parameter is set
@@ -553,6 +562,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
             this.fileEditor.fileTreeVisible.set(true);
             this.fileEditor.terminalVisible.set(false);
           }
+          setTimeout(() => this.syncFileEditorVisibility(), 0);
         } else {
           // Reset file opened flag when agent changes in file-only mode
           // This allows the file to be opened again for the new agent
@@ -742,6 +752,61 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       this.scrollToBottom();
       this.shouldScrollToBottom = false;
     }
+
+    // Sync fileEditor visibility signals to prevent ExpressionChangedAfterItHasBeenCheckedError
+    // This runs after change detection, so it's safe to update signals here
+    this.syncFileEditorVisibility();
+  }
+
+  /**
+   * Syncs local visibility signals with fileEditor's signals
+   * This prevents ExpressionChangedAfterItHasBeenCheckedError by avoiding direct template access
+   */
+  private syncFileEditorVisibility(): void {
+    if (this.editorOpen() && this.fileEditor) {
+      // Use setTimeout to ensure this runs after the current change detection cycle
+      setTimeout(() => {
+        this.fileTreeVisible.set(this.fileEditor.fileTreeVisible());
+        this.terminalVisible.set(this.fileEditor.terminalVisible());
+        this.gitManagerVisible.set(this.fileEditor.gitManagerVisible());
+        this.cdr.markForCheck();
+      }, 0);
+    } else {
+      // Reset to false when editor is closed
+      this.fileTreeVisible.set(false);
+      this.terminalVisible.set(false);
+      this.gitManagerVisible.set(false);
+    }
+  }
+
+  /**
+   * Wrapper for fileEditor's onToggleFileTree that syncs visibility after toggle
+   */
+  onToggleFileTree(): void {
+    if (this.fileEditor) {
+      this.fileEditor.onToggleFileTree();
+      this.syncFileEditorVisibility();
+    }
+  }
+
+  /**
+   * Wrapper for fileEditor's onToggleTerminal that syncs visibility after toggle
+   */
+  onToggleTerminal(): void {
+    if (this.fileEditor) {
+      this.fileEditor.onToggleTerminal();
+      this.syncFileEditorVisibility();
+    }
+  }
+
+  /**
+   * Wrapper for fileEditor's onToggleGitManager that syncs visibility after toggle
+   */
+  onToggleGitManager(): void {
+    if (this.fileEditor) {
+      this.fileEditor.onToggleGitManager();
+      this.syncFileEditorVisibility();
+    }
   }
 
   onClientSelect(clientId: string, navigate = true): void {
@@ -773,6 +838,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       // Close editor if open
       if (this.editorOpen()) {
         this.editorOpen.set(false);
+        setTimeout(() => this.syncFileEditorVisibility(), 0);
       }
     } else {
       // Select the client
@@ -866,6 +932,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     // Close editor if open
     if (this.editorOpen()) {
       this.editorOpen.set(false);
+      setTimeout(() => this.syncFileEditorVisibility(), 0);
     }
   }
 
@@ -963,7 +1030,11 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         this.fileEditor.terminalVisible.set(false);
         this.fileEditor.autosaveEnabled.set(false);
       }
+      setTimeout(() => this.syncFileEditorVisibility(), 0);
     }
+
+    // Sync visibility signals after editor toggles
+    setTimeout(() => this.syncFileEditorVisibility(), 0);
   }
 
   /**
