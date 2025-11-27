@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0](https://github.com/forepath/tsef/compare/v1.7.2...v1.8.0) (2025-11-27)
+
+
+### Features
+
+* agent manager auto provisioning ([#75](https://github.com/forepath/tsef/issues/75)) ([dee032e](https://github.com/forepath/tsef/commit/dee032e5fedcd489ea28394d6371730e419cfc09))
+* git gui integration ([#77](https://github.com/forepath/tsef/issues/77)) ([be64b48](https://github.com/forepath/tsef/commit/be64b48ba6393e49a3a4ee9ad9320aacb74a8735))
+* git repo name in editor ([#76](https://github.com/forepath/tsef/issues/76)) ([7971bec](https://github.com/forepath/tsef/commit/7971bec3c800898e6ab88f86aa7b54e78574cc4d))
+
+
+### Bug Fixes
+
+* bootstrap tooltip disposal ([#80](https://github.com/forepath/tsef/issues/80)) ([f364173](https://github.com/forepath/tsef/commit/f364173a951d8ed2f14c21e4fe3f5f75d821713a))
+* editor panel signals update issues ([#79](https://github.com/forepath/tsef/issues/79)) ([c4466bd](https://github.com/forepath/tsef/commit/c4466bdb2480d17a0a48f9cb6ca1d96057b9618a))
+
 ## [1.7.2](https://github.com/forepath/tsef/compare/v1.7.1...v1.7.2) (2025-11-23)
 
 
