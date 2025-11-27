@@ -9,6 +9,7 @@ import {
   forwardEventFailure,
   forwardEventSuccess,
   forwardedEventReceived,
+  setAgent,
   setChatModel,
   setClient,
   setClientFailure,
@@ -31,6 +32,8 @@ export interface SocketsState {
     payload: import('./sockets.types').ForwardedEventPayload;
     timestamp: number;
   }>;
+  // Track currently selected agent ID (for associating stats with agent)
+  selectedAgentId: string | null;
 }
 
 export const initialSocketsState: SocketsState = {
@@ -43,6 +46,7 @@ export const initialSocketsState: SocketsState = {
   forwardingEvent: null,
   error: null,
   forwardedEvents: [],
+  selectedAgentId: null,
 };
 
 export const socketsReducer = createReducer(
@@ -78,6 +82,7 @@ export const socketsReducer = createReducer(
     selectedClientId: null,
     error: null,
     forwardedEvents: [],
+    selectedAgentId: null,
   })),
   // Set Client
   on(setClient, (state) => ({
@@ -129,8 +134,29 @@ export const socketsReducer = createReducer(
     error: message,
   })),
   // Forwarded Event Received
-  on(forwardedEventReceived, (state, { event, payload }) => ({
+  on(forwardedEventReceived, (state, { event, payload }) => {
+    // Extract agentId from loginSuccess payload to track selected agent
+    let selectedAgentId = state.selectedAgentId;
+    if (event === 'loginSuccess' && 'data' in payload && payload.success) {
+      const loginData = payload.data as import('./sockets.types').LoginSuccessData;
+      selectedAgentId = loginData.agentId;
+    } else if (event === 'logoutSuccess' && 'data' in payload && payload.success) {
+      const logoutData = payload.data as import('./sockets.types').LogoutSuccessData;
+      // Clear selected agent if logged out
+      if (logoutData.agentId === null || logoutData.agentId === state.selectedAgentId) {
+        selectedAgentId = null;
+      }
+    }
+
+    return {
+      ...state,
+      forwardedEvents: [...state.forwardedEvents, { event, payload, timestamp: Date.now() }].slice(-100), // Keep last 100 events to prevent memory issues
+      selectedAgentId,
+    };
+  }),
+  // Set Agent
+  on(setAgent, (state, { agentId }) => ({
     ...state,
-    forwardedEvents: [...state.forwardedEvents, { event, payload, timestamp: Date.now() }].slice(-100), // Keep last 100 events to prevent memory issues
+    selectedAgentId: agentId,
   })),
 );

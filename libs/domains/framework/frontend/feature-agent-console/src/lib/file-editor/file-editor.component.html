@@ -218,6 +218,14 @@
         </div>
       }
     </div>
+
+    <!-- Container Stats Status Bar -->
+    @if (clientId() && agentId()) {
+      <framework-container-stats-status-bar
+        [clientId]="clientId()!"
+        [agentId]="agentId()!"
+      ></framework-container-stats-status-bar>
+    }
   </div>
 </div>
 

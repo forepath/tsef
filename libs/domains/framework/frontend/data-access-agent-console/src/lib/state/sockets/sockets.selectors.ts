@@ -57,3 +57,8 @@ export const selectMostRecentForwardedEventByEvent = (eventName: string) =>
     const filtered = events.filter((e) => e.event === eventName);
     return filtered.length > 0 ? filtered[filtered.length - 1] : null;
   });
+
+/**
+ * Select the currently selected agent ID (from loginSuccess)
+ */
+export const selectSelectedAgentId = createSelector(selectSocketsState, (state) => state.selectedAgentId);

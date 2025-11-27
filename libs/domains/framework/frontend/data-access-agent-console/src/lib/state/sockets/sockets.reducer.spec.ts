@@ -8,6 +8,7 @@ import {
   forwardEventFailure,
   forwardEventSuccess,
   forwardedEventReceived,
+  setAgent,
   setChatModel,
   setClient,
   setClientFailure,
@@ -101,6 +102,7 @@ describe('socketsReducer', () => {
         ...initialSocketsState,
         connected: true,
         selectedClientId: 'client-1',
+        selectedAgentId: 'agent-1',
         forwardedEvents: [{ event: 'chatMessage', payload: mockForwardedPayload, timestamp: Date.now() }],
         disconnecting: true,
       };
@@ -110,6 +112,7 @@ describe('socketsReducer', () => {
       expect(newState.connected).toBe(false);
       expect(newState.disconnecting).toBe(false);
       expect(newState.selectedClientId).toBeNull();
+      expect(newState.selectedAgentId).toBeNull();
       expect(newState.forwardedEvents).toEqual([]);
       expect(newState.error).toBeNull();
     });
@@ -266,6 +269,92 @@ describe('socketsReducer', () => {
       expect(newState.forwardedEvents[99].timestamp).toBe(timestamp);
 
       jest.spyOn(Date, 'now').mockRestore();
+    });
+
+    it('should set selectedAgentId from loginSuccess payload', () => {
+      const loginSuccessPayload: ForwardedEventPayload = {
+        success: true,
+        data: {
+          message: 'Welcome',
+          agentId: 'agent-123',
+          agentName: 'Test Agent',
+        },
+        timestamp: '2024-01-01T00:00:00.000Z',
+      };
+
+      const state: SocketsState = {
+        ...initialSocketsState,
+        selectedAgentId: null,
+      };
+
+      const newState = socketsReducer(
+        state,
+        forwardedEventReceived({ event: 'loginSuccess', payload: loginSuccessPayload }),
+      );
+
+      expect(newState.selectedAgentId).toBe('agent-123');
+    });
+
+    it('should clear selectedAgentId on logoutSuccess', () => {
+      const logoutSuccessPayload: ForwardedEventPayload = {
+        success: true,
+        data: {
+          message: 'Logged out',
+          agentId: null,
+          agentName: null,
+        },
+        timestamp: '2024-01-01T00:00:00.000Z',
+      };
+
+      const state: SocketsState = {
+        ...initialSocketsState,
+        selectedAgentId: 'agent-123',
+      };
+
+      const newState = socketsReducer(
+        state,
+        forwardedEventReceived({ event: 'logoutSuccess', payload: logoutSuccessPayload }),
+      );
+
+      expect(newState.selectedAgentId).toBeNull();
+    });
+
+    it('should not change selectedAgentId for other events', () => {
+      const state: SocketsState = {
+        ...initialSocketsState,
+        selectedAgentId: 'agent-123',
+      };
+
+      const newState = socketsReducer(
+        state,
+        forwardedEventReceived({ event: 'chatMessage', payload: mockForwardedPayload }),
+      );
+
+      expect(newState.selectedAgentId).toBe('agent-123');
+    });
+  });
+
+  describe('setAgent', () => {
+    it('should set the selected agent ID', () => {
+      const state: SocketsState = {
+        ...initialSocketsState,
+        selectedAgentId: null,
+      };
+
+      const newState = socketsReducer(state, setAgent({ agentId: 'agent-123' }));
+
+      expect(newState.selectedAgentId).toBe('agent-123');
+    });
+
+    it('should clear the selected agent ID when set to null', () => {
+      const state: SocketsState = {
+        ...initialSocketsState,
+        selectedAgentId: 'agent-123',
+      };
+
+      const newState = socketsReducer(state, setAgent({ agentId: null }));
+
+      expect(newState.selectedAgentId).toBeNull();
     });
   });
 });

@@ -51,6 +51,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 import { FileEditorComponent } from '../file-editor/file-editor.component';
+import { ContainerStatsStatusBarComponent } from '../file-editor/container-stats-status-bar/container-stats-status-bar.component';
 import { StandaloneLoadingService } from '../standalone-loading.service';
 
 // Type declaration for marked library
@@ -60,7 +61,7 @@ interface Marked {
 
 @Component({
   selector: 'framework-agent-console-chat',
-  imports: [CommonModule, RouterModule, FormsModule, FileEditorComponent],
+  imports: [CommonModule, RouterModule, FormsModule, FileEditorComponent, ContainerStatsStatusBarComponent],
   styleUrls: ['./chat.component.scss'],
   templateUrl: './chat.component.html',
   standalone: true,

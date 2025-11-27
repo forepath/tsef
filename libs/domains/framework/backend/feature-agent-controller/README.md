@@ -341,6 +341,32 @@ The `ClientsGateway` provides WebSocket-based real-time event forwarding to remo
 
   This event is automatically forwarded from the remote agent-manager gateway when a file update occurs. Clients can compare `socketId` with their own socket ID to determine if the update came from themselves (no action needed) or another client (show modal if input is dirty).
 
+- `containerStats` - Container statistics forwarded from agent-manager gateway
+
+  ```typescript
+  {
+    success: true;
+    data: {
+      stats: {
+        read: string; // Timestamp when stats were read
+        preread: string; // Previous read timestamp
+        pids_stats: object; // Process ID statistics
+        blkio_stats: object; // Block I/O statistics
+        num_procs: number; // Number of processes
+        storage_stats: object; // Storage statistics
+        cpu_stats: object; // CPU usage statistics
+        precpu_stats: object; // Previous CPU statistics
+        memory_stats: object; // Memory usage statistics
+        networks: object; // Network statistics
+      }
+      timestamp: string; // ISO timestamp when stats were collected
+    }
+    timestamp: string; // ISO timestamp
+  }
+  ```
+
+  This event is automatically forwarded from the remote agent-manager gateway periodically (every 5 seconds) after successful login. First stats are sent immediately after login, then every 5 seconds while clients remain authenticated.
+
 - `error` - Emitted on errors
 
   ```typescript

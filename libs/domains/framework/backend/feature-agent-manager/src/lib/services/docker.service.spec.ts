@@ -15,6 +15,7 @@ describe('DockerService', () => {
     exec: jest.Mock;
     stop: jest.Mock;
     remove: jest.Mock;
+    stats: jest.Mock;
     modem: {
       demuxStream: jest.Mock;
     };
@@ -72,6 +73,7 @@ describe('DockerService', () => {
       exec: jest.fn().mockResolvedValue(mockExec),
       stop: jest.fn(),
       remove: jest.fn(),
+      stats: jest.fn(),
       modem: {
         demuxStream: jest.fn(),
       },
@@ -1389,6 +1391,235 @@ describe('DockerService', () => {
       expect(sessions2).toContain(sessionId3);
       expect(sessions2).not.toContain(sessionId1);
       expect(sessions2).not.toContain(sessionId2);
+    });
+  });
+
+  describe('getContainerStats', () => {
+    const containerId = 'test-container-id';
+
+    beforeEach(() => {
+      mockContainer.inspect.mockResolvedValue({});
+    });
+
+    it('should get container stats successfully', async () => {
+      const mockStats: Docker.ContainerStats = {
+        read: '2024-01-01T00:00:00.000000000Z',
+        preread: '2024-01-01T00:00:00.000000000Z',
+        pids_stats: { current: 1 },
+        blkio_stats: {
+          io_service_bytes_recursive: [],
+          io_serviced_recursive: [],
+          io_queue_recursive: [],
+          io_service_time_recursive: [],
+          io_wait_time_recursive: [],
+          io_merged_recursive: [],
+          io_time_recursive: [],
+          sectors_recursive: [],
+        },
+        num_procs: 0,
+        storage_stats: {},
+        cpu_stats: {
+          cpu_usage: {
+            total_usage: 1000000000,
+            percpu_usage: [1000000000],
+            usage_in_kernelmode: 100000000,
+            usage_in_usermode: 900000000,
+          },
+          system_cpu_usage: 2000000000,
+          online_cpus: 1,
+          throttling_data: {
+            periods: 0,
+            throttled_periods: 0,
+            throttled_time: 0,
+          },
+        },
+        precpu_stats: {
+          cpu_usage: {
+            total_usage: 0,
+            percpu_usage: [],
+            usage_in_kernelmode: 0,
+            usage_in_usermode: 0,
+          },
+          system_cpu_usage: 0,
+          online_cpus: 1,
+          throttling_data: {
+            periods: 0,
+            throttled_periods: 0,
+            throttled_time: 0,
+          },
+        },
+        memory_stats: {
+          usage: 1000000,
+          max_usage: 2000000,
+          failcnt: 0,
+          limit: 2000000,
+          stats: {
+            total_pgmajfault: 0,
+            cache: 0,
+            mapped_file: 0,
+            total_inactive_file: 0,
+            pgpgout: 0,
+            rss: 0,
+            total_mapped_file: 0,
+            writeback: 0,
+            unevictable: 0,
+            pgpgin: 0,
+            total_active_file: 0,
+            active_anon: 0,
+            total_active_anon: 0,
+            total_inactive_anon: 0,
+            inactive_anon: 0,
+            active_file: 0,
+            inactive_file: 0,
+            total_unevictable: 0,
+            total_rss: 0,
+            total_rss_huge: 0,
+            total_writeback: 0,
+            total_cache: 0,
+            rss_huge: 0,
+            total_pgpgin: 0,
+            total_pgpgout: 0,
+            total_pgfault: 0,
+            pgfault: 0,
+            pgmajfault: 0,
+            hierarchical_memory_limit: 0,
+          },
+        },
+        networks: {},
+      };
+
+      (mockContainer.stats as jest.Mock) = jest.fn((options, callback) => {
+        callback(null, mockStats);
+      });
+
+      const result = await service.getContainerStats(containerId);
+
+      expect(mockContainer.inspect).toHaveBeenCalled();
+      expect(mockContainer.stats).toHaveBeenCalledWith({ stream: false }, expect.any(Function));
+      expect(result).toEqual(mockStats);
+    });
+
+    it('should throw NotFoundException when container does not exist', async () => {
+      mockContainer.inspect.mockRejectedValue({ statusCode: 404 });
+
+      await expect(service.getContainerStats(containerId)).rejects.toThrow(NotFoundException);
+      expect(mockContainer.inspect).toHaveBeenCalled();
+      expect(mockContainer.stats).not.toHaveBeenCalled();
+    });
+
+    it('should handle stats errors', async () => {
+      const statsError = new Error('Stats error');
+      (mockContainer.stats as jest.Mock) = jest.fn((options, callback) => {
+        callback(statsError, null);
+      });
+
+      await expect(service.getContainerStats(containerId)).rejects.toThrow('Stats error');
+      expect(mockContainer.stats).toHaveBeenCalled();
+    });
+
+    it('should handle container inspection errors other than 404', async () => {
+      const error = new Error('Docker daemon error') as any;
+      error.statusCode = 500;
+      mockContainer.inspect.mockRejectedValue(error);
+
+      await expect(service.getContainerStats(containerId)).rejects.toThrow('Docker daemon error');
+      expect(mockContainer.stats).not.toHaveBeenCalled();
+    });
+
+    it('should call getContainer with correct containerId', async () => {
+      const mockStats: Docker.ContainerStats = {
+        read: '2024-01-01T00:00:00.000000000Z',
+        preread: '2024-01-01T00:00:00.000000000Z',
+        pids_stats: { current: 1 },
+        blkio_stats: {
+          io_service_bytes_recursive: [],
+          io_serviced_recursive: [],
+          io_queue_recursive: [],
+          io_service_time_recursive: [],
+          io_wait_time_recursive: [],
+          io_merged_recursive: [],
+          io_time_recursive: [],
+          sectors_recursive: [],
+        },
+        num_procs: 0,
+        storage_stats: {},
+        cpu_stats: {
+          cpu_usage: {
+            total_usage: 1000000000,
+            percpu_usage: [1000000000],
+            usage_in_kernelmode: 100000000,
+            usage_in_usermode: 900000000,
+          },
+          system_cpu_usage: 2000000000,
+          online_cpus: 1,
+          throttling_data: {
+            periods: 0,
+            throttled_periods: 0,
+            throttled_time: 0,
+          },
+        },
+        precpu_stats: {
+          cpu_usage: {
+            total_usage: 0,
+            percpu_usage: [],
+            usage_in_kernelmode: 0,
+            usage_in_usermode: 0,
+          },
+          system_cpu_usage: 0,
+          online_cpus: 1,
+          throttling_data: {
+            periods: 0,
+            throttled_periods: 0,
+            throttled_time: 0,
+          },
+        },
+        memory_stats: {
+          usage: 1000000,
+          max_usage: 2000000,
+          failcnt: 0,
+          limit: 2000000,
+          stats: {
+            total_pgmajfault: 0,
+            cache: 0,
+            mapped_file: 0,
+            total_inactive_file: 0,
+            pgpgout: 0,
+            rss: 0,
+            total_mapped_file: 0,
+            writeback: 0,
+            unevictable: 0,
+            pgpgin: 0,
+            total_active_file: 0,
+            active_anon: 0,
+            total_active_anon: 0,
+            total_inactive_anon: 0,
+            inactive_anon: 0,
+            active_file: 0,
+            inactive_file: 0,
+            total_unevictable: 0,
+            total_rss: 0,
+            total_rss_huge: 0,
+            total_writeback: 0,
+            total_cache: 0,
+            rss_huge: 0,
+            total_pgpgin: 0,
+            total_pgpgout: 0,
+            total_pgfault: 0,
+            pgfault: 0,
+            pgmajfault: 0,
+            hierarchical_memory_limit: 0,
+          },
+        },
+        networks: {},
+      };
+
+      (mockContainer.stats as jest.Mock) = jest.fn((options, callback) => {
+        callback(null, mockStats);
+      });
+
+      await service.getContainerStats(containerId);
+
+      expect(mockDocker.getContainer).toHaveBeenCalledWith(containerId);
     });
   });
 });

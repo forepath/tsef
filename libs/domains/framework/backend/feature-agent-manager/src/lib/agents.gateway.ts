@@ -162,6 +162,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Track agents that have received their first initialization message
   // Maps agent UUID -> boolean (true if initialization message was sent)
   private agentsWithFirstMessageSent = new Set<string>();
+  // Track stats intervals per agent UUID
+  // Maps agent UUID -> NodeJS.Timeout
+  private statsIntervalsByAgent = new Map<string, NodeJS.Timeout>();
 
   constructor(
     private readonly agentsService: AgentsService,
@@ -188,6 +191,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
    */
   handleDisconnect(socket: Socket) {
     this.logger.log(`Client disconnected: ${socket.id}`);
+    const agentUuid = this.authenticatedClients.get(socket.id);
     this.authenticatedClients.delete(socket.id);
     this.socketById.delete(socket.id);
     // Clean up all terminal sessions for this socket
@@ -202,6 +206,10 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }
       this.terminalSessionsBySocket.delete(socket.id);
+    }
+    // Clean up stats interval if this was the last socket for this agent
+    if (agentUuid) {
+      this.cleanupStatsIntervalIfNeeded(agentUuid);
     }
   }
 
@@ -312,6 +320,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // Restore chat history
       await this.restoreChatHistory(agentUuid, socket);
+
+      // Start periodic stats broadcasting and send first stats immediately
+      await this.startStatsBroadcasting(agentUuid);
     } catch (error) {
       socket.emit('loginError', createErrorResponse('Invalid credentials', 'LOGIN_ERROR'));
       const err = error as { message?: string; stack?: string };
@@ -630,6 +641,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Remove authenticated session
       this.authenticatedClients.delete(socket.id);
 
+      // Clean up stats interval if this was the last socket for this agent
+      this.cleanupStatsIntervalIfNeeded(agentUuid);
+
       try {
         // Get agent details for logging
         const agent = await this.agentsService.findOne(agentUuid);
@@ -868,6 +882,103 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         socket.emit('error', createErrorResponse('Error closing terminal session', 'TERMINAL_ERROR'));
         this.logger.error(`Terminal close error for session ${sessionId}: ${err.message}`);
       }
+    }
+  }
+
+  /**
+   * Start periodic stats broadcasting for an agent.
+   * Sends the first stats immediately, then continues periodically.
+   * @param agentUuid - The UUID of the agent
+   */
+  private async startStatsBroadcasting(agentUuid: string): Promise<void> {
+    // Check if stats interval already exists for this agent
+    if (this.statsIntervalsByAgent.has(agentUuid)) {
+      this.logger.debug(`Stats broadcasting already active for agent ${agentUuid}`);
+      return;
+    }
+
+    // Get agent entity to find container
+    const entity = await this.agentsRepository.findById(agentUuid);
+    const containerId = entity?.containerId;
+    if (!containerId) {
+      this.logger.debug(`No container found for agent ${agentUuid}, skipping stats broadcasting`);
+      return;
+    }
+
+    // Send first stats immediately
+    await this.broadcastContainerStats(agentUuid, containerId);
+
+    // Set up periodic stats broadcasting (every 5 seconds)
+    const interval = setInterval(async () => {
+      // Check if agent still has authenticated clients
+      const hasAuthenticatedClients = Array.from(this.authenticatedClients.values()).includes(agentUuid);
+      if (!hasAuthenticatedClients) {
+        // No more authenticated clients, clean up interval
+        this.cleanupStatsInterval(agentUuid);
+        return;
+      }
+
+      try {
+        await this.broadcastContainerStats(agentUuid, containerId);
+      } catch (error) {
+        const err = error as { message?: string };
+        this.logger.warn(`Failed to broadcast stats for agent ${agentUuid}: ${err.message}`);
+        // Continue broadcasting even if one attempt fails
+      }
+    }, 5000); // 5 seconds interval
+
+    this.statsIntervalsByAgent.set(agentUuid, interval);
+    this.logger.debug(`Started stats broadcasting for agent ${agentUuid}`);
+  }
+
+  /**
+   * Broadcast container stats to all clients authenticated to an agent.
+   * @param agentUuid - The UUID of the agent
+   * @param containerId - The container ID
+   */
+  private async broadcastContainerStats(agentUuid: string, containerId: string): Promise<void> {
+    try {
+      const stats = await this.dockerService.getContainerStats(containerId);
+      const statsTimestamp = new Date().toISOString();
+
+      // Broadcast stats to all authenticated clients
+      this.broadcastToAgent(
+        agentUuid,
+        'containerStats',
+        createSuccessResponse({
+          stats,
+          timestamp: statsTimestamp,
+        }),
+      );
+    } catch (error) {
+      const err = error as { message?: string; stack?: string };
+      // Log error but don't throw - periodic broadcasting should continue
+      this.logger.warn(`Failed to get container stats for agent ${agentUuid}: ${err.message}`, err.stack);
+    }
+  }
+
+  /**
+   * Clean up stats interval for an agent if no more authenticated clients exist.
+   * @param agentUuid - The UUID of the agent
+   */
+  private cleanupStatsIntervalIfNeeded(agentUuid: string): void {
+    // Check if there are any authenticated clients for this agent
+    const hasAuthenticatedClients = Array.from(this.authenticatedClients.values()).includes(agentUuid);
+    if (!hasAuthenticatedClients) {
+      this.cleanupStatsInterval(agentUuid);
+    }
+  }
+
+  /**
+   * Clean up stats interval for an agent.
+   * @param agentUuid - The UUID of the agent
+   */
+  private cleanupStatsInterval(agentUuid: string): void {
+    const interval = this.statsIntervalsByAgent.get(agentUuid);
+    if (interval) {
+      clearInterval(interval);
+      this.statsIntervalsByAgent.delete(agentUuid);
+      this.logger.debug(`Stopped stats broadcasting for agent ${agentUuid}`);
     }
   }
 }

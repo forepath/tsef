@@ -105,6 +105,12 @@ channels:
       terminalClosedEvent:
         $ref: '#/components/messages/TerminalClosed'
     description: Server acknowledges terminal closure. Also emitted when terminal session ends (e.g., exit command).
+  agents/containerStats:
+    address: agents/containerStats
+    messages:
+      containerStatsEvent:
+        $ref: '#/components/messages/ContainerStats'
+    description: Server broadcasts container statistics (CPU, memory, network, etc.) periodically to all clients authenticated to the agent. First stats are sent immediately after successful login, then every 5 seconds while clients remain authenticated.
 operations:
   clientSendsLogin:
     action: send
@@ -202,6 +208,12 @@ operations:
       $ref: '#/channels/agents~1terminalClosed'
     messages:
       - $ref: '#/channels/agents~1terminalClosed/messages/terminalClosedEvent'
+  serverBroadcastsContainerStats:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1containerStats'
+    messages:
+      - $ref: '#/channels/agents~1containerStats/messages/containerStatsEvent'
 components:
   securitySchemes:
     jwt:
@@ -562,6 +574,61 @@ components:
               sessionId:
                 type: string
                 description: Terminal session ID that was closed
+          timestamp:
+            type: string
+            description: ISO timestamp
+    ContainerStats:
+      name: ContainerStats
+      title: Container stats event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [stats, timestamp]
+            properties:
+              stats:
+                type: object
+                description: Docker container statistics object (CPU, memory, network, etc.). See Docker API documentation for full structure.
+                properties:
+                  read:
+                    type: string
+                    description: Timestamp when stats were read
+                  preread:
+                    type: string
+                    description: Previous read timestamp
+                  pids_stats:
+                    type: object
+                    description: Process ID statistics
+                  blkio_stats:
+                    type: object
+                    description: Block I/O statistics
+                  num_procs:
+                    type: number
+                    description: Number of processes
+                  storage_stats:
+                    type: object
+                    description: Storage statistics
+                  cpu_stats:
+                    type: object
+                    description: CPU usage statistics
+                  precpu_stats:
+                    type: object
+                    description: Previous CPU statistics
+                  memory_stats:
+                    type: object
+                    description: Memory usage statistics
+                  networks:
+                    type: object
+                    description: Network statistics
+              timestamp:
+                type: string
+                description: ISO timestamp when stats were collected
           timestamp:
             type: string
             description: ISO timestamp

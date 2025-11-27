@@ -52,6 +52,9 @@ import {
   SocketsFacade,
   socketsReducer,
   stageFiles$,
+  StatsFacade,
+  statsReducer,
+  processContainerStats$,
   switchBranch$,
   unstageFiles$,
   updateClient$,
@@ -124,6 +127,7 @@ export const agentConsoleRoutes: Route[] = [
       SocketsFacade,
       FilesFacade,
       VcsFacade,
+      StatsFacade,
       // Feature states - registered at feature level for lazy loading
       provideState('clients', clientsReducer),
       provideState('agents', agentsReducer),
@@ -131,6 +135,7 @@ export const agentConsoleRoutes: Route[] = [
       provideState('authentication', authenticationReducer),
       provideState('files', filesReducer),
       provideState('vcs', vcsReducer),
+      provideState('stats', statsReducer),
       // Effects - only active when this feature route is loaded
       provideEffects({
         loadClients$,
@@ -181,6 +186,7 @@ export const agentConsoleRoutes: Route[] = [
         createBranch$,
         deleteBranch$,
         resolveConflict$,
+        processContainerStats$,
       }),
       provideMonacoEditor(),
     ],

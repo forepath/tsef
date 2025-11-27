@@ -49,3 +49,6 @@ export const forwardedEventReceived = createAction(
   '[Sockets] Forwarded Event Received',
   props<{ event: string; payload: import('./sockets.types').ForwardedEventPayload }>(),
 );
+
+// Agent Actions
+export const setAgent = createAction('[Sockets] Set Agent', props<{ agentId: string | null }>());
