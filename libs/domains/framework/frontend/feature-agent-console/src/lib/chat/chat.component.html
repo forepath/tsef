@@ -23,16 +23,12 @@
             <button
               type="button"
               class="btn btn-sm"
-              [class.btn-outline-primary]="!fileEditor?.fileTreeVisible()"
-              [class.btn-primary]="fileEditor?.fileTreeVisible()"
-              (click)="fileEditor?.onToggleFileTree()"
-              [title]="fileEditor?.fileTreeVisible() ? 'Hide File Tree' : 'Show File Tree'"
+              [class.btn-outline-primary]="!fileTreeVisible()"
+              [class.btn-primary]="fileTreeVisible()"
+              (click)="onToggleFileTree()"
+              [title]="fileTreeVisible() ? 'Hide File Tree' : 'Show File Tree'"
             >
-              <i
-                class="bi"
-                [class.bi-folder]="fileEditor?.fileTreeVisible()"
-                [class.bi-folder-x]="!fileEditor?.fileTreeVisible()"
-              ></i>
+              <i class="bi" [class.bi-folder]="fileTreeVisible()" [class.bi-folder-x]="!fileTreeVisible()"></i>
               <span class="ms-1">File Tree</span>
             </button>
             <button
@@ -49,25 +45,21 @@
             <button
               type="button"
               class="btn btn-sm"
-              [class.btn-outline-primary]="!fileEditor?.terminalVisible()"
-              [class.btn-primary]="fileEditor?.terminalVisible()"
-              (click)="fileEditor?.onToggleTerminal()"
-              [title]="fileEditor?.terminalVisible() ? 'Hide Terminal' : 'Show Terminal'"
+              [class.btn-outline-primary]="!terminalVisible()"
+              [class.btn-primary]="terminalVisible()"
+              (click)="onToggleTerminal()"
+              [title]="terminalVisible() ? 'Hide Terminal' : 'Show Terminal'"
             >
-              <i
-                class="bi"
-                [class.bi-terminal]="!fileEditor?.terminalVisible()"
-                [class.bi-terminal-fill]="fileEditor?.terminalVisible()"
-              ></i>
+              <i class="bi" [class.bi-terminal]="!terminalVisible()" [class.bi-terminal-fill]="terminalVisible()"></i>
               <span class="ms-1">Terminal</span>
             </button>
             <button
               type="button"
               class="btn btn-sm"
-              [class.btn-outline-primary]="!fileEditor?.gitManagerVisible()"
-              [class.btn-primary]="fileEditor?.gitManagerVisible()"
-              (click)="fileEditor?.onToggleGitManager()"
-              [title]="fileEditor?.gitManagerVisible() ? 'Hide Version Control' : 'Show Version Control'"
+              [class.btn-outline-primary]="!gitManagerVisible()"
+              [class.btn-primary]="gitManagerVisible()"
+              (click)="onToggleGitManager()"
+              [title]="gitManagerVisible() ? 'Hide Version Control' : 'Show Version Control'"
             >
               <i class="bi bi-git"></i>
               <span class="ms-1">Version Control</span>
