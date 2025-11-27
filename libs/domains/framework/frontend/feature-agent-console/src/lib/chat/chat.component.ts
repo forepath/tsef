@@ -1161,12 +1161,24 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   /**
    * Show tooltip with message and hide it after a couple seconds.
-   * Temporarily disables hover trigger to prevent tooltip from appearing on hover after click.
+   * Uses a simple approach: just update the title and let Bootstrap handle it naturally.
+   * Avoids programmatic hide() calls that cause errors.
    */
   private showShareTooltip(message: string): void {
-    if (!this.shareFileLinkButton?.nativeElement) {
+    if (!this.shareFileLinkButton?.nativeElement || !message) {
       return;
     }
+
+    const element = this.shareFileLinkButton.nativeElement;
+
+    // Store original values
+    const originalTitle = element.getAttribute('title') || 'Share file link';
+
+    // Clean up any existing tooltip completely first
+    this.cleanupTooltipCompletely();
+
+    // Update title - this will be picked up by Bootstrap's tooltip
+    element.setAttribute('title', message);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const bootstrap = (window as any).bootstrap;
@@ -1175,73 +1187,108 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       return;
     }
 
-    // Store original values
-    const originalTitle = this.shareFileLinkButton.nativeElement.getAttribute('title') || 'Share file link';
-    const originalTrigger = this.shareFileLinkButton.nativeElement.getAttribute('data-bs-trigger') || 'hover focus';
+    // Get or create tooltip instance - let Bootstrap manage it
+    try {
+      // Use getOrCreateInstance if available to avoid creating duplicates
+      if (bootstrap.Tooltip.getOrCreateInstance) {
+        this.shareButtonTooltip = bootstrap.Tooltip.getOrCreateInstance(element);
+      } else {
+        // Fallback: check for existing instance first
+        const existing = bootstrap.Tooltip.getInstance?.(element);
+        if (existing) {
+          this.shareButtonTooltip = existing;
+        } else {
+          this.shareButtonTooltip = new bootstrap.Tooltip(element);
+        }
+      }
 
-    // Dispose existing tooltip if it exists
+      // Update the tooltip title
+      if (this.shareButtonTooltip && typeof this.shareButtonTooltip.setContent === 'function') {
+        this.shareButtonTooltip.setContent({ '.tooltip-inner': message });
+      }
+
+      // Show tooltip manually
+      setTimeout(() => {
+        if (this.shareButtonTooltip && typeof this.shareButtonTooltip.show === 'function') {
+          try {
+            this.shareButtonTooltip.show();
+          } catch (error) {
+            console.error('Failed to show tooltip:', error);
+          }
+        }
+      }, 10);
+    } catch (error) {
+      console.error('Failed to create Bootstrap Tooltip:', error);
+      return;
+    }
+
+    // After 2 seconds, restore original state
+    // Don't call hide() - just update the title and let it fade naturally
+    setTimeout(() => {
+      // Restore original title
+      element.setAttribute('title', originalTitle);
+
+      // Update tooltip content if method exists
+      if (this.shareButtonTooltip && typeof this.shareButtonTooltip.setContent === 'function') {
+        try {
+          this.shareButtonTooltip.setContent({ '.tooltip-inner': originalTitle });
+        } catch (e) {
+          // Ignore
+        }
+      }
+
+      // Remove manual trigger and let it work normally
+      element.removeAttribute('data-bs-trigger');
+    }, 2000);
+  }
+
+  /**
+   * Completely clean up tooltip - removes from DOM to prevent errors
+   */
+  private cleanupTooltipCompletely(): void {
+    if (!this.shareFileLinkButton?.nativeElement) {
+      return;
+    }
+
+    const element = this.shareFileLinkButton.nativeElement;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bootstrap = (window as any).bootstrap;
+
+    // Remove any tooltip elements from DOM first to prevent Bootstrap from accessing them
+    const tooltipElements = document.querySelectorAll('.tooltip');
+    tooltipElements.forEach((tooltip) => {
+      try {
+        tooltip.remove();
+      } catch (e) {
+        // Ignore
+      }
+    });
+
+    // Get and dispose any Bootstrap-managed instance
+    if (bootstrap?.Tooltip?.getInstance) {
+      try {
+        const instance = bootstrap.Tooltip.getInstance(element);
+        if (instance) {
+          try {
+            instance.dispose();
+          } catch (e) {
+            // Ignore disposal errors
+          }
+        }
+      } catch (e) {
+        // Ignore
+      }
+    }
+
+    // Dispose our stored reference
     if (this.shareButtonTooltip) {
       try {
         this.shareButtonTooltip.dispose();
       } catch (e) {
-        // Tooltip might already be disposed
+        // Ignore disposal errors
       }
+      this.shareButtonTooltip = null;
     }
-
-    // Temporarily change trigger to 'manual' to prevent hover from showing tooltip
-    this.shareFileLinkButton.nativeElement.setAttribute('data-bs-trigger', 'manual');
-    this.shareFileLinkButton.nativeElement.setAttribute('title', message);
-    this.shareFileLinkButton.nativeElement.setAttribute('data-bs-original-title', message);
-
-    // Create new tooltip instance with manual trigger
-    this.shareButtonTooltip = new bootstrap.Tooltip(this.shareFileLinkButton.nativeElement, {
-      trigger: 'manual',
-      title: message,
-      placement: 'bottom',
-    });
-
-    // Use setTimeout to ensure DOM is ready
-    setTimeout(() => {
-      if (this.shareButtonTooltip) {
-        this.shareButtonTooltip.show();
-      }
-    }, 0);
-
-    // Hide tooltip after 2 seconds and restore hover behavior
-    setTimeout(() => {
-      if (this.shareButtonTooltip && this.shareFileLinkButton?.nativeElement) {
-        this.shareButtonTooltip.hide();
-
-        // Restore original title
-        this.shareFileLinkButton.nativeElement.setAttribute('title', originalTitle);
-        this.shareFileLinkButton.nativeElement.setAttribute('data-bs-original-title', originalTitle);
-
-        // Restore original trigger after a short delay to ensure tooltip is fully hidden
-        setTimeout(() => {
-          if (this.shareFileLinkButton?.nativeElement) {
-            // Dispose current tooltip
-            if (this.shareButtonTooltip) {
-              try {
-                this.shareButtonTooltip.dispose();
-              } catch (e) {
-                // Tooltip might already be disposed
-              }
-              this.shareButtonTooltip = null;
-            }
-
-            // Restore original trigger
-            this.shareFileLinkButton.nativeElement.setAttribute('data-bs-trigger', originalTrigger);
-
-            // Recreate tooltip with original trigger for hover behavior
-            this.shareButtonTooltip = new bootstrap.Tooltip(this.shareFileLinkButton.nativeElement, {
-              trigger: originalTrigger,
-              title: originalTitle,
-              placement: 'bottom',
-            });
-          }
-        }, 100);
-      }
-    }, 2000);
   }
 
   /**
