@@ -161,10 +161,50 @@ describe('SocketsFacade', () => {
 
     it('should dispatch setClient action and emit to socket', () => {
       const clientId = 'client-1';
+      // Mock state where client is not selected and not being set
+      store.select = jest.fn().mockReturnValue(
+        of({
+          selectedClientId: null,
+          settingClient: false,
+          settingClientId: null,
+        }),
+      );
       facade.setClient(clientId);
 
       expect(store.dispatch).toHaveBeenCalledWith(setClient({ clientId }));
       expect(mockSocket.emit).toHaveBeenCalledWith('setClient', { clientId });
+    });
+
+    it('should not dispatch setClient if client is already selected', () => {
+      const clientId = 'client-1';
+      // Mock state where client is already selected
+      store.select = jest.fn().mockReturnValue(
+        of({
+          selectedClientId: clientId,
+          settingClient: false,
+          settingClientId: null,
+        }),
+      );
+      facade.setClient(clientId);
+
+      expect(store.dispatch).not.toHaveBeenCalled();
+      expect(mockSocket.emit).not.toHaveBeenCalled();
+    });
+
+    it('should not dispatch setClient if client is already being set', () => {
+      const clientId = 'client-1';
+      // Mock state where client is currently being set
+      store.select = jest.fn().mockReturnValue(
+        of({
+          selectedClientId: null,
+          settingClient: true,
+          settingClientId: clientId,
+        }),
+      );
+      facade.setClient(clientId);
+
+      expect(store.dispatch).not.toHaveBeenCalled();
+      expect(mockSocket.emit).not.toHaveBeenCalled();
     });
 
     it('should not emit to socket if not connected', () => {

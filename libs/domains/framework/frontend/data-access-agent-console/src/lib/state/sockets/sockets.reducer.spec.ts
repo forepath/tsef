@@ -119,7 +119,7 @@ describe('socketsReducer', () => {
   });
 
   describe('setClient', () => {
-    it('should clear error', () => {
+    it('should clear error and set settingClient flag', () => {
       const state: SocketsState = {
         ...initialSocketsState,
         error: 'Previous error',
@@ -128,31 +128,41 @@ describe('socketsReducer', () => {
       const newState = socketsReducer(state, setClient({ clientId: 'client-1' }));
 
       expect(newState.error).toBeNull();
+      expect(newState.settingClient).toBe(true);
+      expect(newState.settingClientId).toBe('client-1');
     });
   });
 
   describe('setClientSuccess', () => {
-    it('should set selectedClientId', () => {
+    it('should set selectedClientId and clear settingClient flag', () => {
       const state: SocketsState = {
         ...initialSocketsState,
+        settingClient: true,
+        settingClientId: 'client-1',
       };
 
       const newState = socketsReducer(state, setClientSuccess({ message: 'Client set', clientId: 'client-1' }));
 
       expect(newState.selectedClientId).toBe('client-1');
       expect(newState.error).toBeNull();
+      expect(newState.settingClient).toBe(false);
+      expect(newState.settingClientId).toBeNull();
     });
   });
 
   describe('setClientFailure', () => {
-    it('should set error', () => {
+    it('should set error and clear settingClient flag', () => {
       const state: SocketsState = {
         ...initialSocketsState,
+        settingClient: true,
+        settingClientId: 'client-1',
       };
 
       const newState = socketsReducer(state, setClientFailure({ error: 'Set client failed' }));
 
       expect(newState.error).toBe('Set client failed');
+      expect(newState.settingClient).toBe(false);
+      expect(newState.settingClientId).toBeNull();
     });
   });
 

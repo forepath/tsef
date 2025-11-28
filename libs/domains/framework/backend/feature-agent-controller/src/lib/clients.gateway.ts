@@ -44,6 +44,8 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
   private remoteSocketBySocket = new Map<string, ClientSocket>();
   // Track which agentIds are logged-in per socket (avoid repeated logins)
   private loggedInAgentsBySocket = new Map<string, Set<string>>();
+  // Track setClient operations in progress per socket to prevent duplicate calls
+  private settingClientBySocket = new Map<string, string>();
 
   constructor(
     private readonly clientsService: ClientsService,
@@ -69,6 +71,7 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
       this.remoteSocketBySocket.delete(socket.id);
     }
     this.loggedInAgentsBySocket.delete(socket.id);
+    this.settingClientBySocket.delete(socket.id);
   }
 
   /**
@@ -86,6 +89,28 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
       socket.emit('error', { message: 'clientId is required' });
       return;
     }
+
+    // Prevent duplicate setClient calls for the same socket and clientId
+    const currentSettingClientId = this.settingClientBySocket.get(socket.id);
+    const currentSelectedClientId = this.selectedClientBySocket.get(socket.id);
+
+    // Skip if already setting this clientId for this socket
+    if (currentSettingClientId === clientId) {
+      this.logger.debug(`setClient already in progress for socket ${socket.id} and clientId ${clientId}`);
+      return;
+    }
+
+    // Skip if already selected (unless it's a different clientId, which would be a change)
+    if (currentSelectedClientId === clientId && !currentSettingClientId) {
+      this.logger.debug(`Client ${clientId} already selected for socket ${socket.id}`);
+      // Still emit success to acknowledge the request
+      socket.emit('setClientSuccess', { message: 'Client context already set', clientId });
+      return;
+    }
+
+    // Mark as setting to prevent duplicate calls
+    this.settingClientBySocket.set(socket.id, clientId);
+
     try {
       const client = await this.clientsRepository.findByIdOrThrow(clientId as string);
       this.selectedClientBySocket.set(socket.id, clientId);
@@ -164,14 +189,17 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
       // SECURITY: setClientSuccess is sent only to the initiating socket
       // Check if already connected (socket.io-client can connect synchronously in some cases)
       if (remote.connected) {
+        this.settingClientBySocket.delete(socket.id);
         socket.emit('setClientSuccess', { message: 'Client context set', clientId });
       } else {
         remote.once('connect', () => {
           // SECURITY: Success event sent only to the initiating socket
+          this.settingClientBySocket.delete(socket.id);
           socket.emit('setClientSuccess', { message: 'Client context set', clientId });
         });
         remote.once('connect_error', (err: Error) => {
           this.logger.warn(`Remote connection failed for socket ${socket.id}: ${err.message}`);
+          this.settingClientBySocket.delete(socket.id);
           if (socket.connected) {
             try {
               // SECURITY: Error sent only to the initiating socket
@@ -184,6 +212,8 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
       }
     } catch (err) {
       const message = (err as { message?: string }).message || 'Failed to set client';
+      // Clear setting flag on error
+      this.settingClientBySocket.delete(socket.id);
       // SECURITY: Error sent only to the initiating socket
       socket.emit('error', { message });
     }

@@ -1,7 +1,7 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { distinctUntilChanged, Observable } from 'rxjs';
+import { distinctUntilChanged, Observable, take } from 'rxjs';
 import { connectSocket, disconnectSocket, forwardEvent, setChatModel, setClient } from './sockets.actions';
 import { getSocketInstance } from './sockets.effects';
 import {
@@ -12,11 +12,14 @@ import {
   selectMostRecentForwardedEvent,
   selectMostRecentForwardedEventByEvent,
   selectSelectedClientId,
+  selectSettingClient,
+  selectSettingClientId,
   selectSocketConnected,
   selectSocketConnecting,
   selectSocketDisconnecting,
   selectSocketError,
   selectSocketForwarding,
+  selectSocketsState,
 } from './sockets.selectors';
 import { ForwardableEvent, type ForwardableEventPayload, type ForwardedEventPayload } from './sockets.types';
 
@@ -38,6 +41,8 @@ export class SocketsFacade {
   readonly connecting$: Observable<boolean> = this.store.select(selectSocketConnecting);
   readonly disconnecting$: Observable<boolean> = this.store.select(selectSocketDisconnecting);
   readonly selectedClientId$: Observable<string | null> = this.store.select(selectSelectedClientId);
+  readonly settingClient$: Observable<boolean> = this.store.select(selectSettingClient);
+  readonly settingClientId$: Observable<string | null> = this.store.select(selectSettingClientId);
   readonly forwarding$: Observable<boolean> = this.store.select(selectSocketForwarding);
   readonly chatForwarding$: Observable<boolean> = this.store.select(selectChatForwarding);
   readonly chatModel$: Observable<string | null> = this.store.select(selectChatModel);
@@ -75,8 +80,25 @@ export class SocketsFacade {
       console.warn('Socket not connected. Cannot set client.');
       return;
     }
-    this.store.dispatch(setClient({ clientId }));
-    socket.emit('setClient', { clientId });
+
+    // Prevent duplicate setClient calls with the same clientId
+    // Use synchronous state check to avoid race conditions
+    const state = this.store.select(selectSocketsState).pipe(take(1));
+    state.subscribe((socketsState) => {
+      // Skip if already selected
+      if (socketsState.selectedClientId === clientId) {
+        return;
+      }
+
+      // Skip if already setting this clientId
+      if (socketsState.settingClient && socketsState.settingClientId === clientId) {
+        return;
+      }
+
+      // Dispatch action and emit to socket
+      this.store.dispatch(setClient({ clientId }));
+      socket.emit('setClient', { clientId });
+    });
   }
 
   /**
