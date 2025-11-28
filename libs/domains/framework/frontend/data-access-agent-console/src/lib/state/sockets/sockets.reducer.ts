@@ -34,6 +34,9 @@ export interface SocketsState {
   }>;
   // Track currently selected agent ID (for associating stats with agent)
   selectedAgentId: string | null;
+  // Track setClient operation in progress to prevent duplicate calls
+  settingClient: boolean;
+  settingClientId: string | null; // Track which clientId is being set
 }
 
 export const initialSocketsState: SocketsState = {
@@ -47,6 +50,8 @@ export const initialSocketsState: SocketsState = {
   error: null,
   forwardedEvents: [],
   selectedAgentId: null,
+  settingClient: false,
+  settingClientId: null,
 };
 
 export const socketsReducer = createReducer(
@@ -83,19 +88,27 @@ export const socketsReducer = createReducer(
     error: null,
     forwardedEvents: [],
     selectedAgentId: null,
+    settingClient: false,
+    settingClientId: null,
   })),
   // Set Client
-  on(setClient, (state) => ({
+  on(setClient, (state, { clientId }) => ({
     ...state,
+    settingClient: true,
+    settingClientId: clientId,
     error: null,
   })),
   on(setClientSuccess, (state, { clientId }) => ({
     ...state,
     selectedClientId: clientId,
+    settingClient: false,
+    settingClientId: null,
     error: null,
   })),
   on(setClientFailure, (state, { error }) => ({
     ...state,
+    settingClient: false,
+    settingClientId: null,
     error,
   })),
   on(setChatModel, (state, { model }) => ({
