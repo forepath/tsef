@@ -257,30 +257,6 @@ describe('socketsReducer', () => {
       jest.spyOn(Date, 'now').mockRestore();
     });
 
-    it('should keep only last 100 events', () => {
-      const state: SocketsState = {
-        ...initialSocketsState,
-        forwardedEvents: Array.from({ length: 100 }, (_, i) => ({
-          event: 'chatMessage',
-          payload: mockForwardedPayload,
-          timestamp: i,
-        })),
-      };
-
-      const timestamp = Date.now();
-      jest.spyOn(Date, 'now').mockReturnValue(timestamp);
-
-      const newState = socketsReducer(
-        state,
-        forwardedEventReceived({ event: 'chatMessage', payload: mockForwardedPayload }),
-      );
-
-      expect(newState.forwardedEvents.length).toBe(100);
-      expect(newState.forwardedEvents[99].timestamp).toBe(timestamp);
-
-      jest.spyOn(Date, 'now').mockRestore();
-    });
-
     it('should set selectedAgentId from loginSuccess payload', () => {
       const loginSuccessPayload: ForwardedEventPayload = {
         success: true,

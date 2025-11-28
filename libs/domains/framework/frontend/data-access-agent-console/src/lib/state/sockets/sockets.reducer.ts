@@ -148,6 +148,10 @@ export const socketsReducer = createReducer(
   })),
   // Forwarded Event Received
   on(forwardedEventReceived, (state, { event, payload }) => {
+    // Don't track containerStats events
+    if (event === 'containerStats') {
+      return state;
+    }
     // Extract agentId from loginSuccess payload to track selected agent
     let selectedAgentId = state.selectedAgentId;
     if (event === 'loginSuccess' && 'data' in payload && payload.success) {
@@ -163,7 +167,7 @@ export const socketsReducer = createReducer(
 
     return {
       ...state,
-      forwardedEvents: [...state.forwardedEvents, { event, payload, timestamp: Date.now() }].slice(-100), // Keep last 100 events to prevent memory issues
+      forwardedEvents: [...state.forwardedEvents, { event, payload, timestamp: Date.now() }],
       selectedAgentId,
     };
   }),
