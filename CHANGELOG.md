@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0](https://github.com/forepath/tsef/compare/v1.8.0...v1.9.0) (2025-11-30)
+
+
+### Features
+
+* agent container stats ([#82](https://github.com/forepath/tsef/issues/82)) ([a11c0b7](https://github.com/forepath/tsef/commit/a11c0b70853a1350a31bf13a6b3af18bf2640bb8))
+* console frontend docker image ([#85](https://github.com/forepath/tsef/issues/85)) ([8a1c056](https://github.com/forepath/tsef/commit/8a1c05675a125188d74c4d00d515a3265ecbd8f7))
+
+
+### Bug Fixes
+
+* stream message discarding ([#84](https://github.com/forepath/tsef/issues/84)) ([bfab583](https://github.com/forepath/tsef/commit/bfab58377f33fc23b27f9036b42ccace2bdd3d18))
+* websocket client selection race condition ([#83](https://github.com/forepath/tsef/issues/83)) ([339de6c](https://github.com/forepath/tsef/commit/339de6c4f0344e453899d2f4fd5d1006605ab9fa))
+
 ## [1.8.0](https://github.com/forepath/tsef/compare/v1.7.2...v1.8.0) (2025-11-27)
 
 
