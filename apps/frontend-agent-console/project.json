@@ -112,12 +112,85 @@
         "staticFilePath": "dist/apps/frontend-agent-console/browser",
         "spa": true
       }
+    },
+    "prebuild-server": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/frontend-agent-console/server",
+        "format": ["cjs"],
+        "bundle": true,
+        "main": "apps/frontend-agent-console/src/server.ts",
+        "tsConfig": "apps/frontend-agent-console/tsconfig.server.json",
+        "assets": [],
+        "generatePackageJson": true,
+        "external": ["express"],
+        "deleteOutputPath": false,
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false
+          }
+        }
+      },
+      "dependsOn": ["build"]
+    },
+    "server": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/dist/apps/frontend-agent-console/server/browser"
+      ],
+      "options": {
+        "command": "test -d dist/apps/frontend-agent-console/browser && mkdir -p dist/apps/frontend-agent-console/server && cp -r dist/apps/frontend-agent-console/browser dist/apps/frontend-agent-console/server/browser || (echo 'Error: Browser directory not found. Please run build first.' && exit 1)"
+      },
+      "dependsOn": ["prebuild-server"]
+    },
+    "server-container-image": {
+      "dependsOn": ["server"],
+      "cache": false,
+      "executor": "@nx-tools/nx-container:build",
+      "options": {
+        "engine": "docker",
+        "file": "apps/frontend-agent-console/Dockerfile.server",
+        "context": "dist/apps/frontend-agent-console/server"
+      },
+      "configurations": {
+        "test": {
+          "tags": ["ghcr.io/forepath/agenstra-console-server:latest"]
+        },
+        "release": {
+          "push": true,
+          "tags": [
+            "ghcr.io/forepath/agenstra-console-server:latest",
+            "ghcr.io/forepath/agenstra-console-server:$VERSION"
+          ]
+        }
+      },
+      "defaultConfiguration": "test"
+    },
+    "start-containers": {
+      "dependsOn": ["server-container-image"],
+      "cache": false,
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/frontend-agent-console",
+        "command": "docker compose up -d --force-recreate --remove-orphans"
+      }
     }
   },
   "i18n": {
-    "sourceLocale": "en-US",
+    "sourceLocale": "en",
     "locales": {
-      "en": "apps/frontend-agent-console/src/i18n/messages.en.xlf",
       "de": "apps/frontend-agent-console/src/i18n/messages.de.xlf"
     }
   }

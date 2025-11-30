@@ -16,6 +16,14 @@
         document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
       })();
     </script>
+    <!-- Import map for Monaco Editor (external dependency) -->
+    <script type="importmap">
+      {
+        "imports": {
+          "monaco-editor": "./assets/monaco/esm/vs/editor/editor.main.js"
+        }
+      }
+    </script>
     <!-- Loading indicator styles to show immediately -->
     <style>
       app-root:empty::before {
