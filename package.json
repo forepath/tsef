@@ -59,6 +59,7 @@
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "@typescript-eslint/utils": "7.18.0",
+    "baseline-browser-mapping": "2.8.32",
     "class-validator": "0.14.2",
     "commitlint": "20.1.0",
     "esbuild": "0.25.0",
