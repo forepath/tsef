@@ -137,7 +137,7 @@
     "bootstrap": "5.3.8",
     "bootstrap-icons": "1.13.1",
     "dockerode": "4.0.9",
-    "express": "4.21.2",
+    "express": "4.22.0",
     "ionicons": "7.4.0",
     "keycloak-angular": "19.0.2",
     "keycloak-js": "26.2.1",
