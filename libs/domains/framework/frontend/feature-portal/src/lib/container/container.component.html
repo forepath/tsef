@@ -1,0 +1,122 @@
+<header class="header sticky-top bg-dark text-white">
+  <nav class="navbar navbar-expand-md navbar-dark p-0">
+    <div class="container d-flex align-items-center justify-content-between gap-2">
+      <div class="d-flex align-items-center gap-3">
+        <a routerLink="/" fragment="hero" class="brand-icon-container me-2 fs-3 bg-primary p-3">
+          <img src="assets/images/icon_light.svg" alt="Agenstra" class="brand-icon" />
+        </a>
+      </div>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#solution">Solution</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#features">Features</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#security">Security &amp; Data</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#pricing">Pricing</a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link text-white ms-3"
+              href="https://github.com/forepath/tsef"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              title="View on GitHub"
+            >
+              <i class="bi bi-github fs-5"></i>
+            </a>
+          </li>
+          <li class="nav-item ms-3">
+            <a href="mailto:hi@agenstra.com" class="btn btn-primary py-2 px-4" target="_blank" rel="noopener">
+              Book a Demo
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+<router-outlet></router-outlet>
+<footer class="footer bg-body-tertiary mt-5 position-relative overflow-hidden">
+  <div class="gradient-overlay gradient-overlay-footer"></div>
+  <div class="container py-10 position-relative">
+    <div class="row">
+      <div class="col-md-4 mb-3 mb-md-0">
+        <img src="assets/images/favicon.svg" alt="Agenstra" class="brand-icon" />
+        <h5 class="fw-bold my-3">Agenstra</h5>
+        <p class="text-muted small mb-0">
+          Centralized control for distributed AI agent infrastructure. Manage multiple agent-manager instances, interact
+          with agents in real-time, and edit code directly in their containers.
+        </p>
+        <div class="flex align-items-center gap-2 mt-4 fs-3">
+          <a
+            href="https://github.com/forepath/tsef"
+            class="text-decoration-none text-muted small d-inline-flex align-items-center gap-1"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="bi bi-github"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-md-3 offset-md-2">
+        <h6 class="fw-bold mb-3">Information</h6>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2">
+            <a href="#solution" class="text-decoration-none text-muted small">Solution</a>
+          </li>
+          <li class="mb-2">
+            <a href="#features" class="text-decoration-none text-muted small">Features</a>
+          </li>
+          <li class="mb-2">
+            <a href="#security" class="text-decoration-none text-muted small">Security &amp; Data</a>
+          </li>
+          <li class="mb-2">
+            <a href="#pricing" class="text-decoration-none text-muted small">Pricing</a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <h6 class="fw-bold mb-3">Legal</h6>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2">
+            <a routerLink="/legal/disclosure" fragment="hero" class="text-decoration-none text-muted small"
+              >Legal Disclosure</a
+            >
+          </li>
+          <li class="mb-2">
+            <a routerLink="/legal/privacy" fragment="hero" class="text-decoration-none text-muted small"
+              >Privacy Policy</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="bg-primary text-white py-3">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <p class="mb-0 small">&copy; 2025 IPvX UG (haftungsbeschränkt). All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -536,10 +536,10 @@ export class DockerService {
             const combinedBuffer = Buffer.concat(outputChunks);
             const timeoutOutput = combinedBuffer.toString('utf-8').trim();
             rejectOnce(
-              new Error(`Command timed out after 30 seconds${timeoutOutput ? `\nOutput: ${timeoutOutput}` : ''}`),
+              new Error(`Command timed out after 24 hours${timeoutOutput ? `\nOutput: ${timeoutOutput}` : ''}`),
             );
           }
-        }, 30000);
+        }, 86400000);
       });
 
       return output;
@@ -679,7 +679,7 @@ export class DockerService {
             stderrStream.end();
             resolveOnce(stdoutData);
           }
-        }, 30000);
+        }, 60000);
       });
 
       return output.trim();

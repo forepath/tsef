@@ -1,0 +1,29 @@
+$primary: #7a3fff;
+
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap/scss/bootstrap-grid';
+@import 'bootstrap-icons/font/bootstrap-icons';
+
+// Smooth scrolling for anchor links
+html {
+  scroll-behavior: smooth;
+}
+
+// Responsive py-10 utility (double py-5)
+.py-10 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+
+  @media (min-width: 768px) {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+
+.mt-10 {
+  margin-top: 3rem;
+
+  @media (min-width: 768px) {
+    margin-top: 6rem;
+  }
+}

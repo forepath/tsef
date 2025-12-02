@@ -1,0 +1,50 @@
+.header {
+  z-index: 1020; // Bootstrap sticky-top uses 1020, ensure we're on top
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); // Bootstrap's subtle shadow
+}
+
+.brand-icon {
+  color: #fff;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+}
+
+.nav-link {
+  transition: color 0.15s ease-in-out;
+
+  &:hover {
+    color: var(--bs-primary) !important;
+  }
+}
+
+.footer {
+  margin-top: auto;
+}
+
+// Gradient overlay for footer - subtle fade from top to bottom
+.gradient-overlay-footer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background-image: linear-gradient(
+    to bottom,
+    rgba(122, 63, 255, 0.08) 0%,
+    rgba(122, 63, 255, 0.04) 30%,
+    transparent 60%,
+    rgba(122, 63, 255, 0.06) 100%
+  );
+  mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%, transparent 100%);
+}

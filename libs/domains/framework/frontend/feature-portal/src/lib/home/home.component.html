@@ -1,0 +1,1295 @@
+<!-- Hero Section - Problem Statement -->
+<section id="hero" class="py-10 bg-body-tertiary position-relative overflow-hidden">
+  <div class="gradient-overlay gradient-overlay-hero"></div>
+  <div class="container position-relative">
+    <div class="row align-items-center">
+      <div class="col-md-6 mb-4 mb-md-0">
+        <h1 class="display-4 fw-bold mb-4">
+          Centralized Control for <span class="text-primary">Distributed AI Agent Infrastructure</span>
+        </h1>
+        <p class="mb-4 fs-5">
+          Managing AI agents across multiple servers is complex. You need to coordinate services, monitor containers,
+          and maintain connections - all while trying to build your product.
+        </p>
+        <p class="mb-5">
+          Agenstra provides a complete platform for managing distributed AI agent infrastructure. Control multiple
+          agent-manager instances, interact with agents in real-time, and code directly in their containers using a
+          full-featured web-based IDE - all from one powerful dashboard.
+        </p>
+        <div class="d-flex flex-column flex-md-row gap-3">
+          <a href="#solution" class="btn btn-primary py-2 px-4">Learn More</a>
+          <a href="#features" class="btn btn-outline-primary py-2 px-4">View Features</a>
+        </div>
+      </div>
+      <div class="col-md-6 position-relative dashboard-stack-container">
+        <!-- Rotated background screenshot (stacked behind) -->
+        <div class="dashboard-stack dashboard-stack-back">
+          <!-- TODO: Replace with product screenshot showing the Agenstra console dashboard with agent management interface -->
+          <img
+            src="assets/images/screenshots/workspace-management.png"
+            alt="Agenstra Console Dashboard"
+            class="img-fluid rounded shadow-lg w-100"
+          />
+        </div>
+        <!-- Main dashboard screenshot (on top) -->
+        <div class="dashboard-stack dashboard-stack-front">
+          <!-- TODO: Replace with product screenshot showing the Agenstra console dashboard with agent management interface -->
+          <img
+            src="assets/images/screenshots/workspace-management.png"
+            alt="Agenstra Console Dashboard"
+            class="img-fluid rounded shadow-lg w-100"
+          />
+        </div>
+      </div>
+    </div>
+    <!-- Supported AI Agents Subsection -->
+    <div class="row mt-10">
+      <div class="col-md-12 text-center mb-4">
+        <h3 class="h5 fw-bold mb-2">Supported AI Agents</h3>
+        <p class="text-muted small mb-0">Works with your favorite AI agent providers</p>
+      </div>
+    </div>
+    <div class="row align-items-center justify-content-center g-4 position-relative">
+      <div class="col-6 col-md-3 col-lg-2 text-center">
+        <img
+          src="assets/images/logos/cursor.svg"
+          alt="Cursor"
+          class="img-fluid logo-partner"
+          style="max-height: 28px; filter: grayscale(100%) opacity(0.6); transition: all 0.3s ease"
+        />
+      </div>
+      <div class="col-6 col-md-3 col-lg-2 text-center">
+        <div class="logo-partner-text">
+          <span class="badge bg-body-secondary text-muted px-3 py-2">Custom Providers</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Solution Section -->
+<section id="solution" class="py-10">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 text-center mb-5">
+        <h2 class="display-5 fw-bold mb-3">Complete AI Agent Management Platform</h2>
+        <p class="lead text-muted">
+          Agenstra combines a powerful web-based IDE with distributed backend services to give you complete control over
+          your AI agent infrastructure. Code directly in agent containers, manage agents, interact in real-time, and
+          deploy infrastructure automatically - all from your browser.
+        </p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100 border shadow-sm">
+          <div class="card-body text-center p-5">
+            <div class="mb-3">
+              <i class="bi bi-diagram-3-fill text-primary" style="font-size: 3rem"></i>
+            </div>
+            <h3 class="h5 fw-bold mb-3">Centralized Control</h3>
+            <p class="text-muted mb-0">
+              Connect to and manage multiple remote agent-manager services from a single console. The controller
+              orchestrates all your distributed agent infrastructure in one place.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 border shadow-sm">
+          <div class="card-body text-center p-5">
+            <div class="mb-3">
+              <i class="bi bi-chat-dots-fill text-primary" style="font-size: 3rem"></i>
+            </div>
+            <h3 class="h5 fw-bold mb-3">Real-time Agent Interaction</h3>
+            <p class="text-muted mb-0">
+              WebSocket-based bidirectional communication with AI agents. Chat with agents, stream container logs, and
+              send commands in real-time through persistent connections.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 border shadow-sm">
+          <div class="card-body text-center p-5">
+            <div class="mb-3">
+              <i class="bi bi-code-square text-primary" style="font-size: 3rem"></i>
+            </div>
+            <h3 class="h5 fw-bold mb-3">Full-Featured Web IDE</h3>
+            <p class="text-muted mb-0">
+              Complete IDE experience powered by Monaco Editor (VS Code's editor). Syntax highlighting, IntelliSense,
+              multi-file editing, Git integration, terminal access, live collaboration, and more - all in your browser.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="text-center">
+          <svg
+            viewBox="0 0 1200 630"
+            class="w-100"
+            style="max-width: 100%; height: auto"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <!-- Background -->
+            <rect width="1200" height="630" fill="#f8f9fa" rx="8" />
+
+            <!-- Connection Lines - Green arrows (behind Controller API) -->
+            <!-- All arrows originate from bottom center of Controller API (550, 130) -->
+            <!-- Controller to Manager 1 (L-shaped: down, then left) -->
+            <path
+              d="M 550 130 L 550 240 L 140 240 L 140 300"
+              stroke="#28a745"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowhead-green)"
+            />
+
+            <!-- Controller to Manager 2 (L-shaped: down, then left) -->
+            <path
+              d="M 550 130 L 550 240 L 390 240 L 390 300"
+              stroke="#28a745"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowhead-green)"
+            />
+
+            <!-- Controller to Manager 3 (L-shaped: down, then right) -->
+            <path
+              d="M 550 130 L 550 240 L 640 240 L 640 300"
+              stroke="#28a745"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowhead-green)"
+            />
+
+            <!-- Label for green arrows -->
+            <text
+              x="390"
+              y="235"
+              text-anchor="middle"
+              font-family="system-ui, -apple-system, sans-serif"
+              font-size="11"
+              fill="#28a745"
+            >
+              HTTP / WebSocket
+            </text>
+
+            <!-- Console (Frontend) -->
+            <g id="console">
+              <rect
+                x="50"
+                y="50"
+                width="200"
+                height="80"
+                rx="8"
+                fill="#7a3fff"
+                opacity="0.1"
+                stroke="#7a3fff"
+                stroke-width="2"
+              />
+              <text
+                x="150"
+                y="80"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="18"
+                font-weight="bold"
+                fill="#7a3fff"
+              >
+                Console
+              </text>
+              <text
+                x="150"
+                y="110"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                fill="#6c757d"
+              >
+                Interactive Web UI and IDE
+              </text>
+            </g>
+
+            <!-- Controller API -->
+            <g id="controller">
+              <rect
+                x="450"
+                y="50"
+                width="200"
+                height="80"
+                rx="8"
+                fill="#7a3fff"
+                opacity="0.15"
+                stroke="#7a3fff"
+                stroke-width="2"
+              />
+              <text
+                x="550"
+                y="80"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="18"
+                font-weight="bold"
+                fill="#7a3fff"
+              >
+                Controller
+              </text>
+              <text
+                x="550"
+                y="110"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                fill="#6c757d"
+              >
+                Agent Manager Proxy
+              </text>
+            </g>
+
+            <!-- Manager Instance 1 -->
+            <g id="manager1">
+              <rect
+                x="50"
+                y="300"
+                width="180"
+                height="120"
+                rx="8"
+                fill="#28a745"
+                opacity="0.1"
+                stroke="#28a745"
+                stroke-width="2"
+              />
+              <text
+                x="140"
+                y="330"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="16"
+                font-weight="bold"
+                fill="#28a745"
+              >
+                Manager 1
+              </text>
+              <text
+                x="140"
+                y="355"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                fill="#495057"
+              >
+                Location: us-east-1
+              </text>
+              <text
+                x="140"
+                y="375"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                fill="#495057"
+              >
+                Provider: AWS
+              </text>
+              <text
+                x="140"
+                y="400"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="11"
+                fill="#6c757d"
+              >
+                Agent Manager
+              </text>
+            </g>
+
+            <!-- Manager Instance 2 -->
+            <g id="manager2">
+              <rect
+                x="300"
+                y="300"
+                width="180"
+                height="120"
+                rx="8"
+                fill="#28a745"
+                opacity="0.1"
+                stroke="#28a745"
+                stroke-width="2"
+              />
+              <text
+                x="390"
+                y="330"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="16"
+                font-weight="bold"
+                fill="#28a745"
+              >
+                Manager 2
+              </text>
+              <text
+                x="390"
+                y="355"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                fill="#495057"
+              >
+                Location: FSN1
+              </text>
+              <text
+                x="390"
+                y="375"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                fill="#495057"
+              >
+                Provider: Hetzner
+              </text>
+              <text
+                x="390"
+                y="400"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="11"
+                fill="#6c757d"
+              >
+                Agent Manager
+              </text>
+            </g>
+
+            <!-- Manager Instance 3 -->
+            <g id="manager3">
+              <rect
+                x="550"
+                y="300"
+                width="180"
+                height="120"
+                rx="8"
+                fill="#28a745"
+                opacity="0.1"
+                stroke="#28a745"
+                stroke-width="2"
+              />
+              <text
+                x="640"
+                y="330"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="16"
+                font-weight="bold"
+                fill="#28a745"
+              >
+                Manager 3
+              </text>
+              <text
+                x="640"
+                y="355"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                fill="#495057"
+              >
+                Location: AMS3
+              </text>
+              <text
+                x="640"
+                y="375"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                fill="#495057"
+              >
+                Provider: Digital Ocean
+              </text>
+              <text
+                x="640"
+                y="400"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="11"
+                fill="#6c757d"
+              >
+                Agent Manager
+              </text>
+            </g>
+
+            <!-- Agent Containers -->
+            <!-- Manager 1 Agents -->
+            <!-- Agent 1A -->
+            <g id="agent1a">
+              <rect
+                x="50"
+                y="500"
+                width="100"
+                height="80"
+                rx="6"
+                fill="#17a2b8"
+                opacity="0.15"
+                stroke="#17a2b8"
+                stroke-width="1.5"
+              />
+              <text
+                x="100"
+                y="525"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                font-weight="bold"
+                fill="#17a2b8"
+              >
+                Agent A
+              </text>
+              <text
+                x="100"
+                y="545"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="10"
+                fill="#495057"
+              >
+                Cursor
+              </text>
+              <text
+                x="100"
+                y="565"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="9"
+                fill="#6c757d"
+              >
+                AI Agent
+              </text>
+            </g>
+            <!-- Agent 1B -->
+            <g id="agent1b">
+              <rect
+                x="170"
+                y="500"
+                width="100"
+                height="80"
+                rx="6"
+                fill="#17a2b8"
+                opacity="0.15"
+                stroke="#17a2b8"
+                stroke-width="1.5"
+              />
+              <text
+                x="220"
+                y="525"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                font-weight="bold"
+                fill="#17a2b8"
+              >
+                Agent B
+              </text>
+              <text
+                x="220"
+                y="545"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="10"
+                fill="#495057"
+              >
+                Ollama
+              </text>
+              <text
+                x="220"
+                y="565"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="9"
+                fill="#6c757d"
+              >
+                AI Agent
+              </text>
+            </g>
+
+            <!-- Manager 2 Agent -->
+            <!-- Agent 2 -->
+            <g id="agent2">
+              <rect
+                x="330"
+                y="500"
+                width="120"
+                height="80"
+                rx="6"
+                fill="#17a2b8"
+                opacity="0.15"
+                stroke="#17a2b8"
+                stroke-width="1.5"
+              />
+              <text
+                x="390"
+                y="525"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                font-weight="bold"
+                fill="#17a2b8"
+              >
+                Agent C
+              </text>
+              <text
+                x="390"
+                y="545"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="10"
+                fill="#495057"
+              >
+                Claude Code
+              </text>
+              <text
+                x="390"
+                y="565"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="9"
+                fill="#6c757d"
+              >
+                AI Agent
+              </text>
+            </g>
+
+            <!-- Manager 3 Agent -->
+            <!-- Agent 3 -->
+            <g id="agent3">
+              <rect
+                x="580"
+                y="500"
+                width="120"
+                height="80"
+                rx="6"
+                fill="#17a2b8"
+                opacity="0.15"
+                stroke="#17a2b8"
+                stroke-width="1.5"
+              />
+              <text
+                x="640"
+                y="525"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="12"
+                font-weight="bold"
+                fill="#17a2b8"
+              >
+                Agent D
+              </text>
+              <text
+                x="640"
+                y="545"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="10"
+                fill="#495057"
+              >
+                Cursor
+              </text>
+              <text
+                x="640"
+                y="565"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="9"
+                fill="#6c757d"
+              >
+                AI Agent
+              </text>
+            </g>
+
+            <!-- Connection Lines - Console to Controller (horizontal) -->
+            <path d="M 250 90 L 450 90" stroke="#7a3fff" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+            <text
+              x="350"
+              y="85"
+              text-anchor="middle"
+              font-family="system-ui, -apple-system, sans-serif"
+              font-size="11"
+              fill="#7a3fff"
+            >
+              HTTP / WebSocket
+            </text>
+
+            <!-- Manager 1 to Agent 1A (L-shaped: down, then left) -->
+            <path
+              d="M 140 420 L 140 450 L 100 450 L 100 500"
+              stroke="#17a2b8"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowhead-blue)"
+            />
+
+            <!-- Manager 1 to Agent 1B (L-shaped: down, then right) -->
+            <path
+              d="M 140 420 L 140 450 L 220 450 L 220 500"
+              stroke="#17a2b8"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowhead-blue)"
+            />
+
+            <!-- Manager 2 to Agent 2 -->
+            <path
+              d="M 390 420 L 390 500"
+              stroke="#17a2b8"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowhead-blue)"
+            />
+
+            <!-- Manager 3 to Agent 3 -->
+            <path
+              d="M 640 420 L 640 500"
+              stroke="#17a2b8"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowhead-blue)"
+            />
+
+            <!-- Arrow Markers -->
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <polygon points="0 0, 10 3, 0 6" fill="#7a3fff" />
+              </marker>
+              <marker id="arrowhead-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <polygon points="0 0, 10 3, 0 6" fill="#28a745" />
+              </marker>
+              <marker id="arrowhead-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <polygon points="0 0, 10 3, 0 6" fill="#17a2b8" />
+              </marker>
+            </defs>
+
+            <!-- Legend -->
+            <g id="legend">
+              <rect x="800" y="50" width="350" height="160" rx="8" fill="white" stroke="#dee2e6" stroke-width="1" />
+              <text
+                x="975"
+                y="80"
+                text-anchor="middle"
+                font-family="system-ui, -apple-system, sans-serif"
+                font-size="16"
+                font-weight="bold"
+                fill="#495057"
+              >
+                Architecture
+              </text>
+
+              <!-- Legend Items -->
+              <rect
+                x="820"
+                y="100"
+                width="20"
+                height="15"
+                rx="3"
+                fill="#7a3fff"
+                opacity="0.1"
+                stroke="#7a3fff"
+                stroke-width="1.5"
+              />
+              <text x="850" y="112" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#495057">
+                Agent Console Frontend
+              </text>
+
+              <rect
+                x="820"
+                y="125"
+                width="20"
+                height="15"
+                rx="3"
+                fill="#7a3fff"
+                opacity="0.15"
+                stroke="#7a3fff"
+                stroke-width="2"
+              />
+              <text x="850" y="137" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#495057">
+                Agent Manager Controller (Proxy) Instance
+              </text>
+
+              <rect
+                x="820"
+                y="150"
+                width="20"
+                height="15"
+                rx="3"
+                fill="#28a745"
+                opacity="0.1"
+                stroke="#28a745"
+                stroke-width="2"
+              />
+              <text x="850" y="162" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#495057">
+                Agent Manager Instances
+              </text>
+
+              <rect
+                x="820"
+                y="175"
+                width="20"
+                height="15"
+                rx="3"
+                fill="#17a2b8"
+                opacity="0.15"
+                stroke="#17a2b8"
+                stroke-width="1.5"
+              />
+              <text x="850" y="187" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#495057">
+                Isolated Agent Containers
+              </text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <!-- Supported Infrastructure Providers Subsection -->
+    <div class="row mt-5 pt-5">
+      <div class="col-md-12 text-center mb-4">
+        <h3 class="h5 fw-bold mb-2">Supported Infrastructure Providers</h3>
+        <p class="text-muted small mb-0">Automatically deploy agent managers to your favorite cloud provider</p>
+      </div>
+    </div>
+    <div class="row align-items-center justify-content-center g-4 position-relative">
+      <div class="col-6 col-md-3 col-lg-2 text-center">
+        <img
+          src="assets/images/logos/hetzner.svg"
+          alt="Hetzner Cloud"
+          class="img-fluid logo-partner"
+          style="max-height: 18px; filter: grayscale(100%) opacity(0.6); transition: all 0.3s ease"
+        />
+      </div>
+      <div class="col-6 col-md-3 col-lg-2 text-center">
+        <div class="logo-partner-text">
+          <span class="badge bg-body-secondary text-muted px-3 py-2">Custom Providers</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-10 bg-body-tertiary position-relative overflow-hidden">
+  <div class="gradient-overlay gradient-overlay-features"></div>
+  <div class="container position-relative">
+    <div class="row">
+      <div class="col-md-12 text-center mb-5">
+        <h2 class="display-5 fw-bold mb-3">Complete Agent Management Capabilities</h2>
+        <p class="lead text-muted">
+          Everything you need to create, manage, and interact with AI agents across distributed infrastructure.
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card p-5 border shadow-sm mb-5">
+          <div class="card-body">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="d-flex gap-3">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5 fw-bold mb-2">Agent Lifecycle Management</h3>
+                    <p class="text-muted mb-0">
+                      Create, update, and delete AI agents through REST APIs. Each agent runs in its own isolated Docker
+                      container with secure authentication and credential management.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex gap-3">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5 fw-bold mb-2">Real-time WebSocket Communication</h3>
+                    <p class="text-muted mb-0">
+                      Bidirectional WebSocket connections for chat messaging, container log streaming, and command
+                      execution. Maintain persistent connections with multiple agents simultaneously.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex gap-3">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5 fw-bold mb-2">Full-Featured Web-Based IDE</h3>
+                    <p class="text-muted mb-0">
+                      Complete IDE experience with Monaco Editor (VS Code's editor). Syntax highlighting, IntelliSense
+                      autocomplete, multi-file tabs, Git diff viewer, markdown preview, terminal integration, and file
+                      tree navigation - all running in your browser.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex gap-3">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5 fw-bold mb-2">Terminal & Container Management</h3>
+                    <p class="text-muted mb-0">
+                      Integrated terminal (xterm.js) for running commands, Docker-based agent execution with live log
+                      streaming, container stats monitoring, and full container lifecycle management - all within the
+                      IDE.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex gap-3">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5 fw-bold mb-2">Integrated Git Workflow</h3>
+                    <p class="text-muted mb-0">
+                      Built-in Git manager with visual diff viewer, branch management, staging, commit, push, pull,
+                      rebase, and conflict resolution. All Git operations integrated directly into the IDE interface.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex gap-3">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5 fw-bold mb-2">Automated Infrastructure</h3>
+                    <p class="text-muted mb-0">
+                      Provision cloud servers automatically with Docker and agent-manager deployment. Connect to Hetzner
+                      Cloud and other providers to spin up infrastructure in minutes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex gap-3">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5 fw-bold mb-2">Multi-Provider Agent Support</h3>
+                    <p class="text-muted mb-0">
+                      Plugin-based architecture supporting multiple AI agent providers. Use Cursor agents, OpenAI,
+                      Anthropic, or implement custom providers through a unified interface.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex gap-3">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5 fw-bold mb-2">Centralized Dashboard</h3>
+                    <p class="text-muted mb-0">
+                      Single console interface to manage all your agent-manager instances. View agents across multiple
+                      servers, monitor status, and interact with any agent from one place.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-5 align-items-center position-relative">
+      <!-- Left skewed screenshot -->
+      <div
+        class="col-md-3 d-none d-md-block text-center position-absolute start-0 ide-screenshot-container ide-screenshot-left"
+      >
+        <div class="ide-screenshot">
+          <img
+            src="assets/images/screenshots/terminal.png"
+            alt="Agenstra IDE Terminal"
+            class="img-fluid rounded shadow-sm"
+          />
+        </div>
+      </div>
+      <!-- Main center image -->
+      <div class="col-12 col-md-8 offset-md-2 position-relative" style="z-index: 2">
+        <div class="text-center ide-screenshot-center">
+          <img
+            src="assets/images/screenshots/web-ide.png"
+            alt="Agenstra IDE Editor"
+            class="img-fluid rounded shadow-sm w-100"
+          />
+        </div>
+      </div>
+      <!-- Right skewed screenshot -->
+      <div
+        class="col-md-3 d-none d-md-block text-center position-absolute end-0 ide-screenshot-container ide-screenshot-right"
+      >
+        <div class="ide-screenshot">
+          <img
+            src="assets/images/screenshots/preview.png"
+            alt="Agenstra IDE Preview"
+            class="img-fluid rounded shadow-sm"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Security & Data Protection Section -->
+<section id="security" class="py-10 bg-primary text-white position-relative overflow-hidden">
+  <div class="gradient-overlay gradient-overlay-compliance"></div>
+  <div class="container position-relative">
+    <div class="row">
+      <div class="col-md-12 text-center mb-5">
+        <h2 class="display-6 fw-bold mb-3">Security &amp; Data Protection by Design</h2>
+        <p class="lead mb-0 text-white-50">
+          Keep sensitive data, chats, and agent activity under your full control while meeting strict compliance
+          requirements.
+        </p>
+        <div class="mt-4 d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
+          <!-- GDPR-ready badge -->
+          <div class="badge rounded-pill bg-light text-dark d-inline-flex align-items-center gap-2 ps-2 pe-4 py-2">
+            <!-- TODO: Replace with production-ready EU/GDPR icon if desired -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+              <!-- Blue circular background -->
+              <circle cx="14" cy="14" r="14" fill="#003399" />
+              <!-- Simple ring of stars (approximated as small circles), slightly shifted down to center visually -->
+              <g fill="#ffcc00" transform="translate(0,0.5)">
+                <circle cx="14" cy="4" r="1.1" />
+                <circle cx="18.5" cy="5.2" r="1.1" />
+                <circle cx="21.8" cy="8.5" r="1.1" />
+                <circle cx="23" cy="13" r="1.1" />
+                <circle cx="21.8" cy="17.5" r="1.1" />
+                <circle cx="18.5" cy="20.8" r="1.1" />
+                <circle cx="14" cy="22" r="1.1" />
+                <circle cx="9.5" cy="20.8" r="1.1" />
+                <circle cx="6.2" cy="17.5" r="1.1" />
+                <circle cx="5" cy="13" r="1.1" />
+                <circle cx="6.2" cy="8.5" r="1.1" />
+                <circle cx="9.5" cy="5.2" r="1.1" />
+              </g>
+            </svg>
+            <span class="lh-1 fw-semibold ps-2">GDPR compliant</span>
+          </div>
+          <!-- Made in Germany badge -->
+          <div class="badge rounded-pill bg-light text-dark d-inline-flex align-items-center gap-2 ps-2 pe-4 py-2">
+            <!-- TODO: Replace with production-ready Germany icon if desired -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+              <!-- German flag fully covering the circular icon -->
+              <defs>
+                <clipPath id="de-flag-clip">
+                  <circle cx="14" cy="14" r="14" />
+                </clipPath>
+              </defs>
+              <g clip-path="url(#de-flag-clip)">
+                <!-- Black stripe -->
+                <rect x="0" y="0" width="28" height="9.5" fill="#000000" />
+                <!-- Red stripe -->
+                <rect x="0" y="9.5" width="28" height="9.5" fill="#dd0000" />
+                <!-- Gold stripe -->
+                <rect x="0" y="19" width="28" height="9" fill="#ffce00" />
+              </g>
+            </svg>
+            <span class="lh-1 fw-semibold ps-2">Created and maintained in Germany</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="compliance-card h-100 p-4 p-md-5 rounded border">
+          <div class="mb-3">
+            <i class="bi bi-shield-lock-fill fs-2 text-primary"></i>
+          </div>
+          <h3 class="h5 fw-bold mb-3">Full Control over Data Location</h3>
+          <p class="mb-4">
+            Run controllers and managers where you need them: self-hosted, on-prem, or in specific cloud regions. All
+            agent traffic terminates in your infrastructure - no opaque third-party SaaS.
+          </p>
+          <ul class="small mb-0 list-unstyled">
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill mt-1"></i>
+              <span>Per-manager region and provider selection</span>
+            </li>
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill mt-1"></i>
+              <span>Keep logs and chat history in your own data stores</span>
+            </li>
+            <li class="mb-0 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill mt-1"></i>
+              <span>Supports strict data residency requirements</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="compliance-card h-100 p-4 p-md-5 rounded border">
+          <div class="mb-3">
+            <i class="bi bi-file-earmark-text-fill fs-2 text-primary"></i>
+          </div>
+          <h3 class="h5 fw-bold mb-3">Audit-Ready Agent Activity</h3>
+          <p class="mb-4">
+            Capture a complete trace of what happened, where, and when: from agent connections to executed commands and
+            file changes.
+          </p>
+          <ul class="small mb-0 list-unstyled">
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill mt-1"></i>
+              <span>Per-agent and per-manager audit trails</span>
+            </li>
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill mt-1"></i>
+              <span>Trace chat sessions back to underlying container actions</span>
+            </li>
+            <li class="mb-0 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill mt-1"></i>
+              <span>Exportable logs for internal or external audits</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="compliance-card h-100 p-4 p-md-5 rounded border">
+          <div class="mb-3">
+            <i class="bi bi-diagram-3-fill fs-2 text-primary"></i>
+          </div>
+          <h3 class="h5 fw-bold mb-3">Standardized, Policy-Driven Workspaces</h3>
+          <p class="mb-4">
+            Define standard agent templates, workspace layouts, and policies once and roll them out consistently across
+            environments.
+          </p>
+          <ul class="small mb-0 list-unstyled">
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill mt-1"></i>
+              <span>Reusable agent and project templates</span>
+            </li>
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill mt-1"></i>
+              <span>Consistent access controls and environment configuration</span>
+            </li>
+            <li class="mb-0 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill mt-1"></i>
+              <span>Helps align with GDPR/CCPA and internal security policies</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section id="pricing" class="py-10">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 text-center mb-5">
+        <h2 class="display-5 fw-bold mb-3">Choose Your License</h2>
+        <p class="lead text-muted">
+          Agenstra offers flexible licensing options to fit your needs, from open source to enterprise.
+        </p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <!-- Open Source / Personal Use -->
+      <div class="col-lg-4">
+        <div class="card h-100 border shadow-sm">
+          <div class="card-body p-5 d-flex flex-column">
+            <div class="text-center mb-4">
+              <h3 class="h4 m-0">Open Source</h3>
+              <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
+              <div class="my-3 bg-body-tertiary p-3 rounded-3">
+                <div class="display-6 fw-bold text-primary mb-2">Free</div>
+                <p class="text-muted small mb-0">AGPL-3.0 License</p>
+              </div>
+            </div>
+            <ul class="list-unstyled mb-4 flex-grow-1">
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span><strong>Agent Manager</strong> - Full agent lifecycle management</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span>Complete source code access</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span>Modify and customize freely</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-info-circle-fill text-muted mt-1"></i>
+                <span class="text-muted small">Must share modifications if used as a service (AGPL requirement)</span>
+              </li>
+            </ul>
+            <div class="d-grid mt-auto">
+              <a
+                href="https://github.com/forepath/tsef"
+                class="btn btn-outline-primary py-2 px-4"
+                target="_blank"
+                rel="noopener"
+              >
+                View on GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Free Business Use -->
+      <div class="col-lg-4">
+        <div class="card h-100 border-primary border-2 shadow-sm position-relative">
+          <div class="position-absolute top-0 start-50 translate-middle">
+            <span class="badge bg-primary px-3 py-2">Most Popular</span>
+          </div>
+          <div class="card-body p-5 d-flex flex-column">
+            <div class="text-center mb-4">
+              <h3 class="h4 m-0">Business</h3>
+              <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
+              <div class="my-3 bg-body-tertiary p-3 rounded-3">
+                <div class="display-6 fw-bold text-primary mb-2">Free</div>
+                <p class="text-muted small mb-0">BUSL-1.1 with Additional Use Grant</p>
+              </div>
+            </div>
+            <ul class="list-unstyled mb-4 flex-grow-1">
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span><strong>Agent Controller</strong> - Centralized management & server provisioning</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span>Production use included</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span>No source code sharing required</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span>Converts to AGPL-3.0 after 3 years</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-info-circle-fill text-muted mt-1"></i>
+                <span class="text-muted small">For businesses with Total Finances &lt; €2,000,000/year</span>
+              </li>
+            </ul>
+            <a href="https://github.com/forepath/tsef" class="btn btn-primary py-2 px-4" target="_blank" rel="noopener">
+              View on GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="col-lg-4">
+        <div class="card h-100 border shadow-sm">
+          <div class="card-body p-5 d-flex flex-column">
+            <div class="text-center mb-4">
+              <h3 class="h4 m-0">Enterprise</h3>
+              <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
+              <div class="my-3 bg-body-tertiary p-3 rounded-3">
+                <div class="display-6 fw-bold text-primary mb-2">Custom</div>
+                <p class="text-muted small mb-0">Commercial License</p>
+              </div>
+            </div>
+            <ul class="list-unstyled mb-4 flex-grow-1">
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span><strong>All Features</strong> - Complete platform access</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span>Unlimited production use</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span>Priority support & SLA</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span>Custom licensing terms</span>
+              </li>
+              <li class="mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                <span>For businesses with Total Finances ≥ €2,000,000/year</span>
+              </li>
+            </ul>
+            <div class="d-grid mt-auto">
+              <a href="mailto:hi@agenstra.com" class="btn btn-outline-primary py-2 px-4" target="_blank" rel="noopener">
+                Contact Sales
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hosted / SaaS Option -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="card border-primary border-2 shadow-sm">
+          <div class="card-body p-5">
+            <div class="row align-items-end">
+              <div class="col-md-8">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  <h3 class="h4 m-0">Hosted</h3>
+                  <span class="badge bg-primary px-3 py-2">SaaS</span>
+                </div>
+                <p class="lead mb-4">
+                  Fully managed Agenstra platform hosted in the cloud. No infrastructure setup required - get started in
+                  minutes.
+                </p>
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-2 d-flex align-items-start gap-2">
+                    <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                    <span><strong>Fully Managed</strong> - We handle all infrastructure, updates, and maintenance</span>
+                  </li>
+                  <li class="mb-2 d-flex align-items-start gap-2">
+                    <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                    <span
+                      ><strong>All Features Included</strong> - Complete platform with web IDE, agent management, and
+                      more</span
+                    >
+                  </li>
+                  <li class="mb-2 d-flex align-items-start gap-2">
+                    <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                    <span><strong>Automatic Scaling</strong> - Infrastructure scales with your needs</span>
+                  </li>
+                  <li class="mb-2 d-flex align-items-start gap-2">
+                    <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                    <span><strong>99.9% Uptime SLA</strong> - Enterprise-grade reliability</span>
+                  </li>
+                  <li class="mb-2 d-flex align-items-start gap-2">
+                    <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                    <span><strong>Priority Support</strong> - Dedicated support team</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-4 text-center text-md-end">
+                <div class="mb-3 bg-body-tertiary p-3 rounded-3">
+                  <div class="mb-2">Starting at</div>
+                  <div class="h3 fw-bold mb-2">€99<span class="fs-6 text-muted">/month</span></div>
+                  <p class="text-muted small mb-0">Per agent-manager instance</p>
+                </div>
+                <div class="d-grid">
+                  <a href="mailto:hi@agenstra.com" class="btn btn-primary py-2 px-4" target="_blank" rel="noopener">
+                    Try for Free
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

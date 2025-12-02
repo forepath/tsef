@@ -1,0 +1,38 @@
+import { ViewportScroller } from '@angular/common';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideRouter, withInMemoryScrolling, withRouterConfig } from '@angular/router';
+import { environment, provideEnvironment } from '@forepath/framework/frontend/util-configuration';
+import { provideStore } from '@ngrx/store';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { ViewportScrollerOffset } from './viewport-scroller-offset.service';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideClientHydration(withEventReplay()),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    // NgRx Store - base store required at root level
+    provideStore(),
+    // NgRx Store DevTools - only enabled in non-production environments
+    ...(environment.production
+      ? []
+      : [
+          provideStoreDevtools({
+            maxAge: 25,
+          }),
+        ]),
+    provideRouter(
+      [
+        {
+          path: '',
+          loadChildren: () => import('@forepath/framework/frontend/feature-portal').then((app) => app.portalRoutes),
+        },
+      ],
+      withRouterConfig({ paramsInheritanceStrategy: 'always' }),
+      withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),
+    ),
+    // Custom ViewportScroller with 80px offset for fixed navbar
+    { provide: ViewportScroller, useClass: ViewportScrollerOffset },
+    provideEnvironment(),
+  ],
+};

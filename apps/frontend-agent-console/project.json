@@ -76,7 +76,8 @@
       "continuous": true,
       "executor": "@angular-devkit/build-angular:dev-server",
       "options": {
-        "hmr": false
+        "hmr": false,
+        "port": 4200
       },
       "configurations": {
         "development": {

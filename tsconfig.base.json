@@ -34,6 +34,9 @@
       "@forepath/framework/frontend/feature-agent-console": [
         "libs/domains/framework/frontend/feature-agent-console/src/index.ts"
       ],
+      "@forepath/framework/frontend/feature-portal": [
+        "libs/domains/framework/frontend/feature-portal/src/index.ts"
+      ],
       "@forepath/framework/frontend/util-configuration": [
         "libs/domains/framework/frontend/util-configuration/src/index.ts"
       ],
