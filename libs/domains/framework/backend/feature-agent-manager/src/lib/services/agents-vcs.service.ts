@@ -60,6 +60,29 @@ export class AgentsVcsService {
   }
 
   /**
+   * Normalize git status code to ensure it contains only valid git status characters.
+   * Valid characters: space, M, A, D, R, C, U, ?, T
+   * Invalid characters are replaced with space.
+   */
+  private normalizeStatusCode(statusCode: string): string {
+    if (!statusCode || statusCode.length === 0) {
+      return '  ';
+    }
+
+    // Ensure exactly 2 characters
+    const normalized = statusCode.padEnd(2, ' ').substring(0, 2);
+
+    // Valid git status characters
+    const validChars = new Set([' ', 'M', 'A', 'D', 'R', 'C', 'U', '?', 'T']);
+
+    // Replace invalid characters with space
+    return normalized
+      .split('')
+      .map((char) => (validChars.has(char) ? char : ' '))
+      .join('');
+  }
+
+  /**
    * Execute a git command in the agent's container.
    * @param containerId - The container ID
    * @param command - Git command (without 'git' prefix)
@@ -183,17 +206,40 @@ export class AgentsVcsService {
       const files: GitFileStatusDto[] = [];
       const lines = statusOutput.split('\n').filter((line) => line.length > 0);
 
+      // Valid git status characters for porcelain format
+      const validGitStatusChars = new Set([' ', 'M', 'A', 'D', 'R', 'C', 'U', '?', 'T']);
+
       for (const line of lines) {
-        // Need at least 2 chars for status + whitespace + path
-        if (line.length < 4) {
+        this.logger.debug(`Raw line: ${line}`);
+
+        // Find where the git status code starts (may have shell artifacts like "- " prefix)
+        // Git porcelain format: exactly 2 valid status characters followed by whitespace and path
+        let statusCodeStart = -1;
+        for (let i = 0; i <= line.length - 2; i++) {
+          const char1 = line[i];
+          const char2 = line[i + 1];
+          // Check if both characters are valid git status characters
+          if (validGitStatusChars.has(char1) && validGitStatusChars.has(char2)) {
+            // Check if next character is whitespace (indicating start of path)
+            if (i + 2 < line.length && (line[i + 2] === ' ' || line[i + 2] === '\t')) {
+              statusCodeStart = i;
+              break;
+            }
+          }
+        }
+
+        // If we couldn't find a valid status code, skip this line
+        if (statusCodeStart === -1) {
+          this.logger.warn(`Could not find valid git status code in line: ${line}`);
           continue;
         }
 
-        // First 2 characters are the status code
-        const statusCode = line.substring(0, 2);
+        // Extract the status code (exactly 2 characters)
+        const rawStatusCode = line.substring(statusCodeStart, statusCodeStart + 2);
+        this.logger.debug(`Found status code at position ${statusCodeStart}: "${rawStatusCode}"`);
 
         // Find path start (skip whitespace after status code)
-        let pathStart = 2;
+        let pathStart = statusCodeStart + 2;
         while (pathStart < line.length && (line[pathStart] === ' ' || line[pathStart] === '\t')) {
           pathStart++;
         }
@@ -207,11 +253,12 @@ export class AgentsVcsService {
           continue;
         }
 
-        // Extract status characters
-        const stagedStatus = statusCode[0] || ' ';
-        const unstagedStatus = statusCode[1] || ' ';
+        // Extract status characters from RAW status code for accurate type detection
+        // Use raw code to detect type, as normalization might affect valid status codes
+        const stagedStatus = rawStatusCode[0] || ' ';
+        const unstagedStatus = rawStatusCode[1] || ' ';
 
-        // Determine file type
+        // Determine file type based on raw status code
         let type: 'staged' | 'unstaged' | 'untracked' | 'both';
         if (stagedStatus === '?' && unstagedStatus === '?') {
           type = 'untracked';
@@ -223,12 +270,15 @@ export class AgentsVcsService {
           type = 'unstaged';
         }
 
+        // Normalize status code for the response (to clean invalid characters)
+        const normalizedStatusCode = this.normalizeStatusCode(rawStatusCode);
+
         // Check if binary file
         const isBinary = await this.isBinaryFile(agentEntity.containerId, path);
 
         files.push({
           path,
-          status: statusCode,
+          status: normalizedStatusCode,
           type,
           isBinary,
         });
