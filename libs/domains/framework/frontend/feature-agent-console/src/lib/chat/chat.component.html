@@ -95,17 +95,17 @@
     </div>
   }
   <section class="section__row flex-grow-1">
-    <!-- Column 1: Client list (hidden when editor is open) -->
+    <!-- Column 1: Workspace list (hidden when editor is open) -->
     @if (!editorOpen()) {
       <div class="section__column d-flex flex-column border-end">
         <div class="p-3 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
-          <h5 class="mb-0 fw-semibold">Clients</h5>
+          <h5 class="mb-0 fw-semibold">Workspaces</h5>
           <button
             type="button"
             class="btn btn-sm btn-primary"
             (click)="onAddClientClick()"
             [disabled]="(clientsCreating$ | async) === true"
-            title="Add client"
+            title="Add workspace"
           >
             <i class="bi bi-plus-circle"></i>
             Add
@@ -115,7 +115,7 @@
           @if (clientsLoading$ | async) {
             <div class="d-flex justify-content-center align-items-center p-4">
               <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading clients...</span>
+                <span class="visually-hidden">Loading workspaces...</span>
               </div>
             </div>
           } @else {
@@ -129,7 +129,7 @@
               @if (clients.length === 0) {
                 <div class="p-4 text-center text-muted">
                   <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                  <p class="mb-0">No clients available</p>
+                  <p class="mb-0">No workspaces available</p>
                 </div>
               } @else {
                 <div class="list-group list-group-flush">
@@ -176,7 +176,7 @@
                           class="btn btn-sm btn-outline-primary"
                           (click)="onEditClientClick(client); $event.stopPropagation()"
                           [disabled]="(clientsUpdating$ | async) === true"
-                          title="Edit client"
+                          title="Edit workspace"
                         >
                           <i class="bi bi-pencil"></i>
                         </button>
@@ -185,7 +185,7 @@
                           class="btn btn-sm btn-outline-danger"
                           (click)="onDeleteClientClick(client.id, client.name); $event.stopPropagation()"
                           [disabled]="(clientsDeleting$ | async) === true"
-                          title="Delete client"
+                          title="Delete workspace"
                         >
                           <i class="bi bi-trash"></i>
                         </button>
@@ -355,7 +355,7 @@
             </div>
           </div>
           @if (selectedAgent$ | async; as selectedAgent) {
-            <small class="text-muted">Agent: {{ selectedAgent.name }}</small>
+            <small class="text-muted">{{ selectedAgent.name }}</small>
           } @else {
             <small class="text-muted">No agent selected</small>
           }
@@ -515,7 +515,7 @@
   </section>
 </div>
 
-<!-- Delete Client Confirmation Modal -->
+<!-- Delete Workspace Confirmation Modal -->
 <div
   class="modal fade"
   id="deleteClientModal"
@@ -527,7 +527,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="deleteClientModalLabel">Delete Client</h5>
+        <h5 class="modal-title" id="deleteClientModalLabel">Delete Workspace</h5>
         <button
           type="button"
           class="btn-close"
@@ -538,7 +538,7 @@
       </div>
       <div class="modal-body">
         <p>
-          Are you sure you want to delete the client <strong>{{ clientToDeleteName() }}</strong
+          Are you sure you want to delete the workspace <strong>{{ clientToDeleteName() }}</strong
           >?
         </p>
         @if (clientToDeleteHasProvisioning()) {
@@ -546,7 +546,7 @@
             <i class="bi bi-cloud-fill me-2"></i>
             <strong>Provisioned Server Detected</strong>
             <p class="mb-0 mt-2">
-              This client has a provisioned server. Deleting the client will also delete the server from the cloud
+              This workspace has a provisioned server. Deleting the workspace will also delete the server from the cloud
               provider. This action cannot be undone and will result in permanent data loss.
             </p>
           </div>
@@ -637,7 +637,7 @@
   </div>
 </div>
 
-<!-- Add Client Modal -->
+<!-- Add Workspace Modal -->
 <div
   class="modal fade"
   id="addClientModal"
@@ -649,7 +649,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addClientModalLabel">Add Client</h5>
+        <h5 class="modal-title" id="addClientModalLabel">Add Workspace</h5>
         <button
           type="button"
           class="btn-close"
@@ -672,7 +672,7 @@
                 (change)="onProvisioningToggle(false)"
                 [disabled]="(clientsCreating$ | async) === true || (provisioning$ | async) === true"
               />
-              <label class="form-check-label" for="clientModeManual"> Manual Client </label>
+              <label class="form-check-label" for="clientModeManual"> Existing Workspace </label>
             </div>
             <div class="form-check form-check-inline">
               <input
@@ -1060,7 +1060,7 @@
             @if (useProvisioning()) {
               Provision Server
             } @else {
-              Create Client
+              Create Workspace
             }
           </button>
         </div>
@@ -1169,7 +1169,7 @@
   </div>
 </div>
 
-<!-- Update Client Modal -->
+<!-- Update Workspace Modal -->
 <div
   class="modal fade"
   id="updateClientModal"
@@ -1181,7 +1181,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="updateClientModalLabel">Update Client</h5>
+        <h5 class="modal-title" id="updateClientModalLabel">Update Workspace</h5>
         <button
           type="button"
           class="btn-close"
@@ -1344,7 +1344,7 @@
             @if (clientsUpdating$ | async) {
               <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
             }
-            Update Client
+            Update Workspace
           </button>
         </div>
       </form>

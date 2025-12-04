@@ -93,6 +93,13 @@ The following components are sublicensed under the **Business Source License 1.1
 
 These components are licensed under BUSL-1.1, which permits non-production use and limited production use (subject to the Additional Use Grant terms). The license will convert to AGPL-3.0 after the Change Date (three years from release date). See the respective [backend-agent-controller application LICENSE](./apps/backend-agent-controller/LICENSE) and [feature-agent-controller library LICENSE](./libs/domains/framework/backend/feature-agent-controller/LICENSE) files for the full BUSL-1.1 license text.
 
+The following components are sublicensed under the **Source-Available License**:
+
+- [`apps/frontend-portal`](./apps/frontend-portal/) - Frontend application for the public landing page
+- [`libs/domains/framework/frontend/feature-portal`](./libs/domains/framework/frontend/feature-portal/) - Portal feature library
+
+These components are licensed under a source-available license that grants only the right to view the source code. No other rights are granted, including copying, modifying, distributing, or using the software for any purpose. See the respective [frontend-portal application LICENSE](./apps/frontend-portal/LICENSE) and [feature-portal library LICENSE](./libs/domains/framework/frontend/feature-portal/LICENSE) files for the full license text.
+
 ## Contribution
 
 We welcome contributions! Whether you're fixing bugs, adding features, or improving documentation, your input helps make this framework better for everyone.
