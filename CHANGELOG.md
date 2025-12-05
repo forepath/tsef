@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.0](https://github.com/forepath/tsef/compare/v1.9.0...v1.10.0) (2025-12-05)
+
+
+### Features
+
+* agenstra landing page ([#93](https://github.com/forepath/tsef/issues/93)) ([c31b5d5](https://github.com/forepath/tsef/commit/c31b5d578c48b03264967f3efbf6ec77c253daaf))
+* digitalocean workspace provider ([#95](https://github.com/forepath/tsef/issues/95)) ([b202b1b](https://github.com/forepath/tsef/commit/b202b1b74bcb652cbba6a9882e6b27ab4a6d796f))
+
+
+### Bug Fixes
+
+* git status identification ([#94](https://github.com/forepath/tsef/issues/94)) ([0f42954](https://github.com/forepath/tsef/commit/0f429544e6bb9463d9dd9eac684ad91307941668))
+
+
+### Chores
+
+* improve build process ([#89](https://github.com/forepath/tsef/issues/89)) ([1dac5a9](https://github.com/forepath/tsef/commit/1dac5a9882cb87a52fa024b99eed506ee51efb4b))
+
 ## [1.9.0](https://github.com/forepath/tsef/compare/v1.8.0...v1.9.0) (2025-11-30)
 
 
