@@ -27,6 +27,7 @@ ENV KEYCLOAK_CLIENT_SECRET=
 
 # Environment variables for the provisioning providers
 ENV HETZNER_API_TOKEN=
+ENV DIGITALOCEAN_API_TOKEN=
 
 # Environment variables for static API key authentication
 # If STATIC_API_KEY is set, API key authentication is used (no Keycloak fallback)

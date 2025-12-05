@@ -33,6 +33,7 @@ services:
       DB_DATABASE: postgres
       # Environment variables for the provisioning providers
       HETZNER_API_TOKEN: ${HETZNER_API_TOKEN:-}
+      DIGITALOCEAN_API_TOKEN: ${DIGITALOCEAN_API_TOKEN:-}
       # Static API key authentication configuration
       STATIC_API_KEY: ${STATIC_API_KEY:-}
       # Environment variables for encryption

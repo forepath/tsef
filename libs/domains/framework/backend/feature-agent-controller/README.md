@@ -170,7 +170,7 @@ Base URL: `/api/clients`
 
 ### Server Provisioning
 
-- `GET /api/clients/provisioning/providers` - List available provisioning providers (e.g., Hetzner Cloud)
+- `GET /api/clients/provisioning/providers` - List available provisioning providers (e.g., Hetzner Cloud, DigitalOcean)
 - `GET /api/clients/provisioning/providers/:providerType/server-types` - Get available server types for a provider
 - `POST /api/clients/provisioning/provision` - Provision a new server and create a client
 - `GET /api/clients/:id/provisioning/info` - Get server information for a provisioned client
@@ -182,15 +182,15 @@ The provisioning endpoint accepts a `ProvisionServerDto` with the following fiel
 
 **Required Fields:**
 
-- `providerType` - Provider identifier (e.g., `"hetzner"`)
-- `serverType` - Server type identifier (e.g., `"cx11"`)
+- `providerType` - Provider identifier (e.g., `"hetzner"`, `"digital-ocean"`)
+- `serverType` - Server type identifier (e.g., `"cx11"` for Hetzner, `"s-1vcpu-1gb"` for DigitalOcean)
 - `name` - Server name (auto-generated if not provided)
 - `authenticationType` - Authentication type (`"api_key"` or `"keycloak"`)
 
 **Optional Fields:**
 
 - `description` - Server description
-- `location` - Datacenter location (e.g., `"fsn1"`, `"nbg1"`)
+- `location` - Datacenter location (e.g., `"fsn1"`, `"nbg1"` for Hetzner; `"fra1"`, `"nyc3"` for DigitalOcean)
 - `apiKey` - API key for API_KEY authentication (auto-generated if not provided)
 - `keycloakClientId` - Keycloak client ID (required for KEYCLOAK authentication)
 - `keycloakClientSecret` - Keycloak client secret (required for KEYCLOAK authentication)
@@ -208,8 +208,8 @@ The provisioning endpoint accepts a `ProvisionServerDto` with the following fiel
 
 When provisioning a server:
 
-1. **Server Creation**: The provider creates a cloud server instance (e.g., Hetzner Cloud)
-2. **Docker Installation**: The server automatically installs Docker CE via user data script
+1. **Server Creation**: The provider creates a cloud server instance (e.g., Hetzner Cloud, DigitalOcean)
+2. **Docker Installation**: The server automatically installs Docker CE via cloud-init user data script
 3. **Database Setup**: PostgreSQL container is started with health checks
 4. **Agent-Manager Deployment**: Agent-manager container is deployed with:
    - Authentication configuration (API key or Keycloak)
@@ -218,6 +218,11 @@ When provisioning a server:
    - Cursor agent configuration (if provided)
 5. **Client Creation**: A client entity is created in the database with the server's endpoint
 6. **Reference Storage**: A provisioning reference links the client to the cloud server
+
+#### Supported Providers
+
+- **Hetzner Cloud** (`providerType: "hetzner"`): Requires `HETZNER_API_TOKEN` environment variable
+- **DigitalOcean** (`providerType: "digital-ocean"`): Requires `DIGITALOCEAN_API_TOKEN` environment variable
 
 The provisioned server exposes:
 
@@ -555,6 +560,11 @@ nx test framework-backend-feature-agent-controller --coverage
 - `KEYCLOAK_REALM` - Keycloak realm (required for Keycloak-authenticated clients)
 - `KEYCLOAK_CLIENT_ID` - Keycloak client ID (required for HTTP authentication)
 - `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret (required for HTTP authentication)
+
+### Provisioning Provider Environment Variables
+
+- `HETZNER_API_TOKEN` - Hetzner Cloud API token (required for Hetzner provider)
+- `DIGITALOCEAN_API_TOKEN` - DigitalOcean API token (required for DigitalOcean provider)
 
 ## License
 
