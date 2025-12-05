@@ -902,7 +902,8 @@ paths:
           required: true
           schema:
             type: string
-          description: The provisioning provider type (e.g., 'hetzner')
+            enum: [hetzner, digital-ocean]
+          description: The provisioning provider type (e.g., 'hetzner', 'digital-ocean')
       responses:
         '200':
           description: Array of server types with specifications and pricing
@@ -1380,10 +1381,11 @@ components:
       properties:
         type:
           type: string
-          description: The unique provider type identifier (e.g., 'hetzner')
+          enum: [hetzner, digital-ocean]
+          description: The unique provider type identifier (e.g., 'hetzner', 'digital-ocean')
         displayName:
           type: string
-          description: Human-readable display name (e.g., 'Hetzner Cloud')
+          description: Human-readable display name (e.g., 'Hetzner Cloud', 'DigitalOcean')
     ServerType:
       type: object
       required: [id, name, cores, memory, disk]
@@ -1418,10 +1420,11 @@ components:
       properties:
         providerType:
           type: string
-          description: The provisioning provider type (e.g., 'hetzner')
+          enum: [hetzner, digital-ocean]
+          description: The provisioning provider type (e.g., 'hetzner', 'digital-ocean')
         serverType:
           type: string
-          description: Server type identifier (e.g., 'cx11', 'cpx11')
+          description: Server type identifier (e.g., 'cx11', 'cpx11' for Hetzner; 's-1vcpu-1gb', 's-2vcpu-2gb' for DigitalOcean)
         name:
           type: string
           description: Server name/label
@@ -1430,7 +1433,7 @@ components:
           description: Optional description
         location:
           type: string
-          description: Location/datacenter identifier (e.g., 'nbg1', 'fsn1')
+          description: Location/datacenter identifier (e.g., 'nbg1', 'fsn1' for Hetzner; 'fra1', 'nyc3' for DigitalOcean)
         authenticationType:
           $ref: '#/components/schemas/AuthenticationType'
         apiKey:
@@ -1458,7 +1461,8 @@ components:
           properties:
             providerType:
               type: string
-              description: Provider type used for provisioning (e.g., 'hetzner')
+              enum: [hetzner, digital-ocean]
+              description: Provider type used for provisioning (e.g., 'hetzner', 'digital-ocean')
             serverId:
               type: string
               description: Provider-specific server ID
@@ -1495,4 +1499,5 @@ components:
           description: Server status (e.g., 'running', 'starting')
         providerType:
           type: string
-          description: Provider type used for provisioning (e.g., 'hetzner')
+          enum: [hetzner, digital-ocean]
+          description: Provider type used for provisioning (e.g., 'hetzner', 'digital-ocean')

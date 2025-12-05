@@ -3,8 +3,8 @@ sequenceDiagram
     participant Controller
     participant ProvisioningService
     participant ProviderFactory
-    participant HetznerProvider
-    participant HetznerAPI
+    participant Provider as Cloud Provider<br/>(Hetzner/DigitalOcean)
+    participant CloudAPI as Cloud API<br/>(Hetzner/DigitalOcean)
     participant Server
     participant ClientsService
     participant Database
@@ -13,28 +13,28 @@ sequenceDiagram
     Controller->>ProvisioningService: provisionServer(dto)
 
     ProvisioningService->>ProviderFactory: getProvider(type)
-    ProviderFactory-->>ProvisioningService: HetznerProvider
+    ProviderFactory-->>ProvisioningService: Provider Instance
 
     ProvisioningService->>ProvisioningService: Generate Auth Config
     ProvisioningService->>ProvisioningService: Generate User Data Script
 
-    ProvisioningService->>HetznerProvider: provisionServer(options)
-    HetznerProvider->>HetznerAPI: POST /servers (create server)
-    HetznerAPI-->>HetznerProvider: Server Created
-    HetznerProvider->>HetznerProvider: waitForServerReady()
+    ProvisioningService->>Provider: provisionServer(options)
+    Provider->>CloudAPI: POST /servers or /droplets (create server)
+    CloudAPI-->>Provider: Server Created
+    Provider->>Provider: waitForServerReady()
 
     loop Poll Server Status
-        HetznerProvider->>HetznerAPI: GET /servers/:id
-        HetznerAPI-->>HetznerProvider: Server Status
+        Provider->>CloudAPI: GET /servers/:id or /droplets/:id
+        CloudAPI-->>Provider: Server Status
     end
 
-    Note over Server: Server boots and runs user data script
+    Note over Server: Server boots and runs cloud-init user data script
     Note over Server: Installs Docker CE
     Note over Server: Starts Agent-Manager container
 
-    HetznerProvider->>HetznerAPI: GET /servers/:id (get IP)
-    HetznerAPI-->>HetznerProvider: Server Info with IP
-    HetznerProvider-->>ProvisioningService: ProvisionedServer
+    Provider->>CloudAPI: GET /servers/:id or /droplets/:id (get IP)
+    CloudAPI-->>Provider: Server Info with IP
+    Provider-->>ProvisioningService: ProvisionedServer
 
     ProvisioningService->>ClientsService: create(clientDto)
     ClientsService->>Database: INSERT INTO clients

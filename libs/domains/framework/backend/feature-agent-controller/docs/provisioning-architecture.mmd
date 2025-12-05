@@ -16,12 +16,18 @@ graph TB
 
     subgraph "Provider Factory"
         PPF --> |Manages| HP[HetznerProvider]
+        PPF --> |Manages| DOP[DigitalOceanProvider]
         PPF --> |Manages| FP[Future Providers...]
     end
 
     subgraph "Hetzner Provider"
         HP --> |Calls| HCA[Hetzner Cloud API]
         HCA --> |Returns| SI[Server Info]
+    end
+
+    subgraph "DigitalOcean Provider"
+        DOP --> |Calls| DOA[DigitalOcean API]
+        DOA --> |Returns| SI
     end
 
     subgraph "Database"
@@ -42,4 +48,5 @@ graph TB
     style PS fill:#fff9c4
     style PPF fill:#f3e5f5
     style HP fill:#e8f5e9
+    style DOP fill:#e8f5e9
     style AM fill:#c8e6c9

@@ -92,6 +92,7 @@ export class ClientAgentVcsProxyService {
           'Content-Type': 'application/json',
         },
         validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+        timeout: process.env.REQUEST_TIMEOUT ? parseInt(process.env.REQUEST_TIMEOUT) : 600000, // 10 minutes timeout for long-running processes
         httpsAgent: baseUrl.startsWith('https://')
           ? new (require('https').Agent)({
               rejectUnauthorized: false, // Ignore self-signed certificates

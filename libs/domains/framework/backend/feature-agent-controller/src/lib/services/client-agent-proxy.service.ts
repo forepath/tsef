@@ -99,6 +99,7 @@ export class ClientAgentProxyService {
           'Content-Type': 'application/json',
         },
         validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+        timeout: process.env.REQUEST_TIMEOUT ? parseInt(process.env.REQUEST_TIMEOUT) : 600000, // 10 minutes timeout for long-running processes
         httpsAgent: baseUrl.startsWith('https://')
           ? new (require('https').Agent)({
               rejectUnauthorized: false, // Ignore self-signed certificates
@@ -142,6 +143,15 @@ export class ClientAgentProxyService {
           throw new BadRequestException(`Request failed: ${errorMessage}`);
         }
       } else if (axiosError.request) {
+        // Check for timeout errors
+        if (axiosError.code === 'ECONNABORTED' || axiosError.message?.includes('timeout')) {
+          this.logger.error(
+            `Request to ${baseUrl}${config.url || ''} timed out after 10 minutes for client ${clientId}`,
+          );
+          throw new BadRequestException(
+            'Request timed out after 10 minutes. The operation may still be processing on the remote server.',
+          );
+        }
         this.logger.error(`No response received from ${baseUrl}${config.url || ''}: ${axiosError.message}`);
         throw new BadRequestException(`Failed to connect to client endpoint: ${axiosError.message}`);
       } else {
