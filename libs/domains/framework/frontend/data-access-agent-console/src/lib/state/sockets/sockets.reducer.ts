@@ -5,22 +5,42 @@ import {
   connectSocketSuccess,
   disconnectSocket,
   disconnectSocketSuccess,
+  forwardedEventReceived,
   forwardEvent,
   forwardEventFailure,
   forwardEventSuccess,
-  forwardedEventReceived,
+  remoteDisconnected,
+  remoteReconnected,
+  remoteReconnectError,
+  remoteReconnectFailed,
+  remoteReconnecting,
   setAgent,
   setChatModel,
   setClient,
   setClientFailure,
   setClientSuccess,
   socketError,
+  socketReconnected,
+  socketReconnectError,
+  socketReconnectFailed,
+  socketReconnecting,
 } from './sockets.actions';
 
+export interface RemoteConnectionState {
+  clientId: string;
+  connected: boolean;
+  reconnecting: boolean;
+  reconnectAttempts: number;
+  lastError: string | null;
+}
+
 export interface SocketsState {
+  // Main socket connection state (to clients.gateway)
   connected: boolean;
   connecting: boolean;
   disconnecting: boolean;
+  reconnecting: boolean; // Main socket reconnecting
+  reconnectAttempts: number;
   selectedClientId: string | null;
   chatModel: string | null;
   forwarding: boolean;
@@ -37,12 +57,16 @@ export interface SocketsState {
   // Track setClient operation in progress to prevent duplicate calls
   settingClient: boolean;
   settingClientId: string | null; // Track which clientId is being set
+  // Per-clientId remote connection state (clients.gateway -> agents.gateway)
+  remoteConnections: Record<string, RemoteConnectionState>;
 }
 
 export const initialSocketsState: SocketsState = {
   connected: false,
   connecting: false,
   disconnecting: false,
+  reconnecting: false,
+  reconnectAttempts: 0,
   selectedClientId: null,
   chatModel: null,
   forwarding: false,
@@ -52,6 +76,7 @@ export const initialSocketsState: SocketsState = {
   selectedAgentId: null,
   settingClient: false,
   settingClientId: null,
+  remoteConnections: {},
 };
 
 export const socketsReducer = createReducer(
@@ -66,12 +91,47 @@ export const socketsReducer = createReducer(
     ...state,
     connected: true,
     connecting: false,
+    reconnecting: false,
+    reconnectAttempts: 0,
     error: null,
   })),
   on(connectSocketFailure, (state, { error }) => ({
     ...state,
     connected: false,
     connecting: false,
+    reconnecting: false,
+    reconnectAttempts: 0,
+    error,
+  })),
+  // Main Socket Reconnection
+  on(socketReconnecting, (state, { attempt }) => ({
+    ...state,
+    reconnecting: true,
+    reconnectAttempts: attempt,
+    // Don't set error while reconnecting - only show error if reconnect fails
+    error: null,
+  })),
+  on(socketReconnected, (state) => ({
+    ...state,
+    connected: true,
+    reconnecting: false,
+    reconnectAttempts: 0,
+    error: null,
+    // Clear forwardedEvents on main socket reconnection to prevent duplicates
+    // The backend will restore chat history when client context and login are restored
+    forwardedEvents: [],
+  })),
+  on(socketReconnectError, (state) => ({
+    ...state,
+    reconnecting: true,
+    // Don't set error state while still reconnecting
+    // error will be set only on reconnect_failed
+  })),
+  on(socketReconnectFailed, (state, { error }) => ({
+    ...state,
+    connected: false,
+    reconnecting: false,
+    reconnectAttempts: 0,
     error,
   })),
   // Disconnect Socket
@@ -84,12 +144,15 @@ export const socketsReducer = createReducer(
     ...state,
     connected: false,
     disconnecting: false,
+    reconnecting: false,
+    reconnectAttempts: 0,
     selectedClientId: null,
     error: null,
     forwardedEvents: [],
     selectedAgentId: null,
     settingClient: false,
     settingClientId: null,
+    remoteConnections: {},
   })),
   // Set Client
   on(setClient, (state, { clientId }) => ({
@@ -98,13 +161,43 @@ export const socketsReducer = createReducer(
     settingClientId: clientId,
     error: null,
   })),
-  on(setClientSuccess, (state, { clientId }) => ({
-    ...state,
-    selectedClientId: clientId,
-    settingClient: false,
-    settingClientId: null,
-    error: null,
-  })),
+  on(setClientSuccess, (state, { clientId }) => {
+    // Initialize remote connection state for this clientId if not exists
+    const remoteConnections = { ...state.remoteConnections };
+    if (!remoteConnections[clientId]) {
+      remoteConnections[clientId] = {
+        clientId,
+        connected: true,
+        reconnecting: false,
+        reconnectAttempts: 0,
+        lastError: null,
+      };
+    } else {
+      // Update existing connection state
+      remoteConnections[clientId] = {
+        ...remoteConnections[clientId],
+        connected: true,
+        reconnecting: false,
+        reconnectAttempts: 0,
+        lastError: null,
+      };
+    }
+    // If this is a reconnection (clientId matches the previously selected client),
+    // clear forwardedEvents to prevent duplicates when chat history is restored
+    // This ensures old messages are cleared before restored messages are loaded
+    const isReconnection = state.selectedClientId === clientId && state.forwardedEvents.length > 0;
+    return {
+      ...state,
+      selectedClientId: clientId,
+      settingClient: false,
+      settingClientId: null,
+      error: null,
+      remoteConnections,
+      // Clear forwardedEvents on reconnection to prevent duplicates
+      // The backend will restore chat history, so we need to clear old messages first
+      forwardedEvents: isReconnection ? [] : state.forwardedEvents,
+    };
+  }),
   on(setClientFailure, (state, { error }) => ({
     ...state,
     settingClient: false,
@@ -176,4 +269,102 @@ export const socketsReducer = createReducer(
     ...state,
     selectedAgentId: agentId,
   })),
+  // Remote Connection Disconnection (per clientId)
+  on(remoteDisconnected, (state, { clientId }) => {
+    const remoteConnections = { ...state.remoteConnections };
+    if (!remoteConnections[clientId]) {
+      remoteConnections[clientId] = {
+        clientId,
+        connected: false,
+        reconnecting: false,
+        reconnectAttempts: 0,
+        lastError: null,
+      };
+    } else {
+      remoteConnections[clientId] = {
+        ...remoteConnections[clientId],
+        connected: false,
+        reconnecting: false,
+        reconnectAttempts: 0,
+      };
+    }
+    return {
+      ...state,
+      remoteConnections,
+    };
+  }),
+  // Remote Connection Reconnection (per clientId)
+  on(remoteReconnecting, (state, { clientId, attempt }) => {
+    const remoteConnections = { ...state.remoteConnections };
+    if (!remoteConnections[clientId]) {
+      remoteConnections[clientId] = {
+        clientId,
+        connected: false,
+        reconnecting: true,
+        reconnectAttempts: attempt,
+        lastError: null,
+      };
+    } else {
+      remoteConnections[clientId] = {
+        ...remoteConnections[clientId],
+        reconnecting: true,
+        reconnectAttempts: attempt,
+      };
+    }
+    return {
+      ...state,
+      remoteConnections,
+    };
+  }),
+  on(remoteReconnected, (state, { clientId }) => {
+    const remoteConnections = { ...state.remoteConnections };
+    if (remoteConnections[clientId]) {
+      remoteConnections[clientId] = {
+        ...remoteConnections[clientId],
+        connected: true,
+        reconnecting: false,
+        reconnectAttempts: 0,
+        lastError: null,
+      };
+    }
+    // If this is a reconnection for the selected client, clear forwardedEvents to prevent duplicates
+    // The backend will restore chat history when agent logins are restored after remote reconnection
+    const isReconnection = state.selectedClientId === clientId && state.forwardedEvents.length > 0;
+    return {
+      ...state,
+      remoteConnections,
+      // Clear forwardedEvents on remote reconnection to prevent duplicates
+      // The backend will restore chat history when agent logins are restored
+      forwardedEvents: isReconnection ? [] : state.forwardedEvents,
+    };
+  }),
+  on(remoteReconnectError, (state, { clientId, error }) => {
+    const remoteConnections = { ...state.remoteConnections };
+    if (remoteConnections[clientId]) {
+      remoteConnections[clientId] = {
+        ...remoteConnections[clientId],
+        reconnecting: true,
+        lastError: error,
+      };
+    }
+    return {
+      ...state,
+      remoteConnections,
+    };
+  }),
+  on(remoteReconnectFailed, (state, { clientId, error }) => {
+    const remoteConnections = { ...state.remoteConnections };
+    if (remoteConnections[clientId]) {
+      remoteConnections[clientId] = {
+        ...remoteConnections[clientId],
+        connected: false,
+        reconnecting: false,
+        lastError: error,
+      };
+    }
+    return {
+      ...state,
+      remoteConnections,
+    };
+  }),
 );

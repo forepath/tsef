@@ -39,6 +39,36 @@ channels:
       forwardAckEvent:
         $ref: '#/components/messages/ForwardAck'
     description: Acknowledgement for forwarded events
+  clients/remoteDisconnected:
+    address: clients/remoteDisconnected
+    messages:
+      remoteDisconnectedEvent:
+        $ref: '#/components/messages/RemoteDisconnected'
+    description: Server notifies client that the remote connection to agent-manager has been lost
+  clients/remoteReconnecting:
+    address: clients/remoteReconnecting
+    messages:
+      remoteReconnectingEvent:
+        $ref: '#/components/messages/RemoteReconnecting'
+    description: Server notifies client that reconnection to agent-manager is in progress
+  clients/remoteReconnected:
+    address: clients/remoteReconnected
+    messages:
+      remoteReconnectedEvent:
+        $ref: '#/components/messages/RemoteReconnected'
+    description: Server notifies client that reconnection to agent-manager was successful
+  clients/remoteReconnectError:
+    address: clients/remoteReconnectError
+    messages:
+      remoteReconnectErrorEvent:
+        $ref: '#/components/messages/RemoteReconnectError'
+    description: Server notifies client that a reconnection attempt to agent-manager failed (but will retry)
+  clients/remoteReconnectFailed:
+    address: clients/remoteReconnectFailed
+    messages:
+      remoteReconnectFailedEvent:
+        $ref: '#/components/messages/RemoteReconnectFailed'
+    description: Server notifies client that all reconnection attempts to agent-manager have failed
 operations:
   clientSendsSetClient:
     action: send
@@ -70,6 +100,36 @@ operations:
       $ref: '#/channels/clients~1error'
     messages:
       - $ref: '#/channels/clients~1error/messages/errorEvent'
+  serverEmitsRemoteDisconnected:
+    action: receive
+    channel:
+      $ref: '#/channels/clients~1remoteDisconnected'
+    messages:
+      - $ref: '#/channels/clients~1remoteDisconnected/messages/remoteDisconnectedEvent'
+  serverEmitsRemoteReconnecting:
+    action: receive
+    channel:
+      $ref: '#/channels/clients~1remoteReconnecting'
+    messages:
+      - $ref: '#/channels/clients~1remoteReconnecting/messages/remoteReconnectingEvent'
+  serverEmitsRemoteReconnected:
+    action: receive
+    channel:
+      $ref: '#/channels/clients~1remoteReconnected'
+    messages:
+      - $ref: '#/channels/clients~1remoteReconnected/messages/remoteReconnectedEvent'
+  serverEmitsRemoteReconnectError:
+    action: receive
+    channel:
+      $ref: '#/channels/clients~1remoteReconnectError'
+    messages:
+      - $ref: '#/channels/clients~1remoteReconnectError/messages/remoteReconnectErrorEvent'
+  serverEmitsRemoteReconnectFailed:
+    action: receive
+    channel:
+      $ref: '#/channels/clients~1remoteReconnectFailed'
+    messages:
+      - $ref: '#/channels/clients~1remoteReconnectFailed/messages/remoteReconnectFailedEvent'
 components:
   messages:
     SetClient:
@@ -151,3 +211,67 @@ components:
           message:
             type: string
             description: Error message
+    RemoteDisconnected:
+      name: RemoteDisconnected
+      title: Remote connection disconnected
+      contentType: application/json
+      payload:
+        type: object
+        required: [clientId]
+        properties:
+          clientId:
+            type: string
+            description: Client UUID for which the remote connection was lost
+    RemoteReconnecting:
+      name: RemoteReconnecting
+      title: Remote connection reconnecting
+      contentType: application/json
+      payload:
+        type: object
+        required: [clientId, attempt]
+        properties:
+          clientId:
+            type: string
+            description: Client UUID for which reconnection is in progress
+          attempt:
+            type: number
+            description: Current reconnection attempt number (1-based)
+    RemoteReconnected:
+      name: RemoteReconnected
+      title: Remote connection reconnected
+      contentType: application/json
+      payload:
+        type: object
+        required: [clientId]
+        properties:
+          clientId:
+            type: string
+            description: Client UUID for which reconnection was successful
+    RemoteReconnectError:
+      name: RemoteReconnectError
+      title: Remote reconnection attempt error
+      contentType: application/json
+      payload:
+        type: object
+        required: [clientId, error]
+        properties:
+          clientId:
+            type: string
+            description: Client UUID for which reconnection attempt failed
+          error:
+            type: string
+            description: Error message from the failed reconnection attempt (reconnection will continue)
+    RemoteReconnectFailed:
+      name: RemoteReconnectFailed
+      title: Remote reconnection failed
+      contentType: application/json
+      payload:
+        type: object
+        required: [clientId, error]
+        properties:
+          clientId:
+            type: string
+            description: Client UUID for which all reconnection attempts have failed
+          error:
+            type: string
+            description: Final error message after all reconnection attempts were exhausted

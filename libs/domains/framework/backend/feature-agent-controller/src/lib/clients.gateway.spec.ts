@@ -410,4 +410,541 @@ describe('ClientsGateway', () => {
     // Should forward fileUpdateNotification to local socket
     expect(socket.emit).toHaveBeenCalledWith('fileUpdateNotification', fileUpdateNotification);
   });
+
+  describe('Remote Socket Reconnection', () => {
+    it('should emit remoteReconnecting event with clientId when remote socket attempts reconnection', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Simulate reconnect_attempt event
+      const reconnectAttemptHandler = remote.on.mock.calls.find(
+        (call: unknown[]) => call[0] === 'reconnect_attempt',
+      )?.[1];
+      if (reconnectAttemptHandler) {
+        reconnectAttemptHandler(2); // attempt number 2
+      }
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(socket.emit).toHaveBeenCalledWith('remoteReconnecting', { clientId: 'client-uuid', attempt: 2 });
+    });
+
+    it('should emit remoteReconnected event with clientId when remote socket reconnects', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Simulate reconnect event
+      const reconnectHandler = remote.on.mock.calls.find((call: unknown[]) => call[0] === 'reconnect')?.[1];
+      if (reconnectHandler) {
+        reconnectHandler();
+      }
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(socket.emit).toHaveBeenCalledWith('remoteReconnected', { clientId: 'client-uuid' });
+    });
+
+    it('should emit remoteReconnectError event with clientId when remote socket reconnection fails', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Simulate reconnect_error event
+      const reconnectErrorHandler = remote.on.mock.calls.find((call: unknown[]) => call[0] === 'reconnect_error')?.[1];
+      if (reconnectErrorHandler) {
+        reconnectErrorHandler(new Error('Connection timeout'));
+      }
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(socket.emit).toHaveBeenCalledWith('remoteReconnectError', {
+        clientId: 'client-uuid',
+        error: 'Connection timeout',
+      });
+    });
+
+    it('should emit remoteReconnectFailed event with clientId when all reconnection attempts fail', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Simulate reconnect_failed event
+      const reconnectFailedHandler = remote.on.mock.calls.find(
+        (call: unknown[]) => call[0] === 'reconnect_failed',
+      )?.[1];
+      if (reconnectFailedHandler) {
+        reconnectFailedHandler();
+      }
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(socket.emit).toHaveBeenCalledWith('remoteReconnectFailed', {
+        clientId: 'client-uuid',
+        error: expect.any(String),
+      });
+    });
+
+    it('should track reconnection state independently per socket', async () => {
+      const socket1 = createMockSocket('socket-1');
+      const socket2 = createMockSocket('socket-2');
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote1 = io() as any;
+      const remote2 = io() as any;
+
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      // Set client for both sockets
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket1);
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket2);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Clear previous emits
+      (socket1.emit as jest.Mock).mockClear();
+      (socket2.emit as jest.Mock).mockClear();
+
+      // Simulate reconnection attempt for socket1 only
+      const reconnectAttemptHandler1 = remote1.on.mock.calls.find(
+        (call: unknown[]) => call[0] === 'reconnect_attempt',
+      )?.[1];
+      if (reconnectAttemptHandler1) {
+        reconnectAttemptHandler1(1);
+      }
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Only socket1 should receive the reconnecting event
+      expect(socket1.emit).toHaveBeenCalledWith('remoteReconnecting', { clientId: 'client-uuid', attempt: 1 });
+      expect(socket2.emit).not.toHaveBeenCalledWith('remoteReconnecting', expect.any(Object));
+    });
+
+    it('should emit remoteDisconnected event when remote socket disconnects', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Clear previous emits
+      (socket.emit as jest.Mock).mockClear();
+
+      // Simulate disconnect event
+      const disconnectHandler = remote.on.mock.calls.find((call: unknown[]) => call[0] === 'disconnect')?.[1];
+      if (disconnectHandler) {
+        disconnectHandler('io server disconnect');
+      }
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(socket.emit).toHaveBeenCalledWith('remoteDisconnected', { clientId: 'client-uuid' });
+    });
+
+    it('should wait for remote socket to be connected before forwarding events', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      // Set remote socket to disconnected initially
+      remote.disconnected = true;
+      remote.connected = false;
+
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Try to forward an event while remote is disconnected
+      const forwardPromise = gateway.handleForward({ event: 'chat', payload: { message: 'test' } }, socket);
+
+      // Wait a bit to ensure the wait logic is triggered
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      // Now connect the remote socket
+      remote.disconnected = false;
+      remote.connected = true;
+
+      // Wait for forward to complete
+      await forwardPromise;
+
+      // Should have waited and then forwarded the event
+      expect(remote.emit).toHaveBeenCalledWith('chat', { message: 'test' });
+    });
+
+    it('should return error if remote socket does not connect within timeout', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      // Set remote socket to disconnected
+      remote.disconnected = true;
+      remote.connected = false;
+
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Mock Date.now to simulate timeout
+      const originalNow = Date.now;
+      let currentTime = 0;
+      Date.now = jest.fn(() => currentTime);
+
+      // Try to forward an event
+      const forwardPromise = gateway.handleForward({ event: 'chat', payload: { message: 'test' } }, socket);
+
+      // Advance time past the 5-second timeout
+      currentTime = 6000;
+      // Trigger the wait loop to check timeout
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      await forwardPromise;
+
+      // Restore Date.now
+      Date.now = originalNow;
+
+      // Should have emitted error
+      expect(socket.emit).toHaveBeenCalledWith('error', {
+        message: 'Remote connection not established',
+      });
+      // Should not have forwarded the event
+      expect(remote.emit).not.toHaveBeenCalledWith('chat', expect.any(Object));
+    });
+
+    it('should attempt fallback reconnection when native reconnect fails', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Clear previous emits
+      (socket.emit as jest.Mock).mockClear();
+      (remote.emit as jest.Mock).mockClear();
+
+      // Simulate reconnect_failed event (native reconnection failed)
+      const reconnectFailedHandler = remote.on.mock.calls.find(
+        (call: unknown[]) => call[0] === 'reconnect_failed',
+      )?.[1];
+      if (reconnectFailedHandler) {
+        reconnectFailedHandler();
+      }
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Should have attempted to create a new socket connection (fallback)
+      // The io() function should be called again
+      expect(io).toHaveBeenCalledTimes(2); // Once for initial connection, once for fallback
+
+      // Wait for fallback connection attempt
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // If fallback connection succeeds, should emit remoteReconnected
+      // If it fails, should emit remoteReconnectFailed
+      const remoteReconnectedCalls = (socket.emit as jest.Mock).mock.calls.filter(
+        (call: unknown[]) => call[0] === 'remoteReconnected',
+      );
+      const remoteReconnectFailedCalls = (socket.emit as jest.Mock).mock.calls.filter(
+        (call: unknown[]) => call[0] === 'remoteReconnectFailed',
+      );
+
+      // Either remoteReconnected or remoteReconnectFailed should be called
+      expect(remoteReconnectedCalls.length + remoteReconnectFailedCalls.length).toBeGreaterThan(0);
+    });
+
+    it('should automatically restore agent logins when remote socket reconnects', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      // Mock credentials for agent
+      mockCredentialsRepo.findByClientAndAgent.mockResolvedValue({
+        clientId: 'client-uuid',
+        agentId: 'agent-1',
+        password: 'password123',
+      } as any);
+
+      // Set up client and remote socket
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Simulate initial connection
+      remote.connected = true;
+      remote.disconnected = false;
+      const connectHandler = remote.on.mock.calls.find((call: unknown[]) => call[0] === 'connect')?.[1];
+      if (connectHandler) {
+        connectHandler();
+      }
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Track login success handlers
+      const loginSuccessHandlers: Array<() => void> = [];
+      remote.once.mockImplementation((event: string, handler: unknown) => {
+        if (event === 'loginSuccess' && typeof handler === 'function') {
+          loginSuccessHandlers.push(handler as () => void);
+          // Auto-trigger login success after a short delay
+          setTimeout(() => {
+            const handlerToCall = loginSuccessHandlers[loginSuccessHandlers.length - 1];
+            if (handlerToCall) {
+              handlerToCall();
+            }
+          }, 10);
+        }
+        return remote;
+      });
+
+      // Forward a login event to add agent to loggedInAgentsBySocket
+      await gateway.handleForward({ event: 'login', payload: {}, agentId: 'agent-1' }, socket);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Verify login was sent
+      expect(remote.emit).toHaveBeenCalledWith('login', { agentId: 'agent-1', password: 'password123' });
+
+      // Clear mocks
+      (remote.emit as jest.Mock).mockClear();
+      loginSuccessHandlers.length = 0; // Clear handlers
+
+      // Simulate remote disconnection
+      remote.connected = false;
+      remote.disconnected = true;
+      const disconnectHandler = remote.on.mock.calls.find((call: unknown[]) => call[0] === 'disconnect')?.[1];
+      if (disconnectHandler) {
+        disconnectHandler('io server disconnect');
+      }
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Trigger reconnect_attempt to set reconnecting state
+      const reconnectAttemptHandler = remote.on.mock.calls.find(
+        (call: unknown[]) => call[0] === 'reconnect_attempt',
+      )?.[1];
+      if (reconnectAttemptHandler) {
+        reconnectAttemptHandler(1);
+      }
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Now simulate successful reconnection
+      remote.connected = true;
+      remote.disconnected = false;
+
+      // Set up login success handlers for restoration
+      remote.once.mockImplementation((event: string, handler: unknown) => {
+        if (event === 'loginSuccess' && typeof handler === 'function') {
+          loginSuccessHandlers.push(handler as () => void);
+          // Auto-trigger login success
+          setTimeout(() => {
+            const handlerToCall = loginSuccessHandlers[loginSuccessHandlers.length - 1];
+            if (handlerToCall) {
+              handlerToCall();
+            }
+          }, 10);
+        }
+        return remote;
+      });
+
+      // Trigger connect event (this should trigger login restoration)
+      const connectHandlerForReconnect = remote.on.mock.calls.find((call: unknown[]) => call[0] === 'connect')?.[1];
+      if (connectHandlerForReconnect) {
+        connectHandlerForReconnect();
+      }
+
+      // Wait for async operations (restoreAgentLogins is async)
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      // Verify that login was automatically sent for the logged-in agent
+      expect(remote.emit).toHaveBeenCalledWith('login', { agentId: 'agent-1', password: 'password123' });
+    }, 10000);
+
+    it('should handle multiple logged-in agents when restoring after reconnection', async () => {
+      const socket = createMockSocket();
+      const { io } = jest.requireMock('socket.io-client') as { io: jest.Mock };
+      const remote = io() as any;
+      mockClientsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'client-uuid',
+        endpoint: 'http://localhost:3100/api',
+        authenticationType: 'api_key',
+        apiKey: 'x',
+        agentWsPort: 8099,
+      } as any);
+
+      // Mock credentials for multiple agents
+      mockCredentialsRepo.findByClientAndAgent.mockImplementation(async (clientId: string, agentId: string) => {
+        if (agentId === 'agent-1' || agentId === 'agent-2') {
+          return {
+            clientId,
+            agentId,
+            password: `password-${agentId}`,
+          } as any;
+        }
+        return null;
+      });
+
+      // Set up client and remote socket
+      await gateway.handleSetClient({ clientId: 'client-uuid' }, socket);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Simulate connect to establish connection
+      remote.connected = true;
+      remote.disconnected = false;
+      const connectHandler = remote.on.mock.calls.find((call: unknown[]) => call[0] === 'connect')?.[1];
+      if (connectHandler) {
+        connectHandler();
+      }
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Mock login success responses - auto-trigger on registration
+      const loginSuccessHandlers: Array<() => void> = [];
+      remote.once.mockImplementation((event: string, handler: unknown) => {
+        if (event === 'loginSuccess' && typeof handler === 'function') {
+          loginSuccessHandlers.push(handler as () => void);
+          // Auto-trigger login success after a short delay
+          setTimeout(() => {
+            const handlerToCall = loginSuccessHandlers[loginSuccessHandlers.length - 1];
+            if (handlerToCall) {
+              handlerToCall();
+            }
+          }, 10);
+        }
+        return remote;
+      });
+
+      // Login agent-1
+      await gateway.handleForward({ event: 'login', payload: {}, agentId: 'agent-1' }, socket);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Login agent-2
+      await gateway.handleForward({ event: 'login', payload: {}, agentId: 'agent-2' }, socket);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Clear mocks
+      (remote.emit as jest.Mock).mockClear();
+      loginSuccessHandlers.length = 0; // Clear handlers
+
+      // Simulate remote disconnection and reconnection
+      remote.connected = false;
+      remote.disconnected = true;
+      const disconnectHandler = remote.on.mock.calls.find((call: unknown[]) => call[0] === 'disconnect')?.[1];
+      if (disconnectHandler) {
+        disconnectHandler('io server disconnect');
+      }
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Trigger reconnect_attempt to set reconnecting state
+      const reconnectAttemptHandler = remote.on.mock.calls.find(
+        (call: unknown[]) => call[0] === 'reconnect_attempt',
+      )?.[1];
+      if (reconnectAttemptHandler) {
+        reconnectAttemptHandler(1);
+      }
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Reset login success handlers for restoration - auto-trigger
+      remote.once.mockImplementation((event: string, handler: unknown) => {
+        if (event === 'loginSuccess' && typeof handler === 'function') {
+          loginSuccessHandlers.push(handler as () => void);
+          // Auto-trigger login success
+          setTimeout(() => {
+            const handlerToCall = loginSuccessHandlers[loginSuccessHandlers.length - 1];
+            if (handlerToCall) {
+              handlerToCall();
+            }
+          }, 10);
+        }
+        return remote;
+      });
+
+      // Simulate successful reconnection
+      remote.connected = true;
+      remote.disconnected = false;
+      const connectHandlerForReconnect = remote.on.mock.calls.find((call: unknown[]) => call[0] === 'connect')?.[1];
+      if (connectHandlerForReconnect) {
+        connectHandlerForReconnect();
+      }
+
+      // Wait for async operations (restoreAgentLogins processes agents sequentially)
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Verify that login was automatically sent for both logged-in agents
+      expect(remote.emit).toHaveBeenCalledWith('login', { agentId: 'agent-1', password: 'password-agent-1' });
+      expect(remote.emit).toHaveBeenCalledWith('login', { agentId: 'agent-2', password: 'password-agent-2' });
+    }, 10000);
+  });
 });

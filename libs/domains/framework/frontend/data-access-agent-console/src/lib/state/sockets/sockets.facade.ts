@@ -9,8 +9,12 @@ import {
   selectChatModel,
   selectForwardedEvents,
   selectForwardedEventsByEvent,
+  selectIsRemoteReconnecting,
   selectMostRecentForwardedEvent,
   selectMostRecentForwardedEventByEvent,
+  selectRemoteConnectionError,
+  selectRemoteConnectionState,
+  selectSelectedAgentId,
   selectSelectedClientId,
   selectSettingClient,
   selectSettingClientId,
@@ -19,6 +23,8 @@ import {
   selectSocketDisconnecting,
   selectSocketError,
   selectSocketForwarding,
+  selectSocketReconnectAttempts,
+  selectSocketReconnecting,
   selectSocketsState,
 } from './sockets.selectors';
 import { ForwardableEvent, type ForwardableEventPayload, type ForwardedEventPayload } from './sockets.types';
@@ -40,7 +46,10 @@ export class SocketsFacade {
   readonly connected$: Observable<boolean> = this.store.select(selectSocketConnected);
   readonly connecting$: Observable<boolean> = this.store.select(selectSocketConnecting);
   readonly disconnecting$: Observable<boolean> = this.store.select(selectSocketDisconnecting);
+  readonly reconnecting$: Observable<boolean> = this.store.select(selectSocketReconnecting);
+  readonly reconnectAttempts$: Observable<number> = this.store.select(selectSocketReconnectAttempts);
   readonly selectedClientId$: Observable<string | null> = this.store.select(selectSelectedClientId);
+  readonly selectedAgentId$: Observable<string | null> = this.store.select(selectSelectedAgentId);
   readonly settingClient$: Observable<boolean> = this.store.select(selectSettingClient);
   readonly settingClientId$: Observable<string | null> = this.store.select(selectSettingClientId);
   readonly forwarding$: Observable<boolean> = this.store.select(selectSocketForwarding);
@@ -234,5 +243,38 @@ export class SocketsFacade {
     eventName: string,
   ): Observable<{ event: string; payload: ForwardedEventPayload; timestamp: number } | null> {
     return this.store.select(selectMostRecentForwardedEventByEvent(eventName));
+  }
+
+  /**
+   * Get remote connection state for a specific clientId
+   * @param clientId - The client UUID
+   * @returns Observable of remote connection state or null
+   */
+  getRemoteConnectionState$(clientId: string): Observable<{
+    clientId: string;
+    connected: boolean;
+    reconnecting: boolean;
+    reconnectAttempts: number;
+    lastError: string | null;
+  } | null> {
+    return this.store.select(selectRemoteConnectionState(clientId));
+  }
+
+  /**
+   * Check if a remote connection is reconnecting for a specific clientId
+   * @param clientId - The client UUID
+   * @returns Observable of boolean indicating if reconnecting
+   */
+  isRemoteReconnecting$(clientId: string): Observable<boolean> {
+    return this.store.select(selectIsRemoteReconnecting(clientId));
+  }
+
+  /**
+   * Get the last error for a remote connection for a specific clientId
+   * @param clientId - The client UUID
+   * @returns Observable of error message or null
+   */
+  getRemoteConnectionError$(clientId: string): Observable<string | null> {
+    return this.store.select(selectRemoteConnectionError(clientId));
   }
 }

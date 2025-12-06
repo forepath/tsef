@@ -143,6 +143,10 @@ const createErrorResponse = (message: string, code?: string, details?: string): 
   cors: {
     origin: '*', // adjust for production
   },
+  connectionStateRecovery: {
+    maxDisconnectionDuration: parseInt(process.env.SOCKET_MAX_DISCONNECTION_DURATION || '120000'), // 2 minutes default
+    skipMiddlewares: true,
+  },
 })
 export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -179,7 +183,11 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * @param socket - The connected socket instance
    */
   handleConnection(socket: Socket) {
-    this.logger.log(`Client connected: ${socket.id}`);
+    if (socket.recovered) {
+      this.logger.log(`Client reconnected with state recovery: ${socket.id}`);
+    } else {
+      this.logger.log(`Client connected: ${socket.id}`);
+    }
     // Store socket reference for reliable broadcasting
     this.socketById.set(socket.id, socket);
   }
@@ -303,6 +311,10 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
+      // Check if socket was already authenticated (e.g., via connection state recovery)
+      const wasAlreadyAuthenticated = this.authenticatedClients.has(socket.id);
+      const wasRecovered = socket.recovered;
+
       // Store authenticated session
       this.authenticatedClients.set(socket.id, agentUuid);
 
@@ -318,8 +330,18 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
       this.logger.log(`Agent ${agent.name} (${agentUuid}) authenticated on socket ${socket.id}`);
 
-      // Restore chat history
-      await this.restoreChatHistory(agentUuid, socket);
+      // Only restore chat history if:
+      // 1. The socket was not recovered (Socket.IO's connection state recovery already restores messages)
+      // 2. The socket was not already authenticated (to avoid restoring history twice)
+      // This prevents duplicate messages when logging in after reconnection
+      if (!wasRecovered && !wasAlreadyAuthenticated) {
+        // Restore chat history
+        await this.restoreChatHistory(agentUuid, socket);
+      } else {
+        this.logger.debug(
+          `Skipping chat history restoration for agent ${agentUuid} on socket ${socket.id} because socket was ${wasRecovered ? 'recovered' : 'already authenticated'}`,
+        );
+      }
 
       // Start periodic stats broadcasting and send first stats immediately
       await this.startStatsBroadcasting(agentUuid);

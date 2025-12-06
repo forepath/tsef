@@ -319,24 +319,45 @@
                     class="btn btn-sm btn-outline-success"
                     [disabled]="socketDisconnecting$ | async"
                     (click)="onDisconnectSocket()"
+                    [title]="(socketReconnecting$ | async) ? 'Reconnecting...' : 'Connected'"
                   >
-                    <i class="bi bi-wifi"></i>
+                    @if (socketReconnecting$ | async) {
+                      <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    } @else {
+                      <i class="bi bi-wifi"></i>
+                    }
                     <span class="visually-hidden">Connected</span>
                   </button>
                 } @else {
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    [disabled]="socketConnecting$ | async"
-                    (click)="onConnectSocket()"
-                  >
-                    @if (socketConnecting$ | async) {
+                  @if (socketReconnecting$ | async; as isReconnecting) {
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-warning"
+                      [disabled]="true"
+                      title="Reconnecting..."
+                    >
                       <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                    } @else {
-                      <i class="bi bi-wifi-off"></i>
-                    }
-                    <span class="visually-hidden">Disconnected</span>
-                  </button>
+                      @if (socketReconnectAttempts$ | async; as attempts) {
+                        <span class="ms-1">({{ attempts }})</span>
+                      }
+                      <span class="visually-hidden">Reconnecting</span>
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      [disabled]="socketConnecting$ | async"
+                      (click)="onConnectSocket()"
+                      title="Disconnected"
+                    >
+                      @if (socketConnecting$ | async) {
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                      } @else {
+                        <i class="bi bi-wifi-off"></i>
+                      }
+                      <span class="visually-hidden">Disconnected</span>
+                    </button>
+                  }
                 }
               </div>
               @if (!editorOpen()) {
@@ -422,12 +443,51 @@
           }
         </div>
 
-        <!-- Socket error -->
-        @if (socketError$ | async; as socketError) {
-          <div class="alert alert-danger alert-dismissible m-3" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            {{ socketError }}
+        <!-- Socket reconnection status (main socket) -->
+        @if (socketReconnecting$ | async) {
+          <div class="alert alert-warning alert-dismissible m-3" role="alert">
+            <div class="d-flex align-items-center">
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <span>
+                Reconnecting to server...
+                @if (socketReconnectAttempts$ | async; as attempts) {
+                  <span class="text-muted">(attempt {{ attempts }})</span>
+                }
+              </span>
+            </div>
           </div>
+        }
+
+        <!-- Remote connection reconnection status (per clientId) -->
+        @if (remoteReconnecting$ | async) {
+          @if (activeClientId$ | async) {
+            <div class="alert alert-warning alert-dismissible m-3" role="alert">
+              <div class="d-flex align-items-center">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span>Reconnecting to workspace...</span>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- Remote connection error (only shown when not reconnecting) -->
+        @if (remoteConnectionError$ | async; as remoteError) {
+          @if (remoteError && !(remoteReconnecting$ | async)) {
+            <div class="alert alert-danger alert-dismissible m-3" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              Workspace connection failed: {{ remoteError }}
+            </div>
+          }
+        }
+
+        <!-- Socket error (only shown when not reconnecting) -->
+        @if (socketError$ | async; as socketError) {
+          @if (!(socketReconnecting$ | async)) {
+            <div class="alert alert-danger alert-dismissible m-3" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              {{ socketError }}
+            </div>
+          }
         }
 
         <!-- Chat input -->
@@ -439,7 +499,15 @@
               name="chatCommandsSelect"
               [ngModel]="selectedCommand() ?? ''"
               (ngModelChange)="onCommandChange($event)"
-              [disabled]="!!(!(socketConnected$ | async) || !(selectedAgent$ | async) || (commandsLoading$ | async))"
+              [disabled]="
+                !!(
+                  !(socketConnected$ | async) ||
+                  (socketReconnecting$ | async) ||
+                  (remoteReconnecting$ | async) ||
+                  !(selectedAgent$ | async) ||
+                  (commandsLoading$ | async)
+                )
+              "
             >
               <option value="">Chat</option>
               <optgroup label="Commands">
@@ -459,13 +527,21 @@
               [value]="chatMessage()"
               (input)="chatMessage.set($any($event.target).value)"
               (keydown)="onChatInputKeydown($event)"
-              [disabled]="!(socketConnected$ | async) || (forwarding$ | async) || !(selectedAgent$ | async)"
+              [disabled]="
+                !(socketConnected$ | async) ||
+                (socketReconnecting$ | async) ||
+                (remoteReconnecting$ | async) ||
+                (forwarding$ | async) ||
+                !(selectedAgent$ | async)
+              "
             ></textarea>
             <button
               class="btn btn-primary"
               type="button"
               [disabled]="
                 !(socketConnected$ | async) ||
+                (socketReconnecting$ | async) ||
+                (remoteReconnecting$ | async) ||
                 (forwarding$ | async) ||
                 !(selectedAgent$ | async) ||
                 !chatMessage().trim()
@@ -488,6 +564,12 @@
               name="chatModelSelect"
               [ngModel]="selectedChatModel() ?? ''"
               (ngModelChange)="onChatModelChange($event)"
+              [disabled]="
+                !(socketConnected$ | async) ||
+                (socketReconnecting$ | async) ||
+                (remoteReconnecting$ | async) ||
+                !(selectedAgent$ | async)
+              "
             >
               <option value="auto">Auto</option>
               @for (model of chatModelOptions; track model.value) {

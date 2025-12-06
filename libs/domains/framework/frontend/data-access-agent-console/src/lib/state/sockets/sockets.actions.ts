@@ -7,6 +7,12 @@ export const connectSocketSuccess = createAction('[Sockets] Connect Socket Succe
 
 export const connectSocketFailure = createAction('[Sockets] Connect Socket Failure', props<{ error: string }>());
 
+// Main Socket Reconnection Actions
+export const socketReconnecting = createAction('[Sockets] Socket Reconnecting', props<{ attempt: number }>());
+export const socketReconnected = createAction('[Sockets] Socket Reconnected');
+export const socketReconnectError = createAction('[Sockets] Socket Reconnect Error', props<{ error: string }>());
+export const socketReconnectFailed = createAction('[Sockets] Socket Reconnect Failed', props<{ error: string }>());
+
 // Disconnect Actions
 export const disconnectSocket = createAction('[Sockets] Disconnect Socket');
 
@@ -48,6 +54,22 @@ export const socketError = createAction('[Sockets] Socket Error', props<{ messag
 export const forwardedEventReceived = createAction(
   '[Sockets] Forwarded Event Received',
   props<{ event: string; payload: import('./sockets.types').ForwardedEventPayload }>(),
+);
+
+// Remote Connection Reconnection Actions (per clientId)
+export const remoteDisconnected = createAction('[Sockets] Remote Disconnected', props<{ clientId: string }>());
+export const remoteReconnecting = createAction(
+  '[Sockets] Remote Reconnecting',
+  props<{ clientId: string; attempt: number }>(),
+);
+export const remoteReconnected = createAction('[Sockets] Remote Reconnected', props<{ clientId: string }>());
+export const remoteReconnectError = createAction(
+  '[Sockets] Remote Reconnect Error',
+  props<{ clientId: string; error: string }>(),
+);
+export const remoteReconnectFailed = createAction(
+  '[Sockets] Remote Reconnect Failed',
+  props<{ clientId: string; error: string }>(),
 );
 
 // Agent Actions

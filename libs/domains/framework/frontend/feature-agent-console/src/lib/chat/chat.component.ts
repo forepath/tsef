@@ -193,10 +193,30 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly socketConnected$: Observable<boolean> = this.socketsFacade.connected$;
   readonly socketConnecting$: Observable<boolean> = this.socketsFacade.connecting$;
   readonly socketDisconnecting$: Observable<boolean> = this.socketsFacade.disconnecting$;
+  readonly socketReconnecting$: Observable<boolean> = this.socketsFacade.reconnecting$;
+  readonly socketReconnectAttempts$: Observable<number> = this.socketsFacade.reconnectAttempts$;
   readonly selectedClientId$: Observable<string | null> = this.socketsFacade.selectedClientId$;
   readonly chatMessages$ = this.socketsFacade.getForwardedEventsByEvent$('chatMessage');
   readonly forwarding$: Observable<boolean> = this.socketsFacade.chatForwarding$;
   readonly socketError$: Observable<string | null> = this.socketsFacade.error$;
+
+  // Remote connection reconnection state (per clientId)
+  readonly remoteReconnecting$: Observable<boolean> = this.activeClientId$.pipe(
+    switchMap((clientId) => {
+      if (!clientId) {
+        return of(false);
+      }
+      return this.socketsFacade.isRemoteReconnecting$(clientId);
+    }),
+  );
+  readonly remoteConnectionError$: Observable<string | null> = this.activeClientId$.pipe(
+    switchMap((clientId) => {
+      if (!clientId) {
+        return of(null);
+      }
+      return this.socketsFacade.getRemoteConnectionError$(clientId);
+    }),
+  );
 
   // Local state
   chatMessage = signal<string>('');

@@ -1673,4 +1673,139 @@ describe('AgentsGateway', () => {
       expect(statsIntervals.get(mockAgent.id)).toBe(firstInterval);
     });
   });
+
+  describe('Connection State Recovery', () => {
+    it('should skip chat history restoration when socket is recovered', async () => {
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+
+      const mockMessages = [
+        {
+          id: 'msg-1',
+          agentId: mockAgent.id,
+          agent: mockAgent,
+          actor: 'user',
+          message: 'Hello',
+          createdAt: new Date('2024-01-01T10:00:00Z'),
+          updatedAt: new Date('2024-01-01T10:00:00Z'),
+        },
+      ];
+
+      agentMessagesService.getChatHistory.mockResolvedValue(mockMessages as any);
+
+      // Set socket.recovered to true (simulating Socket.IO connection state recovery)
+      const recoveredSocket = { ...mockSocket, recovered: true } as Socket;
+
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, recoveredSocket);
+
+      // Verify loginSuccess was emitted
+      expect(recoveredSocket.emit).toHaveBeenCalledWith(
+        'loginSuccess',
+        expect.objectContaining({
+          success: true,
+          data: {
+            message: `Welcome, ${mockAgent.name}!`,
+            agentId: mockAgent.id,
+            agentName: mockAgent.name,
+          },
+        }),
+      );
+
+      // Verify chat history was NOT fetched (should be skipped for recovered sockets)
+      expect(agentMessagesService.getChatHistory).not.toHaveBeenCalled();
+
+      // Verify only loginSuccess was emitted, no chat messages
+      const chatMessageCalls = (recoveredSocket.emit as jest.Mock).mock.calls.filter(
+        (call: unknown[]) => call[0] === 'chatMessage',
+      );
+      expect(chatMessageCalls.length).toBe(0);
+    });
+
+    it('should skip chat history restoration when agent is already authenticated', async () => {
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+
+      const socketId = mockSocket.id || 'test-socket-id';
+      // Mark agent as already authenticated (simulating reconnection scenario)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.set(socketId, mockAgent.id);
+
+      const mockMessages = [
+        {
+          id: 'msg-1',
+          agentId: mockAgent.id,
+          agent: mockAgent,
+          actor: 'user',
+          message: 'Hello',
+          createdAt: new Date('2024-01-01T10:00:00Z'),
+          updatedAt: new Date('2024-01-01T10:00:00Z'),
+        },
+      ];
+
+      agentMessagesService.getChatHistory.mockResolvedValue(mockMessages as any);
+
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, mockSocket as Socket);
+
+      // Verify loginSuccess was emitted
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'loginSuccess',
+        expect.objectContaining({
+          success: true,
+          data: {
+            message: `Welcome, ${mockAgent.name}!`,
+            agentId: mockAgent.id,
+            agentName: mockAgent.name,
+          },
+        }),
+      );
+
+      // Verify chat history was NOT fetched (should be skipped for already authenticated agents)
+      expect(agentMessagesService.getChatHistory).not.toHaveBeenCalled();
+
+      // Verify only loginSuccess was emitted, no chat messages
+      const chatMessageCalls = (mockSocket.emit as jest.Mock).mock.calls.filter(
+        (call: unknown[]) => call[0] === 'chatMessage',
+      );
+      expect(chatMessageCalls.length).toBe(0);
+    });
+
+    it('should restore chat history for new login (not recovered, not already authenticated)', async () => {
+      agentsRepository.findById.mockResolvedValue(mockAgent);
+      agentsService.verifyCredentials.mockResolvedValue(true);
+      agentsService.findOne.mockResolvedValue(mockAgentResponse);
+
+      const mockMessages = [
+        {
+          id: 'msg-1',
+          agentId: mockAgent.id,
+          agent: mockAgent,
+          actor: 'user',
+          message: 'Hello',
+          createdAt: new Date('2024-01-01T10:00:00Z'),
+          updatedAt: new Date('2024-01-01T10:00:00Z'),
+        },
+      ];
+
+      agentMessagesService.getChatHistory.mockResolvedValue(mockMessages as any);
+
+      // Ensure socket is not recovered and agent is not already authenticated
+      const newSocket = { ...mockSocket, recovered: false } as Socket;
+      const socketId = newSocket.id || 'test-socket-id';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gateway as any).authenticatedClients.delete(socketId);
+
+      await gateway.handleLogin({ agentId: mockAgent.id, password: 'password123' }, newSocket);
+
+      // Verify chat history WAS fetched (normal login scenario)
+      expect(agentMessagesService.getChatHistory).toHaveBeenCalledWith(mockAgent.id, 20, 0);
+
+      // Verify chat message was emitted
+      const chatMessageCalls = (newSocket.emit as jest.Mock).mock.calls.filter(
+        (call: unknown[]) => call[0] === 'chatMessage',
+      );
+      expect(chatMessageCalls.length).toBe(1);
+    });
+  });
 });
