@@ -43,11 +43,18 @@ ENV KEYCLOAK_CLIENT_SECRET=
 ENV STATIC_API_KEY=
 
 # Environment variables for CORS
-# CORS is enabled by default with origin: '*' (allows all origins)
-# Set ENABLE_CORS=true to enable origin restriction via CORS_ORIGIN
-# Set CORS_ORIGIN to restrict allowed origins (comma-separated list, e.g., "http://localhost:4200,http://localhost:3000")
-ENV ENABLE_CORS=
+# In production: CORS is disabled by default (most secure). Set CORS_ORIGIN to allow specific origins.
+# In development: CORS allows all origins by default. Set CORS_ORIGIN to restrict.
+# CORS_ORIGIN: Comma-separated list of allowed origins (e.g., "https://agenstra.com,https://app.agenstra.com")
 ENV CORS_ORIGIN=
+
+# Environment variables for rate limiting
+# RATE_LIMIT_ENABLED: Enable/disable rate limiting (default: true in production, false in development)
+# RATE_LIMIT_TTL: Time window in seconds (default: 60)
+# RATE_LIMIT_LIMIT: Maximum number of requests per window (default: 100)
+ENV RATE_LIMIT_ENABLED=
+ENV RATE_LIMIT_TTL=60
+ENV RATE_LIMIT_LIMIT=100
 
 WORKDIR /app
 EXPOSE ${PORT}

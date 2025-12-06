@@ -13,21 +13,43 @@ import { typeormConfig } from './typeorm.config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Configure CORS (enabled by default with origin: '*', configurable via ENABLE_CORS and CORS_ORIGIN)
-  const enableCors = process.env.ENABLE_CORS === 'true';
-  const corsOrigin = enableCors ? process.env.CORS_ORIGIN || '*' : '*';
-  const origin = corsOrigin === '*' ? '*' : corsOrigin.split(',').map((o) => o.trim());
+  // Configure CORS
+  // In production: CORS is restricted by default (requires CORS_ORIGIN to be set)
+  // In development: CORS allows all origins by default (can be restricted via CORS_ORIGIN)
+  const isProduction = process.env.NODE_ENV === 'production';
+  const corsOrigin = process.env.CORS_ORIGIN;
+
+  let origin: string | string[];
+  if (corsOrigin) {
+    // If CORS_ORIGIN is explicitly set, use it (comma-separated list)
+    origin = corsOrigin.split(',').map((o) => o.trim());
+  } else if (isProduction) {
+    // In production, if CORS_ORIGIN is not set, default to empty array (no CORS)
+    // This is the most secure default for production
+    origin = [];
+    Logger.warn(
+      '⚠️  CORS_ORIGIN not set in production - CORS is disabled. Set CORS_ORIGIN environment variable to allow specific origins.',
+    );
+  } else {
+    // In development, allow all origins by default
+    origin = '*';
+  }
 
   app.enableCors({
     origin,
     // credentials can only be true when origin is not '*'
-    credentials: origin !== '*',
+    credentials: origin !== '*' && Array.isArray(origin) && origin.length > 0,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
 
-  if (enableCors && corsOrigin !== '*') {
-    Logger.log(`🌐 CORS enabled with restricted origin: ${corsOrigin}`);
+  if (Array.isArray(origin) && origin.length > 0) {
+    Logger.log(`🌐 CORS enabled with restricted origins: ${origin.join(', ')}`);
+  } else if (origin === '*') {
+    Logger.log('🌐 CORS enabled with origin: * (all origins allowed - development mode)');
   } else {
-    Logger.log('🌐 CORS enabled with origin: * (all origins allowed)');
+    Logger.log('🌐 CORS disabled (no origins allowed)');
   }
 
   // Configure WebSocket adapter for Socket.IO
