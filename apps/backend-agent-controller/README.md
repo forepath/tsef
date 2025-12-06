@@ -1,25 +1,25 @@
-# backend-agent-manager
+# backend-agent-controller
 
-NestJS backend application for managing and interacting with AI agents through HTTP REST API and WebSocket gateway.
+NestJS backend application for managing clients and proxying agent operations to remote agent-manager services.
 
 ## Purpose
 
-This application provides a complete agent management system by integrating the `@forepath/framework-backend-feature-agent-manager` library. It enables the creation, management, and real-time interaction with AI agents through both synchronous HTTP requests and persistent WebSocket connections.
+This application provides a centralized control plane for managing multiple distributed agent-manager instances. It enables the creation, management, and real-time interaction with agents across multiple remote agent-manager services through both synchronous HTTP requests and persistent WebSocket connections.
 
-See the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#purpose) for detailed feature descriptions.
+See the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#purpose) for detailed feature descriptions.
 
 ## Features
 
 This application provides:
 
-- **HTTP REST API** - Full CRUD operations for agent management
-- **WebSocket Gateway** - Real-time bidirectional communication with agents
-- **Container Integration** - Docker container management for agent execution
-- **Secure Authentication** - Keycloak integration for HTTP endpoints and database-backed authentication for WebSocket
+- **HTTP REST API** - Full CRUD operations for client management and proxied agent operations
+- **WebSocket Gateway** - Real-time bidirectional event forwarding to remote agent-manager services
+- **Server Provisioning** - Automated cloud server provisioning (Hetzner Cloud, DigitalOcean) with Docker and agent-manager deployment
+- **Secure Authentication** - Keycloak integration for HTTP endpoints and API key fallback
 - **Database Support** - PostgreSQL with TypeORM for data persistence
 - **Auto Migrations** - Automatic database schema migrations on startup
 
-For complete feature details, see the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#features).
+For complete feature details, see the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#features).
 
 ## Architecture
 
@@ -29,9 +29,8 @@ This application is built using:
 - **TypeORM** - Object-Relational Mapping for database operations
 - **Keycloak** - Identity and access management
 - **Socket.IO** - WebSocket communication
-- **Docker** - Container management for agent execution
 
-The application integrates the `@forepath/framework-backend-feature-agent-manager` library, which provides the core agent management functionality. See the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#architecture) for detailed architecture information.
+The application integrates the `@forepath/framework-backend-feature-agent-controller` library, which provides the core client management functionality. See the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#architecture) for detailed architecture information.
 
 ## Usage
 
@@ -39,8 +38,8 @@ The application integrates the `@forepath/framework-backend-feature-agent-manage
 
 - Node.js 22.12.0 or higher
 - PostgreSQL database
-- Keycloak server (for HTTP authentication)
-- Docker (for agent container management)
+- Keycloak server (for HTTP authentication, optional if using API key authentication)
+- Docker (for server provisioning)
 
 ### Installation
 
@@ -49,10 +48,10 @@ The application integrates the `@forepath/framework-backend-feature-agent-manage
 npm install
 
 # Build the application
-nx build backend-agent-manager
+nx build backend-agent-controller
 
 # Run the application
-nx serve backend-agent-manager
+nx serve backend-agent-controller
 ```
 
 ### Database Migrations
@@ -65,43 +64,43 @@ The application automatically runs pending migrations on startup when `synchroni
 
 ## API Endpoints
 
-All HTTP endpoints are prefixed with `/api` and protected by Keycloak authentication.
+All HTTP endpoints are prefixed with `/api` and protected by Keycloak authentication (or API key authentication if `STATIC_API_KEY` is set).
 
-For complete API endpoint documentation, request/response schemas, and authentication requirements, see the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#api-endpoints).
+For complete API endpoint documentation, request/response schemas, and authentication requirements, see the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#api-endpoints).
 
 ## WebSocket Gateway
 
-The Socket.IO WebSocket gateway is available at `http://localhost:8080/agents` (or configured `WEBSOCKET_PORT`).
+The Socket.IO WebSocket gateway is available at `http://localhost:8081/clients` (or configured `WEBSOCKET_PORT`).
 
-For complete WebSocket event specifications, authentication flow, and usage examples, see the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#websocket-gateway).
+For complete WebSocket event specifications, authentication flow, and usage examples, see the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#websocket-gateway).
 
 ## Authentication
 
 ### HTTP Endpoints
 
-All HTTP endpoints are protected by Keycloak authentication. For detailed authentication requirements, see the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#authentication).
+All HTTP endpoints are protected by Keycloak authentication by default. If `STATIC_API_KEY` is set, API key authentication is used instead (no Keycloak fallback). For detailed authentication requirements, see the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#authentication).
 
 ### WebSocket Gateway
 
-The WebSocket gateway uses database-backed authentication. See the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#authentication) for authentication details.
+The WebSocket gateway uses client context management. See the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#authentication) for authentication details.
 
 ## Database Setup
 
-The application uses TypeORM and requires a database connection to be configured. See the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#database-setup) for database setup requirements and entity schema.
+The application uses TypeORM and requires a database connection to be configured. See the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#database-setup) for database setup requirements and entity schema.
 
 ## Testing
 
 Run unit tests:
 
 ```bash
-nx test backend-agent-manager
+nx test backend-agent-controller
 ```
 
-For library testing information, see the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#testing).
+For library testing information, see the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#testing).
 
 ## Security Considerations
 
-For security best practices and considerations, see the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#security-considerations).
+For security best practices and considerations, see the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#security-considerations).
 
 ## Rate Limiting
 
@@ -193,12 +192,12 @@ CORS_ORIGIN="http://localhost:4200,http://localhost:3000"
 
 ## Environment Variables
 
-See the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#environment-variables) for complete environment variable documentation.
+See the [library documentation](../../libs/domains/framework/backend/feature-agent-controller/README.md#environment-variables) for complete environment variable documentation.
 
 **Application-specific:**
 
-- `PORT` - HTTP API port (default: `3000`)
-- `WEBSOCKET_PORT` - WebSocket gateway port (default: `8080`)
+- `PORT` - HTTP API port (default: `3100`)
+- `WEBSOCKET_PORT` - WebSocket gateway port (default: `8081`)
 - `NODE_ENV` - Environment mode (`development` or `production`)
 
 **CORS Configuration:**
@@ -213,38 +212,53 @@ See the [library documentation](../../libs/domains/framework/backend/feature-age
 - `RATE_LIMIT_TTL` - Time window in seconds (default: `60`)
 - `RATE_LIMIT_LIMIT` - Maximum requests per window (default: `100`)
 
+**Authentication:**
+
+- `STATIC_API_KEY` - Static API key for authentication (if set, uses API key auth instead of Keycloak)
+- `KEYCLOAK_AUTH_SERVER_URL` - Keycloak server URL
+- `KEYCLOAK_REALM` - Keycloak realm name
+- `KEYCLOAK_CLIENT_ID` - Keycloak client ID
+- `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret
+
+**Database:**
+
+- `DB_HOST` - Database host (default: `localhost`)
+- `DB_PORT` - Database port (default: `5432`)
+- `DB_USERNAME` - Database username (default: `postgres`)
+- `DB_PASSWORD` - Database password (default: `postgres`)
+- `DB_DATABASE` - Database name (default: `postgres`)
+
+**Server Provisioning:**
+
+- `HETZNER_API_TOKEN` - Hetzner Cloud API token (for server provisioning)
+- `DIGITALOCEAN_API_TOKEN` - DigitalOcean API token (for server provisioning)
+- `ENCRYPTION_KEY` - Encryption key for sensitive data
+
 ## Docker Deployment
 
 The application includes Dockerfiles for containerized deployment:
 
 ```bash
 # Build API container
-nx docker:api backend-agent-manager
-
-# Build worker container
-nx docker:worker backend-agent-manager
+nx docker:api backend-agent-controller
 ```
 
 ### Running the Container
 
-When running the API container, you must mount the Docker socket to enable Docker-in-Docker functionality for agent container management:
-
 ```bash
 # Run with docker-compose (recommended)
-cd apps/backend-agent-manager
+cd apps/backend-agent-controller
 docker compose up -d
 
-# Or run directly with Docker socket mount
-docker run -v /var/run/docker.sock:/var/run/docker.sock \
-  -p 3000:3000 \
-  -p 8080:8080 \
+# Or run directly
+docker run \
+  -p 3100:3100 \
+  -p 8081:8081 \
   -e CORS_ORIGIN="https://agenstra.com" \
   -e RATE_LIMIT_ENABLED=true \
   -e RATE_LIMIT_LIMIT=100 \
-  backend-agent-manager:api
+  backend-agent-controller:api
 ```
-
-**Important**: The `/var/run/docker.sock` mount is required for the application to manage agent containers. Without this mount, the Docker CLI installed in the container will not be able to communicate with the host Docker daemon.
 
 ### Production Deployment Checklist
 
@@ -256,18 +270,16 @@ Before deploying to production, ensure:
 - ✅ `RATE_LIMIT_LIMIT` is set to an appropriate value for your use case
 - ✅ `STATIC_API_KEY` or Keycloak credentials are configured
 - ✅ Database credentials are secure
-- ✅ Docker socket is properly mounted for container management
+- ✅ `ENCRYPTION_KEY` is set for sensitive data encryption
 
 ## License
 
-This application is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+This application is licensed under the **Business Source License 1.1 (BUSL-1.1)**.
 
 Copyright (c) 2025 IPvX UG (haftungsbeschränkt)
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is licensed under the Business Source License 1.1, which permits non-production use and limited production use (subject to the Additional Use Grant terms). The license will convert to AGPL-3.0 after the Change Date (three years from release date).
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.html) for more details.
+See the [LICENSE](./LICENSE) file for the full license text.
 
-You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-**Note**: This component is sublicensed under AGPL-3.0, while the rest of the project remains under the MIT License. This means that any modifications or derivative works of this application must also be licensed under AGPL-3.0 and made available to users, including when accessed over a network.
+**Note**: This component is sublicensed under BUSL-1.1, while the rest of the project remains under the MIT License. This means that production use is subject to the terms of the Business Source License.
