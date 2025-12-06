@@ -144,6 +144,34 @@ describe('SocketsFacade', () => {
         done();
       });
     });
+
+    it('should expose reconnecting$ observable', (done) => {
+      const testFacade = createFacadeWithMock(true);
+
+      testFacade.reconnecting$.subscribe((result) => {
+        expect(result).toBe(true);
+        done();
+      });
+    });
+
+    it('should expose reconnectAttempts$ observable', (done) => {
+      const testFacade = createFacadeWithMock(3);
+
+      testFacade.reconnectAttempts$.subscribe((result) => {
+        expect(result).toBe(3);
+        done();
+      });
+    });
+
+    it('should expose selectedAgentId$ observable', (done) => {
+      const agentId = 'agent-123';
+      const testFacade = createFacadeWithMock(agentId);
+
+      testFacade.selectedAgentId$.subscribe((result) => {
+        expect(result).toEqual(agentId);
+        done();
+      });
+    });
   });
 
   describe('Action Methods', () => {
@@ -363,6 +391,70 @@ describe('SocketsFacade', () => {
 
       testFacade.getMostRecentForwardedEventByEvent$('chatMessage').subscribe((result) => {
         expect(result).toEqual(event);
+        done();
+      });
+    });
+  });
+
+  describe('Remote Connection State Methods', () => {
+    it('should return remote connection state for a specific clientId', (done) => {
+      const remoteConnection = {
+        clientId: 'client-1',
+        connected: true,
+        reconnecting: false,
+        reconnectAttempts: 0,
+        lastError: null,
+      };
+      const testFacade = createFacadeWithMock(remoteConnection);
+
+      testFacade.getRemoteConnectionState$('client-1').subscribe((result) => {
+        expect(result).toEqual(remoteConnection);
+        done();
+      });
+    });
+
+    it('should return null when clientId does not exist', (done) => {
+      const testFacade = createFacadeWithMock(null);
+
+      testFacade.getRemoteConnectionState$('client-1').subscribe((result) => {
+        expect(result).toBeNull();
+        done();
+      });
+    });
+
+    it('should return true when remote connection is reconnecting', (done) => {
+      const testFacade = createFacadeWithMock(true);
+
+      testFacade.isRemoteReconnecting$('client-1').subscribe((result) => {
+        expect(result).toBe(true);
+        done();
+      });
+    });
+
+    it('should return false when remote connection is not reconnecting', (done) => {
+      const testFacade = createFacadeWithMock(false);
+
+      testFacade.isRemoteReconnecting$('client-1').subscribe((result) => {
+        expect(result).toBe(false);
+        done();
+      });
+    });
+
+    it('should return error when remote connection has error', (done) => {
+      const error = 'Reconnection failed';
+      const testFacade = createFacadeWithMock(error);
+
+      testFacade.getRemoteConnectionError$('client-1').subscribe((result) => {
+        expect(result).toEqual(error);
+        done();
+      });
+    });
+
+    it('should return null when remote connection has no error', (done) => {
+      const testFacade = createFacadeWithMock(null);
+
+      testFacade.getRemoteConnectionError$('client-1').subscribe((result) => {
+        expect(result).toBeNull();
         done();
       });
     });

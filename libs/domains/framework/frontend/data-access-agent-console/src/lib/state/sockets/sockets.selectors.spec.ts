@@ -1,19 +1,25 @@
-import { createFeatureSelector } from '@ngrx/store';
+import { initialSocketsState, type SocketsState } from './sockets.reducer';
 import {
   selectChatModel,
   selectForwardedEvents,
   selectForwardedEventsByEvent,
+  selectIsRemoteReconnecting,
   selectMostRecentForwardedEvent,
   selectMostRecentForwardedEventByEvent,
+  selectRemoteConnectionError,
+  selectRemoteConnectionState,
+  selectRemoteConnections,
+  selectSelectedAgentId,
   selectSelectedClientId,
   selectSocketConnected,
   selectSocketConnecting,
   selectSocketDisconnecting,
   selectSocketError,
   selectSocketForwarding,
+  selectSocketReconnectAttempts,
+  selectSocketReconnecting,
   selectSocketsState,
 } from './sockets.selectors';
-import { initialSocketsState, type SocketsState } from './sockets.reducer';
 import { ChatActor, type ForwardedEventPayload } from './sockets.types';
 
 describe('Sockets Selectors', () => {
@@ -249,6 +255,242 @@ describe('Sockets Selectors', () => {
       const rootState = { sockets: state };
       const selector = selectMostRecentForwardedEventByEvent('loginSuccess');
       const result = selector(rootState as any);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('selectSocketReconnecting', () => {
+    it('should select reconnecting state', () => {
+      const state = createState({ reconnecting: true });
+      const rootState = { sockets: state };
+      const result = selectSocketReconnecting(rootState as any);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when not reconnecting', () => {
+      const state = createState({ reconnecting: false });
+      const rootState = { sockets: state };
+      const result = selectSocketReconnecting(rootState as any);
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('selectSocketReconnectAttempts', () => {
+    it('should select reconnectAttempts', () => {
+      const state = createState({ reconnectAttempts: 3 });
+      const rootState = { sockets: state };
+      const result = selectSocketReconnectAttempts(rootState as any);
+
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 when no attempts', () => {
+      const state = createState({ reconnectAttempts: 0 });
+      const rootState = { sockets: state };
+      const result = selectSocketReconnectAttempts(rootState as any);
+
+      expect(result).toBe(0);
+    });
+  });
+
+  describe('selectRemoteConnections', () => {
+    it('should select remoteConnections', () => {
+      const remoteConnections = {
+        'client-1': {
+          clientId: 'client-1',
+          connected: true,
+          reconnecting: false,
+          reconnectAttempts: 0,
+          lastError: null,
+        },
+        'client-2': {
+          clientId: 'client-2',
+          connected: false,
+          reconnecting: true,
+          reconnectAttempts: 2,
+          lastError: 'Connection timeout',
+        },
+      };
+      const state = createState({ remoteConnections });
+      const rootState = { sockets: state };
+      const result = selectRemoteConnections(rootState as any);
+
+      expect(result).toEqual(remoteConnections);
+    });
+
+    it('should return empty object when no remote connections', () => {
+      const state = createState({ remoteConnections: {} });
+      const rootState = { sockets: state };
+      const result = selectRemoteConnections(rootState as any);
+
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('selectRemoteConnectionState', () => {
+    it('should select remote connection state for a specific clientId', () => {
+      const remoteConnection = {
+        clientId: 'client-1',
+        connected: true,
+        reconnecting: false,
+        reconnectAttempts: 0,
+        lastError: null,
+      };
+      const state = createState({
+        remoteConnections: {
+          'client-1': remoteConnection,
+        },
+      });
+      const rootState = { sockets: state };
+      const selector = selectRemoteConnectionState('client-1');
+      const result = selector(rootState as any);
+
+      expect(result).toEqual(remoteConnection);
+    });
+
+    it('should return null when clientId does not exist', () => {
+      const state = createState({
+        remoteConnections: {
+          'client-1': {
+            clientId: 'client-1',
+            connected: true,
+            reconnecting: false,
+            reconnectAttempts: 0,
+            lastError: null,
+          },
+        },
+      });
+      const rootState = { sockets: state };
+      const selector = selectRemoteConnectionState('client-2');
+      const result = selector(rootState as any);
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when remoteConnections is empty', () => {
+      const state = createState({ remoteConnections: {} });
+      const rootState = { sockets: state };
+      const selector = selectRemoteConnectionState('client-1');
+      const result = selector(rootState as any);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('selectIsRemoteReconnecting', () => {
+    it('should return true when remote connection is reconnecting', () => {
+      const state = createState({
+        remoteConnections: {
+          'client-1': {
+            clientId: 'client-1',
+            connected: false,
+            reconnecting: true,
+            reconnectAttempts: 2,
+            lastError: null,
+          },
+        },
+      });
+      const rootState = { sockets: state };
+      const selector = selectIsRemoteReconnecting('client-1');
+      const result = selector(rootState as any);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when remote connection is not reconnecting', () => {
+      const state = createState({
+        remoteConnections: {
+          'client-1': {
+            clientId: 'client-1',
+            connected: true,
+            reconnecting: false,
+            reconnectAttempts: 0,
+            lastError: null,
+          },
+        },
+      });
+      const rootState = { sockets: state };
+      const selector = selectIsRemoteReconnecting('client-1');
+      const result = selector(rootState as any);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when clientId does not exist', () => {
+      const state = createState({ remoteConnections: {} });
+      const rootState = { sockets: state };
+      const selector = selectIsRemoteReconnecting('client-1');
+      const result = selector(rootState as any);
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('selectRemoteConnectionError', () => {
+    it('should return error when remote connection has error', () => {
+      const state = createState({
+        remoteConnections: {
+          'client-1': {
+            clientId: 'client-1',
+            connected: false,
+            reconnecting: false,
+            reconnectAttempts: 5,
+            lastError: 'Reconnection failed',
+          },
+        },
+      });
+      const rootState = { sockets: state };
+      const selector = selectRemoteConnectionError('client-1');
+      const result = selector(rootState as any);
+
+      expect(result).toBe('Reconnection failed');
+    });
+
+    it('should return null when remote connection has no error', () => {
+      const state = createState({
+        remoteConnections: {
+          'client-1': {
+            clientId: 'client-1',
+            connected: true,
+            reconnecting: false,
+            reconnectAttempts: 0,
+            lastError: null,
+          },
+        },
+      });
+      const rootState = { sockets: state };
+      const selector = selectRemoteConnectionError('client-1');
+      const result = selector(rootState as any);
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when clientId does not exist', () => {
+      const state = createState({ remoteConnections: {} });
+      const rootState = { sockets: state };
+      const selector = selectRemoteConnectionError('client-1');
+      const result = selector(rootState as any);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('selectSelectedAgentId', () => {
+    it('should select selectedAgentId', () => {
+      const state = createState({ selectedAgentId: 'agent-123' });
+      const rootState = { sockets: state };
+      const result = selectSelectedAgentId(rootState as any);
+
+      expect(result).toBe('agent-123');
+    });
+
+    it('should return null when no agent is selected', () => {
+      const state = createState({ selectedAgentId: null });
+      const rootState = { sockets: state };
+      const result = selectSelectedAgentId(rootState as any);
 
       expect(result).toBeNull();
     });

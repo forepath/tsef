@@ -4,16 +4,25 @@ import {
   connectSocketSuccess,
   disconnectSocket,
   disconnectSocketSuccess,
+  forwardedEventReceived,
   forwardEvent,
   forwardEventFailure,
   forwardEventSuccess,
-  forwardedEventReceived,
+  remoteDisconnected,
+  remoteReconnected,
+  remoteReconnectError,
+  remoteReconnectFailed,
+  remoteReconnecting,
   setAgent,
   setChatModel,
   setClient,
   setClientFailure,
   setClientSuccess,
   socketError,
+  socketReconnected,
+  socketReconnectError,
+  socketReconnectFailed,
+  socketReconnecting,
 } from './sockets.actions';
 import { initialSocketsState, socketsReducer, type SocketsState } from './sockets.reducer';
 import { ChatActor, ForwardableEvent, type ForwardedEventPayload } from './sockets.types';
@@ -147,6 +156,47 @@ describe('socketsReducer', () => {
       expect(newState.error).toBeNull();
       expect(newState.settingClient).toBe(false);
       expect(newState.settingClientId).toBeNull();
+    });
+
+    it('should clear forwardedEvents on reconnection (same clientId with existing events)', () => {
+      const state: SocketsState = {
+        ...initialSocketsState,
+        selectedClientId: 'client-1',
+        forwardedEvents: [
+          { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 1000 },
+          { event: 'loginSuccess', payload: mockForwardedPayload, timestamp: 2000 },
+        ],
+      };
+
+      const newState = socketsReducer(state, setClientSuccess({ message: 'Client set', clientId: 'client-1' }));
+
+      expect(newState.forwardedEvents).toEqual([]);
+    });
+
+    it('should not clear forwardedEvents on initial connection (different clientId)', () => {
+      const state: SocketsState = {
+        ...initialSocketsState,
+        selectedClientId: 'client-1',
+        forwardedEvents: [{ event: 'chatMessage', payload: mockForwardedPayload, timestamp: 1000 }],
+      };
+
+      const newState = socketsReducer(state, setClientSuccess({ message: 'Client set', clientId: 'client-2' }));
+
+      expect(newState.forwardedEvents).toEqual([
+        { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 1000 },
+      ]);
+    });
+
+    it('should not clear forwardedEvents on initial connection (no existing events)', () => {
+      const state: SocketsState = {
+        ...initialSocketsState,
+        selectedClientId: 'client-1',
+        forwardedEvents: [],
+      };
+
+      const newState = socketsReducer(state, setClientSuccess({ message: 'Client set', clientId: 'client-1' }));
+
+      expect(newState.forwardedEvents).toEqual([]);
     });
   });
 
@@ -341,6 +391,384 @@ describe('socketsReducer', () => {
       const newState = socketsReducer(state, setAgent({ agentId: null }));
 
       expect(newState.selectedAgentId).toBeNull();
+    });
+  });
+
+  describe('Main Socket Reconnection', () => {
+    describe('socketReconnecting', () => {
+      it('should set reconnecting to true and update reconnectAttempts', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          connected: true,
+        };
+
+        const newState = socketsReducer(state, socketReconnecting({ attempt: 2 }));
+
+        expect(newState.reconnecting).toBe(true);
+        expect(newState.reconnectAttempts).toBe(2);
+        expect(newState.error).toBeNull(); // Should clear error while reconnecting
+      });
+    });
+
+    describe('socketReconnected', () => {
+      it('should set connected to true and clear reconnecting state', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          reconnecting: true,
+          reconnectAttempts: 3,
+        };
+
+        const newState = socketsReducer(state, socketReconnected());
+
+        expect(newState.connected).toBe(true);
+        expect(newState.reconnecting).toBe(false);
+        expect(newState.reconnectAttempts).toBe(0);
+        expect(newState.error).toBeNull();
+      });
+
+      it('should clear forwardedEvents on reconnection to prevent duplicates', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          reconnecting: true,
+          reconnectAttempts: 2,
+          forwardedEvents: [
+            { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 1000 },
+            { event: 'loginSuccess', payload: mockForwardedPayload, timestamp: 2000 },
+          ],
+        };
+
+        const newState = socketsReducer(state, socketReconnected());
+
+        expect(newState.forwardedEvents).toEqual([]);
+      });
+    });
+
+    describe('socketReconnectError', () => {
+      it('should keep reconnecting state true', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          reconnecting: true,
+          reconnectAttempts: 2,
+        };
+
+        const newState = socketsReducer(state, socketReconnectError({ error: 'Reconnection error' }));
+
+        expect(newState.reconnecting).toBe(true);
+        // Error should not be set while still reconnecting
+      });
+    });
+
+    describe('socketReconnectFailed', () => {
+      it('should set error and clear reconnecting state', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          reconnecting: true,
+          reconnectAttempts: 5,
+        };
+
+        const newState = socketsReducer(state, socketReconnectFailed({ error: 'Reconnection failed' }));
+
+        expect(newState.connected).toBe(false);
+        expect(newState.reconnecting).toBe(false);
+        expect(newState.reconnectAttempts).toBe(0);
+        expect(newState.error).toBe('Reconnection failed');
+      });
+    });
+  });
+
+  describe('Remote Connection Reconnection (per clientId)', () => {
+    describe('remoteDisconnected', () => {
+      it('should initialize remote connection state if not exists and set connected to false', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+        };
+
+        const newState = socketsReducer(state, remoteDisconnected({ clientId: 'client-1' }));
+
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: false,
+          reconnecting: false,
+          reconnectAttempts: 0,
+          lastError: null,
+        });
+      });
+
+      it('should update existing remote connection state to disconnected', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          remoteConnections: {
+            'client-1': {
+              clientId: 'client-1',
+              connected: true,
+              reconnecting: false,
+              reconnectAttempts: 0,
+              lastError: null,
+            },
+          },
+        };
+
+        const newState = socketsReducer(state, remoteDisconnected({ clientId: 'client-1' }));
+
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: false,
+          reconnecting: false,
+          reconnectAttempts: 0,
+          lastError: null,
+        });
+      });
+    });
+
+    describe('remoteReconnecting', () => {
+      it('should initialize remote connection state if not exists', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+        };
+
+        const newState = socketsReducer(state, remoteReconnecting({ clientId: 'client-1', attempt: 1 }));
+
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: false,
+          reconnecting: true,
+          reconnectAttempts: 1,
+          lastError: null,
+        });
+      });
+
+      it('should update existing remote connection state', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          remoteConnections: {
+            'client-1': {
+              clientId: 'client-1',
+              connected: true,
+              reconnecting: false,
+              reconnectAttempts: 0,
+              lastError: null,
+            },
+          },
+        };
+
+        const newState = socketsReducer(state, remoteReconnecting({ clientId: 'client-1', attempt: 2 }));
+
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: true,
+          reconnecting: true,
+          reconnectAttempts: 2,
+          lastError: null,
+        });
+      });
+    });
+
+    describe('remoteReconnected', () => {
+      it('should update remote connection state to connected', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          remoteConnections: {
+            'client-1': {
+              clientId: 'client-1',
+              connected: false,
+              reconnecting: true,
+              reconnectAttempts: 2,
+              lastError: 'Previous error',
+            },
+          },
+        };
+
+        const newState = socketsReducer(state, remoteReconnected({ clientId: 'client-1' }));
+
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: true,
+          reconnecting: false,
+          reconnectAttempts: 0,
+          lastError: null,
+        });
+      });
+
+      it('should clear forwardedEvents when reconnecting for the selected client', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          selectedClientId: 'client-1',
+          forwardedEvents: [
+            { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 1000 },
+            { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 2000 },
+          ],
+          remoteConnections: {
+            'client-1': {
+              clientId: 'client-1',
+              connected: false,
+              reconnecting: true,
+              reconnectAttempts: 1,
+              lastError: null,
+            },
+          },
+        };
+
+        const newState = socketsReducer(state, remoteReconnected({ clientId: 'client-1' }));
+
+        expect(newState.forwardedEvents).toEqual([]);
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: true,
+          reconnecting: false,
+          reconnectAttempts: 0,
+          lastError: null,
+        });
+      });
+
+      it('should not clear forwardedEvents when reconnecting for a different client', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          selectedClientId: 'client-1',
+          forwardedEvents: [
+            { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 1000 },
+            { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 2000 },
+          ],
+          remoteConnections: {
+            'client-2': {
+              clientId: 'client-2',
+              connected: false,
+              reconnecting: true,
+              reconnectAttempts: 1,
+              lastError: null,
+            },
+          },
+        };
+
+        const newState = socketsReducer(state, remoteReconnected({ clientId: 'client-2' }));
+
+        expect(newState.forwardedEvents).toEqual([
+          { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 1000 },
+          { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 2000 },
+        ]);
+        expect(newState.remoteConnections['client-2']).toEqual({
+          clientId: 'client-2',
+          connected: true,
+          reconnecting: false,
+          reconnectAttempts: 0,
+          lastError: null,
+        });
+      });
+
+      it('should not clear forwardedEvents when there are no existing forwardedEvents', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          selectedClientId: 'client-1',
+          forwardedEvents: [],
+          remoteConnections: {
+            'client-1': {
+              clientId: 'client-1',
+              connected: false,
+              reconnecting: true,
+              reconnectAttempts: 1,
+              lastError: null,
+            },
+          },
+        };
+
+        const newState = socketsReducer(state, remoteReconnected({ clientId: 'client-1' }));
+
+        expect(newState.forwardedEvents).toEqual([]);
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: true,
+          reconnecting: false,
+          reconnectAttempts: 0,
+          lastError: null,
+        });
+      });
+    });
+
+    describe('remoteReconnectError', () => {
+      it('should update lastError while keeping reconnecting true', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          remoteConnections: {
+            'client-1': {
+              clientId: 'client-1',
+              connected: false,
+              reconnecting: true,
+              reconnectAttempts: 2,
+              lastError: null,
+            },
+          },
+        };
+
+        const newState = socketsReducer(state, remoteReconnectError({ clientId: 'client-1', error: 'Timeout' }));
+
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: false,
+          reconnecting: true,
+          reconnectAttempts: 2,
+          lastError: 'Timeout',
+        });
+      });
+    });
+
+    describe('remoteReconnectFailed', () => {
+      it('should set connected to false and clear reconnecting state', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+          remoteConnections: {
+            'client-1': {
+              clientId: 'client-1',
+              connected: false,
+              reconnecting: true,
+              reconnectAttempts: 5,
+              lastError: null,
+            },
+          },
+        };
+
+        const newState = socketsReducer(state, remoteReconnectFailed({ clientId: 'client-1', error: 'Failed' }));
+
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: false,
+          reconnecting: false,
+          reconnectAttempts: 5,
+          lastError: 'Failed',
+        });
+      });
+    });
+
+    describe('setClientSuccess', () => {
+      it('should initialize remote connection state for new clientId', () => {
+        const state: SocketsState = {
+          ...initialSocketsState,
+        };
+
+        const newState = socketsReducer(state, setClientSuccess({ message: 'Success', clientId: 'client-1' }));
+
+        expect(newState.remoteConnections['client-1']).toEqual({
+          clientId: 'client-1',
+          connected: true,
+          reconnecting: false,
+          reconnectAttempts: 0,
+          lastError: null,
+        });
+      });
+    });
+
+    it('should track multiple clientIds independently', () => {
+      let state: SocketsState = {
+        ...initialSocketsState,
+      };
+
+      // Set client 1
+      state = socketsReducer(state, setClientSuccess({ message: 'Success', clientId: 'client-1' }));
+      // Set client 2
+      state = socketsReducer(state, setClientSuccess({ message: 'Success', clientId: 'client-2' }));
+      // Reconnecting for client 1
+      state = socketsReducer(state, remoteReconnecting({ clientId: 'client-1', attempt: 1 }));
+
+      expect(state.remoteConnections['client-1']?.reconnecting).toBe(true);
+      expect(state.remoteConnections['client-2']?.reconnecting).toBe(false);
     });
   });
 });

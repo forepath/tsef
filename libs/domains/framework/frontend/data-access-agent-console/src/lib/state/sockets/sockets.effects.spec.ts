@@ -12,8 +12,17 @@ import {
   disconnectSocketSuccess,
   forwardedEventReceived,
   forwardEventSuccess,
+  remoteDisconnected,
+  remoteReconnected,
+  remoteReconnectError,
+  remoteReconnectFailed,
+  remoteReconnecting,
   setClientSuccess,
   socketError,
+  socketReconnected,
+  socketReconnectError,
+  socketReconnectFailed,
+  socketReconnecting,
 } from './sockets.actions';
 import { connectSocket$, disconnectSocket$ } from './sockets.effects';
 import { ChatActor, type ForwardedEventPayload } from './sockets.types';
@@ -131,10 +140,8 @@ describe('SocketsEffects', () => {
       actions$ = of(action);
 
       // Mock connect event
-      let connectHandler: () => void;
       (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: () => void) => {
         if (event === 'connect') {
-          connectHandler = handler;
           // Simulate immediate connection
           setTimeout(() => handler(), 0);
         }
@@ -145,6 +152,11 @@ describe('SocketsEffects', () => {
         expect(io).toHaveBeenCalledWith('http://localhost:8081/clients', {
           transports: ['websocket'],
           rejectUnauthorized: false,
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          randomizationFactor: 0.5,
           extraHeaders: { Authorization: 'Bearer test-api-key' },
         });
         expect(result).toEqual(connectSocketSuccess());
@@ -192,6 +204,11 @@ describe('SocketsEffects', () => {
         expect(io).toHaveBeenCalledWith('http://localhost:8081/clients', {
           transports: ['websocket'],
           rejectUnauthorized: false,
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          randomizationFactor: 0.5,
           extraHeaders: { Authorization: 'Bearer keycloak-token-123' },
         });
         expect(result).toEqual(connectSocketSuccess());
@@ -199,7 +216,7 @@ describe('SocketsEffects', () => {
       });
     });
 
-    it('should return connectSocketFailure on connection error', (done) => {
+    it('should return socketReconnectError on connection error (with reconnection enabled)', (done) => {
       const action = connectSocket();
       actions$ = of(action);
 
@@ -212,7 +229,9 @@ describe('SocketsEffects', () => {
       });
 
       connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
-        expect(result).toEqual(connectSocketFailure({ error: 'Connection failed' }));
+        // With reconnection enabled, connect_error emits socketReconnectError
+        // Final failure will be emitted on reconnect_failed
+        expect(result).toEqual(socketReconnectError({ error: 'Connection failed' }));
         done();
       });
     });
@@ -403,6 +422,250 @@ describe('SocketsEffects', () => {
       disconnectSocket$(actions$).subscribe((result) => {
         expect(result).toEqual(disconnectSocketSuccess());
         done();
+      });
+    });
+  });
+
+  describe('Main Socket Reconnection Events', () => {
+    it('should handle reconnect_attempt event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'reconnect_attempt') {
+          setTimeout(() => handler(2), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Socket Reconnecting') {
+          expect(result).toEqual(socketReconnecting({ attempt: 2 }));
+          done();
+        }
+      });
+    });
+
+    it('should handle reconnecting event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'reconnecting') {
+          setTimeout(() => handler(3), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Socket Reconnecting') {
+          expect(result).toEqual(socketReconnecting({ attempt: 3 }));
+          done();
+        }
+      });
+    });
+
+    it('should handle reconnect event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'reconnect') {
+          setTimeout(() => handler(), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Socket Reconnected') {
+          expect(result).toEqual(socketReconnected());
+          done();
+        }
+      });
+    });
+
+    it('should handle reconnect_error event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'reconnect_error') {
+          setTimeout(() => handler(new Error('Reconnection error')), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Socket Reconnect Error') {
+          expect(result).toEqual(socketReconnectError({ error: 'Reconnection error' }));
+          done();
+        }
+      });
+    });
+
+    it('should handle reconnect_failed event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'reconnect_failed') {
+          setTimeout(() => handler(), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Socket Reconnect Failed') {
+          expect(result).toEqual(socketReconnectFailed({ error: 'Reconnection failed after all attempts' }));
+          done();
+        }
+      });
+    });
+  });
+
+  describe('Remote Connection Reconnection Events', () => {
+    it('should handle remoteDisconnected event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'remoteDisconnected') {
+          setTimeout(() => handler({ clientId: 'client-1' }), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Remote Disconnected') {
+          expect(result).toEqual(remoteDisconnected({ clientId: 'client-1' }));
+          done();
+        }
+      });
+    });
+
+    it('should handle remoteReconnecting event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'remoteReconnecting') {
+          setTimeout(() => handler({ clientId: 'client-1', attempt: 2 }), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Remote Reconnecting') {
+          expect(result).toEqual(remoteReconnecting({ clientId: 'client-1', attempt: 2 }));
+          done();
+        }
+      });
+    });
+
+    it('should handle remoteReconnected event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'remoteReconnected') {
+          setTimeout(() => handler({ clientId: 'client-1' }), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Remote Reconnected') {
+          expect(result).toEqual(remoteReconnected({ clientId: 'client-1' }));
+          done();
+        }
+      });
+    });
+
+    it('should handle remoteReconnectError event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'remoteReconnectError') {
+          setTimeout(() => handler({ clientId: 'client-1', error: 'Timeout' }), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Remote Reconnect Error') {
+          expect(result).toEqual(remoteReconnectError({ clientId: 'client-1', error: 'Timeout' }));
+          done();
+        }
+      });
+    });
+
+    it('should handle remoteReconnectFailed event', (done) => {
+      const action = connectSocket();
+      actions$ = of(action);
+
+      let connectHandler: () => void;
+      (mockSocket.on as jest.Mock).mockImplementation((event: string, handler: any) => {
+        if (event === 'remoteReconnectFailed') {
+          setTimeout(() => handler({ clientId: 'client-1', error: 'Failed' }), 0);
+        }
+        if (event === 'connect') {
+          connectHandler = handler;
+          setTimeout(() => connectHandler(), 0);
+        }
+        return mockSocket as any;
+      });
+
+      connectSocket$(actions$, TestBed.inject(ENVIRONMENT), null).subscribe((result) => {
+        if (result.type === '[Sockets] Remote Reconnect Failed') {
+          expect(result).toEqual(remoteReconnectFailed({ clientId: 'client-1', error: 'Failed' }));
+          done();
+        }
       });
     });
   });

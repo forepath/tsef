@@ -31,6 +31,31 @@ export const selectChatForwarding = createSelector(
 // Error selector
 export const selectSocketError = createSelector(selectSocketsState, (state) => state.error);
 
+// Reconnection state selectors (main socket)
+export const selectSocketReconnecting = createSelector(selectSocketsState, (state) => state.reconnecting);
+export const selectSocketReconnectAttempts = createSelector(selectSocketsState, (state) => state.reconnectAttempts);
+
+// Remote connection state selectors (per clientId)
+export const selectRemoteConnections = createSelector(selectSocketsState, (state) => state.remoteConnections);
+
+/**
+ * Select remote connection state for a specific clientId
+ */
+export const selectRemoteConnectionState = (clientId: string) =>
+  createSelector(selectRemoteConnections, (connections) => connections[clientId] || null);
+
+/**
+ * Select whether a remote connection is reconnecting for a specific clientId
+ */
+export const selectIsRemoteReconnecting = (clientId: string) =>
+  createSelector(selectRemoteConnectionState(clientId), (connection) => connection?.reconnecting ?? false);
+
+/**
+ * Select the last error for a remote connection for a specific clientId
+ */
+export const selectRemoteConnectionError = (clientId: string) =>
+  createSelector(selectRemoteConnectionState(clientId), (connection) => connection?.lastError ?? null);
+
 // Forwarded events selectors
 export const selectForwardedEvents = createSelector(selectSocketsState, (state) => state.forwardedEvents);
 
