@@ -34,11 +34,17 @@
       "@forepath/framework/frontend/feature-agent-console": [
         "libs/domains/framework/frontend/feature-agent-console/src/index.ts"
       ],
+      "@forepath/framework/frontend/feature-docs": [
+        "libs/domains/framework/frontend/feature-docs/src/index.ts"
+      ],
       "@forepath/framework/frontend/feature-portal": [
         "libs/domains/framework/frontend/feature-portal/src/index.ts"
       ],
       "@forepath/framework/frontend/util-configuration": [
         "libs/domains/framework/frontend/util-configuration/src/index.ts"
+      ],
+      "@forepath/framework/frontend/util-docs-parser": [
+        "libs/domains/framework/frontend/util-docs-parser/src/index.ts"
       ],
       "@forepath/identity/backend": ["libs/domains/identity/backend/index.ts"],
       "@forepath/identity/frontend": ["libs/domains/identity/frontend/index.ts"]

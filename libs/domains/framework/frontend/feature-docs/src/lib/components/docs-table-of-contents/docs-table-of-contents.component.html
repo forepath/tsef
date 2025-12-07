@@ -1,0 +1,16 @@
+@if (tocHeadings().length > 0) {
+  <div class="docs-toc">
+    <h6 class="toc-title">Table of Contents</h6>
+    <nav class="toc-nav">
+      <ul class="toc-list">
+        @for (heading of tocHeadings(); track heading.id) {
+          <li [class]="getHeadingClass(heading.level)" [class.active]="activeHeadingId() === heading.id">
+            <a href="#{{ heading.id }}" (click)="scrollToHeading(heading.id); $event.preventDefault()">
+              {{ heading.text }}
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+  </div>
+}

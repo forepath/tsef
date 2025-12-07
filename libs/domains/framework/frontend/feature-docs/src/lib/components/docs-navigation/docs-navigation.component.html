@@ -1,0 +1,53 @@
+<nav class="docs-navigation">
+  <ul class="nav-list">
+    @for (node of navigationNodes(); track node.path) {
+      <li class="nav-item">
+        <div class="nav-node">
+          @if (node.children && node.children.length > 0) {
+            <button
+              type="button"
+              class="nav-toggle"
+              (click)="toggleSection(node.path)"
+              [attr.aria-expanded]="isExpanded(node.path)"
+            >
+              <i
+                class="bi"
+                [class.bi-chevron-right]="!isExpanded(node.path)"
+                [class.bi-chevron-down]="isExpanded(node.path)"
+              ></i>
+            </button>
+          } @else {
+            <span class="nav-spacer"></span>
+          }
+          <a
+            [routerLink]="node.path"
+            [routerLinkActive]="'active'"
+            [routerLinkActiveOptions]="{ exact: true }"
+            [class.active]="isActive(node)"
+            (click)="onNodeClick(node, $event)"
+            class="nav-link"
+          >
+            {{ node.title }}
+          </a>
+        </div>
+        @if (node.children && node.children.length > 0 && isExpanded(node.path)) {
+          <ul class="nav-children">
+            @for (child of node.children; track child.path) {
+              <li class="nav-item">
+                <a
+                  [routerLink]="child.path"
+                  [routerLinkActive]="'active'"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  [class.active]="isActive(child)"
+                  class="nav-link nav-link-child"
+                >
+                  {{ child.title }}
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </li>
+    }
+  </ul>
+</nav>

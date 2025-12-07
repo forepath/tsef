@@ -1,0 +1,16 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item">
+      <a routerLink="/docs">Documentation</a>
+    </li>
+    @for (crumb of breadcrumbs(); track crumb.path) {
+      <li class="breadcrumb-item" [class.active]="$last">
+        @if ($last) {
+          {{ crumb.title }}
+        } @else {
+          <a [routerLink]="crumb.path">{{ crumb.title }}</a>
+        }
+      </li>
+    }
+  </ol>
+</nav>

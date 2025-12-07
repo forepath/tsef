@@ -1,0 +1,20 @@
+.docs-search-page {
+  .search-results {
+    .list-group-item {
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--bs-secondary-bg);
+      }
+
+      h5 {
+        color: var(--bs-link-color);
+      }
+
+      mark {
+        background-color: var(--bs-warning);
+        padding: 0;
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+.docs-navigation {
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+
+  .nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    .nav-item {
+      margin-bottom: 0.25rem;
+
+      .nav-node {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .nav-toggle {
+          background: none;
+          border: none;
+          padding: 0.25rem;
+          cursor: pointer;
+          color: var(--bs-secondary-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.5rem;
+          height: 1.5rem;
+
+          &:hover {
+            color: var(--bs-primary);
+          }
+
+          i {
+            font-size: 0.75rem;
+          }
+        }
+
+        .nav-spacer {
+          width: 1.5rem;
+        }
+
+        .nav-link {
+          flex: 1;
+          padding: 0.5rem 1rem;
+          color: var(--bs-body-color);
+          text-decoration: none;
+          border-radius: var(--bs-border-radius-sm);
+          transition: background-color 0.15s ease-in-out;
+          display: block;
+
+          &:hover {
+            background-color: var(--bs-secondary-bg);
+            color: var(--bs-link-color);
+          }
+
+          &.active {
+            background-color: var(--bs-primary-bg-subtle);
+            color: var(--bs-primary);
+            font-weight: 600;
+          }
+        }
+      }
+
+      .nav-children {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        padding-left: 1.5rem;
+
+        .nav-item {
+          .nav-link-child {
+            padding-left: 1.5rem;
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            font-size: 0.875rem;
+
+            &.active {
+              background-color: var(--bs-primary-bg-subtle);
+              color: var(--bs-primary);
+              font-weight: 600;
+              border-radius: var(--bs-border-radius-sm);
+            }
+
+            &:hover {
+              background-color: var(--bs-secondary-bg);
+              color: var(--bs-link-color);
+              border-radius: var(--bs-border-radius-sm);
+            }
+          }
+        }
+      }
+    }
+  }
+}

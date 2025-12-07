@@ -1,0 +1,74 @@
+@use '../../section.scss';
+
+.docs-layout {
+  .docs-header {
+    z-index: 1020;
+    position: sticky;
+    top: 0;
+    height: 72px;
+
+    .brand-icon {
+      color: #fff;
+      height: 39px;
+      width: 39px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h5 {
+      margin: 0;
+    }
+  }
+
+  .docs-main {
+    height: calc(100vh - 72px);
+
+    .docs-sidebar {
+      width: 280px;
+      background-color: var(--bs-body-bg);
+      overflow-y: auto;
+      position: relative;
+      flex-shrink: 0;
+      height: 100%;
+
+      @media (max-width: 767.98px) {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        z-index: 1030;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+
+        &.mobile-open {
+          left: 0;
+        }
+
+        .docs-sidebar-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: -1;
+        }
+      }
+
+      .docs-sidebar-content {
+        height: 100%;
+      }
+    }
+
+    .docs-content-area {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+
+      @media (max-width: 767.98px) {
+        padding: 1rem;
+      }
+    }
+  }
+}
