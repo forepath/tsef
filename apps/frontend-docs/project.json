@@ -43,6 +43,16 @@
             "glob": "**/*.md",
             "input": "docs/agenstra",
             "output": "docs/agenstra"
+          },
+          {
+            "glob": "**/*.yaml",
+            "input": "libs/domains/framework/backend/feature-agent-controller/spec",
+            "output": "spec/agent-controller"
+          },
+          {
+            "glob": "**/*.yaml",
+            "input": "libs/domains/framework/backend/feature-agent-manager/spec",
+            "output": "spec/agent-manager"
           }
         ],
         "styles": ["apps/frontend-docs/src/styles.scss"],

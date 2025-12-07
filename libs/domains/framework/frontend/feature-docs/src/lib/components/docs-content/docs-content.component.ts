@@ -266,6 +266,7 @@ export class DocsContentComponent implements AfterViewInit {
    * Process links in HTML to convert markdown links to router links
    * If a link doesn't include a folder path, preserve the current file's folder name
    * Handles README.md files by removing the README part from the route path
+   * Preserves external links and YAML file links as-is
    */
   private processLinks(html: string): string {
     const metadata = this.metadata();
@@ -279,10 +280,29 @@ export class DocsContentComponent implements AfterViewInit {
       ? currentFilePath.substring(0, currentFilePath.lastIndexOf('/'))
       : '';
 
-    // Convert relative markdown links to Angular router links
-    // Pattern: <a href="./path.md"> or <a href="../path.md"> or <a href="path.md">
-    const linkRegex = /<a href="([^"]+\.md)">/gi;
+    // Process all links, but handle different types differently
+    const linkRegex = /<a href="([^"]+)">/gi;
     return html.replace(linkRegex, (match, path) => {
+      // Skip external links (http://, https://, mailto:, etc.)
+      if (/^(https?:\/\/|mailto:)/i.test(path)) {
+        return match; // Keep external links as-is
+      }
+
+      // Handle YAML files - keep them as direct links (not router links)
+      if (path.endsWith('.yaml') || path.endsWith('.yml')) {
+        // If it's an absolute path starting with /, keep it as-is
+        if (path.startsWith('/')) {
+          return `<a href="${path}" target="_blank" rel="noopener noreferrer">`;
+        }
+        // Relative paths - resolve them
+        return `<a href="${path}" target="_blank" rel="noopener noreferrer">`;
+      }
+
+      // Only process markdown file links
+      if (!path.endsWith('.md')) {
+        return match; // Keep non-markdown links as-is
+      }
+
       // Remove .md extension
       let routePath = path.replace(/\.md$/, '');
 

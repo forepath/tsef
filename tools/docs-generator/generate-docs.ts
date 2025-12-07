@@ -272,7 +272,7 @@ function formatTitle(name: string): string {
 }
 
 function sortNavigationNodes(nodes: NavigationNode[]): void {
-  // Sort nodes: categories (folders with children property) first, then links (files without children property)
+  // Sort nodes: categories (folders with non-empty children) first, then links (files without children property or empty children)
   // Both sorted alphabetically within their group
   // IMPORTANT: Use a stable sort by first separating categories and links, then sorting each group
   const categories: NavigationNode[] = [];
@@ -280,10 +280,9 @@ function sortNavigationNodes(nodes: NavigationNode[]): void {
 
   // Separate categories and links
   for (const node of nodes) {
-    // A node is a category if it has a children property (even if empty)
-    // This is because folders are created with children: [] and represent directory structures
-    // A node is a link if it doesn't have a children property at all
-    if (node.children !== undefined) {
+    // A node is a category if it has a children property AND has at least one child
+    // A node is a link if it doesn't have a children property OR has an empty children array
+    if (node.children !== undefined && node.children.length > 0) {
       categories.push(node);
     } else {
       links.push(node);
