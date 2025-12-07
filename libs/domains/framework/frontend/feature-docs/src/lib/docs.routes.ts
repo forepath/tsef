@@ -14,7 +14,8 @@ export const docsRoutes: Route[] = [
       },
       {
         path: '',
-        component: DocsPageComponent,
+        redirectTo: 'docs',
+        pathMatch: 'full',
       },
       {
         path: '**',
