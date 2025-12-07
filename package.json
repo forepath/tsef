@@ -144,6 +144,7 @@
     "keycloak-js": "26.2.1",
     "keycloakify": "11.9.6",
     "marked": "^15.0.12",
+    "mermaid": "11.12.2",
     "monaco-editor": "0.52.2",
     "nest-keycloak-connect": "2.0.0-alpha.2",
     "ngx-monaco-editor-v2": "19.0.2",

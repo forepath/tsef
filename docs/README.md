@@ -24,6 +24,10 @@ Explore the development tools, automation, and integrations that power our devel
 
 Quick access to commands, troubleshooting guides, and comprehensive rule references. Essential information for daily development work.
 
+### [Agenstra](./agenstra/README.md)
+
+Comprehensive documentation for the Agenstra agent management system, including architecture, features, deployment, and troubleshooting guides.
+
 ## Quick Start
 
 New to the project? Start here:

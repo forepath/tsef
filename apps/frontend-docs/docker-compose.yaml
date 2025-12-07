@@ -1,0 +1,19 @@
+services:
+  frontend-docs-server:
+    image: ghcr.io/forepath/agenstra-docs-server:latest
+    container_name: docs-server
+    environment:
+      # Frontend server configuration
+      HOST: 0.0.0.0
+      PORT: 4200
+      NODE_ENV: production
+      DEFAULT_LOCALE: en
+    ports:
+      - '4200:4200'
+    networks:
+      - docs-network
+    restart: unless-stopped
+
+networks:
+  docs-network:
+    driver: bridge

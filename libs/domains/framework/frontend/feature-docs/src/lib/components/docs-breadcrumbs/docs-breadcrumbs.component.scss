@@ -1,0 +1,19 @@
+.breadcrumb {
+  background-color: transparent;
+  padding: 0.5rem 0;
+}
+
+.breadcrumb-item {
+  a {
+    color: var(--bs-link-color);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &.active {
+    color: var(--bs-secondary-color);
+  }
+}
