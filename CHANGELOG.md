@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.11.1](https://github.com/forepath/tsef/compare/v1.11.0...v1.11.1) (2025-12-07)
+
+
+### Bug Fixes
+
+* missing documentation link ([#101](https://github.com/forepath/tsef/issues/101)) ([55919da](https://github.com/forepath/tsef/commit/55919daa1ae614905f61ee4fafb5cb4d0da76461))
+
 ## [1.11.0](https://github.com/forepath/tsef/compare/v1.10.0...v1.11.0) (2025-12-07)
 
 
