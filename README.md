@@ -97,8 +97,10 @@ The following components are sublicensed under the **Source-Available License**:
 
 - [`apps/frontend-portal`](./apps/frontend-portal/) - Frontend application for the public landing page
 - [`libs/domains/framework/frontend/feature-portal`](./libs/domains/framework/frontend/feature-portal/) - Portal feature library
+- [`apps/frontend-docs`](./apps/frontend-docs/) - Frontend application for documentation
+- [`libs/domains/framework/frontend/feature-docs`](./libs/domains/framework/frontend/feature-docs/) - Documentation feature library
 
-These components are licensed under a source-available license that grants only the right to view the source code. No other rights are granted, including copying, modifying, distributing, or using the software for any purpose. See the respective [frontend-portal application LICENSE](./apps/frontend-portal/LICENSE) and [feature-portal library LICENSE](./libs/domains/framework/frontend/feature-portal/LICENSE) files for the full license text.
+These components are licensed under a source-available license that grants only the right to view the source code. No other rights are granted, including copying, modifying, distributing, or using the software for any purpose. See the respective [frontend-portal application LICENSE](./apps/frontend-portal/LICENSE), [feature-portal library LICENSE](./libs/domains/framework/frontend/feature-portal/LICENSE), [frontend-docs application LICENSE](./apps/frontend-docs/LICENSE), and [feature-docs library LICENSE](./libs/domains/framework/frontend/feature-docs/LICENSE) files for the full license text.
 
 ## Contribution
 
