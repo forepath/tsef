@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.11.0](https://github.com/forepath/tsef/compare/v1.10.0...v1.11.0) (2025-12-07)
+
+
+### Features
+
+* api rate limits ([#97](https://github.com/forepath/tsef/issues/97)) ([75d983f](https://github.com/forepath/tsef/commit/75d983fc6222c0d41a9b5085a2a5b50ee5de5900))
+* docs api references ([#100](https://github.com/forepath/tsef/issues/100)) ([878cbf3](https://github.com/forepath/tsef/commit/878cbf3387270265a6f037b1a975faa5f13f0f0d))
+* operational agenstra documentation ([#98](https://github.com/forepath/tsef/issues/98)) ([9fecb22](https://github.com/forepath/tsef/commit/9fecb22cb18ce19392f43e03062163769044ef6e))
+* websocket state recovery ([#96](https://github.com/forepath/tsef/issues/96)) ([4425869](https://github.com/forepath/tsef/commit/442586931280e3a9d764d5cc55d1313041a36ec1))
+
+
+### Bug Fixes
+
+* documentation logo link ([#99](https://github.com/forepath/tsef/issues/99)) ([3b8ba41](https://github.com/forepath/tsef/commit/3b8ba41345d0a8e185f30d93e4abba5211b49e64))
+
 ## [1.10.0](https://github.com/forepath/tsef/compare/v1.9.0...v1.10.0) (2025-12-05)
 
 
