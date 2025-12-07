@@ -62,6 +62,13 @@ Deployment guides and configuration:
 - [Production Checklist](./deployment/production-checklist.md) - Production deployment guide
 - [Environment Configuration](./deployment/environment-configuration.md) - Complete environment variables reference
 
+### [API Reference](./api-reference/README.md)
+
+Complete API specifications:
+
+- [Agent Controller API](./api-reference/README.md) - HTTP REST API and WebSocket gateway specifications
+- [Agent Manager API](./api-reference/README.md) - HTTP REST API and WebSocket gateway specifications
+
 ### [Troubleshooting](./troubleshooting/README.md)
 
 Problem-solving guides:

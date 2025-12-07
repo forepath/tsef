@@ -1,0 +1,95 @@
+# API Reference
+
+Complete API specifications for Agenstra's backend services. All specifications are available in OpenAPI 3.1.0 (for HTTP REST APIs) and AsyncAPI 3.0.0 (for WebSocket gateways) formats.
+
+## Agent Controller API
+
+The Agent Controller provides a centralized control plane for managing multiple distributed agent-manager instances.
+
+### HTTP REST API
+
+**OpenAPI Specification**: [openapi.yaml](/spec/agent-controller/openapi.yaml)
+
+- **View in Swagger Editor**: [Open in Swagger Editor](https://editor.swagger.io/?url=https://docs.agenstra.com/spec/agent-controller/openapi.yaml)
+- **Download**: [openapi.yaml](/spec/agent-controller/openapi.yaml)
+
+The Agent Controller HTTP API provides:
+
+- Client management (CRUD operations)
+- Proxied agent operations (create, update, delete agents)
+- Proxied file operations (read, write, create, delete files)
+- Proxied version control operations (git status, branches, commit, push, pull, rebase)
+- Server provisioning (Hetzner Cloud, DigitalOcean)
+
+### WebSocket Gateway
+
+**AsyncAPI Specification**: [asyncapi.yaml](/spec/agent-controller/asyncapi.yaml)
+
+- **View in AsyncAPI Studio**: [Open in AsyncAPI Studio](https://studio.asyncapi.com/?url=https://docs.agenstra.com/spec/agent-controller/asyncapi.yaml)
+- **Download**: [asyncapi.yaml](/spec/agent-controller/asyncapi.yaml)
+
+The Agent Controller WebSocket gateway provides:
+
+- Client context management (`setClient` event)
+- Event forwarding to remote agent-manager instances
+- Reconnection handling and status notifications
+
+## Agent Manager API
+
+The Agent Manager provides agent lifecycle management and container execution.
+
+### HTTP REST API
+
+**OpenAPI Specification**: [openapi.yaml](/spec/agent-manager/openapi.yaml)
+
+- **View in Swagger Editor**: [Open in Swagger Editor](https://editor.swagger.io/?url=https://docs.agenstra.com/spec/agent-manager/openapi.yaml)
+- **Download**: [openapi.yaml](/spec/agent-manager/openapi.yaml)
+
+The Agent Manager HTTP API provides:
+
+- Agent management (CRUD operations)
+- File system operations (read, write, create, delete, move files)
+- Version control operations (git status, branches, commit, push, pull, rebase)
+- Configuration endpoints
+
+### WebSocket Gateway
+
+**AsyncAPI Specification**: [asyncapi.yaml](/spec/agent-manager/asyncapi.yaml)
+
+- **View in AsyncAPI Studio**: [Open in AsyncAPI Studio](https://studio.asyncapi.com/?url=https://docs.agenstra.com/spec/agent-manager/asyncapi.yaml)
+- **Download**: [asyncapi.yaml](/spec/agent-manager/asyncapi.yaml)
+
+The Agent Manager WebSocket gateway provides:
+
+- Agent authentication (`login` event)
+- Real-time chat communication (`chat` event, `chatMessage` broadcast)
+- File update notifications (`fileUpdate`, `fileUpdateNotification`)
+- Terminal session management (`createTerminal`, `terminalInput`, `terminalOutput`, `closeTerminal`)
+- Container statistics broadcasting (`containerStats`)
+
+## Using the Specifications
+
+### Swagger Editor
+
+[Swagger Editor](https://editor.swagger.io/) is an online tool for viewing and editing OpenAPI specifications. Use it to:
+
+- Explore API endpoints interactively
+- Generate client SDKs
+- Validate API contracts
+- Test API operations
+
+### AsyncAPI Studio
+
+[AsyncAPI Studio](https://studio.asyncapi.com/) is an online tool for viewing and editing AsyncAPI specifications. Use it to:
+
+- Visualize WebSocket event flows
+- Understand message schemas
+- Generate documentation
+- Validate AsyncAPI contracts
+
+## Related Documentation
+
+- **[Architecture Overview](../architecture/system-overview.md)** - System architecture and component relationships
+- **[WebSocket Communication](../features/websocket-communication.md)** - Real-time communication patterns
+- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** - Application details
+- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** - Application details

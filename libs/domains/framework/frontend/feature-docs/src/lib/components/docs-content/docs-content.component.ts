@@ -265,7 +265,8 @@ export class DocsContentComponent implements AfterViewInit {
   /**
    * Process links in HTML to convert markdown links to router links
    * If a link doesn't include a folder path, preserve the current file's folder name
-   * Handles README.md files by removing the README part from the route path
+   * Handles README.md files by treating links as relative to the folder containing the README
+   * Preserves external links and YAML file links as-is
    */
   private processLinks(html: string): string {
     const metadata = this.metadata();
@@ -273,25 +274,80 @@ export class DocsContentComponent implements AfterViewInit {
       return html;
     }
 
-    // Get the current file's folder path (e.g., "architecture" from "architecture/README.md")
+    // Get the current file path
     const currentFilePath = metadata.path;
-    const currentFileFolder = currentFilePath.includes('/')
-      ? currentFilePath.substring(0, currentFilePath.lastIndexOf('/'))
-      : '';
 
-    // Convert relative markdown links to Angular router links
-    // Pattern: <a href="./path.md"> or <a href="../path.md"> or <a href="path.md">
-    const linkRegex = /<a href="([^"]+\.md)">/gi;
+    // Check if this is a README.md file
+    const isReadme = currentFilePath.toLowerCase().endsWith('readme.md');
+
+    // For README.md files, use the folder path as the base (one level up from the file)
+    // For other files, use the file's folder path
+    let basePath: string;
+    if (isReadme) {
+      // For README.md, the base is the folder containing it
+      // e.g., "api-reference/README.md" -> base is "api-reference"
+      basePath = currentFilePath.includes('/') ? currentFilePath.substring(0, currentFilePath.lastIndexOf('/')) : '';
+    } else {
+      // For regular files, the base is the folder containing the file
+      // e.g., "architecture/system-overview.md" -> base is "architecture"
+      basePath = currentFilePath.includes('/') ? currentFilePath.substring(0, currentFilePath.lastIndexOf('/')) : '';
+    }
+
+    // Process all links, but handle different types differently
+    const linkRegex = /<a href="([^"]+)">/gi;
     return html.replace(linkRegex, (match, path) => {
+      // Skip external links (http://, https://, mailto:, etc.)
+      if (/^(https?:\/\/|mailto:)/i.test(path)) {
+        return match; // Keep external links as-is
+      }
+
+      // Skip absolute paths starting with /
+      if (path.startsWith('/')) {
+        return match; // Keep absolute paths as-is
+      }
+
+      // Handle YAML files - keep them as direct links (not router links)
+      if (path.endsWith('.yaml') || path.endsWith('.yml')) {
+        return `<a href="${path}" target="_blank" rel="noopener noreferrer">`;
+      }
+
+      // Only process markdown file links
+      if (!path.endsWith('.md')) {
+        return match; // Keep non-markdown links as-is
+      }
+
       // Remove .md extension
       let routePath = path.replace(/\.md$/, '');
 
       // Remove leading ./ if present
       routePath = routePath.replace(/^\.\//, '');
 
-      // If the path doesn't contain a slash (no folder), preserve the current folder
-      if (!routePath.includes('/') && currentFileFolder) {
-        routePath = `${currentFileFolder}/${routePath}`;
+      // Resolve relative paths (handle ../ and ./)
+      if (routePath.startsWith('../')) {
+        // Handle going up directories
+        const parts = basePath.split('/').filter((p: string) => p);
+        const relativeParts = routePath.split('/').filter((p: string) => p);
+
+        // Remove ../ parts and corresponding base parts
+        let i = 0;
+        while (i < relativeParts.length && relativeParts[i] === '..') {
+          if (parts.length > 0) {
+            parts.pop();
+          }
+          i++;
+        }
+
+        // Combine remaining base parts with remaining relative parts
+        routePath = [...parts, ...relativeParts.slice(i)].join('/');
+      } else if (!routePath.includes('/') && basePath) {
+        // If the path doesn't contain a slash (no folder), it's relative to the base folder
+        routePath = `${basePath}/${routePath}`;
+      } else if (routePath.startsWith('./')) {
+        // Remove ./ prefix and resolve relative to base
+        routePath = routePath.replace(/^\.\//, '');
+        if (basePath) {
+          routePath = `${basePath}/${routePath}`;
+        }
       }
 
       // Remove any "agenstra/" prefix if present (shouldn't happen in markdown, but handle it)
@@ -304,7 +360,7 @@ export class DocsContentComponent implements AfterViewInit {
       // Determine route based on folder
       const finalRoutePath = routePath ? `/docs/${routePath}` : '/docs';
 
-      if (finalRoutePath.startsWith('/docs/../')) {
+      if (finalRoutePath.startsWith('/docs/../') || finalRoutePath.includes('/../')) {
         return `<a data-md-link="${path}">`;
       }
 
