@@ -112,7 +112,7 @@ Complete reference for all environment variables used in Agenstra.
 ### Git Author Configuration
 
 - `GIT_AUTHOR_NAME` - Git commit author name (default: `Agenstra`)
-- `GIT_AUTHOR_EMAIL` - Git commit author email (default: `noreply@agenstra.io`)
+- `GIT_AUTHOR_EMAIL` - Git commit author email (default: `noreply@agenstra.com`)
 
 ## Frontend Agent Console
 

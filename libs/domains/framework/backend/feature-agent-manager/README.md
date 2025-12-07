@@ -458,7 +458,7 @@ nx test framework-backend-feature-agent-manager --coverage
 - `CURSOR_API_KEY` - Cursor API key for agent communication (required for agent containers)
 - `CURSOR_AGENT_DOCKER_IMAGE` - Docker image (including tag) for cursor-agent containers (optional, defaults to `ghcr.io/forepath/agenstra-manager-worker:latest`)
 - `GIT_AUTHOR_NAME` - Git commit author name (optional, defaults to 'Agenstra')
-- `GIT_AUTHOR_EMAIL` - Git commit author email (optional, defaults to 'noreply@agenstra.io')
+- `GIT_AUTHOR_EMAIL` - Git commit author email (optional, defaults to 'noreply@agenstra.com')
 
 ### Git Repository Environment Variables
 
