@@ -18,6 +18,14 @@
   overflow: hidden;
 }
 
+.section__column {
+  &:not(.active-column) {
+    @media (max-width: 768px) {
+      display: none !important;
+    }
+  }
+}
+
 .section__column--editor {
   flex: 5;
 }

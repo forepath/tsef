@@ -50,8 +50,8 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
-import { FileEditorComponent } from '../file-editor/file-editor.component';
 import { ContainerStatsStatusBarComponent } from '../file-editor/container-stats-status-bar/container-stats-status-bar.component';
+import { FileEditorComponent } from '../file-editor/file-editor.component';
 import { StandaloneLoadingService } from '../standalone-loading.service';
 
 // Type declaration for marked library
@@ -929,7 +929,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
    * Unselect the current agent and close the websocket if open
    * @param navigate - Whether to navigate to the client route (default: true)
    */
-  private onAgentUnselect(navigate = true): void {
+  onAgentUnselect(navigate = true): void {
     const clientId = this.activeClientId;
     if (clientId) {
       // Clear selected agent in facade
@@ -954,6 +954,16 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     if (this.editorOpen()) {
       this.editorOpen.set(false);
       setTimeout(() => this.syncFileEditorVisibility(), 0);
+    }
+  }
+
+  /**
+   * Navigate back to workspaces by unselecting the current client
+   */
+  onClientUnselect(): void {
+    const clientId = this.activeClientId;
+    if (clientId) {
+      this.onClientSelect(clientId, true);
     }
   }
 
