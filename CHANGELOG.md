@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.12.0](https://github.com/forepath/tsef/compare/v1.11.1...v1.12.0) (2025-12-08)
+
+
+### Features
+
+* mobile agent selection improvement ([#107](https://github.com/forepath/tsef/issues/107)) ([238b88c](https://github.com/forepath/tsef/commit/238b88cd2ee534c570032f357b5b423cd5dffb5a))
+* mobile editor improvements ([#108](https://github.com/forepath/tsef/issues/108)) ([aa3c78a](https://github.com/forepath/tsef/commit/aa3c78a2d0193cc55055abb1b42dc14cd77672b4))
+
+
+### Bug Fixes
+
+* agent selector column auto-width ([#105](https://github.com/forepath/tsef/issues/105)) ([b34c4f4](https://github.com/forepath/tsef/commit/b34c4f46925e20c809068c2a8e9fbda5ed7c0d30))
+* always show container statusbar ([#109](https://github.com/forepath/tsef/issues/109)) ([36dd787](https://github.com/forepath/tsef/commit/36dd787ecd0a064fe5a95a8afdd5f8681cbffb49))
+* conditional provisioning info load ([#106](https://github.com/forepath/tsef/issues/106)) ([cce5317](https://github.com/forepath/tsef/commit/cce5317ed056ba9b52b8ef0e0ba70b819ec69f2d))
+* default docs route ([#102](https://github.com/forepath/tsef/issues/102)) ([73f33cd](https://github.com/forepath/tsef/commit/73f33cd3f25276a764bf27b7ed56c0b650a53661))
+
+
+### Chores
+
+* add docs licenses ([#104](https://github.com/forepath/tsef/issues/104)) ([463a8c9](https://github.com/forepath/tsef/commit/463a8c9f326ca8d0ff107557e0c4a3424aae7f5f))
+
+
+### Documentation
+
+* email examples ([#103](https://github.com/forepath/tsef/issues/103)) ([97e18f9](https://github.com/forepath/tsef/commit/97e18f99db53bb7f7a14e12e781126f66324a36d))
+
 ## [1.11.1](https://github.com/forepath/tsef/compare/v1.11.0...v1.11.1) (2025-12-07)
 
 
