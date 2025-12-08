@@ -97,7 +97,7 @@
   <section class="section__row flex-grow-1">
     <!-- Column 1: Workspace list (hidden when editor is open) -->
     @if (!editorOpen()) {
-      <div class="section__column d-flex flex-column border-end">
+      <div class="section__column d-flex flex-column border-end" [class.active-column]="!(activeClientId$ | async)">
         <div class="p-3 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
           <h5 class="mb-0 fw-semibold">Workspaces</h5>
           <button
@@ -202,10 +202,25 @@
 
     <!-- Column 2: Agent list (hidden when editor is open) -->
     @if (!editorOpen() && (activeClientId$ | async)) {
-      <div class="section__column d-flex flex-column border-end">
+      <div
+        class="section__column d-flex flex-column border-end"
+        [class.active-column]="(activeClientId$ | async) && !(selectedAgent$ | async)"
+      >
         <div class="p-3 border-bottom bg-body-tertiary">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="mb-0 fw-semibold">Agents</h5>
+            <div class="d-flex align-items-center gap-2">
+              <!-- Back button (mobile only) -->
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary d-block d-md-none"
+                (click)="onClientUnselect()"
+                [disabled]="!(activeClientId$ | async)"
+                title="Back to workspaces"
+              >
+                <i class="bi bi-arrow-left"></i>
+              </button>
+              <h5 class="mb-0 fw-semibold">Agents</h5>
+            </div>
             <button
               type="button"
               class="btn btn-sm btn-primary"
@@ -307,10 +322,25 @@
 
     <!-- Column: Agent chat controls -->
     @if (shouldShowChat$ | async) {
-      <div class="section__column section__column--chat d-flex flex-column">
+      <div
+        class="section__column section__column--chat d-flex flex-column"
+        [class.active-column]="(activeClientId$ | async) && (selectedAgent$ | async)"
+      >
         <div class="p-3 border-bottom bg-body-tertiary">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="mb-0 fw-semibold">Chat</h5>
+            <div class="d-flex align-items-center gap-2">
+              <!-- Back button (mobile only) -->
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary d-block d-md-none"
+                (click)="onAgentUnselect()"
+                [disabled]="!(selectedAgent$ | async)"
+                title="Back to agents"
+              >
+                <i class="bi bi-arrow-left"></i>
+              </button>
+              <h5 class="mb-0 fw-semibold">Chat</h5>
+            </div>
             <div class="d-flex align-items-center gap-2">
               <div class="btn-group" role="group">
                 @if (socketConnected$ | async) {
