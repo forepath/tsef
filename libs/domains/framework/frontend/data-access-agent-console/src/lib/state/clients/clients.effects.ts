@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import { catchError, exhaustMap, map, mergeMap, of, switchMap } from 'rxjs';
 import { ClientsService } from '../../services/clients.service';
 import {
@@ -38,6 +39,7 @@ import {
   updateClientFailure,
   updateClientSuccess,
 } from './clients.actions';
+import { selectClientById } from './clients.selectors';
 
 /**
  * Normalizes error messages from HTTP errors.
@@ -236,21 +238,33 @@ export const provisionServer$ = createEffect(
 );
 
 export const loadServerInfo$ = createEffect(
-  (actions$ = inject(Actions), clientsService = inject(ClientsService)) => {
+  (actions$ = inject(Actions), clientsService = inject(ClientsService), store = inject(Store)) => {
     return actions$.pipe(
       ofType(loadServerInfo),
       mergeMap(({ clientId }) =>
-        clientsService.getServerInfo(clientId).pipe(
-          map((serverInfo) => loadServerInfoSuccess({ clientId, serverInfo })),
-          catchError((error) => {
-            // Handle 404 gracefully - client doesn't have provisioning, this is expected
-            if (error instanceof HttpErrorResponse && error.status === 404) {
-              // Silently ignore 404 - client doesn't have provisioning
-              // Don't set error state, just mark loading as complete
+        store.select(selectClientById(clientId)).pipe(
+          switchMap((client) => {
+            // Skip API call if client is not auto-provisioned to avoid 404s and protect rate limits
+            if (!client?.isAutoProvisioned) {
+              // Client is not auto-provisioned, skip the API call
+              // Return a failure action with empty error to mark loading as complete without setting error state
               return of(loadServerInfoFailure({ clientId, error: '' }));
             }
-            // For other errors, set the error message
-            return of(loadServerInfoFailure({ clientId, error: normalizeError(error) }));
+
+            // Client is auto-provisioned, proceed with API call
+            return clientsService.getServerInfo(clientId).pipe(
+              map((serverInfo) => loadServerInfoSuccess({ clientId, serverInfo })),
+              catchError((error) => {
+                // Handle 404 gracefully - client doesn't have provisioning, this is expected
+                if (error instanceof HttpErrorResponse && error.status === 404) {
+                  // Silently ignore 404 - client doesn't have provisioning
+                  // Don't set error state, just mark loading as complete
+                  return of(loadServerInfoFailure({ clientId, error: '' }));
+                }
+                // For other errors, set the error message
+                return of(loadServerInfoFailure({ clientId, error: normalizeError(error) }));
+              }),
+            );
           }),
         ),
       ),

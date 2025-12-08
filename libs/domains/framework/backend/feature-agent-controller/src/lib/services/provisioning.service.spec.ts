@@ -144,6 +144,7 @@ describe('ProvisioningService', () => {
 
       expect(result).toEqual({
         ...mockClient,
+        isAutoProvisioned: true,
         providerType: 'hetzner',
         serverId: 'server-123',
         serverName: 'test-server',
@@ -151,6 +152,7 @@ describe('ProvisioningService', () => {
         privateIp: '10.0.0.1',
         serverStatus: 'running',
       });
+      expect(result.isAutoProvisioned).toBe(true);
 
       expect(mockProvisioningProviderFactory.hasProvider).toHaveBeenCalledWith('hetzner');
       expect(mockProvisioningProviderFactory.getProvider).toHaveBeenCalledWith('hetzner');

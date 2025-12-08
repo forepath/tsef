@@ -1,10 +1,12 @@
+import { ConfigResponseDto } from '@forepath/framework/backend/feature-agent-manager';
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigResponseDto } from '@forepath/framework/backend/feature-agent-manager';
 import { CreateClientDto } from '../dto/create-client.dto';
 import { UpdateClientDto } from '../dto/update-client.dto';
 import { AuthenticationType, ClientEntity } from '../entities/client.entity';
+import { ProvisioningReferenceEntity } from '../entities/provisioning-reference.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
+import { ProvisioningReferencesRepository } from '../repositories/provisioning-references.repository';
 import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { ClientsService } from './clients.service';
 import { KeycloakTokenService } from './keycloak-token.service';
@@ -14,6 +16,7 @@ describe('ClientsService', () => {
   let repository: jest.Mocked<ClientsRepository>;
   let keycloakTokenService: jest.Mocked<KeycloakTokenService>;
   let clientAgentProxyService: jest.Mocked<ClientAgentProxyService>;
+  let provisioningReferencesRepository: jest.Mocked<ProvisioningReferencesRepository>;
 
   const mockClient: ClientEntity = {
     id: 'test-uuid',
@@ -59,6 +62,10 @@ describe('ClientsService', () => {
     getClientConfig: jest.fn(),
   };
 
+  const mockProvisioningReferencesRepository = {
+    findByClientId: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,6 +82,10 @@ describe('ClientsService', () => {
           provide: ClientAgentProxyService,
           useValue: mockClientAgentProxyService,
         },
+        {
+          provide: ProvisioningReferencesRepository,
+          useValue: mockProvisioningReferencesRepository,
+        },
       ],
     }).compile();
 
@@ -82,6 +93,7 @@ describe('ClientsService', () => {
     repository = module.get(ClientsRepository);
     keycloakTokenService = module.get(KeycloakTokenService);
     clientAgentProxyService = module.get(ClientAgentProxyService);
+    provisioningReferencesRepository = module.get(ProvisioningReferencesRepository);
   });
 
   afterEach(() => {
@@ -258,14 +270,24 @@ describe('ClientsService', () => {
   });
 
   describe('findAll', () => {
-    it('should return array of clients with config', async () => {
+    it('should return array of clients with config and isAutoProvisioned set correctly', async () => {
       const clients = [mockClient];
       const mockConfig: ConfigResponseDto = {
         gitRepositoryUrl: 'https://github.com/user/repo.git',
         agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
       };
+      const mockProvisioningReference: ProvisioningReferenceEntity = {
+        id: 'ref-uuid',
+        clientId: mockClient.id,
+        providerType: 'hetzner',
+        serverId: 'server-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as ProvisioningReferenceEntity;
+
       mockRepository.findAll.mockResolvedValue(clients);
       clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
+      provisioningReferencesRepository.findByClientId.mockResolvedValue(mockProvisioningReference);
 
       const result = await service.findAll(10, 0);
 
@@ -273,20 +295,37 @@ describe('ClientsService', () => {
       expect(result[0].id).toBe(mockClient.id);
       expect(result[0]).not.toHaveProperty('apiKey');
       expect(result[0].config).toEqual(mockConfig);
+      expect(result[0].isAutoProvisioned).toBe(true);
       expect(repository.findAll).toHaveBeenCalledWith(10, 0);
       expect(clientAgentProxyService.getClientConfig).toHaveBeenCalledWith(mockClient.id);
+      expect(provisioningReferencesRepository.findByClientId).toHaveBeenCalledWith(mockClient.id);
+    });
+
+    it('should set isAutoProvisioned to false when no provisioning reference exists', async () => {
+      const clients = [mockClient];
+      mockRepository.findAll.mockResolvedValue(clients);
+      clientAgentProxyService.getClientConfig.mockResolvedValue(undefined);
+      provisioningReferencesRepository.findByClientId.mockResolvedValue(null);
+
+      const result = await service.findAll(10, 0);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].isAutoProvisioned).toBe(false);
+      expect(provisioningReferencesRepository.findByClientId).toHaveBeenCalledWith(mockClient.id);
     });
 
     it('should return clients without config if fetch fails', async () => {
       const clients = [mockClient];
       mockRepository.findAll.mockResolvedValue(clients);
       clientAgentProxyService.getClientConfig.mockResolvedValue(undefined);
+      provisioningReferencesRepository.findByClientId.mockResolvedValue(null);
 
       const result = await service.findAll(10, 0);
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(mockClient.id);
       expect(result[0].config).toBeUndefined();
+      expect(result[0].isAutoProvisioned).toBe(false);
       expect(repository.findAll).toHaveBeenCalledWith(10, 0);
     });
 
@@ -294,6 +333,7 @@ describe('ClientsService', () => {
       const clients = [mockClient];
       mockRepository.findAll.mockResolvedValue(clients);
       clientAgentProxyService.getClientConfig.mockResolvedValue(undefined);
+      provisioningReferencesRepository.findByClientId.mockResolvedValue(null);
 
       await service.findAll();
 
@@ -302,32 +342,47 @@ describe('ClientsService', () => {
   });
 
   describe('findOne', () => {
-    it('should return client by id with config', async () => {
+    it('should return client by id with config and isAutoProvisioned set correctly', async () => {
       const mockConfig: ConfigResponseDto = {
         gitRepositoryUrl: 'https://github.com/user/repo.git',
         agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
       };
+      const mockProvisioningReference: ProvisioningReferenceEntity = {
+        id: 'ref-uuid',
+        clientId: mockClient.id,
+        providerType: 'hetzner',
+        serverId: 'server-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as ProvisioningReferenceEntity;
+
       mockRepository.findByIdOrThrow.mockResolvedValue(mockClient);
       clientAgentProxyService.getClientConfig.mockResolvedValue(mockConfig);
+      mockProvisioningReferencesRepository.findByClientId.mockResolvedValue(mockProvisioningReference);
 
       const result = await service.findOne('test-uuid');
 
       expect(result.id).toBe(mockClient.id);
       expect(result).not.toHaveProperty('apiKey');
       expect(result.config).toEqual(mockConfig);
+      expect(result.isAutoProvisioned).toBe(true);
       expect(repository.findByIdOrThrow).toHaveBeenCalledWith('test-uuid');
       expect(clientAgentProxyService.getClientConfig).toHaveBeenCalledWith('test-uuid');
+      expect(provisioningReferencesRepository.findByClientId).toHaveBeenCalledWith('test-uuid');
     });
 
-    it('should return client without config if fetch fails', async () => {
+    it('should set isAutoProvisioned to false when no provisioning reference exists', async () => {
       mockRepository.findByIdOrThrow.mockResolvedValue(mockClient);
       clientAgentProxyService.getClientConfig.mockResolvedValue(undefined);
+      provisioningReferencesRepository.findByClientId.mockResolvedValue(null);
 
       const result = await service.findOne('test-uuid');
 
       expect(result.id).toBe(mockClient.id);
       expect(result.config).toBeUndefined();
+      expect(result.isAutoProvisioned).toBe(false);
       expect(repository.findByIdOrThrow).toHaveBeenCalledWith('test-uuid');
+      expect(provisioningReferencesRepository.findByClientId).toHaveBeenCalledWith('test-uuid');
     });
   });
 
@@ -660,9 +715,20 @@ describe('ClientsService', () => {
   });
 
   describe('mapToResponseDto', () => {
-    it('should exclude apiKey from response', () => {
+    it('should exclude apiKey from response and set isAutoProvisioned correctly', async () => {
+      const mockProvisioningReference: ProvisioningReferenceEntity = {
+        id: 'ref-uuid',
+        clientId: mockClient.id,
+        providerType: 'hetzner',
+        serverId: 'server-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as ProvisioningReferenceEntity;
+
+      mockProvisioningReferencesRepository.findByClientId.mockResolvedValue(mockProvisioningReference);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = (service as any).mapToResponseDto(mockClient);
+      const result = await (service as any).mapToResponseDto(mockClient);
 
       expect(result).not.toHaveProperty('apiKey');
       expect(result.id).toBe(mockClient.id);
@@ -670,8 +736,20 @@ describe('ClientsService', () => {
       expect(result.description).toBe(mockClient.description);
       expect(result.endpoint).toBe(mockClient.endpoint);
       expect(result.authenticationType).toBe(mockClient.authenticationType);
+      expect(result.isAutoProvisioned).toBe(true);
       expect(result.createdAt).toBe(mockClient.createdAt);
       expect(result.updatedAt).toBe(mockClient.updatedAt);
+      expect(provisioningReferencesRepository.findByClientId).toHaveBeenCalledWith(mockClient.id);
+    });
+
+    it('should set isAutoProvisioned to false when no provisioning reference exists', async () => {
+      provisioningReferencesRepository.findByClientId.mockResolvedValue(null);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await (service as any).mapToResponseDto(mockClient);
+
+      expect(result.isAutoProvisioned).toBe(false);
+      expect(provisioningReferencesRepository.findByClientId).toHaveBeenCalledWith(mockClient.id);
     });
   });
 });

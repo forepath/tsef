@@ -25,6 +25,7 @@ describe('Clients Selectors', () => {
     description: 'Test Description',
     endpoint: 'https://example.com/api',
     authenticationType: 'api_key',
+    isAutoProvisioned: false,
     config: {
       gitRepositoryUrl: 'https://github.com/user/repo.git',
       agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
@@ -38,6 +39,7 @@ describe('Clients Selectors', () => {
     name: 'Test Client 2',
     endpoint: 'https://example2.com/api',
     authenticationType: 'keycloak',
+    isAutoProvisioned: false,
     config: {
       gitRepositoryUrl: 'https://github.com/user2/repo2.git',
       agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
