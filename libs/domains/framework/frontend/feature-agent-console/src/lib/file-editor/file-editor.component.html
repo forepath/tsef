@@ -1,12 +1,28 @@
 <div class="file-editor-container d-flex h-100">
   <!-- File Tree Sidebar with Git Manager below -->
-  <div class="file-tree-sidebar border-end d-flex flex-column" [class.d-none]="!fileTreeVisible()">
+  <div
+    class="file-tree-sidebar border-end d-flex flex-column"
+    [class.d-none]="!fileTreeVisible() && !gitManagerVisible()"
+    [class.mobile-overlay]="fileTreeVisible() || gitManagerVisible()"
+  >
     @if (clientId() && agentId()) {
-      <!-- File Tree -->
+      <!-- File Tree Header with Back Button (mobile only, hidden when only git manager is visible) -->
+      @if (fileTreeVisible() || !gitManagerVisible()) {
+        <div class="d-block d-md-none p-3 border-bottom bg-body-tertiary">
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-secondary" (click)="onCloseFileTree()" title="Close File Tree">
+              <i class="bi bi-arrow-left"></i>
+            </button>
+            <h5 class="mb-0 fw-semibold">File Tree</h5>
+          </div>
+        </div>
+      }
+      <!-- File Tree (hidden on mobile when only git manager is visible) -->
       <div
         class="file-tree-wrapper"
         [class.flex-grow-1]="!gitManagerVisible()"
         [style.flex-basis]="gitManagerVisible() ? '60%' : '100%'"
+        [class.d-none]="!fileTreeVisible() && gitManagerVisible()"
       >
         <framework-file-tree
           [clientId]="clientId()!"
@@ -25,13 +41,34 @@
 
       <!-- Git Manager below File Tree -->
       @if (gitManagerVisible()) {
-        <div class="git-manager-wrapper border-top" style="flex-basis: 50%; min-height: 200px">
-          <framework-git-manager
-            [clientId]="clientId()!"
-            [agentId]="agentId()!"
-            (fileSelected)="onFileSelect($event)"
-            (showDiff)="onShowGitDiff($event)"
-          ></framework-git-manager>
+        <div
+          class="git-manager-wrapper d-flex flex-column"
+          [class.border-top]="fileTreeVisible()"
+          [style.flex-basis]="fileTreeVisible() ? '50%' : '100%'"
+          style="min-height: 200px"
+        >
+          <!-- Git Manager Header with Back Button (mobile only) -->
+          <div class="d-block d-md-none p-3 border-bottom bg-body-tertiary">
+            <div class="d-flex align-items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary"
+                (click)="onCloseGitManager()"
+                title="Close Version Control"
+              >
+                <i class="bi bi-arrow-left"></i>
+              </button>
+              <h5 class="mb-0 fw-semibold">Version Control</h5>
+            </div>
+          </div>
+          <div class="flex-grow-1 d-flex flex-column" style="min-height: 0">
+            <framework-git-manager
+              [clientId]="clientId()!"
+              [agentId]="agentId()!"
+              (fileSelected)="onFileSelect($event)"
+              (showDiff)="onShowGitDiff($event)"
+            ></framework-git-manager>
+          </div>
         </div>
       }
     } @else {
@@ -177,6 +214,7 @@
           class="editor-content"
           [class.flex-grow-1]="!terminalVisible()"
           [style.flex-basis]="terminalVisible() ? '60%' : '100%'"
+          [class.mobile-hidden]="fileTreeVisible() || terminalVisible() || gitManagerVisible()"
         >
           @if (selectedFilePath()) {
             @if (isReadingFile$ | async) {
@@ -209,12 +247,23 @@
         </div>
       }
       @if (terminalVisible()) {
-        <div class="terminal-wrapper border-top" style="flex-basis: 40%; min-height: 200px">
-          <framework-terminal
-            [clientId]="clientId()"
-            [agentId]="agentId()"
-            [visible]="terminalVisible()"
-          ></framework-terminal>
+        <div class="terminal-wrapper border-top d-flex flex-column" [class.mobile-overlay]="terminalVisible()">
+          <!-- Terminal Header with Back Button (mobile only) -->
+          <div class="d-block d-md-none p-3 border-bottom bg-body-tertiary flex-shrink-0">
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-sm btn-secondary" (click)="onCloseTerminal()" title="Close Terminal">
+                <i class="bi bi-arrow-left"></i>
+              </button>
+              <h5 class="mb-0 fw-semibold">Terminal</h5>
+            </div>
+          </div>
+          <div class="flex-grow-1 d-flex flex-column" style="min-height: 0; overflow: hidden; height: 100%">
+            <framework-terminal
+              [clientId]="clientId()"
+              [agentId]="agentId()"
+              [visible]="terminalVisible()"
+            ></framework-terminal>
+          </div>
         </div>
       }
     </div>
@@ -224,6 +273,7 @@
       <framework-container-stats-status-bar
         [clientId]="clientId()!"
         [agentId]="agentId()!"
+        [class.d-none]="fileTreeVisible() || terminalVisible() || gitManagerVisible()"
       ></framework-container-stats-status-bar>
     }
   </div>

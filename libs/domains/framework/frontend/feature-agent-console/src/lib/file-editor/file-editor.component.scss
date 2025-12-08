@@ -8,6 +8,9 @@
 
 .editor-content-wrapper {
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .file-editor-container {
@@ -29,6 +32,25 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  // Hide by default on mobile, show as overlay when visible
+  @media (max-width: 767.98px) {
+    display: none !important; // Hidden by default on mobile
+
+    &.mobile-overlay {
+      display: flex !important; // Show as overlay when explicitly opened
+      position: fixed;
+      top: 115px; // Start below editor toolbar (70px + 42px)
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1050;
+      flex: 0 0 100%;
+      width: 100%;
+      height: calc(100% - 115px); // Account for toolbar height
+      border: none;
+    }
+  }
 }
 
 .file-tree-wrapper {
@@ -45,10 +67,50 @@
   flex-direction: column;
 }
 
+.terminal-wrapper {
+  min-height: 0; // Important for flex children to shrink
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-basis: 40%;
+  flex-shrink: 0;
+  flex-grow: 0;
+  min-height: 200px; // Minimum height for desktop
+
+  // Hide by default on mobile, overlay when visible
+  @media (max-width: 767.98px) {
+    display: none !important; // Hidden by default on mobile
+    flex-basis: auto !important;
+    flex-shrink: 1 !important;
+    flex-grow: 0 !important;
+    min-height: 0 !important;
+
+    &.mobile-overlay {
+      display: flex !important; // Show as overlay when explicitly opened
+      position: fixed;
+      top: 115px; // Start below editor toolbar (70px + 42px)
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1050;
+      flex-basis: auto !important;
+      flex-shrink: 0 !important;
+      flex-grow: 0 !important;
+      width: 100%;
+      height: calc(100% - 115px) !important; // Account for toolbar height
+      border: none;
+      background-color: var(--bs-body-bg);
+    }
+  }
+}
+
 .editor-area {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .file-editor-tabs-container {
@@ -212,4 +274,13 @@
 .editor-content {
   min-height: 0;
   overflow: hidden;
+}
+
+// Hide editor content on mobile when any panel is open
+.editor-content {
+  @media (max-width: 767.98px) {
+    &.mobile-hidden {
+      display: none !important;
+    }
+  }
 }

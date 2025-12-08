@@ -29,7 +29,7 @@
               [title]="fileTreeVisible() ? 'Hide File Tree' : 'Show File Tree'"
             >
               <i class="bi" [class.bi-folder]="fileTreeVisible()" [class.bi-folder-x]="!fileTreeVisible()"></i>
-              <span class="ms-1">File Tree</span>
+              <span class="ms-1 d-none d-md-inline">File Tree</span>
             </button>
             <button
               type="button"
@@ -40,7 +40,7 @@
               [title]="chatVisible() ? 'Hide Chat' : 'Show Chat'"
             >
               <i class="bi" [class.bi-chat-dots]="chatVisible()" [class.bi-chat-dots-fill]="!chatVisible()"></i>
-              <span class="ms-1">Chat</span>
+              <span class="ms-1 d-none d-md-inline">Chat</span>
             </button>
             <button
               type="button"
@@ -51,7 +51,7 @@
               [title]="terminalVisible() ? 'Hide Terminal' : 'Show Terminal'"
             >
               <i class="bi" [class.bi-terminal]="!terminalVisible()" [class.bi-terminal-fill]="terminalVisible()"></i>
-              <span class="ms-1">Terminal</span>
+              <span class="ms-1 d-none d-md-inline">Terminal</span>
             </button>
             <button
               type="button"
@@ -62,7 +62,7 @@
               [title]="gitManagerVisible() ? 'Hide Version Control' : 'Show Version Control'"
             >
               <i class="bi bi-git"></i>
-              <span class="ms-1">Version Control</span>
+              <span class="ms-1 d-none d-md-inline">Version Control</span>
             </button>
           </div>
           <button
@@ -86,7 +86,7 @@
                 title="Close Editor"
               >
                 <i class="bi bi-x-lg"></i>
-                <span class="ms-1">Close Editor</span>
+                <span class="ms-1 d-none d-md-inline">Close Editor</span>
               </button>
             </div>
           }
@@ -309,7 +309,10 @@
 
     <!-- Column: Editor (shown when editor is open, to the left of chat) -->
     @if (editorOpen() && (activeClientId$ | async) && (selectedAgent$ | async)) {
-      <div class="section__column section__column--editor d-flex flex-column border-end">
+      <div
+        class="section__column section__column--editor d-flex flex-column border-end"
+        [class.mobile-hidden]="chatVisible()"
+      >
         <framework-file-editor
           #fileEditor
           [clientId]="(activeClientId$ | async)!"
@@ -325,6 +328,7 @@
       <div
         class="section__column section__column--chat d-flex flex-column"
         [class.active-column]="(activeClientId$ | async) && (selectedAgent$ | async)"
+        [class.mobile-overlay]="editorOpen() && chatVisible()"
       >
         <div class="p-3 border-bottom bg-body-tertiary">
           <div class="d-flex justify-content-between align-items-center mb-2">
@@ -333,9 +337,9 @@
               <button
                 type="button"
                 class="btn btn-sm btn-secondary d-block d-md-none"
-                (click)="onAgentUnselect()"
+                (click)="onChatBackButton()"
                 [disabled]="!(selectedAgent$ | async)"
-                title="Back to agents"
+                [title]="editorOpen() ? 'Close Chat' : 'Back to agents'"
               >
                 <i class="bi bi-arrow-left"></i>
               </button>

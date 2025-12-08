@@ -224,7 +224,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   selectedCommand = signal<string | null>(null);
   selectedAgentId = signal<string | null>(null);
   editorOpen = signal<boolean>(false);
-  chatVisible = signal<boolean>(true);
+  chatVisible = signal<boolean>(false);
   private previousAgentId: string | null = null;
   readonly fileOnlyMode = signal<boolean>(false);
   readonly standaloneMode = signal<boolean>(false);
@@ -399,6 +399,13 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   };
   private fileOpenedFromQuery = false;
 
+  /**
+   * Check if the current viewport is mobile (width <= 767.98px)
+   */
+  private isMobile(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= 767.98;
+  }
+
   ngOnInit(): void {
     // Default chat model to auto mode on load
     this.socketsFacade.setChatModel(null);
@@ -489,9 +496,14 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
             }
           } else {
             // Normal editor mode
-            this.chatVisible.set(true);
+            // Only show chat and file tree on desktop, hide on mobile by default
+            if (!this.isMobile()) {
+              this.chatVisible.set(true);
+              if (this.fileEditor) {
+                this.fileEditor.fileTreeVisible.set(true);
+              }
+            }
             if (this.fileEditor) {
-              this.fileEditor.fileTreeVisible.set(true);
               this.fileEditor.terminalVisible.set(false);
               this.fileEditor.autosaveEnabled.set(false);
             }
@@ -578,9 +590,14 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       if (currentAgentId && currentAgentId !== this.previousAgentId && this.editorOpen()) {
         // Reset visibility when agent changes and editor is open (unless in file-only mode)
         if (!this.fileOnlyMode()) {
-          this.chatVisible.set(true);
+          // Only show chat and file tree on desktop, hide on mobile by default
+          if (!this.isMobile()) {
+            this.chatVisible.set(true);
+            if (this.fileEditor) {
+              this.fileEditor.fileTreeVisible.set(true);
+            }
+          }
           if (this.fileEditor) {
-            this.fileEditor.fileTreeVisible.set(true);
             this.fileEditor.terminalVisible.set(false);
           }
           setTimeout(() => this.syncFileEditorVisibility(), 0);
@@ -1055,9 +1072,14 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
     // Reset visibility when opening editor for a new agent (unless in file-only mode)
     if (!wasOpen && this.editorOpen() && !this.fileOnlyMode()) {
-      this.chatVisible.set(true);
+      // Only show chat and file tree on desktop, hide on mobile by default
+      if (!this.isMobile()) {
+        this.chatVisible.set(true);
+        if (this.fileEditor) {
+          this.fileEditor.fileTreeVisible.set(true);
+        }
+      }
       if (this.fileEditor) {
-        this.fileEditor.fileTreeVisible.set(true);
         this.fileEditor.terminalVisible.set(false);
         this.fileEditor.autosaveEnabled.set(false);
       }
@@ -1150,6 +1172,24 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     // Recalculate file editor tabs when chat visibility changes
     if (this.fileEditor) {
       this.fileEditor.recalculateTabs();
+    }
+  }
+
+  /**
+   * Handle back button click in chat panel on mobile
+   * - If editor is open: close the chat panel and return to editor
+   * - If editor is closed: unselect agent and return to agent list
+   */
+  onChatBackButton(): void {
+    if (this.editorOpen()) {
+      // Editor is open, just close the chat
+      this.chatVisible.set(false);
+      if (this.fileEditor) {
+        this.fileEditor.recalculateTabs();
+      }
+    } else {
+      // Editor is closed, go back to agent list
+      this.onAgentUnselect();
     }
   }
 

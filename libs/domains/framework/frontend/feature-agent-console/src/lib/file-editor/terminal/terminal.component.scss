@@ -1,9 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .terminal-container {
   background-color: #1e1e1e;
   color: #d4d4d4;
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .terminal-header {
@@ -12,7 +22,7 @@
 }
 
 .terminal-content {
-  flex: 1;
+  flex: 1 1 0;
   overflow: hidden;
   position: relative;
   min-height: 0; // Important for flex children

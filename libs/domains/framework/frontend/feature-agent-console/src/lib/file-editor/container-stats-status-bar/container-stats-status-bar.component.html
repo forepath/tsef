@@ -6,7 +6,7 @@
         <div class="d-flex align-items-center gap-1">
           <i class="bi bi-cpu small"></i>
           <small>
-            CPU:
+            <span class="d-none d-md-inline">CPU: </span>
             <span class="fw-semibold"> {{ statsData.cpuPercent | number: '1.1-1' }}% </span>
           </small>
         </div>
@@ -15,7 +15,7 @@
         <div class="d-flex align-items-center gap-1">
           <i class="bi bi-memory small"></i>
           <small>
-            Memory:
+            <span class="d-none d-md-inline">Memory: </span>
             <span class="fw-semibold">{{ statsData.memoryUsageFormatted }}</span>
             @if (statsData.memoryLimit > 0) {
               /
