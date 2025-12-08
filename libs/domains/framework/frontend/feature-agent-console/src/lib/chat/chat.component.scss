@@ -19,8 +19,8 @@
 }
 
 .section__column {
-  &:not(.active-column) {
-    @media (max-width: 768px) {
+  &:not(.active-column):not(.section__column--editor) {
+    @media (max-width: 767.98px) {
       display: none !important;
     }
   }
@@ -28,6 +28,13 @@
 
 .section__column--editor {
   flex: 5;
+
+  // Hide editor on mobile when chat is open (chat overlays it)
+  @media (max-width: 767.98px) {
+    &.mobile-hidden {
+      display: none !important;
+    }
+  }
 }
 
 .section__row {
@@ -352,6 +359,21 @@ span {
 
 .section__column--chat {
   flex: 2; // Chat takes more space when editor is closed
+
+  // Overlay on mobile when editor is open
+  @media (max-width: 767.98px) {
+    &.mobile-overlay {
+      position: fixed;
+      top: 115px; // Start below editor toolbar (70px + 42px)
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1050;
+      width: 100%;
+      height: calc(100% - 115px); // Account for toolbar height
+      background-color: var(--bs-body-bg);
+    }
+  }
 }
 
 .editor-toolbar-container {

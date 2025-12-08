@@ -28,12 +28,12 @@ import {
 } from '@forepath/framework/frontend/data-access-agent-console';
 import { Actions, ofType } from '@ngrx/effects';
 import { combineLatest, debounceTime, filter, map, Observable, of, Subject, switchMap, take } from 'rxjs';
+import { ContainerStatsStatusBarComponent } from './container-stats-status-bar/container-stats-status-bar.component';
+import { FileTreeComponent } from './file-tree/file-tree.component';
 import { GitDiffViewerComponent } from './git-diff-viewer/git-diff-viewer.component';
 import { GitManagerComponent } from './git-manager/git-manager.component';
-import { FileTreeComponent } from './file-tree/file-tree.component';
 import { MonacoEditorWrapperComponent } from './monaco-editor-wrapper/monaco-editor-wrapper.component';
 import { TerminalComponent } from './terminal/terminal.component';
-import { ContainerStatsStatusBarComponent } from './container-stats-status-bar/container-stats-status-bar.component';
 
 @Component({
   selector: 'framework-file-editor',
@@ -80,7 +80,8 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
   private allTabs = signal<OpenTab[]>([]);
 
   // Visibility toggles (exposed for parent component access)
-  readonly fileTreeVisible = signal<boolean>(true);
+  // Initialize based on screen size: true for desktop, false for mobile
+  readonly fileTreeVisible = signal<boolean>(typeof window !== 'undefined' && window.innerWidth > 767.98);
   readonly terminalVisible = signal<boolean>(false);
   readonly gitManagerVisible = signal<boolean>(false);
   readonly gitDiffViewerVisible = signal<boolean>(false);
@@ -982,12 +983,35 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     this.recalculateTabs();
   }
 
+  onCloseFileTree(): void {
+    this.fileTreeVisible.set(false);
+    this.recalculateTabs();
+  }
+
   onToggleTerminal(): void {
     this.terminalVisible.update((visible) => !visible);
   }
 
+  onCloseTerminal(): void {
+    this.terminalVisible.set(false);
+  }
+
   onToggleGitManager(): void {
+    const wasVisible = this.gitManagerVisible();
     this.gitManagerVisible.update((visible) => !visible);
+
+    // On mobile, hide file tree when opening git manager
+    if (!wasVisible && this.isMobile()) {
+      this.fileTreeVisible.set(false);
+    }
+  }
+
+  private isMobile(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= 767.98;
+  }
+
+  onCloseGitManager(): void {
+    this.gitManagerVisible.set(false);
   }
 
   onShowGitDiff(filePath: string): void {
