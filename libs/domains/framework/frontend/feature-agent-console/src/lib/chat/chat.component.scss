@@ -20,7 +20,7 @@
 
 .section__column {
   &:not(.active-column):not(.section__column--editor) {
-    @media (max-width: 768px) {
+    @media (max-width: 767.98px) {
       display: none !important;
     }
   }
