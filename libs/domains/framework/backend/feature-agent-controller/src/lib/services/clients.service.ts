@@ -6,6 +6,7 @@ import { CreateClientDto } from '../dto/create-client.dto';
 import { UpdateClientDto } from '../dto/update-client.dto';
 import { AuthenticationType, ClientEntity } from '../entities/client.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
+import { ProvisioningReferencesRepository } from '../repositories/provisioning-references.repository';
 import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { KeycloakTokenService } from './keycloak-token.service';
 
@@ -22,6 +23,7 @@ export class ClientsService {
     private readonly keycloakTokenService: KeycloakTokenService,
     @Inject(forwardRef(() => ClientAgentProxyService))
     private readonly clientAgentProxyService: ClientAgentProxyService,
+    private readonly provisioningReferencesRepository: ProvisioningReferencesRepository,
   ) {}
 
   /**
@@ -82,7 +84,7 @@ export class ClientsService {
       agentWsPort: createClientDto.agentWsPort,
     });
 
-    const response = this.mapToResponseDto(client);
+    const response = await this.mapToResponseDto(client);
     return {
       ...response,
       apiKey,
@@ -100,7 +102,7 @@ export class ClientsService {
     // Fetch config for all clients in parallel, but don't fail if any request fails
     const clientsWithConfig = await Promise.all(
       clients.map(async (client) => {
-        const dto = this.mapToResponseDto(client);
+        const dto = await this.mapToResponseDto(client);
         try {
           dto.config = await this.clientAgentProxyService.getClientConfig(client.id);
         } catch (error) {
@@ -120,7 +122,7 @@ export class ClientsService {
    */
   async findOne(id: string): Promise<ClientResponseDto> {
     const client = await this.clientsRepository.findByIdOrThrow(id);
-    const dto = this.mapToResponseDto(client);
+    const dto = await this.mapToResponseDto(client);
     // Fetch config from agent-manager, but don't fail if request fails
     try {
       dto.config = await this.clientAgentProxyService.getClientConfig(id);
@@ -205,7 +207,7 @@ export class ClientsService {
     );
 
     const client = await this.clientsRepository.update(id, updateData);
-    const dto = this.mapToResponseDto(client);
+    const dto = await this.mapToResponseDto(client);
     // Fetch config from agent-manager, but don't fail if request fails
     try {
       dto.config = await this.clientAgentProxyService.getClientConfig(id);
@@ -276,13 +278,18 @@ export class ClientsService {
    * @param client - The client entity to map
    * @returns The client response DTO
    */
-  private mapToResponseDto(client: ClientEntity): ClientResponseDto {
+  private async mapToResponseDto(client: ClientEntity): Promise<ClientResponseDto> {
+    // Check if client was auto-provisioned by checking for provisioning reference
+    const provisioningReference = await this.provisioningReferencesRepository.findByClientId(client.id);
+    const isAutoProvisioned = provisioningReference !== null;
+
     return {
       id: client.id,
       name: client.name,
       description: client.description,
       endpoint: client.endpoint,
       authenticationType: client.authenticationType,
+      isAutoProvisioned,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
     };

@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { Store } from '@ngrx/store';
 import { of, throwError } from 'rxjs';
 import { ClientsService } from '../../services/clients.service';
 import {
@@ -48,6 +49,7 @@ import type {
 describe('ClientsEffects', () => {
   let actions$: Actions;
   let clientsService: jest.Mocked<ClientsService>;
+  let store: jest.Mocked<Store>;
 
   const mockClient: ClientResponseDto = {
     id: 'client-1',
@@ -55,12 +57,19 @@ describe('ClientsEffects', () => {
     description: 'Test Description',
     endpoint: 'https://example.com/api',
     authenticationType: 'api_key',
+    isAutoProvisioned: false,
     config: {
       gitRepositoryUrl: 'https://github.com/user/repo.git',
       agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
     },
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+  };
+
+  const mockAutoProvisionedClient: ClientResponseDto = {
+    ...mockClient,
+    id: 'client-2',
+    isAutoProvisioned: true,
   };
 
   const mockCreateClientResponse: CreateClientResponseDto = {
@@ -78,12 +87,20 @@ describe('ClientsEffects', () => {
       getServerInfo: jest.fn(),
     } as any;
 
+    store = {
+      select: jest.fn(),
+    } as any;
+
     TestBed.configureTestingModule({
       providers: [
         provideMockActions(() => actions$),
         {
           provide: ClientsService,
           useValue: clientsService,
+        },
+        {
+          provide: Store,
+          useValue: store,
         },
       ],
     });
@@ -452,46 +469,77 @@ describe('ClientsEffects', () => {
       providerType: 'hetzner',
     };
 
-    it('should return loadServerInfoSuccess on success', (done) => {
-      const action = loadServerInfo({ clientId: 'client-1' });
-      const outcome = loadServerInfoSuccess({ clientId: 'client-1', serverInfo: mockServerInfo });
+    it('should return loadServerInfoSuccess on success when client is auto-provisioned', (done) => {
+      const action = loadServerInfo({ clientId: 'client-2' });
+      const outcome = loadServerInfoSuccess({ clientId: 'client-2', serverInfo: mockServerInfo });
 
       actions$ = of(action);
+      (store.select as jest.Mock).mockReturnValue(of(mockAutoProvisionedClient));
       clientsService.getServerInfo.mockReturnValue(of(mockServerInfo));
 
-      loadServerInfo$(actions$, clientsService).subscribe((result) => {
+      loadServerInfo$(actions$, clientsService, store).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(clientsService.getServerInfo).toHaveBeenCalledWith('client-1');
+        expect(clientsService.getServerInfo).toHaveBeenCalledWith('client-2');
+        done();
+      });
+    });
+
+    it('should skip API call and return failure with empty error when client is not auto-provisioned', (done) => {
+      const action = loadServerInfo({ clientId: 'client-1' });
+      const outcome = loadServerInfoFailure({ clientId: 'client-1', error: '' });
+
+      actions$ = of(action);
+      (store.select as jest.Mock).mockReturnValue(of(mockClient));
+
+      loadServerInfo$(actions$, clientsService, store).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        expect(clientsService.getServerInfo).not.toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('should skip API call when client is not found in store', (done) => {
+      const action = loadServerInfo({ clientId: 'client-unknown' });
+      const outcome = loadServerInfoFailure({ clientId: 'client-unknown', error: '' });
+
+      actions$ = of(action);
+      (store.select as jest.Mock).mockReturnValue(of(null));
+
+      loadServerInfo$(actions$, clientsService, store).subscribe((result) => {
+        expect(result).toEqual(outcome);
+        expect(clientsService.getServerInfo).not.toHaveBeenCalled();
         done();
       });
     });
 
     it('should return loadServerInfoFailure with empty error for 404 (no provisioning)', (done) => {
-      const action = loadServerInfo({ clientId: 'client-1' });
+      const action = loadServerInfo({ clientId: 'client-2' });
       const error = new HttpErrorResponse({ status: 404, statusText: 'Not Found' });
-      const outcome = loadServerInfoFailure({ clientId: 'client-1', error: '' });
+      const outcome = loadServerInfoFailure({ clientId: 'client-2', error: '' });
 
       actions$ = of(action);
+      (store.select as jest.Mock).mockReturnValue(of(mockAutoProvisionedClient));
       clientsService.getServerInfo.mockReturnValue(throwError(() => error));
 
-      loadServerInfo$(actions$, clientsService).subscribe((result) => {
+      loadServerInfo$(actions$, clientsService, store).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(clientsService.getServerInfo).toHaveBeenCalledWith('client-1');
+        expect(clientsService.getServerInfo).toHaveBeenCalledWith('client-2');
         done();
       });
     });
 
     it('should return loadServerInfoFailure with error message for non-404 errors', (done) => {
-      const action = loadServerInfo({ clientId: 'client-1' });
+      const action = loadServerInfo({ clientId: 'client-2' });
       const error = new Error('Network error');
-      const outcome = loadServerInfoFailure({ clientId: 'client-1', error: 'Network error' });
+      const outcome = loadServerInfoFailure({ clientId: 'client-2', error: 'Network error' });
 
       actions$ = of(action);
+      (store.select as jest.Mock).mockReturnValue(of(mockAutoProvisionedClient));
       clientsService.getServerInfo.mockReturnValue(throwError(() => error));
 
-      loadServerInfo$(actions$, clientsService).subscribe((result) => {
+      loadServerInfo$(actions$, clientsService, store).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(clientsService.getServerInfo).toHaveBeenCalledWith('client-1');
+        expect(clientsService.getServerInfo).toHaveBeenCalledWith('client-2');
         done();
       });
     });
@@ -505,26 +553,45 @@ describe('ClientsEffects', () => {
       };
 
       actions$ = of(action1, action2);
-      clientsService.getServerInfo.mockImplementation((clientId: string) => {
-        if (clientId === 'client-1') {
-          return of(mockServerInfo);
+
+      // Mock store.select to execute the selector with mock state
+      // The selector function from selectClientById(clientId) will be called with state
+      const mockState = {
+        clients: {
+          entities: [mockClient, mockAutoProvisionedClient],
+        },
+      };
+
+      (store.select as jest.Mock).mockImplementation((selector: any) => {
+        // Execute the selector with mock state to get the correct client
+        // selectClientById creates a selector that finds a client by id
+        if (typeof selector === 'function') {
+          const result = selector(mockState);
+          return of(result);
         }
-        return of(mockServerInfo2);
+        return of(null);
+      });
+
+      clientsService.getServerInfo.mockImplementation((clientId: string) => {
+        if (clientId === 'client-2') {
+          return of(mockServerInfo2);
+        }
+        return of(mockServerInfo);
       });
 
       const outcomes = [
-        loadServerInfoSuccess({ clientId: 'client-1', serverInfo: mockServerInfo }),
-        loadServerInfoSuccess({ clientId: 'client-2', serverInfo: mockServerInfo2 }),
+        loadServerInfoFailure({ clientId: 'client-1', error: '' }), // Not auto-provisioned, skipped
+        loadServerInfoSuccess({ clientId: 'client-2', serverInfo: mockServerInfo2 }), // Auto-provisioned, called
       ];
       const results: any[] = [];
 
-      loadServerInfo$(actions$, clientsService).subscribe({
+      loadServerInfo$(actions$, clientsService, store).subscribe({
         next: (result) => {
           results.push(result);
           if (results.length === 2) {
             expect(results).toContainEqual(outcomes[0]);
             expect(results).toContainEqual(outcomes[1]);
-            expect(clientsService.getServerInfo).toHaveBeenCalledWith('client-1');
+            expect(clientsService.getServerInfo).not.toHaveBeenCalledWith('client-1');
             expect(clientsService.getServerInfo).toHaveBeenCalledWith('client-2');
             done();
           }

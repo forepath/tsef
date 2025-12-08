@@ -380,6 +380,7 @@ DOCKER_COMPOSE_EOF
 
     return {
       ...client,
+      isAutoProvisioned: true,
       providerType: provisionServerDto.providerType,
       serverId: provisionedServer.serverId,
       serverName: provisionedServer.name,

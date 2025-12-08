@@ -19,6 +19,7 @@ export interface ClientResponseDto {
   authenticationType: ClientAuthenticationType;
   agentWsPort?: number;
   config?: ConfigResponseDto;
+  isAutoProvisioned: boolean;
   createdAt: string;
   updatedAt: string;
 }

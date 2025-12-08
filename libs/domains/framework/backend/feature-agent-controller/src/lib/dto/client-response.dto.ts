@@ -12,6 +12,7 @@ export class ClientResponseDto {
   endpoint!: string;
   authenticationType!: AuthenticationType;
   config?: ConfigResponseDto;
+  isAutoProvisioned!: boolean;
   createdAt!: Date;
   updatedAt!: Date;
 }

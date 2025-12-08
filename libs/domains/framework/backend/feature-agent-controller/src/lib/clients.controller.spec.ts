@@ -40,6 +40,7 @@ describe('ClientsController', () => {
     description: 'Test Description',
     endpoint: 'https://example.com/api',
     authenticationType: AuthenticationType.API_KEY,
+    isAutoProvisioned: false,
     config: {
       gitRepositoryUrl: 'https://github.com/user/repo.git',
       agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
@@ -614,6 +615,7 @@ describe('ClientsController', () => {
 
       const mockResponse: ProvisionedServerResponseDto = {
         ...mockClientResponse,
+        isAutoProvisioned: true,
         providerType: 'hetzner',
         serverId: 'server-123',
         serverName: 'test-server',

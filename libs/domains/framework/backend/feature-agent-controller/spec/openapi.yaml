@@ -988,7 +988,16 @@ components:
         - keycloak
     ClientResponseDto:
       type: object
-      required: [id, name, endpoint, authenticationType, createdAt, updatedAt]
+      required:
+        [
+          id,
+          name,
+          endpoint,
+          authenticationType,
+          isAutoProvisioned,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id:
           type: string
@@ -1010,6 +1019,9 @@ components:
         config:
           $ref: '#/components/schemas/ConfigResponseDto'
           description: Configuration from the agent-manager instance (optional, may be undefined if agent-manager is unreachable)
+        isAutoProvisioned:
+          type: boolean
+          description: Indicates whether the client was auto-provisioned via server provisioning. Used to determine if server info endpoints should be called.
         createdAt:
           type: string
           format: date-time
