@@ -1,39 +1,38 @@
 <header class="header sticky-top bg-dark text-white">
   <nav class="navbar navbar-expand-md navbar-dark p-0">
-    <div class="container d-flex align-items-center justify-content-between gap-2">
+    <div class="container d-flex align-items-center justify-content-between gap-2 navbar-content">
       <div class="d-flex align-items-center gap-3">
         <a routerLink="/" fragment="hero" class="brand-icon-container me-2 fs-3 bg-primary p-3">
           <img src="assets/images/icon_light.svg" alt="Agenstra" class="brand-icon" />
         </a>
       </div>
       <button
-        class="navbar-toggler"
+        class="navbar-toggler d-md-none d-block"
         type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
+        (click)="toggleMobileMenu()"
+        [attr.aria-expanded]="mobileMenuOpen()"
         aria-controls="navbarNav"
-        aria-expanded="false"
         aria-label="Toggle navigation"
       >
-        <span class="navbar-toggler-icon"></span>
+        <i class="bi bi-list fs-4"></i>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
+      <div class="collapse navbar-collapse mobile-navbar" [class.mobile-open]="mobileMenuOpen()" id="navbarNav">
         <ul class="navbar-nav ms-auto align-items-center">
           <li class="nav-item">
-            <a class="nav-link text-white" href="#solution">Solution</a>
+            <a class="nav-link text-white" href="#solution" (click)="closeMobileMenu()">Solution</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#features">Features</a>
+            <a class="nav-link text-white" href="#features" (click)="closeMobileMenu()">Features</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#security">Security &amp; Data</a>
+            <a class="nav-link text-white" href="#security" (click)="closeMobileMenu()">Security &amp; Data</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#pricing">Pricing</a>
+            <a class="nav-link text-white" href="#pricing" (click)="closeMobileMenu()">Pricing</a>
           </li>
           <li class="nav-item">
             <a
-              class="nav-link text-white ms-3"
+              class="nav-link text-white ms-3 d-none d-md-block"
               href="https://github.com/forepath/tsef"
               target="_blank"
               rel="noopener noreferrer"
@@ -43,12 +42,15 @@
               <i class="bi bi-github fs-5"></i>
             </a>
           </li>
-          <li class="nav-item ms-3">
-            <a href="mailto:hi@agenstra.com" class="btn btn-primary py-2 px-4" target="_blank" rel="noopener">
+          <li class="nav-item ms-md-3">
+            <a href="mailto:hi@agenstra.com" class="btn btn-primary py-2 px-3 px-md-4" target="_blank" rel="noopener">
               Book a Demo
             </a>
           </li>
         </ul>
+        @if (mobileMenuOpen()) {
+          <div class="mobile-navbar-overlay" (click)="closeMobileMenu()"></div>
+        }
       </div>
     </div>
   </nav>
