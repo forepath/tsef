@@ -4,7 +4,7 @@
     <div class="d-flex align-items-center gap-3">
       <button
         type="button"
-        class="btn btn-link d-md-none text-white"
+        class="btn btn-link d-md-none text-white menu-collapse-button"
         (click)="toggleMobileMenu()"
         aria-label="Toggle navigation"
       >
@@ -13,12 +13,12 @@
       <a [routerLink]="getBasePath()" class="brand-icon-container me-2 fs-3 bg-primary p-3">
         <img src="assets/images/icon_light.svg" alt="Agenstra" class="brand-icon" />
       </a>
-      <a [routerLink]="getBasePath()" class="text-decoration-none text-white">
+      <a [routerLink]="getBasePath()" class="text-decoration-none text-white d-none d-md-block">
         <h5 class="mb-0">Documentation</h5>
       </a>
     </div>
     <div class="d-flex align-items-center gap-2">
-      <framework-docs-search />
+      <framework-docs-search [searchField]="!isMobile()" />
       <a
         class="nav-link text-white ms-3"
         href="https://github.com/forepath/tsef"

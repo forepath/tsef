@@ -16,6 +16,19 @@
       justify-content: center;
     }
 
+    .menu-collapse-button {
+      height: 71px;
+      width: 71px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0;
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      margin-right: -1rem;
+    }
+
     h5 {
       margin: 0;
     }
