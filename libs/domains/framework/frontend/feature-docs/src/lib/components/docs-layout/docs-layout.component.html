@@ -2,14 +2,6 @@
   <!-- Header -->
   <header class="docs-header border-bottom bg-dark text-white d-flex align-items-center justify-content-between gap-2">
     <div class="d-flex align-items-center gap-3">
-      <button
-        type="button"
-        class="btn btn-link d-md-none text-white menu-collapse-button"
-        (click)="toggleMobileMenu()"
-        aria-label="Toggle navigation"
-      >
-        <i class="bi bi-list fs-4"></i>
-      </button>
       <a [routerLink]="getBasePath()" class="brand-icon-container me-2 fs-3 bg-primary p-3">
         <img src="assets/images/icon_light.svg" alt="Agenstra" class="brand-icon" />
       </a>
@@ -20,7 +12,7 @@
     <div class="d-flex align-items-center gap-2">
       <framework-docs-search [searchField]="!isMobile()" />
       <a
-        class="nav-link text-white ms-3"
+        class="nav-link text-white ms-3 d-none d-md-block"
         href="https://github.com/forepath/tsef"
         target="_blank"
         rel="noopener noreferrer"
@@ -29,7 +21,7 @@
       >
         <i class="bi bi-github fs-5"></i>
       </a>
-      <div class="form-check form-switch mx-3">
+      <div class="form-check form-switch mx-3 me-3 me-md-4">
         <input
           class="form-check-input"
           type="checkbox"
@@ -46,6 +38,14 @@
           ></i>
         </label>
       </div>
+      <button
+        type="button"
+        class="btn btn-link d-md-none text-white menu-collapse-button"
+        (click)="toggleMobileMenu()"
+        aria-label="Toggle navigation"
+      >
+        <i class="bi bi-list fs-4"></i>
+      </button>
     </div>
   </header>
 
