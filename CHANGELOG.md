@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.12.1](https://github.com/forepath/tsef/compare/v1.12.0...v1.12.1) (2025-12-09)
+
+
+### Bug Fixes
+
+* mobile docs navigation ([#110](https://github.com/forepath/tsef/issues/110)) ([3d429ba](https://github.com/forepath/tsef/commit/3d429badce4b960354f80dd2dc5a5422a8ea5efc))
+* mobile portal navigation ([#111](https://github.com/forepath/tsef/issues/111)) ([ac78a3e](https://github.com/forepath/tsef/commit/ac78a3e4acadf376f3ac2d115ed0dce2a7489093))
+
 ## [1.12.0](https://github.com/forepath/tsef/compare/v1.11.1...v1.12.0) (2025-12-08)
 
 
