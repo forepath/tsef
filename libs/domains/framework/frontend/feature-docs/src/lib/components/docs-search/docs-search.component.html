@@ -1,15 +1,17 @@
 <div class="docs-search-container position-relative">
   <div class="input-group">
-    <input
-      type="text"
-      class="form-control"
-      placeholder="Search documentation..."
-      [value]="searchQuery()"
-      (input)="onSearchInput($event)"
-      (focus)="onFocus()"
-      (blur)="onBlur()"
-      (keydown.enter)="onSearchClick()"
-    />
+    @if (searchField()) {
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search documentation..."
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+        (keydown.enter)="onSearchClick()"
+      />
+    }
     <button class="btn btn-primary" type="button" (click)="onSearchClick()">
       <i class="bi bi-search"></i>
     </button>

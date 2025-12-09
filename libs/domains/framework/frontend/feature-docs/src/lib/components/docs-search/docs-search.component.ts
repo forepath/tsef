@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,6 +14,8 @@ import { DocsSearchService } from '../../services';
   standalone: true,
 })
 export class DocsSearchComponent {
+  readonly searchField = input<boolean>(true);
+
   private readonly searchService = inject(DocsSearchService);
   private readonly router = inject(Router);
 
@@ -85,6 +87,9 @@ export class DocsSearchComponent {
     const query = this.searchQuery().trim();
     if (query.length > 0) {
       this.router.navigate(['/search'], { queryParams: { q: query } });
+      this.showResults.set(false);
+    } else {
+      this.router.navigate(['/search']);
       this.showResults.set(false);
     }
   }
