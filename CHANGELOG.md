@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.13.1](https://github.com/forepath/tsef/compare/v1.13.0...v1.13.1) (2025-12-10)
+
+
+### Bug Fixes
+
+* initial consent status identification ([#113](https://github.com/forepath/tsef/issues/113)) ([b0631cc](https://github.com/forepath/tsef/commit/b0631cca619370812c90889921b94b2093f0ba8e))
+
 ## [1.13.0](https://github.com/forepath/tsef/compare/v1.12.1...v1.13.0) (2025-12-10)
 
 
