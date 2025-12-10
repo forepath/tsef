@@ -55,13 +55,17 @@
             "output": "spec/agent-manager"
           }
         ],
-        "styles": ["apps/frontend-docs/src/styles.scss"],
+        "styles": [
+          "node_modules/cookieconsent/build/cookieconsent.min.css",
+          "apps/frontend-docs/src/styles.scss"
+        ],
         "server": "apps/frontend-docs/src/main.server.ts",
         "ssr": {
           "entry": "apps/frontend-docs/src/server.ts"
         },
         "prerender": true,
         "scripts": [
+          "node_modules/cookieconsent/build/cookieconsent.min.js",
           "node_modules/@popperjs/core/dist/umd/popper.min.js",
           "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
         ],

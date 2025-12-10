@@ -9,6 +9,10 @@ export interface Environment {
   editor: {
     openInNewWindow: boolean;
   };
+  cookieConsent: {
+    domain: string;
+    privacyPolicyUrl: string;
+  };
 }
 
 export type AuthenticationConfig = KeycloakAuthenticationConfig | ApiKeyAuthenticationConfig;

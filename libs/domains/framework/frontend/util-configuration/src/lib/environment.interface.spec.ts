@@ -19,6 +19,10 @@ describe('Environment interfaces', () => {
         editor: {
           openInNewWindow: false,
         },
+        cookieConsent: {
+          domain: 'localhost',
+          privacyPolicyUrl: 'https://example.com/privacy',
+        },
       };
       expect(validEnv.production).toBe(true);
     });
@@ -34,6 +38,10 @@ describe('Environment interfaces', () => {
         },
         editor: {
           openInNewWindow: false,
+        },
+        cookieConsent: {
+          domain: 'localhost',
+          privacyPolicyUrl: 'https://example.com/privacy',
         },
       };
       expect(validEnv.authentication).toBeDefined();
@@ -56,6 +64,10 @@ describe('Environment interfaces', () => {
         editor: {
           openInNewWindow: false,
         },
+        cookieConsent: {
+          domain: 'localhost',
+          privacyPolicyUrl: 'https://example.com/privacy',
+        },
       };
       expect(envWithController.controller).toBeDefined();
       expect(envWithController.controller?.restApiUrl).toBe('http://localhost:3100/api');
@@ -74,6 +86,10 @@ describe('Environment interfaces', () => {
         editor: {
           openInNewWindow: false,
         },
+        cookieConsent: {
+          domain: 'localhost',
+          privacyPolicyUrl: 'https://example.com/privacy',
+        },
       };
       expect(envWithoutController.controller).toBeUndefined();
     });
@@ -90,6 +106,10 @@ describe('Environment interfaces', () => {
         },
         editor: {
           openInNewWindow: false,
+        },
+        cookieConsent: {
+          domain: 'localhost',
+          privacyPolicyUrl: 'https://example.com/privacy',
         },
       };
       expect(env.chatModelOptions).toBeDefined();

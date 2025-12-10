@@ -69,6 +69,10 @@ describe('authGuard', () => {
       editor: {
         openInNewWindow: true,
       },
+      cookieConsent: {
+        domain: 'localhost',
+        privacyPolicyUrl: 'https://example.com/privacy',
+      },
     };
 
     mockIsAuthenticated = isAuthenticated as jest.MockedFunction<typeof isAuthenticated>;

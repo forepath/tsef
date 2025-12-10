@@ -12,6 +12,7 @@ describe('environment', () => {
       authentication: expect.any(Object),
       chatModelOptions: expect.any(Object),
       editor: expect.any(Object),
+      cookieConsent: expect.any(Object),
     });
   });
 
@@ -76,6 +77,17 @@ describe('environment', () => {
         });
         expect(environment.controller.restApiUrl).toBeTruthy();
         expect(environment.controller.websocketUrl).toBeTruthy();
+      }
+    });
+  });
+
+  describe('when cookieConsent is defined', () => {
+    it('should have cookieConsent with domain', () => {
+      if (environment.cookieConsent) {
+        expect(environment.cookieConsent).toMatchObject({
+          domain: expect.any(String),
+          privacyPolicyUrl: expect.any(String),
+        });
       }
     });
   });

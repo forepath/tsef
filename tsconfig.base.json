@@ -43,6 +43,9 @@
       "@forepath/framework/frontend/util-configuration": [
         "libs/domains/framework/frontend/util-configuration/src/index.ts"
       ],
+      "@forepath/framework/frontend/util-cookie-consent": [
+        "libs/domains/framework/frontend/util-cookie-consent/src/index.ts"
+      ],
       "@forepath/framework/frontend/util-docs-parser": [
         "libs/domains/framework/frontend/util-docs-parser/src/index.ts"
       ],

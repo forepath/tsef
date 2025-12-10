@@ -3,8 +3,10 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideRouter, withInMemoryScrolling, withRouterConfig } from '@angular/router';
 import { environment, provideEnvironment } from '@forepath/framework/frontend/util-configuration';
+import { cookieConfig } from '@forepath/framework/frontend/util-cookie-consent';
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { provideNgcCookieConsent } from 'ngx-cookieconsent';
 import { ViewportScrollerOffset } from './viewport-scroller-offset.service';
 
 export const appConfig: ApplicationConfig = {
@@ -34,5 +36,6 @@ export const appConfig: ApplicationConfig = {
     // Custom ViewportScroller with 80px offset for fixed navbar
     { provide: ViewportScroller, useClass: ViewportScrollerOffset },
     provideEnvironment(),
+    provideNgcCookieConsent(cookieConfig),
   ],
 };

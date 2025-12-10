@@ -65,6 +65,10 @@ describe('AuthenticationEffects', () => {
       editor: {
         openInNewWindow: true,
       },
+      cookieConsent: {
+        domain: 'localhost',
+        privacyPolicyUrl: 'https://example.com/privacy',
+      },
     };
 
     mockKeycloakService = {

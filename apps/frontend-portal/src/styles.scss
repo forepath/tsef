@@ -3,6 +3,7 @@ $primary: #7a3fff;
 @import 'bootstrap/scss/bootstrap';
 @import 'bootstrap/scss/bootstrap-grid';
 @import 'bootstrap-icons/font/bootstrap-icons';
+@import 'libs/domains/framework/frontend/util-cookie-consent/src/lib/cookie-consent.scss';
 
 // Smooth scrolling for anchor links
 html {
