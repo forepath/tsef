@@ -33,42 +33,39 @@ export class CookieConsentComponent implements OnInit, OnDestroy {
     // Subscribe to initializing$ to trigger our onInitialise callback
     // This fires when cookie consent initializes with the current status
     const initializingSub = this.cookieConsentService.initializing$.subscribe((event) => {
-      const win = window as any;
-
-      if (!win.dataLayer) {
-        return;
-      }
-
-      if (event.status === 'allow') {
-        win.dataLayer.push({ event: 'consent_given' });
-      } else if (event.status === 'deny') {
-        win.dataLayer.push({ event: 'consent_denied' });
-      } else if (event.status === 'dismiss') {
-        win.dataLayer.push({ event: 'consent_dismissed' });
-      }
+      this.sendConsentEvent(event.status);
     });
     this.subscriptions.add(initializingSub);
 
+    // Subscribe to initialized$ to send initial consent status when service is ready
+    // This ensures we send the event even if initialization happened before we subscribed
+    const initializedSub = this.cookieConsentService.initialized$.subscribe(() => {
+      // Service is now initialized, check current status and send event
+      try {
+        const status = this.cookieConsentService.getStatus();
+        // Convert status object to string
+        if (status.allow) {
+          this.sendConsentEvent('allow');
+        } else if (status.deny) {
+          this.sendConsentEvent('deny');
+        } else if (status.dismiss) {
+          this.sendConsentEvent('dismiss');
+        }
+      } catch {
+        // Service not fully ready yet, will be handled by initializing$ or status check
+      }
+    });
+    this.subscriptions.add(initializedSub);
+
     // Subscribe to statusChange$ to trigger our onStatusChange callback
     const statusChangeSub = this.cookieConsentService.statusChange$.subscribe((event) => {
-      const win = window as any;
-
-      if (!win.dataLayer) {
-        return;
-      }
-
-      if (event.status === 'allow') {
-        win.dataLayer.push({ event: 'consent_given' });
-      } else if (event.status === 'deny') {
-        win.dataLayer.push({ event: 'consent_denied' });
-      } else if (event.status === 'dismiss') {
-        win.dataLayer.push({ event: 'consent_dismissed' });
-      }
+      this.sendConsentEvent(event.status);
     });
     this.subscriptions.add(statusChangeSub);
 
     // Subscribe to revokeChoice$ to trigger our onRevokeChoice callback
     const revokeChoiceSub = this.cookieConsentService.revokeChoice$.subscribe(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const win = window as any;
 
       if (!win.dataLayer) {
@@ -81,6 +78,7 @@ export class CookieConsentComponent implements OnInit, OnDestroy {
 
     // Subscribe to noCookieLaw$ to trigger our onNoCookieLaw callback
     const noCookieLawSub = this.cookieConsentService.noCookieLaw$.subscribe((event) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const win = window as any;
 
       if (!win.dataLayer) {
@@ -109,6 +107,9 @@ export class CookieConsentComponent implements OnInit, OnDestroy {
                 this.manualInitialize();
               }
             }, 100);
+          } else {
+            // User has already answered, send the current consent status
+            this.sendCurrentConsentStatus();
           }
         } catch {
           this.manualInitialize();
@@ -129,6 +130,44 @@ export class CookieConsentComponent implements OnInit, OnDestroy {
       const cookieconsent = win.cookieconsent;
       // Manually initialize with our config that includes callbacks
       cookieconsent.initialise(cookieConfig);
+
+      // After manual initialization, check status and send event
+      setTimeout(() => {
+        this.sendCurrentConsentStatus();
+      }, 100);
+    }
+  }
+
+  private sendConsentEvent(status: 'allow' | 'deny' | 'dismiss'): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const win = window as any;
+
+    if (!win.dataLayer) {
+      return;
+    }
+
+    if (status === 'allow') {
+      win.dataLayer.push({ event: 'consent_given' });
+    } else if (status === 'deny') {
+      win.dataLayer.push({ event: 'consent_denied' });
+    } else if (status === 'dismiss') {
+      win.dataLayer.push({ event: 'consent_dismissed' });
+    }
+  }
+
+  private sendCurrentConsentStatus(): void {
+    try {
+      if (this.cookieConsentService.hasAnswered()) {
+        const status = this.cookieConsentService.hasConsented();
+
+        if (status) {
+          this.sendConsentEvent('allow');
+        } else {
+          this.sendConsentEvent('deny');
+        }
+      }
+    } catch {
+      // Service not ready yet, will be handled by observables
     }
   }
 }
