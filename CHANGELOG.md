@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.13.0](https://github.com/forepath/tsef/compare/v1.12.1...v1.13.0) (2025-12-10)
+
+
+### Features
+
+* cookie consent and tag manager ([#112](https://github.com/forepath/tsef/issues/112)) ([7f56db8](https://github.com/forepath/tsef/commit/7f56db89018c5cc5bdbd2606681673c5424db8c9))
+
 ## [1.12.1](https://github.com/forepath/tsef/compare/v1.12.0...v1.12.1) (2025-12-09)
 
 
