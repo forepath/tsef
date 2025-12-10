@@ -5,3 +5,4 @@ export * from './util-configuration/src';
 export * from './feature-portal/src';
 export * from './feature-docs/src';
 export * from './util-docs-parser/src';
+export * from './util-cookie-consent/src';

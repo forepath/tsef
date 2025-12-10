@@ -73,6 +73,10 @@ describe('loginGuard', () => {
       editor: {
         openInNewWindow: true,
       },
+      cookieConsent: {
+        domain: 'localhost',
+        privacyPolicyUrl: 'https://example.com/privacy',
+      },
     };
 
     mockKeycloakService = {
