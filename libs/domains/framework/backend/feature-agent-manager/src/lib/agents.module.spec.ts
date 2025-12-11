@@ -6,7 +6,12 @@ import { AgentsModule } from './agents.module';
 import { AgentMessageEntity } from './entities/agent-message.entity';
 import { AgentEntity } from './entities/agent.entity';
 import { AgentProviderFactory } from './providers/agent-provider.factory';
-import { CursorAgentProvider } from './providers/cursor-agent.provider';
+import { CursorAgentProvider } from './providers/agents/cursor-agent.provider';
+import { ChatFilterFactory } from './providers/chat-filter.factory';
+import { BidirectionalChatFilter } from './providers/filters/bidirectional-chat-filter';
+import { IncomingChatFilter } from './providers/filters/incoming-chat-filter';
+import { NoopChatFilter } from './providers/filters/noop-chat-filter';
+import { OutgoingChatFilter } from './providers/filters/outgoing-chat-filter';
 import { AgentsRepository } from './repositories/agents.repository';
 import { AgentsService } from './services/agents.service';
 import { DockerService } from './services/docker.service';
@@ -113,6 +118,66 @@ describe('AgentsModule', () => {
 
   it('should initialize AGENT_PROVIDER_INIT factory', () => {
     const initValue = module.get<boolean>('AGENT_PROVIDER_INIT');
+    expect(initValue).toBe(true);
+  });
+
+  it('should provide ChatFilterFactory', () => {
+    const factory = module.get<ChatFilterFactory>(ChatFilterFactory);
+    expect(factory).toBeDefined();
+    expect(factory).toBeInstanceOf(ChatFilterFactory);
+  });
+
+  it('should provide NoopChatFilter', () => {
+    const filter = module.get<NoopChatFilter>(NoopChatFilter);
+    expect(filter).toBeDefined();
+    expect(filter).toBeInstanceOf(NoopChatFilter);
+  });
+
+  it('should provide IncomingChatFilter', () => {
+    const filter = module.get<IncomingChatFilter>(IncomingChatFilter);
+    expect(filter).toBeDefined();
+    expect(filter).toBeInstanceOf(IncomingChatFilter);
+  });
+
+  it('should provide OutgoingChatFilter', () => {
+    const filter = module.get<OutgoingChatFilter>(OutgoingChatFilter);
+    expect(filter).toBeDefined();
+    expect(filter).toBeInstanceOf(OutgoingChatFilter);
+  });
+
+  it('should provide BidirectionalChatFilter', () => {
+    const filter = module.get<BidirectionalChatFilter>(BidirectionalChatFilter);
+    expect(filter).toBeDefined();
+    expect(filter).toBeInstanceOf(BidirectionalChatFilter);
+  });
+
+  it('should register all filters via CHAT_FILTER_INIT factory', () => {
+    const factory = module.get<ChatFilterFactory>(ChatFilterFactory);
+    const noopFilter = module.get<NoopChatFilter>(NoopChatFilter);
+    const incomingFilter = module.get<IncomingChatFilter>(IncomingChatFilter);
+    const outgoingFilter = module.get<OutgoingChatFilter>(OutgoingChatFilter);
+    const bidirectionalFilter = module.get<BidirectionalChatFilter>(BidirectionalChatFilter);
+
+    // Verify all filters are registered
+    expect(factory.hasFilter('noop')).toBe(true);
+    expect(factory.getFilter('noop')).toBe(noopFilter);
+    expect(noopFilter.getType()).toBe('noop');
+
+    expect(factory.hasFilter('incoming-example')).toBe(true);
+    expect(factory.getFilter('incoming-example')).toBe(incomingFilter);
+    expect(incomingFilter.getType()).toBe('incoming-example');
+
+    expect(factory.hasFilter('outgoing-example')).toBe(true);
+    expect(factory.getFilter('outgoing-example')).toBe(outgoingFilter);
+    expect(outgoingFilter.getType()).toBe('outgoing-example');
+
+    expect(factory.hasFilter('bidirectional-example')).toBe(true);
+    expect(factory.getFilter('bidirectional-example')).toBe(bidirectionalFilter);
+    expect(bidirectionalFilter.getType()).toBe('bidirectional-example');
+  });
+
+  it('should initialize CHAT_FILTER_INIT factory', () => {
+    const initValue = module.get<boolean>('CHAT_FILTER_INIT');
     expect(initValue).toBe(true);
   });
 });

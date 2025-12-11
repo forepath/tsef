@@ -234,6 +234,30 @@ export interface TerminalClosedData {
 }
 
 /**
+ * Message filter result data (from agents.gateway.ts MessageFilterResultData)
+ */
+export interface MessageFilterResultData {
+  direction: 'incoming' | 'outgoing';
+  status: 'allowed' | 'filtered' | 'dropped';
+  message: string;
+  modifiedMessage?: string;
+  appliedFilters: Array<{
+    type: string;
+    displayName: string;
+    matched: boolean;
+    reason?: string;
+  }>;
+  matchedFilter?: {
+    type: string;
+    displayName: string;
+    matched: boolean;
+    reason?: string;
+  };
+  action?: 'drop' | 'flag';
+  timestamp: string;
+}
+
+/**
  * Container stats payload (from agents.gateway.ts ContainerStatsPayload)
  */
 export interface ContainerStatsPayload {
@@ -285,6 +309,7 @@ export type ForwardedEventPayload =
   | SuccessResponse<LoginSuccessData> // loginSuccess
   | ErrorResponse // loginError
   | SuccessResponse<ChatMessageData> // chatMessage
+  | SuccessResponse<MessageFilterResultData> // messageFilterResult
   | SuccessResponse<LogoutSuccessData> // logoutSuccess
   | SuccessResponse<FileUpdateNotificationData> // fileUpdateNotification
   | SuccessResponse<TerminalCreatedData> // terminalCreated

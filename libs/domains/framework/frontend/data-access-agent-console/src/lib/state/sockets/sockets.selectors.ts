@@ -91,3 +91,35 @@ export const selectMostRecentForwardedEventByEvent = (eventName: string) =>
  * Select the currently selected agent ID (from loginSuccess)
  */
 export const selectSelectedAgentId = createSelector(selectSocketsState, (state) => state.selectedAgentId);
+
+// Message filter results selectors
+export const selectMessageFilterResults = createSelector(selectSocketsState, (state) => state.messageFilterResults);
+
+/**
+ * Select message filter results for a specific direction and message timestamp
+ * Matches filter results to messages by finding the closest filter result timestamp
+ */
+export const selectFilterResultForMessage = (direction: 'incoming' | 'outgoing', messageTimestamp: number) =>
+  createSelector(selectMessageFilterResults, (filterResults) => {
+    // Find filter results matching the direction
+    const matchingDirection = filterResults.filter((fr) => fr.direction === direction);
+    if (matchingDirection.length === 0) {
+      return null;
+    }
+
+    // Find the filter result with timestamp closest to the message timestamp
+    // Allow a small time window (e.g., 5 seconds) for matching
+    const TIME_WINDOW_MS = 5000;
+    const candidates = matchingDirection.filter((fr) => Math.abs(fr.timestamp - messageTimestamp) <= TIME_WINDOW_MS);
+
+    if (candidates.length === 0) {
+      return null;
+    }
+
+    // Return the closest match
+    return candidates.reduce((closest, current) =>
+      Math.abs(current.timestamp - messageTimestamp) < Math.abs(closest.timestamp - messageTimestamp)
+        ? current
+        : closest,
+    );
+  });

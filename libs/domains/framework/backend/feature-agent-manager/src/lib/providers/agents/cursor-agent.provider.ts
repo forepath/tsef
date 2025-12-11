@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { DockerService } from '../services/docker.service';
-import { AgentProvider, AgentProviderOptions } from './agent-provider.interface';
+import { DockerService } from '../../services/docker.service';
+import { AgentProvider, AgentProviderOptions } from '../agent-provider.interface';
 
 /**
  * Cursor-agent provider implementation.

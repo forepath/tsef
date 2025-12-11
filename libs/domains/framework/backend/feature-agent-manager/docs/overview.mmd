@@ -24,7 +24,7 @@ flowchart TB
         direction TB
         WS_USE["Use Case: Real-time Communication<br/>Bidirectional Messages<br/>Persistent Connection"]
         WS_USE --> WS1["🔐 Authentication & Connection<br/>1. Connect to WebSocket<br/>2. Login with credentials<br/>3. Session established<br/>4. Chat history restored"]
-        WS_USE --> WS2["💬 Chat Messages<br/>1. Check if first message (no chat history)<br/>2. Send initialization message if needed<br/>3. Send chat message<br/>4. Persist message to database<br/>5. Broadcast to all clients<br/>6. Forward to container stdin<br/>7. Capture and emit agent response<br/>8. Persist agent response to database"]
+        WS_USE --> WS2["💬 Chat Messages<br/>1. Apply incoming filters (drop/flag)<br/>2. Send filter result message<br/>3. Check if first message (no chat history)<br/>4. Send initialization message if needed<br/>5. Send chat message<br/>6. Persist message to database (with filtered flag)<br/>7. Broadcast to all clients<br/>8. Forward to container stdin<br/>9. Capture agent response<br/>10. Apply outgoing filters (drop/flag)<br/>11. Send filter result message<br/>12. Persist agent response (with filtered flag)<br/>13. Broadcast agent response"]
     end
 
     Start([Agent Manager Feature]) --> HTTP

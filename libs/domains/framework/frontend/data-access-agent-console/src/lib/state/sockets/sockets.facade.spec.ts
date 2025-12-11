@@ -396,6 +396,50 @@ describe('SocketsFacade', () => {
     });
   });
 
+  describe('messageFilterResults$', () => {
+    it('should emit messageFilterResults from state', (done) => {
+      const filterResults = [
+        {
+          direction: 'incoming' as const,
+          status: 'filtered' as const,
+          message: 'Test message',
+          appliedFilters: [
+            {
+              type: 'incoming-filter',
+              displayName: 'Incoming Filter',
+              matched: true,
+              reason: 'Test filter matched',
+            },
+          ],
+          matchedFilter: {
+            type: 'incoming-filter',
+            displayName: 'Incoming Filter',
+            matched: true,
+            reason: 'Test filter matched',
+          },
+          action: 'flag' as const,
+          timestamp: 1000,
+          receivedAt: 1000,
+        },
+      ];
+      const testFacade = createFacadeWithMock(filterResults);
+
+      testFacade.messageFilterResults$.subscribe((result) => {
+        expect(result).toEqual(filterResults);
+        done();
+      });
+    });
+
+    it('should emit empty array when no filter results', (done) => {
+      const testFacade = createFacadeWithMock([]);
+
+      testFacade.messageFilterResults$.subscribe((result) => {
+        expect(result).toEqual([]);
+        done();
+      });
+    });
+  });
+
   describe('Remote Connection State Methods', () => {
     it('should return remote connection state for a specific clientId', (done) => {
       const remoteConnection = {

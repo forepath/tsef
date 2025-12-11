@@ -24,7 +24,8 @@ Agents are entities that can be created, authenticated, and interacted with thro
 - ✅ Container command forwarding
 - ✅ Support for UUID or name-based agent identification
 - ✅ **Plugin-based agent provider system** - Support for multiple agent implementations (cursor-agent, OpenAI, Anthropic, etc.) through a unified interface
-- ✅ **Extensible architecture** - Easy to add new agent providers by implementing the `AgentProvider` interface
+- ✅ **Plugin-based chat filter system** - Support for multiple message filtering implementations (profanity, PII, content policy, etc.) through a unified interface
+- ✅ **Extensible architecture** - Easy to add new agent providers and chat filters by implementing the respective interfaces
 
 ## Architecture
 
@@ -36,10 +37,18 @@ The library follows Domain-Driven Design (DDD) principles with clear separation 
   - `AgentsService` - Business logic orchestration
   - `PasswordService` - Password hashing and verification
   - `DockerService` - Container log streaming and command execution
-- **Providers**: Plugin-based agent provider system
-  - `AgentProvider` - Interface for agent implementations
-  - `AgentProviderFactory` - Factory for getting the appropriate provider based on agent type
-  - `CursorAgentProvider` - Cursor-agent implementation
+- **Providers**: Plugin-based provider systems
+  - **Agent Providers**: Plugin-based agent provider system
+    - `AgentProvider` - Interface for agent implementations
+    - `AgentProviderFactory` - Factory for getting the appropriate provider based on agent type
+    - `CursorAgentProvider` - Cursor-agent implementation
+  - **Chat Filters**: Plugin-based chat filter system
+    - `ChatFilter` - Interface for message filtering implementations
+    - `ChatFilterFactory` - Factory for managing and retrieving filters by direction
+    - `NoopChatFilter` - No-op filter (never filters messages)
+    - `IncomingChatFilter` - Example incoming-only filter
+    - `OutgoingChatFilter` - Example outgoing-only filter
+    - `BidirectionalChatFilter` - Example bidirectional filter
 - **DTOs**: Data transfer objects for API boundaries
   - `CreateAgentDto` - Input validation for creating agents (includes optional `agentType`)
   - `UpdateAgentDto` - Input validation for updating agents (includes optional `agentType`)
@@ -218,6 +227,47 @@ The `AgentsGateway` provides WebSocket-based real-time communication with databa
     result?: string;
     session_id?: string;
     request_id?: string;
+  }
+
+  // Dropped message response (when message is dropped by filter)
+  {
+    from: 'agent';
+    response: {
+      type: 'error';
+      is_error: true;
+      result: 'MESSAGE_DROPPED';
+      message: string; // Filter reason
+    };
+    timestamp: string; // ISO timestamp
+  }
+  ```
+
+- `messageFilterResult` - Broadcasted to all connected clients after applying filters to a message
+
+  ```typescript
+  {
+    success: true;
+    data: {
+      direction: 'incoming' | 'outgoing';
+      status: 'allowed' | 'filtered' | 'dropped';
+      message: string; // Original message
+      modifiedMessage?: string; // Modified message (if filter modified it)
+      appliedFilters: Array<{
+        type: string;
+        displayName: string;
+        matched: boolean;
+        reason?: string;
+      }>;
+      matchedFilter?: {
+        type: string;
+        displayName: string;
+        matched: boolean;
+        reason?: string;
+      };
+      action?: 'drop' | 'flag'; // Only present if filtered
+      timestamp: string; // ISO timestamp
+    };
+    timestamp: string; // ISO timestamp
   }
   ```
 
@@ -420,6 +470,160 @@ To add a new agent provider:
    ```
 
 4. Create a database migration if needed (the `agentType` field already exists in the schema)
+
+### Chat Filter Plugin System
+
+The library uses a plugin-based architecture to support multiple message filtering implementations. Filters can be applied to incoming messages (from user to agent), outgoing messages (from agent to user), or both (bidirectional).
+
+#### Filter Directions
+
+- **INCOMING** - Filters apply only to incoming messages (from user to agent)
+- **OUTGOING** - Filters apply only to outgoing messages (from agent to user)
+- **BIDIRECTIONAL** - Filters apply to both incoming and outgoing messages
+
+#### Filter Actions
+
+When a filter matches a message, it can take one of two actions:
+
+- **drop** - Do not process the message further. A fake agent response with `MESSAGE_DROPPED` error code is created, persisted, and broadcast instead. Message modification is not allowed when action is `drop`.
+- **flag** - Process the message normally but mark it as filtered in the database. Filters can optionally modify the message content by returning a `modifiedMessage` in the filter result. If provided, the modified message will be used instead of the original for all subsequent processing (persistence, broadcasting, and forwarding to the agent).
+
+#### Available Filters
+
+- **noop** - No-op filter that never filters messages (useful for testing)
+- **incoming-example** - Example incoming-only filter (filters messages containing "test-filter")
+- **outgoing-example** - Example outgoing-only filter (filters messages containing "test-filter")
+- **bidirectional-example** - Example bidirectional filter (filters messages containing "test-filter")
+
+#### Filter Result Messages
+
+After applying filters, the system automatically sends filter result messages through the `chatMessage` event. These messages contain:
+
+- `type: "filter-result"` - Identifies the message as a filter result
+- `direction: "incoming" | "outgoing"` - Filter direction
+- `status: "allowed" | "filtered" | "dropped"` - Final filter status
+- `message` - Original message that was filtered
+- `appliedFilters` - List of all filters that were applied with their results
+- `matchedFilter` - The filter that matched (if any)
+- `action` - Action to take (only present if filtered)
+- `timestamp` - When filters were applied
+
+#### Adding New Filters
+
+To add a new chat filter:
+
+1. Implement the `ChatFilter` interface:
+
+   ```typescript
+   import { ChatFilter, FilterContext, FilterDirection, FilterResult } from './providers/chat-filter.interface';
+
+   @Injectable()
+   export class MyChatFilter implements ChatFilter {
+     getType(): string {
+       return 'my-filter';
+     }
+
+     getDisplayName(): string {
+       return 'My Filter';
+     }
+
+     getDirection(): FilterDirection {
+       return FilterDirection.BIDIRECTIONAL; // or INCOMING, OUTGOING
+     }
+
+     async filter(message: string, context?: FilterContext): Promise<FilterResult> {
+       // Your filtering logic here
+       if (/* message should be filtered */) {
+         return {
+           filtered: true,
+           action: 'flag', // or 'drop' to prevent processing
+           reason: 'Reason for filtering',
+           // Optional: modify the message content
+           // modifiedMessage: message.replace(/badword/gi, '***'),
+         };
+       }
+
+       return {
+         filtered: false,
+       };
+     }
+   }
+   ```
+
+2. Register the filter in `AgentsModule`:
+
+   ```typescript
+   providers: [
+     // ... existing providers
+     MyChatFilter,
+     {
+       provide: 'CHAT_FILTER_INIT',
+       useFactory: (
+         factory: ChatFilterFactory,
+         noopFilter: NoopChatFilter,
+         incomingFilter: IncomingChatFilter,
+         outgoingFilter: OutgoingChatFilter,
+         bidirectionalFilter: BidirectionalChatFilter,
+         myFilter: MyChatFilter, // Add your new filter here
+       ) => {
+         factory.registerFilter(noopFilter);
+         factory.registerFilter(incomingFilter);
+         factory.registerFilter(outgoingFilter);
+         factory.registerFilter(bidirectionalFilter);
+         factory.registerFilter(myFilter); // Register your new filter
+         return true;
+       },
+       inject: [
+         ChatFilterFactory,
+         NoopChatFilter,
+         IncomingChatFilter,
+         OutgoingChatFilter,
+         BidirectionalChatFilter,
+         MyChatFilter, // Add your new filter to inject array
+       ],
+     },
+   ],
+   ```
+
+   **Note**: The `CHAT_FILTER_INIT` factory registers all filters at module initialization. When adding a new filter, you must:
+   - Add the filter class to the `providers` array
+   - Add the filter instance to the factory's `inject` array
+   - Call `factory.registerFilter()` for your new filter in the factory function
+
+3. The filter will automatically be applied to messages based on its direction:
+   - Incoming filters are applied before broadcasting and persisting user messages
+   - Outgoing filters are applied before broadcasting and persisting agent responses
+   - Bidirectional filters are applied to both directions
+
+#### Filter Application Flow
+
+1. **Incoming Messages** (user → agent):
+   - Filters are applied before broadcasting the user message
+   - Filter result is broadcast via `messageFilterResult` event (not persisted)
+   - If filter action is `drop`:
+     - A fake agent response is created with `type: "error"`, `is_error: true`, `result: "MESSAGE_DROPPED"`
+     - The fake response is persisted and broadcast as a normal agent response
+     - Processing stops (no actual agent call is made)
+   - If filter action is `flag`:
+     - Message is processed but marked as filtered
+     - If filter provided `modifiedMessage`, the modified message is used instead of the original
+     - Modified message (or original if not modified) is persisted with `filtered` flag
+     - Modified message (or original if not modified) is forwarded to the agent
+   - User message is persisted with `filtered` flag if applicable
+
+2. **Outgoing Messages** (agent → user):
+   - Filters are applied after receiving agent response
+   - Filter result is broadcast via `messageFilterResult` event (not persisted)
+   - If filter action is `drop`:
+     - A fake agent response is created with `type: "error"`, `is_error: true`, `result: "MESSAGE_DROPPED"`
+     - The fake response replaces the original agent response
+     - The fake response is persisted and broadcast as a normal agent response
+   - If filter action is `flag`:
+     - Message is processed but marked as filtered
+     - If filter provided `modifiedMessage`, the modified message is used instead of the original
+     - Modified message (or original if not modified) is persisted with `filtered` flag
+     - Modified message (or original if not modified) is broadcast to clients
+   - Agent message is persisted with `filtered` flag if applicable
 
 ## Testing
 

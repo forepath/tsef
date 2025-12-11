@@ -25,7 +25,7 @@ import {
   socketReconnecting,
 } from './sockets.actions';
 import { initialSocketsState, socketsReducer, type SocketsState } from './sockets.reducer';
-import { ChatActor, ForwardableEvent, type ForwardedEventPayload } from './sockets.types';
+import { ChatActor, ForwardableEvent, type ForwardedEventPayload, type MessageFilterResultData } from './sockets.types';
 
 describe('socketsReducer', () => {
   const mockForwardedPayload: ForwardedEventPayload = {
@@ -166,11 +166,22 @@ describe('socketsReducer', () => {
           { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 1000 },
           { event: 'loginSuccess', payload: mockForwardedPayload, timestamp: 2000 },
         ],
+        messageFilterResults: [
+          {
+            direction: 'incoming',
+            status: 'filtered',
+            message: 'Test',
+            appliedFilters: [],
+            timestamp: 1000,
+            receivedAt: 1000,
+          },
+        ],
       };
 
       const newState = socketsReducer(state, setClientSuccess({ message: 'Client set', clientId: 'client-1' }));
 
       expect(newState.forwardedEvents).toEqual([]);
+      expect(newState.messageFilterResults).toEqual([]);
     });
 
     it('should not clear forwardedEvents on initial connection (different clientId)', () => {
@@ -367,6 +378,194 @@ describe('socketsReducer', () => {
       );
 
       expect(newState.selectedAgentId).toBe('agent-123');
+    });
+
+    it('should store messageFilterResult events in messageFilterResults array', () => {
+      const filterResultPayload: ForwardedEventPayload = {
+        success: true,
+        data: {
+          direction: 'incoming',
+          status: 'filtered',
+          message: 'Test message',
+          appliedFilters: [
+            {
+              type: 'incoming-filter',
+              displayName: 'Incoming Filter',
+              matched: true,
+              reason: 'Test filter matched',
+            },
+          ],
+          matchedFilter: {
+            type: 'incoming-filter',
+            displayName: 'Incoming Filter',
+            matched: true,
+            reason: 'Test filter matched',
+          },
+          action: 'flag',
+          timestamp: '2024-01-01T00:00:00.000Z',
+        },
+        timestamp: '2024-01-01T00:00:00.000Z',
+      };
+
+      const state: SocketsState = {
+        ...initialSocketsState,
+        messageFilterResults: [],
+      };
+
+      const receivedAt = Date.now();
+      jest.spyOn(Date, 'now').mockReturnValue(receivedAt);
+
+      const newState = socketsReducer(
+        state,
+        forwardedEventReceived({ event: 'messageFilterResult', payload: filterResultPayload }),
+      );
+
+      expect(newState.messageFilterResults).toHaveLength(1);
+      expect(newState.messageFilterResults[0]).toEqual({
+        direction: 'incoming',
+        status: 'filtered',
+        message: 'Test message',
+        appliedFilters: [
+          {
+            type: 'incoming-filter',
+            displayName: 'Incoming Filter',
+            matched: true,
+            reason: 'Test filter matched',
+          },
+        ],
+        matchedFilter: {
+          type: 'incoming-filter',
+          displayName: 'Incoming Filter',
+          matched: true,
+          reason: 'Test filter matched',
+        },
+        action: 'flag',
+        timestamp: new Date('2024-01-01T00:00:00.000Z').getTime(),
+        receivedAt,
+      });
+
+      jest.spyOn(Date, 'now').mockRestore();
+    });
+
+    it('should handle messageFilterResult with dropped status', () => {
+      const filterResultPayload: ForwardedEventPayload = {
+        success: true,
+        data: {
+          direction: 'outgoing',
+          status: 'dropped',
+          message: 'Test response',
+          appliedFilters: [
+            {
+              type: 'outgoing-filter',
+              displayName: 'Outgoing Filter',
+              matched: true,
+              reason: 'Outgoing filter matched',
+            },
+          ],
+          matchedFilter: {
+            type: 'outgoing-filter',
+            displayName: 'Outgoing Filter',
+            matched: true,
+            reason: 'Outgoing filter matched',
+          },
+          action: 'drop',
+          timestamp: '2024-01-01T00:00:00.000Z',
+        },
+        timestamp: '2024-01-01T00:00:00.000Z',
+      };
+
+      const state: SocketsState = {
+        ...initialSocketsState,
+        messageFilterResults: [],
+      };
+
+      const receivedAt = Date.now();
+      jest.spyOn(Date, 'now').mockReturnValue(receivedAt);
+
+      const newState = socketsReducer(
+        state,
+        forwardedEventReceived({ event: 'messageFilterResult', payload: filterResultPayload }),
+      );
+
+      expect(newState.messageFilterResults).toHaveLength(1);
+      expect(newState.messageFilterResults[0].status).toBe('dropped');
+      expect(newState.messageFilterResults[0].action).toBe('drop');
+      expect(newState.messageFilterResults[0].direction).toBe('outgoing');
+
+      jest.spyOn(Date, 'now').mockRestore();
+    });
+
+    it('should handle messageFilterResult with allowed status', () => {
+      const filterResultPayload: ForwardedEventPayload = {
+        success: true,
+        data: {
+          direction: 'incoming',
+          status: 'allowed',
+          message: 'Test message',
+          appliedFilters: [
+            {
+              type: 'incoming-filter',
+              displayName: 'Incoming Filter',
+              matched: false,
+            },
+          ],
+          timestamp: '2024-01-01T00:00:00.000Z',
+        },
+        timestamp: '2024-01-01T00:00:00.000Z',
+      };
+
+      const state: SocketsState = {
+        ...initialSocketsState,
+        messageFilterResults: [],
+      };
+
+      const receivedAt = Date.now();
+      jest.spyOn(Date, 'now').mockReturnValue(receivedAt);
+
+      const newState = socketsReducer(
+        state,
+        forwardedEventReceived({ event: 'messageFilterResult', payload: filterResultPayload }),
+      );
+
+      expect(newState.messageFilterResults).toHaveLength(1);
+      expect(newState.messageFilterResults[0].status).toBe('allowed');
+      expect(newState.messageFilterResults[0].action).toBeUndefined();
+
+      jest.spyOn(Date, 'now').mockRestore();
+    });
+
+    it('should still add messageFilterResult to forwardedEvents array', () => {
+      const filterResultPayload: ForwardedEventPayload = {
+        success: true,
+        data: {
+          direction: 'incoming',
+          status: 'filtered',
+          message: 'Test message',
+          appliedFilters: [],
+          timestamp: '2024-01-01T00:00:00.000Z',
+        },
+        timestamp: '2024-01-01T00:00:00.000Z',
+      };
+
+      const state: SocketsState = {
+        ...initialSocketsState,
+        forwardedEvents: [],
+        messageFilterResults: [],
+      };
+
+      const timestamp = Date.now();
+      jest.spyOn(Date, 'now').mockReturnValue(timestamp);
+
+      const newState = socketsReducer(
+        state,
+        forwardedEventReceived({ event: 'messageFilterResult', payload: filterResultPayload }),
+      );
+
+      expect(newState.forwardedEvents).toHaveLength(1);
+      expect(newState.forwardedEvents[0].event).toBe('messageFilterResult');
+      expect(newState.messageFilterResults).toHaveLength(1);
+
+      jest.spyOn(Date, 'now').mockRestore();
     });
   });
 
@@ -597,6 +796,16 @@ describe('socketsReducer', () => {
             { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 1000 },
             { event: 'chatMessage', payload: mockForwardedPayload, timestamp: 2000 },
           ],
+          messageFilterResults: [
+            {
+              direction: 'incoming',
+              status: 'filtered',
+              message: 'Test',
+              appliedFilters: [],
+              timestamp: 1000,
+              receivedAt: 1000,
+            },
+          ],
           remoteConnections: {
             'client-1': {
               clientId: 'client-1',
@@ -611,6 +820,7 @@ describe('socketsReducer', () => {
         const newState = socketsReducer(state, remoteReconnected({ clientId: 'client-1' }));
 
         expect(newState.forwardedEvents).toEqual([]);
+        expect(newState.messageFilterResults).toEqual([]);
         expect(newState.remoteConnections['client-1']).toEqual({
           clientId: 'client-1',
           connected: true,

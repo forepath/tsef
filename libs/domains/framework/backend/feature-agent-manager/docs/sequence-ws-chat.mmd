@@ -6,6 +6,7 @@ sequenceDiagram
     participant DB as Database
     participant MsgService as AgentMessagesService
     participant MsgRepo as AgentMessagesRepository
+    participant FilterFactory as ChatFilterFactory
     participant Docker as DockerService
 
     Note over WSClient,Docker: WebSocket - Connection, Authentication, Chat & Disconnection
@@ -90,6 +91,35 @@ sequenceDiagram
         alt Not authenticated
             Gateway-->>WSClient: error<br/>{success: false, error: {message, code}, timestamp}
         else Authenticated
+            Note over Gateway,FilterFactory: Apply Incoming Filters
+            Gateway->>FilterFactory: getFiltersByDirection(INCOMING)
+            FilterFactory-->>Gateway: filters[]
+            loop For each incoming filter
+                Gateway->>Gateway: filter.filter(message, context)
+                alt Filter matched
+                    Gateway->>Gateway: result = {filtered: true, action, reason, modifiedMessage?}
+                    Gateway->>Gateway: If modifiedMessage, use it for subsequent filters
+                    Gateway->>Gateway: Break loop
+                else Filter did not match
+                    Gateway->>Gateway: result = {filtered: false}
+                end
+            end
+            alt Filter action is "drop"
+                Note over Gateway: Message dropped, create fake agent response
+                Gateway->>Gateway: Create fake response {type: "error", is_error: true, result: "MESSAGE_DROPPED"}
+                Gateway->>MsgService: createAgentMessage(uuid, fakeResponse)
+                MsgService->>MsgRepo: create({agentId, actor: "agent", message: fakeResponse JSON})
+                MsgRepo->>DB: INSERT agent_messages
+                Gateway->>Gateway: broadcastToAgent(uuid, "messageFilterResult")
+                Gateway-->>WSClient: messageFilterResult<br/>{direction: "incoming", status: "dropped", ...}
+                Gateway->>Gateway: broadcastToAgent(uuid, "chatMessage")
+                Gateway-->>WSClient: chatMessage<br/>{from: "agent", response: {type: "error", result: "MESSAGE_DROPPED"}, ...}
+            else Filter action is "flag" or no filter matched
+                Note over Gateway: Use modifiedMessage if provided,<br/>otherwise use original message
+                Note over Gateway: Continue processing (flag if filtered)
+                Gateway->>Gateway: broadcastToAgent(uuid, "messageFilterResult")
+                Gateway-->>WSClient: messageFilterResult<br/>{direction: "incoming", status: "allowed"/"filtered", modifiedMessage?, ...}
+
             Gateway->>Service: findOne(uuid)
             Service->>Repo: findById(uuid)
             Repo->>DB: SELECT agent WHERE id
@@ -126,8 +156,8 @@ sequenceDiagram
             end
 
             Note over Gateway,MsgRepo: Persist User Message
-            Gateway->>MsgService: createUserMessage(uuid, message)
-            MsgService->>MsgRepo: create({agentId, actor: "user", message})
+            Gateway->>MsgService: createUserMessage(uuid, message, filtered)
+            MsgService->>MsgRepo: create({agentId, actor: "user", message, filtered})
             MsgRepo->>DB: INSERT agent_messages
             DB-->>MsgRepo: message entity
             MsgRepo-->>MsgService: message entity
@@ -152,27 +182,80 @@ sequenceDiagram
                     Gateway->>Gateway: toParse = cleaned string
                     Gateway->>Gateway: Try JSON.parse(toParse)
                     alt JSON valid
-                        Note over Gateway,MsgRepo: Persist Agent Message (parsed)
-                        Gateway->>MsgService: createAgentMessage(uuid, parsedResponse)
-                        MsgService->>MsgRepo: create({agentId, actor: "agent", message: JSON.stringify(parsedResponse)})
-                        MsgRepo->>DB: INSERT agent_messages
-                        DB-->>MsgRepo: message entity
-                        MsgRepo-->>MsgService: message entity
-                        MsgService-->>Gateway: message entity
+                        Note over Gateway,FilterFactory: Apply Outgoing Filters
+                        Gateway->>FilterFactory: getFiltersByDirection(OUTGOING)
+                        FilterFactory-->>Gateway: filters[]
+                        loop For each outgoing filter
+                            Gateway->>Gateway: filter.filter(agentResponseString, context)
+                            alt Filter matched
+                                Gateway->>Gateway: result = {filtered: true, action, reason}
+                                Gateway->>Gateway: Break loop
+                            else Filter did not match
+                                Gateway->>Gateway: result = {filtered: false}
+                            end
+                        end
+                        alt Filter action is "drop"
+                            Note over Gateway: Message dropped, create fake agent response
+                            Gateway->>Gateway: Create fake response {type: "error", is_error: true, result: "MESSAGE_DROPPED"}
+                            Gateway->>MsgService: createAgentMessage(uuid, fakeResponse)
+                            MsgService->>MsgRepo: create({agentId, actor: "agent", message: fakeResponse JSON})
+                            MsgRepo->>DB: INSERT agent_messages
+                            Gateway->>Gateway: broadcastToAgent(uuid, "messageFilterResult")
+                            Gateway-->>WSClient: messageFilterResult<br/>{direction: "outgoing", status: "dropped", ...}
+                            Gateway->>Gateway: broadcastToAgent(uuid, "chatMessage")
+                            Gateway-->>WSClient: chatMessage<br/>{from: "agent", response: {type: "error", result: "MESSAGE_DROPPED"}, ...}
+                        else Filter action is "flag" or no filter matched
+                            Note over Gateway: Use modifiedMessage if provided,<br/>otherwise use original response
+                            Note over Gateway: Broadcast filter result
+                            Gateway->>Gateway: broadcastToAgent(uuid, "messageFilterResult")
+                            Gateway-->>WSClient: messageFilterResult<br/>{direction: "outgoing", status: "allowed"/"filtered", modifiedMessage?, ...}
+                            Note over Gateway,MsgRepo: Persist Agent Message (parsed or modified)
+                            Gateway->>MsgService: createAgentMessage(uuid, parsedResponse/modified, filtered)
+                            MsgService->>MsgRepo: create({agentId, actor: "agent", message: JSON.stringify(parsedResponse/modified), filtered})
+                            MsgRepo->>DB: INSERT agent_messages
+                            DB-->>MsgRepo: message entity
+                            MsgRepo-->>MsgService: message entity
+                            MsgService-->>Gateway: message entity
 
-                        Gateway->>Gateway: server.emit('chatMessage')
-                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: {...}, timestamp}, timestamp}
+                            Gateway->>Gateway: server.emit('chatMessage')
+                            Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: {...}, timestamp}, timestamp}
+                        end
                     else JSON invalid
-                        Note over Gateway,MsgRepo: Persist Agent Message (cleaned string)
-                        Gateway->>MsgService: createAgentMessage(uuid, toParse)
-                        MsgService->>MsgRepo: create({agentId, actor: "agent", message: toParse})
-                        MsgRepo->>DB: INSERT agent_messages
-                        DB-->>MsgRepo: message entity
-                        MsgRepo-->>MsgService: message entity
-                        MsgService-->>Gateway: message entity
+                        Note over Gateway,FilterFactory: Apply Outgoing Filters
+                        Gateway->>FilterFactory: getFiltersByDirection(OUTGOING)
+                        FilterFactory-->>Gateway: filters[]
+                        loop For each outgoing filter
+                            Gateway->>Gateway: filter.filter(toParse, context)
+                            alt Filter matched
+                                Gateway->>Gateway: result = {filtered: true, action, reason}
+                                Gateway->>Gateway: Break loop
+                            else Filter did not match
+                                Gateway->>Gateway: result = {filtered: false}
+                            end
+                        end
+                        alt Filter action is "drop"
+                            Note over Gateway: Message dropped, create fake agent response
+                            Gateway->>Gateway: Create fake response {type: "error", is_error: true, result: "MESSAGE_DROPPED"}
+                            Gateway->>MsgService: createAgentMessage(uuid, fakeResponse)
+                            MsgService->>MsgRepo: create({agentId, actor: "agent", message: fakeResponse JSON})
+                            MsgRepo->>DB: INSERT agent_messages
+                            Gateway->>Gateway: broadcastToAgent(uuid, "messageFilterResult")
+                            Gateway-->>WSClient: messageFilterResult<br/>{direction: "outgoing", status: "dropped", ...}
+                            Gateway->>Gateway: broadcastToAgent(uuid, "chatMessage")
+                            Gateway-->>WSClient: chatMessage<br/>{from: "agent", response: {type: "error", result: "MESSAGE_DROPPED"}, ...}
+                        else Filter action is "flag" or no filter matched
+                            Note over Gateway: Use modifiedMessage if provided,<br/>otherwise use cleaned string
+                            Note over Gateway,MsgRepo: Persist Agent Message (cleaned string or modified)
+                            Gateway->>MsgService: createAgentMessage(uuid, toParse/modified, filtered)
+                            MsgService->>MsgRepo: create({agentId, actor: "agent", message: toParse, filtered})
+                            MsgRepo->>DB: INSERT agent_messages
+                            DB-->>MsgRepo: message entity
+                            MsgRepo-->>MsgService: message entity
+                            MsgService-->>Gateway: message entity
 
-                        Gateway->>Gateway: server.emit('chatMessage')
-                        Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: toParse, timestamp}, timestamp}
+                            Gateway->>Gateway: server.emit('chatMessage')
+                            Gateway-->>WSClient: chatMessage<br/>{success: true, data: {from: "agent", response: toParse, timestamp}, timestamp}
+                        end
                     end
                 end
             end
