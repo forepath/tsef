@@ -26,10 +26,14 @@ Complete reference for all environment variables used in Agenstra.
 
 **Option 2: Keycloak Authentication**
 
-- `KEYCLOAK_AUTH_SERVER_URL` - Keycloak server URL
-- `KEYCLOAK_REALM` - Keycloak realm name
-- `KEYCLOAK_CLIENT_ID` - Keycloak client ID
-- `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret
+- `KEYCLOAK_SERVER_URL` - Keycloak server URL (optional, used for server URL if different from auth server URL)
+- `KEYCLOAK_AUTH_SERVER_URL` - Keycloak authentication server URL (required)
+- `KEYCLOAK_REALM` - Keycloak realm name (required)
+- `KEYCLOAK_CLIENT_ID` - Keycloak client ID (required)
+- `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret (required)
+- `KEYCLOAK_TOKEN_VALIDATION` - Token validation method: `ONLINE` or `OFFLINE` (optional, default: `ONLINE`)
+
+⚠️ **Note for Backend Agent Manager**: When using Keycloak authentication, the JWT token must include the `agent_management` role to access agent-manager endpoints.
 
 ### CORS Configuration
 
@@ -73,10 +77,14 @@ Complete reference for all environment variables used in Agenstra.
 
 **Option 2: Keycloak Authentication**
 
-- `KEYCLOAK_AUTH_SERVER_URL` - Keycloak server URL
-- `KEYCLOAK_REALM` - Keycloak realm name
-- `KEYCLOAK_CLIENT_ID` - Keycloak client ID
-- `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret
+- `KEYCLOAK_SERVER_URL` - Keycloak server URL (optional, used for server URL if different from auth server URL)
+- `KEYCLOAK_AUTH_SERVER_URL` - Keycloak authentication server URL (required)
+- `KEYCLOAK_REALM` - Keycloak realm name (required)
+- `KEYCLOAK_CLIENT_ID` - Keycloak client ID (required)
+- `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret (required)
+- `KEYCLOAK_TOKEN_VALIDATION` - Token validation method: `ONLINE` or `OFFLINE` (optional, default: `ONLINE`)
+
+⚠️ **Note for Backend Agent Manager**: When using Keycloak authentication, the JWT token must include the `agent_management` role to access agent-manager endpoints.
 
 ### CORS Configuration
 

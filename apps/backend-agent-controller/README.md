@@ -215,10 +215,12 @@ See the [library documentation](../../libs/domains/framework/backend/feature-age
 **Authentication:**
 
 - `STATIC_API_KEY` - Static API key for authentication (if set, uses API key auth instead of Keycloak)
-- `KEYCLOAK_AUTH_SERVER_URL` - Keycloak server URL
-- `KEYCLOAK_REALM` - Keycloak realm name
-- `KEYCLOAK_CLIENT_ID` - Keycloak client ID
-- `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret
+- `KEYCLOAK_SERVER_URL` - Keycloak server URL (optional, used for server URL if different from auth server URL)
+- `KEYCLOAK_AUTH_SERVER_URL` - Keycloak authentication server URL (required for Keycloak auth)
+- `KEYCLOAK_REALM` - Keycloak realm name (required for Keycloak auth)
+- `KEYCLOAK_CLIENT_ID` - Keycloak client ID (required for Keycloak auth)
+- `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret (required for Keycloak auth)
+- `KEYCLOAK_TOKEN_VALIDATION` - Token validation method: `ONLINE` or `OFFLINE` (optional, default: `ONLINE`)
 
 **Database:**
 

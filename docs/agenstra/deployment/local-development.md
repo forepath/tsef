@@ -68,10 +68,12 @@ DB_DATABASE=agent_controller
 # Authentication (choose one)
 STATIC_API_KEY=dev-api-key-123
 # OR Keycloak
-# KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080/auth
-# KEYCLOAK_REALM=your-realm
-# KEYCLOAK_CLIENT_ID=your-client-id
+# KEYCLOAK_AUTH_SERVER_URL=http://localhost:8380
+# KEYCLOAK_REALM=agenstra
+# KEYCLOAK_CLIENT_ID=agent-controller
 # KEYCLOAK_CLIENT_SECRET=your-client-secret
+# Optional: KEYCLOAK_SERVER_URL if different from auth server URL
+# Optional: KEYCLOAK_TOKEN_VALIDATION=ONLINE (default) or OFFLINE
 
 # Ports
 PORT=3100
@@ -125,9 +127,9 @@ Create `.env` file in `apps/frontend-agent-console`:
 ```bash
 API_URL=http://localhost:3100
 WEBSOCKET_URL=http://localhost:8081
-KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080/auth
-KEYCLOAK_REALM=your-realm
-KEYCLOAK_CLIENT_ID=your-client-id
+KEYCLOAK_AUTH_SERVER_URL=http://localhost:8380
+KEYCLOAK_REALM=agenstra
+KEYCLOAK_CLIENT_ID=agent-manager
 ```
 
 ## Running Applications

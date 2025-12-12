@@ -57,7 +57,11 @@
               },
               {
                 "sourceTag": "domain:identity",
-                "onlyDependOnLibsWithTags": ["domain:identity", "domain:shared"]
+                "onlyDependOnLibsWithTags": [
+                  "domain:identity",
+                  "domain:framework",
+                  "domain:shared"
+                ]
               },
               {
                 "sourceTag": "scope:frontend",

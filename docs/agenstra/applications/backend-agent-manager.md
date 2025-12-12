@@ -106,6 +106,7 @@ All HTTP endpoints are protected by Keycloak authentication by default. If `STAT
 **Keycloak Authentication**:
 
 - Include a valid Keycloak JWT bearer token in the `Authorization` header: `Bearer <keycloak-jwt-token>`
+- ⚠️ **Note**: The token must include the `agent_management` role to access agent-manager endpoints
 
 **API Key Authentication**:
 

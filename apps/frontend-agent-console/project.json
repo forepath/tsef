@@ -5,6 +5,7 @@
   "prefix": "app",
   "sourceRoot": "apps/frontend-agent-console/src",
   "tags": ["type:app", "scope:frontend"],
+  "implicitDependencies": ["platform-authentication"],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",

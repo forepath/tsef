@@ -20,10 +20,12 @@ ENV DB_PASSWORD=postgres
 ENV DB_DATABASE=postgres
 
 # Environment variables for the keycloak server
+ENV KEYCLOAK_SERVER_URL=http://keycloak:8080
 ENV KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080
 ENV KEYCLOAK_REALM=forepath
 ENV KEYCLOAK_CLIENT_ID=agent-controller
 ENV KEYCLOAK_CLIENT_SECRET=
+ENV KEYCLOAK_TOKEN_VALIDATION=online
 
 # Environment variables for the provisioning providers
 ENV HETZNER_API_TOKEN=

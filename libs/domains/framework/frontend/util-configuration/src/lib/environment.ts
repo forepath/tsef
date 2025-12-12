@@ -3,11 +3,17 @@ import { Environment } from './environment.interface';
 export const environment: Environment = {
   production: false,
   controller: {
-    restApiUrl: 'http://localhost:3100/api',
-    websocketUrl: 'http://localhost:8081/clients',
+    restApiUrl: 'http://host.docker.internal:3100/api',
+    websocketUrl: 'http://host.docker.internal:8081/clients',
   },
   authentication: {
     type: 'api-key',
+    /*
+    type: 'keycloak',
+    authServerUrl: 'http://host.docker.internal:8380',
+    realm: 'agenstra',
+    clientId: 'agent-frontend',
+    */
   },
   chatModelOptions: {
     'composer-1': 'Composer 1',
