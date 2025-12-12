@@ -19,6 +19,16 @@ import type { editor } from 'monaco-editor';
 import * as monaco from 'monaco-editor';
 import { ThemeService } from '../../theme.service';
 
+/**
+ * Decode base64 string to UTF-8 string.
+ * atob() decodes to Latin-1, so we need to properly convert to UTF-8.
+ */
+function base64ToUtf8(base64: string): string {
+  const binaryString = atob(base64);
+  const bytes = Uint8Array.from(binaryString, (c) => c.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
 @Component({
   selector: 'framework-git-diff-viewer',
   imports: [CommonModule],
@@ -269,8 +279,8 @@ export class GitDiffViewerComponent implements AfterViewInit, AfterViewChecked, 
     try {
       // Always decode base64 for text files (encoding === 'utf-8' means it's a text file)
       // The content is always base64-encoded in the API response
-      originalText = diff.originalContent ? atob(diff.originalContent) : '';
-      modifiedText = diff.modifiedContent ? atob(diff.modifiedContent) : '';
+      originalText = diff.originalContent ? base64ToUtf8(diff.originalContent) : '';
+      modifiedText = diff.modifiedContent ? base64ToUtf8(diff.modifiedContent) : '';
     } catch (error) {
       console.error('Failed to decode file content:', error);
       this.error.set('Failed to decode file content');

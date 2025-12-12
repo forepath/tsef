@@ -25,6 +25,16 @@ interface Marked {
   parse(markdown: string, options?: { breaks?: boolean; gfm?: boolean }): string;
 }
 
+/**
+ * Decode base64 string to UTF-8 string.
+ * atob() decodes to Latin-1, so we need to properly convert to UTF-8.
+ */
+function base64ToUtf8(base64: string): string {
+  const binaryString = atob(base64);
+  const bytes = Uint8Array.from(binaryString, (c) => c.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
 @Component({
   selector: 'framework-monaco-editor-wrapper',
   imports: [CommonModule, MonacoEditorModule],
@@ -264,7 +274,7 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     }
 
     try {
-      const decoded = atob(content);
+      const decoded = base64ToUtf8(content);
       const current = editor.getValue();
 
       // Only update if different
@@ -544,7 +554,7 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     } else if (inputContent) {
       // Input content is base64 encoded, need to decode
       try {
-        markdownText = atob(inputContent);
+        markdownText = base64ToUtf8(inputContent);
       } catch (error) {
         return null;
       }
