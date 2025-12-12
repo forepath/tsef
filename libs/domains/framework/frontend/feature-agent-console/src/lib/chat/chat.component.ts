@@ -59,6 +59,23 @@ interface Marked {
   parse(markdown: string, options?: { breaks?: boolean; gfm?: boolean }): string;
 }
 
+// Type for messages with filter results attached
+type ChatMessageWithFilter = {
+  event: string;
+  payload: ForwardedEventPayload;
+  timestamp: number;
+  filterResult: {
+    direction: 'incoming' | 'outgoing';
+    status: 'allowed' | 'filtered' | 'dropped';
+    matchedFilter?: {
+      type: string;
+      displayName: string;
+      matched: boolean;
+      reason?: string;
+    };
+  } | null;
+};
+
 @Component({
   selector: 'framework-agent-console-chat',
   imports: [CommonModule, RouterModule, FormsModule, FileEditorComponent, ContainerStatsStatusBarComponent],
@@ -197,6 +214,28 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly socketReconnectAttempts$: Observable<number> = this.socketsFacade.reconnectAttempts$;
   readonly selectedClientId$: Observable<string | null> = this.socketsFacade.selectedClientId$;
   readonly chatMessages$ = this.socketsFacade.getForwardedEventsByEvent$('chatMessage');
+  readonly messageFilterResults$ = this.socketsFacade.messageFilterResults$;
+
+  // Combine chat messages with filter results for efficient template access
+  readonly chatMessagesWithFilters$: Observable<ChatMessageWithFilter[]> = combineLatest([
+    this.chatMessages$,
+    this.messageFilterResults$,
+  ]).pipe(
+    map(([messages, filterResults]) =>
+      messages.map((msg) => {
+        const messageData = this.getChatMessageData(msg.payload);
+        // Extract timestamp from message data (ISO string) and convert to number for matching
+        // Use the original message timestamp, not the received timestamp
+        const messageTimestamp = messageData?.timestamp ? new Date(messageData.timestamp).getTime() : msg.timestamp; // Fallback to received timestamp if not available
+        return {
+          ...msg,
+          filterResult: messageData
+            ? this.getFilterResultForMessage(messageData, messageTimestamp, filterResults)
+            : null,
+        } as ChatMessageWithFilter;
+      }),
+    ),
+  );
   readonly forwarding$: Observable<boolean> = this.socketsFacade.chatForwarding$;
   readonly socketError$: Observable<string | null> = this.socketsFacade.error$;
 
@@ -2218,6 +2257,80 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       }
     }
     return null;
+  }
+
+  /**
+   * Check if an agent message is a MESSAGE_DROPPED error response
+   */
+  isMessageDropped(messageData: ChatMessageData): boolean {
+    if ('response' in messageData) {
+      const response = messageData.response;
+      if (typeof response === 'object' && response !== null) {
+        return response.is_error === true && 'result' in response && response.result === 'MESSAGE_DROPPED';
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Get filter result for a message
+   */
+  getFilterResultForMessage(
+    messageData: ChatMessageData,
+    messageTimestamp: number,
+    filterResults: Array<{
+      direction: 'incoming' | 'outgoing';
+      status: 'allowed' | 'filtered' | 'dropped';
+      message: string;
+      appliedFilters: Array<{
+        type: string;
+        displayName: string;
+        matched: boolean;
+        reason?: string;
+      }>;
+      matchedFilter?: {
+        type: string;
+        displayName: string;
+        matched: boolean;
+        reason?: string;
+      };
+      action?: 'drop' | 'flag';
+      timestamp: number;
+    }>,
+  ): {
+    direction: 'incoming' | 'outgoing';
+    status: 'allowed' | 'filtered' | 'dropped';
+    matchedFilter?: {
+      type: string;
+      displayName: string;
+      matched: boolean;
+      reason?: string;
+    };
+  } | null {
+    const direction = 'from' in messageData && messageData.from === 'user' ? 'incoming' : 'outgoing';
+    const TIME_WINDOW_MS = 5000;
+
+    // Find matching filter result
+    const matchingResults = filterResults.filter(
+      (fr) => fr.direction === direction && Math.abs(fr.timestamp - messageTimestamp) <= TIME_WINDOW_MS,
+    );
+
+    if (matchingResults.length === 0) {
+      return null;
+    }
+
+    // Return the closest match
+    const closest = matchingResults.reduce((closest, current) =>
+      Math.abs(current.timestamp - messageTimestamp) < Math.abs(closest.timestamp - messageTimestamp)
+        ? current
+        : closest,
+    );
+
+    return {
+      direction: closest.direction,
+      status: closest.status,
+      matchedFilter: closest.matchedFilter,
+    };
   }
 
   /**

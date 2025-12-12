@@ -24,6 +24,7 @@ describe('AgentMessagesService', () => {
     agent: mockAgent as any,
     actor: 'user',
     message: 'Test message content',
+    filtered: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -74,6 +75,7 @@ describe('AgentMessagesService', () => {
         agentId,
         actor: 'user',
         message: messageText,
+        filtered: false,
       });
     });
 
@@ -95,6 +97,7 @@ describe('AgentMessagesService', () => {
         agentId,
         actor: 'user',
         message: 'Hello, agent!',
+        filtered: false,
       });
     });
   });
@@ -119,6 +122,31 @@ describe('AgentMessagesService', () => {
         agentId,
         actor: 'agent',
         message: response,
+        filtered: false,
+      });
+    });
+
+    it('should create and persist a filtered agent message', async () => {
+      const agentId = 'agent-uuid-123';
+      const response = 'Agent response text';
+      const expectedMessage = {
+        ...mockMessage,
+        agentId,
+        actor: 'agent',
+        message: response,
+        filtered: true,
+      };
+
+      mockRepository.create.mockResolvedValue(expectedMessage);
+
+      const result = await service.createAgentMessage(agentId, response, true);
+
+      expect(result).toEqual(expectedMessage);
+      expect(mockRepository.create).toHaveBeenCalledWith({
+        agentId,
+        actor: 'agent',
+        message: response,
+        filtered: true,
       });
     });
 
@@ -145,6 +173,7 @@ describe('AgentMessagesService', () => {
         agentId,
         actor: 'agent',
         message: JSON.stringify(response),
+        filtered: false,
       });
     });
 
@@ -167,6 +196,7 @@ describe('AgentMessagesService', () => {
         agentId,
         actor: 'agent',
         message: 'null',
+        filtered: false,
       });
     });
 
@@ -189,6 +219,7 @@ describe('AgentMessagesService', () => {
         agentId,
         actor: 'agent',
         message: '42',
+        filtered: false,
       });
     });
 
@@ -219,6 +250,7 @@ describe('AgentMessagesService', () => {
         agentId,
         actor: 'agent',
         message: expect.any(String),
+        filtered: false,
       });
 
       // Restore original stringify

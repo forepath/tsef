@@ -4,6 +4,7 @@ import {
   selectForwardedEvents,
   selectForwardedEventsByEvent,
   selectIsRemoteReconnecting,
+  selectMessageFilterResults,
   selectMostRecentForwardedEvent,
   selectMostRecentForwardedEventByEvent,
   selectRemoteConnectionError,

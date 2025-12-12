@@ -16,16 +16,18 @@ export class AgentMessagesService {
    * Persist a user message.
    * @param agentId - The UUID of the agent
    * @param message - The message text from the user
+   * @param filtered - Whether the message was filtered (default: false)
    * @returns The created message entity
    */
-  async createUserMessage(agentId: string, message: string): Promise<AgentMessageEntity> {
+  async createUserMessage(agentId: string, message: string, filtered = false): Promise<AgentMessageEntity> {
     const messageEntity = await this.agentMessagesRepository.create({
       agentId,
       actor: 'user',
       message: message.trim(),
+      filtered,
     });
 
-    this.logger.debug(`Persisted user message for agent ${agentId}`);
+    this.logger.debug(`Persisted user message for agent ${agentId}${filtered ? ' (filtered)' : ''}`);
     return messageEntity;
   }
 
@@ -33,9 +35,10 @@ export class AgentMessagesService {
    * Persist an agent message.
    * @param agentId - The UUID of the agent
    * @param response - The agent response (can be JSON object or string)
+   * @param filtered - Whether the message was filtered (default: false)
    * @returns The created message entity
    */
-  async createAgentMessage(agentId: string, response: unknown): Promise<AgentMessageEntity> {
+  async createAgentMessage(agentId: string, response: unknown, filtered = false): Promise<AgentMessageEntity> {
     // Convert response to string representation
     let messageContent: string;
     if (typeof response === 'string') {
@@ -56,9 +59,10 @@ export class AgentMessagesService {
       agentId,
       actor: 'agent',
       message: messageContent,
+      filtered,
     });
 
-    this.logger.debug(`Persisted agent message for agent ${agentId}`);
+    this.logger.debug(`Persisted agent message for agent ${agentId}${filtered ? ' (filtered)' : ''}`);
     return messageEntity;
   }
 

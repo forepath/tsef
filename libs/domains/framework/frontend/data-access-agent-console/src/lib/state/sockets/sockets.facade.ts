@@ -10,6 +10,7 @@ import {
   selectForwardedEvents,
   selectForwardedEventsByEvent,
   selectIsRemoteReconnecting,
+  selectMessageFilterResults,
   selectMostRecentForwardedEvent,
   selectMostRecentForwardedEventByEvent,
   selectRemoteConnectionError,
@@ -58,6 +59,28 @@ export class SocketsFacade {
   readonly error$: Observable<string | null> = this.store.select(selectSocketError);
   readonly forwardedEvents$: Observable<Array<{ event: string; payload: ForwardedEventPayload; timestamp: number }>> =
     this.store.select(selectForwardedEvents);
+  readonly messageFilterResults$: Observable<
+    Array<{
+      direction: 'incoming' | 'outgoing';
+      status: 'allowed' | 'filtered' | 'dropped';
+      message: string;
+      appliedFilters: Array<{
+        type: string;
+        displayName: string;
+        matched: boolean;
+        reason?: string;
+      }>;
+      matchedFilter?: {
+        type: string;
+        displayName: string;
+        matched: boolean;
+        reason?: string;
+      };
+      action?: 'drop' | 'flag';
+      timestamp: number;
+      receivedAt: number;
+    }>
+  > = this.store.select(selectMessageFilterResults);
 
   constructor() {
     this.chatModel$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((model) => {

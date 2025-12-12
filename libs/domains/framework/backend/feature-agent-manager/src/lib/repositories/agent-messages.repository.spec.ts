@@ -28,6 +28,7 @@ describe('AgentMessagesRepository', () => {
     agent: mockAgent,
     actor: 'user',
     message: 'Test message content',
+    filtered: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

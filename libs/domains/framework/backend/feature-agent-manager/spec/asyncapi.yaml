@@ -39,6 +39,12 @@ channels:
       chatBroadcast:
         $ref: '#/components/messages/ChatMessage'
     description: Server broadcasts chat messages to all connected clients. Also used for chat history restoration after successful login (messages are emitted in chronological order to the authenticated client only).
+  agents/messageFilterResult:
+    address: agents/messageFilterResult
+    messages:
+      messageFilterResultEvent:
+        $ref: '#/components/messages/MessageFilterResult'
+    description: Server broadcasts filter result messages to all connected clients authenticated to the same agent. Sent after applying filters to incoming or outgoing messages.
   agents/error:
     address: agents/error
     messages:
@@ -142,6 +148,12 @@ operations:
       $ref: '#/channels/agents~1chatMessage'
     messages:
       - $ref: '#/channels/agents~1chatMessage/messages/chatBroadcast'
+  serverBroadcastsMessageFilterResult:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1messageFilterResult'
+    messages:
+      - $ref: '#/channels/agents~1messageFilterResult/messages/messageFilterResultEvent'
   serverEmitsError:
     action: receive
     channel:
@@ -343,24 +355,112 @@ components:
                             type: string
                           subtype:
                             type: string
+                            description: Agent response subtype
                           is_error:
                             type: boolean
+                            description: Whether the agent response is an error. When true and result is "MESSAGE_DROPPED", the message was dropped by a filter.
                           duration_ms:
                             type: number
+                            description: Total duration in milliseconds
                           duration_api_ms:
                             type: number
+                            description: API call duration in milliseconds
                           result:
                             type: string
+                            description: >
+                              Agent response result. Can be "MESSAGE_DROPPED" when a message was dropped by a filter
+                              (in this case, is_error will be true and message field will contain the filter reason).
+                          message:
+                            type: string
+                            description: >
+                              Error message or filter reason. Present when is_error is true, especially when result is "MESSAGE_DROPPED".
                           session_id:
                             type: string
+                            description: Session ID
                           request_id:
                             type: string
-                        description: Parsed JSON response object from agent
+                            description: Request ID
+                        description: >
+                          Parsed JSON response object from agent. When a message is dropped by a filter, a fake agent response
+                          is created with type: "error", is_error: true, result: "MESSAGE_DROPPED", and message containing the filter reason.
                       - type: string
                         description: Cleaned string response if JSON parsing fails (text before first { and after last } is removed)
                   timestamp:
                     type: string
                     description: ISO timestamp
+          timestamp:
+            type: string
+            description: ISO timestamp
+    MessageFilterResult:
+      name: MessageFilterResult
+      title: Message filter result event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [direction, status, message, appliedFilters, timestamp]
+            properties:
+              direction:
+                type: string
+                enum: [incoming, outgoing]
+                description: Filter direction (incoming or outgoing)
+              status:
+                type: string
+                enum: [allowed, filtered, dropped]
+                description: Final filter status
+              message:
+                type: string
+                description: Original message that was filtered
+              modifiedMessage:
+                type: string
+                description: >
+                  Modified message content (if filter modified the message).
+                  Only present when status is "filtered" and action is "flag".
+                  If present, this modified message should be used instead of the original message.
+              appliedFilters:
+                type: array
+                description: List of all filters that were applied
+                items:
+                  type: object
+                  required: [type, displayName, matched]
+                  properties:
+                    type:
+                      type: string
+                      description: Filter type identifier
+                    displayName:
+                      type: string
+                      description: Filter display name
+                    matched:
+                      type: boolean
+                      description: Whether this filter matched
+                    reason:
+                      type: string
+                      description: Reason if filter matched
+              matchedFilter:
+                type: object
+                description: The filter that matched, if any
+                properties:
+                  type:
+                    type: string
+                  displayName:
+                    type: string
+                  matched:
+                    type: boolean
+                  reason:
+                    type: string
+              action:
+                type: string
+                enum: [drop, flag]
+                description: Action to take (only present if status is "filtered" or "dropped")
+              timestamp:
+                type: string
+                description: ISO timestamp when filters were applied
           timestamp:
             type: string
             description: ISO timestamp

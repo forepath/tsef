@@ -31,6 +31,9 @@ export class AgentMessageEntity {
   @Column({ type: 'text', name: 'message' })
   message!: string;
 
+  @Column({ type: 'boolean', name: 'filtered', default: false })
+  filtered!: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

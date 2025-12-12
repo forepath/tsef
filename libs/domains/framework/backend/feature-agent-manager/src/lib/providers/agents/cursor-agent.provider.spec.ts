@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DockerService } from '../services/docker.service';
+import { DockerService } from '../../services/docker.service';
 import { CursorAgentProvider } from './cursor-agent.provider';
 
 describe('CursorAgentProvider', () => {

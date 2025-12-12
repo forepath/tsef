@@ -52,6 +52,27 @@ export interface SocketsState {
     payload: import('./sockets.types').ForwardedEventPayload;
     timestamp: number;
   }>;
+  // Track message filter results keyed by direction and timestamp (for matching to messages)
+  messageFilterResults: Array<{
+    direction: 'incoming' | 'outgoing';
+    status: 'allowed' | 'filtered' | 'dropped';
+    message: string;
+    appliedFilters: Array<{
+      type: string;
+      displayName: string;
+      matched: boolean;
+      reason?: string;
+    }>;
+    matchedFilter?: {
+      type: string;
+      displayName: string;
+      matched: boolean;
+      reason?: string;
+    };
+    action?: 'drop' | 'flag';
+    timestamp: number; // When filter was applied (from payload timestamp)
+    receivedAt: number; // When event was received (Date.now())
+  }>;
   // Track currently selected agent ID (for associating stats with agent)
   selectedAgentId: string | null;
   // Track setClient operation in progress to prevent duplicate calls
@@ -73,6 +94,7 @@ export const initialSocketsState: SocketsState = {
   forwardingEvent: null,
   error: null,
   forwardedEvents: [],
+  messageFilterResults: [],
   selectedAgentId: null,
   settingClient: false,
   settingClientId: null,
@@ -120,6 +142,7 @@ export const socketsReducer = createReducer(
     // Clear forwardedEvents on main socket reconnection to prevent duplicates
     // The backend will restore chat history when client context and login are restored
     forwardedEvents: [],
+    messageFilterResults: [],
   })),
   on(socketReconnectError, (state) => ({
     ...state,
@@ -149,6 +172,7 @@ export const socketsReducer = createReducer(
     selectedClientId: null,
     error: null,
     forwardedEvents: [],
+    messageFilterResults: [],
     selectedAgentId: null,
     settingClient: false,
     settingClientId: null,
@@ -196,6 +220,7 @@ export const socketsReducer = createReducer(
       // Clear forwardedEvents on reconnection to prevent duplicates
       // The backend will restore chat history, so we need to clear old messages first
       forwardedEvents: isReconnection ? [] : state.forwardedEvents,
+      messageFilterResults: isReconnection ? [] : state.messageFilterResults,
     };
   }),
   on(setClientFailure, (state, { error }) => ({
@@ -258,9 +283,29 @@ export const socketsReducer = createReducer(
       }
     }
 
+    // Handle messageFilterResult events separately
+    let messageFilterResults = state.messageFilterResults;
+    if (event === 'messageFilterResult' && 'data' in payload && payload.success) {
+      const filterResult = payload.data as import('./sockets.types').MessageFilterResultData;
+      messageFilterResults = [
+        ...messageFilterResults,
+        {
+          direction: filterResult.direction,
+          status: filterResult.status,
+          message: filterResult.message,
+          appliedFilters: filterResult.appliedFilters,
+          matchedFilter: filterResult.matchedFilter,
+          action: filterResult.action,
+          timestamp: new Date(filterResult.timestamp).getTime(), // Convert ISO string to timestamp
+          receivedAt: Date.now(),
+        },
+      ];
+    }
+
     return {
       ...state,
       forwardedEvents: [...state.forwardedEvents, { event, payload, timestamp: Date.now() }],
+      messageFilterResults,
       selectedAgentId,
     };
   }),
@@ -336,6 +381,7 @@ export const socketsReducer = createReducer(
       // Clear forwardedEvents on remote reconnection to prevent duplicates
       // The backend will restore chat history when agent logins are restored
       forwardedEvents: isReconnection ? [] : state.forwardedEvents,
+      messageFilterResults: isReconnection ? [] : state.messageFilterResults,
     };
   }),
   on(remoteReconnectError, (state, { clientId, error }) => {
