@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
-import { Resource } from 'nest-keycloak-connect';
+import { Resource, Roles } from 'nest-keycloak-connect';
 import { CommitDto } from './dto/commit.dto';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { GitBranchDto } from './dto/git-branch.dto';
@@ -17,6 +17,7 @@ import { AgentsVcsService } from './services/agents-vcs.service';
  * Provides endpoints for git operations in agent containers.
  */
 @Resource('agents')
+@Roles('agent_management')
 @Controller('agents/:agentId/vcs')
 export class AgentsVcsController {
   constructor(private readonly agentsVcsService: AgentsVcsService) {}

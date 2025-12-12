@@ -4,6 +4,10 @@
   "sourceRoot": "apps/backend-agent-manager/src",
   "projectType": "application",
   "tags": ["type:app", "scope:backend"],
+  "implicitDependencies": [
+    "platform-authentication",
+    "framework-backend-feature-agent-manager"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",

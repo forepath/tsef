@@ -122,6 +122,7 @@ All HTTP endpoints require authentication. The authentication method depends on 
 
 - If `STATIC_API_KEY` is set: API key authentication (use `Bearer <static-api-key>` or `ApiKey <static-api-key>` in the `Authorization` header)
 - If `STATIC_API_KEY` is not set: Keycloak authentication (use `Bearer <keycloak-jwt-token>` in the `Authorization` header)
+  - ⚠️ **Note**: The JWT token must include the `agent_management` role to access agent-manager endpoints
 
 Base URL: `/api/agents`
 
@@ -359,6 +360,8 @@ Clients must include a valid Keycloak JWT bearer token in the `Authorization` he
 ```
 Authorization: Bearer <keycloak-jwt-token>
 ```
+
+⚠️ **Note**: The JWT token must include the `agent_management` role to access agent-manager endpoints.
 
 ### WebSocket Gateway
 

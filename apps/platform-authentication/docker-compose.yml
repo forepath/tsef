@@ -1,0 +1,41 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.2
+    command: start-dev
+    depends_on:
+      - db
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: db
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_STRICT: 'false'
+      KC_HOSTNAME_STRICT_HTTPS: 'false'
+      KC_HOSTNAME: 'host.docker.internal'
+      KC_HTTP_RELATIVE_PATH: /
+    ports:
+      - '8380:8080'
+    networks:
+      - platform-authentication-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: keycloak
+    networks:
+      - platform-authentication-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data: {}
+
+networks:
+  platform-authentication-network:
+    driver: bridge

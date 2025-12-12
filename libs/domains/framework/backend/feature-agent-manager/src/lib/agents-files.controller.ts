@@ -13,7 +13,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { Resource } from 'nest-keycloak-connect';
+import { Resource, Roles } from 'nest-keycloak-connect';
 import { CreateFileDto } from './dto/create-file.dto';
 import { FileContentDto } from './dto/file-content.dto';
 import { FileNodeDto } from './dto/file-node.dto';
@@ -26,6 +26,7 @@ import { AgentFileSystemService } from './services/agent-file-system.service';
  * Provides endpoints for reading, writing, listing, creating, deleting, and moving files in agent containers.
  */
 @Resource('agents')
+@Roles('agent_management')
 @Controller('agents/:agentId/files')
 export class AgentsFilesController {
   constructor(private readonly agentFileSystemService: AgentFileSystemService) {}

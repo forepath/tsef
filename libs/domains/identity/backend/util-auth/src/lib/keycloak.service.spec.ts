@@ -38,12 +38,13 @@ describe('KeycloakService', () => {
       const options = service.createKeycloakConnectOptions();
 
       expect(options).toEqual({
+        serverUrl: undefined,
         authServerUrl: 'http://localhost:8080',
         realm: 'test-realm',
         clientId: 'test-client',
         secret: 'test-secret',
         policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
-        tokenValidation: TokenValidation.ONLINE,
+        tokenValidation: undefined,
       });
     });
 
@@ -56,12 +57,13 @@ describe('KeycloakService', () => {
       const options = service.createKeycloakConnectOptions();
 
       expect(options).toEqual({
+        serverUrl: undefined,
         authServerUrl: undefined,
         realm: undefined,
         clientId: undefined,
         secret: undefined,
         policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
-        tokenValidation: TokenValidation.ONLINE,
+        tokenValidation: undefined,
       });
     });
 
@@ -74,12 +76,13 @@ describe('KeycloakService', () => {
       const options = service.createKeycloakConnectOptions();
 
       expect(options).toEqual({
+        serverUrl: undefined,
         authServerUrl: '',
         realm: '',
         clientId: '',
         secret: '',
         policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
-        tokenValidation: TokenValidation.ONLINE,
+        tokenValidation: undefined,
       });
     });
 

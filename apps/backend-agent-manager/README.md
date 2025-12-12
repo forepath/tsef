@@ -79,7 +79,11 @@ For complete WebSocket event specifications, authentication flow, and usage exam
 
 ### HTTP Endpoints
 
-All HTTP endpoints are protected by Keycloak authentication. For detailed authentication requirements, see the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#authentication).
+All HTTP endpoints are protected by Keycloak authentication.
+
+⚠️ **Note**: When using Keycloak authentication, the JWT token must include the `agent_management` role to access agent-manager endpoints.
+
+For detailed authentication requirements, see the [library documentation](../../libs/domains/framework/backend/feature-agent-manager/README.md#authentication).
 
 ### WebSocket Gateway
 

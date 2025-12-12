@@ -11,7 +11,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { Resource } from 'nest-keycloak-connect';
+import { Resource, Roles } from 'nest-keycloak-connect';
 import { AgentResponseDto } from './dto/agent-response.dto';
 import { CreateAgentResponseDto } from './dto/create-agent-response.dto';
 import { CreateAgentDto } from './dto/create-agent.dto';
@@ -23,6 +23,7 @@ import { AgentsService } from './services/agents.service';
  * Provides CRUD operations for agents.
  */
 @Resource('agents')
+@Roles('agent_management')
 @Controller('agents')
 export class AgentsController {
   constructor(private readonly agentsService: AgentsService) {}

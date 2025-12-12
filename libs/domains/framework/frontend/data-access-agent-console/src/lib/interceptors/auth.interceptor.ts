@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import type { Environment } from '@forepath/framework/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
 import { KeycloakService } from 'keycloak-angular';
-import { catchError, from, switchMap } from 'rxjs';
+import { from, switchMap } from 'rxjs';
 
 /**
  * HTTP interceptor that conditionally applies API key or Keycloak authentication
@@ -48,7 +48,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }
     return next(req);
   } else if (environment.authentication.type === 'keycloak' && keycloakService) {
-    // getToken() returns a Promise, so we need to handle it asynchronously
+    // Use KeycloakBearerInterceptor logic: get token and add to request
+    // getToken() handles token refresh automatically
     return from(keycloakService.getToken()).pipe(
       switchMap((token) => {
         if (token) {
@@ -57,15 +58,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               Authorization: `Bearer ${token}`,
             },
           });
+
           return next(authReq);
         }
-        // If token is null/undefined, proceed without auth header
-        return next(req);
-      }),
-      catchError((error) => {
-        // If token retrieval fails, proceed without auth header
-        // The API will return 401 if authentication is required
-        console.warn('Failed to get Keycloak token:', error);
+
         return next(req);
       }),
     );

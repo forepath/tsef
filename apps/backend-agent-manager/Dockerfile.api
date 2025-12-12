@@ -32,10 +32,12 @@ ENV GIT_PASSWORD=
 ENV GIT_PRIVATE_KEY=
 
 # Environment variables for the keycloak server
+ENV KEYCLOAK_SERVER_URL=http://keycloak:8080
 ENV KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080
 ENV KEYCLOAK_REALM=forepath
 ENV KEYCLOAK_CLIENT_ID=agent-manager
 ENV KEYCLOAK_CLIENT_SECRET=
+ENV KEYCLOAK_TOKEN_VALIDATION=online
 
 # Environment variables for static API key authentication
 # If STATIC_API_KEY is set, API key authentication is used (no Keycloak fallback)
