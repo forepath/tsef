@@ -331,12 +331,20 @@ export class AgentFileSystemService {
           const rawType = parts[0].trim();
           const rawName = parts[1].trim();
 
-          // Remove shell artifacts from type and name
-          const type = this.sanitizeFilesystemString(rawType) as 'file' | 'directory';
+          // Normalize type: extract "file" or "directory" from rawType, handling cases like "1file" or "directory"
+          // This handles shell artifacts or prefixes that might appear before the actual type
+          let type: 'file' | 'directory' | null = null;
+          const normalizedRawType = rawType.toLowerCase();
+          if (normalizedRawType.includes('directory')) {
+            type = 'directory';
+          } else if (normalizedRawType.includes('file')) {
+            type = 'file';
+          }
+
           const name = this.sanitizeFilesystemString(rawName);
 
           // Skip if type or name is invalid after sanitization
-          if (!type || !name || (type !== 'file' && type !== 'directory')) {
+          if (!type || !name) {
             this.logger.warn(
               `Skipping invalid entry: rawType=${rawType}, rawName=${rawName}, type=${type}, name=${name}`,
             );
@@ -345,6 +353,16 @@ export class AgentFileSystemService {
 
           const size = parts[2] ? parseInt(parts[2].trim(), 10) : undefined;
           const modifiedTimestamp = parts[3] ? parseInt(parts[3].trim(), 10) : undefined;
+
+          // Skip entries where stat failed (timestamp is 0 or invalid) - indicates file doesn't exist
+          // This filters out phantom entries that appear in ls output but don't actually exist
+          // The stat command returns 0 when the file doesn't exist (due to the || echo 0 fallback)
+          if (!modifiedTimestamp || modifiedTimestamp <= 0) {
+            this.logger.debug(
+              `Skipping non-existent entry: name=${name}, type=${type}, size=${size}, modified=${modifiedTimestamp}`,
+            );
+            continue;
+          }
 
           // Build relative path (sanitize the directory path as well)
           const sanitizedDirPath = directoryPath === '.' ? '' : this.sanitizeFilesystemString(directoryPath);
@@ -355,7 +373,7 @@ export class AgentFileSystemService {
             type,
             path: relativePath,
             size: type === 'file' ? size : undefined,
-            modifiedAt: modifiedTimestamp && modifiedTimestamp > 0 ? new Date(modifiedTimestamp * 1000) : undefined,
+            modifiedAt: new Date(modifiedTimestamp * 1000),
           });
         }
       }

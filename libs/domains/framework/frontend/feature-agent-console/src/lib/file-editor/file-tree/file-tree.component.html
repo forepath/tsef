@@ -21,6 +21,9 @@
         >
           <i class="bi bi-folder-plus"></i>
         </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onUploadFile()" title="Upload File">
+          <i class="bi bi-upload"></i>
+        </button>
         <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onRefreshRoot()" title="Refresh">
           <i class="bi bi-arrow-clockwise"></i>
         </button>
@@ -172,6 +175,10 @@
     [isOpen]="branchModalOpen()"
     (closed)="onBranchModalClosed()"
   ></framework-git-branch-modal>
+
+  <!-- Hidden file inputs for upload -->
+  <input #rootFileInput type="file" class="d-none" (change)="onFileSelected($event)" multiple />
+  <input #folderFileInput type="file" class="d-none" (change)="onFileSelected($event)" multiple />
 </div>
 
 <!-- Tree Node Template -->
@@ -244,6 +251,14 @@
               title="New Directory"
             >
               <i class="bi bi-folder-plus"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary py-0 px-1"
+              (click)="onUploadFile(node.path); $event.stopPropagation()"
+              title="Upload File"
+            >
+              <i class="bi bi-upload"></i>
             </button>
           }
           <button
@@ -321,6 +336,11 @@
     >
       <i class="bi bi-folder-plus me-2"></i>New Directory
     </button>
+    @if (contextMenuPath() && (contextMenuPath() === '.' || findNodeByPath(contextMenuPath()!)?.type === 'directory')) {
+      <button class="dropdown-item" (click)="onUploadFile(contextMenuPath()!); onCloseContextMenu()">
+        <i class="bi bi-upload me-2"></i>Upload File
+      </button>
+    }
     @if (contextMenuPath() && findNodeByPath(contextMenuPath()!)?.type === 'directory') {
       <div class="dropdown-divider"></div>
       <button class="dropdown-item" (click)="onRefreshFolder(contextMenuPath()!); onCloseContextMenu()">

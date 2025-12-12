@@ -56,6 +56,12 @@ export class FileTreeComponent implements OnInit {
   @ViewChild('moveFileModal', { static: false })
   private moveFileModal!: ElementRef<HTMLDivElement>;
 
+  @ViewChild('rootFileInput', { static: false })
+  private rootFileInput!: ElementRef<HTMLInputElement>;
+
+  @ViewChild('folderFileInput', { static: false })
+  private folderFileInput!: ElementRef<HTMLInputElement>;
+
   // Inputs
   clientId = input.required<string>();
   agentId = input.required<string>();
@@ -83,6 +89,7 @@ export class FileTreeComponent implements OnInit {
   itemToMove = signal<{ path: string; type: 'file' | 'directory'; name: string } | null>(null);
   renameNewName = signal<string>('');
   moveDestinationPath = signal<string>('');
+  uploadTargetPath = signal<string>('.');
   // Drag and drop state
   draggedItem = signal<{ path: string; type: 'file' | 'directory'; name: string } | null>(null);
   dragOverPath = signal<string | null>(null);
@@ -1341,5 +1348,91 @@ export class FileTreeComponent implements OnInit {
         this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path });
       }, index * 50); // 50ms delay between each call
     });
+  }
+
+  onUploadFile(parentPath?: string): void {
+    const targetPath = parentPath || '.';
+    this.uploadTargetPath.set(targetPath);
+
+    // Use root input for root, folder input for folders
+    const fileInput = targetPath === '.' ? this.rootFileInput : this.folderFileInput;
+    if (fileInput?.nativeElement) {
+      fileInput.nativeElement.click();
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const targetPath = this.uploadTargetPath();
+    const fileArray = Array.from(files);
+    let uploadedCount = 0;
+
+    fileArray.forEach((file) => {
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove data URL prefix if present (data:...;base64,)
+        const base64Content = result.includes(',') ? result.split(',')[1] : result;
+
+        // Build full file path
+        const fullPath = targetPath === '.' ? file.name : `${targetPath}/${file.name}`;
+
+        // Create file with content using createFileOrDirectory
+        this.filesFacade.createFileOrDirectory(this.clientId(), this.agentId(), fullPath, {
+          type: 'file',
+          content: base64Content,
+        });
+
+        uploadedCount++;
+
+        // After all files are uploaded, refresh directory listing and git status
+        if (uploadedCount === fileArray.length) {
+          // Expand target folder if it's not already expanded (only for non-root folders)
+          if (targetPath !== '.' && !this.expandedPaths().has(targetPath)) {
+            this.directoryExpand.emit(targetPath);
+            // Load directory if not cached
+            const hasCachedData = this.treeCache().has(targetPath);
+            if (!hasCachedData) {
+              this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: targetPath });
+            }
+          }
+
+          // Refresh directory listing
+          setTimeout(() => {
+            this.filesFacade.listDirectory(this.clientId(), this.agentId(), { path: targetPath });
+          }, 100);
+
+          // Reload git status after file upload
+          setTimeout(() => {
+            this.vcsFacade.loadStatus(this.clientId(), this.agentId());
+          }, 500);
+
+          // Select the last uploaded file
+          if (fileArray.length === 1) {
+            setTimeout(() => {
+              const lastFilePath = targetPath === '.' ? fileArray[0].name : `${targetPath}/${fileArray[0].name}`;
+              this.fileSelect.emit(lastFilePath);
+            }, 500);
+          }
+        }
+      };
+
+      reader.onerror = () => {
+        console.error(`Failed to read file: ${file.name}`);
+        uploadedCount++;
+      };
+
+      // Read file as data URL (base64)
+      reader.readAsDataURL(file);
+    });
+
+    // Reset input
+    input.value = '';
   }
 }
