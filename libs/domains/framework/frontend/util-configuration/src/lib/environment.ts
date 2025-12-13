@@ -33,7 +33,7 @@ export const environment: Environment = {
     openInNewWindow: true,
   },
   cookieConsent: {
-    domain: 'localhost',
+    domain: '.agenstra.com',
     privacyPolicyUrl: 'https://www.agenstra.com/legal/privacy',
   },
 };
