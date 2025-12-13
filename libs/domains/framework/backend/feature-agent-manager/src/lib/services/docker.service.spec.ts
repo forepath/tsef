@@ -144,6 +144,9 @@ describe('DockerService', () => {
             '9229/tcp': [{ HostPort: undefined }],
           },
           AutoRemove: false,
+          RestartPolicy: {
+            Name: 'unless-stopped',
+          },
         },
       });
       expect(createdContainer.start).toHaveBeenCalled();

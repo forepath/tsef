@@ -92,6 +92,9 @@ export class DockerService {
         Binds: binds.length ? binds : undefined,
         PortBindings: Object.keys(portBindings).length ? portBindings : undefined,
         AutoRemove: false,
+        RestartPolicy: {
+          Name: 'unless-stopped',
+        },
       },
     });
 
