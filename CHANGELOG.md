@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.14.0](https://github.com/forepath/tsef/compare/v1.13.1...v1.14.0) (2025-12-13)
+
+
+### Features
+
+* file upload dialog ([#116](https://github.com/forepath/tsef/issues/116)) ([b6dabdb](https://github.com/forepath/tsef/commit/b6dabdb360f70aca10238ad32eb0b89f2c77cd1c))
+* message filter providers ([#114](https://github.com/forepath/tsef/issues/114)) ([0f9fef9](https://github.com/forepath/tsef/commit/0f9fef98d7fe46556fb17f313950d3bf389e77a5))
+
+
+### Bug Fixes
+
+* agent container restart policy ([#117](https://github.com/forepath/tsef/issues/117)) ([d6ba191](https://github.com/forepath/tsef/commit/d6ba19129d2bd7f3e8eb3a6a6ce1756e2741f000))
+* keycloak authentication ([#115](https://github.com/forepath/tsef/issues/115)) ([5700933](https://github.com/forepath/tsef/commit/5700933b35d69a8940ea0aae1382a42989146f6e))
+
 ## [1.13.1](https://github.com/forepath/tsef/compare/v1.13.0...v1.13.1) (2025-12-10)
 
 
