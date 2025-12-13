@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.14.1](https://github.com/forepath/tsef/compare/v1.14.0...v1.14.1) (2025-12-13)
+
+
+### Bug Fixes
+
+* cookie domain ([#118](https://github.com/forepath/tsef/issues/118)) ([e424c5f](https://github.com/forepath/tsef/commit/e424c5f5d052c5e0da44ca57d82173297f2bba8a))
+
 ## [1.14.0](https://github.com/forepath/tsef/compare/v1.13.1...v1.14.0) (2025-12-13)
 
 
