@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.15.0](https://github.com/forepath/tsef/compare/v1.14.1...v1.15.0) (2025-12-14)
+
+
+### Features
+
+* container health checks ([#120](https://github.com/forepath/tsef/issues/120)) ([b9f769a](https://github.com/forepath/tsef/commit/b9f769ac7454174bf8c50185fde781092512d0e0))
+* undo and redo buttons ([#119](https://github.com/forepath/tsef/issues/119)) ([72a6b1b](https://github.com/forepath/tsef/commit/72a6b1b52e7a360f8231b23364a03112f59482f8))
+
 ## [1.14.1](https://github.com/forepath/tsef/compare/v1.14.0...v1.14.1) (2025-12-13)
 
 
