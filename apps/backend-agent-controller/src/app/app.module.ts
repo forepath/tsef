@@ -1,7 +1,7 @@
-import { ClientsModule } from '@forepath/framework/backend';
+import { ClientsModule, MonitoringModule } from '@forepath/framework/backend';
 import { getHybridAuthGuards, getRateLimitConfig, KeycloakModule, KeycloakService } from '@forepath/identity/backend';
-import { APP_GUARD } from '@nestjs/core';
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { KeycloakConnectModule } from 'nest-keycloak-connect';
@@ -14,6 +14,7 @@ import { typeormConfig } from '../typeorm.config';
     KeycloakModule,
     KeycloakConnectModule.registerAsync({ useExisting: KeycloakService }),
     ClientsModule,
+    MonitoringModule,
   ],
   // Use hybrid guards (checks STATIC_API_KEY to determine authentication method)
   providers: [

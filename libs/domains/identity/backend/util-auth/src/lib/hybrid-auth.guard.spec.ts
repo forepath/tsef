@@ -45,10 +45,33 @@ describe('HybridAuthGuard', () => {
     });
 
     it('should allow request to proceed to Keycloak guards', () => {
+      const mockRequest = {
+        url: '/api/some-other-endpoint',
+        headers: {},
+      };
+
+      mockExecutionContext.switchToHttp = jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+      });
+
       const result = guard.canActivate(mockExecutionContext);
 
       expect(result).toBe(true);
-      expect(mockExecutionContext.switchToHttp).not.toHaveBeenCalled();
+    });
+
+    it('should allow health check endpoint without authentication', () => {
+      const mockRequest = {
+        url: '/api/health',
+        headers: {},
+      };
+
+      mockExecutionContext.switchToHttp = jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+      });
+
+      const result = guard.canActivate(mockExecutionContext);
+
+      expect(result).toBe(true);
     });
   });
 
@@ -57,6 +80,21 @@ describe('HybridAuthGuard', () => {
 
     beforeEach(() => {
       process.env.STATIC_API_KEY = testApiKey;
+    });
+
+    it('should allow health check endpoint without authentication', () => {
+      const mockRequest = {
+        url: '/api/health',
+        headers: {},
+      };
+
+      mockExecutionContext.switchToHttp = jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+      });
+
+      const result = guard.canActivate(mockExecutionContext);
+
+      expect(result).toBe(true);
     });
 
     it('should throw UnauthorizedException when authorization header is missing', () => {

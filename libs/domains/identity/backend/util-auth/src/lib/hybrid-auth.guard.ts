@@ -12,6 +12,14 @@ export class HybridAuthGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+    const path = request.url;
+
+    // Allow health check endpoint without authentication
+    if (path === '/api/health') {
+      return true;
+    }
+
     const staticApiKey = process.env.STATIC_API_KEY;
 
     // If STATIC_API_KEY is set, require API key authentication (no Keycloak fallback, no anonymous)
