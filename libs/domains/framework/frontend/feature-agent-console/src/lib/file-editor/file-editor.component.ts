@@ -129,21 +129,16 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
     this.selectedFilePath$,
     this.clientId$,
     this.agentId$,
+    toObservable(this.lastLoadedFilePath),
   ]).pipe(
-    switchMap(([filePath, clientId, agentId]) => {
+    switchMap(([filePath, clientId, agentId, lastLoadedFilePath]) => {
       if (!filePath || !clientId || !agentId) {
         return of(false);
       }
-      // Only show loading if we don't have cached data (silent refresh)
-      return combineLatest([
-        this.filesFacade.isReadingFile$(clientId, agentId, filePath),
-        this.filesFacade.getFileContent$(clientId, agentId, filePath),
-      ]).pipe(
-        map(([isLoading, cachedData]) => {
-          // Show loading only if loading AND no cached data exists
-          return isLoading && !cachedData;
-        }),
-      );
+
+      return this.filesFacade
+        .isReadingFile$(clientId, agentId, filePath)
+        .pipe(map((isLoading) => isLoading && lastLoadedFilePath !== filePath));
     }),
   );
 
@@ -276,9 +271,6 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
             return newDirty;
           });
         }
-
-        // Update lastLoadedFilePath to trigger content reload
-        this.lastLoadedFilePath.set(null);
 
         // Load the file content at the new location
         // The effect will automatically load it when selectedFilePath changes
@@ -1074,7 +1066,6 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
         }
       } else {
         // File is not dirty - automatically reload from server (no need to disable autosave)
-        this.lastLoadedFilePath.set(null);
         this.filesFacade.readFile(clientId, agentId, notification.filePath);
       }
     }
@@ -1134,7 +1125,6 @@ export class FileEditorComponent implements OnDestroy, AfterViewInit {
 
     // Reload the file from server
     // This will trigger the effect that updates editorContent
-    this.lastLoadedFilePath.set(null);
     this.filesFacade.readFile(clientId, agentId, filePath);
 
     // Clear dirty state for this file

@@ -279,11 +279,36 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
 
       // Only update if different
       if (current !== decoded) {
-        // Set flag to prevent marking as dirty during initial content load
+        // Set flag to prevent marking as dirty during content updates
         this.isSettingInitialContent = true;
         const position = editor.getPosition();
-        editor.setValue(decoded);
-        // Update current editor content when setting initial content
+        const model = editor.getModel();
+
+        if (!model) {
+          this.isSettingInitialContent = false;
+          return;
+        }
+
+        // Check if this is an initial load (lastContent === null) or a remote update
+        const isInitialLoad = this.lastContent === null;
+
+        if (isInitialLoad) {
+          // Initial load: use setValue() which clears both undo and redo stacks (expected behavior)
+          editor.setValue(decoded);
+        } else {
+          // Remote update: use executeEdits() to preserve undo stack and only clear redo stack
+          const fullRange = model.getFullModelRange();
+          const editOperation: editor.IIdentifiedSingleEditOperation = {
+            range: fullRange,
+            text: decoded,
+            forceMoveMarkers: false,
+          };
+
+          // Execute edit with 'remote-update' source to preserve undo history
+          editor.executeEdits('remote-update', [editOperation]);
+        }
+
+        // Update current editor content
         this.currentEditorContent.set(decoded);
         if (position) {
           editor.setPosition(position);
@@ -630,5 +655,29 @@ export class MonacoEditorWrapperComponent implements OnDestroy, DoCheck {
     })();
 
     return this.markedLoadPromise;
+  }
+
+  /**
+   * Trigger undo action in Monaco editor
+   */
+  undo(): void {
+    const editor = this.editorInstance();
+    if (!editor || this.isBinary()) {
+      return;
+    }
+
+    editor.trigger('keyboard', 'undo', null);
+  }
+
+  /**
+   * Trigger redo action in Monaco editor
+   */
+  redo(): void {
+    const editor = this.editorInstance();
+    if (!editor || this.isBinary()) {
+      return;
+    }
+
+    editor.trigger('keyboard', 'redo', null);
   }
 }

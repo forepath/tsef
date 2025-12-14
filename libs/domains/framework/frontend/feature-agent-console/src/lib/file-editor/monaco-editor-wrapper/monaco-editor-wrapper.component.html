@@ -42,7 +42,33 @@
         [class.w-50]="previewVisible()"
         [class.flex-grow-1]="!previewVisible()"
       >
-        <div class="editor-toolbar d-flex align-items-center justify-content-end p-2 border-bottom bg-body-tertiary">
+        <div
+          class="editor-toolbar d-flex align-items-center justify-content-between p-2 border-bottom bg-body-tertiary"
+        >
+          <div class="btn-group btn-group-sm me-2" role="group">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              (click)="undo()"
+              [disabled]="isBinary()"
+              data-bs-toggle="tooltip"
+              data-bs-placement="bottom"
+              title="Undo (Ctrl+Z)"
+            >
+              <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              (click)="redo()"
+              [disabled]="isBinary()"
+              data-bs-toggle="tooltip"
+              data-bs-placement="bottom"
+              title="Redo (Ctrl+Y)"
+            >
+              <i class="bi bi-arrow-clockwise"></i>
+            </button>
+          </div>
           @if (isPreviewable()) {
             <button
               type="button"
