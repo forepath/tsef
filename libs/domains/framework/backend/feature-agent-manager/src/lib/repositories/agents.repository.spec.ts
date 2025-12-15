@@ -1,9 +1,9 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
-import { AgentsRepository } from './agents.repository';
 import { AgentEntity } from '../entities/agent.entity';
+import { AgentsRepository } from './agents.repository';
 
 describe('AgentsRepository', () => {
   let repository: AgentsRepository;

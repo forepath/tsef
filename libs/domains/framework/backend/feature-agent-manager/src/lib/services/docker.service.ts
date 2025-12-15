@@ -5,6 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { PassThrough } from 'stream';
 import { promisify } from 'util';
+import { v4 as uuidv4 } from 'uuid';
 import Docker = require('dockerode');
 
 const execAsync = promisify(exec);
@@ -25,12 +26,12 @@ export class DockerService {
 
   async createContainer(options: {
     image?: string;
-    name?: string;
     env?: Record<string, string | undefined>;
     volumes?: Array<{ hostPath: string; containerPath: string; readOnly?: boolean }>;
     ports?: Array<{ containerPort: number; hostPort?: number; protocol?: 'tcp' | 'udp' }>;
+    network?: string;
   }): Promise<string> {
-    const { image, name, env, volumes = [], ports = [] } = options;
+    const { image, env, volumes = [], ports = [], network } = options;
 
     // Resolve image: explicit -> env -> default placeholder
     const resolvedImage = image || process.env.AGENT_DEFAULT_IMAGE || 'ghcr.io/forepath/agenstra-manager-worker:latest';
@@ -95,6 +96,7 @@ export class DockerService {
         RestartPolicy: {
           Name: 'unless-stopped',
         },
+        NetworkMode: network ? network : undefined,
       },
     });
 
@@ -172,6 +174,119 @@ export class DockerService {
       }
       const err = error as { message?: string; stack?: string };
       this.logger.error(`Error deleting container: ${err.message}`, err.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a Docker network and optionally attach containers to it.
+   * @param options - Network creation options
+   * @param options.name - The name of the network
+   * @param options.driver - Network driver (default: 'bridge')
+   * @param options.containerIds - Optional list of container IDs to attach to the network
+   * @returns The network ID
+   */
+  async createNetwork(options: { name?: string; driver?: string; containerIds?: string[] }): Promise<string> {
+    try {
+      const { name = uuidv4(), driver = 'bridge', containerIds = [] } = options;
+
+      // Create the network
+      const network = await this.docker.createNetwork({
+        Name: name,
+        Driver: driver,
+      });
+
+      const networkId = network.id as unknown as string;
+
+      // Attach containers if provided
+      if (containerIds.length > 0) {
+        for (const containerId of containerIds) {
+          try {
+            await network.connect({ Container: containerId });
+            this.logger.debug(`Attached container ${containerId} to network ${name}`);
+          } catch (error: unknown) {
+            const connectError = error as { statusCode?: number; message?: string };
+            // Log warning but continue attaching other containers
+            this.logger.warn(`Failed to attach container ${containerId} to network ${name}: ${connectError.message}`);
+          }
+        }
+      }
+
+      this.logger.log(`Created network ${name} with ID ${networkId}`);
+      return networkId;
+    } catch (error: unknown) {
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error creating network: ${err.message}`, err.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a Docker network by ID.
+   * Automatically disconnects all containers from the network before deletion.
+   * @param networkId - The ID of the network to delete
+   * @throws NotFoundException if network is not found
+   */
+  async deleteNetwork(networkId: string): Promise<void> {
+    try {
+      const network = this.docker.getNetwork(networkId);
+
+      // Check if network exists and get its info
+      let networkInfo;
+      try {
+        networkInfo = await network.inspect();
+      } catch (error: unknown) {
+        const dockerError = error as { statusCode?: number };
+        if (dockerError.statusCode === 404) {
+          throw new NotFoundException(`Network with ID '${networkId}' not found`);
+        }
+        throw error;
+      }
+
+      // Disconnect all containers from the network
+      const containers = networkInfo.Containers || {};
+      const containerIds = Object.keys(containers);
+
+      if (containerIds.length > 0) {
+        this.logger.debug(`Disconnecting ${containerIds.length} containers from network ${networkId}`);
+        for (const containerId of containerIds) {
+          try {
+            await network.disconnect({ Container: containerId });
+            this.logger.debug(`Disconnected container ${containerId} from network ${networkId}`);
+          } catch (error: unknown) {
+            const disconnectError = error as { statusCode?: number; message?: string };
+            // Log warning but continue disconnecting other containers
+            // Ignore 404 errors (container already disconnected or doesn't exist)
+            if (disconnectError.statusCode !== 404) {
+              this.logger.warn(
+                `Failed to disconnect container ${containerId} from network ${networkId}: ${disconnectError.message}`,
+              );
+            }
+          }
+        }
+      }
+
+      // Remove the network
+      try {
+        await network.remove();
+        this.logger.log(`Deleted network ${networkId}`);
+      } catch (error: unknown) {
+        const removeError = error as { statusCode?: number; message?: string };
+        // If network doesn't exist (404), consider it already deleted
+        if (removeError.statusCode === 404) {
+          this.logger.debug(`Network ${networkId} was already removed`);
+          return;
+        }
+        const err = removeError as { message?: string; stack?: string };
+        this.logger.error(`Failed to remove network ${networkId}: ${err.message}`, err.stack);
+        throw error;
+      }
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error deleting network: ${err.message}`, err.stack);
       throw error;
     }
   }

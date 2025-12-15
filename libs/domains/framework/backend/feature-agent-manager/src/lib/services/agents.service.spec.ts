@@ -35,6 +35,7 @@ describe('AgentsService', () => {
     findById: jest.fn(),
     findByName: jest.fn(),
     findAll: jest.fn(),
+    findPortInUse: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -48,6 +49,8 @@ describe('AgentsService', () => {
   const mockDockerService = {
     createContainer: jest.fn(),
     deleteContainer: jest.fn(),
+    createNetwork: jest.fn(),
+    deleteNetwork: jest.fn(),
     sendCommandToContainer: jest.fn(),
   };
 
@@ -55,6 +58,7 @@ describe('AgentsService', () => {
     getType: jest.fn().mockReturnValue('cursor'),
     getDisplayName: jest.fn().mockReturnValue('Cursor'),
     getDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-worker:latest'),
+    getVirtualWorkspaceDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-vnc:latest'),
     sendMessage: jest.fn(),
     sendInitialization: jest.fn(),
   };
@@ -133,6 +137,8 @@ describe('AgentsService', () => {
         volumePath,
       };
 
+      // Disable VNC for this test
+      mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
       mockRepository.findByName.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue(hashedPassword);
       dockerService.createContainer.mockResolvedValue(containerId);
@@ -151,9 +157,8 @@ describe('AgentsService', () => {
       expect(passwordService.hashPassword).toHaveBeenCalled();
       expect(agentProviderFactory.getProvider).toHaveBeenCalledWith('cursor');
       expect(mockAgentProvider.getDockerImage).toHaveBeenCalled();
-      expect(dockerService.createContainer).toHaveBeenCalledWith({
+      expect(dockerService.createContainer).toHaveBeenNthCalledWith(1, {
         image: 'ghcr.io/forepath/agenstra-manager-worker:latest',
-        name: createDto.name,
         env: {
           AGENT_NAME: createDto.name,
           CURSOR_API_KEY: process.env.CURSOR_API_KEY,
@@ -161,6 +166,7 @@ describe('AgentsService', () => {
           GIT_USERNAME: process.env.GIT_USERNAME,
           GIT_TOKEN: process.env.GIT_TOKEN,
           GIT_PASSWORD: process.env.GIT_PASSWORD,
+          GIT_PRIVATE_KEY: process.env.GIT_PRIVATE_KEY,
         },
         volumes: [
           {
@@ -212,6 +218,8 @@ describe('AgentsService', () => {
         updatedAt: mockAgent.updatedAt,
       };
 
+      // Disable VNC for this test
+      mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
       mockRepository.findByName.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue(hashedPassword);
       dockerService.createContainer.mockResolvedValue(containerId);
@@ -224,9 +232,8 @@ describe('AgentsService', () => {
       expect(result.description).toBeUndefined();
       expect(agentProviderFactory.getProvider).toHaveBeenCalledWith('cursor');
       expect(mockAgentProvider.getDockerImage).toHaveBeenCalled();
-      expect(dockerService.createContainer).toHaveBeenCalledWith({
+      expect(dockerService.createContainer).toHaveBeenNthCalledWith(1, {
         image: 'ghcr.io/forepath/agenstra-manager-worker:latest',
-        name: createDto.name,
         env: {
           AGENT_NAME: createDto.name,
           CURSOR_API_KEY: process.env.CURSOR_API_KEY,
@@ -234,6 +241,7 @@ describe('AgentsService', () => {
           GIT_USERNAME: process.env.GIT_USERNAME,
           GIT_TOKEN: process.env.GIT_TOKEN,
           GIT_PASSWORD: process.env.GIT_PASSWORD,
+          GIT_PRIVATE_KEY: process.env.GIT_PRIVATE_KEY,
         },
         volumes: [
           {
@@ -478,6 +486,8 @@ describe('AgentsService', () => {
       process.env.GIT_REPOSITORY_URL = 'git@github.com:user/repo.git';
       process.env.GIT_PRIVATE_KEY = privateKeyPem;
 
+      // Disable VNC for this test
+      mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
       mockRepository.findByName.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue(hashedPassword);
       dockerService.createContainer.mockResolvedValue(containerId);
@@ -492,9 +502,8 @@ describe('AgentsService', () => {
       expect(result.password).toBeDefined();
       expect(agentProviderFactory.getProvider).toHaveBeenCalledWith('cursor');
       expect(mockAgentProvider.getDockerImage).toHaveBeenCalled();
-      expect(dockerService.createContainer).toHaveBeenCalledWith({
+      expect(dockerService.createContainer).toHaveBeenNthCalledWith(1, {
         image: 'ghcr.io/forepath/agenstra-manager-worker:latest',
-        name: createDto.name,
         env: {
           AGENT_NAME: createDto.name,
           CURSOR_API_KEY: process.env.CURSOR_API_KEY,

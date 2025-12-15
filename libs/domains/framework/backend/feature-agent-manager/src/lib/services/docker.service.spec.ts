@@ -24,6 +24,13 @@ describe('DockerService', () => {
     start: jest.Mock;
   };
   let mockStream: NodeJS.ReadWriteStream;
+  let mockNetwork: {
+    inspect: jest.Mock;
+    connect: jest.Mock;
+    disconnect: jest.Mock;
+    remove: jest.Mock;
+    id: string;
+  };
 
   beforeEach(async () => {
     // Create mock stream
@@ -79,9 +86,20 @@ describe('DockerService', () => {
       },
     };
 
+    // Create mock network
+    mockNetwork = {
+      inspect: jest.fn(),
+      connect: jest.fn(),
+      disconnect: jest.fn(),
+      remove: jest.fn(),
+      id: 'test-network-id',
+    };
+
     // Create mock Docker instance
     mockDocker = {
       getContainer: jest.fn().mockReturnValue(mockContainer),
+      getNetwork: jest.fn().mockReturnValue(mockNetwork),
+      createNetwork: jest.fn().mockResolvedValue(mockNetwork),
     } as any;
 
     // Mock Docker constructor
@@ -127,6 +145,7 @@ describe('DockerService', () => {
           { containerPort: 3000, hostPort: 3001 },
           { containerPort: 9229, protocol: 'tcp' },
         ],
+        network: 'test-network',
       });
 
       expect((mockDocker as any).pull).toHaveBeenCalledWith('node:22-alpine', expect.any(Function));
@@ -147,6 +166,7 @@ describe('DockerService', () => {
           RestartPolicy: {
             Name: 'unless-stopped',
           },
+          NetworkMode: 'test-network',
         },
       });
       expect(createdContainer.start).toHaveBeenCalled();
@@ -371,6 +391,252 @@ describe('DockerService', () => {
       await service.deleteContainer(containerId);
 
       expect(mockDocker.getContainer).toHaveBeenCalledWith(containerId);
+    });
+  });
+
+  describe('createNetwork', () => {
+    const networkName = 'test-network';
+
+    it('should create a network with default driver', async () => {
+      const result = await service.createNetwork({ name: networkName });
+
+      expect((mockDocker as any).createNetwork).toHaveBeenCalledWith({
+        Name: networkName,
+        Driver: 'bridge',
+      });
+      expect(result).toBe('test-network-id');
+    });
+
+    it('should create a network with custom driver', async () => {
+      const result = await service.createNetwork({ name: networkName, driver: 'overlay' });
+
+      expect((mockDocker as any).createNetwork).toHaveBeenCalledWith({
+        Name: networkName,
+        Driver: 'overlay',
+      });
+      expect(result).toBe('test-network-id');
+    });
+
+    it('should create a network and attach containers', async () => {
+      const containerIds = ['container-1', 'container-2'];
+      mockNetwork.connect.mockResolvedValue(undefined);
+
+      const result = await service.createNetwork({ name: networkName, containerIds });
+
+      expect((mockDocker as any).createNetwork).toHaveBeenCalledWith({
+        Name: networkName,
+        Driver: 'bridge',
+      });
+      expect(mockNetwork.connect).toHaveBeenCalledTimes(2);
+      expect(mockNetwork.connect).toHaveBeenNthCalledWith(1, { Container: 'container-1' });
+      expect(mockNetwork.connect).toHaveBeenNthCalledWith(2, { Container: 'container-2' });
+      expect(result).toBe('test-network-id');
+    });
+
+    it('should continue attaching containers if one fails', async () => {
+      const containerIds = ['container-1', 'container-2', 'container-3'];
+      const connectError = new Error('Connection failed') as any;
+      connectError.statusCode = 500;
+      mockNetwork.connect
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(connectError)
+        .mockResolvedValueOnce(undefined);
+
+      const result = await service.createNetwork({ name: networkName, containerIds });
+
+      expect(mockNetwork.connect).toHaveBeenCalledTimes(3);
+      expect(result).toBe('test-network-id');
+    });
+
+    it('should create network without containers when containerIds is empty', async () => {
+      const result = await service.createNetwork({ name: networkName, containerIds: [] });
+
+      expect((mockDocker as any).createNetwork).toHaveBeenCalled();
+      expect(mockNetwork.connect).not.toHaveBeenCalled();
+      expect(result).toBe('test-network-id');
+    });
+
+    it('should create network without containers when containerIds is undefined', async () => {
+      const result = await service.createNetwork({ name: networkName });
+
+      expect((mockDocker as any).createNetwork).toHaveBeenCalled();
+      expect(mockNetwork.connect).not.toHaveBeenCalled();
+      expect(result).toBe('test-network-id');
+    });
+
+    it('should handle network creation errors', async () => {
+      const createError = new Error('Network creation failed');
+      (mockDocker as any).createNetwork.mockRejectedValue(createError);
+
+      await expect(service.createNetwork({ name: networkName })).rejects.toThrow('Network creation failed');
+    });
+  });
+
+  describe('deleteNetwork', () => {
+    const networkId = 'test-network-id';
+
+    it('should throw NotFoundException when network does not exist', async () => {
+      mockNetwork.inspect.mockRejectedValue({ statusCode: 404 });
+
+      await expect(service.deleteNetwork(networkId)).rejects.toThrow(NotFoundException);
+      expect(mockNetwork.inspect).toHaveBeenCalled();
+      expect(mockNetwork.disconnect).not.toHaveBeenCalled();
+      expect(mockNetwork.remove).not.toHaveBeenCalled();
+    });
+
+    it('should delete a network without containers', async () => {
+      mockNetwork.inspect.mockResolvedValue({
+        Containers: {},
+      });
+      mockNetwork.remove.mockResolvedValue(undefined);
+
+      await service.deleteNetwork(networkId);
+
+      expect(mockNetwork.inspect).toHaveBeenCalled();
+      expect(mockNetwork.disconnect).not.toHaveBeenCalled();
+      expect(mockNetwork.remove).toHaveBeenCalled();
+      expect(mockDocker.getNetwork).toHaveBeenCalledWith(networkId);
+    });
+
+    it('should disconnect containers before deleting network', async () => {
+      mockNetwork.inspect.mockResolvedValue({
+        Containers: {
+          'container-1': {
+            Name: 'container-1',
+            EndpointID: 'endpoint-1',
+            MacAddress: '00:00:00:00:00:01',
+            IPv4Address: '172.17.0.2/16',
+            IPv6Address: '',
+          },
+          'container-2': {
+            Name: 'container-2',
+            EndpointID: 'endpoint-2',
+            MacAddress: '00:00:00:00:00:02',
+            IPv4Address: '172.17.0.3/16',
+            IPv6Address: '',
+          },
+        },
+      });
+      mockNetwork.disconnect.mockResolvedValue(undefined);
+      mockNetwork.remove.mockResolvedValue(undefined);
+
+      await service.deleteNetwork(networkId);
+
+      expect(mockNetwork.inspect).toHaveBeenCalled();
+      expect(mockNetwork.disconnect).toHaveBeenCalledTimes(2);
+      expect(mockNetwork.disconnect).toHaveBeenNthCalledWith(1, { Container: 'container-1' });
+      expect(mockNetwork.disconnect).toHaveBeenNthCalledWith(2, { Container: 'container-2' });
+      expect(mockNetwork.remove).toHaveBeenCalled();
+    });
+
+    it('should handle network with undefined Containers', async () => {
+      mockNetwork.inspect.mockResolvedValue({
+        Containers: undefined,
+      });
+      mockNetwork.remove.mockResolvedValue(undefined);
+
+      await service.deleteNetwork(networkId);
+
+      expect(mockNetwork.inspect).toHaveBeenCalled();
+      expect(mockNetwork.disconnect).not.toHaveBeenCalled();
+      expect(mockNetwork.remove).toHaveBeenCalled();
+    });
+
+    it('should continue disconnecting if one container disconnect fails', async () => {
+      mockNetwork.inspect.mockResolvedValue({
+        Containers: {
+          'container-1': {
+            Name: 'container-1',
+            EndpointID: 'endpoint-1',
+            MacAddress: '00:00:00:00:00:01',
+            IPv4Address: '172.17.0.2/16',
+            IPv6Address: '',
+          },
+          'container-2': {
+            Name: 'container-2',
+            EndpointID: 'endpoint-2',
+            MacAddress: '00:00:00:00:00:02',
+            IPv4Address: '172.17.0.3/16',
+            IPv6Address: '',
+          },
+        },
+      });
+      const disconnectError = new Error('Disconnect failed') as any;
+      disconnectError.statusCode = 500;
+      mockNetwork.disconnect.mockResolvedValueOnce(undefined).mockRejectedValueOnce(disconnectError);
+      mockNetwork.remove.mockResolvedValue(undefined);
+
+      await service.deleteNetwork(networkId);
+
+      expect(mockNetwork.disconnect).toHaveBeenCalledTimes(2);
+      expect(mockNetwork.remove).toHaveBeenCalled();
+    });
+
+    it('should ignore 404 errors when disconnecting containers', async () => {
+      mockNetwork.inspect.mockResolvedValue({
+        Containers: {
+          'container-1': {
+            Name: 'container-1',
+            EndpointID: 'endpoint-1',
+            MacAddress: '00:00:00:00:00:01',
+            IPv4Address: '172.17.0.2/16',
+            IPv6Address: '',
+          },
+        },
+      });
+      const disconnectError = new Error('Container not found') as any;
+      disconnectError.statusCode = 404;
+      mockNetwork.disconnect.mockRejectedValue(disconnectError);
+      mockNetwork.remove.mockResolvedValue(undefined);
+
+      await service.deleteNetwork(networkId);
+
+      expect(mockNetwork.disconnect).toHaveBeenCalled();
+      expect(mockNetwork.remove).toHaveBeenCalled();
+    });
+
+    it('should handle network already removed (404 on remove)', async () => {
+      mockNetwork.inspect.mockResolvedValue({
+        Containers: {},
+      });
+      const removeError = new Error('Network not found') as any;
+      removeError.statusCode = 404;
+      mockNetwork.remove.mockRejectedValue(removeError);
+
+      await expect(service.deleteNetwork(networkId)).resolves.not.toThrow();
+      expect(mockNetwork.remove).toHaveBeenCalled();
+    });
+
+    it('should throw error on other remove errors', async () => {
+      mockNetwork.inspect.mockResolvedValue({
+        Containers: {},
+      });
+      const removeError = new Error('Remove failed') as any;
+      removeError.statusCode = 500;
+      mockNetwork.remove.mockRejectedValue(removeError);
+
+      await expect(service.deleteNetwork(networkId)).rejects.toThrow('Remove failed');
+    });
+
+    it('should handle network inspection errors other than 404', async () => {
+      const error = new Error('Docker daemon error') as any;
+      error.statusCode = 500;
+      mockNetwork.inspect.mockRejectedValue(error);
+
+      await expect(service.deleteNetwork(networkId)).rejects.toThrow('Docker daemon error');
+      expect(mockNetwork.disconnect).not.toHaveBeenCalled();
+      expect(mockNetwork.remove).not.toHaveBeenCalled();
+    });
+
+    it('should call getNetwork with correct networkId', async () => {
+      mockNetwork.inspect.mockResolvedValue({
+        Containers: {},
+      });
+      mockNetwork.remove.mockResolvedValue(undefined);
+
+      await service.deleteNetwork(networkId);
+
+      expect(mockDocker.getNetwork).toHaveBeenCalledWith(networkId);
     });
   });
 

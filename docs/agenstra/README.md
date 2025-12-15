@@ -12,6 +12,7 @@ Agenstra is a full-stack agent management platform that enables you to:
 - **Automated Server Provisioning** - Provision cloud servers (Hetzner Cloud, DigitalOcean) with automated Docker and agent-manager deployment
 - **Version Control Integration** - Full Git operations (status, branches, commit, push, pull, rebase) directly from the web interface
 - **Container Management** - Monitor and interact with agent containers, view logs, and manage container lifecycle
+- **VNC Browser Access** - Graphical browser access via VNC with XFCE4 desktop and Chromium browser
 
 ## Documentation Structure
 
@@ -52,6 +53,7 @@ Comprehensive feature documentation:
 - [Version Control](./features/version-control.md) - Git/VCS operations (status, branches, commit, push, pull)
 - [Web IDE](./features/web-ide.md) - Monaco Editor integration for code editing
 - [Chat Interface](./features/chat-interface.md) - AI chat functionality and message flow
+- [VNC Browser Access](./features/vnc-browser-access.md) - Graphical browser access via VNC and noVNC
 
 ### [Deployment](./deployment/README.md)
 
@@ -143,6 +145,10 @@ Full Git operations directly from the web interface:
 ### ✅ Container Management
 
 Monitor agent containers, view logs, and manage container lifecycle. Real-time container statistics and health monitoring.
+
+### ✅ VNC Browser Access
+
+Access a Chromium browser running in a virtual workspace container via VNC. XFCE4 desktop environment with auto-started browser, accessible through a web-based noVNC client.
 
 ## Related Documentation
 

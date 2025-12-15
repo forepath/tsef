@@ -143,8 +143,35 @@
       },
       "defaultConfiguration": "test"
     },
+    "vnc-container-image": {
+      "dependsOn": ["prune"],
+      "cache": false,
+      "executor": "@nx-tools/nx-container:build",
+      "options": {
+        "engine": "docker",
+        "file": "apps/backend-agent-manager/Dockerfile.vnc",
+        "context": "dist/apps/backend-agent-manager"
+      },
+      "configurations": {
+        "test": {
+          "tags": ["ghcr.io/forepath/agenstra-manager-vnc:latest"]
+        },
+        "release": {
+          "push": true,
+          "tags": [
+            "ghcr.io/forepath/agenstra-manager-vnc:latest",
+            "ghcr.io/forepath/agenstra-manager-vnc:$VERSION"
+          ]
+        }
+      },
+      "defaultConfiguration": "test"
+    },
     "start-containers": {
-      "dependsOn": ["api-container-image", "worker-container-image"],
+      "dependsOn": [
+        "api-container-image",
+        "worker-container-image",
+        "vnc-container-image"
+      ],
       "cache": false,
       "executor": "nx:run-commands",
       "options": {

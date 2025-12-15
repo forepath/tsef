@@ -12,6 +12,7 @@ Agents are AI-powered entities that run in Docker containers. Each agent has:
 - **Container** - Docker container for agent execution
 - **Credentials** - Password for WebSocket authentication
 - **Workspace** - Git repository cloned into the container
+- **VNC Container** (optional) - Virtual workspace with XFCE4 desktop and Chromium browser
 
 ## Creating an Agent
 
@@ -29,8 +30,10 @@ The system will:
 - Generate a secure password
 - Create a Docker container for the agent
 - Clone the Git repository (if configured) into the container
+- Create a VNC container (if VNC support is enabled) with XFCE4 desktop and Chromium browser
+- Create a Docker network connecting the agent and VNC containers
 - Store credentials in the controller for automatic login
-- Return the agent details including the password
+- Return the agent details including the password and VNC information
 
 **Important**: Save the password! You'll need it to authenticate with the agent via WebSocket (though the system handles this automatically).
 
@@ -175,6 +178,7 @@ For detailed API documentation, see the [Agent Controller Library](../../../libs
 - **[File Management](./file-management.md)** - File operations in containers
 - **[Version Control](./version-control.md)** - Git operations in containers
 - **[WebSocket Communication](./websocket-communication.md)** - Real-time communication
+- **[VNC Browser Access](./vnc-browser-access.md)** - Graphical browser access via VNC
 - **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** - Application details
 
 ---

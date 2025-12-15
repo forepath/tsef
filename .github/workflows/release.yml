@@ -58,4 +58,5 @@ jobs:
         run: |
           npx nx run-many --target=api-container-image --configuration=release --parallel=3 || echo "No projects for api container image build"
           npx nx run-many --target=worker-container-image --configuration=release --parallel=3 || echo "No projects for worker container image build"
+          npx nx run-many --target=vnc-container-image --configuration=release --parallel=3 || echo "No projects for vnc container image build"
           npx nx run-many --target=server-container-image --configuration=release --parallel=3 || echo "No projects for server container image build"

@@ -61,6 +61,16 @@ export class AgentsRepository {
   }
 
   /**
+   * Check if a port is in use by an agent.
+   * @param port - The port to check
+   * @returns True if the port is in use, false otherwise
+   */
+  async findPortInUse(port: number): Promise<boolean> {
+    const agent = await this.repository.findOne({ where: { vncHostPort: port } });
+    return agent !== null;
+  }
+
+  /**
    * Count total number of agents.
    * @returns Total count of agents
    */

@@ -13,6 +13,7 @@ This application provides:
 - **HTTP REST API** - Full CRUD operations for agent management
 - **WebSocket Gateway** - Real-time bidirectional communication with agents
 - **Container Integration** - Docker container management for agent execution
+- **VNC Browser Access** - Virtual workspace containers with XFCE4 desktop and Chromium browser
 - **Secure Authentication** - Keycloak integration for HTTP endpoints and database-backed authentication for WebSocket
 - **Database Support** - PostgreSQL with TypeORM for data persistence
 - **Auto Migrations** - Automatic database schema migrations on startup
@@ -172,6 +173,11 @@ See the [library documentation](../../../libs/domains/framework/backend/feature-
 - `CURSOR_API_KEY` - Cursor API key for agent communication
 - `CURSOR_AGENT_DOCKER_IMAGE` - Docker image for cursor-agent containers
 
+**VNC Browser Access:**
+
+- `VNC_SERVER_DOCKER_IMAGE` - Docker image for VNC containers (default: `ghcr.io/forepath/agenstra-manager-vnc:latest`)
+- `VNC_SERVER_PUBLIC_PORTS` - Port range for VNC host port allocation (e.g., `"6080-6180"`)
+
 ## Database Setup
 
 The application uses TypeORM and requires a database connection to be configured. See the [library documentation](../../../libs/domains/framework/backend/feature-agent-manager/README.md#database-setup) for database setup requirements and entity schema.
@@ -186,6 +192,9 @@ nx docker:api backend-agent-manager
 
 # Build worker container
 nx docker:worker backend-agent-manager
+
+# Build VNC container
+nx docker:vnc-container-image backend-agent-manager
 ```
 
 ### Running the Container
@@ -225,6 +234,7 @@ Before deploying to production, ensure:
 
 - **[Library Documentation](../../../libs/domains/framework/backend/feature-agent-manager/README.md)** - Complete library reference
 - **[Agent Management Feature](../features/agent-management.md)** - Agent management guide
+- **[VNC Browser Access Feature](../features/vnc-browser-access.md)** - VNC browser access guide
 - **[WebSocket Communication Feature](../features/websocket-communication.md)** - WebSocket communication guide
 - **[Deployment Guide](../deployment/production-checklist.md)** - Production deployment guide
 

@@ -7,6 +7,10 @@ export class AgentResponseDto {
   name!: string;
   description?: string;
   agentType!: string;
+  vnc?: {
+    port: number;
+    password: string;
+  };
   createdAt!: Date;
   updatedAt!: Date;
 }
