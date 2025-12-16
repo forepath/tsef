@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { createAes256GcmTransformer } from '../utils/encryption.transformer';
 
 /**
  * Agent entity representing an agent in the system.
@@ -26,6 +27,24 @@ export class AgentEntity {
 
   @Column({ type: 'varchar', length: 50, default: 'cursor', name: 'agent_type' })
   agentType!: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'vnc_container_id' })
+  vncContainerId?: string;
+
+  @Column({ type: 'integer', nullable: true, name: 'vnc_host_port' })
+  vncHostPort?: number;
+
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'vnc_network_id' })
+  vncNetworkId?: string;
+
+  @Column({
+    type: 'varchar',
+    length: 1024,
+    nullable: true,
+    name: 'vnc_password',
+    transformer: createAes256GcmTransformer(),
+  })
+  vncPassword?: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

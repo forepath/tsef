@@ -269,11 +269,21 @@
                           @if (agent.description) {
                             <small class="text-muted text-truncate">{{ agent.description }}</small>
                           }
-                          @if (activeClient$ | async; as activeClient) {
-                            <small class="text-muted mt-1">
-                              <i class="bi bi-robot me-1"></i>
-                              {{ getAgentTypeDisplayName(agent.agentType, activeClient) }}
-                            </small>
+                          @if ((activeClient$ | async) || agent.vnc) {
+                            <div class="d-flex align-items-center gap-3">
+                              @if (activeClient$ | async; as activeClient) {
+                                <small class="text-muted mt-1">
+                                  <i class="bi bi-robot me-1"></i>
+                                  {{ getAgentTypeDisplayName(agent.agentType, activeClient) }}
+                                </small>
+                              }
+                              @if (agent.vnc?.port) {
+                                <small class="text-muted mt-1">
+                                  <i class="bi bi-window-desktop me-1"></i>
+                                  Virtual Desktop
+                                </small>
+                              }
+                            </div>
                           }
                         </div>
                       </button>
@@ -406,6 +416,20 @@
                     <span class="ms-1">Open Editor</span>
                   </button>
                 </div>
+              }
+              @if (activeClient$ | async; as activeClient) {
+                @if (selectedAgent$ | async; as selectedAgent) {
+                  @if (selectedAgent.vnc?.port && (activeClient$ | async)) {
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="onToggleVNC(activeClient, selectedAgent)"
+                    >
+                      <i class="bi bi-window-desktop"></i>
+                      <span class="ms-1">Open Virtual Desktop</span>
+                    </button>
+                  }
+                }
               }
             </div>
           </div>

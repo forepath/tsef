@@ -39,10 +39,17 @@ ENV KEYCLOAK_CLIENT_ID=agent-manager
 ENV KEYCLOAK_CLIENT_SECRET=
 ENV KEYCLOAK_TOKEN_VALIDATION=online
 
+# Environment variables for the VNC server
+ENV VNC_SERVER_PUBLIC_PORTS=49152-65535
+ENV VNC_SERVER_DEFAULT_IMAGE=ghcr.io/forepath/agenstra-manager-vnc:latest
+
 # Environment variables for static API key authentication
 # If STATIC_API_KEY is set, API key authentication is used (no Keycloak fallback)
 # If STATIC_API_KEY is not set, Keycloak authentication is used
 ENV STATIC_API_KEY=
+
+# Environment variables for encryption
+ENV ENCRYPTION_KEY=
 
 # Environment variables for CORS
 # In production: CORS is disabled by default (most secure). Set CORS_ORIGIN to allow specific origins.

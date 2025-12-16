@@ -4,6 +4,10 @@ export interface AgentResponseDto {
   name: string;
   description?: string;
   agentType: string;
+  vnc?: {
+    port: number;
+    password: string;
+  };
   createdAt: string;
   updatedAt: string;
 }

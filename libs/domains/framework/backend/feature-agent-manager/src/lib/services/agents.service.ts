@@ -259,11 +259,11 @@ export class AgentsService {
     // Get the provider for this agent type to retrieve the Docker image
     const provider = this.agentProviderFactory.getProvider(agentType);
     const dockerImage = provider.getDockerImage();
+    const virtualWorkspaceDockerImage = provider.getVirtualWorkspaceDockerImage();
 
     // Create a docker container
     const containerId = await this.dockerService.createContainer({
       image: dockerImage,
-      name: createAgentDto.name,
       env: {
         AGENT_NAME: createAgentDto.name,
         CURSOR_API_KEY: process.env.CURSOR_API_KEY,
@@ -295,20 +295,88 @@ export class AgentsService {
       // Clone the repository to the agent volume
       await this.dockerService.sendCommandToContainer(containerId, `sh -c "git clone ${escapedUrl} /app"`);
 
-      // Create the agent entity
-      const agent = await this.agentsRepository.create({
-        name: createAgentDto.name,
-        description: createAgentDto.description,
-        hashedPassword,
-        containerId: containerId,
-        volumePath: agentVolumePath,
-        agentType: createAgentDto.agentType || 'cursor',
-      });
+      // Create virtual workspace
+      let virtualWorkspace: { containerId: string; hostPort: number; password: string } | undefined;
+      if (virtualWorkspaceDockerImage) {
+        const virtualWorkspaceHostPort = await this.generateRandomVNCPort();
+        const virtualWorkspacePassword = this.generateRandomPassword();
+        const virtualWorkspaceContainerId = await this.dockerService.createContainer({
+          image: virtualWorkspaceDockerImage,
+          env: {
+            AGENT_NAME: createAgentDto.name,
+            CURSOR_API_KEY: process.env.CURSOR_API_KEY,
+            GIT_REPOSITORY_URL: repositoryUrl,
+            GIT_USERNAME: process.env.GIT_USERNAME,
+            GIT_TOKEN: process.env.GIT_TOKEN,
+            GIT_PASSWORD: process.env.GIT_PASSWORD,
+            GIT_PRIVATE_KEY: process.env.GIT_PRIVATE_KEY,
+            VNC_PASSWORD: virtualWorkspacePassword,
+          },
+          volumes: [
+            {
+              hostPath: agentVolumePath,
+              containerPath: '/repository',
+              readOnly: false,
+            },
+          ],
+          ports: [
+            {
+              containerPort: 6080,
+              hostPort: virtualWorkspaceHostPort,
+            },
+          ],
+        });
 
-      return {
-        ...this.mapToResponseDto(agent),
-        password: generatedPassword,
-      };
+        virtualWorkspace = {
+          containerId: virtualWorkspaceContainerId,
+          hostPort: virtualWorkspaceHostPort,
+          password: virtualWorkspacePassword,
+        };
+      }
+
+      try {
+        let networkId: string | undefined;
+        if (virtualWorkspace) {
+          networkId = await this.dockerService.createNetwork({
+            name: virtualWorkspace.containerId + '-network',
+            containerIds: [virtualWorkspace.containerId, containerId],
+          });
+        }
+
+        // Create the agent entity
+        const agent = await this.agentsRepository.create({
+          name: createAgentDto.name,
+          description: createAgentDto.description,
+          hashedPassword,
+          containerId: containerId,
+          volumePath: agentVolumePath,
+          agentType: createAgentDto.agentType || 'cursor',
+          vncContainerId: virtualWorkspace?.containerId,
+          vncHostPort: virtualWorkspace?.hostPort,
+          vncNetworkId: networkId,
+          vncPassword: virtualWorkspace?.password,
+        });
+
+        return {
+          ...this.mapToResponseDto(agent),
+          password: generatedPassword,
+        };
+      } catch (error) {
+        // Clean up the container if any step after creation fails
+        try {
+          await this.dockerService.deleteContainer(virtualWorkspace.containerId);
+        } catch (cleanupError) {
+          // Log cleanup error but don't mask the original error
+          // The original error is more important for debugging
+          const err = cleanupError as { message?: string; stack?: string };
+          this.logger.error(
+            `Failed to clean up container ${containerId} after agent creation failure: ${err.message}`,
+            err.stack,
+          );
+        }
+        // Re-throw the original error
+        throw error;
+      }
     } catch (error) {
       // Clean up the container if any step after creation fails
       try {
@@ -395,6 +463,14 @@ export class AgentsService {
       await this.dockerService.deleteContainer(agent.containerId);
     }
 
+    if (agent.vncContainerId) {
+      await this.dockerService.deleteContainer(agent.vncContainerId);
+    }
+
+    if (agent.vncNetworkId) {
+      await this.dockerService.deleteNetwork(agent.vncNetworkId);
+    }
+
     await this.agentsRepository.delete(id);
   }
 
@@ -424,8 +500,30 @@ export class AgentsService {
       name: agent.name,
       description: agent.description,
       agentType: agent.agentType,
+      vnc: {
+        port: agent.vncHostPort,
+        password: agent.vncPassword,
+      },
       createdAt: agent.createdAt,
       updatedAt: agent.updatedAt,
     };
+  }
+
+  /**
+   * Generate a random public port from a range of ports.
+   * @param range - The range of ports to generate a random port from
+   * @returns A random public port
+   */
+  private async generateRandomVNCPort(): Promise<number> {
+    const range = process.env.VNC_SERVER_PUBLIC_PORTS || '49152-65535';
+
+    const [start, end] = range.split('-').map(Number);
+    const prosedPort = Math.floor(Math.random() * (end - start + 1)) + start;
+
+    if (await this.agentsRepository.findPortInUse(prosedPort)) {
+      return await this.generateRandomVNCPort();
+    }
+
+    return prosedPort;
   }
 }
