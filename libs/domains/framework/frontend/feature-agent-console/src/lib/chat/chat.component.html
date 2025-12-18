@@ -610,7 +610,7 @@
 
         <!-- Chat input -->
         <div class="p-3 border-top bg-body-tertiary chat-input-container">
-          <div class="chat-commands-select w-50">
+          <div class="chat-commands-select">
             <select
               id="chatCommandsSelect"
               class="form-select form-select-sm small text-body"
@@ -637,24 +637,28 @@
               </optgroup>
             </select>
           </div>
-          <div class="input-group chat-input-group">
-            <textarea
-              class="form-control chat-textarea"
-              rows="3"
-              placeholder="Type a message..."
-              [value]="chatMessage()"
-              (input)="chatMessage.set($any($event.target).value)"
-              (keydown)="onChatInputKeydown($event)"
-              [disabled]="
-                !(socketConnected$ | async) ||
-                (socketReconnecting$ | async) ||
-                (remoteReconnecting$ | async) ||
-                (forwarding$ | async) ||
-                !(selectedAgent$ | async)
-              "
-            ></textarea>
+          <div class="chat-input-group">
+            <div class="form-control chat-textarea-container">
+              <textarea
+                class="chat-textarea"
+                rows="3"
+                placeholder="Type a message..."
+                [value]="chatMessage()"
+                (input)="chatMessage.set($any($event.target).value)"
+                (keydown)="onChatInputKeydown($event)"
+                [disabled]="
+                  !(socketConnected$ | async) ||
+                  (socketReconnecting$ | async) ||
+                  (remoteReconnecting$ | async) ||
+                  (forwarding$ | async) ||
+                  !(selectedAgent$ | async)
+                "
+              ></textarea>
+            </div>
+          </div>
+          <div class="chat-send-button-container">
             <button
-              class="btn btn-primary"
+              class="btn btn-primary btn-sm chat-send-button"
               type="button"
               [disabled]="
                 !(socketConnected$ | async) ||
