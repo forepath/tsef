@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { AgentEntity } from '../entities/agent.entity';
 
 /**
@@ -57,6 +57,17 @@ export class AgentsRepository {
       take: limit,
       skip: offset,
       order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Find all agents that have container IDs (agent containers and VNC containers).
+   * Used for restarting containers on service startup.
+   * @returns Array of agent entities with containerId or vncContainerId
+   */
+  async findAllWithContainers(): Promise<AgentEntity[]> {
+    return await this.repository.find({
+      where: [{ containerId: Not(IsNull()) }, { vncContainerId: Not(IsNull()) }],
     });
   }
 

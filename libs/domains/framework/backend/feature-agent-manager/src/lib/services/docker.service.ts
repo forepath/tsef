@@ -179,6 +179,60 @@ export class DockerService {
   }
 
   /**
+   * Restart a Docker container by ID.
+   * Stops the container if it's running, then starts it again.
+   * @param containerId - The ID of the container to restart
+   * @throws NotFoundException if container is not found
+   */
+  async restartContainer(containerId: string): Promise<void> {
+    try {
+      const container = this.docker.getContainer(containerId);
+
+      // Check if container exists
+      try {
+        await container.inspect();
+      } catch (error: unknown) {
+        const dockerError = error as { statusCode?: number };
+        if (dockerError.statusCode === 404) {
+          throw new NotFoundException(`Container with ID '${containerId}' not found`);
+        }
+        throw error;
+      }
+
+      // Restart the container
+      try {
+        await container.restart();
+        this.logger.log(`Restarted container ${containerId}`);
+      } catch (error: unknown) {
+        const restartError = error as { statusCode?: number; message?: string };
+        // If container is not running (409 Conflict), try to start it
+        if (restartError.statusCode === 409) {
+          this.logger.debug(`Container ${containerId} is not running, attempting to start it`);
+          try {
+            await container.start();
+            this.logger.log(`Started container ${containerId}`);
+          } catch (startError: unknown) {
+            const startErr = startError as { message?: string; stack?: string };
+            this.logger.error(`Failed to start container ${containerId}: ${startErr.message}`, startErr.stack);
+            throw startError;
+          }
+        } else {
+          const err = restartError as { message?: string; stack?: string };
+          this.logger.error(`Failed to restart container ${containerId}: ${err.message}`, err.stack);
+          throw error;
+        }
+      }
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error restarting container: ${err.message}`, err.stack);
+      throw error;
+    }
+  }
+
+  /**
    * Create a Docker network and optionally attach containers to it.
    * @param options - Network creation options
    * @param options.name - The name of the network
