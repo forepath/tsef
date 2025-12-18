@@ -20,6 +20,7 @@ export * from './lib/dto/git-diff.dto';
 export * from './lib/dto/stage-files.dto';
 export * from './lib/dto/unstage-files.dto';
 export * from './lib/dto/commit.dto';
+export * from './lib/dto/push-options.dto';
 export * from './lib/dto/rebase.dto';
 export * from './lib/dto/create-branch.dto';
 export * from './lib/dto/resolve-conflict.dto';

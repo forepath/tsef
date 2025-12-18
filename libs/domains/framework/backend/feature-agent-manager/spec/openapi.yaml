@@ -367,6 +367,7 @@ paths:
           description: Cannot delete current branch
         '404':
           description: Agent or branch not found
+  /agents/{agentId}/vcs/branches/{branch}/switch:
     post:
       summary: Switch to a branch
       operationId: switchGitBranch
