@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import * as sshpk from 'sshpk';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,7 +17,7 @@ import { PasswordService } from './password.service';
  * Orchestrates repository and password service operations.
  */
 @Injectable()
-export class AgentsService {
+export class AgentsService implements OnApplicationBootstrap {
   private readonly logger = new Logger(AgentsService.name);
   private readonly PASSWORD_LENGTH = 16;
 
@@ -525,5 +525,82 @@ export class AgentsService {
     }
 
     return prosedPort;
+  }
+
+  /**
+   * Restart all Docker containers associated with agents (agent containers and VNC containers).
+   * This ensures volume mounts are set correctly based on the current context.
+   * Called automatically on service startup after the module has been initialized.
+   */
+  async restartAllContainers(): Promise<void> {
+    try {
+      this.logger.log('🔄 Starting container restart process...');
+
+      // Get all agents that have containers
+      const agents = await this.agentsRepository.findAllWithContainers();
+
+      if (agents.length === 0) {
+        this.logger.log('ℹ️  No agents with containers found, skipping container restart');
+        return;
+      }
+
+      this.logger.log(`Found ${agents.length} agent(s) with containers to restart`);
+
+      // Track containers we've already restarted to avoid duplicates
+      const restartedContainers = new Set<string>();
+
+      // Restart all agent containers and VNC containers
+      for (const agent of agents) {
+        // Restart agent container if it exists
+        if (agent.containerId && !restartedContainers.has(agent.containerId)) {
+          try {
+            this.logger.log(`Restarting agent container ${agent.containerId} for agent ${agent.name}`);
+            await this.dockerService.restartContainer(agent.containerId);
+            restartedContainers.add(agent.containerId);
+            this.logger.log(`✅ Successfully restarted agent container ${agent.containerId}`);
+          } catch (error: unknown) {
+            const err = error as { message?: string; stack?: string };
+            this.logger.error(
+              `Failed to restart agent container ${agent.containerId} for agent ${agent.name}: ${err.message}`,
+              err.stack,
+            );
+            // Continue with other containers even if one fails
+          }
+        }
+
+        // Restart VNC container if it exists
+        if (agent.vncContainerId && !restartedContainers.has(agent.vncContainerId)) {
+          try {
+            this.logger.log(`Restarting VNC container ${agent.vncContainerId} for agent ${agent.name}`);
+            await this.dockerService.restartContainer(agent.vncContainerId);
+            restartedContainers.add(agent.vncContainerId);
+            this.logger.log(`✅ Successfully restarted VNC container ${agent.vncContainerId}`);
+          } catch (error: unknown) {
+            const err = error as { message?: string; stack?: string };
+            this.logger.error(
+              `Failed to restart VNC container ${agent.vncContainerId} for agent ${agent.name}: ${err.message}`,
+              err.stack,
+            );
+            // Continue with other containers even if one fails
+          }
+        }
+      }
+
+      this.logger.log(`✅ Container restart process completed. Restarted ${restartedContainers.size} container(s)`);
+    } catch (error: unknown) {
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error during container restart process: ${err.message}`, err.stack);
+      // Don't throw - we don't want to prevent service startup if container restart fails
+    }
+  }
+
+  /**
+   * Lifecycle hook called after the application has been fully bootstrapped.
+   * This fires after all modules are initialized, migrations have run, and the HTTP server is ready.
+   * Restarts all Docker containers to ensure volume mounts are set correctly.
+   */
+  async onApplicationBootstrap(): Promise<void> {
+    this.logger.log('🚀 Application fully bootstrapped, restarting containers...');
+    await this.restartAllContainers();
   }
 }
