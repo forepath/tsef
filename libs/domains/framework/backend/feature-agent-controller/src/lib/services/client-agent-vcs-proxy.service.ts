@@ -232,11 +232,13 @@ export class ClientAgentVcsProxyService {
    * Push changes to remote via client proxy.
    * @param clientId - The UUID of the client
    * @param agentId - The UUID of the agent
+   * @param pushOptions - Optional push options (e.g., force flag)
    */
-  async push(clientId: string, agentId: string): Promise<void> {
+  async push(clientId: string, agentId: string, pushOptions: { force?: boolean } = {}): Promise<void> {
     await this.makeRequest<void>(clientId, agentId, {
       method: 'POST',
       url: '/push',
+      data: pushOptions,
     });
   }
 

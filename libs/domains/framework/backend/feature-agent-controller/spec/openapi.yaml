@@ -577,6 +577,7 @@ paths:
           description: Cannot delete current branch
         '404':
           description: Client, agent, or branch not found
+  /clients/{id}/agents/{agentId}/vcs/branches/{branch}/switch:
     post:
       summary: Switch to a branch (proxied)
       operationId: switchClientAgentGitBranch
@@ -758,6 +759,12 @@ paths:
             type: string
             format: uuid
           description: The UUID of the agent
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushOptionsDto'
       responses:
         '204':
           description: Changes pushed successfully
@@ -1352,6 +1359,13 @@ components:
         message:
           type: string
           description: Commit message
+    PushOptionsDto:
+      type: object
+      properties:
+        force:
+          type: boolean
+          description: >
+            When true, performs a `git push --force-with-lease`. Defaults to false.
     CreateBranchDto:
       type: object
       required: [name]

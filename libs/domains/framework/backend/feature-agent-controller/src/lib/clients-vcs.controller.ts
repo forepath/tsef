@@ -4,6 +4,7 @@ import {
   GitBranchDto,
   GitDiffDto,
   GitStatusDto,
+  PushOptionsDto,
   RebaseDto,
   ResolveConflictDto,
   StageFilesDto,
@@ -121,14 +122,16 @@ export class ClientsVcsController {
    * Push changes to remote.
    * @param clientId - The UUID of the client
    * @param agentId - The UUID of the agent
+   * @param pushOptions - Optional push options (e.g., force flag)
    */
   @Post('push')
   @HttpCode(HttpStatus.NO_CONTENT)
   async push(
     @Param('clientId', new ParseUUIDPipe({ version: '4' })) clientId: string,
     @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Body() pushOptions: PushOptionsDto = {},
   ): Promise<void> {
-    await this.clientAgentVcsProxyService.push(clientId, agentId);
+    await this.clientAgentVcsProxyService.push(clientId, agentId, pushOptions);
   }
 
   /**
