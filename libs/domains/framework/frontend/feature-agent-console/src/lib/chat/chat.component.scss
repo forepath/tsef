@@ -120,6 +120,7 @@
   left: calc(0.75rem + 1px + 0.375rem); // Container padding + border + textarea border-radius offset
   z-index: 10;
   pointer-events: auto; // Allow interaction with select
+  width: calc(100% - 2.25rem - 2px);
 
   select {
     width: 100%;
@@ -133,15 +134,44 @@
   }
 }
 
+.chat-send-button-container {
+  position: absolute;
+  // Position to align with textarea inside input-group
+  // The input-group is positioned after the select in DOM flow
+  // We need to align with where the textarea actually renders
+  // Account for: container padding + input-group positioning + textarea border
+  bottom: calc(1rem + 0.75rem + 0.5rem + 0.75rem + 1px + 0.375rem + 0.25rem);
+  display: flex;
+  justify-content: flex-end;
+  left: calc(0.75rem + 1px + 0.375rem); // Container padding + border + textarea border-radius offset
+  z-index: 10;
+  pointer-events: auto; // Allow interaction with select
+  width: calc(100% - 2.25rem - 2px);
+}
+
+.chat-textarea-container {
+  padding-bottom: 2rem;
+  padding-top: 2.5rem;
+  padding-right: 0;
+  padding-left: 0;
+}
+
 // Textarea with padding to prevent typing in the rows where select is
 .chat-textarea {
-  // Add padding-top to prevent typing in the rows where select is positioned
-  // Select height is approximately 1.875rem (form-select-sm with padding)
-  // Plus container padding: 0.375rem top + 0.375rem bottom = 0.75rem
-  // Total padding needed: ~2.625rem to cover select + padding
-  padding-top: 2.75rem;
   min-width: 0; // Allow input to shrink
   overflow-wrap: break-word;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  line-height: 1.5;
+  min-width: 100%;
+  max-width: 100%;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
 }
 
 // Input area - prevent horizontal overflow
