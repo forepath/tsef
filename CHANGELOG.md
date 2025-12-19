@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.16.0](https://github.com/forepath/tsef/compare/v1.15.0...v1.16.0) (2025-12-19)
+
+
+### Features
+
+* virtual browser support ([#121](https://github.com/forepath/tsef/issues/121)) ([7ce8cb7](https://github.com/forepath/tsef/commit/7ce8cb7132506e4886bf17f37fd0b342bb2f047e))
+* virtual workspace landingpage teaser ([#125](https://github.com/forepath/tsef/issues/125)) ([ee7cfe0](https://github.com/forepath/tsef/commit/ee7cfe0a87d4b21d529d8177b56b78777c3dbb2a))
+
+
+### Bug Fixes
+
+* api inputs and documentation ([#122](https://github.com/forepath/tsef/issues/122)) ([61bc5bb](https://github.com/forepath/tsef/commit/61bc5bbd85b99567b55729f38bf5ba89aa0670b5))
+* container autostart ([#123](https://github.com/forepath/tsef/issues/123)) ([4a2f468](https://github.com/forepath/tsef/commit/4a2f468954deb7a1ab79940a6c58551bbacbed37))
+* mobile landingpage ([#126](https://github.com/forepath/tsef/issues/126)) ([89d421e](https://github.com/forepath/tsef/commit/89d421e5571354901704faea5c53510a61fec746))
+* production docker image build process ([#132](https://github.com/forepath/tsef/issues/132)) ([6fd54e0](https://github.com/forepath/tsef/commit/6fd54e05833b6f5b00424884a3096a5d375adb56))
+
+
+### Chores
+
+* im prove chat input styling ([#124](https://github.com/forepath/tsef/issues/124)) ([5bfa490](https://github.com/forepath/tsef/commit/5bfa4903ceec9e5992ec16d2ad5ab52a570b624d))
+
+
+### Code Refactoring
+
+* dockerfiles ([#127](https://github.com/forepath/tsef/issues/127)) ([4bf6c74](https://github.com/forepath/tsef/commit/4bf6c7467280975d1f20e33ad766d54e0919a064))
+
 ## [1.15.0](https://github.com/forepath/tsef/compare/v1.14.1...v1.15.0) (2025-12-14)
 
 
