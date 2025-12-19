@@ -302,3 +302,20 @@ img {
     }
   }
 }
+
+.virtual-workspace-screenshot {
+  position: absolute;
+  left: 55%;
+  top: 0;
+  height: 100%;
+  max-width: none;
+
+  @media (max-width: 767.98px) {
+    position: relative;
+    left: 0;
+    top: 0;
+    height: auto;
+    max-width: 100%;
+    border-radius: var(--bs-border-radius);
+  }
+}
