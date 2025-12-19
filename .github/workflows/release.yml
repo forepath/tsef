@@ -13,7 +13,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -32,7 +32,7 @@ jobs:
           private_key: ${{ secrets.SEMANTIC_RELEASE_KEY_PEM }}
 
       - name: Semantic release
-        uses: cycjimmy/semantic-release-action@v5
+        uses: cycjimmy/semantic-release-action@v6
         id: semantic-release
         with:
           semantic_version: 22.0.5
