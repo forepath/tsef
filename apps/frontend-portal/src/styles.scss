@@ -12,8 +12,13 @@ html {
 
 // Responsive py-10 utility (double py-5)
 .py-10 {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+
+  @media (min-width: 576px) {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
 
   @media (min-width: 768px) {
     padding-top: 6rem;
@@ -22,9 +27,25 @@ html {
 }
 
 .mt-10 {
-  margin-top: 3rem;
+  margin-top: 2rem;
+
+  @media (min-width: 576px) {
+    margin-top: 3rem;
+  }
 
   @media (min-width: 768px) {
     margin-top: 6rem;
+  }
+}
+
+.container,
+.container-fluid,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl,
+.container-xxl {
+  @media (max-width: 767.98px) {
+    --bs-gutter-x: 4rem;
   }
 }
