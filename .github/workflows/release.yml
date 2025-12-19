@@ -11,6 +11,9 @@ jobs:
       contents: read
       actions: read
       packages: write
+    outputs:
+      new_release_published: ${{ steps.semantic-release.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic-release.outputs.new_release_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -43,20 +46,142 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
+  build-api-container-images:
+    name: Build API Container Images
+    runs-on: ubuntu-latest
+    needs: publish
+    if: needs.publish.outputs.new_release_published == 'true'
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set nx shas
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
       - name: 'Login to container registry'
-        if: steps.semantic-release.outputs.new_release_published
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish container images
-        if: steps.semantic-release.outputs.new_release_published
+      - name: Publish API container images
         env:
-          VERSION: ${{ steps.semantic-release.outputs.new_release_version }}
+          VERSION: ${{ needs.publish.outputs.new_release_version }}
         run: |
           npx nx run-many --target=api-container-image --configuration=release --parallel=3 || echo "No projects for api container image build"
+
+  build-worker-container-images:
+    name: Build Worker Container Images
+    runs-on: ubuntu-latest
+    needs: publish
+    if: needs.publish.outputs.new_release_published == 'true'
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set nx shas
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: 'Login to container registry'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Worker container images
+        env:
+          VERSION: ${{ needs.publish.outputs.new_release_version }}
+        run: |
           npx nx run-many --target=worker-container-image --configuration=release --parallel=3 || echo "No projects for worker container image build"
+
+  build-vnc-container-images:
+    name: Build VNC Container Images
+    runs-on: ubuntu-latest
+    needs: publish
+    if: needs.publish.outputs.new_release_published == 'true'
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set nx shas
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: 'Login to container registry'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish VNC container images
+        env:
+          VERSION: ${{ needs.publish.outputs.new_release_version }}
+        run: |
           npx nx run-many --target=vnc-container-image --configuration=release --parallel=3 || echo "No projects for vnc container image build"
+
+  build-server-container-images:
+    name: Build Server Container Images
+    runs-on: ubuntu-latest
+    needs: publish
+    if: needs.publish.outputs.new_release_published == 'true'
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set nx shas
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: 'Login to container registry'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Server container images
+        env:
+          VERSION: ${{ needs.publish.outputs.new_release_version }}
+        run: |
           npx nx run-many --target=server-container-image --configuration=release --parallel=3 || echo "No projects for server container image build"
