@@ -465,7 +465,7 @@
                   <div class="d-flex justify-content-between mb-2 mt-3 flex-column gap-2">
                     <div class="border bg-body rounded small p-3 fw-normal text-wrap text-start d-block w-100">
                       <label class="form-label d-block mb-2 fw-bold">SSH Command</label>
-                      <div class="code-block">
+                      <div class="code-block border">
                         {{
                           buildSSHCommand(
                             activeClient?.endpoint || '',
@@ -482,14 +482,14 @@
                       following lines to your
                       <code class="text-primary d-inline-block border border-primary rounded px-1">~/.ssh/config</code>
                       file:
-                      <div class="code-block mb-3">
+                      <div class="code-block border mb-3">
                         Host remote-workspace<br />
                         &nbsp;&nbsp;&nbsp;&nbsp;HostName {{ getHostname(activeClient?.endpoint || '', false) }}<br />
                         &nbsp;&nbsp;&nbsp;&nbsp;User ssh<br />
                         &nbsp;&nbsp;&nbsp;&nbsp;Port {{ selectedAgent.ssh?.port }}<br />
                         &nbsp;&nbsp;&nbsp;&nbsp;StrictHostKeyChecking no
                       </div>
-                      <div class="d-flex align-items-center gap-2">
+                      <div class="alert alert-primary mb-0 d-flex align-items-center gap-2">
                         <i class="bi bi-info-circle"></i>
                         <span
                           >The password for the
