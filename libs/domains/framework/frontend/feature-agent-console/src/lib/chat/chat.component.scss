@@ -434,3 +434,13 @@ span {
 .list-group-item-action {
   min-width: 0;
 }
+
+.code-block {
+  background-color: var(--bs-secondary-bg, rgba(0, 0, 0, 0.05));
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  font-size: 0.8125rem; // Slightly smaller code
+  line-height: 1.4;
+}

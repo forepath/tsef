@@ -166,11 +166,35 @@
       },
       "defaultConfiguration": "test"
     },
+    "ssh-container-image": {
+      "dependsOn": ["prune"],
+      "cache": false,
+      "executor": "@nx-tools/nx-container:build",
+      "options": {
+        "engine": "docker",
+        "file": "apps/backend-agent-manager/Dockerfile.ssh",
+        "context": "dist/apps/backend-agent-manager"
+      },
+      "configurations": {
+        "test": {
+          "tags": ["ghcr.io/forepath/agenstra-manager-ssh:latest"]
+        },
+        "release": {
+          "push": true,
+          "tags": [
+            "ghcr.io/forepath/agenstra-manager-ssh:latest",
+            "ghcr.io/forepath/agenstra-manager-ssh:$VERSION"
+          ]
+        }
+      },
+      "defaultConfiguration": "test"
+    },
     "start-containers": {
       "dependsOn": [
         "api-container-image",
         "worker-container-image",
-        "vnc-container-image"
+        "vnc-container-image",
+        "ssh-container-image"
       ],
       "cache": false,
       "executor": "nx:run-commands",

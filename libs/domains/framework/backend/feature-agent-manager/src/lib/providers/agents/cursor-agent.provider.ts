@@ -46,6 +46,14 @@ export class CursorAgentProvider implements AgentProvider {
   }
 
   /**
+   * Get the Docker image (including tag) to use for SSH connection containers created for this provider.
+   * @returns The Docker image string
+   */
+  getSshConnectionDockerImage(): string {
+    return process.env.CURSOR_AGENT_SSH_CONNECTION_DOCKER_IMAGE || 'ghcr.io/forepath/agenstra-manager-ssh:latest';
+  }
+
+  /**
    * Send a message to the cursor-agent and get a response.
    * @param agentId - The UUID of the agent
    * @param containerId - The Docker container ID where the agent is running

@@ -46,6 +46,21 @@ export class AgentEntity {
   })
   vncPassword?: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'ssh_container_id' })
+  sshContainerId?: string;
+
+  @Column({ type: 'integer', nullable: true, name: 'ssh_host_port' })
+  sshHostPort?: number;
+
+  @Column({
+    type: 'varchar',
+    length: 1024,
+    nullable: true,
+    name: 'ssh_password',
+    transformer: createAes256GcmTransformer(),
+  })
+  sshPassword?: string;
+
   @Column({ type: 'varchar', length: 255, nullable: true, name: 'git_repository_url' })
   gitRepositoryUrl?: string;
 

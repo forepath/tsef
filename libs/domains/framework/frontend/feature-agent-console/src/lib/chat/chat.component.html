@@ -209,7 +209,7 @@
         [class.active-column]="(activeClientId$ | async) && !(selectedAgent$ | async)"
       >
         <div class="p-3 border-bottom bg-body-tertiary">
-          <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
               <!-- Back button (mobile only) -->
               <button
@@ -234,9 +234,6 @@
               Add
             </button>
           </div>
-          @if (activeClient$ | async; as activeClient) {
-            <small class="text-muted">{{ activeClient.name }}</small>
-          }
         </div>
         <div class="flex-grow-1 overflow-auto">
           @if (agentsLoading$ | async) {
@@ -357,7 +354,7 @@
         [class.mobile-overlay]="editorOpen() && chatVisible()"
       >
         <div class="p-3 border-bottom bg-body-tertiary">
-          <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
               <!-- Back button (mobile only) -->
               <button
@@ -429,7 +426,7 @@
                     [title]="getOpenInNewWindow() ? 'Open Editor in New Window' : 'Open Editor'"
                   >
                     <i class="bi bi-code-square"></i>
-                    <span class="ms-1">Open Editor</span>
+                    <span class="ms-1 d-none d-lg-inline">Open Editor</span>
                   </button>
                 </div>
               }
@@ -442,17 +439,67 @@
                       (click)="onToggleVNC(activeClient, selectedAgent)"
                     >
                       <i class="bi bi-window-desktop"></i>
-                      <span class="ms-1">Open Virtual Desktop</span>
+                      <span class="ms-1 d-none d-lg-inline">Open Virtual Desktop</span>
+                    </button>
+                  }
+                  @if (selectedAgent.ssh?.port) {
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-primary]="showSSHCommand()"
+                      [class.btn-outline-primary]="!showSSHCommand()"
+                      (click)="onToggleSSHCommand()"
+                    >
+                      <i class="bi bi-terminal"></i>
+                      <span class="ms-1 d-none d-lg-inline">SSH Connect</span>
                     </button>
                   }
                 }
               }
             </div>
           </div>
-          @if (selectedAgent$ | async; as selectedAgent) {
-            <small class="text-muted">{{ selectedAgent.name }}</small>
-          } @else {
-            <small class="text-muted">No agent selected</small>
+          @if (showSSHCommand()) {
+            @if (selectedAgent$ | async; as selectedAgent) {
+              @if (activeClient$ | async; as activeClient) {
+                @if (activeClient?.endpoint && selectedAgent.ssh?.port) {
+                  <div class="d-flex justify-content-between mb-2 mt-3 flex-column gap-2">
+                    <div class="border bg-body rounded small p-3 fw-normal text-wrap text-start d-block w-100">
+                      <label class="form-label d-block mb-2 fw-bold">SSH Command</label>
+                      <div class="code-block">
+                        {{
+                          buildSSHCommand(
+                            activeClient?.endpoint || '',
+                            selectedAgent.ssh?.port || 22,
+                            undefined,
+                            selectedAgent.ssh?.password
+                          )
+                        }}
+                      </div>
+                    </div>
+                    <div class="border bg-body rounded small p-3 fw-normal text-wrap text-start d-block w-100">
+                      <label class="form-label d-block mb-2 fw-bold">Remote Workspace Configuration</label>
+                      If you want to connect to this workspace with an editor like Cursor or VS Code via SSH, add the
+                      following lines to your <code class="text-primary">~/.ssh/config</code> file:
+                      <div class="code-block mb-3">
+                        Host remote-workspace<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;HostName {{ getHostname(activeClient?.endpoint || '', false) }}<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;User ssh<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;Port {{ selectedAgent.ssh?.port }}<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;StrictHostKeyChecking no
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-info-circle"></i>
+                        <span
+                          >The password for the <code class="text-primary">ssh</code> user is
+                          <code class="text-primary">{{ selectedAgent.ssh?.password }}</code
+                          >. The repository path is <code class="text-primary">/app</code>.</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                }
+              }
+            }
           }
         </div>
 

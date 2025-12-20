@@ -31,6 +31,12 @@ export interface AgentProvider {
   getVirtualWorkspaceDockerImage(): string | undefined;
 
   /**
+   * Get the Docker image (including tag) to use for SSH connection containers created for this provider.
+   * @returns The Docker image string (e.g., 'ghcr.io/forepath/agenstra-manager-ssh:latest')
+   */
+  getSshConnectionDockerImage(): string | undefined;
+
+  /**
    * Send a message to the agent and get a response.
    * @param agentId - The UUID of the agent
    * @param containerId - The Docker container ID where the agent is running

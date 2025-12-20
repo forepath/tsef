@@ -20,6 +20,7 @@ describe('AgentProviderFactory', () => {
       getDisplayName: jest.fn().mockReturnValue('Provider 1'),
       getDockerImage: jest.fn().mockReturnValue('image1:latest'),
       getVirtualWorkspaceDockerImage: jest.fn().mockReturnValue('image1-virtual-workspace:latest'),
+      getSshConnectionDockerImage: jest.fn().mockReturnValue('image1-ssh-connection:latest'),
       sendMessage: jest.fn(),
       sendInitialization: jest.fn(),
     };
@@ -29,6 +30,7 @@ describe('AgentProviderFactory', () => {
       getDisplayName: jest.fn().mockReturnValue('Provider 2'),
       getDockerImage: jest.fn().mockReturnValue('image2:latest'),
       getVirtualWorkspaceDockerImage: jest.fn().mockReturnValue('image2-virtual-workspace:latest'),
+      getSshConnectionDockerImage: jest.fn().mockReturnValue('image2-ssh-connection:latest'),
       sendMessage: jest.fn(),
       sendInitialization: jest.fn(),
     };

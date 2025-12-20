@@ -11,6 +11,7 @@ describe('ConfigService', () => {
     getDisplayName: jest.fn().mockReturnValue('Cursor'),
     getDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-worker:latest'),
     getVirtualWorkspaceDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-vnc:latest'),
+    getSshConnectionDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-ssh:latest'),
     sendMessage: jest.fn(),
     sendInitialization: jest.fn(),
   };
@@ -78,6 +79,7 @@ describe('ConfigService', () => {
         getDisplayName: jest.fn().mockReturnValue('OpenAI'),
         getDockerImage: jest.fn().mockReturnValue('openai-image:latest'),
         getVirtualWorkspaceDockerImage: jest.fn().mockReturnValue('openai-virtual-workspace-image:latest'),
+        getSshConnectionDockerImage: jest.fn().mockReturnValue('openai-ssh-connection-image:latest'),
         sendMessage: jest.fn(),
         sendInitialization: jest.fn(),
       };
@@ -86,6 +88,7 @@ describe('ConfigService', () => {
         getDisplayName: jest.fn().mockReturnValue('Anthropic Claude'),
         getDockerImage: jest.fn().mockReturnValue('anthropic-image:latest'),
         getVirtualWorkspaceDockerImage: jest.fn().mockReturnValue('anthropic-virtual-workspace-image:latest'),
+        getSshConnectionDockerImage: jest.fn().mockReturnValue('anthropic-ssh-connection-image:latest'),
         sendMessage: jest.fn(),
         sendInitialization: jest.fn(),
       };

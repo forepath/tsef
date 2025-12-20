@@ -268,6 +268,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly fileOnlyMode = signal<boolean>(false);
   readonly standaloneMode = signal<boolean>(false);
   private standaloneFileLoaded = false;
+  readonly showSSHCommand = signal<boolean>(false);
 
   // Local signals to mirror fileEditor's visibility states
   // These prevent ExpressionChangedAfterItHasBeenCheckedError by avoiding direct access
@@ -2188,11 +2189,11 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
    * @param url - The full URL string
    * @returns The hostname with port if present (e.g., "example.com:8080") or just hostname if no port, or the original string if parsing fails
    */
-  getHostname(url: string): string {
+  getHostname(url: string, withPort = true): string {
     try {
       const urlObj = new URL(url);
       // Return hostname with port if port is explicitly specified in the URL
-      if (urlObj.port) {
+      if (withPort && urlObj.port) {
         return `${urlObj.hostname}:${urlObj.port}`;
       }
       return urlObj.hostname;
@@ -2298,6 +2299,17 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     } catch {
       return null;
     }
+  }
+
+  buildSSHCommand(clientEndpoint: string, port: number, username?: string, password?: string): string | null {
+    const hostname = this.getHostname(clientEndpoint, false);
+    if (!hostname) {
+      return null;
+    }
+    if (!password) {
+      return `ssh -o StrictHostKeyChecking=no ${port ? `-p ${port} ` : ''}${username ?? 'ssh'}@${hostname}`;
+    }
+    return `SSHPASS='${password}' sshpass -e ssh -o StrictHostKeyChecking=no ${port ? `-p ${port} ` : ''}${username ?? 'ssh'}@${hostname}`;
   }
 
   isUserMessage(payload: ForwardedEventPayload): boolean {
@@ -2680,5 +2692,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         }),
       )
       .subscribe();
+  }
+
+  onToggleSSHCommand(): void {
+    this.showSSHCommand.set(!this.showSSHCommand());
   }
 }

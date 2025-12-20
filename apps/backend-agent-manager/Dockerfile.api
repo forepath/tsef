@@ -42,7 +42,8 @@ ENV KEYCLOAK_CLIENT_SECRET=
 ENV KEYCLOAK_TOKEN_VALIDATION=online
 
 # Environment variables for the VNC server
-ENV VNC_SERVER_PUBLIC_PORTS=49152-65535
+ENV VNC_SERVER_PUBLIC_PORTS=49152-57343
+ENV SSH_SERVER_PUBLIC_PORTS=57344-65535
 ENV VNC_SERVER_DEFAULT_IMAGE=ghcr.io/forepath/agenstra-manager-vnc:latest
 
 # Environment variables for static API key authentication
