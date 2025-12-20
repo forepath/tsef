@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.17.0](https://github.com/forepath/tsef/compare/v1.16.0...v1.17.0) (2025-12-20)
+
+
+### Features
+
+* agent git repository url override ([#134](https://github.com/forepath/tsef/issues/134)) ([4fff04e](https://github.com/forepath/tsef/commit/4fff04e6d083db4e2df0d065862eaaff87a6eb0f))
+* workspace ssh connection ([#136](https://github.com/forepath/tsef/issues/136)) ([6c5fc0c](https://github.com/forepath/tsef/commit/6c5fc0c9c39d9c1df2d79ea052242e2532bb1cf6))
+
+
+### Bug Fixes
+
+* editor file loading fallback ([#135](https://github.com/forepath/tsef/issues/135)) ([3636ccc](https://github.com/forepath/tsef/commit/3636cccff90a07319697266b5ebfff48b206b843))
+
+
+### Chores
+
+* update publish job name ([#133](https://github.com/forepath/tsef/issues/133)) ([59f740d](https://github.com/forepath/tsef/commit/59f740df341d4b148bc427998b1bf3d0ef961567))
+
 ## [1.16.0](https://github.com/forepath/tsef/compare/v1.15.0...v1.16.0) (2025-12-19)
 
 
