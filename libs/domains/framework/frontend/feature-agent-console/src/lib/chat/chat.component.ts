@@ -770,7 +770,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         switchMap(([, agent, clientId, queryParams]) => {
           // TypeScript guard: agent and clientId are checked in filter, but we need to assert here
           if (!agent || !clientId) {
-            return of(false);
+            return of({ error: false, filePath: undefined, clientId: undefined, agentId: undefined });
           }
           // At this point, TypeScript knows agent and clientId are non-null
           const nonNullAgent = agent;
@@ -779,7 +779,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           const filePathParam = queryParams?.['file'];
           // If no file is specified, hide loading immediately
           if (!filePathParam || typeof filePathParam !== 'string') {
-            return of(true); // Return true to indicate we can hide loading (no file to wait for)
+            return of({ error: false, filePath: undefined, clientId: nonNullClientId, agentId: nonNullAgent.id }); // No file to wait for
           }
           const filePath: string = filePathParam;
           // Decode the file path
@@ -790,24 +790,54 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
               return filePath;
             }
           })();
-          // Watch for file content to be loaded
-          // Use combineLatest to watch both loading state and content
+          // Watch for file content to be loaded or error to occur
           return combineLatest([
             this.filesFacade.isReadingFile$(nonNullClientId, nonNullAgent.id, decodedFilePath),
             this.filesFacade.getFileContent$(nonNullClientId, nonNullAgent.id, decodedFilePath),
+            this.filesFacade.getFileError$(nonNullClientId, nonNullAgent.id, decodedFilePath),
           ]).pipe(
-            // Wait until file is not loading AND content is available
-            filter(([isLoading, content]) => !isLoading && content !== null),
+            // Wait until file is not loading AND (content is available OR error occurred)
+            filter(([isLoading, content, error]) => !isLoading && (content !== null || error !== null)),
             take(1),
-            map(() => true), // Just emit a value to indicate loading is complete
+            map(([, , error]) => ({
+              error: error !== null,
+              filePath: decodedFilePath,
+              clientId: nonNullClientId,
+              agentId: nonNullAgent.id,
+            })),
+            catchError(() => {
+              // Handle any unexpected errors
+              return of({
+                error: true,
+                filePath: decodedFilePath,
+                clientId: nonNullClientId,
+                agentId: nonNullAgent.id,
+              });
+            }),
           );
         }),
-        filter((result) => result === true), // Filter out false results
         takeUntil(this.destroy$),
       )
-      .subscribe(() => {
+      .subscribe((result) => {
         // File content is loaded (or no file to load), hide the loading spinner (only on initial load)
         if (!this.standaloneFileLoaded) {
+          // If file was not found (error occurred), unselect the file and close the tab
+          if (result?.error && result.filePath && result.clientId && result.agentId) {
+            // Close the tab
+            this.filesFacade.closeFileTab(result.clientId, result.agentId, result.filePath);
+            // Open chat if it's not open
+            if (!this.chatVisible()) {
+              this.chatVisible.set(true);
+            }
+            // Unselect the file if it's currently selected
+            if (this.fileEditor) {
+              const currentPath = this.fileEditor.selectedFilePath();
+              if (currentPath === result.filePath) {
+                this.fileEditor.selectedFilePath.set(null);
+              }
+            }
+            this.fileOpenedFromQuery = false;
+          }
           this.standaloneLoadingService.setLoading(false);
           this.standaloneFileLoaded = true;
         }
