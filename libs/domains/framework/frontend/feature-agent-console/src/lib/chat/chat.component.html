@@ -479,7 +479,9 @@
                     <div class="border bg-body rounded small p-3 fw-normal text-wrap text-start d-block w-100">
                       <label class="form-label d-block mb-2 fw-bold">Remote Workspace Configuration</label>
                       If you want to connect to this workspace with an editor like Cursor or VS Code via SSH, add the
-                      following lines to your <code class="text-primary">~/.ssh/config</code> file:
+                      following lines to your
+                      <code class="text-primary d-inline-block border border-primary rounded px-1">~/.ssh/config</code>
+                      file:
                       <div class="code-block mb-3">
                         Host remote-workspace<br />
                         &nbsp;&nbsp;&nbsp;&nbsp;HostName {{ getHostname(activeClient?.endpoint || '', false) }}<br />
@@ -490,9 +492,15 @@
                       <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-info-circle"></i>
                         <span
-                          >The password for the <code class="text-primary">ssh</code> user is
-                          <code class="text-primary">{{ selectedAgent.ssh?.password }}</code
-                          >. The repository path is <code class="text-primary">/app</code>.</span
+                          >The password for the
+                          <code class="text-primary d-inline-block border border-primary rounded px-1">ssh</code> user
+                          is
+                          <code class="text-primary d-inline-block border border-primary rounded px-1">{{
+                            selectedAgent.ssh?.password
+                          }}</code
+                          >. The repository path is
+                          <code class="text-primary d-inline-block border border-primary rounded px-1">/app</code
+                          >.</span
                         >
                       </div>
                     </div>
