@@ -67,7 +67,7 @@ export class AgentsRepository {
    */
   async findAllWithContainers(): Promise<AgentEntity[]> {
     return await this.repository.find({
-      where: [{ containerId: Not(IsNull()) }, { vncContainerId: Not(IsNull()) }],
+      where: [{ containerId: Not(IsNull()) }, { vncContainerId: Not(IsNull()) }, { sshContainerId: Not(IsNull()) }],
     });
   }
 
@@ -77,7 +77,7 @@ export class AgentsRepository {
    * @returns True if the port is in use, false otherwise
    */
   async findPortInUse(port: number): Promise<boolean> {
-    const agent = await this.repository.findOne({ where: { vncHostPort: port } });
+    const agent = await this.repository.findOne({ where: [{ vncHostPort: port }, { sshHostPort: port }] });
     return agent !== null;
   }
 

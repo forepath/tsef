@@ -8,6 +8,10 @@ export interface AgentResponseDto {
     port: number;
     password: string;
   };
+  ssh?: {
+    port: number;
+    password: string;
+  };
   git?: {
     repositoryUrl: string;
   };

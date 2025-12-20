@@ -59,6 +59,7 @@ describe('AgentsService', () => {
     getDisplayName: jest.fn().mockReturnValue('Cursor'),
     getDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-worker:latest'),
     getVirtualWorkspaceDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-vnc:latest'),
+    getSshConnectionDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-ssh:latest'),
     sendMessage: jest.fn(),
     sendInitialization: jest.fn(),
   };
@@ -139,6 +140,7 @@ describe('AgentsService', () => {
 
       // Disable VNC for this test
       mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
+      mockAgentProvider.getSshConnectionDockerImage.mockReturnValueOnce(undefined);
       mockRepository.findByName.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue(hashedPassword);
       dockerService.createContainer.mockResolvedValue(containerId);
@@ -220,6 +222,7 @@ describe('AgentsService', () => {
 
       // Disable VNC for this test
       mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
+      mockAgentProvider.getSshConnectionDockerImage.mockReturnValueOnce(undefined);
       mockRepository.findByName.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue(hashedPassword);
       dockerService.createContainer.mockResolvedValue(containerId);
@@ -488,6 +491,7 @@ describe('AgentsService', () => {
 
       // Disable VNC for this test
       mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
+      mockAgentProvider.getSshConnectionDockerImage.mockReturnValueOnce(undefined);
       mockRepository.findByName.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue(hashedPassword);
       dockerService.createContainer.mockResolvedValue(containerId);
