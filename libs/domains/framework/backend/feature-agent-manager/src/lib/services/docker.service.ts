@@ -523,6 +523,8 @@ export class DockerService {
     checkExitCode = false,
   ): Promise<string> {
     try {
+      this.logger.debug(`Sending command to container ${containerId}: ${command}`);
+
       const container = this.docker.getContainer(containerId);
 
       // Check if container exists

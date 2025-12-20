@@ -11,6 +11,9 @@ export class AgentResponseDto {
     port: number;
     password: string;
   };
+  git?: {
+    repositoryUrl: string;
+  };
   createdAt!: Date;
   updatedAt!: Date;
 }

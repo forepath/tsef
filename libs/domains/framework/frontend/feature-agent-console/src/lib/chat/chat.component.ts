@@ -410,6 +410,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     name: '',
     description: '',
     agentType: undefined,
+    gitRepositoryUrl: undefined,
   });
 
   // Edit state
@@ -1633,6 +1634,8 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.newAgent.set({
       name: '',
       description: '',
+      agentType: undefined,
+      gitRepositoryUrl: undefined,
     });
     this.showModal(this.addAgentModal);
   }
@@ -1862,6 +1865,10 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       createDto.description = agentData.description;
     }
 
+    if (agentData.gitRepositoryUrl) {
+      createDto.gitRepositoryUrl = agentData.gitRepositoryUrl;
+    }
+
     this.agentsFacade.createClientAgent(clientId, createDto);
 
     // Subscribe to creation completion to close modal
@@ -1878,6 +1885,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           name: '',
           description: '',
           agentType: undefined,
+          gitRepositoryUrl: undefined,
         });
       });
   }

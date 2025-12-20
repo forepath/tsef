@@ -190,16 +190,16 @@ export class AgentsService implements OnApplicationBootstrap {
   /**
    * Create .netrc file in the container for git authentication.
    * @param containerId - The ID of the container
+   * @param repositoryUrl - The URL of the repository to create the .netrc file for
    * @throws Error if git credentials are not configured
    */
-  private async createNetrcFile(containerId: string): Promise<void> {
+  private async createNetrcFile(containerId: string, repositoryUrl: string): Promise<void> {
     const gitUsername = process.env.GIT_USERNAME;
     const gitToken = process.env.GIT_TOKEN || process.env.GIT_PASSWORD;
-    const repositoryUrl = process.env.GIT_REPOSITORY_URL;
 
     if (!gitUsername || !gitToken || !repositoryUrl) {
       throw new BadRequestException(
-        'Git credentials not configured. Please set GIT_USERNAME, GIT_TOKEN (or GIT_PASSWORD), and GIT_REPOSITORY_URL environment variables.',
+        'Git credentials not configured. Please set GIT_USERNAME, GIT_TOKEN (or GIT_PASSWORD), and provide a repositoryUrl in the createNetrcFile.',
       );
     }
 
@@ -246,9 +246,11 @@ export class AgentsService implements OnApplicationBootstrap {
     // Define a folder name for the agent
     const agentVolumePath = `/opt/agents/${uuidv4()}`;
 
-    const repositoryUrl = process.env.GIT_REPOSITORY_URL;
+    const repositoryUrl = createAgentDto.gitRepositoryUrl || process.env.GIT_REPOSITORY_URL;
     if (!repositoryUrl) {
-      throw new BadRequestException('Git repository URL not configured. Please set GIT_REPOSITORY_URL.');
+      throw new BadRequestException(
+        'Git repository URL not configured. Please set GIT_REPOSITORY_URL or provide a gitRepositoryUrl in the createAgentDto.',
+      );
     }
 
     const sshRepository = this.isSshRepository(repositoryUrl);
@@ -287,7 +289,7 @@ export class AgentsService implements OnApplicationBootstrap {
         await this.configureSshAccess(containerId, repositoryUrl, process.env.GIT_PRIVATE_KEY);
       } else {
         // Create .netrc file for git authentication
-        await this.createNetrcFile(containerId);
+        await this.createNetrcFile(containerId, repositoryUrl);
       }
 
       const escapedUrl = this.escapeForShell(repositoryUrl);
@@ -315,7 +317,7 @@ export class AgentsService implements OnApplicationBootstrap {
           volumes: [
             {
               hostPath: agentVolumePath,
-              containerPath: '/repository',
+              containerPath: '/root/repository',
               readOnly: false,
             },
           ],
@@ -355,6 +357,7 @@ export class AgentsService implements OnApplicationBootstrap {
           vncHostPort: virtualWorkspace?.hostPort,
           vncNetworkId: networkId,
           vncPassword: virtualWorkspace?.password,
+          gitRepositoryUrl: createAgentDto.gitRepositoryUrl,
         });
 
         return {
@@ -504,6 +507,11 @@ export class AgentsService implements OnApplicationBootstrap {
         port: agent.vncHostPort,
         password: agent.vncPassword,
       },
+      git: agent.gitRepositoryUrl
+        ? {
+            repositoryUrl: agent.gitRepositoryUrl,
+          }
+        : undefined,
       createdAt: agent.createdAt,
       updatedAt: agent.updatedAt,
     };

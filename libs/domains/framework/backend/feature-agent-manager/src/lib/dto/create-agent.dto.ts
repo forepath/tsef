@@ -17,4 +17,8 @@ export class CreateAgentDto {
   @IsString({ message: 'Agent type must be a string' })
   @IsIn(['cursor'], { message: 'Agent type must be one of: cursor' })
   agentType?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Git repository URL must be a string' })
+  gitRepositoryUrl?: string;
 }

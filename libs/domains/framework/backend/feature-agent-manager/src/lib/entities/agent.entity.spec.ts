@@ -13,6 +13,7 @@ describe('AgentEntity', () => {
     agent.description = 'Test Description';
     agent.hashedPassword = 'hashed-password';
     agent.containerId = 'container-id-123';
+    agent.gitRepositoryUrl = 'https://github.com/user/repo.git';
     agent.createdAt = new Date();
     agent.updatedAt = new Date();
 
@@ -21,6 +22,7 @@ describe('AgentEntity', () => {
     expect(agent.description).toBe('Test Description');
     expect(agent.hashedPassword).toBe('hashed-password');
     expect(agent.containerId).toBe('container-id-123');
+    expect(agent.gitRepositoryUrl).toBe('https://github.com/user/repo.git');
     expect(agent.createdAt).toBeInstanceOf(Date);
     expect(agent.updatedAt).toBeInstanceOf(Date);
   });
@@ -47,5 +49,17 @@ describe('AgentEntity', () => {
     agent.updatedAt = new Date();
 
     expect(agent.containerId).toBeNull();
+  });
+
+  it('should allow nullable gitRepositoryUrl', () => {
+    const agent = new AgentEntity();
+    agent.id = 'test-uuid';
+    agent.name = 'Test Agent';
+    agent.hashedPassword = 'hashed-password';
+    agent.gitRepositoryUrl = null as any;
+    agent.createdAt = new Date();
+    agent.updatedAt = new Date();
+
+    expect(agent.gitRepositoryUrl).toBeNull();
   });
 });
