@@ -8,6 +8,9 @@ export interface AgentResponseDto {
     port: number;
     password: string;
   };
+  git?: {
+    repositoryUrl: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -16,6 +19,7 @@ export interface CreateAgentDto {
   name: string;
   description?: string;
   agentType?: string;
+  gitRepositoryUrl?: string;
 }
 
 export interface UpdateAgentDto {

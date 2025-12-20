@@ -1110,6 +1110,9 @@ components:
           type: string
         description:
           type: string
+        gitRepositoryUrl:
+          type: [string, 'null']
+          description: Git repository URL to clone when creating the agent
     UpdateAgentDto:
       type: object
       properties:
@@ -1128,6 +1131,13 @@ components:
           type: string
         description:
           type: string
+        git:
+          type: [object, 'null']
+          properties:
+            repositoryUrl:
+              type: string
+              description: Git repository URL associated with the agent
+          description: Git information (only present if gitRepositoryUrl is set)
         createdAt:
           type: string
           format: date-time

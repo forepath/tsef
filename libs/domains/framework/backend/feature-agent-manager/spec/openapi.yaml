@@ -615,6 +615,9 @@ components:
           type: string
           enum: [cursor]
           description: Agent provider type (defaults to 'cursor' if not provided)
+        gitRepositoryUrl:
+          type: [string, 'null']
+          description: Git repository URL to clone when creating the agent
     UpdateAgentDto:
       type: object
       properties:
@@ -640,6 +643,13 @@ components:
         agentType:
           type: string
           description: Agent provider type identifier
+        git:
+          type: [object, 'null']
+          properties:
+            repositoryUrl:
+              type: string
+              description: Git repository URL associated with the agent
+          description: Git information (only present if gitRepositoryUrl is set)
         createdAt:
           type: string
           format: date-time

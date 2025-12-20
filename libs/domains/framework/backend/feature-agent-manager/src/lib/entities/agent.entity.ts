@@ -46,6 +46,9 @@ export class AgentEntity {
   })
   vncPassword?: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'git_repository_url' })
+  gitRepositoryUrl?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

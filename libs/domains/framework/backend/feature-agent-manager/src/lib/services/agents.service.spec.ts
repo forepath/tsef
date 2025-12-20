@@ -280,7 +280,7 @@ describe('AgentsService', () => {
 
       await expect(service.create(createDto)).rejects.toThrow(BadRequestException);
       await expect(service.create(createDto)).rejects.toThrow(
-        'Git credentials not configured. Please set GIT_USERNAME, GIT_TOKEN (or GIT_PASSWORD), and GIT_REPOSITORY_URL environment variables.',
+        'Git credentials not configured. Please set GIT_USERNAME, GIT_TOKEN (or GIT_PASSWORD), and provide a repositoryUrl in the createNetrcFile.',
       );
     });
 
@@ -601,7 +601,7 @@ describe('AgentsService', () => {
 
       await expect(service.create(createDto)).rejects.toThrow(BadRequestException);
       await expect(service.create(createDto)).rejects.toThrow(
-        'Git repository URL not configured. Please set GIT_REPOSITORY_URL.',
+        'Git repository URL not configured. Please set GIT_REPOSITORY_URL or provide a gitRepositoryUrl in the createAgentDto.',
       );
     });
 
@@ -837,7 +837,7 @@ describe('AgentsService', () => {
       dockerService.sendCommandToContainer.mockResolvedValue(undefined);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).createNetrcFile(containerId);
+      await (service as any).createNetrcFile(containerId, process.env.GIT_REPOSITORY_URL);
 
       expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(2);
       // Verify first command writes file using base64
@@ -867,7 +867,7 @@ describe('AgentsService', () => {
       dockerService.sendCommandToContainer.mockResolvedValue(undefined);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).createNetrcFile(containerId);
+      await (service as any).createNetrcFile(containerId, process.env.GIT_REPOSITORY_URL);
 
       // Verify that special characters are properly handled in base64 content
       const base64Call = dockerService.sendCommandToContainer.mock.calls[0];
@@ -914,10 +914,11 @@ describe('AgentsService', () => {
       const containerId = 'container-id-123';
       delete process.env.GIT_TOKEN;
       process.env.GIT_PASSWORD = 'test-password';
+      process.env.GIT_REPOSITORY_URL = 'https://github.com/user/repo.git';
       dockerService.sendCommandToContainer.mockResolvedValue(undefined);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).createNetrcFile(containerId);
+      await (service as any).createNetrcFile(containerId, process.env.GIT_REPOSITORY_URL);
 
       expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(2);
       // Verify password line uses GIT_PASSWORD in base64 content

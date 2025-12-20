@@ -150,24 +150,26 @@
                           @if (client.description) {
                             <small class="text-muted text-truncate">{{ client.description }}</small>
                           }
-                          <small class="text-muted mt-1">
-                            <i class="bi bi-globe me-1"></i>
-                            {{ getHostname(client.endpoint) }}
+                          <div class="d-flex align-items-center gap-3 row-gap-0 flex-wrap">
+                            <small class="text-muted mt-1">
+                              <i class="bi bi-globe me-1"></i>
+                              {{ getHostname(client.endpoint) }}
+                            </small>
                             @if (parseGitRepository(client.config?.gitRepositoryUrl); as repo) {
-                              <span class="ms-2">
+                              <small class="text-muted mt-1">
                                 <i class="bi bi-git me-1"></i>
                                 {{ repo }}
-                              </span>
+                              </small>
                             }
                             @if (getClientProviderDisplayName$(client.id) | async; as providerName) {
                               @if (providerName) {
-                                <span class="ms-2">
+                                <small class="text-muted mt-1">
                                   <i class="bi bi-cloud-fill me-1"></i>
                                   {{ providerName }}
-                                </span>
+                                </small>
                               }
                             }
-                          </small>
+                          </div>
                         </div>
                       </button>
                       <div class="btn-group ms-2" role="group">
@@ -269,12 +271,26 @@
                           @if (agent.description) {
                             <small class="text-muted text-truncate">{{ agent.description }}</small>
                           }
-                          @if ((activeClient$ | async) || agent.vnc) {
-                            <div class="d-flex align-items-center gap-3">
+                          @if ((activeClient$ | async) || agent.vnc || agent.git?.repositoryUrl) {
+                            <div class="d-flex align-items-center gap-3 row-gap-0 flex-wrap">
                               @if (activeClient$ | async; as activeClient) {
                                 <small class="text-muted mt-1">
                                   <i class="bi bi-robot me-1"></i>
                                   {{ getAgentTypeDisplayName(agent.agentType, activeClient) }}
+                                </small>
+                                @if (!agent.git?.repositoryUrl) {
+                                  @if (parseGitRepository(activeClient.config?.gitRepositoryUrl); as repo) {
+                                    <small class="text-muted mt-1">
+                                      <i class="bi bi-git me-1"></i>
+                                      {{ repo }}
+                                    </small>
+                                  }
+                                }
+                              }
+                              @if (agent.git?.repositoryUrl) {
+                                <small class="text-muted mt-1">
+                                  <i class="bi bi-git me-1"></i>
+                                  {{ parseGitRepository(agent.git?.repositoryUrl) }}
                                 </small>
                               }
                               @if (agent.vnc?.port) {
@@ -1368,6 +1384,22 @@
               }
             }
           }
+          <div class="mb-3">
+            <label for="agentGitRepositoryUrl" class="form-label">Git Repository URL</label>
+            <input
+              type="url"
+              class="form-control"
+              id="agentGitRepositoryUrl"
+              name="gitRepositoryUrl"
+              [ngModel]="newAgent().gitRepositoryUrl"
+              (ngModelChange)="updateAgentField('gitRepositoryUrl', $event)"
+              placeholder="https://github.com/user/repo.git"
+              [disabled]="(agentsCreating$ | async) === true"
+            />
+            <small class="form-text text-muted"
+              >Optional. Defaults to workspace Git repository URL if not specified.</small
+            >
+          </div>
           <div class="alert alert-info mb-0" role="alert">
             <i class="bi bi-info-circle me-2"></i>
             A password will be auto-generated and shown after creation.
