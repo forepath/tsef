@@ -412,6 +412,8 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     description: '',
     agentType: undefined,
     gitRepositoryUrl: undefined,
+    createVirtualWorkspace: true,
+    createSshConnection: true,
   });
 
   // Edit state
@@ -1896,9 +1898,17 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       createDto.description = agentData.description;
     }
 
+    if (agentData.agentType) {
+      createDto.agentType = agentData.agentType;
+    }
+
     if (agentData.gitRepositoryUrl) {
       createDto.gitRepositoryUrl = agentData.gitRepositoryUrl;
     }
+
+    // Include boolean fields (default to true if not set)
+    createDto.createVirtualWorkspace = agentData.createVirtualWorkspace ?? true;
+    createDto.createSshConnection = agentData.createSshConnection ?? true;
 
     this.agentsFacade.createClientAgent(clientId, createDto);
 
@@ -1917,6 +1927,8 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           description: '',
           agentType: undefined,
           gitRepositoryUrl: undefined,
+          createVirtualWorkspace: true,
+          createSshConnection: true,
         });
       });
   }

@@ -24,6 +24,8 @@ export interface CreateAgentDto {
   description?: string;
   agentType?: string;
   gitRepositoryUrl?: string;
+  createVirtualWorkspace?: boolean;
+  createSshConnection?: boolean;
 }
 
 export interface UpdateAgentDto {
