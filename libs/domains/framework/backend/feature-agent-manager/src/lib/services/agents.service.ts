@@ -306,7 +306,7 @@ export class AgentsService implements OnApplicationBootstrap {
             password: string;
           }
         | undefined;
-      if (sshConnectionDockerImage) {
+      if (createAgentDto.createSshConnection && sshConnectionDockerImage) {
         const sshConnectionHostPort = await this.generateRandomSSHPort();
         const sshConnectionPassword = this.generateRandomPassword();
         const sshConnectionContainerId = await this.dockerService.createContainer({
@@ -344,7 +344,7 @@ export class AgentsService implements OnApplicationBootstrap {
             password: string;
           }
         | undefined;
-      if (virtualWorkspaceDockerImage) {
+      if (createAgentDto.createVirtualWorkspace && virtualWorkspaceDockerImage) {
         const virtualWorkspaceHostPort = await this.generateRandomVNCPort();
         const virtualWorkspacePassword = this.generateRandomPassword();
         const virtualWorkspaceContainerId = await this.dockerService.createContainer({
@@ -383,9 +383,9 @@ export class AgentsService implements OnApplicationBootstrap {
 
       try {
         let networkId: string | undefined;
-        if (virtualWorkspace || sshConnection) {
+        if (createAgentDto.createVirtualWorkspace && virtualWorkspace) {
           networkId = await this.dockerService.createNetwork({
-            name: virtualWorkspace.containerId + '-network',
+            name: uuidv4(),
             containerIds: [
               containerId,
               ...(virtualWorkspace ? [virtualWorkspace.containerId] : []),
@@ -402,13 +402,19 @@ export class AgentsService implements OnApplicationBootstrap {
           containerId: containerId,
           volumePath: agentVolumePath,
           agentType: createAgentDto.agentType || 'cursor',
-          vncContainerId: virtualWorkspace?.containerId,
-          vncHostPort: virtualWorkspace?.hostPort,
-          vncNetworkId: networkId,
-          vncPassword: virtualWorkspace?.password,
-          sshContainerId: sshConnection?.containerId,
-          sshHostPort: sshConnection?.hostPort,
-          sshPassword: sshConnection?.password,
+          ...(createAgentDto.createVirtualWorkspace &&
+            virtualWorkspace && {
+              vncContainerId: virtualWorkspace.containerId,
+              vncHostPort: virtualWorkspace.hostPort,
+              vncNetworkId: networkId,
+              vncPassword: virtualWorkspace.password,
+            }),
+          ...(createAgentDto.createSshConnection &&
+            sshConnection && {
+              sshContainerId: sshConnection.containerId,
+              sshHostPort: sshConnection.hostPort,
+              sshPassword: sshConnection.password,
+            }),
           gitRepositoryUrl: createAgentDto.gitRepositoryUrl,
         });
 
@@ -419,8 +425,12 @@ export class AgentsService implements OnApplicationBootstrap {
       } catch (error) {
         // Clean up the container if any step after creation fails
         try {
-          await this.dockerService.deleteContainer(virtualWorkspace.containerId);
-          await this.dockerService.deleteContainer(sshConnection.containerId);
+          if (createAgentDto.createVirtualWorkspace && virtualWorkspace) {
+            await this.dockerService.deleteContainer(virtualWorkspace.containerId);
+          }
+          if (createAgentDto.createSshConnection && sshConnection) {
+            await this.dockerService.deleteContainer(sshConnection.containerId);
+          }
         } catch (cleanupError) {
           // Log cleanup error but don't mask the original error
           // The original error is more important for debugging

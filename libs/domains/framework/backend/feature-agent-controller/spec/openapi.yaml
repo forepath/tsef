@@ -1113,6 +1113,14 @@ components:
         gitRepositoryUrl:
           type: [string, 'null']
           description: Git repository URL to clone when creating the agent
+        createVirtualWorkspace:
+          type: boolean
+          default: true
+          description: Whether to create a VNC virtual workspace container (defaults to true)
+        createSshConnection:
+          type: boolean
+          default: true
+          description: Whether to create an SSH connection container (defaults to true)
     UpdateAgentDto:
       type: object
       properties:

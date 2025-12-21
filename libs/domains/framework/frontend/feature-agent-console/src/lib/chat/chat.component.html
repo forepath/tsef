@@ -296,6 +296,12 @@
                                   Virtual Desktop
                                 </small>
                               }
+                              @if (agent.ssh?.port) {
+                                <small class="text-muted mt-1">
+                                  <i class="bi bi-terminal me-1"></i>
+                                  SSH Access
+                                </small>
+                              }
                             </div>
                           }
                         </div>
@@ -451,7 +457,7 @@
                       (click)="onToggleSSHCommand()"
                     >
                       <i class="bi bi-terminal"></i>
-                      <span class="ms-1 d-none d-lg-inline">SSH Connect</span>
+                      <span class="ms-1 d-none d-lg-inline">SSH Access</span>
                     </button>
                   }
                 }
@@ -1453,6 +1459,40 @@
             />
             <small class="form-text text-muted"
               >Optional. Defaults to workspace Git repository URL if not specified.</small
+            >
+          </div>
+          <div class="mb-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="createVirtualWorkspace"
+                name="createVirtualWorkspace"
+                [ngModel]="newAgent().createVirtualWorkspace !== false"
+                (ngModelChange)="updateAgentField('createVirtualWorkspace', $event)"
+                [disabled]="(agentsCreating$ | async) === true"
+              />
+              <label class="form-check-label" for="createVirtualWorkspace"> Create Virtual Workspace (VNC) </label>
+            </div>
+            <small class="form-text text-muted d-block mt-1"
+              >Enable VNC access to the agent's virtual workspace. Defaults to enabled.</small
+            >
+          </div>
+          <div class="mb-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="createSshConnection"
+                name="createSshConnection"
+                [ngModel]="newAgent().createSshConnection !== false"
+                (ngModelChange)="updateAgentField('createSshConnection', $event)"
+                [disabled]="(agentsCreating$ | async) === true"
+              />
+              <label class="form-check-label" for="createSshConnection"> Create SSH Connection </label>
+            </div>
+            <small class="form-text text-muted d-block mt-1"
+              >Enable SSH access to the agent container. Defaults to enabled.</small
             >
           </div>
           <div class="alert alert-info mb-0" role="alert">

@@ -1,4 +1,4 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 /**
  * DTO for creating a new agent.
@@ -21,4 +21,12 @@ export class CreateAgentDto {
   @IsOptional()
   @IsString({ message: 'Git repository URL must be a string' })
   gitRepositoryUrl?: string;
+
+  @IsOptional()
+  @IsBoolean({ message: 'Create virtual workspace must be a boolean' })
+  createVirtualWorkspace?: boolean = true;
+
+  @IsOptional()
+  @IsBoolean({ message: 'Create SSH connection must be a boolean' })
+  createSshConnection?: boolean = true;
 }
