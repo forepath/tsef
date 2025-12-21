@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.18.1](https://github.com/forepath/tsef/compare/v1.18.0...v1.18.1) (2025-12-21)
+
+
+### Bug Fixes
+
+* node api clients scopes ([#143](https://github.com/forepath/tsef/issues/143)) ([d114e34](https://github.com/forepath/tsef/commit/d114e347513ab7647b9e3a09faf0423ba1b55c69))
+
 ## [1.18.0](https://github.com/forepath/tsef/compare/v1.17.0...v1.18.0) (2025-12-21)
 
 
