@@ -1,5 +1,6 @@
 import {
   AgentResponseDto,
+  ContainerType,
   CreateAgentDto,
   CreateAgentResponseDto,
   CreateFileDto,
@@ -59,6 +60,7 @@ describe('ClientsController', () => {
     name: 'Test Agent',
     description: 'Test Agent Description',
     agentType: 'cursor',
+    containerType: ContainerType.GENERIC,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };

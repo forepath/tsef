@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
 import type {
   AgentResponseDto,
+  ContainerType,
   CreateAgentDto,
   CreateAgentResponseDto,
   UpdateAgentDto,
@@ -20,6 +21,7 @@ describe('AgentsService', () => {
     name: 'Test Agent',
     description: 'Test Description',
     agentType: 'cursor',
+    containerType: 'generic' as ContainerType,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };

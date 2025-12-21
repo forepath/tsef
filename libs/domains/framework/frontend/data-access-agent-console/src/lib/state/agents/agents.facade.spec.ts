@@ -10,7 +10,13 @@ import {
   updateClientAgent,
 } from './agents.actions';
 import { AgentsFacade } from './agents.facade';
-import type { AgentResponseDto, CreateAgentDto, ListClientAgentsParams, UpdateAgentDto } from './agents.types';
+import type {
+  AgentResponseDto,
+  ContainerType,
+  CreateAgentDto,
+  ListClientAgentsParams,
+  UpdateAgentDto,
+} from './agents.types';
 
 describe('AgentsFacade', () => {
   let facade: AgentsFacade;
@@ -23,6 +29,7 @@ describe('AgentsFacade', () => {
     name: 'Test Agent',
     description: 'Test Description',
     agentType: 'cursor',
+    containerType: 'generic' as ContainerType,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
@@ -31,6 +38,7 @@ describe('AgentsFacade', () => {
     id: 'agent-2',
     name: 'Test Agent 2',
     agentType: 'cursor',
+    containerType: 'generic' as ContainerType,
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',
   };

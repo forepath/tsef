@@ -1,3 +1,5 @@
+import { ContainerType } from '../entities/agent.entity';
+
 /**
  * DTO for agent API responses.
  * Excludes sensitive information like password hash.
@@ -7,6 +9,7 @@ export class AgentResponseDto {
   name!: string;
   description?: string;
   agentType!: string;
+  containerType!: ContainerType;
   vnc?: {
     port: number;
     password: string;

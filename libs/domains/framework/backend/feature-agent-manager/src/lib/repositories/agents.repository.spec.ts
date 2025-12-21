@@ -2,7 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AgentEntity } from '../entities/agent.entity';
+import { AgentEntity, ContainerType } from '../entities/agent.entity';
 import { AgentsRepository } from './agents.repository';
 
 describe('AgentsRepository', () => {
@@ -17,6 +17,7 @@ describe('AgentsRepository', () => {
     containerId: 'container-id-123',
     volumePath: '/opt/agents/test-volume-uuid',
     agentType: 'cursor',
+    containerType: ContainerType.GENERIC,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

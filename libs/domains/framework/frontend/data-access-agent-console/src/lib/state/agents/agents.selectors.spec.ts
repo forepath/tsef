@@ -1,4 +1,4 @@
-import { createFeatureSelector } from '@ngrx/store';
+import { initialAgentsState, type AgentsState } from './agents.reducer';
 import {
   selectAgentsCommands,
   selectAgentsCreating,
@@ -12,6 +12,8 @@ import {
   selectAgentsUpdating,
   selectClientAgentById,
   selectClientAgentCommands,
+  selectClientAgentLoading,
+  selectClientAgentLoadingCommands,
   selectClientAgents,
   selectClientAgentsCount,
   selectClientAgentsCreating,
@@ -19,15 +21,12 @@ import {
   selectClientAgentsError,
   selectClientAgentsLoading,
   selectClientAgentsLoadingAny,
-  selectClientAgentLoading,
-  selectClientAgentLoadingCommands,
   selectClientAgentsUpdating,
   selectHasClientAgents,
   selectSelectedAgents,
   selectSelectedClientAgent,
 } from './agents.selectors';
-import { initialAgentsState, type AgentsState } from './agents.reducer';
-import type { AgentResponseDto } from './agents.types';
+import type { AgentResponseDto, ContainerType } from './agents.types';
 
 describe('Agents Selectors', () => {
   const clientId = 'client-1';
@@ -38,6 +37,7 @@ describe('Agents Selectors', () => {
     name: 'Test Agent',
     description: 'Test Description',
     agentType: 'cursor',
+    containerType: 'generic' as ContainerType,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
@@ -46,6 +46,7 @@ describe('Agents Selectors', () => {
     id: 'agent-2',
     name: 'Test Agent 2',
     agentType: 'cursor',
+    containerType: 'generic' as ContainerType,
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',
   };

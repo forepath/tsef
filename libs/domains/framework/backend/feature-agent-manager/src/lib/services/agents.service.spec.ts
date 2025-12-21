@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as sshpk from 'sshpk';
 import { CreateAgentDto } from '../dto/create-agent.dto';
 import { UpdateAgentDto } from '../dto/update-agent.dto';
-import { AgentEntity } from '../entities/agent.entity';
+import { AgentEntity, ContainerType } from '../entities/agent.entity';
 import { AgentProviderFactory } from '../providers/agent-provider.factory';
 import { AgentProvider } from '../providers/agent-provider.interface';
 import { AgentsRepository } from '../repositories/agents.repository';
@@ -26,6 +26,7 @@ describe('AgentsService', () => {
     containerId: 'container-id-123',
     volumePath: '/opt/agents/test-volume-uuid',
     agentType: 'cursor',
+    containerType: ContainerType.GENERIC,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
@@ -125,6 +126,7 @@ describe('AgentsService', () => {
       const createDto: CreateAgentDto = {
         name: 'New Agent',
         description: 'New Description',
+        containerType: ContainerType.GENERIC,
       };
       const hashedPassword = 'hashed-password';
       const containerId = 'container-id-123';
@@ -199,12 +201,14 @@ describe('AgentsService', () => {
         containerId,
         volumePath: expect.stringMatching(/^\/opt\/agents\/[a-f0-9-]+$/),
         agentType: 'cursor',
+        gitRepositoryUrl: undefined,
       });
     });
 
     it('should create agent without description', async () => {
       const createDto: CreateAgentDto = {
         name: 'New Agent',
+        containerType: ContainerType.GENERIC,
       };
       const hashedPassword = 'hashed-password';
       const containerId = 'container-id-123';
@@ -216,6 +220,7 @@ describe('AgentsService', () => {
         containerId,
         volumePath,
         agentType: 'cursor',
+        containerType: ContainerType.GENERIC,
         createdAt: mockAgent.createdAt,
         updatedAt: mockAgent.updatedAt,
       };
@@ -263,6 +268,7 @@ describe('AgentsService', () => {
         hashedPassword,
         containerId,
         volumePath: expect.stringMatching(/^\/opt\/agents\/[a-f0-9-]+$/),
+        gitRepositoryUrl: undefined,
       });
     });
 

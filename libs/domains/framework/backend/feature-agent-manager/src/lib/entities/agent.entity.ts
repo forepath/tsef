@@ -2,6 +2,18 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateCol
 import { createAes256GcmTransformer } from '../utils/encryption.transformer';
 
 /**
+ * Container type enum representing the type of container.
+ * This is used to identify what type of content the container contains.
+ * Different tooling may be used depending on the container type.
+ */
+export enum ContainerType {
+  GENERIC = 'generic',
+  DOCKER = 'docker',
+  TERRAFORM = 'terraform',
+  KUBERNETES = 'kubernetes',
+}
+
+/**
  * Agent entity representing an agent in the system.
  * Each agent has a unique UUID identifier, name, description, and hashed password.
  */
@@ -27,6 +39,9 @@ export class AgentEntity {
 
   @Column({ type: 'varchar', length: 50, default: 'cursor', name: 'agent_type' })
   agentType!: string;
+
+  @Column({ type: 'enum', enum: ContainerType, name: 'container_type', default: ContainerType.GENERIC })
+  containerType!: ContainerType;
 
   @Column({ type: 'varchar', length: 255, nullable: true, name: 'vnc_container_id' })
   vncContainerId?: string;
