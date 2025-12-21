@@ -185,6 +185,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+          description: File or directory path relative to /app (supports nested paths)
       requestBody:
         required: true
         content:

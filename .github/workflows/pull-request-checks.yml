@@ -231,3 +231,71 @@ jobs:
       - name: Build Server container images
         run: |
           npx nx run-many --target=server-container-image --configuration=test --parallel=3 || echo "No projects for server container image build"
+
+  build-openapi-clients-java:
+    name: Build OpenAPI Java Clients
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set nx shas
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install OpenAPI Generator CLI
+        run: |
+          npm install --ignore-scripts=false @openapitools/openapi-generator-cli
+          npx @openapitools/openapi-generator-cli version
+
+      - name: Build Java clients
+        run: |
+          npx nx run-many --target=openapi-client-java --configuration=test --parallel=3 || echo "No projects for openapi java client build"
+
+  build-openapi-clients-js:
+    name: Build OpenAPI JavaScript/TypeScript Clients
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set nx shas
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Install OpenAPI Generator CLI
+        run: |
+          npm install --ignore-scripts=false @openapitools/openapi-generator-cli
+          npx @openapitools/openapi-generator-cli version
+
+      - name: Build JavaScript/TypeScript clients
+        run: |
+          npx nx run-many --target=openapi-client-js --configuration=test --parallel=3 || echo "No projects for openapi js client build"

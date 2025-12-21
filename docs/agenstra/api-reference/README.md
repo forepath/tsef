@@ -87,6 +87,39 @@ The Agent Manager WebSocket gateway provides:
 - Generate documentation
 - Validate AsyncAPI contracts
 
+## Generated Client Packages
+
+Pre-built client SDKs are automatically generated from the OpenAPI specifications and published to GitHub Packages. These clients provide type-safe, language-specific interfaces for interacting with the Agenstra APIs.
+
+### Java Clients
+
+Java client packages are published to GitHub Packages Maven repository and can be installed using Maven or Gradle.
+
+**Agent Manager Client**: `io.agenstra:agent-manager-client`
+
+**Agent Controller Client**: `io.agenstra:agent-controller-client`
+
+The Java clients use RestTemplate for HTTP communication and Jackson for JSON serialization. All clients support configurable base URLs, allowing you to point them at different environments or API instances.
+
+### JavaScript/TypeScript Clients
+
+JavaScript and TypeScript client packages are published to GitHub Packages npm registry and can be installed using npm or yarn.
+
+**Agent Manager Client**: `@agenstra/agent-manager-client`
+
+**Agent Controller Client**: `@agenstra/agent-controller-client`
+
+The TypeScript clients are built with Axios and include full type definitions and interfaces. All clients support configurable base URLs for flexible endpoint configuration.
+
+### Installing Clients
+
+To install the published clients, configure your package manager to use GitHub Packages:
+
+- **Maven**: Configure GitHub Packages repository in your `pom.xml` or `settings.xml`
+- **npm/yarn**: Configure `@agenstra` scope to use GitHub Packages registry in your `.npmrc`
+
+All clients are automatically generated and published with each release, ensuring they stay in sync with the latest API specifications.
+
 ## Related Documentation
 
 - **[Architecture Overview](../architecture/system-overview.md)** - System architecture and component relationships
