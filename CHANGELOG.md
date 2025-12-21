@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.18.0](https://github.com/forepath/tsef/compare/v1.17.0...v1.18.0) (2025-12-21)
+
+
+### Features
+
+* api client generation and publishing ([#141](https://github.com/forepath/tsef/issues/141)) ([c0a41b9](https://github.com/forepath/tsef/commit/c0a41b9ffe33e6899fc52bedef9bdd24f4f54ffa))
+* editor integration feature ([#137](https://github.com/forepath/tsef/issues/137)) ([4086cd9](https://github.com/forepath/tsef/commit/4086cd9de9f1f4a245bee7e524e705ce741132d8))
+* virtual workspace and ssh toggles ([#140](https://github.com/forepath/tsef/issues/140)) ([23a8e31](https://github.com/forepath/tsef/commit/23a8e3192344cda106e7b4973abffb1d28fd0ccb))
+
+
+### Chores
+
+* mark ssh connection data ([#138](https://github.com/forepath/tsef/issues/138)) ([6362b0e](https://github.com/forepath/tsef/commit/6362b0ebe1e759a52b02d1934f594e2c5159dfbc))
+* ssh data as alert ([#139](https://github.com/forepath/tsef/issues/139)) ([a8ef39c](https://github.com/forepath/tsef/commit/a8ef39c1f53db5330adc52430a309ac9cf963f16))
+
 ## [1.17.0](https://github.com/forepath/tsef/compare/v1.16.0...v1.17.0) (2025-12-20)
 
 
