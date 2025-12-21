@@ -105,7 +105,6 @@ The TypeScript clients are built with Axios and include full type definitions an
 
 To install the published clients, configure your package manager to use GitHub Packages:
 
-- **Maven**: Configure GitHub Packages repository in your `pom.xml` or `settings.xml`
 - **npm/yarn**: Configure `@forepath` scope to use GitHub Packages registry in your `.npmrc`
 
 All clients are automatically generated and published with each release, ensuring they stay in sync with the latest API specifications.
