@@ -129,21 +129,6 @@
         "command": "docker compose up -d --force-recreate --remove-orphans"
       }
     },
-    "openapi-client-java": {
-      "cache": true,
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/dist/clients/agent-controller/java"],
-      "options": {
-        "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-controller/spec/openapi.yaml -g java -o dist/clients/agent-controller/java --additional-properties=groupId=io.agenstra,artifactId=agent-controller-client,packageName=io.agenstra.agentcontroller,library=resttemplate,serializationLibrary=jackson,dateLibrary=java8-localdatetime && cd dist/clients/agent-controller/java && mvn clean package -DskipTests"
-      },
-      "configurations": {
-        "test": {},
-        "release": {
-          "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-controller/spec/openapi.yaml -g java -o dist/clients/agent-controller/java --additional-properties=groupId=io.agenstra,artifactId=agent-controller-client,packageName=io.agenstra.agentcontroller,library=resttemplate,serializationLibrary=jackson,dateLibrary=java8-localdatetime && cd dist/clients/agent-controller/java && mvn clean package -DskipTests && mvn deploy:deploy-file -DrepositoryId=github -Durl=https://maven.pkg.github.com/forepath/tsef -Dfile=target/agent-controller-client-*.jar -DpomFile=pom.xml -DgroupId=io.agenstra -DartifactId=agent-controller-client -Dversion=$VERSION"
-        }
-      },
-      "defaultConfiguration": "test"
-    },
     "openapi-client-js": {
       "cache": true,
       "executor": "nx:run-commands",
