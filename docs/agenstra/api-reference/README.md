@@ -105,9 +105,9 @@ The Java clients use RestTemplate for HTTP communication and Jackson for JSON se
 
 JavaScript and TypeScript client packages are published to GitHub Packages npm registry and can be installed using npm or yarn.
 
-**Agent Manager Client**: `@agenstra/agent-manager-client`
+**Agent Manager Client**: `@forepath/agenstra-agent-manager-client`
 
-**Agent Controller Client**: `@agenstra/agent-controller-client`
+**Agent Controller Client**: `@forepath/agenstra-agent-controller-client`
 
 The TypeScript clients are built with Axios and include full type definitions and interfaces. All clients support configurable base URLs for flexible endpoint configuration.
 
@@ -116,7 +116,7 @@ The TypeScript clients are built with Axios and include full type definitions an
 To install the published clients, configure your package manager to use GitHub Packages:
 
 - **Maven**: Configure GitHub Packages repository in your `pom.xml` or `settings.xml`
-- **npm/yarn**: Configure `@agenstra` scope to use GitHub Packages registry in your `.npmrc`
+- **npm/yarn**: Configure `@forepath` scope to use GitHub Packages registry in your `.npmrc`
 
 All clients are automatically generated and published with each release, ensuring they stay in sync with the latest API specifications.
 

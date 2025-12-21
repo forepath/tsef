@@ -223,12 +223,12 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/clients/agent-manager/js"],
       "options": {
-        "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g typescript-axios -o dist/clients/agent-manager/js --additional-properties=npmName=@agenstra/agent-manager-client,npmVersion=1.0.0,withInterfaces=true && cd dist/clients/agent-manager/js && npm install && npm run build"
+        "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g typescript-axios -o dist/clients/agent-manager/js --additional-properties=npmName=@forepath/agenstra-agent-manager-client,npmVersion=1.0.0,withInterfaces=true && cd dist/clients/agent-manager/js && npm install && npm run build"
       },
       "configurations": {
         "test": {},
         "release": {
-          "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g typescript-axios -o dist/clients/agent-manager/js --additional-properties=npmName=@agenstra/agent-manager-client,npmVersion=$VERSION,withInterfaces=true && cd dist/clients/agent-manager/js && node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json'));pkg.publishConfig={registry:'https://npm.pkg.github.com'};fs.writeFileSync('package.json',JSON.stringify(pkg,null,2));\" && npm install && npm run build && npm publish"
+          "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g typescript-axios -o dist/clients/agent-manager/js --additional-properties=npmName=@forepath/agenstra-agent-manager-client,npmVersion=$VERSION,withInterfaces=true && cd dist/clients/agent-manager/js && node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json'));pkg.publishConfig={registry:'https://npm.pkg.github.com'};fs.writeFileSync('package.json',JSON.stringify(pkg,null,2));\" && npm install && npm run build && npm publish"
         }
       },
       "defaultConfiguration": "test"

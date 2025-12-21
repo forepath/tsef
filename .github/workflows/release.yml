@@ -356,7 +356,7 @@ jobs:
 
       - name: Configure npm for GitHub Packages
         run: |
-          echo "@agenstra:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@forepath:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
       - name: Install OpenAPI Generator CLI
