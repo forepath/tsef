@@ -203,32 +203,17 @@
         "command": "docker compose up -d --force-recreate --remove-orphans"
       }
     },
-    "openapi-client-java": {
-      "cache": true,
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/dist/clients/agent-manager/java"],
-      "options": {
-        "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g java -o dist/clients/agent-manager/java --additional-properties=groupId=io.agenstra,artifactId=agent-manager-client,packageName=io.agenstra.agentmanager,library=resttemplate,serializationLibrary=jackson,dateLibrary=java8-localdatetime && cd dist/clients/agent-manager/java && mvn clean package -DskipTests"
-      },
-      "configurations": {
-        "test": {},
-        "release": {
-          "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g java -o dist/clients/agent-manager/java --additional-properties=groupId=io.agenstra,artifactId=agent-manager-client,packageName=io.agenstra.agentmanager,library=resttemplate,serializationLibrary=jackson,dateLibrary=java8-localdatetime && cd dist/clients/agent-manager/java && mvn clean package -DskipTests && mvn deploy:deploy-file -DrepositoryId=github -Durl=https://maven.pkg.github.com/forepath/tsef -Dfile=target/agent-manager-client-*.jar -DpomFile=pom.xml -DgroupId=io.agenstra -DartifactId=agent-manager-client -Dversion=$VERSION"
-        }
-      },
-      "defaultConfiguration": "test"
-    },
     "openapi-client-js": {
       "cache": true,
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/clients/agent-manager/js"],
       "options": {
-        "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g typescript-axios -o dist/clients/agent-manager/js --additional-properties=npmName=@agenstra/agent-manager-client,npmVersion=1.0.0,withInterfaces=true && cd dist/clients/agent-manager/js && npm install && npm run build"
+        "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g typescript-axios -o dist/clients/agent-manager/js --additional-properties=npmName=@forepath/agenstra-agent-manager-client,npmVersion=1.0.0,withInterfaces=true && cd dist/clients/agent-manager/js && npm install && npm run build"
       },
       "configurations": {
         "test": {},
         "release": {
-          "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g typescript-axios -o dist/clients/agent-manager/js --additional-properties=npmName=@agenstra/agent-manager-client,npmVersion=$VERSION,withInterfaces=true && cd dist/clients/agent-manager/js && node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json'));pkg.publishConfig={registry:'https://npm.pkg.github.com'};fs.writeFileSync('package.json',JSON.stringify(pkg,null,2));\" && npm install && npm run build && npm publish"
+          "command": "npx @openapitools/openapi-generator-cli generate -i libs/domains/framework/backend/feature-agent-manager/spec/openapi.yaml -g typescript-axios -o dist/clients/agent-manager/js --additional-properties=npmName=@forepath/agenstra-agent-manager-client,npmVersion=$VERSION,withInterfaces=true && cd dist/clients/agent-manager/js && node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json'));pkg.publishConfig={registry:'https://npm.pkg.github.com'};fs.writeFileSync('package.json',JSON.stringify(pkg,null,2));\" && npm install && npm run build && npm publish"
         }
       },
       "defaultConfiguration": "test"
