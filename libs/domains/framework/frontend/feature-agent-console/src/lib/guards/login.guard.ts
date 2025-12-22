@@ -28,6 +28,9 @@ export const loginGuard: CanActivateFn = (_route, _state) => {
       if (isAuthenticated) {
         // User is already authenticated, redirect to dashboard
         return router.createUrlTree(localeService.buildAbsoluteUrl(['/clients']));
+      } else {
+        // Login to Keycloak
+        keycloakService.login();
       }
     }
     // User is not authenticated, allow access to login
