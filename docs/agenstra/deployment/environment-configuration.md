@@ -124,6 +124,14 @@ Complete reference for all environment variables used in Agenstra.
 
 ## Frontend Agent Console
 
+### Runtime Configuration
+
+- `CONFIG` - URL to a remote JSON configuration file that will be loaded at runtime and merged with build-time defaults (optional)
+  - If set, the application will fetch this configuration during initialization via `/config` endpoint
+  - The remote configuration takes precedence over build-time defaults
+  - If not set or fetch fails, the application falls back to build-time defaults
+  - Example: `CONFIG=https://config.example.com/agenstra-config.json`
+
 ### API Configuration
 
 - `API_URL` - Backend API endpoint (default: `http://localhost:3100`)

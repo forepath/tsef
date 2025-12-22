@@ -115,7 +115,7 @@ describe('loginGuard', () => {
       const result = runInInjectionContext(injector, () => loginGuard(mockRoute, mockState));
 
       expect(result).toBe(mockUrlTree);
-      expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/dashboard']);
+      expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/clients']);
       expect(mockIsLoggedIn).toHaveBeenCalled();
     });
 
@@ -163,7 +163,7 @@ describe('loginGuard', () => {
       const result = runInInjectionContext(injector, () => loginGuard(mockRoute, mockState));
 
       expect(result).toBe(mockUrlTree);
-      expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/dashboard']);
+      expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/clients']);
     });
 
     it('should redirect to dashboard if API key exists in localStorage', () => {
@@ -179,7 +179,7 @@ describe('loginGuard', () => {
       const result = runInInjectionContext(injector, () => loginGuard(mockRoute, mockState));
 
       expect(result).toBe(mockUrlTree);
-      expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/dashboard']);
+      expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/clients']);
       expect(window.localStorage.getItem).toHaveBeenCalledWith('agent-controller-api-key');
     });
 
@@ -197,7 +197,7 @@ describe('loginGuard', () => {
       const result = runInInjectionContext(injector, () => loginGuard(mockRoute, mockState));
 
       expect(result).toBe(mockUrlTree);
-      expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/dashboard']);
+      expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/clients']);
       // Should check environment first, so localStorage might not be checked
     });
 

@@ -156,8 +156,21 @@ The application uses Keycloak for authentication:
 
 Configure the application via environment variables:
 
+### Runtime Configuration (Docker Containers)
+
+- `CONFIG` - URL to a remote JSON configuration file that will be loaded at runtime and merged with build-time defaults (optional)
+  - If set, the application will fetch this configuration during initialization via `/config` endpoint
+  - The remote configuration takes precedence over build-time defaults
+  - If not set or fetch fails, the application falls back to build-time defaults
+  - Example: `CONFIG=https://config.example.com/agenstra-config.json`
+
+### API Configuration
+
 - `API_URL` - Backend API endpoint (default: `http://localhost:3100`)
 - `WEBSOCKET_URL` - WebSocket endpoint (default: `http://localhost:8081`)
+
+### Keycloak Configuration
+
 - `KEYCLOAK_AUTH_SERVER_URL` - Keycloak server URL
 - `KEYCLOAK_REALM` - Keycloak realm
 - `KEYCLOAK_CLIENT_ID` - Keycloak client ID
@@ -196,8 +209,9 @@ Before deploying to production:
 2. Set `API_URL` to production backend endpoint
 3. Set `WEBSOCKET_URL` to production WebSocket endpoint
 4. Configure Keycloak client for production domain
-5. Build the application: `nx build frontend-agent-console --configuration=production`
-6. Serve the built files using a web server (nginx, Apache, etc.)
+5. (Optional) Set `CONFIG` environment variable to a remote JSON configuration URL for runtime configuration
+6. Build the application: `nx build frontend-agent-console --configuration=production`
+7. Serve the built files using a web server (nginx, Apache, etc.)
 
 ## Related Documentation
 

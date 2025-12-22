@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import type { Environment } from '@forepath/framework/frontend/util-configuration';
-import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
+import { ENVIRONMENT, LocaleService } from '@forepath/framework/frontend/util-configuration';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { KeycloakService } from 'keycloak-angular';
@@ -28,6 +28,7 @@ import {
 // Mock KeycloakService to avoid ES module import issues in Jest
 jest.mock('keycloak-angular', () => ({
   KeycloakService: jest.fn(),
+  LocaleService: jest.fn(),
 }));
 
 describe('AuthenticationEffects', () => {
@@ -35,6 +36,7 @@ describe('AuthenticationEffects', () => {
   let mockEnvironment: Environment;
   let mockKeycloakService: jest.Mocked<Partial<KeycloakService>>;
   let mockRouter: jest.Mocked<Partial<Router>>;
+  let mockLocaleService: jest.Mocked<Partial<LocaleService>>;
 
   const API_KEY_STORAGE_KEY = 'agent-controller-api-key';
 
@@ -77,6 +79,10 @@ describe('AuthenticationEffects', () => {
       isLoggedIn: jest.fn(),
     };
 
+    mockLocaleService = {
+      buildAbsoluteUrl: jest.fn(),
+    };
+
     mockRouter = {
       navigate: jest.fn().mockResolvedValue(true),
     };
@@ -95,6 +101,10 @@ describe('AuthenticationEffects', () => {
         {
           provide: Router,
           useValue: mockRouter,
+        },
+        {
+          provide: LocaleService,
+          useValue: mockLocaleService,
         },
       ],
     });
@@ -131,6 +141,10 @@ describe('AuthenticationEffects', () => {
             {
               provide: KeycloakService,
               useValue: mockKeycloakService,
+            },
+            {
+              provide: LocaleService,
+              useValue: mockLocaleService,
             },
           ],
         });
@@ -205,6 +219,10 @@ describe('AuthenticationEffects', () => {
               provide: KeycloakService,
               useValue: mockKeycloakService,
             },
+            {
+              provide: LocaleService,
+              useValue: mockLocaleService,
+            },
           ],
         });
       });
@@ -272,6 +290,10 @@ describe('AuthenticationEffects', () => {
               provide: KeycloakService,
               useValue: mockKeycloakService,
             },
+            {
+              provide: LocaleService,
+              useValue: mockLocaleService,
+            },
           ],
         });
       });
@@ -312,6 +334,10 @@ describe('AuthenticationEffects', () => {
             {
               provide: KeycloakService,
               useValue: mockKeycloakService,
+            },
+            {
+              provide: LocaleService,
+              useValue: mockLocaleService,
             },
           ],
         });
@@ -380,6 +406,10 @@ describe('AuthenticationEffects', () => {
             {
               provide: KeycloakService,
               useValue: mockKeycloakService,
+            },
+            {
+              provide: LocaleService,
+              useValue: mockLocaleService,
             },
           ],
         });
@@ -461,6 +491,10 @@ describe('AuthenticationEffects', () => {
               provide: KeycloakService,
               useValue: mockKeycloakService,
             },
+            {
+              provide: LocaleService,
+              useValue: mockLocaleService,
+            },
           ],
         });
       });
@@ -524,30 +558,34 @@ describe('AuthenticationEffects', () => {
   });
 
   describe('loginSuccessRedirect$', () => {
-    it('should navigate to /dashboard when loginSuccess action is dispatched', (done) => {
+    it('should navigate to /clients when loginSuccess action is dispatched', (done) => {
       const action = loginSuccess({ authenticationType: 'api-key' });
 
       actions$ = of(action);
       mockRouter.navigate = jest.fn().mockResolvedValue(true);
+      mockLocaleService.buildAbsoluteUrl = jest.fn().mockReturnValue(['/clients']);
 
-      loginSuccessRedirect$(actions$, mockRouter as any).subscribe({
+      loginSuccessRedirect$(actions$, mockRouter as any, mockLocaleService as any).subscribe({
         complete: () => {
-          expect(mockRouter.navigate).toHaveBeenCalledWith(['/dashboard']);
+          expect(mockLocaleService.buildAbsoluteUrl).toHaveBeenCalledWith(['/clients']);
+          expect(mockRouter.navigate).toHaveBeenCalledWith(['/clients']);
           expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
           done();
         },
       });
     });
 
-    it('should navigate to /dashboard for keycloak authentication type', (done) => {
+    it('should navigate to /clients for keycloak authentication type', (done) => {
       const action = loginSuccess({ authenticationType: 'keycloak' });
 
       actions$ = of(action);
       mockRouter.navigate = jest.fn().mockResolvedValue(true);
+      mockLocaleService.buildAbsoluteUrl = jest.fn().mockReturnValue(['/clients']);
 
-      loginSuccessRedirect$(actions$, mockRouter as any).subscribe({
+      loginSuccessRedirect$(actions$, mockRouter as any, mockLocaleService as any).subscribe({
         complete: () => {
-          expect(mockRouter.navigate).toHaveBeenCalledWith(['/dashboard']);
+          expect(mockLocaleService.buildAbsoluteUrl).toHaveBeenCalledWith(['/clients']);
+          expect(mockRouter.navigate).toHaveBeenCalledWith(['/clients']);
           expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
           done();
         },
@@ -561,9 +599,11 @@ describe('AuthenticationEffects', () => {
 
       actions$ = of(action);
       mockRouter.navigate = jest.fn().mockResolvedValue(true);
+      mockLocaleService.buildAbsoluteUrl = jest.fn().mockReturnValue(['/login']);
 
-      logoutSuccessRedirect$(actions$, mockRouter as any).subscribe({
+      logoutSuccessRedirect$(actions$, mockRouter as any, mockLocaleService as any).subscribe({
         complete: () => {
+          expect(mockLocaleService.buildAbsoluteUrl).toHaveBeenCalledWith(['/login']);
           expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']);
           expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
           done();
