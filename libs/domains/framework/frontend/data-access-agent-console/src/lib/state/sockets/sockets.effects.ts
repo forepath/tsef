@@ -110,7 +110,7 @@ export const connectSocket$ = createEffect(
     return actions$.pipe(
       ofType(connectSocket),
       switchMap(() => {
-        const websocketUrl = environment.controller?.websocketUrl;
+        const websocketUrl = environment.controller.websocketUrl;
         if (!websocketUrl) {
           return of(connectSocketFailure({ error: 'WebSocket URL not configured' }));
         }

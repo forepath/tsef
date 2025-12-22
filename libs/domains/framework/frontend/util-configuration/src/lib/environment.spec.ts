@@ -9,6 +9,7 @@ describe('environment', () => {
   it('should be an instance of Environment', () => {
     expect(environment).toMatchObject<Environment>({
       production: expect.any(Boolean),
+      controller: expect.any(Object),
       authentication: expect.any(Object),
       chatModelOptions: expect.any(Object),
       editor: expect.any(Object),

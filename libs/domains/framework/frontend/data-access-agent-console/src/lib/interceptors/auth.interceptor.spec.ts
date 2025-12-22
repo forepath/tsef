@@ -49,6 +49,7 @@ describe('authInterceptor', () => {
     mockEnvironment = {
       controller: {
         restApiUrl: 'http://localhost:3100/api',
+        websocketUrl: 'ws://localhost:8081/clients',
       },
       authentication: {
         type: 'api-key',
@@ -74,20 +75,6 @@ describe('authInterceptor', () => {
     it('should pass through requests without modification', (done) => {
       const injector = setupTestBed();
       const req = new HttpRequest('GET', 'http://other-domain.com/api/data');
-      const result = runInInjectionContext(injector, () => authInterceptor(req, mockNext));
-
-      result.subscribe((response) => {
-        expect(response).toBeInstanceOf(HttpResponse);
-        expect(mockNext).toHaveBeenCalledWith(req);
-        done();
-      });
-    });
-  });
-
-  describe('when API URL is not configured', () => {
-    it('should pass through requests without modification', (done) => {
-      const injector = setupTestBed({ controller: undefined });
-      const req = new HttpRequest('GET', 'http://localhost:3100/api/clients');
       const result = runInInjectionContext(injector, () => authInterceptor(req, mockNext));
 
       result.subscribe((response) => {

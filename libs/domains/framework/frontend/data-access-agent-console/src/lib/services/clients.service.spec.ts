@@ -159,31 +159,4 @@ describe('ClientsService', () => {
       req.flush(null);
     });
   });
-
-  describe('apiUrl fallback', () => {
-    it('should use default API URL when environment controller is not configured', () => {
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          {
-            provide: ENVIRONMENT,
-            useValue: {
-              controller: undefined,
-            },
-          },
-        ],
-      });
-
-      const serviceWithFallback = TestBed.inject(ClientsService);
-      const httpMockWithFallback = TestBed.inject(HttpTestingController);
-
-      serviceWithFallback.listClients().subscribe();
-
-      const req = httpMockWithFallback.expectOne('http://localhost:3100/api/clients');
-      expect(req.request.method).toBe('GET');
-      req.flush([]);
-      httpMockWithFallback.verify();
-    });
-  });
 });

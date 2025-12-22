@@ -53,7 +53,13 @@
               "maximumError": "8kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "fileReplacements": [
+            {
+              "replace": "libs/domains/framework/frontend/util-configuration/src/lib/environment.ts",
+              "with": "libs/domains/framework/frontend/util-configuration/src/lib/environment.production.ts"
+            }
+          ]
         },
         "development": {
           "optimization": false,

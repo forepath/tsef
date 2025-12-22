@@ -10,6 +10,10 @@ describe('Environment interfaces', () => {
     it('should require production property', () => {
       const validEnv: Environment = {
         production: true,
+        controller: {
+          restApiUrl: 'http://localhost:3100/api',
+          websocketUrl: 'ws://localhost:8081/clients',
+        },
         authentication: {
           type: 'api-key',
         },
@@ -30,6 +34,10 @@ describe('Environment interfaces', () => {
     it('should require authentication property', () => {
       const validEnv: Environment = {
         production: false,
+        controller: {
+          restApiUrl: 'http://localhost:3100/api',
+          websocketUrl: 'ws://localhost:8081/clients',
+        },
         authentication: {
           type: 'api-key',
         },
@@ -74,29 +82,13 @@ describe('Environment interfaces', () => {
       expect(envWithController.controller?.websocketUrl).toBe('ws://localhost:8081/clients');
     });
 
-    it('should allow environment without controller', () => {
-      const envWithoutController: Environment = {
-        production: false,
-        authentication: {
-          type: 'api-key',
-        },
-        chatModelOptions: {
-          default: 'Auto',
-        },
-        editor: {
-          openInNewWindow: false,
-        },
-        cookieConsent: {
-          domain: 'localhost',
-          privacyPolicyUrl: 'https://example.com/privacy',
-        },
-      };
-      expect(envWithoutController.controller).toBeUndefined();
-    });
-
     it('should require chatModelOptions map', () => {
       const env: Environment = {
         production: true,
+        controller: {
+          restApiUrl: 'http://localhost:3100/api',
+          websocketUrl: 'ws://localhost:8081/clients',
+        },
         authentication: {
           type: 'api-key',
         },

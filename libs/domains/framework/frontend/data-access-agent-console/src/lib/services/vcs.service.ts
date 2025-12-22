@@ -26,7 +26,7 @@ export class VcsService {
    * Get the base URL for the API.
    */
   private get apiUrl(): string {
-    return this.environment.controller?.restApiUrl || 'http://localhost:3100/api';
+    return this.environment.controller.restApiUrl;
   }
 
   /**
