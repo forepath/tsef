@@ -2,7 +2,7 @@ import { Injector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import type { Environment } from '@forepath/framework/frontend/util-configuration';
-import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
+import { ENVIRONMENT, LocaleService } from '@forepath/framework/frontend/util-configuration';
 import { KeycloakService } from 'keycloak-angular';
 import { loginGuard } from './login.guard';
 
@@ -17,8 +17,12 @@ describe('loginGuard', () => {
   let mockState: RouterStateSnapshot;
   let mockEnvironment: Environment;
   let mockKeycloakService: jest.Mocked<Partial<KeycloakService>>;
+  let mockLocaleService: jest.Mocked<Partial<LocaleService>>;
 
-  const setupTestBed = (environmentOverrides?: Partial<Environment>, keycloakServiceOverride?: any): Injector => {
+  const setupTestBed = (
+    environmentOverrides?: Partial<Environment>,
+    keycloakServiceOverride?: Partial<KeycloakService> | null,
+  ): Injector => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -33,6 +37,10 @@ describe('loginGuard', () => {
         {
           provide: KeycloakService,
           useValue: keycloakServiceOverride ?? mockKeycloakService,
+        },
+        {
+          provide: LocaleService,
+          useValue: mockLocaleService,
         },
       ],
     });
@@ -81,6 +89,11 @@ describe('loginGuard', () => {
 
     mockKeycloakService = {
       isLoggedIn: jest.fn(),
+      login: jest.fn(),
+    };
+
+    mockLocaleService = {
+      buildAbsoluteUrl: jest.fn((path: string[]) => path),
     };
 
     jest.clearAllMocks();
@@ -115,18 +128,24 @@ describe('loginGuard', () => {
       const result = runInInjectionContext(injector, () => loginGuard(mockRoute, mockState));
 
       expect(result).toBe(mockUrlTree);
+      expect(mockLocaleService.buildAbsoluteUrl).toHaveBeenCalledWith(['/clients']);
       expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/clients']);
       expect(mockIsLoggedIn).toHaveBeenCalled();
     });
 
-    it('should allow access if user is not authenticated', () => {
+    it('should call login and allow access if user is not authenticated', () => {
+      const mockLogin = jest.fn();
+      const mockIsLoggedIn = jest.fn().mockReturnValue(false);
       const injector = setupTestBed(undefined, {
-        isLoggedIn: jest.fn().mockReturnValue(false),
+        isLoggedIn: mockIsLoggedIn,
+        login: mockLogin,
       });
 
       const result = runInInjectionContext(injector, () => loginGuard(mockRoute, mockState));
 
       expect(result).toBe(true);
+      expect(mockIsLoggedIn).toHaveBeenCalled();
+      expect(mockLogin).toHaveBeenCalled();
       expect(mockRouter.createUrlTree).not.toHaveBeenCalled();
     });
 
@@ -163,6 +182,7 @@ describe('loginGuard', () => {
       const result = runInInjectionContext(injector, () => loginGuard(mockRoute, mockState));
 
       expect(result).toBe(mockUrlTree);
+      expect(mockLocaleService.buildAbsoluteUrl).toHaveBeenCalledWith(['/clients']);
       expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/clients']);
     });
 
@@ -179,6 +199,7 @@ describe('loginGuard', () => {
       const result = runInInjectionContext(injector, () => loginGuard(mockRoute, mockState));
 
       expect(result).toBe(mockUrlTree);
+      expect(mockLocaleService.buildAbsoluteUrl).toHaveBeenCalledWith(['/clients']);
       expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/clients']);
       expect(window.localStorage.getItem).toHaveBeenCalledWith('agent-controller-api-key');
     });
@@ -197,6 +218,7 @@ describe('loginGuard', () => {
       const result = runInInjectionContext(injector, () => loginGuard(mockRoute, mockState));
 
       expect(result).toBe(mockUrlTree);
+      expect(mockLocaleService.buildAbsoluteUrl).toHaveBeenCalledWith(['/clients']);
       expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/clients']);
       // Should check environment first, so localStorage might not be checked
     });
