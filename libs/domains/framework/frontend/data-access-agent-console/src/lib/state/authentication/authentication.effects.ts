@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import type { Environment } from '@forepath/framework/frontend/util-configuration';
-import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
+import { ENVIRONMENT, LocaleService } from '@forepath/framework/frontend/util-configuration';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { KeycloakService } from 'keycloak-angular';
 import { catchError, from, map, of, switchMap, tap } from 'rxjs';
@@ -77,11 +77,11 @@ export const login$ = createEffect(
  * Effect to redirect to dashboard upon login success
  */
 export const loginSuccessRedirect$ = createEffect(
-  (actions$ = inject(Actions), router = inject(Router)) => {
+  (actions$ = inject(Actions), router = inject(Router), localeService = inject(LocaleService)) => {
     return actions$.pipe(
       ofType(loginSuccess),
       tap(() => {
-        router.navigate(['/dashboard']);
+        router.navigate(localeService.buildAbsoluteUrl(['/clients']));
       }),
     );
   },
@@ -122,11 +122,11 @@ export const logout$ = createEffect(
  * Effect to redirect to login upon logout success
  */
 export const logoutSuccessRedirect$ = createEffect(
-  (actions$ = inject(Actions), router = inject(Router)) => {
+  (actions$ = inject(Actions), router = inject(Router), localeService = inject(LocaleService)) => {
     return actions$.pipe(
       ofType(logoutSuccess),
       tap(() => {
-        router.navigate(['/login']);
+        router.navigate(localeService.buildAbsoluteUrl(['/login']));
       }),
     );
   },

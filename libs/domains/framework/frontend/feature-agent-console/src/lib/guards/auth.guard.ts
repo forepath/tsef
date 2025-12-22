@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { Router, type CanActivateFn } from '@angular/router';
 import type { Environment } from '@forepath/framework/frontend/util-configuration';
-import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
+import { ENVIRONMENT, LocaleService } from '@forepath/framework/frontend/util-configuration';
 import { isAuthenticated } from '@forepath/identity/frontend';
 
 /**
@@ -18,6 +18,7 @@ const API_KEY_STORAGE_KEY = 'agent-controller-api-key';
 export const authGuard: CanActivateFn = (route, state) => {
   const environment = inject<Environment>(ENVIRONMENT);
   const router = inject(Router);
+  const localeService = inject(LocaleService);
 
   if (environment.authentication.type === 'keycloak') {
     // Use Keycloak guard for authentication
@@ -40,9 +41,9 @@ export const authGuard: CanActivateFn = (route, state) => {
     }
 
     // No API key found in environment or localStorage, redirect to login
-    return router.createUrlTree(['/login']);
+    return router.createUrlTree(localeService.buildAbsoluteUrl(['/login']));
   }
 
   // For other authentication types, redirect to login
-  return router.createUrlTree(['/login']);
+  return router.createUrlTree(localeService.buildAbsoluteUrl(['/login']));
 };

@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { Router, type CanActivateFn } from '@angular/router';
 import type { Environment } from '@forepath/framework/frontend/util-configuration';
-import { ENVIRONMENT } from '@forepath/framework/frontend/util-configuration';
+import { ENVIRONMENT, LocaleService } from '@forepath/framework/frontend/util-configuration';
 import { KeycloakService } from 'keycloak-angular';
 
 /**
@@ -11,13 +11,14 @@ const API_KEY_STORAGE_KEY = 'agent-controller-api-key';
 
 /**
  * Guard that prevents authenticated users from accessing the login route.
- * - If authentication type is 'keycloak', checks if user is authenticated and redirects to /dashboard if so
- * - If authentication type is 'api-key', checks if API key exists in environment or localStorage and redirects to /dashboard if so
+ * - If authentication type is 'keycloak', checks if user is authenticated and redirects to /clients if so
+ * - If authentication type is 'api-key', checks if API key exists in environment or localStorage and redirects to /clients if so
  * - Otherwise, allows access to login route
  */
 export const loginGuard: CanActivateFn = (_route, _state) => {
   const environment = inject<Environment>(ENVIRONMENT);
   const router = inject(Router);
+  const localeService = inject(LocaleService);
 
   if (environment.authentication.type === 'keycloak') {
     const keycloakService = inject(KeycloakService, { optional: true });
@@ -26,7 +27,7 @@ export const loginGuard: CanActivateFn = (_route, _state) => {
       const isAuthenticated = keycloakService.isLoggedIn();
       if (isAuthenticated) {
         // User is already authenticated, redirect to dashboard
-        return router.createUrlTree(['/dashboard']);
+        return router.createUrlTree(localeService.buildAbsoluteUrl(['/clients']));
       }
     }
     // User is not authenticated, allow access to login
@@ -38,14 +39,14 @@ export const loginGuard: CanActivateFn = (_route, _state) => {
     const envApiKey = environment.authentication.apiKey;
     if (envApiKey) {
       // API key found in environment, user is "logged in", redirect to dashboard
-      return router.createUrlTree(['/dashboard']);
+      return router.createUrlTree(localeService.buildAbsoluteUrl(['/clients']));
     }
 
     // Check if API key exists in localStorage
     const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
     if (storedApiKey) {
       // API key found in localStorage, user is "logged in", redirect to dashboard
-      return router.createUrlTree(['/dashboard']);
+      return router.createUrlTree(localeService.buildAbsoluteUrl(['/clients']));
     }
 
     // No API key found, allow access to login

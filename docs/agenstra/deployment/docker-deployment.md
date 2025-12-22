@@ -117,6 +117,20 @@ nx docker:api backend-agent-manager
 nx docker:server frontend-agent-console
 ```
 
+### Frontend Container Configuration
+
+Frontend containers support runtime configuration via the `CONFIG` environment variable:
+
+```yaml
+services:
+  frontend:
+    environment:
+      - CONFIG=https://config.example.com/agenstra-config.json
+      - PORT=4200
+```
+
+The `CONFIG` variable specifies a URL to a JSON configuration file that will be fetched at runtime and merged with build-time defaults. This allows you to configure frontend applications without rebuilding containers.
+
 ## Running Containers
 
 ### Using Docker Compose (Recommended)
@@ -156,6 +170,13 @@ docker run -d \
   -e DB_HOST=postgres \
   -e STATIC_API_KEY=your-api-key \
   backend-agent-manager:api
+
+# Run frontend agent console
+docker run -d \
+  --name frontend-agent-console \
+  -p 4200:4200 \
+  -e CONFIG=https://config.example.com/agenstra-config.json \
+  frontend-agent-console:server
 ```
 
 ## Docker Socket Mount

@@ -5,6 +5,34 @@ import { join, resolve } from 'path';
 const app = express();
 const port = process.env['PORT'] || 4200;
 
+/**
+ * Runtime configuration endpoint.
+ * If process.env.CONFIG is set to a URL, this endpoint will proxy the JSON from that URL.
+ * Otherwise, it returns an empty object so the frontend can safely fall back to defaults.
+ */
+app.get('/config', async (req, res) => {
+  const configUrl = process.env['CONFIG'];
+
+  if (!configUrl) {
+    return res.json({});
+  }
+
+  try {
+    const response = await fetch(configUrl);
+
+    if (!response.ok) {
+      console.error(`Failed to fetch CONFIG from ${configUrl}: ${response.status} ${response.statusText}`);
+      return res.status(500).json({});
+    }
+
+    const json = await response.json();
+    return res.json(json);
+  } catch (error) {
+    console.error('Error fetching CONFIG URL:', error);
+    return res.status(500).json({});
+  }
+});
+
 // Base path for the Angular build output
 // When bundled (CommonJS), use the script's directory to find browser directory relative to server bundle
 // When running with ts-node (ES modules), use import.meta.url to find from workspace root
@@ -114,6 +142,19 @@ function getLocaleFromRequest(req: express.Request): string {
 
   // Default to configured default locale
   return DEFAULT_LOCALE;
+}
+
+function getLocaleFromPath(req: express.Request): string | undefined {
+  // Check URL path for locale prefix (e.g., /en/..., /de/...)
+  const url = new URL(req.url || '', `http://${req.headers.host}`);
+  const pathSegments = url.pathname.split('/').filter(Boolean);
+
+  if (pathSegments.length > 0 && AVAILABLE_LOCALES.includes(pathSegments[0])) {
+    return pathSegments[0];
+  }
+
+  // Default to undefined
+  return undefined;
 }
 
 /**
@@ -240,6 +281,11 @@ app.get('*', (req, res) => {
   if (!existsSync(indexPath)) {
     console.error(`Index file not found: ${indexPath}`);
     res.status(404).send('Locale build not found. Please build the application first.');
+    return;
+  }
+
+  if (!getLocaleFromPath(req)) {
+    res.redirect(302, `/${locale}${req.url}`);
     return;
   }
 
