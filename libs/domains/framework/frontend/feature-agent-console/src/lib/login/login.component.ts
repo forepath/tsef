@@ -28,7 +28,7 @@ export class AgentConsoleLoginComponent implements OnInit {
    * Extracts only the hostname and port (without protocol or path).
    */
   get apiBaseHostname(): string {
-    const apiUrl = this.environment.controller?.restApiUrl || 'http://localhost:3100/api';
+    const apiUrl = this.environment.controller.restApiUrl;
     try {
       const url = new URL(apiUrl);
       return url.host;

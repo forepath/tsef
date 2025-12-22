@@ -229,33 +229,4 @@ describe('FilesService', () => {
       req.flush(null);
     });
   });
-
-  describe('apiUrl fallback', () => {
-    it('should use default API URL when environment controller is not configured', () => {
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          {
-            provide: ENVIRONMENT,
-            useValue: {
-              controller: undefined,
-            },
-          },
-        ],
-      });
-
-      const serviceWithFallback = TestBed.inject(FilesService);
-      const httpMockWithFallback = TestBed.inject(HttpTestingController);
-
-      serviceWithFallback.listDirectory(clientId, agentId).subscribe();
-
-      const req = httpMockWithFallback.expectOne(
-        `http://localhost:3100/api/clients/${clientId}/agents/${agentId}/files`,
-      );
-      expect(req.request.method).toBe('GET');
-      req.flush([]);
-      httpMockWithFallback.verify();
-    });
-  });
 });

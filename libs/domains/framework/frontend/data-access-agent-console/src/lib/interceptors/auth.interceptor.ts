@@ -14,7 +14,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const keycloakService = inject(KeycloakService, { optional: true });
 
   // Only apply authentication to API requests
-  const apiUrl = environment.controller?.restApiUrl;
+  const apiUrl = environment.controller.restApiUrl;
   if (!apiUrl) {
     return next(req);
   }

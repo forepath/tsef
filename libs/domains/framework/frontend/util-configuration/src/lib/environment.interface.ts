@@ -1,6 +1,6 @@
 export interface Environment {
   production: boolean;
-  controller?: {
+  controller: {
     restApiUrl: string;
     websocketUrl: string;
   };
