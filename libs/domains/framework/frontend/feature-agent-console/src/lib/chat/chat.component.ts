@@ -130,8 +130,21 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   private markedInstance: Marked | null = null;
   private markedLoadPromise: Promise<Marked> | null = null;
 
+  // Search state
+  readonly searchClientQuery = signal<string>('');
+  readonly searchAgentQuery = signal<string>('');
+
   // Client list observables
-  readonly clients$: Observable<ClientResponseDto[]> = this.clientsFacade.clients$;
+  readonly searchClientQuery$ = toObservable(this.searchClientQuery);
+  readonly clients$: Observable<ClientResponseDto[]> = this.clientsFacade.clients$.pipe(
+    combineLatestWith(this.searchClientQuery$),
+    map(([clients, searchQuery]) => {
+      if (!searchQuery) {
+        return clients;
+      }
+      return clients.filter((client) => JSON.stringify(client).toLowerCase().includes(searchQuery.toLowerCase()));
+    }),
+  );
   readonly activeClientId$: Observable<string | null> = this.clientsFacade.activeClientId$;
   readonly activeClient$: Observable<ClientResponseDto | null> = this.clientsFacade.activeClient$;
   readonly clientsLoading$: Observable<boolean> = this.clientsFacade.loading$;
@@ -141,12 +154,21 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly clientsUpdating$: Observable<boolean> = this.clientsFacade.updating$;
 
   // Agent list observables (computed based on active client)
+  readonly searchAgentQuery$ = toObservable(this.searchAgentQuery);
   readonly agents$: Observable<AgentResponseDto[]> = this.activeClientId$.pipe(
     switchMap((clientId) => {
       if (!clientId) {
         return of([]);
       }
-      return this.agentsFacade.getClientAgents$(clientId);
+      return this.agentsFacade.getClientAgents$(clientId).pipe(
+        combineLatestWith(this.searchAgentQuery$),
+        map(([agents, searchQuery]) => {
+          if (!searchQuery) {
+            return agents;
+          }
+          return agents.filter((agent) => JSON.stringify(agent).toLowerCase().includes(searchQuery.toLowerCase()));
+        }),
+      );
     }),
   );
   readonly agentsLoading$: Observable<boolean> = this.activeClientId$.pipe(
@@ -697,6 +719,10 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         // Update active client
         this.activeClientId = clientId;
         this.agentsFacade.loadClientAgents(clientId);
+        // Clear search agent query
+        if (this.searchAgentQuery()) {
+          this.searchAgentQuery.set('');
+        }
         // Ensure socket is connected before setting client
         this.ensureSocketConnectedAndSetClient(clientId);
       } else if (!clientId && this.activeClientId) {
@@ -711,6 +737,10 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         const currentAgentId = this.selectedAgentId();
         if (currentAgentId) {
           this.selectedAgentId.set(null);
+        }
+        // Clear search agent query
+        if (this.searchAgentQuery()) {
+          this.searchAgentQuery.set('');
         }
       }
     });
