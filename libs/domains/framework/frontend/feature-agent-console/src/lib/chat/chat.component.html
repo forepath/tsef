@@ -221,14 +221,14 @@
               >
                 <i class="bi bi-arrow-left"></i>
               </button>
-              <h5 class="mb-0 fw-semibold">Agents</h5>
+              <h5 class="mb-0 fw-semibold">Environments</h5>
             </div>
             <button
               type="button"
               class="btn btn-sm btn-primary"
               (click)="onAddAgentClick()"
               [disabled]="!(activeClientId$ | async) || (agentsCreating$ | async) === true"
-              title="Add agent"
+              title="Add environment"
             >
               <i class="bi bi-plus-circle"></i>
               Add
@@ -239,7 +239,7 @@
           @if (agentsLoading$ | async) {
             <div class="d-flex justify-content-center align-items-center p-4">
               <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading agents...</span>
+                <span class="visually-hidden">Loading environments...</span>
               </div>
             </div>
           } @else {
@@ -247,7 +247,7 @@
               @if (agents.length === 0) {
                 <div class="p-4 text-center text-muted">
                   <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                  <p class="mb-0">No agents available</p>
+                  <p class="mb-0">No environments available</p>
                 </div>
               } @else {
                 <div class="list-group list-group-flush">
@@ -312,7 +312,7 @@
                           class="btn btn-sm btn-outline-primary"
                           (click)="onEditAgentClick(agent); $event.stopPropagation()"
                           [disabled]="(agentsUpdating$ | async) === true"
-                          title="Edit agent"
+                          title="Edit environment"
                         >
                           <i class="bi bi-pencil"></i>
                         </button>
@@ -321,7 +321,7 @@
                           class="btn btn-sm btn-outline-danger"
                           (click)="onDeleteAgentClick(agent.id, agent.name); $event.stopPropagation()"
                           [disabled]="(agentsDeleting$ | async) === true"
-                          title="Delete agent"
+                          title="Delete environment"
                         >
                           <i class="bi bi-trash"></i>
                         </button>
@@ -368,7 +368,7 @@
                 class="btn btn-sm btn-secondary d-block d-md-none"
                 (click)="onChatBackButton()"
                 [disabled]="!(selectedAgent$ | async)"
-                [title]="editorOpen() ? 'Close Chat' : 'Back to agents'"
+                [title]="editorOpen() ? 'Close Chat' : 'Back to environments'"
               >
                 <i class="bi bi-arrow-left"></i>
               </button>
@@ -874,7 +874,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="deleteAgentModalLabel">Delete Agent</h5>
+        <h5 class="modal-title" id="deleteAgentModalLabel">Delete Environment</h5>
         <button
           type="button"
           class="btn-close"
@@ -885,7 +885,7 @@
       </div>
       <div class="modal-body">
         <p>
-          Are you sure you want to delete the agent <strong>{{ agentToDeleteName() }}</strong
+          Are you sure you want to delete the environment <strong>{{ agentToDeleteName() }}</strong
           >?
         </p>
         <p class="text-danger mb-0">
@@ -1387,7 +1387,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addAgentModalLabel">Add Agent</h5>
+        <h5 class="modal-title" id="addAgentModalLabel">Add Environment</h5>
         <button
           type="button"
           class="btn-close"
@@ -1475,7 +1475,7 @@
               <label class="form-check-label" for="createVirtualWorkspace"> Create Virtual Workspace (VNC) </label>
             </div>
             <small class="form-text text-muted d-block mt-1"
-              >Enable VNC access to the agent's virtual workspace. Defaults to enabled.</small
+              >Enable VNC access to the environment's virtual workspace. Defaults to enabled.</small
             >
           </div>
           <div class="mb-3">
@@ -1492,7 +1492,7 @@
               <label class="form-check-label" for="createSshConnection"> Create SSH Connection </label>
             </div>
             <small class="form-text text-muted d-block mt-1"
-              >Enable SSH access to the agent container. Defaults to enabled.</small
+              >Enable SSH access to the environment container. Defaults to enabled.</small
             >
           </div>
           <div class="alert alert-info mb-0" role="alert">
@@ -1517,7 +1517,7 @@
             @if (agentsCreating$ | async) {
               <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
             }
-            Create Agent
+            Create Environment
           </button>
         </div>
       </form>
@@ -1720,7 +1720,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="updateAgentModalLabel">Update Agent</h5>
+        <h5 class="modal-title" id="updateAgentModalLabel">Update Environment</h5>
         <button
           type="button"
           class="btn-close"
@@ -1774,7 +1774,7 @@
             @if (agentsUpdating$ | async) {
               <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
             }
-            Update Agent
+            Update Environment
           </button>
         </div>
       </form>
