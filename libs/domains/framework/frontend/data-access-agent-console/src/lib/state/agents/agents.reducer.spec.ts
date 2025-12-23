@@ -7,21 +7,21 @@ import {
   deleteClientAgentFailure,
   deleteClientAgentSuccess,
   loadClientAgent,
+  loadClientAgentCommands,
+  loadClientAgentCommandsFailure,
+  loadClientAgentCommandsSuccess,
   loadClientAgentFailure,
   loadClientAgents,
   loadClientAgentsBatch,
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
-  loadClientAgentCommands,
-  loadClientAgentCommandsFailure,
-  loadClientAgentCommandsSuccess,
   updateClientAgent,
   updateClientAgentFailure,
   updateClientAgentSuccess,
 } from './agents.actions';
 import { agentsReducer, initialAgentsState, type AgentsState } from './agents.reducer';
-import type { AgentResponseDto } from './agents.types';
+import type { AgentResponseDto, ContainerType } from './agents.types';
 
 describe('agentsReducer', () => {
   const clientId = 'client-1';
@@ -32,6 +32,7 @@ describe('agentsReducer', () => {
     name: 'Test Agent',
     description: 'Test Description',
     agentType: 'cursor',
+    containerType: 'generic' as ContainerType,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
@@ -40,6 +41,7 @@ describe('agentsReducer', () => {
     id: 'agent-2',
     name: 'Test Agent 2',
     agentType: 'cursor',
+    containerType: 'generic' as ContainerType,
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',
   };

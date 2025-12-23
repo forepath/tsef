@@ -270,6 +270,10 @@
                           }
                           @if ((activeClient$ | async) || agent.vnc || agent.git?.repositoryUrl) {
                             <div class="d-flex align-items-center gap-3 row-gap-0 flex-wrap">
+                              <small class="text-muted mt-1">
+                                <i class="bi bi-box me-1"></i>
+                                {{ getContainerTypeDisplayName(agent.containerType) }}
+                              </small>
                               @if (activeClient$ | async; as activeClient) {
                                 <small class="text-muted mt-1">
                                   <i class="bi bi-robot me-1"></i>
@@ -1446,6 +1450,26 @@
             }
           }
           <div class="mb-3">
+            <label for="agentContainerType" class="form-label">Container Type</label>
+            <select
+              class="form-select"
+              id="agentContainerType"
+              name="containerType"
+              [ngModel]="newAgent().containerType ?? ''"
+              (ngModelChange)="updateAgentField('containerType', $event === '' ? undefined : $event)"
+              [disabled]="(agentsCreating$ | async) === true"
+            >
+              <option value="">Default (Generic)</option>
+              <option [value]="ContainerType.GENERIC">Generic</option>
+              <option [value]="ContainerType.DOCKER">Docker</option>
+              <option [value]="ContainerType.TERRAFORM">Terraform</option>
+              <option [value]="ContainerType.KUBERNETES">Kubernetes</option>
+            </select>
+            <small class="form-text text-muted"
+              >The type of content this agent holds. Defaults to Generic if not specified.</small
+            >
+          </div>
+          <div class="mb-3">
             <label for="agentGitRepositoryUrl" class="form-label">Git Repository URL</label>
             <input
               type="url"
@@ -1755,6 +1779,24 @@
               (ngModelChange)="updateEditingAgentField('description', $event)"
               [disabled]="(agentsUpdating$ | async) === true"
             ></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="updateAgentContainerType" class="form-label">Container Type</label>
+            <select
+              class="form-select"
+              id="updateAgentContainerType"
+              name="containerType"
+              [ngModel]="editingAgent().containerType ?? ''"
+              (ngModelChange)="updateEditingAgentField('containerType', $event === '' ? undefined : $event)"
+              [disabled]="(agentsUpdating$ | async) === true"
+            >
+              <option value="">Default (Generic)</option>
+              <option [value]="ContainerType.GENERIC">Generic</option>
+              <option [value]="ContainerType.DOCKER">Docker</option>
+              <option [value]="ContainerType.TERRAFORM">Terraform</option>
+              <option [value]="ContainerType.KUBERNETES">Kubernetes</option>
+            </select>
+            <small class="form-text text-muted">The type of content this agent holds.</small>
           </div>
         </div>
         <div class="modal-footer">

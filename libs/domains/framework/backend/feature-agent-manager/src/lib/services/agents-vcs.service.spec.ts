@@ -1,15 +1,12 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateBranchDto } from '../dto/create-branch.dto';
-import { GitBranchDto } from '../dto/git-branch.dto';
-import { GitDiffDto } from '../dto/git-diff.dto';
-import { GitFileStatusDto, GitStatusDto } from '../dto/git-status.dto';
 import { ResolveConflictDto } from '../dto/resolve-conflict.dto';
-import { AgentEntity } from '../entities/agent.entity';
+import { AgentEntity, ContainerType } from '../entities/agent.entity';
 import { AgentsRepository } from '../repositories/agents.repository';
 import { AgentFileSystemService } from './agent-file-system.service';
-import { AgentsService } from './agents.service';
 import { AgentsVcsService } from './agents-vcs.service';
+import { AgentsService } from './agents.service';
 import { DockerService } from './docker.service';
 
 describe('AgentsVcsService', () => {
@@ -30,6 +27,7 @@ describe('AgentsVcsService', () => {
     containerId: mockContainerId,
     volumePath: '/opt/agents/test-uuid',
     agentType: 'cursor',
+    containerType: ContainerType.GENERIC,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };

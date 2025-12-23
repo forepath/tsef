@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 import { AgentsGateway } from './agents.gateway';
-import { AgentEntity } from './entities/agent.entity';
+import { AgentEntity, ContainerType } from './entities/agent.entity';
 import { AgentProviderFactory } from './providers/agent-provider.factory';
 import { AgentProvider } from './providers/agent-provider.interface';
 import { ChatFilterFactory } from './providers/chat-filter.factory';
@@ -34,6 +34,7 @@ describe('AgentsGateway', () => {
     hashedPassword: 'hashed-password',
     containerId: 'container-123',
     agentType: 'cursor',
+    containerType: ContainerType.GENERIC,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
@@ -43,6 +44,7 @@ describe('AgentsGateway', () => {
     name: mockAgent.name,
     description: mockAgent.description,
     agentType: mockAgent.agentType,
+    containerType: mockAgent.containerType,
     createdAt: mockAgent.createdAt,
     updatedAt: mockAgent.updatedAt,
   };

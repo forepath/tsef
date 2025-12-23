@@ -1,16 +1,17 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import axios, { AxiosError } from 'axios';
 import {
   AgentResponseDto,
+  ContainerType,
   CreateAgentDto,
   CreateAgentResponseDto,
   UpdateAgentDto,
 } from '@forepath/framework/backend/feature-agent-manager';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import axios, { AxiosError } from 'axios';
 import { AuthenticationType, ClientEntity } from '../entities/client.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
-import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { ClientAgentCredentialsService } from './client-agent-credentials.service';
+import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { ClientsService } from './clients.service';
 
 // Mock axios
@@ -51,6 +52,7 @@ describe('ClientAgentProxyService', () => {
     name: 'Test Agent',
     description: 'Test Agent Description',
     agentType: 'cursor',
+    containerType: ContainerType.GENERIC,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };

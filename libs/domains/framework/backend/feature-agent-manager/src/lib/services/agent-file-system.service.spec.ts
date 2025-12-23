@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as fs from 'fs';
 import { AgentResponseDto } from '../dto/agent-response.dto';
 import { FileNodeDto } from '../dto/file-node.dto';
-import { AgentEntity } from '../entities/agent.entity';
+import { AgentEntity, ContainerType } from '../entities/agent.entity';
 import { AgentsRepository } from '../repositories/agents.repository';
 import { AgentFileSystemService } from './agent-file-system.service';
 import { AgentsService } from './agents.service';
@@ -23,6 +23,7 @@ describe('AgentFileSystemService', () => {
     name: 'Test Agent',
     description: 'Test Description',
     agentType: 'cursor',
+    containerType: ContainerType.GENERIC,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };

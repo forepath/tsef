@@ -4,6 +4,7 @@ export interface AgentResponseDto {
   name: string;
   description?: string;
   agentType: string;
+  containerType: ContainerType;
   vnc?: {
     port: number;
     password: string;
@@ -23,6 +24,7 @@ export interface CreateAgentDto {
   name: string;
   description?: string;
   agentType?: string;
+  containerType?: ContainerType;
   gitRepositoryUrl?: string;
   createVirtualWorkspace?: boolean;
   createSshConnection?: boolean;
@@ -31,6 +33,7 @@ export interface CreateAgentDto {
 export interface UpdateAgentDto {
   name?: string;
   description?: string;
+  containerType?: ContainerType;
 }
 
 export interface CreateAgentResponseDto extends AgentResponseDto {
@@ -40,4 +43,11 @@ export interface CreateAgentResponseDto extends AgentResponseDto {
 export interface ListClientAgentsParams {
   limit?: number;
   offset?: number;
+}
+
+export enum ContainerType {
+  GENERIC = 'generic',
+  DOCKER = 'docker',
+  TERRAFORM = 'terraform',
+  KUBERNETES = 'kubernetes',
 }

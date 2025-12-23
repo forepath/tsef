@@ -35,7 +35,13 @@ import {
   loadClientAgentsBatch$,
   updateClientAgent$,
 } from './agents.effects';
-import type { AgentResponseDto, CreateAgentDto, CreateAgentResponseDto, UpdateAgentDto } from './agents.types';
+import type {
+  AgentResponseDto,
+  ContainerType,
+  CreateAgentDto,
+  CreateAgentResponseDto,
+  UpdateAgentDto,
+} from './agents.types';
 
 describe('AgentsEffects', () => {
   let actions$: Actions;
@@ -47,6 +53,7 @@ describe('AgentsEffects', () => {
     name: 'Test Agent',
     description: 'Test Description',
     agentType: 'cursor',
+    containerType: 'generic' as ContainerType,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };

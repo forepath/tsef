@@ -1,4 +1,5 @@
-import { IsBoolean, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ContainerType } from '../entities/agent.entity';
 
 /**
  * DTO for creating a new agent.
@@ -17,6 +18,10 @@ export class CreateAgentDto {
   @IsString({ message: 'Agent type must be a string' })
   @IsIn(['cursor'], { message: 'Agent type must be one of: cursor' })
   agentType?: string;
+
+  @IsOptional()
+  @IsEnum(ContainerType, { message: 'Container type must be one of: generic, docker, terraform, kubernetes' })
+  containerType?: ContainerType = ContainerType.GENERIC;
 
   @IsOptional()
   @IsString({ message: 'Git repository URL must be a string' })

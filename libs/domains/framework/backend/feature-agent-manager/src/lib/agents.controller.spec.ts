@@ -4,6 +4,7 @@ import { AgentResponseDto } from './dto/agent-response.dto';
 import { CreateAgentResponseDto } from './dto/create-agent-response.dto';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { UpdateAgentDto } from './dto/update-agent.dto';
+import { ContainerType } from './entities/agent.entity';
 import { AgentsService } from './services/agents.service';
 
 describe('AgentsController', () => {
@@ -15,6 +16,7 @@ describe('AgentsController', () => {
     name: 'Test Agent',
     description: 'Test Description',
     agentType: 'cursor',
+    containerType: ContainerType.GENERIC,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };

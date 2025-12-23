@@ -6,7 +6,7 @@ import { AgentResponseDto } from '../dto/agent-response.dto';
 import { CreateAgentResponseDto } from '../dto/create-agent-response.dto';
 import { CreateAgentDto } from '../dto/create-agent.dto';
 import { UpdateAgentDto } from '../dto/update-agent.dto';
-import { AgentEntity } from '../entities/agent.entity';
+import { AgentEntity, ContainerType } from '../entities/agent.entity';
 import { AgentProviderFactory } from '../providers/agent-provider.factory';
 import { AgentsRepository } from '../repositories/agents.repository';
 import { DockerService } from './docker.service';
@@ -402,6 +402,7 @@ export class AgentsService implements OnApplicationBootstrap {
           containerId: containerId,
           volumePath: agentVolumePath,
           agentType: createAgentDto.agentType || 'cursor',
+          containerType: createAgentDto.containerType || ContainerType.GENERIC,
           ...(createAgentDto.createVirtualWorkspace &&
             virtualWorkspace && {
               vncContainerId: virtualWorkspace.containerId,
@@ -506,6 +507,7 @@ export class AgentsService implements OnApplicationBootstrap {
       name: updateAgentDto.name,
       description: updateAgentDto.description,
       ...(updateAgentDto.agentType !== undefined && { agentType: updateAgentDto.agentType }),
+      ...(updateAgentDto.containerType !== undefined && { containerType: updateAgentDto.containerType }),
     };
 
     // Remove undefined fields
@@ -586,6 +588,7 @@ export class AgentsService implements OnApplicationBootstrap {
       name: agent.name,
       description: agent.description,
       agentType: agent.agentType,
+      containerType: agent.containerType,
       vnc: agent.vncHostPort
         ? {
             port: agent.vncHostPort,

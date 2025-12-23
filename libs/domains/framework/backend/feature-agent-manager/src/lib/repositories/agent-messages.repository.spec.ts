@@ -1,10 +1,10 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
-import { AgentMessagesRepository } from './agent-messages.repository';
 import { AgentMessageEntity } from '../entities/agent-message.entity';
-import { AgentEntity } from '../entities/agent.entity';
+import { AgentEntity, ContainerType } from '../entities/agent.entity';
+import { AgentMessagesRepository } from './agent-messages.repository';
 
 describe('AgentMessagesRepository', () => {
   let repository: AgentMessagesRepository;
@@ -18,6 +18,7 @@ describe('AgentMessagesRepository', () => {
     containerId: 'container-id-123',
     volumePath: '/opt/agents/test-volume-uuid',
     agentType: 'cursor',
+    containerType: ContainerType.GENERIC,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

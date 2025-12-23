@@ -18,6 +18,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   AgentsFacade,
   ClientsFacade,
+  ContainerType,
   FilesFacade,
   SocketsFacade,
   type AgentResponseDto,
@@ -285,6 +286,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     label,
   }));
 
+  // Expose ContainerType enum for template use
+  readonly ContainerType = ContainerType;
+
   // Computed observable to determine if chat should be visible
   readonly shouldShowChat$ = combineLatest([
     this.selectedAgent$,
@@ -412,6 +416,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     name: '',
     description: '',
     agentType: undefined,
+    containerType: undefined,
     gitRepositoryUrl: undefined,
     createVirtualWorkspace: true,
     createSshConnection: true,
@@ -434,6 +439,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly editingAgent = signal<Partial<UpdateAgentDto>>({
     name: '',
     description: '',
+    containerType: undefined,
   });
 
   private initialRouting: Record<string, boolean> = {
@@ -1682,6 +1688,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       name: '',
       description: '',
       agentType: undefined,
+      containerType: undefined,
       gitRepositoryUrl: undefined,
     });
     this.showModal(this.addAgentModal);
@@ -1920,6 +1927,10 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       createDto.gitRepositoryUrl = agentData.gitRepositoryUrl;
     }
 
+    if (agentData.containerType) {
+      createDto.containerType = agentData.containerType;
+    }
+
     // Include boolean fields (default to true if not set)
     createDto.createVirtualWorkspace = agentData.createVirtualWorkspace ?? true;
     createDto.createSshConnection = agentData.createSshConnection ?? true;
@@ -1940,6 +1951,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           name: '',
           description: '',
           agentType: undefined,
+          containerType: undefined,
           gitRepositoryUrl: undefined,
           createVirtualWorkspace: true,
           createSshConnection: true,
@@ -2065,6 +2077,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.editingAgent.set({
       name: agent.name,
       description: agent.description,
+      containerType: agent.containerType,
     });
     this.showModal(this.updateAgentModal);
   }
@@ -2169,6 +2182,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     if (agentData.description !== undefined) {
       updateDto.description = agentData.description;
     }
+    if (agentData.containerType !== undefined) {
+      updateDto.containerType = agentData.containerType;
+    }
 
     this.agentsFacade.updateClientAgent(clientId, agentId, updateDto);
 
@@ -2186,6 +2202,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         this.editingAgent.set({
           name: '',
           description: '',
+          containerType: undefined,
         });
       });
   }
@@ -2720,7 +2737,29 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       .subscribe();
   }
 
+  /**
+   * Toggle the SSH command visibility
+   */
   onToggleSSHCommand(): void {
     this.showSSHCommand.set(!this.showSSHCommand());
+  }
+
+  /**
+   * Get the display name for a container type
+   * @param containerType - The container type
+   * @returns The display name
+   */
+  getContainerTypeDisplayName(containerType: ContainerType): string {
+    switch (containerType) {
+      case ContainerType.DOCKER:
+        return 'Docker';
+      case ContainerType.TERRAFORM:
+        return 'Terraform';
+      case ContainerType.KUBERNETES:
+        return 'Kubernetes';
+      case ContainerType.GENERIC:
+      default:
+        return 'Generic';
+    }
   }
 }

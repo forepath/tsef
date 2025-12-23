@@ -1,4 +1,5 @@
-import { IsIn, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsIn, IsOptional, IsString } from 'class-validator';
+import { ContainerType } from '../entities/agent.entity';
 
 /**
  * DTO for updating an existing agent.
@@ -18,4 +19,8 @@ export class UpdateAgentDto {
   @IsString({ message: 'Agent type must be a string' })
   @IsIn(['cursor'], { message: 'Agent type must be one of: cursor' })
   agentType?: string;
+
+  @IsOptional()
+  @IsEnum(ContainerType, { message: 'Container type must be one of: generic, docker, terraform, kubernetes' })
+  containerType?: ContainerType;
 }
