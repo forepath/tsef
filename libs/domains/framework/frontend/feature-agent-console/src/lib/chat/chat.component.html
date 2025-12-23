@@ -111,6 +111,19 @@
             Add
           </button>
         </div>
+        <form #searchClientForm="ngForm">
+          <div class="input-group search-input-container border-bottom">
+            <i class="bi bi-search"></i>
+            <input
+              type="text"
+              class="form-control border-0 search-input"
+              placeholder="Search workspaces"
+              name="search"
+              [(ngModel)]="searchClientQuery"
+              required
+            />
+          </div>
+        </form>
         <div class="flex-grow-1 overflow-auto">
           @if (clientsLoading$ | async) {
             <div class="d-flex justify-content-center align-items-center p-4">
@@ -235,6 +248,19 @@
             </button>
           </div>
         </div>
+        <form #searchAgentForm="ngForm">
+          <div class="input-group search-input-container border-bottom">
+            <i class="bi bi-search"></i>
+            <input
+              type="text"
+              class="form-control border-0 search-input"
+              placeholder="Search environments"
+              name="search"
+              [(ngModel)]="searchAgentQuery"
+              required
+            />
+          </div>
+        </form>
         <div class="flex-grow-1 overflow-auto">
           @if (agentsLoading$ | async) {
             <div class="d-flex justify-content-center align-items-center p-4">
