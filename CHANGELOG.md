@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.19.0](https://github.com/forepath/tsef/compare/v1.18.1...v1.19.0) (2025-12-27)
+
+
+### Features
+
+* agent content types ([#146](https://github.com/forepath/tsef/issues/146)) ([5c3d27a](https://github.com/forepath/tsef/commit/5c3d27ab143292ccc7b4f63addf3514af24e5032))
+* clients and agents search input ([#154](https://github.com/forepath/tsef/issues/154)) ([600ab21](https://github.com/forepath/tsef/commit/600ab21de374619d5f17e6c255d353892971af24))
+* environment remote frontend config ([#148](https://github.com/forepath/tsef/issues/148)) ([6450b71](https://github.com/forepath/tsef/commit/6450b7188948ad5409873eda4cff7775761ccbc6))
+* production frontend config ([#147](https://github.com/forepath/tsef/issues/147)) ([6fa3f1a](https://github.com/forepath/tsef/commit/6fa3f1acb5e9a265894bf619270a2eba20583809))
+
+
+### Bug Fixes
+
+* login guard keycloak redirect ([#152](https://github.com/forepath/tsef/issues/152)) ([bb8a3ef](https://github.com/forepath/tsef/commit/bb8a3ef8ab794a5f28620f70797642fc7d088ca0))
+
+
+### Chores
+
+* lock package manager and package versions ([#149](https://github.com/forepath/tsef/issues/149)) ([87468ca](https://github.com/forepath/tsef/commit/87468caccdd4b72a3a13ef24c560e8a8ae83bca6))
+* rename agents to environments ([#153](https://github.com/forepath/tsef/issues/153)) ([7e2d0ab](https://github.com/forepath/tsef/commit/7e2d0ab4da647dba81fcf9322af62c64258cfd05))
+* upgrade nx workspace ([#150](https://github.com/forepath/tsef/issues/150)) ([99e0511](https://github.com/forepath/tsef/commit/99e051124e280db35561e8be97ad878d9daa3c34))
+
+
+### Documentation
+
+* remove invalid package type ([#145](https://github.com/forepath/tsef/issues/145)) ([76b8719](https://github.com/forepath/tsef/commit/76b871916b5753cd936e99e584ccb6e264d9a3a8))
+
 ## [1.18.1](https://github.com/forepath/tsef/compare/v1.18.0...v1.18.1) (2025-12-21)
 
 
