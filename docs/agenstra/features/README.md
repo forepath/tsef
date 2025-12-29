@@ -15,6 +15,7 @@ Agenstra provides a complete set of features for managing distributed AI agent i
 - **Web IDE** - Monaco Editor integration for code editing
 - **Chat Interface** - AI chat functionality with real-time responses
 - **VNC Browser Access** - Graphical browser access via VNC and noVNC
+- **Deployment** - CI/CD pipeline management and deployment functionality
 
 ## Features
 
@@ -124,6 +125,19 @@ Graphical browser access via VNC and noVNC. Access a Chromium browser running in
 - Dedicated Docker network for container isolation
 - Shared workspace volume between agent and VNC containers
 
+### [Deployment](./deployment.md)
+
+CI/CD pipeline management and deployment functionality. Configure CI/CD providers (GitHub Actions), trigger pipeline runs, monitor their status, and view logs directly from the Agenstra console.
+
+**Key Capabilities**:
+
+- Configure CI/CD providers (GitHub Actions)
+- List repositories, branches, and workflows
+- Trigger pipeline runs manually
+- Monitor pipeline run status in real-time
+- View pipeline run logs and individual job logs
+- Track deployment history
+
 ## Feature Relationships
 
 ```mermaid
@@ -137,6 +151,7 @@ graph TB
     IDE[Web IDE]
     Chat[Chat Interface]
     VNC[VNC Browser Access]
+    DEP[Deployment]
 
     SP --> CM
     CM --> AM
@@ -146,9 +161,11 @@ graph TB
     AM --> IDE
     AM --> Chat
     AM --> VNC
+    AM --> DEP
     WS --> Chat
     FM --> IDE
     VC --> IDE
+    VC --> DEP
 ```
 
 ## Related Documentation

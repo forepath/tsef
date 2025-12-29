@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import * as sshpk from 'sshpk';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,6 +9,7 @@ import { UpdateAgentDto } from '../dto/update-agent.dto';
 import { AgentEntity, ContainerType } from '../entities/agent.entity';
 import { AgentProviderFactory } from '../providers/agent-provider.factory';
 import { AgentsRepository } from '../repositories/agents.repository';
+import { DeploymentsService } from './deployments.service';
 import { DockerService } from './docker.service';
 import { PasswordService } from './password.service';
 
@@ -26,6 +27,8 @@ export class AgentsService implements OnApplicationBootstrap {
     private readonly dockerService: DockerService,
     private readonly passwordService: PasswordService,
     private readonly agentProviderFactory: AgentProviderFactory,
+    @Inject(forwardRef(() => DeploymentsService))
+    private readonly deploymentsService?: DeploymentsService,
   ) {}
 
   /**
@@ -419,6 +422,25 @@ export class AgentsService implements OnApplicationBootstrap {
           gitRepositoryUrl: createAgentDto.gitRepositoryUrl,
         });
 
+        // Create deployment configuration if provided
+        if (createAgentDto.deploymentConfiguration && this.deploymentsService) {
+          try {
+            await this.deploymentsService.upsertConfiguration(agent.id, {
+              providerType: createAgentDto.deploymentConfiguration.providerType,
+              repositoryId: createAgentDto.deploymentConfiguration.repositoryId,
+              defaultBranch: createAgentDto.deploymentConfiguration.defaultBranch,
+              workflowId: createAgentDto.deploymentConfiguration.workflowId,
+              providerToken: createAgentDto.deploymentConfiguration.providerToken,
+              providerBaseUrl: createAgentDto.deploymentConfiguration.providerBaseUrl,
+            });
+          } catch (error) {
+            this.logger.warn(
+              `Failed to create deployment configuration for agent ${agent.id}: ${(error as Error).message}`,
+            );
+            // Don't fail agent creation if deployment config fails
+          }
+        }
+
         return {
           ...this.mapToResponseDto(agent),
           password: generatedPassword,
@@ -516,6 +538,24 @@ export class AgentsService implements OnApplicationBootstrap {
     );
 
     const agent = await this.agentsRepository.update(id, updateData);
+
+    // Update deployment configuration if provided
+    if (updateAgentDto.deploymentConfiguration && this.deploymentsService) {
+      try {
+        await this.deploymentsService.upsertConfiguration(id, {
+          providerType: updateAgentDto.deploymentConfiguration.providerType,
+          repositoryId: updateAgentDto.deploymentConfiguration.repositoryId,
+          defaultBranch: updateAgentDto.deploymentConfiguration.defaultBranch,
+          workflowId: updateAgentDto.deploymentConfiguration.workflowId,
+          providerToken: updateAgentDto.deploymentConfiguration.providerToken,
+          providerBaseUrl: updateAgentDto.deploymentConfiguration.providerBaseUrl,
+        });
+      } catch (error) {
+        this.logger.warn(`Failed to update deployment configuration for agent ${id}: ${(error as Error).message}`);
+        // Don't fail agent update if deployment config fails
+      }
+    }
+
     return this.mapToResponseDto(agent);
   }
 

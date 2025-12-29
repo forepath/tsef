@@ -1,0 +1,171 @@
+<div class="deployment-run-details-container d-flex flex-column h-100">
+  @if (loadingRunStatus() && !hasLoadedOnce()) {
+    <div class="d-flex justify-content-center align-items-center p-4">
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Loading run details...</span>
+      </div>
+    </div>
+  } @else if (currentRunStatus()) {
+    <!-- Run Status -->
+    <div class="p-3 border-bottom">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h6 class="mb-0 fw-semibold">{{ currentRunStatus()!.runName || 'Untitled Run' }}</h6>
+        <span
+          class="badge"
+          [ngClass]="getStatusBadgeClass(currentRunStatus()!.status)"
+          [title]="currentRunStatus()!.status"
+        >
+          <i class="bi" [ngClass]="getStatusIcon(currentRunStatus()!.status)"></i>
+          {{ currentRunStatus()!.status }}
+        </span>
+      </div>
+      <dl class="row mb-0 small">
+        <dt class="col-sm-4">Branch</dt>
+        <dd class="col-sm-8">
+          <code>{{ currentRunStatus()!.ref }}</code>
+        </dd>
+        <dt class="col-sm-4">Commit</dt>
+        <dd class="col-sm-8">
+          <code class="small">{{ currentRunStatus()!.sha.substring(0, 7) }}</code>
+        </dd>
+        <dt class="col-sm-4">Started</dt>
+        <dd class="col-sm-8">{{ formatDate(currentRunStatus()!.createdAt) }}</dd>
+        @if (currentRunStatus()!.updatedAt) {
+          <dt class="col-sm-4">Updated</dt>
+          <dd class="col-sm-8">{{ formatDate(currentRunStatus()!.updatedAt) }}</dd>
+        }
+      </dl>
+      @if (canCancelRun()) {
+        <div class="mt-2">
+          <button
+            type="button"
+            class="btn btn-sm btn-danger"
+            (click)="onCancelRun()"
+            [disabled]="cancellingRun$ | async"
+          >
+            @if (cancellingRun$ | async) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            } @else {
+              <i class="bi bi-stop-circle me-1"></i>
+            }
+            Cancel Run
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Jobs List -->
+    @if (!showRunLogs() && !showJobLogs()) {
+      <div class="d-flex flex-column flex-grow-1" style="min-height: 0">
+        <div class="p-2 border-bottom bg-body-tertiary d-flex align-items-center justify-content-between flex-shrink-0">
+          <h6 class="mb-0 fw-semibold">Jobs</h6>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            (click)="onLoadRunLogs()"
+            [disabled]="loadingRunLogs$ | async"
+          >
+            @if (loadingRunLogs$ | async) {
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            } @else {
+              <i class="bi bi-file-text me-1"></i>
+              View Run Logs
+            }
+          </button>
+        </div>
+        <div class="flex-grow-1 overflow-auto" style="min-height: 0">
+          @if (loadingRunJobs$ | async) {
+            <div class="d-flex justify-content-center p-2">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading jobs...</span>
+              </div>
+            </div>
+          } @else if (runJobs().length === 0) {
+            <p class="text-muted small mb-0">No jobs available</p>
+          } @else {
+            <div class="list-group list-group-flush">
+              @for (job of runJobs(); track job.id) {
+                <div class="list-group-item d-flex align-items-center justify-content-between">
+                  <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <span class="badge" [ngClass]="getJobStatusBadgeClass(job.status)" [title]="job.status">
+                        {{ job.status }}
+                      </span>
+                      <span class="fw-semibold">{{ job.name }}</span>
+                    </div>
+                    @if (job.startedAt) {
+                      <div class="small text-muted">Started: {{ formatDate(job.startedAt) }}</div>
+                    }
+                    @if (job.completedAt) {
+                      <div class="small text-muted">Completed: {{ formatDate(job.completedAt) }}</div>
+                    }
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="onLoadJobLogs(job.id)"
+                    [disabled]="loadingJobLogs$ | async"
+                  >
+                    <i class="bi bi-file-text"></i>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Logs Display -->
+    @if (showRunLogs() || showJobLogs()) {
+      <div class="flex-grow-1 d-flex flex-column" style="min-height: 0">
+        <div class="p-2 border-bottom bg-body-tertiary d-flex align-items-center justify-content-between">
+          <h6 class="mb-0 fw-semibold">
+            {{ showRunLogs() ? 'Run Logs' : 'Job Logs' }}
+            @if (selectedJob()) {
+              - {{ selectedJob()!.name }}
+            }
+          </h6>
+          <button type="button" class="btn btn-sm btn-secondary" (click)="onCloseLogs()">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+        <div class="flex-grow-1 overflow-auto p-3" style="min-height: 0">
+          @if (showRunLogs() && loadingRunLogs()) {
+            <div class="d-flex justify-content-center p-4">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading logs...</span>
+              </div>
+            </div>
+          } @else if (showRunLogs() && runLogs()) {
+            <pre class="log-content mb-0">{{ runLogs() }}</pre>
+          } @else if (showJobLogs() && loadingJobLogs()) {
+            <div class="d-flex justify-content-center p-4">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading logs...</span>
+              </div>
+            </div>
+          } @else if (showJobLogs() && jobLogs()) {
+            <pre class="log-content mb-0">{{ jobLogs() }}</pre>
+          } @else {
+            <p class="text-muted small mb-0">No logs available</p>
+          }
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="d-flex justify-content-center align-items-center p-4">
+      <div class="text-center text-muted">
+        <i class="bi bi-exclamation-triangle fs-4 d-block mb-2"></i>
+        <p class="mb-0 small">Run not found</p>
+      </div>
+    </div>
+  }
+
+  @if (error() && !hasLoadedOnce()) {
+    <div class="alert alert-danger m-3" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ error() }}
+    </div>
+  }
+</div>

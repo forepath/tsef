@@ -34,4 +34,18 @@ export class CreateAgentDto {
   @IsOptional()
   @IsBoolean({ message: 'Create SSH connection must be a boolean' })
   createSshConnection?: boolean = true;
+
+  /**
+   * CI/CD deployment configuration (optional).
+   * If provided, a deployment configuration will be created for this agent.
+   */
+  @IsOptional()
+  deploymentConfiguration?: {
+    providerType: string;
+    repositoryId: string;
+    defaultBranch?: string;
+    workflowId?: string;
+    providerToken: string;
+    providerBaseUrl?: string;
+  };
 }

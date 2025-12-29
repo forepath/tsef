@@ -3,3 +3,11 @@ $primary: #7a3fff;
 @import 'bootstrap/scss/bootstrap';
 @import 'bootstrap/scss/bootstrap-grid';
 @import 'bootstrap-icons/font/bootstrap-icons';
+
+.status-badge {
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  color: var(--bs-white);
+}

@@ -1,4 +1,9 @@
-import { AgentEntity, AgentMessageEntity } from '@forepath/framework/backend';
+import {
+  AgentEntity,
+  AgentMessageEntity,
+  DeploymentConfigurationEntity,
+  DeploymentRunEntity,
+} from '@forepath/framework/backend';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
 /**
@@ -16,7 +21,7 @@ export const typeormConfig: DataSourceOptions = {
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'agent_manager',
-  entities: [AgentEntity, AgentMessageEntity],
+  entities: [AgentEntity, AgentMessageEntity, DeploymentConfigurationEntity, DeploymentRunEntity],
   // Migration paths:
   // - In development with TypeScript: use path from workspace root
   // - In production/Docker: use relative path from working directory (/app)

@@ -47,11 +47,12 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
       - name: Run build
+        if: steps.semantic-release.outputs.new_release_published == 'true'
         run: npx nx run-many --target=build --configuration=production --parallel=3 || echo "No projects for build"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
-        if: always()
+        if: steps.semantic-release.outputs.new_release_published == 'true'
         with:
           name: build-artifacts
           path: |

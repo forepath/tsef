@@ -8,6 +8,7 @@ import { AgentProviderFactory } from '../providers/agent-provider.factory';
 import { AgentProvider } from '../providers/agent-provider.interface';
 import { AgentsRepository } from '../repositories/agents.repository';
 import { AgentsService } from './agents.service';
+import { DeploymentsService } from './deployments.service';
 import { DockerService } from './docker.service';
 import { PasswordService } from './password.service';
 
@@ -17,6 +18,7 @@ describe('AgentsService', () => {
   let passwordService: jest.Mocked<PasswordService>;
   let dockerService: jest.Mocked<DockerService>;
   let agentProviderFactory: jest.Mocked<AgentProviderFactory>;
+  let deploymentsService: jest.Mocked<DeploymentsService>;
 
   const mockAgent: AgentEntity = {
     id: 'test-uuid',
@@ -72,6 +74,12 @@ describe('AgentsService', () => {
     getRegisteredTypes: jest.fn(),
   } as unknown as jest.Mocked<AgentProviderFactory>;
 
+  const mockDeploymentsService = {
+    upsertConfiguration: jest.fn(),
+    deleteConfiguration: jest.fn(),
+    getConfiguration: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -92,6 +100,10 @@ describe('AgentsService', () => {
           provide: AgentProviderFactory,
           useValue: mockAgentProviderFactory,
         },
+        {
+          provide: DeploymentsService,
+          useValue: mockDeploymentsService,
+        },
       ],
     }).compile();
 
@@ -100,6 +112,7 @@ describe('AgentsService', () => {
     passwordService = module.get(PasswordService);
     dockerService = module.get(DockerService);
     agentProviderFactory = module.get(AgentProviderFactory);
+    deploymentsService = module.get(DeploymentsService);
   });
 
   afterEach(() => {
@@ -201,6 +214,7 @@ describe('AgentsService', () => {
         containerId,
         volumePath: expect.stringMatching(/^\/opt\/agents\/[a-f0-9-]+$/),
         agentType: 'cursor',
+        containerType: ContainerType.GENERIC,
         gitRepositoryUrl: undefined,
       });
     });
@@ -265,6 +279,7 @@ describe('AgentsService', () => {
         name: createDto.name,
         description: undefined,
         agentType: 'cursor',
+        containerType: ContainerType.GENERIC,
         hashedPassword,
         containerId,
         volumePath: expect.stringMatching(/^\/opt\/agents\/[a-f0-9-]+$/),
@@ -635,6 +650,191 @@ describe('AgentsService', () => {
       expect(dockerService.deleteContainer).toHaveBeenCalledWith(containerId);
       expect(repository.create).not.toHaveBeenCalled();
     });
+
+    it('should create agent with deployment configuration', async () => {
+      const createDto: CreateAgentDto = {
+        name: 'New Agent',
+        description: 'New Description',
+        containerType: ContainerType.GENERIC,
+        deploymentConfiguration: {
+          providerType: 'github',
+          repositoryId: 'owner/repo',
+          defaultBranch: 'main',
+          workflowId: 'workflow.yml',
+          providerToken: 'ghp_token123',
+        },
+      };
+      const hashedPassword = 'hashed-password';
+      const containerId = 'container-id-123';
+      const volumePath = '/opt/agents/test-volume-uuid';
+      const createdAgent = {
+        ...mockAgent,
+        name: createDto.name,
+        description: createDto.description,
+        hashedPassword,
+        containerId,
+        volumePath,
+      };
+
+      mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
+      mockAgentProvider.getSshConnectionDockerImage.mockReturnValueOnce(undefined);
+      mockRepository.findByName.mockResolvedValue(null);
+      passwordService.hashPassword.mockResolvedValue(hashedPassword);
+      dockerService.createContainer.mockResolvedValue(containerId);
+      dockerService.sendCommandToContainer.mockResolvedValue(undefined);
+      repository.create.mockResolvedValue(createdAgent);
+      deploymentsService.upsertConfiguration.mockResolvedValue({
+        id: 'config-uuid',
+        agentId: createdAgent.id,
+        providerType: 'github',
+        repositoryId: 'owner/repo',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.create(createDto);
+
+      expect(result.id).toBe(mockAgent.id);
+      expect(deploymentsService.upsertConfiguration).toHaveBeenCalledWith(createdAgent.id, {
+        providerType: 'github',
+        repositoryId: 'owner/repo',
+        defaultBranch: 'main',
+        workflowId: 'workflow.yml',
+        providerToken: 'ghp_token123',
+        providerBaseUrl: undefined,
+      });
+    });
+
+    it('should create agent successfully even if deployment configuration fails', async () => {
+      const createDto: CreateAgentDto = {
+        name: 'New Agent',
+        deploymentConfiguration: {
+          providerType: 'github',
+          repositoryId: 'owner/repo',
+          providerToken: 'ghp_token123',
+        },
+      };
+      const hashedPassword = 'hashed-password';
+      const containerId = 'container-id-123';
+      const volumePath = '/opt/agents/test-volume-uuid';
+      const createdAgent = {
+        ...mockAgent,
+        name: createDto.name,
+        hashedPassword,
+        containerId,
+        volumePath,
+      };
+
+      mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
+      mockAgentProvider.getSshConnectionDockerImage.mockReturnValueOnce(undefined);
+      mockRepository.findByName.mockResolvedValue(null);
+      passwordService.hashPassword.mockResolvedValue(hashedPassword);
+      dockerService.createContainer.mockResolvedValue(containerId);
+      dockerService.sendCommandToContainer.mockResolvedValue(undefined);
+      repository.create.mockResolvedValue(createdAgent);
+      deploymentsService.upsertConfiguration.mockRejectedValue(new Error('Deployment config error'));
+
+      const result = await service.create(createDto);
+
+      expect(result.id).toBe(mockAgent.id);
+      expect(result.name).toBe(createDto.name);
+      expect(deploymentsService.upsertConfiguration).toHaveBeenCalled();
+      // Agent creation should succeed even if deployment config fails
+      expect(repository.create).toHaveBeenCalled();
+    });
+
+    it('should not create deployment configuration when not provided', async () => {
+      const createDto: CreateAgentDto = {
+        name: 'New Agent',
+      };
+      const hashedPassword = 'hashed-password';
+      const containerId = 'container-id-123';
+      const volumePath = '/opt/agents/test-volume-uuid';
+      const createdAgent = {
+        ...mockAgent,
+        name: createDto.name,
+        hashedPassword,
+        containerId,
+        volumePath,
+      };
+
+      mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
+      mockAgentProvider.getSshConnectionDockerImage.mockReturnValueOnce(undefined);
+      mockRepository.findByName.mockResolvedValue(null);
+      passwordService.hashPassword.mockResolvedValue(hashedPassword);
+      dockerService.createContainer.mockResolvedValue(containerId);
+      dockerService.sendCommandToContainer.mockResolvedValue(undefined);
+      repository.create.mockResolvedValue(createdAgent);
+
+      const result = await service.create(createDto);
+
+      expect(result.id).toBe(mockAgent.id);
+      expect(deploymentsService.upsertConfiguration).not.toHaveBeenCalled();
+    });
+
+    it('should create agent successfully when DeploymentsService is not available', async () => {
+      // Create a new module without DeploymentsService
+      const moduleWithoutDeployments: TestingModule = await Test.createTestingModule({
+        providers: [
+          AgentsService,
+          {
+            provide: AgentsRepository,
+            useValue: mockRepository,
+          },
+          {
+            provide: PasswordService,
+            useValue: mockPasswordService,
+          },
+          {
+            provide: DockerService,
+            useValue: mockDockerService,
+          },
+          {
+            provide: AgentProviderFactory,
+            useValue: mockAgentProviderFactory,
+          },
+          {
+            provide: DeploymentsService,
+            useValue: undefined,
+          },
+        ],
+      }).compile();
+
+      const serviceWithoutDeployments = moduleWithoutDeployments.get<AgentsService>(AgentsService);
+
+      const createDto: CreateAgentDto = {
+        name: 'New Agent',
+        deploymentConfiguration: {
+          providerType: 'github',
+          repositoryId: 'owner/repo',
+          providerToken: 'ghp_token123',
+        },
+      };
+      const hashedPassword = 'hashed-password';
+      const containerId = 'container-id-123';
+      const volumePath = '/opt/agents/test-volume-uuid';
+      const createdAgent = {
+        ...mockAgent,
+        name: createDto.name,
+        hashedPassword,
+        containerId,
+        volumePath,
+      };
+
+      mockAgentProvider.getVirtualWorkspaceDockerImage.mockReturnValueOnce(undefined);
+      mockAgentProvider.getSshConnectionDockerImage.mockReturnValueOnce(undefined);
+      mockRepository.findByName.mockResolvedValue(null);
+      passwordService.hashPassword.mockResolvedValue(hashedPassword);
+      dockerService.createContainer.mockResolvedValue(containerId);
+      dockerService.sendCommandToContainer.mockResolvedValue(undefined);
+      repository.create.mockResolvedValue(createdAgent);
+
+      // Should succeed even without DeploymentsService
+      const result = await serviceWithoutDeployments.create(createDto);
+
+      expect(result.id).toBe(mockAgent.id);
+      expect(result.name).toBe(createDto.name);
+    });
   });
 
   describe('findAll', () => {
@@ -698,6 +898,81 @@ describe('AgentsService', () => {
       mockRepository.findByName.mockResolvedValue(conflictingAgent);
 
       await expect(service.update('test-uuid', updateDto)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should update agent with deployment configuration', async () => {
+      const updateDto: UpdateAgentDto = {
+        name: 'Updated Agent',
+        deploymentConfiguration: {
+          providerType: 'github',
+          repositoryId: 'owner/repo',
+          defaultBranch: 'main',
+          workflowId: 'workflow.yml',
+          providerToken: 'ghp_token123',
+        },
+      };
+      const updatedAgent = { ...mockAgent, ...updateDto };
+
+      mockRepository.findByName.mockResolvedValue(null);
+      repository.update.mockResolvedValue(updatedAgent);
+      deploymentsService.upsertConfiguration.mockResolvedValue({
+        id: 'config-uuid',
+        agentId: 'test-uuid',
+        providerType: 'github',
+        repositoryId: 'owner/repo',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.update('test-uuid', updateDto);
+
+      expect(result.name).toBe(updateDto.name);
+      expect(deploymentsService.upsertConfiguration).toHaveBeenCalledWith('test-uuid', {
+        providerType: 'github',
+        repositoryId: 'owner/repo',
+        defaultBranch: 'main',
+        workflowId: 'workflow.yml',
+        providerToken: 'ghp_token123',
+        providerBaseUrl: undefined,
+      });
+    });
+
+    it('should update agent successfully even if deployment configuration fails', async () => {
+      const updateDto: UpdateAgentDto = {
+        name: 'Updated Agent',
+        deploymentConfiguration: {
+          providerType: 'github',
+          repositoryId: 'owner/repo',
+          providerToken: 'ghp_token123',
+        },
+      };
+      const updatedAgent = { ...mockAgent, ...updateDto };
+
+      mockRepository.findByName.mockResolvedValue(null);
+      repository.update.mockResolvedValue(updatedAgent);
+      deploymentsService.upsertConfiguration.mockRejectedValue(new Error('Deployment config error'));
+
+      const result = await service.update('test-uuid', updateDto);
+
+      expect(result.name).toBe(updateDto.name);
+      expect(deploymentsService.upsertConfiguration).toHaveBeenCalled();
+      // Agent update should succeed even if deployment config fails
+      expect(repository.update).toHaveBeenCalled();
+    });
+
+    it('should not update deployment configuration when not provided', async () => {
+      const updateDto: UpdateAgentDto = {
+        name: 'Updated Agent',
+      };
+      const updatedAgent = { ...mockAgent, ...updateDto };
+
+      mockRepository.findByName.mockResolvedValue(null);
+      repository.update.mockResolvedValue(updatedAgent);
+
+      const result = await service.update('test-uuid', updateDto);
+
+      expect(result.name).toBe(updateDto.name);
+      expect(deploymentsService.upsertConfiguration).not.toHaveBeenCalled();
     });
   });
 

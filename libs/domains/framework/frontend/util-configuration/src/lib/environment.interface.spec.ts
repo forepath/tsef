@@ -23,6 +23,9 @@ describe('Environment interfaces', () => {
         editor: {
           openInNewWindow: false,
         },
+        deployment: {
+          openInNewWindow: false,
+        },
         cookieConsent: {
           domain: 'localhost',
           privacyPolicyUrl: 'https://example.com/privacy',
@@ -45,6 +48,9 @@ describe('Environment interfaces', () => {
           default: 'Auto',
         },
         editor: {
+          openInNewWindow: false,
+        },
+        deployment: {
           openInNewWindow: false,
         },
         cookieConsent: {
@@ -72,6 +78,9 @@ describe('Environment interfaces', () => {
         editor: {
           openInNewWindow: false,
         },
+        deployment: {
+          openInNewWindow: false,
+        },
         cookieConsent: {
           domain: 'localhost',
           privacyPolicyUrl: 'https://example.com/privacy',
@@ -97,6 +106,9 @@ describe('Environment interfaces', () => {
           'gpt-4o': 'GPT-4o',
         },
         editor: {
+          openInNewWindow: false,
+        },
+        deployment: {
           openInNewWindow: false,
         },
         cookieConsent: {

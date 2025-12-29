@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientsDeploymentsController } from './clients-deployments.controller';
 import { ClientsVcsController } from './clients-vcs.controller';
 import { ClientsController } from './clients.controller';
 import { ClientsGateway } from './clients.gateway';
@@ -13,6 +14,7 @@ import { ClientAgentCredentialsRepository } from './repositories/client-agent-cr
 import { ClientsRepository } from './repositories/clients.repository';
 import { ProvisioningReferencesRepository } from './repositories/provisioning-references.repository';
 import { ClientAgentCredentialsService } from './services/client-agent-credentials.service';
+import { ClientAgentDeploymentsProxyService } from './services/client-agent-deployments-proxy.service';
 import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientAgentVcsProxyService } from './services/client-agent-vcs-proxy.service';
@@ -26,7 +28,7 @@ import { ProvisioningService } from './services/provisioning.service';
  */
 @Module({
   imports: [TypeOrmModule.forFeature([ClientEntity, ClientAgentCredentialEntity, ProvisioningReferenceEntity])],
-  controllers: [ClientsController, ClientsVcsController],
+  controllers: [ClientsController, ClientsVcsController, ClientsDeploymentsController],
   providers: [
     ClientsService,
     ClientsRepository,
@@ -34,6 +36,7 @@ import { ProvisioningService } from './services/provisioning.service';
     ClientAgentProxyService,
     ClientAgentFileSystemProxyService,
     ClientAgentVcsProxyService,
+    ClientAgentDeploymentsProxyService,
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,
     ClientsGateway,
@@ -63,6 +66,7 @@ import { ProvisioningService } from './services/provisioning.service';
     ClientAgentProxyService,
     ClientAgentFileSystemProxyService,
     ClientAgentVcsProxyService,
+    ClientAgentDeploymentsProxyService,
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,
     ClientsGateway,

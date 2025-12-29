@@ -1,0 +1,344 @@
+<div class="deployment-configuration-container d-flex flex-column h-100">
+  @if (loadingConfiguration$ | async) {
+    <!-- Loading State -->
+    <div class="d-flex justify-content-center align-items-center flex-grow-1 p-4">
+      <div class="text-center">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Loading configuration...</span>
+        </div>
+        <p class="text-muted small mb-0">Loading deployment configuration...</p>
+      </div>
+    </div>
+  } @else if (hasConfiguration()) {
+    <!-- Existing Configuration View -->
+    <div class="p-3">
+      <div class="card">
+        <div class="card-body">
+          <h6 class="card-title d-flex align-items-center justify-content-between">
+            <span>Configuration</span>
+            <div class="btn-group btn-group-sm" role="group">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                (click)="onShowConfigurationForm()"
+                title="Edit Configuration"
+              >
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="onDeleteConfiguration()"
+                [disabled]="deletingConfiguration$ | async"
+                title="Delete Configuration"
+              >
+                @if (deletingConfiguration$ | async) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else {
+                  <i class="bi bi-trash"></i>
+                }
+              </button>
+            </div>
+          </h6>
+          <dl class="row mb-0">
+            <dt class="col-sm-4">Provider</dt>
+            <dd class="col-sm-8">{{ getProviderDisplayName(configuration()!.providerType) }}</dd>
+            <dt class="col-sm-4">Repository</dt>
+            <dd class="col-sm-8">{{ configuration()!.repositoryId }}</dd>
+            @if (configuration()!.defaultBranch) {
+              <dt class="col-sm-4">Default Branch</dt>
+              <dd class="col-sm-8">{{ configuration()!.defaultBranch }}</dd>
+            }
+            @if (configuration()!.workflowId) {
+              <dt class="col-sm-4">Workflow</dt>
+              <dd class="col-sm-8">{{ configuration()!.workflowId }}</dd>
+            }
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <!-- Repository Selection -->
+    <div class="p-3 border-top">
+      <h6 class="fw-semibold mb-2">Repository</h6>
+      @if (loadingRepositories$ | async) {
+        <div class="d-flex justify-content-center p-3">
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      } @else if (repositories().length === 0) {
+        <p class="text-muted small mb-0">No repositories available</p>
+      } @else {
+        <select
+          class="form-select form-select-sm"
+          [ngModel]="selectedRepositoryId() || ''"
+          (ngModelChange)="onSelectRepository($event)"
+        >
+          <option value="">Select a repository</option>
+          @for (repo of repositories(); track repo.id) {
+            <option [value]="repo.id">{{ repo.name }}</option>
+          }
+        </select>
+      }
+    </div>
+
+    <!-- Branch Selection -->
+    @if (selectedRepositoryId()) {
+      <div class="p-3 border-top">
+        <h6 class="fw-semibold mb-2">Branch</h6>
+        @if (loadingBranches$ | async) {
+          <div class="d-flex justify-content-center p-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        } @else if (branches().length === 0) {
+          <p class="text-muted small mb-0">No branches available</p>
+        } @else {
+          <select
+            class="form-select form-select-sm"
+            [ngModel]="selectedBranch() || ''"
+            (ngModelChange)="onSelectBranch($event)"
+          >
+            <option value="">Select a branch</option>
+            @for (branch of branches(); track branch.name) {
+              <option [value]="branch.name">{{ branch.name }}</option>
+            }
+          </select>
+        }
+      </div>
+    }
+
+    <!-- Workflow Selection -->
+    @if (selectedRepositoryId()) {
+      <div class="p-3 border-top">
+        <h6 class="fw-semibold mb-2">Workflow</h6>
+        @if (loadingWorkflows$ | async) {
+          <div class="d-flex justify-content-center p-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        } @else if (workflows().length === 0) {
+          <p class="text-muted small mb-0">No workflows available</p>
+        } @else {
+          <select
+            class="form-select form-select-sm mb-2"
+            [ngModel]="selectedWorkflowId() || ''"
+            (ngModelChange)="onSelectWorkflow($event)"
+          >
+            <option value="">Select a workflow</option>
+            @for (workflow of workflows(); track workflow.id) {
+              <option [value]="workflow.id">{{ workflow.name }}</option>
+            }
+          </select>
+
+          <!-- Workflow Inputs -->
+          @if (showWorkflowInputs()) {
+            <div class="mt-2">
+              <label class="form-label small">Workflow Inputs (optional)</label>
+              @for (input of workflowInputsEntries(); track input.key) {
+                <div class="input-group input-group-sm mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    [placeholder]="input.key"
+                    [value]="input.value"
+                    (input)="onUpdateWorkflowInput(input.key, $any($event.target).value)"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    (click)="onRemoveWorkflowInput(input.key)"
+                    title="Remove input"
+                  >
+                    <i class="bi bi-x"></i>
+                  </button>
+                </div>
+              }
+              <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="onAddWorkflowInput()">
+                <i class="bi bi-plus"></i> Add Input
+              </button>
+            </div>
+          }
+
+          <!-- Trigger Workflow Button -->
+          @if (canTriggerWorkflow()) {
+            <button
+              type="button"
+              class="btn btn-sm btn-primary w-100 mt-2"
+              (click)="onTriggerWorkflowClick()"
+              [disabled]="triggeringWorkflow$ | async"
+            >
+              @if (triggeringWorkflow$ | async) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              } @else {
+                <i class="bi bi-play-fill me-1"></i>
+              }
+              Trigger Workflow
+            </button>
+          }
+        }
+      </div>
+    }
+  } @else {
+    <!-- No Configuration - Show Form -->
+    <div class="p-3">
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        No deployment configuration found. Create one to get started.
+      </div>
+      <button type="button" class="btn btn-primary w-100" (click)="onShowConfigurationForm()">
+        <i class="bi bi-plus-circle me-1"></i>
+        Create Configuration
+      </button>
+    </div>
+  }
+
+  <!-- Configuration Form Modal -->
+  <div
+    class="modal fade"
+    id="configurationModal"
+    tabindex="-1"
+    aria-labelledby="configurationModalLabel"
+    aria-hidden="true"
+    #configurationModal
+  >
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="configurationModalLabel">
+            {{ hasConfiguration() ? 'Edit' : 'Create' }} Deployment Configuration
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            (click)="onCancelConfigurationForm()"
+            aria-label="Close"
+            [disabled]="(creatingConfiguration$ | async) || (updatingConfiguration$ | async)"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="providerType" class="form-label">Provider Type</label>
+              <select
+                class="form-select"
+                id="providerType"
+                [value]="providerType()"
+                (change)="providerType.set($any($event.target).value)"
+                [disabled]="hasConfiguration()"
+              >
+                <option value="github">GitHub Actions</option>
+                <option value="gitlab">GitLab CI/CD</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="repositoryId" class="form-label">Repository ID</label>
+              <input
+                type="text"
+                class="form-control"
+                id="repositoryId"
+                [value]="repositoryId()"
+                (input)="repositoryId.set($any($event.target).value)"
+                placeholder="owner/repo"
+                required
+              />
+              <small class="form-text text-muted">Format: owner/repository-name</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="defaultBranch" class="form-label">Default Branch (optional)</label>
+              <input
+                type="text"
+                class="form-control"
+                id="defaultBranch"
+                [value]="defaultBranch()"
+                (input)="defaultBranch.set($any($event.target).value)"
+                placeholder="main"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="workflowId" class="form-label">Workflow ID (optional)</label>
+              <input
+                type="text"
+                class="form-control"
+                id="workflowId"
+                [value]="workflowId()"
+                (input)="workflowId.set($any($event.target).value)"
+                placeholder="workflow.yml"
+              />
+            </div>
+
+            @if (providerType() === 'gitlab') {
+              <div class="mb-3">
+                <label for="providerBaseUrl" class="form-label">GitLab Base URL (optional)</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="providerBaseUrl"
+                  [value]="providerBaseUrl()"
+                  (input)="providerBaseUrl.set($any($event.target).value)"
+                  placeholder="https://gitlab.com"
+                />
+                <small class="form-text text-muted">Leave empty for GitLab.com</small>
+              </div>
+            }
+
+            <div class="mb-3">
+              <label for="providerToken" class="form-label">
+                {{ providerType() === 'github' ? 'GitHub' : 'GitLab' }} Token
+              </label>
+              <input
+                type="password"
+                class="form-control"
+                id="providerToken"
+                [value]="providerToken()"
+                (input)="providerToken.set($any($event.target).value)"
+                [placeholder]="hasConfiguration() ? 'Leave empty to keep current token' : 'Enter token'"
+                [required]="!hasConfiguration()"
+              />
+              <small class="form-text text-muted">
+                {{ hasConfiguration() ? 'Leave empty to keep the current token' : 'Required for authentication' }}
+              </small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+            (click)="onCancelConfigurationForm()"
+            [disabled]="(creatingConfiguration$ | async) || (updatingConfiguration$ | async)"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="onSaveConfiguration()"
+            [disabled]="(creatingConfiguration$ | async) || (updatingConfiguration$ | async) || !repositoryId()"
+          >
+            @if ((creatingConfiguration$ | async) || (updatingConfiguration$ | async)) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            }
+            {{ hasConfiguration() ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Display (404 errors are hidden since we have a "Create Configuration" button) -->
+  @if (filteredError(); as error) {
+    <div class="alert alert-danger m-3" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ error }}
+    </div>
+  }
+</div>
