@@ -62,7 +62,12 @@ describe('AuthenticationEffects', () => {
         type: 'api-key',
       },
       chatModelOptions: {
-        default: 'Auto',
+        cursor: {
+          'composer-1': 'Composer 1',
+        },
+        opencode: {
+          'gpt-4o': 'GPT-4o',
+        },
       },
       editor: {
         openInNewWindow: true,

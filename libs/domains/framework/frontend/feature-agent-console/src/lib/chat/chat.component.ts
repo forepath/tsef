@@ -238,7 +238,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       if (!clientId || !agent) {
         return of([]);
       }
-      return this.agentsFacade.getClientAgentCommands$(clientId, agent.id);
+      return this.agentsFacade.getClientAgentCommands$(clientId, agent.id, agent.agentType);
     }),
   );
   readonly commandsLoading$: Observable<boolean> = combineLatest([this.activeClientId$, this.selectedAgent$]).pipe(
@@ -778,7 +778,11 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       }
       // Load commands when agent is selected
       if (currentAgentId && this.activeClientId) {
-        this.filesFacade.listDirectory(this.activeClientId, currentAgentId, { path: '.cursor/commands' });
+        if (agent?.agentType === 'cursor') {
+          this.filesFacade.listDirectory(this.activeClientId, currentAgentId, { path: '.cursor/commands' });
+        } else if (agent?.agentType === 'opencode') {
+          this.filesFacade.listDirectory(this.activeClientId, currentAgentId, { path: '.opencode/command' });
+        }
       }
       this.previousAgentId = currentAgentId;
     });
@@ -3058,5 +3062,18 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       default:
         return 'Generic';
     }
+  }
+
+  /**
+   * Get the chat model options for a provider
+   * @param provider - The provider type
+   * @returns The chat model options
+   */
+  getChatModelOptions(provider: string): { value: string; label: string }[] {
+    const options = this.environment.chatModelOptions[provider] ?? {};
+    return Object.entries(options).map(([value, label]) => ({
+      value,
+      label,
+    }));
   }
 }

@@ -14,6 +14,8 @@ describe('ConfigService', () => {
     getSshConnectionDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-ssh:latest'),
     sendMessage: jest.fn(),
     sendInitialization: jest.fn(),
+    toParseableString: jest.fn(),
+    toUnifiedResponse: jest.fn(),
   };
 
   const mockAgentProviderFactory = {
@@ -82,6 +84,8 @@ describe('ConfigService', () => {
         getSshConnectionDockerImage: jest.fn().mockReturnValue('openai-ssh-connection-image:latest'),
         sendMessage: jest.fn(),
         sendInitialization: jest.fn(),
+        toParseableString: jest.fn(),
+        toUnifiedResponse: jest.fn(),
       };
       const mockAnthropicProvider = {
         getType: jest.fn().mockReturnValue('anthropic'),
@@ -91,6 +95,8 @@ describe('ConfigService', () => {
         getSshConnectionDockerImage: jest.fn().mockReturnValue('anthropic-ssh-connection-image:latest'),
         sendMessage: jest.fn(),
         sendInitialization: jest.fn(),
+        toParseableString: jest.fn(),
+        toUnifiedResponse: jest.fn(),
       };
 
       const agentTypes = ['cursor', 'openai', 'anthropic'];

@@ -18,7 +18,12 @@ describe('Environment interfaces', () => {
           type: 'api-key',
         },
         chatModelOptions: {
-          default: 'Auto',
+          cursor: {
+            'composer-1': 'Composer 1',
+          },
+          opencode: {
+            'gpt-4o': 'GPT-4o',
+          },
         },
         editor: {
           openInNewWindow: false,
@@ -45,7 +50,12 @@ describe('Environment interfaces', () => {
           type: 'api-key',
         },
         chatModelOptions: {
-          default: 'Auto',
+          cursor: {
+            'composer-1': 'Composer 1',
+          },
+          opencode: {
+            'gpt-4o': 'GPT-4o',
+          },
         },
         editor: {
           openInNewWindow: false,
@@ -73,7 +83,12 @@ describe('Environment interfaces', () => {
           type: 'api-key',
         },
         chatModelOptions: {
-          default: 'Auto',
+          cursor: {
+            'composer-1': 'Composer 1',
+          },
+          opencode: {
+            'gpt-4o': 'GPT-4o',
+          },
         },
         editor: {
           openInNewWindow: false,
@@ -102,8 +117,12 @@ describe('Environment interfaces', () => {
           type: 'api-key',
         },
         chatModelOptions: {
-          default: 'Auto',
-          'gpt-4o': 'GPT-4o',
+          cursor: {
+            'composer-1': 'Composer 1',
+          },
+          opencode: {
+            'gpt-4o': 'GPT-4o',
+          },
         },
         editor: {
           openInNewWindow: false,
@@ -119,7 +138,13 @@ describe('Environment interfaces', () => {
       expect(env.chatModelOptions).toBeDefined();
       Object.entries(env.chatModelOptions).forEach(([key, value]) => {
         expect(typeof key).toBe('string');
-        expect(typeof value).toBe('string');
+        expect(typeof value).toBe('object');
+        expect(value).not.toBeNull();
+        // Each value should be a Record<string, string>
+        Object.entries(value).forEach(([innerKey, innerValue]) => {
+          expect(typeof innerKey).toBe('string');
+          expect(typeof innerValue).toBe('string');
+        });
       });
     });
   });

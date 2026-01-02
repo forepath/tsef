@@ -34,7 +34,13 @@ describe('environment', () => {
     expect(typeof environment.chatModelOptions).toBe('object');
     Object.entries(environment.chatModelOptions).forEach(([key, value]) => {
       expect(typeof key).toBe('string');
-      expect(typeof value).toBe('string');
+      expect(typeof value).toBe('object');
+      expect(value).not.toBeNull();
+      // Each value should be a Record<string, string>
+      Object.entries(value).forEach(([innerKey, innerValue]) => {
+        expect(typeof innerKey).toBe('string');
+        expect(typeof innerValue).toBe('string');
+      });
     });
   });
 

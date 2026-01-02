@@ -150,7 +150,12 @@ describe('FilesEffects', () => {
     it('should return listDirectorySuccess on success', (done) => {
       const directoryPath = '.';
       const action = listDirectory({ clientId, agentId });
-      const outcome = listDirectorySuccess({ clientId, agentId, directoryPath, files: mockFileNodes });
+      const outcome = listDirectorySuccess({
+        clientId,
+        agentId,
+        directoryPath,
+        files: mockFileNodes,
+      });
 
       actions$ = of(action);
       filesService.listDirectory.mockReturnValue(of(mockFileNodes));
@@ -164,7 +169,12 @@ describe('FilesEffects', () => {
     it('should use provided path parameter', (done) => {
       const directoryPath = 'subdirectory';
       const action = listDirectory({ clientId, agentId, params: { path: directoryPath } });
-      const outcome = listDirectorySuccess({ clientId, agentId, directoryPath, files: mockFileNodes });
+      const outcome = listDirectorySuccess({
+        clientId,
+        agentId,
+        directoryPath,
+        files: mockFileNodes,
+      });
 
       actions$ = of(action);
       filesService.listDirectory.mockReturnValue(of(mockFileNodes));
@@ -179,7 +189,12 @@ describe('FilesEffects', () => {
     it('should return listDirectoryFailure on error', (done) => {
       const action = listDirectory({ clientId, agentId });
       const error = new Error('List failed');
-      const outcome = listDirectoryFailure({ clientId, agentId, directoryPath: '.', error: 'List failed' });
+      const outcome = listDirectoryFailure({
+        clientId,
+        agentId,
+        directoryPath: '.',
+        error: 'List failed',
+      });
 
       actions$ = of(action);
       filesService.listDirectory.mockReturnValue(throwError(() => error));

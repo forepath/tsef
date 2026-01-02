@@ -5,7 +5,7 @@ export interface Environment {
     websocketUrl: string;
   };
   authentication: AuthenticationConfig;
-  chatModelOptions: Record<string, string>;
+  chatModelOptions: { [provider: string]: Record<string, string> };
   editor: {
     openInNewWindow: boolean;
   };

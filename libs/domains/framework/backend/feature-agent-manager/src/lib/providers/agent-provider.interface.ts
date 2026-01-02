@@ -1,3 +1,15 @@
+export interface AgentResponseObject {
+  type: string;
+  subtype?: string;
+  is_error?: boolean;
+  duration_ms?: number;
+  duration_api_ms?: number;
+  result?: string;
+  session_id?: string;
+  request_id?: string;
+  [key: string]: unknown; // Allow additional properties
+}
+
 /**
  * Agent provider interface for implementing different agent solutions.
  * This interface allows the system to support multiple agent implementations
@@ -55,6 +67,20 @@ export interface AgentProvider {
    * @returns Promise that resolves when initialization is complete
    */
   sendInitialization(agentId: string, containerId: string, options?: AgentProviderOptions): Promise<void>;
+
+  /**
+   * Convert the response from the agent to a parseable string.
+   * @param response - The response from the agent
+   * @returns The parseable string
+   */
+  toParseableString(response: string): string;
+
+  /**
+   * Convert the response from the agent to a unified response object.
+   * @param response - The response from the agent
+   * @returns The unified response object
+   */
+  toUnifiedResponse(response: string): AgentResponseObject;
 }
 
 /**
@@ -65,4 +91,10 @@ export interface AgentProviderOptions {
    * Optional model identifier (e.g., 'gpt-4', 'claude-3', etc.)
    */
   model?: string;
+
+  /**
+   * Optional flag to continue the agent's session.
+   * @default false
+   */
+  continue?: boolean;
 }

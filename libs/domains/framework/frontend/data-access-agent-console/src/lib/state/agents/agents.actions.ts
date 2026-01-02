@@ -106,7 +106,7 @@ export const loadClientAgentCommands = createAction(
 
 export const loadClientAgentCommandsSuccess = createAction(
   '[Agents] Load Client Agent Commands Success',
-  props<{ clientId: string; agentId: string; commands: string[] }>(),
+  props<{ clientId: string; agentId: string; commands: { [agentType: string]: string[] } }>(),
 );
 
 export const loadClientAgentCommandsFailure = createAction(

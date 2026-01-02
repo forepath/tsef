@@ -1,5 +1,4 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import type { AgentResponseDto } from './agents.types';
 import type { AgentsState } from './agents.reducer';
 
 export const selectAgentsState = createFeatureSelector<AgentsState>('agents');
@@ -73,10 +72,10 @@ export const selectHasClientAgents = (clientId: string) =>
   createSelector(selectClientAgents(clientId), (agents) => agents.length > 0);
 
 // Client:Agent-scoped selectors for commands
-export const selectClientAgentCommands = (clientId: string, agentId: string) =>
+export const selectClientAgentCommands = (clientId: string, agentId: string, agentType: string) =>
   createSelector(selectAgentsCommands, (commands) => {
     const key = `${clientId}:${agentId}`;
-    return commands[key] ?? [];
+    return commands[key]?.[agentType] ?? [];
   });
 
 export const selectClientAgentLoadingCommands = (clientId: string, agentId: string) =>
