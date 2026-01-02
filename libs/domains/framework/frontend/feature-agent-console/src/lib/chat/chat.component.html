@@ -95,8 +95,8 @@
     </div>
   }
   <section class="section__row flex-grow-1">
-    <!-- Column 1: Workspace list (hidden when editor is open) -->
-    @if (!editorOpen()) {
+    <!-- Column 1: Workspace list (hidden when editor is open or deployment manager in standalone mode) -->
+    @if (!editorOpen() && !(deploymentManagerOpen() && standaloneMode())) {
       <div class="section__column d-flex flex-column border-end" [class.active-column]="!(activeClientId$ | async)">
         <div class="p-3 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
           <h5 class="mb-0 fw-semibold">Workspaces</h5>
@@ -215,8 +215,8 @@
       </div>
     }
 
-    <!-- Column 2: Agent list (hidden when editor is open) -->
-    @if (!editorOpen() && (activeClientId$ | async)) {
+    <!-- Column 2: Agent list (hidden when editor is open or deployment manager in standalone mode) -->
+    @if (!editorOpen() && !(deploymentManagerOpen() && standaloneMode()) && (activeClientId$ | async)) {
       <div
         class="section__column d-flex flex-column border-end"
         [class.active-column]="(activeClientId$ | async) && !(selectedAgent$ | async)"
@@ -288,8 +288,27 @@
                         (click)="onAgentSelect(agent.id)"
                       >
                         <div class="d-flex flex-column">
-                          <div class="d-flex justify-content-between align-items-center mb-1">
+                          <div class="d-flex align-items-center mb-1">
                             <strong class="text-truncate me-2">{{ agent.name }}</strong>
+                            @if (activeClient$ | async; as activeClient) {
+                              @if (getAgentDeploymentStatus$(activeClient.id, agent.id) | async; as deploymentStatus) {
+                                @if (deploymentStatus) {
+                                  <small class="flex-shrink-0">
+                                    <i
+                                      [class]="[
+                                        'bi',
+                                        'd-flex',
+                                        'align-items-center',
+                                        'justify-content-center',
+                                        deploymentStatus.icon,
+                                        deploymentStatus.color,
+                                        'status-badge',
+                                      ]"
+                                    ></i>
+                                  </small>
+                                }
+                              }
+                            }
                           </div>
                           @if (agent.description) {
                             <small class="text-muted text-truncate">{{ agent.description }}</small>
@@ -370,7 +389,7 @@
     @if (editorOpen() && (activeClientId$ | async) && (selectedAgent$ | async)) {
       <div
         class="section__column section__column--editor d-flex flex-column border-end"
-        [class.mobile-hidden]="chatVisible()"
+        [class.mobile-hidden]="chatVisible() || deploymentManagerOpen()"
       >
         <framework-file-editor
           #fileEditor
@@ -379,6 +398,42 @@
           [chatVisible]="chatVisible()"
           (chatToggleRequested)="onToggleChat()"
         ></framework-file-editor>
+      </div>
+    }
+
+    <!-- Column: Deployment Manager (shown when deployment manager is open, to the left of chat) -->
+    @if (deploymentManagerOpen() && (activeClientId$ | async) && (selectedAgent$ | async)) {
+      <div
+        class="section__column section__column--deployment-manager d-flex flex-column"
+        [class.border-end]="!standaloneMode()"
+        [class.mobile-hidden]="chatVisible() || editorOpen()"
+      >
+        <!-- Toolbar (shown when deployment manager is open in standalone mode) -->
+        @if (standaloneMode()) {
+          <div class="editor-toolbar-container border-bottom bg-body-tertiary">
+            <div class="editor-toolbar ps-2 pe-3 py-3 d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center gap-2">
+                <div
+                  class="brand-icon-container me-2 fs-3 bg-primary p-3"
+                  style="margin-left: -0.5rem; margin-top: -1rem; margin-bottom: -1rem"
+                >
+                  <img src="assets/images/icon_light.svg" alt="Agenstra" class="brand-icon" />
+                </div>
+                <span class="fw-bold text-uppercase">Agenstra</span>
+                <span
+                  class="badge bg-primary border border-2 border-primary bg-transparent text-primary text-uppercase small editor-toolbar-badge"
+                  >Deployment Manager</span
+                >
+              </div>
+            </div>
+          </div>
+        }
+        <framework-deployment-manager
+          #deploymentManager
+          [clientId]="(activeClientId$ | async)!"
+          [agentId]="(selectedAgent$ | async)!.id"
+          (closeRequested)="onCloseDeploymentManager()"
+        ></framework-deployment-manager>
       </div>
     }
 
@@ -490,6 +545,25 @@
                       <span class="ms-1 d-none d-lg-inline">SSH Access</span>
                     </button>
                   }
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-outline-primary]="!deploymentManagerOpen()"
+                    [class.btn-primary]="deploymentManagerOpen()"
+                    (click)="onToggleDeploymentManager(true, getDeploymentOpenInNewWindow())"
+                    [title]="
+                      getDeploymentOpenInNewWindow()
+                        ? deploymentManagerOpen()
+                          ? 'Close Deployment Manager'
+                          : 'Open Deployment Manager in New Window'
+                        : deploymentManagerOpen()
+                          ? 'Close Deployment Manager'
+                          : 'Open Deployment Manager'
+                    "
+                  >
+                    <i class="bi bi-rocket-takeoff"></i>
+                    <span class="ms-1 d-none d-lg-inline">Open Deployments</span>
+                  </button>
                 }
               }
             </div>

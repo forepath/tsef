@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AgentsDeploymentsController } from './agents-deployments.controller';
 import { AgentsFilesController } from './agents-files.controller';
 import { AgentsVcsController } from './agents-vcs.controller';
 import { AgentsController } from './agents.controller';
@@ -7,6 +8,8 @@ import { AgentsGateway } from './agents.gateway';
 import { ConfigController } from './config.controller';
 import { AgentMessageEntity } from './entities/agent-message.entity';
 import { AgentEntity } from './entities/agent.entity';
+import { DeploymentConfigurationEntity } from './entities/deployment-configuration.entity';
+import { DeploymentRunEntity } from './entities/deployment-run.entity';
 import { AgentProviderFactory } from './providers/agent-provider.factory';
 import { CursorAgentProvider } from './providers/agents/cursor-agent.provider';
 import { ChatFilterFactory } from './providers/chat-filter.factory';
@@ -14,13 +17,19 @@ import { BidirectionalChatFilter } from './providers/filters/bidirectional-chat-
 import { IncomingChatFilter } from './providers/filters/incoming-chat-filter';
 import { NoopChatFilter } from './providers/filters/noop-chat-filter';
 import { OutgoingChatFilter } from './providers/filters/outgoing-chat-filter';
+import { PipelineProviderFactory } from './providers/pipeline-provider.factory';
+import { GitHubProvider } from './providers/pipelines/github.provider';
+import { GitLabProvider } from './providers/pipelines/gitlab.provider';
 import { AgentMessagesRepository } from './repositories/agent-messages.repository';
 import { AgentsRepository } from './repositories/agents.repository';
+import { DeploymentConfigurationsRepository } from './repositories/deployment-configurations.repository';
+import { DeploymentRunsRepository } from './repositories/deployment-runs.repository';
 import { AgentFileSystemService } from './services/agent-file-system.service';
 import { AgentMessagesService } from './services/agent-messages.service';
 import { AgentsVcsService } from './services/agents-vcs.service';
 import { AgentsService } from './services/agents.service';
 import { ConfigService } from './services/config.service';
+import { DeploymentsService } from './services/deployments.service';
 import { DockerService } from './services/docker.service';
 import { PasswordService } from './services/password.service';
 
@@ -29,8 +38,16 @@ import { PasswordService } from './services/password.service';
  * Provides controllers, services, and repository for agent CRUD operations and file system operations.
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([AgentEntity, AgentMessageEntity])],
-  controllers: [AgentsController, AgentsFilesController, AgentsVcsController, ConfigController],
+  imports: [
+    TypeOrmModule.forFeature([AgentEntity, AgentMessageEntity, DeploymentConfigurationEntity, DeploymentRunEntity]),
+  ],
+  controllers: [
+    AgentsController,
+    AgentsFilesController,
+    AgentsVcsController,
+    AgentsDeploymentsController,
+    ConfigController,
+  ],
   providers: [
     AgentsGateway,
     AgentsService,
@@ -39,11 +56,17 @@ import { PasswordService } from './services/password.service';
     AgentsVcsService,
     ConfigService,
     PasswordService,
+    DeploymentsService,
     AgentsRepository,
     AgentMessagesRepository,
+    DeploymentConfigurationsRepository,
+    DeploymentRunsRepository,
     DockerService,
     AgentProviderFactory,
     CursorAgentProvider,
+    PipelineProviderFactory,
+    GitHubProvider,
+    GitLabProvider,
     ChatFilterFactory,
     NoopChatFilter,
     IncomingChatFilter,
@@ -56,6 +79,19 @@ import { PasswordService } from './services/password.service';
         return true;
       },
       inject: [AgentProviderFactory, CursorAgentProvider],
+    },
+    {
+      provide: 'PIPELINE_PROVIDER_INIT',
+      useFactory: (
+        factory: PipelineProviderFactory,
+        githubProvider: GitHubProvider,
+        gitlabProvider: GitLabProvider,
+      ) => {
+        factory.registerProvider(githubProvider);
+        factory.registerProvider(gitlabProvider);
+        return true;
+      },
+      inject: [PipelineProviderFactory, GitHubProvider, GitLabProvider],
     },
     {
       provide: 'CHAT_FILTER_INIT',
@@ -75,6 +111,14 @@ import { PasswordService } from './services/password.service';
       inject: [ChatFilterFactory, NoopChatFilter, IncomingChatFilter, OutgoingChatFilter, BidirectionalChatFilter],
     },
   ],
-  exports: [AgentsService, AgentMessagesService, AgentsRepository, AgentMessagesRepository],
+  exports: [
+    AgentsService,
+    AgentMessagesService,
+    DeploymentsService,
+    AgentsRepository,
+    AgentMessagesRepository,
+    DeploymentConfigurationsRepository,
+    DeploymentRunsRepository,
+  ],
 })
 export class AgentsModule {}

@@ -1,0 +1,20 @@
+.deployment-configuration-container {
+  min-height: 0;
+  overflow: auto;
+}
+
+.card {
+  border: 1px solid var(--bs-border-color);
+}
+
+.card-title {
+  font-size: 0.875rem;
+}
+
+.modal {
+  z-index: 1055;
+}
+
+.modal-dialog {
+  margin: 1.75rem auto;
+}

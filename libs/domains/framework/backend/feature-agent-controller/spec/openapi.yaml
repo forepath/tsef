@@ -981,6 +981,461 @@ paths:
           description: No provisioning reference found for client
         '404':
           description: Client not found
+  /clients/{id}/agents/{agentId}/deployments/configuration:
+    get:
+      summary: Get deployment configuration for an agent (proxied)
+      operationId: getClientAgentDeploymentConfiguration
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      responses:
+        '200':
+          description: Deployment configuration
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Client, agent, or deployment configuration not found
+    post:
+      summary: Create or update deployment configuration for an agent (proxied)
+      operationId: upsertClientAgentDeploymentConfiguration
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Deployment configuration created or updated
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Invalid request
+        '404':
+          description: Client or agent not found
+    delete:
+      summary: Delete deployment configuration for an agent (proxied)
+      operationId: deleteClientAgentDeploymentConfiguration
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      responses:
+        '204':
+          description: Deployment configuration deleted successfully
+        '404':
+          description: Client, agent, or deployment configuration not found
+  /clients/{id}/agents/{agentId}/deployments/repositories:
+    get:
+      summary: List repositories accessible with the agent's deployment configuration (proxied)
+      operationId: listClientAgentDeploymentRepositories
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      responses:
+        '200':
+          description: Array of repositories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '404':
+          description: Client, agent, or deployment configuration not found
+  /clients/{id}/agents/{agentId}/deployments/repositories/{repositoryId}/branches:
+    get:
+      summary: List branches for a repository (proxied)
+      operationId: listClientAgentDeploymentBranches
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: repositoryId
+          required: true
+          schema:
+            type: string
+          description: Repository identifier (e.g., 'owner/repo' for GitHub)
+      responses:
+        '200':
+          description: Array of branches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '404':
+          description: Client, agent, or deployment configuration not found
+  /clients/{id}/agents/{agentId}/deployments/repositories/{repositoryId}/workflows:
+    get:
+      summary: List workflows for a repository (proxied)
+      operationId: listClientAgentDeploymentWorkflows
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: repositoryId
+          required: true
+          schema:
+            type: string
+          description: Repository identifier (e.g., 'owner/repo' for GitHub)
+        - in: query
+          name: branch
+          schema:
+            type: string
+          description: Branch name (optional, defaults to default branch)
+      responses:
+        '200':
+          description: Array of workflows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '404':
+          description: Client, agent, or deployment configuration not found
+  /clients/{id}/agents/{agentId}/deployments/workflows/trigger:
+    post:
+      summary: Trigger a workflow run (proxied)
+      operationId: triggerClientAgentDeploymentWorkflow
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Workflow run triggered
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Invalid request
+        '404':
+          description: Client, agent, or deployment configuration not found
+  /clients/{id}/agents/{agentId}/deployments/runs:
+    get:
+      summary: List deployment runs for an agent (proxied)
+      operationId: listClientAgentDeploymentRuns
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum number of runs to return (default 50)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of runs to skip (default 0)
+      responses:
+        '200':
+          description: Array of deployment runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '404':
+          description: Client, agent, or deployment configuration not found
+  /clients/{id}/agents/{agentId}/deployments/runs/{runId}:
+    get:
+      summary: Get the status of a pipeline run (proxied)
+      operationId: getClientAgentDeploymentRunStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+          description: Provider-specific run identifier
+      responses:
+        '200':
+          description: Pipeline run status
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Client, agent, deployment configuration, or run not found
+  /clients/{id}/agents/{agentId}/deployments/runs/{runId}/logs:
+    get:
+      summary: Get logs for a pipeline run (proxied)
+      operationId: getClientAgentDeploymentRunLogs
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+          description: Provider-specific run identifier
+      responses:
+        '200':
+          description: Pipeline run logs
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [logs]
+                properties:
+                  logs:
+                    type: string
+                    description: Pipeline run logs as string
+        '404':
+          description: Client, agent, deployment configuration, or run not found
+  /clients/{id}/agents/{agentId}/deployments/runs/{runId}/jobs:
+    get:
+      summary: List jobs/steps for a pipeline run (proxied)
+      operationId: listClientAgentDeploymentRunJobs
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+          description: Provider-specific run identifier
+      responses:
+        '200':
+          description: Array of jobs/steps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '404':
+          description: Client, agent, deployment configuration, or run not found
+  /clients/{id}/agents/{agentId}/deployments/runs/{runId}/jobs/{jobId}/logs:
+    get:
+      summary: Get logs for a specific job/step (proxied)
+      operationId: getClientAgentDeploymentJobLogs
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+          description: Provider-specific run identifier
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job identifier
+      responses:
+        '200':
+          description: Job logs
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [logs]
+                properties:
+                  logs:
+                    type: string
+                    description: Job logs as string
+        '404':
+          description: Client, agent, deployment configuration, run, or job not found
+  /clients/{id}/agents/{agentId}/deployments/runs/{runId}/cancel:
+    post:
+      summary: Cancel a running pipeline (proxied)
+      operationId: cancelClientAgentDeploymentRun
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+          description: Provider-specific run identifier
+      responses:
+        '204':
+          description: Pipeline cancelled successfully
+        '404':
+          description: Client, agent, deployment configuration, or run not found
 components:
   securitySchemes:
     bearerAuth:

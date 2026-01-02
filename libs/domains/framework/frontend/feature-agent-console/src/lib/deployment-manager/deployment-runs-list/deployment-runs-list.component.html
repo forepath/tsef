@@ -1,0 +1,76 @@
+<div class="deployment-runs-list-container d-flex flex-column h-100">
+  @if (loadingRuns$ | async) {
+    <div class="d-flex justify-content-center align-items-center p-4">
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Loading runs...</span>
+      </div>
+    </div>
+  } @else {
+    <form #searchRunsForm="ngForm">
+      <div class="input-group search-input-container border-bottom">
+        <i class="bi bi-search"></i>
+        <input
+          type="text"
+          class="form-control border-0 search-input"
+          placeholder="Search deployment runs"
+          name="search"
+          [(ngModel)]="searchRunsQuery"
+          required
+        />
+      </div>
+    </form>
+    <div class="flex-grow-1 overflow-auto">
+      @if (!hasRuns()) {
+        <div class="d-flex justify-content-center align-items-center p-4">
+          <div class="text-center text-muted">
+            <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+            <p class="mb-0 small">No deployment runs found</p>
+          </div>
+        </div>
+      } @else {
+        <div class="list-group list-group-flush">
+          @for (run of filteredRuns(); track run.id) {
+            <div
+              class="list-group-item rounded-0 border-0 border-bottom d-flex align-items-center"
+              [class.active]="selectedRunId() === run.id"
+            >
+              <button
+                type="button"
+                class="list-group-item-action border-0 bg-transparent flex-grow-1 text-start p-0"
+                (click)="onRunClick(run.id)"
+              >
+                <div class="d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="text-truncate me-2">{{ run.runName || 'Untitled Run' }}</strong>
+                    <span class="badge" [ngClass]="getStatusBadgeClass(run.status)" [title]="run.status">
+                      <i class="bi" [ngClass]="getStatusIcon(run.status)"></i>
+                      {{ run.status }}
+                    </span>
+                  </div>
+                  <div class="d-flex align-items-center gap-3 row-gap-0 flex-wrap">
+                    <small class="text-muted mt-1">
+                      <i class="bi bi-git me-1"></i>
+                      {{ run.ref }}
+                    </small>
+                    <small class="text-muted mt-1">
+                      <i class="bi bi-clock me-1"></i>
+                      {{ formatDate(run.createdAt) }}
+                    </small>
+                  </div>
+                </div>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Error Display (404 errors are hidden since empty state is handled by hasRuns check) -->
+  @if (filteredError(); as error) {
+    <div class="alert alert-danger m-3" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ error }}
+    </div>
+  }
+</div>

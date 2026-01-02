@@ -23,4 +23,18 @@ export class UpdateAgentDto {
   @IsOptional()
   @IsEnum(ContainerType, { message: 'Container type must be one of: generic, docker, terraform, kubernetes' })
   containerType?: ContainerType;
+
+  /**
+   * CI/CD deployment configuration (optional).
+   * If provided, the deployment configuration for this agent will be updated or created.
+   */
+  @IsOptional()
+  deploymentConfiguration?: {
+    providerType?: string;
+    repositoryId?: string;
+    defaultBranch?: string;
+    workflowId?: string;
+    providerToken?: string;
+    providerBaseUrl?: string;
+  };
 }

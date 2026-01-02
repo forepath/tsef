@@ -37,6 +37,21 @@
   }
 }
 
+.section__column--deployment-manager {
+  flex: 5;
+  min-height: 0; // Critical for flex scrolling
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  // Hide deployment manager on mobile when chat is open (chat overlays it)
+  @media (max-width: 767.98px) {
+    &.mobile-hidden {
+      display: none !important;
+    }
+  }
+}
+
 .section__row {
   flex-wrap: nowrap;
   min-height: 0; // Critical for flex scrolling

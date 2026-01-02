@@ -9,6 +9,9 @@ export interface Environment {
   editor: {
     openInNewWindow: boolean;
   };
+  deployment: {
+    openInNewWindow: boolean;
+  };
   cookieConsent: {
     domain: string;
     privacyPolicyUrl: string;

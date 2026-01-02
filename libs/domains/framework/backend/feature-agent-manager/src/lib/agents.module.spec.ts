@@ -1,10 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { AgentsDeploymentsController } from './agents-deployments.controller';
 import { AgentsController } from './agents.controller';
 import { AgentsGateway } from './agents.gateway';
 import { AgentsModule } from './agents.module';
 import { AgentMessageEntity } from './entities/agent-message.entity';
 import { AgentEntity } from './entities/agent.entity';
+import { DeploymentConfigurationEntity } from './entities/deployment-configuration.entity';
+import { DeploymentRunEntity } from './entities/deployment-run.entity';
 import { AgentProviderFactory } from './providers/agent-provider.factory';
 import { CursorAgentProvider } from './providers/agents/cursor-agent.provider';
 import { ChatFilterFactory } from './providers/chat-filter.factory';
@@ -12,7 +15,13 @@ import { BidirectionalChatFilter } from './providers/filters/bidirectional-chat-
 import { IncomingChatFilter } from './providers/filters/incoming-chat-filter';
 import { NoopChatFilter } from './providers/filters/noop-chat-filter';
 import { OutgoingChatFilter } from './providers/filters/outgoing-chat-filter';
+import { PipelineProviderFactory } from './providers/pipeline-provider.factory';
+import { GitHubProvider } from './providers/pipelines/github.provider';
+import { GitLabProvider } from './providers/pipelines/gitlab.provider';
+import { DeploymentConfigurationsRepository } from './repositories/deployment-configurations.repository';
+import { DeploymentRunsRepository } from './repositories/deployment-runs.repository';
 import { AgentsRepository } from './repositories/agents.repository';
+import { DeploymentsService } from './services/deployments.service';
 import { AgentsService } from './services/agents.service';
 import { DockerService } from './services/docker.service';
 import { PasswordService } from './services/password.service';
@@ -36,6 +45,10 @@ describe('AgentsModule', () => {
       .overrideProvider(getRepositoryToken(AgentEntity))
       .useValue(mockRepository)
       .overrideProvider(getRepositoryToken(AgentMessageEntity))
+      .useValue(mockRepository)
+      .overrideProvider(getRepositoryToken(DeploymentConfigurationEntity))
+      .useValue(mockRepository)
+      .overrideProvider(getRepositoryToken(DeploymentRunEntity))
       .useValue(mockRepository)
       .compile();
   });
@@ -179,5 +192,82 @@ describe('AgentsModule', () => {
   it('should initialize CHAT_FILTER_INIT factory', () => {
     const initValue = module.get<boolean>('CHAT_FILTER_INIT');
     expect(initValue).toBe(true);
+  });
+
+  it('should provide DeploymentsService', () => {
+    const service = module.get<DeploymentsService>(DeploymentsService);
+    expect(service).toBeDefined();
+    expect(service).toBeInstanceOf(DeploymentsService);
+  });
+
+  it('should provide DeploymentConfigurationsRepository', () => {
+    const repository = module.get<DeploymentConfigurationsRepository>(DeploymentConfigurationsRepository);
+    expect(repository).toBeDefined();
+    expect(repository).toBeInstanceOf(DeploymentConfigurationsRepository);
+  });
+
+  it('should provide DeploymentRunsRepository', () => {
+    const repository = module.get<DeploymentRunsRepository>(DeploymentRunsRepository);
+    expect(repository).toBeDefined();
+    expect(repository).toBeInstanceOf(DeploymentRunsRepository);
+  });
+
+  it('should provide PipelineProviderFactory', () => {
+    const factory = module.get<PipelineProviderFactory>(PipelineProviderFactory);
+    expect(factory).toBeDefined();
+    expect(factory).toBeInstanceOf(PipelineProviderFactory);
+  });
+
+  it('should provide GitHubProvider', () => {
+    const provider = module.get<GitHubProvider>(GitHubProvider);
+    expect(provider).toBeDefined();
+    expect(provider).toBeInstanceOf(GitHubProvider);
+  });
+
+  it('should provide GitLabProvider', () => {
+    const provider = module.get<GitLabProvider>(GitLabProvider);
+    expect(provider).toBeDefined();
+    expect(provider).toBeInstanceOf(GitLabProvider);
+  });
+
+  it('should register GitHubProvider and GitLabProvider via PIPELINE_PROVIDER_INIT factory', () => {
+    const factory = module.get<PipelineProviderFactory>(PipelineProviderFactory);
+    const githubProvider = module.get<GitHubProvider>(GitHubProvider);
+    const gitlabProvider = module.get<GitLabProvider>(GitLabProvider);
+
+    // Verify the providers are registered
+    expect(factory.hasProvider('github')).toBe(true);
+    expect(factory.getProvider('github')).toBe(githubProvider);
+    expect(githubProvider.getType()).toBe('github');
+
+    expect(factory.hasProvider('gitlab')).toBe(true);
+    expect(factory.getProvider('gitlab')).toBe(gitlabProvider);
+    expect(gitlabProvider.getType()).toBe('gitlab');
+  });
+
+  it('should initialize PIPELINE_PROVIDER_INIT factory', () => {
+    const initValue = module.get<boolean>('PIPELINE_PROVIDER_INIT');
+    expect(initValue).toBe(true);
+  });
+
+  it('should provide AgentsDeploymentsController', () => {
+    const controller = module.get<AgentsDeploymentsController>(AgentsDeploymentsController);
+    expect(controller).toBeDefined();
+    expect(controller).toBeInstanceOf(AgentsDeploymentsController);
+  });
+
+  it('should export DeploymentsService', () => {
+    const service = module.get<DeploymentsService>(DeploymentsService);
+    expect(service).toBeDefined();
+  });
+
+  it('should export DeploymentConfigurationsRepository', () => {
+    const repository = module.get<DeploymentConfigurationsRepository>(DeploymentConfigurationsRepository);
+    expect(repository).toBeDefined();
+  });
+
+  it('should export DeploymentRunsRepository', () => {
+    const repository = module.get<DeploymentRunsRepository>(DeploymentRunsRepository);
+    expect(repository).toBeDefined();
   });
 });

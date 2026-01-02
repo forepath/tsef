@@ -55,6 +55,9 @@ describe('authInterceptor', () => {
         type: 'api-key',
         apiKey: 'test-api-key',
       },
+      deployment: {
+        openInNewWindow: true,
+      },
     };
 
     mockKeycloakService = {

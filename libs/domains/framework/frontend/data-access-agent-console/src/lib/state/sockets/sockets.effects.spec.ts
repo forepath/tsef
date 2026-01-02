@@ -81,6 +81,9 @@ describe('SocketsEffects', () => {
       editor: {
         openInNewWindow: true,
       },
+      deployment: {
+        openInNewWindow: true,
+      },
     };
 
     mockKeycloakService = {

@@ -69,6 +69,9 @@ describe('authGuard', () => {
       editor: {
         openInNewWindow: true,
       },
+      deployment: {
+        openInNewWindow: true,
+      },
       cookieConsent: {
         domain: 'localhost',
         privacyPolicyUrl: 'https://example.com/privacy',

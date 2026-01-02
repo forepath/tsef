@@ -19,6 +19,7 @@ import {
   AgentsFacade,
   ClientsFacade,
   ContainerType,
+  DeploymentsService,
   FilesFacade,
   SocketsFacade,
   type AgentResponseDto,
@@ -27,6 +28,7 @@ import {
   type ClientResponseDto,
   type CreateAgentDto,
   type CreateClientDto,
+  type DeploymentRun,
   type ForwardedEventPayload,
   type ProvisionServerDto,
   type UpdateAgentDto,
@@ -51,6 +53,7 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
+import { DeploymentManagerComponent } from '../deployment-manager/deployment-manager.component';
 import { ContainerStatsStatusBarComponent } from '../file-editor/container-stats-status-bar/container-stats-status-bar.component';
 import { FileEditorComponent } from '../file-editor/file-editor.component';
 import { StandaloneLoadingService } from '../standalone-loading.service';
@@ -79,7 +82,14 @@ type ChatMessageWithFilter = {
 
 @Component({
   selector: 'framework-agent-console-chat',
-  imports: [CommonModule, RouterModule, FormsModule, FileEditorComponent, ContainerStatsStatusBarComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    FileEditorComponent,
+    DeploymentManagerComponent,
+    ContainerStatsStatusBarComponent,
+  ],
   styleUrls: ['./chat.component.scss'],
   templateUrl: './chat.component.html',
   standalone: true,
@@ -89,6 +99,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   private readonly agentsFacade = inject(AgentsFacade);
   private readonly socketsFacade = inject(SocketsFacade);
   private readonly filesFacade = inject(FilesFacade);
+  private readonly deploymentsService = inject(DeploymentsService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly router = inject(Router);
@@ -121,6 +132,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   @ViewChild('fileEditor', { static: false })
   fileEditor!: FileEditorComponent;
 
+  @ViewChild('deploymentManager', { static: false })
+  deploymentManager!: DeploymentManagerComponent;
+
   @ViewChild('shareFileLinkButton', { static: false })
   shareFileLinkButton!: ElementRef<HTMLButtonElement>;
 
@@ -129,6 +143,12 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   // Cache for marked instance to avoid repeated async imports
   private markedInstance: Marked | null = null;
   private markedLoadPromise: Promise<Marked> | null = null;
+
+  // Cache for deployment status observables (key: `${clientId}:${agentId}`)
+  private readonly deploymentStatusCache = new Map<
+    string,
+    Observable<{ status: string; icon: string; color: string } | null>
+  >();
 
   // Search state
   readonly searchClientQuery = signal<string>('');
@@ -287,6 +307,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   selectedCommand = signal<string | null>(null);
   selectedAgentId = signal<string | null>(null);
   editorOpen = signal<boolean>(false);
+  deploymentManagerOpen = signal<boolean>(false);
   chatVisible = signal<boolean>(false);
   private previousAgentId: string | null = null;
   readonly fileOnlyMode = signal<boolean>(false);
@@ -315,14 +336,15 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly shouldShowChat$ = combineLatest([
     this.selectedAgent$,
     toObservable(this.editorOpen),
+    toObservable(this.deploymentManagerOpen),
     toObservable(this.chatVisible),
   ]).pipe(
-    map(([selectedAgent, editorOpen, chatVisible]) => {
+    map(([selectedAgent, editorOpen, deploymentManagerOpen, chatVisible]) => {
       if (!selectedAgent) {
         return false;
       }
-      // Show chat if editor is not open, or if editor is open and chat is visible
-      return !editorOpen || chatVisible;
+      // Show chat if editor and deployment manager are not open, or if one is open and chat is visible
+      return (!editorOpen && !deploymentManagerOpen) || chatVisible;
     }),
   );
 
@@ -468,6 +490,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     client: false,
     agent: false,
     editor: false,
+    deployments: false,
   };
   private fileOpenedFromQuery = false;
 
@@ -500,6 +523,24 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         clients.forEach((client) => {
           this.clientsFacade.loadServerInfo(client.id);
         });
+      });
+
+    // Preload deployment status for all agents when agents list loads successfully
+    combineLatest([this.activeClientId$, this.agents$])
+      .pipe(
+        filter(([clientId, agents]) => !!clientId && agents.length > 0),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(([clientId, agents]) => {
+        // Trigger status loading for each agent (will be loaded on-demand via getAgentDeploymentStatus$)
+        // The observable will handle caching and will only load once per agent
+        if (clientId) {
+          agents.forEach((agent) => {
+            // Just subscribe to trigger the load, but don't keep the subscription
+            // The template will handle the actual display
+            this.getAgentDeploymentStatus$(clientId, agent.id).pipe(take(1)).subscribe();
+          });
+        }
       });
 
     this.route.params
@@ -598,6 +639,43 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
             }
             this.openFileWhenReady(decodedFilePath);
           }
+        }
+
+        // Select deployment manager from route params
+        if (
+          !this.initialRouting['deployments'] &&
+          agents.length > 0 &&
+          this.router.url.includes('/deployments') &&
+          !this.deploymentManagerOpen()
+        ) {
+          // Check if standalone query parameter is set
+          const isStandaloneMode = !!queryParams['standalone'];
+          this.standaloneMode.set(isStandaloneMode);
+
+          // Note: run query parameter is handled by the deployment manager component itself
+
+          // Close editor if opening deployment manager (unless in standalone mode)
+          if (!isStandaloneMode && this.editorOpen()) {
+            this.editorOpen.set(false);
+          }
+
+          // Open deployment manager if route has /deployments but manager is closed
+          this.deploymentManagerOpen.set(true);
+
+          // Clear standalone loading when deployment manager is opened via route
+          this.standaloneLoadingService.setLoading(false);
+
+          // In standalone mode, hide chat and other panels
+          if (isStandaloneMode) {
+            this.chatVisible.set(false);
+          }
+
+          // Hide chat on mobile when deployment manager is open
+          if (this.isMobile()) {
+            this.chatVisible.set(false);
+          }
+
+          this.initialRouting['deployments'] = true;
         }
       });
 
@@ -1163,6 +1241,11 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       return;
     }
 
+    // Close deployment manager if opening editor (unless in standalone mode)
+    if (!wasOpen && this.deploymentManagerOpen() && !this.standaloneMode()) {
+      this.deploymentManagerOpen.set(false);
+    }
+
     this.editorOpen.update((open) => !open);
 
     if (navigate) {
@@ -1277,6 +1360,10 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     return this.environment.editor?.openInNewWindow ?? false;
   }
 
+  getDeploymentOpenInNewWindow(): boolean {
+    return this.environment.deployment?.openInNewWindow ?? false;
+  }
+
   /**
    * Open editor in a new window with minimal browser controls in standalone mode
    */
@@ -1352,6 +1439,111 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     // Recalculate file editor tabs when chat visibility changes
     if (this.fileEditor) {
       this.fileEditor.recalculateTabs();
+    }
+  }
+
+  onToggleDeploymentManager(navigate = true, openInNewWindow = false): void {
+    const wasOpen = this.deploymentManagerOpen();
+
+    // If opening in new window and deployment manager is not open, open new window
+    if (openInNewWindow && !wasOpen) {
+      this.openDeploymentManagerInNewWindow();
+      return;
+    }
+
+    // Close editor if opening deployment manager (unless in standalone mode)
+    if (!wasOpen && this.editorOpen() && !this.standaloneMode()) {
+      this.editorOpen.set(false);
+    }
+
+    this.deploymentManagerOpen.set(!wasOpen);
+
+    // Clear standalone loading when opening deployment manager
+    if (!wasOpen) {
+      this.standaloneLoadingService.setLoading(false);
+    }
+
+    if (navigate) {
+      this.router.navigate(
+        this.localeService.buildAbsoluteUrl(
+          wasOpen
+            ? ['/clients', this.activeClientId, 'agents', this.selectedAgentId()]
+            : ['/clients', this.activeClientId, 'agents', this.selectedAgentId(), 'deployments'],
+        ),
+      );
+    }
+  }
+
+  onCloseDeploymentManager(): void {
+    this.deploymentManagerOpen.set(false);
+  }
+
+  /**
+   * Open deployment manager in a new standalone window
+   */
+  private openDeploymentManagerInNewWindow(): void {
+    const clientId = this.activeClientId;
+    const agentId = this.selectedAgentId();
+    if (!clientId || !agentId) {
+      return;
+    }
+
+    // Get currently selected run ID if deployment manager is open and run is selected
+    let runId: string | undefined;
+    if (this.deploymentManager) {
+      // Access the selectedRunId signal from the deployment manager component
+      // Note: We'll need to expose this via a getter or method if needed
+      // For now, we'll check the URL query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      runId = urlParams.get('run') || undefined;
+    }
+
+    // Build the URL
+    const baseUrl = window.location.origin;
+    const deploymentsPath = `/clients/${clientId}/agents/${agentId}/deployments`;
+    const queryParams = new URLSearchParams();
+    queryParams.set('standalone', 'true');
+    if (runId) {
+      queryParams.set('run', encodeURIComponent(runId));
+    }
+    const url = `${baseUrl}${deploymentsPath}?${queryParams.toString()}`;
+
+    // Open new window with minimal controls and maximize if possible
+    const screenWidth = window.screen.availWidth || window.screen.width;
+    const screenHeight = window.screen.availHeight || window.screen.height;
+
+    const windowFeatures = [
+      'menubar=no',
+      'toolbar=no',
+      'location=no',
+      'status=no',
+      'resizable=yes',
+      'scrollbars=yes',
+      `width=${screenWidth}`,
+      `height=${screenHeight}`,
+      `left=0`,
+      `top=0`,
+    ].join(',');
+
+    const newWindow = window.open(url, '_blank', windowFeatures);
+
+    // Try to maximize after window opens
+    if (newWindow) {
+      setTimeout(() => {
+        try {
+          newWindow.moveTo(0, 0);
+          newWindow.resizeTo(screenWidth, screenHeight);
+          if (newWindow.screen && 'availWidth' in newWindow.screen) {
+            const availWidth = (newWindow.screen as Screen & { availWidth?: number }).availWidth;
+            const availHeight = (newWindow.screen as Screen & { availHeight?: number }).availHeight;
+            if (availWidth && availHeight) {
+              newWindow.resizeTo(availWidth, availHeight);
+            }
+          }
+        } catch (e) {
+          console.warn('Could not maximize window:', e);
+        }
+      }, 100);
     }
   }
 
@@ -2330,6 +2522,81 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       }),
       startWith(null as string | null),
     );
+  }
+
+  /**
+   * Get deployment status for an agent.
+   * @param clientId - The client ID
+   * @param agentId - The agent ID
+   * @returns Observable of deployment status info or null
+   */
+  getAgentDeploymentStatus$(
+    clientId: string,
+    agentId: string,
+  ): Observable<{ status: string; icon: string; color: string } | null> {
+    const cacheKey = `${clientId}:${agentId}`;
+
+    // Return cached observable if it exists
+    const cached = this.deploymentStatusCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // Create new observable and cache it
+    const status$ = this.deploymentsService.getConfiguration(clientId, agentId).pipe(
+      switchMap((config) => {
+        if (!config) {
+          return of(null);
+        }
+        // Get the latest run (limit=1, sorted by createdAt desc on backend)
+        return this.deploymentsService.listRuns(clientId, agentId, 1, 0).pipe(
+          map((runs): { status: string; icon: string; color: string } | null => {
+            if (!runs || runs.length === 0) {
+              return null;
+            }
+            const latestRun = runs[0];
+            return this.getDeploymentStatusInfo(latestRun);
+          }),
+          catchError(() => of(null)),
+        );
+      }),
+      catchError(() => of(null)),
+      startWith(null),
+    );
+
+    this.deploymentStatusCache.set(cacheKey, status$);
+    return status$;
+  }
+
+  /**
+   * Get deployment status info (icon, color, text) from a deployment run.
+   * @param run - The deployment run
+   * @returns Status info with icon, color, and status text
+   */
+  private getDeploymentStatusInfo(run: DeploymentRun): { status: string; icon: string; color: string } {
+    // Use conclusion if available (completed runs), otherwise use status (in-progress runs)
+    const statusOrConclusion = run.conclusion || run.status;
+
+    switch (statusOrConclusion) {
+      case 'success':
+        return { status: 'Successful', icon: 'bi-check', color: 'bg-success' };
+      case 'failure':
+        return { status: 'Failed', icon: 'bi-x', color: 'bg-danger' };
+      case 'cancelled':
+        return { status: 'Cancelled', icon: 'bi-x', color: 'bg-warning' };
+      case 'skipped':
+        return { status: 'Skipped', icon: 'bi-skip-forward', color: 'bg-muted' };
+      case 'in_progress':
+      case 'running':
+        return { status: 'Running', icon: 'bi-play', color: 'bg-primary' };
+      case 'queued':
+        return { status: 'Queued', icon: 'bi-clock-history', color: 'bg-info' };
+      case 'completed':
+        // If status is completed but no conclusion, treat as success
+        return { status: 'Successful', icon: 'bi-check', color: 'bg-success' };
+      default:
+        return { status: statusOrConclusion || 'Unknown', icon: 'bi-question', color: 'bg-muted' };
+    }
   }
 
   /**

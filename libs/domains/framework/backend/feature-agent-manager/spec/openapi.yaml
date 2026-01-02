@@ -602,6 +602,349 @@ paths:
           description: Invalid conflict resolution strategy
         '404':
           description: Agent or file not found
+  /agents/{agentId}/deployments/configuration:
+    get:
+      summary: Get deployment configuration for an agent
+      operationId: getDeploymentConfiguration
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deployment configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentConfigurationResponseDto'
+        '404':
+          description: Agent or deployment configuration not found
+    post:
+      summary: Create or update deployment configuration for an agent
+      operationId: upsertDeploymentConfiguration
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeploymentConfigurationDto'
+      responses:
+        '200':
+          description: Deployment configuration created or updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentConfigurationResponseDto'
+        '400':
+          description: Invalid request
+        '404':
+          description: Agent not found
+    delete:
+      summary: Delete deployment configuration for an agent
+      operationId: deleteDeploymentConfiguration
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deployment configuration deleted successfully
+        '404':
+          description: Agent or deployment configuration not found
+  /agents/{agentId}/deployments/repositories:
+    get:
+      summary: List repositories accessible with the agent's deployment configuration
+      operationId: listDeploymentRepositories
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Array of repositories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RepositoryResponseDto'
+        '404':
+          description: Agent or deployment configuration not found
+  /agents/{agentId}/deployments/repositories/{repositoryId}/branches:
+    get:
+      summary: List branches for a repository
+      operationId: listDeploymentBranches
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: repositoryId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Array of branches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BranchResponseDto'
+        '404':
+          description: Agent or deployment configuration not found
+  /agents/{agentId}/deployments/repositories/{repositoryId}/workflows:
+    get:
+      summary: List workflows for a repository
+      operationId: listDeploymentWorkflows
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: repositoryId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: branch
+          schema:
+            type: string
+          description: Branch name (optional, defaults to default branch)
+      responses:
+        '200':
+          description: Array of workflows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkflowResponseDto'
+        '404':
+          description: Agent or deployment configuration not found
+  /agents/{agentId}/deployments/workflows/trigger:
+    post:
+      summary: Trigger a workflow run
+      operationId: triggerDeploymentWorkflow
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriggerWorkflowDto'
+      responses:
+        '200':
+          description: Workflow run triggered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentRunResponseDto'
+        '400':
+          description: Invalid request
+        '404':
+          description: Agent or deployment configuration not found
+  /agents/{agentId}/deployments/runs:
+    get:
+      summary: List deployment runs for an agent
+      operationId: listDeploymentRuns
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum number of runs to return (default 50)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of runs to skip (default 0)
+      responses:
+        '200':
+          description: Array of deployment runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeploymentRunResponseDto'
+        '404':
+          description: Agent or deployment configuration not found
+  /agents/{agentId}/deployments/runs/{runId}:
+    get:
+      summary: Get the status of a pipeline run
+      operationId: getDeploymentRunStatus
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pipeline run status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentRunResponseDto'
+        '404':
+          description: Agent, deployment configuration, or run not found
+  /agents/{agentId}/deployments/runs/{runId}/logs:
+    get:
+      summary: Get logs for a pipeline run
+      operationId: getDeploymentRunLogs
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pipeline run logs
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [logs]
+                properties:
+                  logs:
+                    type: string
+                    description: Pipeline run logs as string
+        '404':
+          description: Agent, deployment configuration, or run not found
+  /agents/{agentId}/deployments/runs/{runId}/jobs:
+    get:
+      summary: List jobs/steps for a pipeline run
+      operationId: listDeploymentRunJobs
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Array of jobs/steps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobResponseDto'
+        '404':
+          description: Agent, deployment configuration, or run not found
+  /agents/{agentId}/deployments/runs/{runId}/jobs/{jobId}/logs:
+    get:
+      summary: Get logs for a specific job/step
+      operationId: getDeploymentJobLogs
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job logs
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [logs]
+                properties:
+                  logs:
+                    type: string
+                    description: Job logs as string
+        '404':
+          description: Agent, deployment configuration, run, or job not found
+  /agents/{agentId}/deployments/runs/{runId}/cancel:
+    post:
+      summary: Cancel a running pipeline
+      operationId: cancelDeploymentRun
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Pipeline cancelled successfully
+        '404':
+          description: Agent, deployment configuration, or run not found
 components:
   securitySchemes:
     bearerAuth:
@@ -632,6 +975,29 @@ components:
           type: boolean
           default: true
           description: Whether to create an SSH connection container (defaults to true)
+        deploymentConfiguration:
+          type: object
+          description: CI/CD deployment configuration (optional). If provided, a deployment configuration will be created for this agent.
+          properties:
+            providerType:
+              type: string
+              description: CI/CD provider type (e.g., 'github')
+            repositoryId:
+              type: string
+              description: Repository identifier (e.g., 'owner/repo' for GitHub)
+            defaultBranch:
+              type: string
+              description: Default branch name
+            workflowId:
+              type: string
+              description: Workflow/pipeline identifier
+            providerToken:
+              type: string
+              description: Provider-specific API token/credentials
+            providerBaseUrl:
+              type: string
+              format: uri
+              description: Optional base URL for self-hosted instances (e.g., GitHub Enterprise Server)
     UpdateAgentDto:
       type: object
       properties:
@@ -643,6 +1009,29 @@ components:
           type: string
           enum: [cursor]
           description: Agent provider type
+        deploymentConfiguration:
+          type: object
+          description: CI/CD deployment configuration (optional). If provided, the deployment configuration for this agent will be updated or created.
+          properties:
+            providerType:
+              type: string
+              description: CI/CD provider type (e.g., 'github')
+            repositoryId:
+              type: string
+              description: Repository identifier (e.g., 'owner/repo' for GitHub)
+            defaultBranch:
+              type: string
+              description: Default branch name
+            workflowId:
+              type: string
+              description: Workflow/pipeline identifier
+            providerToken:
+              type: string
+              description: Provider-specific API token/credentials
+            providerBaseUrl:
+              type: string
+              format: uri
+              description: Optional base URL for self-hosted instances (e.g., GitHub Enterprise Server)
     AgentResponseDto:
       type: object
       required: [id, name, agentType, createdAt, updatedAt]
@@ -937,3 +1326,238 @@ components:
           type: string
           enum: [yours, mine, both]
           description: Merge strategy - 'yours' (accept incoming), 'mine' (accept current), 'both' (keep both)
+    CreateDeploymentConfigurationDto:
+      type: object
+      required: [providerType, repositoryId, providerToken]
+      properties:
+        providerType:
+          type: string
+          description: CI/CD provider type (e.g., 'github')
+        repositoryId:
+          type: string
+          description: Repository identifier (e.g., 'owner/repo' for GitHub)
+        defaultBranch:
+          type: string
+          description: Default branch name
+        workflowId:
+          type: string
+          description: Workflow/pipeline identifier
+        providerToken:
+          type: string
+          description: Provider-specific API token/credentials
+        providerBaseUrl:
+          type: string
+          format: uri
+          description: Optional base URL for self-hosted instances (e.g., GitHub Enterprise Server)
+    UpdateDeploymentConfigurationDto:
+      type: object
+      properties:
+        repositoryId:
+          type: string
+          description: Repository identifier (e.g., 'owner/repo' for GitHub)
+        defaultBranch:
+          type: string
+          description: Default branch name
+        workflowId:
+          type: string
+          description: Workflow/pipeline identifier
+        providerToken:
+          type: string
+          description: Provider-specific API token/credentials
+        providerBaseUrl:
+          type: string
+          format: uri
+          description: Optional base URL for self-hosted instances (e.g., GitHub Enterprise Server)
+    DeploymentConfigurationResponseDto:
+      type: object
+      required: [id, agentId, providerType, repositoryId, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+          format: uuid
+        providerType:
+          type: string
+          description: CI/CD provider type (e.g., 'github')
+        repositoryId:
+          type: string
+          description: Repository identifier (e.g., 'owner/repo' for GitHub)
+        defaultBranch:
+          type: string
+          description: Default branch name
+        workflowId:
+          type: string
+          description: Workflow/pipeline identifier
+        providerBaseUrl:
+          type: string
+          format: uri
+          description: Optional base URL for self-hosted instances
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TriggerWorkflowDto:
+      type: object
+      required: [workflowId, ref]
+      properties:
+        workflowId:
+          type: string
+          description: Workflow/pipeline identifier
+        ref:
+          type: string
+          description: Git reference (branch, tag, or commit SHA)
+        inputs:
+          type: object
+          additionalProperties:
+            type: string
+          description: Optional workflow inputs
+    DeploymentRunResponseDto:
+      type: object
+      required:
+        [
+          id,
+          configurationId,
+          providerRunId,
+          runName,
+          status,
+          ref,
+          sha,
+          createdAt,
+          updatedAt,
+        ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        configurationId:
+          type: string
+          format: uuid
+        providerRunId:
+          type: string
+          description: Provider-specific run identifier
+        runName:
+          type: string
+          description: Run name/title
+        status:
+          type: string
+          enum: [queued, in_progress, completed, cancelled, failure]
+          description: Run status
+        conclusion:
+          type: string
+          enum: [success, failure, cancelled, skipped]
+          description: Run conclusion
+        ref:
+          type: string
+          description: Git reference (branch, tag, or commit SHA)
+        sha:
+          type: string
+          description: Commit SHA
+        workflowId:
+          type: string
+          description: Workflow that triggered this run
+        workflowName:
+          type: string
+          description: Workflow name
+        startedAt:
+          type: string
+          format: date-time
+          description: When the run started
+        completedAt:
+          type: string
+          format: date-time
+          description: When the run completed
+        htmlUrl:
+          type: string
+          format: uri
+          description: HTML URL for viewing the run
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    RepositoryResponseDto:
+      type: object
+      required: [id, name, fullName, defaultBranch, url, private]
+      properties:
+        id:
+          type: string
+          description: Repository identifier (e.g., 'owner/repo' for GitHub)
+        name:
+          type: string
+          description: Repository name
+        fullName:
+          type: string
+          description: Repository full name (e.g., 'owner/repo')
+        defaultBranch:
+          type: string
+          description: Default branch name
+        url:
+          type: string
+          format: uri
+          description: Repository URL
+        private:
+          type: boolean
+          description: Whether the repository is private
+    BranchResponseDto:
+      type: object
+      required: [name, sha, default]
+      properties:
+        name:
+          type: string
+          description: Branch name
+        sha:
+          type: string
+          description: Commit SHA
+        default:
+          type: boolean
+          description: Whether this is the default branch
+    WorkflowResponseDto:
+      type: object
+      required: [id, name, path, state, canTrigger]
+      properties:
+        id:
+          type: string
+          description: Workflow identifier
+        name:
+          type: string
+          description: Workflow name
+        path:
+          type: string
+          description: Workflow file path (e.g., '.github/workflows/deploy.yml')
+        state:
+          type: string
+          description: Workflow state (e.g., 'active', 'disabled')
+        canTrigger:
+          type: boolean
+          description: Whether the workflow can be manually triggered
+    JobResponseDto:
+      type: object
+      required: [id, name, status]
+      properties:
+        id:
+          type: string
+          description: Job identifier
+        name:
+          type: string
+          description: Job name
+        status:
+          type: string
+          enum: [queued, in_progress, completed, cancelled, failure]
+          description: Job status
+        conclusion:
+          type: string
+          enum: [success, failure, cancelled, skipped]
+          description: Job conclusion
+        startedAt:
+          type: string
+          format: date-time
+          description: When the job started
+        completedAt:
+          type: string
+          format: date-time
+          description: When the job completed
