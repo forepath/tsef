@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.19.1](https://github.com/forepath/tsef/compare/v1.19.0...v1.19.1) (2026-01-02)
+
+
+### Bug Fixes
+
+* runtime environment loading ([#157](https://github.com/forepath/tsef/issues/157)) ([a1011d2](https://github.com/forepath/tsef/commit/a1011d2770bf48305826548aca0d75c012aef5e3))
+
+
+### Chores
+
+* analytics tools privacy ([#156](https://github.com/forepath/tsef/issues/156)) ([8ada6b4](https://github.com/forepath/tsef/commit/8ada6b44046b4f316a883f89ac05a135056415b0))
+
 ## [1.19.0](https://github.com/forepath/tsef/compare/v1.18.1...v1.19.0) (2025-12-27)
 
 
