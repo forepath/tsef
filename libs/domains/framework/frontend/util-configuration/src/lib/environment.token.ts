@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { APP_INITIALIZER, InjectionToken, Provider } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import { environment } from './environment';
 import { Environment } from './environment.interface';
 
@@ -29,20 +29,15 @@ export function loadRuntimeEnvironment(http: HttpClient): () => Promise<void> {
   return async () => {
     try {
       const remoteConfig = await firstValueFrom(
-        http.get<Partial<Environment>>('/config', {
-          responseType: 'json',
-        }),
+        http
+          .get<Partial<Environment>>('/config', {
+            responseType: 'json',
+          })
+          .pipe(timeout({ first: 5000 })),
       );
 
       runtimeEnvironment = mergeEnvironmentOverrides(environment, remoteConfig);
     } catch (error) {
-      // If the /config endpoint is not available or returns an error,
-      // fall back to the build-time environment.
-      // eslint-disable-next-line no-console
-      console.warn(
-        'Runtime configuration could not be loaded from /config. Falling back to default environment.',
-        error,
-      );
       runtimeEnvironment = environment;
     }
   };
