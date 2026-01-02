@@ -2585,7 +2585,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       case 'cancelled':
         return { status: 'Cancelled', icon: 'bi-x', color: 'bg-warning' };
       case 'skipped':
-        return { status: 'Skipped', icon: 'bi-skip-forward', color: 'bg-muted' };
+        return { status: 'Skipped', icon: 'bi-skip-forward', color: 'bg-secondary' };
       case 'in_progress':
       case 'running':
         return { status: 'Running', icon: 'bi-play', color: 'bg-primary' };
@@ -2595,7 +2595,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         // If status is completed but no conclusion, treat as success
         return { status: 'Successful', icon: 'bi-check', color: 'bg-success' };
       default:
-        return { status: statusOrConclusion || 'Unknown', icon: 'bi-question', color: 'bg-muted' };
+        return { status: statusOrConclusion || 'Unknown', icon: 'bi-question', color: 'bg-secondary' };
     }
   }
 
