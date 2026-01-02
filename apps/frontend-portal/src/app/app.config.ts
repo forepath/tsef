@@ -36,8 +36,8 @@ export const appConfig: ApplicationConfig = {
     ),
     // Custom ViewportScroller with 80px offset for fixed navbar
     { provide: ViewportScroller, useClass: ViewportScrollerOffset },
+    provideHttpClient(withFetch()),
     ...provideRuntimeEnvironment(),
     provideNgcCookieConsent(cookieConfig),
-    provideHttpClient(withFetch()),
   ],
 };
