@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, exhaustMap, filter, map, of, switchMap } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { catchError, exhaustMap, filter, map, of, switchMap, withLatestFrom } from 'rxjs';
 import { AgentsService } from '../../services/agents.service';
 import { listDirectory, listDirectoryFailure, listDirectorySuccess } from '../files/files.actions';
 import type { FileNodeDto } from '../files/files.types';
@@ -24,6 +25,7 @@ import {
   updateClientAgentFailure,
   updateClientAgentSuccess,
 } from './agents.actions';
+import { selectAgentsEntities } from './agents.selectors';
 
 /**
  * Normalizes error messages from HTTP errors.
@@ -174,7 +176,12 @@ export const loadClientAgentCommandsLoading$ = createEffect(
         // Normalize path for comparison (handle both '.cursor/commands' and './.cursor/commands')
         const path = params?.path || '';
         const normalized = path.replace(/^\.\//, '').replace(/\/$/, '');
-        return normalized === '.cursor/commands' || normalized === 'cursor/commands';
+        return (
+          normalized === '.cursor/commands' ||
+          normalized === 'cursor/commands' ||
+          normalized === '.opencode/command' ||
+          normalized === 'opencode/command'
+        );
       }),
       map(({ clientId, agentId }) => loadClientAgentCommands({ clientId, agentId })),
     );
@@ -187,31 +194,69 @@ export const loadClientAgentCommandsLoading$ = createEffect(
  * and extracts .md files as commands.
  */
 export const loadClientAgentCommandsFromFiles$ = createEffect(
-  (actions$ = inject(Actions)) => {
+  (actions$ = inject(Actions), store = inject(Store)) => {
     return actions$.pipe(
       ofType(listDirectorySuccess, listDirectoryFailure),
-      filter(({ directoryPath }) => {
-        // Normalize path for comparison (handle both '.cursor/commands' and './.cursor/commands')
-        const normalized = directoryPath.replace(/^\.\//, '').replace(/\/$/, '');
-        return normalized === '.cursor/commands' || normalized === 'cursor/commands';
+      withLatestFrom(store.select(selectAgentsEntities)),
+      map(([action, agentsEntities]) => {
+        const agent = agentsEntities[action.clientId]?.find((agent) => agent.id === action.agentId);
+        if (!agent) {
+          return action;
+        }
+        return {
+          ...action,
+          agentType: agent.agentType,
+        };
       }),
-      map((action) => {
+      filter((action) => {
+        // Normalize path for comparison (handle both '.cursor/commands' and './.cursor/commands')
+        const normalized = action.directoryPath.replace(/^\.\//, '').replace(/\/$/, '');
+        return (
+          normalized === '.cursor/commands' ||
+          normalized === 'cursor/commands' ||
+          normalized === '.opencode/command' ||
+          normalized === 'opencode/command'
+        );
+      }),
+      map((action: any) => {
         if (action.type === '[Files] List Directory Success') {
-          const { clientId, agentId, files } = action;
+          const { clientId, agentId, agentType, files, directoryPath } = action;
           // Filter for .md files (type === 'file' and name ends with .md)
           const commandFiles = files.filter((file: FileNodeDto) => file.type === 'file' && file.name.endsWith('.md'));
 
+          // Determine agentType from directoryPath
+          const normalizedPath = directoryPath.replace(/^\.\//, '').replace(/\/$/, '');
+
           // Extract command names: remove .md extension and prefix with /
-          const commands = commandFiles.map((file: FileNodeDto) => {
-            const commandName = file.name.replace(/\.md$/, '');
-            return `/${commandName}`;
-          });
+          const commands: { [agentType: string]: string[] } = {
+            cursor: [],
+            opencode: [],
+          };
+          if (agentType) {
+            const commandNames = commandFiles.map((file: FileNodeDto) => {
+              const commandName = file.name.replace(/\.md$/, '');
+              return `/${commandName}`;
+            });
+            if (normalizedPath.includes(normalizedPath)) {
+              commands[agentType] = commandNames;
+            }
+          } else {
+            // If agentType couldn't be determined, return empty object
+            // This shouldn't happen if the filter is working correctly
+          }
 
           return loadClientAgentCommandsSuccess({ clientId, agentId, commands });
         } else {
-          // If directory listing fails, assume no commands (per requirement)
-          const { clientId, agentId } = action;
-          return loadClientAgentCommandsSuccess({ clientId, agentId, commands: [] });
+          // If directory listing fails, determine agentType from directoryPath and return empty commands
+          const { clientId, agentId, directoryPath } = action;
+          const normalizedPath = directoryPath.replace(/^\.\//, '').replace(/\/$/, '');
+          const commands: { [agentType: string]: string[] } = {};
+          if (normalizedPath === '.cursor/commands' || normalizedPath === 'cursor/commands') {
+            commands['cursor'] = [];
+          } else if (normalizedPath === '.opencode/command' || normalizedPath === 'opencode/command') {
+            commands['opencode'] = [];
+          }
+          return loadClientAgentCommandsSuccess({ clientId, agentId, commands });
         }
       }),
     );

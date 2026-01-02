@@ -10,6 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AgentProviderFactory } from './providers/agent-provider.factory';
+import { AgentResponseObject } from './providers/agent-provider.interface';
 import { ChatFilterFactory } from './providers/chat-filter.factory';
 import {
   AppliedFilterInfo,
@@ -89,18 +90,6 @@ interface LogoutSuccessData {
   message: string;
   agentId: string | null;
   agentName: string | null;
-}
-
-interface AgentResponseObject {
-  type: string;
-  subtype?: string;
-  is_error?: boolean;
-  duration_ms?: number;
-  duration_api_ms?: number;
-  result?: string;
-  session_id?: string;
-  request_id?: string;
-  [key: string]: unknown; // Allow additional properties
 }
 
 interface UserChatMessageData {
@@ -637,22 +626,11 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           // Emit agent's response if there is any
           if (agentResponse && agentResponse.trim()) {
             const agentResponseTimestamp = new Date().toISOString();
-            // Clean the response: remove everything before first { and after last }
-            let toParse = agentResponse.trim();
-            // Remove everything before the first { in the string
-            const firstBrace = toParse.indexOf('{');
-            if (firstBrace !== -1) {
-              toParse = toParse.slice(firstBrace);
-            }
-            // Remove everything after the last } in the string
-            const lastBrace = toParse.lastIndexOf('}');
-            if (lastBrace !== -1) {
-              toParse = toParse.slice(0, lastBrace + 1);
-            }
+            const toParse = provider.toParseableString(agentResponse);
 
             try {
               // Parse JSON response from agent
-              const parsedResponse = JSON.parse(toParse);
+              const parsedResponse = provider.toUnifiedResponse(toParse);
 
               // Convert parsed response to string for filtering
               const agentResponseString = JSON.stringify(parsedResponse);

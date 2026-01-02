@@ -12,6 +12,7 @@ import { DeploymentConfigurationEntity } from './entities/deployment-configurati
 import { DeploymentRunEntity } from './entities/deployment-run.entity';
 import { AgentProviderFactory } from './providers/agent-provider.factory';
 import { CursorAgentProvider } from './providers/agents/cursor-agent.provider';
+import { OpenCodeAgentProvider } from './providers/agents/opencode-agent.provider';
 import { ChatFilterFactory } from './providers/chat-filter.factory';
 import { BidirectionalChatFilter } from './providers/filters/bidirectional-chat-filter';
 import { IncomingChatFilter } from './providers/filters/incoming-chat-filter';
@@ -64,6 +65,7 @@ import { PasswordService } from './services/password.service';
     DockerService,
     AgentProviderFactory,
     CursorAgentProvider,
+    OpenCodeAgentProvider,
     PipelineProviderFactory,
     GitHubProvider,
     GitLabProvider,
@@ -74,11 +76,16 @@ import { PasswordService } from './services/password.service';
     BidirectionalChatFilter,
     {
       provide: 'AGENT_PROVIDER_INIT',
-      useFactory: (factory: AgentProviderFactory, cursorProvider: CursorAgentProvider) => {
+      useFactory: (
+        factory: AgentProviderFactory,
+        cursorProvider: CursorAgentProvider,
+        opencodeProvider: OpenCodeAgentProvider,
+      ) => {
         factory.registerProvider(cursorProvider);
+        factory.registerProvider(opencodeProvider);
         return true;
       },
-      inject: [AgentProviderFactory, CursorAgentProvider],
+      inject: [AgentProviderFactory, CursorAgentProvider, OpenCodeAgentProvider],
     },
     {
       provide: 'PIPELINE_PROVIDER_INIT',

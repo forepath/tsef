@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { of, throwError } from 'rxjs';
 import { AgentsService } from '../../services/agents.service';
 import { listDirectory, listDirectoryFailure, listDirectorySuccess } from '../files/files.actions';
@@ -35,6 +36,7 @@ import {
   loadClientAgentsBatch$,
   updateClientAgent$,
 } from './agents.effects';
+import { selectAgentsEntities } from './agents.selectors';
 import type {
   AgentResponseDto,
   ContainerType,
@@ -75,6 +77,16 @@ describe('AgentsEffects', () => {
     TestBed.configureTestingModule({
       providers: [
         provideMockActions(() => actions$),
+        provideMockStore({
+          selectors: [
+            {
+              selector: selectAgentsEntities,
+              value: {
+                [clientId]: [mockAgent],
+              },
+            },
+          ],
+        }),
         {
           provide: AgentsService,
           useValue: agentsService,
@@ -487,14 +499,16 @@ describe('AgentsEffects', () => {
       const outcome = loadClientAgentCommandsSuccess({
         clientId,
         agentId,
-        commands: ['/command1', '/command2'],
+        commands: { cursor: ['/command1', '/command2'], opencode: [] },
       });
 
       actions$ = of(action);
 
-      loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
-        expect(result).toEqual(outcome);
-        done();
+      TestBed.runInInjectionContext(() => {
+        loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
+          expect(result).toEqual(outcome);
+          done();
+        });
       });
     });
 
@@ -512,14 +526,16 @@ describe('AgentsEffects', () => {
       const outcome = loadClientAgentCommandsSuccess({
         clientId,
         agentId,
-        commands: [],
+        commands: { cursor: [], opencode: [] },
       });
 
       actions$ = of(action);
 
-      loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
-        expect(result).toEqual(outcome);
-        done();
+      TestBed.runInInjectionContext(() => {
+        loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
+          expect(result).toEqual(outcome);
+          done();
+        });
       });
     });
 
@@ -533,14 +549,16 @@ describe('AgentsEffects', () => {
       const outcome = loadClientAgentCommandsSuccess({
         clientId,
         agentId,
-        commands: [],
+        commands: { cursor: [] },
       });
 
       actions$ = of(action);
 
-      loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
-        expect(result).toEqual(outcome);
-        done();
+      TestBed.runInInjectionContext(() => {
+        loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
+          expect(result).toEqual(outcome);
+          done();
+        });
       });
     });
 
@@ -556,14 +574,16 @@ describe('AgentsEffects', () => {
       actions$ = of(action);
       let called = false;
 
-      loadClientAgentCommandsFromFiles$(actions$).subscribe({
-        next: () => {
-          called = true;
-        },
-        complete: () => {
-          expect(called).toBe(false);
-          done();
-        },
+      TestBed.runInInjectionContext(() => {
+        loadClientAgentCommandsFromFiles$(actions$).subscribe({
+          next: () => {
+            called = true;
+          },
+          complete: () => {
+            expect(called).toBe(false);
+            done();
+          },
+        });
       });
     });
 
@@ -581,14 +601,16 @@ describe('AgentsEffects', () => {
       const outcome = loadClientAgentCommandsSuccess({
         clientId,
         agentId,
-        commands: ['/command1'],
+        commands: { cursor: ['/command1'], opencode: [] },
       });
 
       actions$ = of(action);
 
-      loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
-        expect(result).toEqual(outcome);
-        done();
+      TestBed.runInInjectionContext(() => {
+        loadClientAgentCommandsFromFiles$(actions$).subscribe((result) => {
+          expect(result).toEqual(outcome);
+          done();
+        });
       });
     });
   });

@@ -17,6 +17,7 @@ import {
   unpinFileTab,
   writeFile,
 } from './files.actions';
+import type { OpenTab } from './files.reducer';
 import {
   selectDirectoryListing,
   selectDirectoryOperationLoading,
@@ -39,7 +40,6 @@ import type {
   MoveFileDto,
   WriteFileDto,
 } from './files.types';
-import type { OpenTab } from './files.reducer';
 
 /**
  * Facade for file system state management.

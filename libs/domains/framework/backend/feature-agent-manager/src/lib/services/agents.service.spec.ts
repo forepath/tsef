@@ -65,6 +65,8 @@ describe('AgentsService', () => {
     getSshConnectionDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-ssh:latest'),
     sendMessage: jest.fn(),
     sendInitialization: jest.fn(),
+    toParseableString: jest.fn(),
+    toUnifiedResponse: jest.fn(),
   };
 
   const mockAgentProviderFactory = {

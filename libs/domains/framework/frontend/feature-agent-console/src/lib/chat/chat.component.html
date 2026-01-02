@@ -804,18 +804,21 @@
                   (socketReconnecting$ | async) ||
                   (remoteReconnecting$ | async) ||
                   !(selectedAgent$ | async) ||
-                  (commandsLoading$ | async)
+                  (commandsLoading$ | async) ||
+                  (commands$ | async)?.length === 0
                 )
               "
             >
               <option value="">Chat</option>
-              <optgroup label="Commands">
-                @if (commands$ | async; as commands) {
-                  @for (command of commands; track command) {
-                    <option [value]="command">{{ command }}</option>
-                  }
+              @if (commands$ | async; as commands) {
+                @if (commands.length > 0) {
+                  <optgroup label="Commands">
+                    @for (command of commands; track command) {
+                      <option [value]="command">{{ command }}</option>
+                    }
+                  </optgroup>
                 }
-              </optgroup>
+              }
             </select>
           </div>
           <div class="chat-input-group">
@@ -875,8 +878,10 @@
               "
             >
               <option value="auto">Auto</option>
-              @for (model of chatModelOptions; track model.value) {
-                <option [value]="model.value">{{ model.label }}</option>
+              @if (selectedAgent$ | async; as agent) {
+                @for (model of getChatModelOptions(agent.agentType); track model.value) {
+                  <option [value]="model.value">{{ model.label }}</option>
+                }
               }
             </select>
           </div>

@@ -295,9 +295,10 @@ describe('AgentsFacade', () => {
 
     it('should return client agent commands observable', (done) => {
       const commands = ['/command1', '/command2'];
+      const agentType = 'cursor';
       store.select.mockReturnValue(of(commands));
 
-      facade.getClientAgentCommands$(clientId, agentId).subscribe((result) => {
+      facade.getClientAgentCommands$(clientId, agentId, agentType).subscribe((result) => {
         expect(result).toEqual(commands);
         expect(store.select).toHaveBeenCalled();
         done();
@@ -305,9 +306,10 @@ describe('AgentsFacade', () => {
     });
 
     it('should return empty array when no commands', (done) => {
+      const agentType = 'cursor';
       store.select.mockReturnValue(of([]));
 
-      facade.getClientAgentCommands$(clientId, agentId).subscribe((result) => {
+      facade.getClientAgentCommands$(clientId, agentId, agentType).subscribe((result) => {
         expect(result).toEqual([]);
         done();
       });

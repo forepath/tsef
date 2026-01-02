@@ -23,6 +23,8 @@ describe('AgentProviderFactory', () => {
       getSshConnectionDockerImage: jest.fn().mockReturnValue('image1-ssh-connection:latest'),
       sendMessage: jest.fn(),
       sendInitialization: jest.fn(),
+      toParseableString: jest.fn(),
+      toUnifiedResponse: jest.fn(),
     };
 
     mockProvider2 = {
@@ -33,6 +35,8 @@ describe('AgentProviderFactory', () => {
       getSshConnectionDockerImage: jest.fn().mockReturnValue('image2-ssh-connection:latest'),
       sendMessage: jest.fn(),
       sendInitialization: jest.fn(),
+      toParseableString: jest.fn(),
+      toUnifiedResponse: jest.fn(),
     };
   });
 

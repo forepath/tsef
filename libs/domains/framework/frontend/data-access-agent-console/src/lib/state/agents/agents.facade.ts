@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import {
@@ -206,10 +206,11 @@ export class AgentsFacade {
    * Get commands for a specific client and agent.
    * @param clientId - The client ID
    * @param agentId - The agent ID
+   * @param agentType - The agent type (e.g., 'cursor', 'opencode')
    * @returns Observable of commands array
    */
-  getClientAgentCommands$(clientId: string, agentId: string): Observable<string[]> {
-    return this.store.select(selectClientAgentCommands(clientId, agentId));
+  getClientAgentCommands$(clientId: string, agentId: string, agentType: string): Observable<string[]> {
+    return this.store.select(selectClientAgentCommands(clientId, agentId, agentType));
   }
 
   /**

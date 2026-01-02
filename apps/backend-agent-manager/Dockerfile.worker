@@ -61,12 +61,15 @@ RUN echo "deb http://deb.debian.org/debian bookworm main" > /etc/apt/sources.lis
     rm -f /etc/apt/sources.list.d/bookworm.list
 
 # Install cursor-agent natively
-# This is done last in a separate layer as cursor-agent changes most frequently
-# This ensures cursor-agent updates don't invalidate cache for nx and other dependencies
+# This is done later in a separate layer as cursor-agent changes frequently
 RUN curl -fsSL https://cursor.com/install | bash -s -- --prefix /usr/local
 
+# Install opencode agent natively
+# This is done later in a separate layer as opencode agent changes frequently
+RUN curl -fsSL https://opencode.ai/install | bash
+
 # Ensure cursor-agent is in PATH (including $HOME/.local/bin)
-ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
+ENV PATH="/root/.local/bin:/usr/local/bin:/root/.opencode/bin:${PATH}"
 
 # Keep container running (use docker exec to get bash session)
 CMD [ "tail", "-f", "/dev/null" ]

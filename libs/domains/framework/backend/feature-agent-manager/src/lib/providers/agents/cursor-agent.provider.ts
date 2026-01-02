@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DockerService } from '../../services/docker.service';
-import { AgentProvider, AgentProviderOptions } from '../agent-provider.interface';
+import { AgentProvider, AgentProviderOptions, AgentResponseObject } from '../agent-provider.interface';
 
 /**
  * Cursor-agent provider implementation.
@@ -126,5 +126,37 @@ MESSAGE HANDLING:
       // Re-throw to allow caller to handle the error
       throw error;
     }
+  }
+
+  /**
+   * Convert the response from the agent to a parseable string.
+   * @param response - The response from the agent
+   * @returns The parseable string
+   */
+  toParseableString(response: string): string {
+    // Clean the response: remove everything before first { and after last }
+    let toParse = response.trim();
+    // Remove everything before the first { in the string
+    const firstBrace = toParse.indexOf('{');
+    if (firstBrace !== -1) {
+      toParse = toParse.slice(firstBrace);
+    }
+
+    // Remove everything after the last } in the string
+    const lastBrace = toParse.lastIndexOf('}');
+    if (lastBrace !== -1) {
+      toParse = toParse.slice(0, lastBrace + 1);
+    }
+
+    return toParse;
+  }
+
+  /**
+   * Convert the response from the agent to a unified response object.
+   * @param response - The response from the agent
+   * @returns The unified response object
+   */
+  toUnifiedResponse(response: string): AgentResponseObject {
+    return JSON.parse(response) as AgentResponseObject;
   }
 }

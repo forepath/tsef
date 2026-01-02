@@ -10,6 +10,7 @@ import { DeploymentConfigurationEntity } from './entities/deployment-configurati
 import { DeploymentRunEntity } from './entities/deployment-run.entity';
 import { AgentProviderFactory } from './providers/agent-provider.factory';
 import { CursorAgentProvider } from './providers/agents/cursor-agent.provider';
+import { OpenCodeAgentProvider } from './providers/agents/opencode-agent.provider';
 import { ChatFilterFactory } from './providers/chat-filter.factory';
 import { BidirectionalChatFilter } from './providers/filters/bidirectional-chat-filter';
 import { IncomingChatFilter } from './providers/filters/incoming-chat-filter';
@@ -18,11 +19,11 @@ import { OutgoingChatFilter } from './providers/filters/outgoing-chat-filter';
 import { PipelineProviderFactory } from './providers/pipeline-provider.factory';
 import { GitHubProvider } from './providers/pipelines/github.provider';
 import { GitLabProvider } from './providers/pipelines/gitlab.provider';
+import { AgentsRepository } from './repositories/agents.repository';
 import { DeploymentConfigurationsRepository } from './repositories/deployment-configurations.repository';
 import { DeploymentRunsRepository } from './repositories/deployment-runs.repository';
-import { AgentsRepository } from './repositories/agents.repository';
-import { DeploymentsService } from './services/deployments.service';
 import { AgentsService } from './services/agents.service';
+import { DeploymentsService } from './services/deployments.service';
 import { DockerService } from './services/docker.service';
 import { PasswordService } from './services/password.service';
 
@@ -119,14 +120,25 @@ describe('AgentsModule', () => {
     expect(provider).toBeInstanceOf(CursorAgentProvider);
   });
 
-  it('should register CursorAgentProvider via AGENT_PROVIDER_INIT factory', () => {
+  it('should provide OpenCodeAgentProvider', () => {
+    const provider = module.get<OpenCodeAgentProvider>(OpenCodeAgentProvider);
+    expect(provider).toBeDefined();
+    expect(provider).toBeInstanceOf(OpenCodeAgentProvider);
+  });
+
+  it('should register CursorAgentProvider and OpenCodeAgentProvider via AGENT_PROVIDER_INIT factory', () => {
     const factory = module.get<AgentProviderFactory>(AgentProviderFactory);
     const cursorProvider = module.get<CursorAgentProvider>(CursorAgentProvider);
+    const opencodeProvider = module.get<OpenCodeAgentProvider>(OpenCodeAgentProvider);
 
     // Verify the provider is registered
     expect(factory.hasProvider('cursor')).toBe(true);
     expect(factory.getProvider('cursor')).toBe(cursorProvider);
     expect(cursorProvider.getType()).toBe('cursor');
+
+    expect(factory.hasProvider('opencode')).toBe(true);
+    expect(factory.getProvider('opencode')).toBe(opencodeProvider);
+    expect(opencodeProvider.getType()).toBe('opencode');
   });
 
   it('should initialize AGENT_PROVIDER_INIT factory', () => {

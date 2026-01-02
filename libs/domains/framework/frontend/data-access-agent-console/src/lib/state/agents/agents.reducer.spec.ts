@@ -436,7 +436,7 @@ describe('agentsReducer', () => {
 
   describe('loadClientAgentCommandsSuccess', () => {
     const agentId = 'agent-1';
-    const commands = ['/command1', '/command2'];
+    const commands = { cursor: ['/command1', '/command2'] };
 
     it('should set commands for the client:agent key and set loadingCommands to false', () => {
       const state: AgentsState = {
@@ -450,15 +450,15 @@ describe('agentsReducer', () => {
       expect(newState.loadingCommands[`${clientId}:${agentId}`]).toBe(false);
     });
 
-    it('should handle empty commands array', () => {
+    it('should handle empty commands object', () => {
       const state: AgentsState = {
         ...initialAgentsState,
         loadingCommands: { [`${clientId}:${agentId}`]: true },
       };
 
-      const newState = agentsReducer(state, loadClientAgentCommandsSuccess({ clientId, agentId, commands: [] }));
+      const newState = agentsReducer(state, loadClientAgentCommandsSuccess({ clientId, agentId, commands: {} }));
 
-      expect(newState.commands[`${clientId}:${agentId}`]).toEqual([]);
+      expect(newState.commands[`${clientId}:${agentId}`]).toEqual({});
       expect(newState.loadingCommands[`${clientId}:${agentId}`]).toBe(false);
     });
 
@@ -467,7 +467,7 @@ describe('agentsReducer', () => {
       const agentId2 = 'agent-2';
       const state: AgentsState = {
         ...initialAgentsState,
-        commands: { [`${clientId2}:${agentId2}`]: ['/other-command'] },
+        commands: { [`${clientId2}:${agentId2}`]: { cursor: ['/other-command'] } },
         loadingCommands: {
           [`${clientId}:${agentId}`]: true,
           [`${clientId2}:${agentId2}`]: false,
@@ -477,7 +477,7 @@ describe('agentsReducer', () => {
       const newState = agentsReducer(state, loadClientAgentCommandsSuccess({ clientId, agentId, commands }));
 
       expect(newState.commands[`${clientId}:${agentId}`]).toEqual(commands);
-      expect(newState.commands[`${clientId2}:${agentId2}`]).toEqual(['/other-command']);
+      expect(newState.commands[`${clientId2}:${agentId2}`]).toEqual({ cursor: ['/other-command'] });
     });
   });
 

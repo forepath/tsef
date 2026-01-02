@@ -208,4 +208,193 @@ describe('CursorAgentProvider', () => {
       loggerWarnSpy.mockRestore();
     });
   });
+
+  describe('toParseableString', () => {
+    it('should extract JSON from response with text before and after', () => {
+      const response = 'Some text before {"type":"result","result":"Hello"} and text after';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('{"type":"result","result":"Hello"}');
+    });
+
+    it('should return clean JSON when response is already clean', () => {
+      const response = '{"type":"result","result":"Hello"}';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('{"type":"result","result":"Hello"}');
+    });
+
+    it('should handle response with only opening brace', () => {
+      const response = 'Some text {';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('{');
+    });
+
+    it('should handle response with only closing brace', () => {
+      const response = '} some text';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('}');
+    });
+
+    it('should handle response with no braces', () => {
+      const response = 'Some text without braces';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('Some text without braces');
+    });
+
+    it('should extract first complete JSON object when multiple objects exist', () => {
+      const response = 'Text {"type":"first","result":"First"} more {"type":"second","result":"Second"} end';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('{"type":"first","result":"First"} more {"type":"second","result":"Second"}');
+    });
+
+    it('should handle nested JSON objects', () => {
+      const response = 'Prefix {"type":"result","data":{"nested":"value"}} suffix';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('{"type":"result","data":{"nested":"value"}}');
+    });
+
+    it('should trim whitespace from response', () => {
+      const response = '   {"type":"result","result":"Hello"}   ';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('{"type":"result","result":"Hello"}');
+    });
+
+    it('should handle empty string', () => {
+      const response = '';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('');
+    });
+
+    it('should handle response with only whitespace', () => {
+      const response = '   \n\t   ';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('');
+    });
+
+    it('should handle complex JSON with arrays and nested objects', () => {
+      const response = 'Log: {"type":"result","items":[{"id":1},{"id":2}]} done';
+      const result = provider.toParseableString(response);
+
+      expect(result).toBe('{"type":"result","items":[{"id":1},{"id":2}]}');
+    });
+  });
+
+  describe('toUnifiedResponse', () => {
+    it('should parse valid JSON response with required fields', () => {
+      const response = '{"type":"result","result":"Hello from agent"}';
+      const result = provider.toUnifiedResponse(response);
+
+      expect(result).toEqual({
+        type: 'result',
+        result: 'Hello from agent',
+      });
+    });
+
+    it('should parse valid JSON response with all optional fields', () => {
+      const response =
+        '{"type":"result","subtype":"success","is_error":false,"duration_ms":100,"duration_api_ms":50,"result":"Success","session_id":"session-123","request_id":"req-456"}';
+      const result = provider.toUnifiedResponse(response);
+
+      expect(result).toEqual({
+        type: 'result',
+        subtype: 'success',
+        is_error: false,
+        duration_ms: 100,
+        duration_api_ms: 50,
+        result: 'Success',
+        session_id: 'session-123',
+        request_id: 'req-456',
+      });
+    });
+
+    it('should parse JSON response with additional properties', () => {
+      const response = '{"type":"result","result":"Hello","custom_field":"custom_value","another_field":123}';
+      const result = provider.toUnifiedResponse(response);
+
+      expect(result).toEqual({
+        type: 'result',
+        result: 'Hello',
+        custom_field: 'custom_value',
+        another_field: 123,
+      });
+    });
+
+    it('should parse error response', () => {
+      const response = '{"type":"error","is_error":true,"result":"Something went wrong"}';
+      const result = provider.toUnifiedResponse(response);
+
+      expect(result).toEqual({
+        type: 'error',
+        is_error: true,
+        result: 'Something went wrong',
+      });
+    });
+
+    it('should throw error for invalid JSON', () => {
+      const response = '{"type":"result","result":"Hello"'; // Missing closing brace
+
+      expect(() => provider.toUnifiedResponse(response)).toThrow();
+    });
+
+    it('should throw error for empty string', () => {
+      const response = '';
+
+      expect(() => provider.toUnifiedResponse(response)).toThrow();
+    });
+
+    it('should throw error for non-JSON string', () => {
+      const response = 'This is not JSON';
+
+      expect(() => provider.toUnifiedResponse(response)).toThrow();
+    });
+
+    it('should throw error for malformed JSON with trailing comma', () => {
+      const response = '{"type":"result","result":"Hello",}'; // Trailing comma
+
+      expect(() => provider.toUnifiedResponse(response)).toThrow();
+    });
+
+    it('should parse JSON with null values', () => {
+      const response = '{"type":"result","result":null,"subtype":null}';
+      const result = provider.toUnifiedResponse(response);
+
+      expect(result).toEqual({
+        type: 'result',
+        result: null,
+        subtype: null,
+      });
+    });
+
+    it('should parse JSON with boolean values', () => {
+      const response = '{"type":"result","is_error":true,"success":false}';
+      const result = provider.toUnifiedResponse(response);
+
+      expect(result).toEqual({
+        type: 'result',
+        is_error: true,
+        success: false,
+      });
+    });
+
+    it('should parse JSON with numeric values', () => {
+      const response = '{"type":"result","duration_ms":1234,"count":42,"rate":3.14}';
+      const result = provider.toUnifiedResponse(response);
+
+      expect(result).toEqual({
+        type: 'result',
+        duration_ms: 1234,
+        count: 42,
+        rate: 3.14,
+      });
+    });
+  });
 });
