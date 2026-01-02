@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.20.0](https://github.com/forepath/tsef/compare/v1.19.1...v1.20.0) (2026-01-02)
+
+
+### Features
+
+* pipeline triggering and monitoring ([#155](https://github.com/forepath/tsef/issues/155)) ([1dd0a91](https://github.com/forepath/tsef/commit/1dd0a91f09fa190ecc1336ed817f14b304484f4e))
+
+
+### Bug Fixes
+
+* pipeline status background ([#158](https://github.com/forepath/tsef/issues/158)) ([71d92fd](https://github.com/forepath/tsef/commit/71d92fd43c72a500018794faf4ef6e44277ae453))
+
 ## [1.19.1](https://github.com/forepath/tsef/compare/v1.19.0...v1.19.1) (2026-01-02)
 
 
