@@ -1,8 +1,8 @@
-import { FactoryProvider, InjectionToken } from '@angular/core';
+import { InjectionToken } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { environment } from './environment';
 import { Environment } from './environment.interface';
-import { ENVIRONMENT, provideEnvironment } from './environment.token';
+import { ENVIRONMENT, loadRuntimeEnvironment } from './environment.token';
 
 describe('environment.token', () => {
   describe('ENVIRONMENT', () => {
@@ -21,48 +21,73 @@ describe('environment.token', () => {
     });
   });
 
-  describe('provideEnvironment', () => {
-    it('should return a Provider object', () => {
-      const provider = provideEnvironment();
-      expect(provider).toBeDefined();
-      expect(typeof provider).toBe('object');
-      expect(Array.isArray(provider)).toBe(false);
+  describe('loadRuntimeEnvironment', () => {
+    beforeEach(() => {
+      // Mock fetch globally
+      global.fetch = jest.fn();
     });
 
-    it('should provide ENVIRONMENT token', () => {
-      const provider = provideEnvironment() as FactoryProvider;
-      expect(provider.provide).toBe(ENVIRONMENT);
+    afterEach(() => {
+      jest.restoreAllMocks();
     });
 
-    it('should use factory function', () => {
-      const provider = provideEnvironment() as FactoryProvider;
-      expect(provider.useFactory).toBeDefined();
-      expect(typeof provider.useFactory).toBe('function');
+    it('should return environment when fetch fails', async () => {
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+
+      const result = await loadRuntimeEnvironment();
+      expect(result).toBe(environment);
     });
 
-    it('should have empty deps array', () => {
-      const provider = provideEnvironment() as FactoryProvider;
-      expect(provider.deps).toEqual([]);
-    });
-
-    it('should return environment from factory', () => {
-      const provider = provideEnvironment() as FactoryProvider;
-      const factoryResult = provider.useFactory();
-      expect(factoryResult).toBe(environment);
-      expect(factoryResult).toMatchObject<Environment>({
-        production: expect.any(Boolean),
-        controller: expect.any(Object),
-        authentication: expect.any(Object),
-        chatModelOptions: expect.any(Object),
-        editor: expect.any(Object),
-        deployment: expect.any(Object),
-        cookieConsent: expect.any(Object),
+    it('should return environment when response is not ok', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: false,
+        status: 404,
       });
+
+      const result = await loadRuntimeEnvironment();
+      expect(result).toBe(environment);
     });
 
-    it('should be usable in TestBed configuration', async () => {
+    it('should merge remote config with base environment', async () => {
+      const remoteConfig: Partial<Environment> = {
+        controller: {
+          restApiUrl: 'http://custom-api:3000/api',
+          websocketUrl: 'http://custom-ws:8080/clients',
+        },
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => remoteConfig,
+      });
+
+      const result = await loadRuntimeEnvironment();
+      expect(result.controller.restApiUrl).toBe('http://custom-api:3000/api');
+      expect(result.controller.websocketUrl).toBe('http://custom-ws:8080/clients');
+      // Other properties should remain from base environment
+      expect(result.production).toBe(environment.production);
+    });
+
+    it('should call /config endpoint', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({}),
+      });
+
+      await loadRuntimeEnvironment();
+      expect(global.fetch).toHaveBeenCalledWith('/config');
+    });
+  });
+
+  describe('ENVIRONMENT injection', () => {
+    it('should be injectable via useValue provider', async () => {
       await TestBed.configureTestingModule({
-        providers: [provideEnvironment()],
+        providers: [
+          {
+            provide: ENVIRONMENT,
+            useValue: environment,
+          },
+        ],
       }).compileComponents();
 
       const injected = TestBed.inject(ENVIRONMENT);
@@ -80,7 +105,12 @@ describe('environment.token', () => {
 
     it('should provide same instance on multiple injections', async () => {
       await TestBed.configureTestingModule({
-        providers: [provideEnvironment()],
+        providers: [
+          {
+            provide: ENVIRONMENT,
+            useValue: environment,
+          },
+        ],
       }).compileComponents();
 
       const first = TestBed.inject(ENVIRONMENT);
@@ -96,7 +126,10 @@ describe('environment.token', () => {
 
       await TestBed.configureTestingModule({
         providers: [
-          provideEnvironment(),
+          {
+            provide: ENVIRONMENT,
+            useValue: environment,
+          },
           {
             provide: TestService,
             useFactory: (env: Environment) => new TestService(env),
