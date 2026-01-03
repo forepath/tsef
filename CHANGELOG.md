@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.21.0](https://github.com/forepath/tsef/compare/v1.20.0...v1.21.0) (2026-01-03)
+
+
+### Features
+
+* opencode agent support ([#159](https://github.com/forepath/tsef/issues/159)) ([a2b5704](https://github.com/forepath/tsef/commit/a2b5704f808551d40a7c9dca01bd4ff65566018e))
+
 ## [1.20.0](https://github.com/forepath/tsef/compare/v1.19.1...v1.20.0) (2026-01-02)
 
 
