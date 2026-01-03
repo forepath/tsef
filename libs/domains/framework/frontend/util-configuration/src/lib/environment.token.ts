@@ -1,16 +1,8 @@
-import { HttpClient } from '@angular/common/http';
-import { APP_INITIALIZER, InjectionToken, Provider } from '@angular/core';
-import { firstValueFrom, timeout } from 'rxjs';
+import { InjectionToken } from '@angular/core';
 import { environment } from './environment';
 import { Environment } from './environment.interface';
 
 export const ENVIRONMENT = new InjectionToken<Environment>('Environment');
-
-/**
- * Runtime environment instance that can be overridden by remote configuration.
- * Falls back to the build-time environment by default.
- */
-let runtimeEnvironment: Environment = environment;
 
 function mergeEnvironmentOverrides(base: Environment, overrides: Partial<Environment> | null | undefined): Environment {
   if (!overrides) {
@@ -25,49 +17,15 @@ function mergeEnvironmentOverrides(base: Environment, overrides: Partial<Environ
   } as Environment;
 }
 
-export function loadRuntimeEnvironment(http: HttpClient): () => Promise<void> {
-  return async () => {
-    try {
-      const remoteConfig = await firstValueFrom(
-        http
-          .get<Partial<Environment>>('/config', {
-            responseType: 'json',
-          })
-          .pipe(timeout({ first: 5000 })),
-      );
-
-      runtimeEnvironment = mergeEnvironmentOverrides(environment, remoteConfig);
-    } catch (error) {
-      runtimeEnvironment = environment;
+export async function loadRuntimeEnvironment(): Promise<Environment> {
+  try {
+    const response: Response = await fetch('/config');
+    if (!response.ok) {
+      return environment;
     }
-  };
-}
-
-export function provideEnvironment(): Provider {
-  return {
-    provide: ENVIRONMENT,
-    useFactory: () => environment,
-    deps: [],
-  };
-}
-
-/**
- * Provides the ENVIRONMENT token backed by runtime configuration loaded from the
- * server's /config endpoint. If the endpoint is unavailable or misconfigured,
- * the build-time environment is used as a safe fallback.
- */
-export function provideRuntimeEnvironment(): Provider[] {
-  return [
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (http: HttpClient) => loadRuntimeEnvironment(http),
-      deps: [HttpClient],
-      multi: true,
-    },
-    {
-      provide: ENVIRONMENT,
-      useFactory: () => runtimeEnvironment,
-      deps: [],
-    },
-  ];
+    const overrides: Partial<Environment> = await response.json();
+    return mergeEnvironmentOverrides(environment, overrides);
+  } catch {
+    return environment;
+  }
 }

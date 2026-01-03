@@ -3,7 +3,7 @@ import { existsSync, readdirSync, statSync } from 'fs';
 import { join, resolve } from 'path';
 
 const app = express();
-const port = process.env['PORT'] || 4200;
+const port = parseInt(process.env['PORT'] || '4200', 10);
 
 /**
  * Runtime configuration endpoint.
@@ -292,7 +292,7 @@ app.get('*', (req, res) => {
   res.sendFile(resolve(indexPath));
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Express server running on http://localhost:${port}`);
   console.log(`📦 Serving files from: ${baseDistPath}`);
   console.log(`🌐 Available locales: ${AVAILABLE_LOCALES.join(', ')}`);

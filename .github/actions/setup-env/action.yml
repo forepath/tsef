@@ -30,11 +30,23 @@ runs:
         if [ "$PM" = "yarn" ]; then yarn install --frozen-lockfile; fi
         if [ "$PM" = "npm" ]; then npm ci; fi
 
+    - name: Set Cypress cache folder
+      id: cypress-cache
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          CYPRESS_CACHE="$USERPROFILE/.cache/Cypress"
+        else
+          CYPRESS_CACHE="$HOME/.cache/Cypress"
+        fi
+        echo "folder=$CYPRESS_CACHE" >> $GITHUB_OUTPUT
+        echo "CYPRESS_CACHE_FOLDER=$CYPRESS_CACHE" >> $GITHUB_ENV
+
     - name: Restore Cypress cache
       uses: actions/cache@v4
       with:
         path: |
-          ~/.cache/Cypress
+          ${{ steps.cypress-cache.outputs.folder }}
           node_modules/.cache/Cypress
         key: ${{ runner.os }}-cypress-${{ hashFiles('**/pnpm-lock.yaml', '**/yarn.lock', '**/package-lock.json') }}
         restore-keys: |
@@ -43,9 +55,14 @@ runs:
     - name: Cypress binary install
       shell: bash
       env:
-        CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
+        CYPRESS_CACHE_FOLDER: ${{ steps.cypress-cache.outputs.folder }}
       run: |
         PM="${{ steps.pm.outputs.pm }}"
         if [ "$PM" = "pnpm" ]; then pnpm exec cypress install || true; fi
         if [ "$PM" = "yarn" ]; then yarn run -s cypress install || yarn dlx cypress install || true; fi
         if [ "$PM" = "npm" ]; then npx --yes cypress install || true; fi
+
+    - name: Electron binary install
+      shell: bash
+      working-directory: ./node_modules/electron
+      run: npm run postinstall || node install.js || true
