@@ -1,0 +1,10 @@
+{
+  "name": "native-agent-console-server",
+  "version": "0.0.0",
+  "license": "BUSL-1.1-or-later",
+  "description": "Forepath Agent Console Server",
+  "private": true,
+  "dependencies": {
+    "express": "4.21.2"
+  }
+}

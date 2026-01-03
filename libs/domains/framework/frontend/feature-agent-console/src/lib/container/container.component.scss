@@ -6,6 +6,11 @@
   overflow: hidden; // Prevent page-level overflow
 }
 
+// Adjust height in Electron context to account for custom titlebar (32px)
+:host-context(body.electron-app) {
+  height: calc(100vh - 32px);
+}
+
 .section__container {
   flex-grow: 1;
   min-height: 0; // Critical for flex scrolling
