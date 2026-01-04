@@ -5,7 +5,10 @@
   "prefix": "app",
   "sourceRoot": "apps/frontend-agent-console/src",
   "tags": ["type:app", "scope:frontend"],
-  "implicitDependencies": ["platform-authentication"],
+  "implicitDependencies": [
+    "platform-authentication",
+    "backend-agent-controller"
+  ],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
@@ -162,7 +165,7 @@
         "{workspaceRoot}/dist/apps/frontend-agent-console/server/browser"
       ],
       "options": {
-        "command": "test -d dist/apps/frontend-agent-console/browser && mkdir -p dist/apps/frontend-agent-console/server && cp -r dist/apps/frontend-agent-console/browser dist/apps/frontend-agent-console/server/browser || (echo 'Error: Browser directory not found. Please run build first.' && exit 1)"
+        "command": "bash -c \"test -d dist/apps/frontend-agent-console/browser && mkdir -p dist/apps/frontend-agent-console/server && cp -r dist/apps/frontend-agent-console/browser dist/apps/frontend-agent-console/server/browser || (echo 'Error: Browser directory not found. Please run build first.' && exit 1)\""
       },
       "dependsOn": ["prebuild-server"]
     },

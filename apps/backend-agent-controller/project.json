@@ -6,7 +6,8 @@
   "tags": ["type:app", "scope:backend"],
   "implicitDependencies": [
     "platform-authentication",
-    "framework-backend-feature-agent-controller"
+    "framework-backend-feature-agent-controller",
+    "backend-agent-manager"
   ],
   "targets": {
     "build": {
