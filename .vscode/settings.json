@@ -51,8 +51,7 @@
     "*.mdx": "markdown"
   },
   "files.exclude": {
-    "**/node_modules": true,
-    "**/dist": true,
+    "**/.angular": true,
     "**/.nx": true,
     "**/.cache": true,
     "**/tmp": true,

@@ -33,13 +33,11 @@ console.log('[Electron Preload] Preload script loaded, electronAPI exposed');
 
 // Inject custom titlebar
 function injectTitlebar() {
-  // Wait for body to exist
   if (!document.body) {
     setTimeout(injectTitlebar, 100);
     return;
   }
 
-  // Don't inject if already injected
   if (document.getElementById('electron-titlebar')) {
     return;
   }
@@ -144,14 +142,10 @@ function injectTitlebar() {
     </style>
   `;
 
-  // Add electron class to body for CSS targeting
   document.body.classList.add('electron-app');
 
-  // Inject titlebar
   document.body.insertAdjacentHTML('afterbegin', titlebarHTML);
 
-  // Inject a script into the page context (not preload context) to set up listeners
-  // This script runs in the page's main world where electronAPI is available
   const setupScript = document.createElement('script');
   setupScript.textContent = `
     (function() {
@@ -240,9 +234,6 @@ function injectTitlebar() {
   `;
   document.body.appendChild(setupScript);
 }
-
-// Event delegation as a fallback (runs in page context via injected script)
-// This is handled by the injected script above
 
 // Try to inject immediately and also on DOMContentLoaded
 injectTitlebar();

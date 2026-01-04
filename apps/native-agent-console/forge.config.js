@@ -12,10 +12,7 @@ module.exports = {
   makers: [
     ...(isWindows
       ? [
-          {
-            name: '@electron-forge/maker-squirrel',
-            config: { name: 'agenstra', exe: 'agenstra_installer.exe' },
-          },
+          { name: '@electron-forge/maker-squirrel', config: {} },
           { name: '@electron-forge/maker-zip', platforms: ['win32'] },
         ]
       : []),
@@ -30,10 +27,5 @@ module.exports = {
         ]
       : []),
   ],
-  plugins: [
-    {
-      name: '@electron-forge/plugin-auto-unpack-natives',
-      config: {},
-    },
-  ],
+  plugins: [],
 };
