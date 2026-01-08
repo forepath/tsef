@@ -340,7 +340,7 @@ jobs:
 
       - name: Build binaries
         env:
-          VERSION: ${{ needs.publish.outputs.new_release_version }}
+          RELEASE_VERSION: ${{ needs.publish.outputs.new_release_version }}
         run: |
           npx nx run-many --target=package --configuration=production --parallel=3 || echo "No projects for native applications build"
 
