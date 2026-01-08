@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.23.0](https://github.com/forepath/tsef/compare/v1.22.2...v1.23.0) (2026-01-08)
+
+
+### Features
+
+* landingpage downloads link ([#166](https://github.com/forepath/tsef/issues/166)) ([587c698](https://github.com/forepath/tsef/commit/587c698a9cfa5b283dde532bda0e624da4bdf977))
+
 ## [1.22.2](https://github.com/forepath/tsef/compare/v1.22.1...v1.22.2) (2026-01-08)
 
 
