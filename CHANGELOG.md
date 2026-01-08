@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.22.2](https://github.com/forepath/tsef/compare/v1.22.1...v1.22.2) (2026-01-08)
+
+
+### Bug Fixes
+
+* read release version value from environment ([#165](https://github.com/forepath/tsef/issues/165)) ([7e686af](https://github.com/forepath/tsef/commit/7e686af3b3126a5fd44ac7eda7c46a3e0dfd7638))
+
 ## [1.22.1](https://github.com/forepath/tsef/compare/v1.22.0...v1.22.1) (2026-01-08)
 
 
