@@ -88,9 +88,8 @@
         "production": {
           "commands": [
             "nx build native-agent-console --configuration=production",
-            "echo 'RELEASE_VERSION=${RELEASE_VERSION}'",
-            "sed -i 's/0.0.0/${RELEASE_VERSION}/g' dist/apps/native-agent-console/package.json",
-            "sed -i 's/0.0.0/${RELEASE_VERSION}/g' dist/apps/native-agent-console/server/package.json",
+            "sed -i \"s/0.0.0/${RELEASE_VERSION}/g\" dist/apps/native-agent-console/package.json",
+            "sed -i \"s/0.0.0/${RELEASE_VERSION}/g\" dist/apps/native-agent-console/server/package.json",
             "cd dist/apps/native-agent-console && npx electron-forge make"
           ]
         }
