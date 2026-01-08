@@ -302,6 +302,7 @@ jobs:
   publish-native-applications:
     name: Publish Native Applications
     runs-on: ubuntu-latest
+    if:
     needs:
       - build-native-applications-linux
     steps:
@@ -315,6 +316,7 @@ jobs:
       - name: Consolidate binaries
         run: |
           mkdir -p release
+          mkdir -p artifacts
           find artifacts -type f -name '*.zip' -exec cp {} release/ \;
           find artifacts -type f -name '*.deb' -exec cp {} release/ \;
           find artifacts -type f -name '*.rpm' -exec cp {} release/ \;
