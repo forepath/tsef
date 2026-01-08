@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.22.0](https://github.com/forepath/tsef/compare/v1.21.0...v1.22.0) (2026-01-08)
+
+
+### Features
+
+* electron desktop application for linux ([#160](https://github.com/forepath/tsef/issues/160)) ([3dfa9dc](https://github.com/forepath/tsef/commit/3dfa9dc52d160d8efb66c82311238afb336372fa))
+
+
+### Bug Fixes
+
+* route reuse strategy ([#162](https://github.com/forepath/tsef/issues/162)) ([1cc2d05](https://github.com/forepath/tsef/commit/1cc2d05ebb2e4d79c1e30d370802563ab55dcbb3))
+
 ## [1.21.0](https://github.com/forepath/tsef/compare/v1.20.0...v1.21.0) (2026-01-03)
 
 
