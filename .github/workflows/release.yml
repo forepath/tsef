@@ -374,6 +374,7 @@ jobs:
       - name: Consolidate binaries
         run: |
           mkdir -p release
+          mkdir -p artifacts
           find artifacts -type f -name '*.zip' -exec cp {} release/ \;
           find artifacts -type f -name '*.deb' -exec cp {} release/ \;
           find artifacts -type f -name '*.rpm' -exec cp {} release/ \;
