@@ -389,4 +389,4 @@ jobs:
           CLOUDFLARE_R2_ENDPOINT: ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
           AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
         run: |
-          aws s3 cp release/ s3://${{ secrets.AWS_BUCKET }}/releases/${{ needs.publish.outputs.new_release_version }} --recursive --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
+          aws s3 cp release/ s3://${{ secrets.AWS_BUCKET }}/releases/${{ needs.publish.outputs.new_release_version }} --recursive --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT }} --no-multipart
