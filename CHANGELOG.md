@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.22.1](https://github.com/forepath/tsef/compare/v1.22.0...v1.22.1) (2026-01-08)
+
+
+### Bug Fixes
+
+* desktop app prodution release env collision ([#164](https://github.com/forepath/tsef/issues/164)) ([e4e02dd](https://github.com/forepath/tsef/commit/e4e02dd9ad4609a106579c91722dac73de3ee000))
+
 ## [1.22.0](https://github.com/forepath/tsef/compare/v1.21.0...v1.22.0) (2026-01-08)
 
 
