@@ -21,7 +21,7 @@ The easiest way to get started is using Docker Compose:
 ```bash
 # Clone the repository (if not already done)
 git clone <repository-url>
-cd tsef
+cd agenstra
 
 # Start all services
 cd apps/backend-agent-controller
