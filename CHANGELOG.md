@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.23.1](https://github.com/forepath/agenstra/compare/v1.23.0...v1.23.1) (2026-01-11)
+
+
+### Chores
+
+* rename repository ([#169](https://github.com/forepath/agenstra/issues/169)) ([6983bcc](https://github.com/forepath/agenstra/commit/6983bcc84c8b3d9612cd167090c5c9c5fb485bf9))
+
 ## [1.23.0](https://github.com/forepath/agenstra/compare/v1.22.2...v1.23.0) (2026-01-08)
 
 ### Features
