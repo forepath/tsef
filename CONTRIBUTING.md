@@ -166,9 +166,9 @@ We value documentation improvements:
 
 ### Community Support
 
-- [GitHub Discussions](https://github.com/forepath/tsef/discussions)
+- [GitHub Discussions](https://github.com/forepath/agenstra/discussions)
 - [Documentation](./docs/README.md)
-- [Issue Tracker](https://github.com/forepath/tsef/issues)
+- [Issue Tracker](https://github.com/forepath/agenstra/issues)
 
 ### Direct Support
 

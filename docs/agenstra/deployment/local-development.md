@@ -18,7 +18,7 @@ Before you begin, ensure you have:
 
 ```bash
 git clone <repository-url>
-cd tsef
+cd agenstra
 ```
 
 ### Install Dependencies

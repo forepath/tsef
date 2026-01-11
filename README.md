@@ -1,10 +1,3 @@
-<p style="text-align: center;">
- <picture>
- <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/forepath/tsef/main/images/tsef-dark.svg">
- <img alt="TSEF - The AI-ready Typescript Enterprise Framework" src="https://raw.githubusercontent.com/forepath/tsef/main/images/tsef-light.svg" width="100%">
- </picture>
-</p>
-
 <div style="text-align: center;">
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -16,56 +9,143 @@
 
 </div>
 
-# The Agentic Framework for TypeScript Developers
+# Agenstra
 
-From idea to scalable product in no time. Standardize AI-powered development workflows and start producing maintainable code in seconds. Built for developers and AI agents.
+**A centralized control plane for managing distributed AI agent infrastructure.**
 
-To create a new TSEF workspace run:
+Agenstra is a full-stack platform that enables you to manage multiple AI agent instances from a single web-based console. Connect to remote agent-manager services, interact with AI agents in real-time, edit code directly in containers, and automate server provisioning—all from one unified interface.
 
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/forepath/tsef/refs/heads/main/install.sh)"
+## What is Agenstra?
+
+Agenstra provides a complete solution for managing distributed AI agent infrastructure:
+
+- **Centralized Management** - Connect to and control multiple remote agent-manager services from a single console
+- **Real-time AI Interaction** - WebSocket-based bidirectional communication with AI agents for instant responses
+- **Integrated Code Editor** - Edit files directly in agent containers with Monaco Editor—read, write, and manage code in real-time
+- **Automated Server Provisioning** - Provision cloud servers (Hetzner Cloud, DigitalOcean) with automated Docker and agent-manager deployment
+- **Version Control Integration** - Full Git operations (status, branches, commit, push, pull, rebase) directly from the web interface
+- **Container Management** - Monitor and interact with agent containers, view logs, and manage container lifecycle
+- **VNC Browser Access** - Graphical browser access via VNC with XFCE4 desktop and Chromium browser
+- **CI/CD Pipeline Management** - Configure, trigger, and monitor deployment pipelines from the console
+
+## Architecture
+
+Agenstra follows a three-tier distributed architecture:
+
+```
+┌─────────────────────┐
+│  Frontend Console   │  Angular application with NgRx state management
+│  (Web-based IDE)    │  Monaco Editor, Chat Interface, File Management
+└──────────┬──────────┘
+           │ HTTP REST API
+           │ WebSocket (Socket.IO)
+           ▼
+┌─────────────────────┐
+│ Agent Controller   │  Centralized control plane
+│ (Backend)           │  Client management, event forwarding
+└──────────┬──────────┘
+           │ HTTP REST API
+           │ WebSocket (Socket.IO)
+           ▼
+┌─────────────────────┐
+│ Agent Manager       │  Agent lifecycle management
+│ (Backend)           │  Container management, Docker integration
+└─────────────────────┘
 ```
 
-To activate Cursor hooks for this workspace, run:
+### Components
 
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/forepath/tsef/refs/heads/main/hooks.sh)"
-```
+- **Frontend Agent Console** - Web-based IDE and chat interface built with Angular and NgRx
+- **Backend Agent Controller** - Centralized control plane for managing multiple agent-manager instances
+- **Backend Agent Manager** - Agent management system with HTTP REST API and WebSocket gateway
 
-To update an existing TSEF workspace, run:
+## Key Features
 
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/forepath/tsef/refs/heads/main/update.sh)"
-```
+### ✅ Distributed Agent Management
+
+Connect to and manage multiple remote agent-manager services from a single console. Each client represents a remote agent-manager instance that can be provisioned automatically or connected manually.
+
+### ✅ Real-time AI Chat
+
+WebSocket-based bidirectional communication with AI agents. Send messages, receive instant responses, and maintain chat history across reconnections.
+
+### ✅ Integrated Code Editor
+
+Monaco Editor integration allows you to edit files directly in agent containers. Read, write, and manage code in real-time with syntax highlighting and code completion.
+
+### ✅ Automated Server Provisioning
+
+Provision cloud servers (Hetzner Cloud, DigitalOcean) with automated Docker installation and agent-manager deployment. Configure authentication, Git repositories, and agent settings during provisioning.
+
+### ✅ Version Control Integration
+
+Full Git operations directly from the web interface:
+
+- View git status and branches
+- Stage, commit, and push changes
+- Pull and rebase operations
+- Resolve merge conflicts
+
+### ✅ Container Management
+
+Monitor agent containers, view logs, and manage container lifecycle. Real-time container statistics and health monitoring.
+
+### ✅ VNC Browser Access
+
+Access a Chromium browser running in a virtual workspace container via VNC. XFCE4 desktop environment with auto-started browser, accessible through a web-based noVNC client.
+
+### ✅ CI/CD Pipeline Management
+
+Configure CI/CD providers (GitHub Actions), trigger pipeline runs, monitor their status, and view logs directly from the Agenstra console.
+
+## Quick Start
+
+### Getting Started
+
+1. **Set up your environment** - Follow the [Getting Started Guide](./docs/agenstra/getting-started.md) to install and configure Agenstra
+2. **Create your first client** - Connect to an existing agent-manager or provision a new server
+3. **Create an agent** - Set up your first AI agent and start interacting
+4. **Explore features** - Use the integrated code editor, Git operations, and chat interface
 
 ## Documentation
 
-### Development Workflows
+### Getting Started
 
-- [Getting Started](./docs/development-workflows/getting-started.md) - Your first steps in the framework
-- [Operation Modes](./docs/development-workflows/operation-modes.md) - Understanding different approaches to tasks
-- [GitHub Workflow](./docs/development-workflows/github-workflow.md) - Issue handling and PR processes
-- [Validation Pipeline](./docs/development-workflows/validation-pipeline.md) - Quality assurance and testing
+- [Getting Started Guide](./docs/agenstra/getting-started.md) - Your entry point to Agenstra
+- [Local Development](./docs/agenstra/deployment/local-development.md) - Setting up for local development
 
-### Software Architecture
+### Architecture
 
-- [Monorepo Structure](./docs/architecture/monorepo-structure.md) - High-level organization and principles
+- [System Overview](./docs/agenstra/architecture/system-overview.md) - High-level architecture and component relationships
+- [Components](./docs/agenstra/architecture/components.md) - Detailed breakdown of all system components
+- [Data Flow](./docs/agenstra/architecture/data-flow.md) - Communication patterns and data flow
 
-### Best Practices
+### Features
 
-- [Code Quality](./docs/best-practices/code-quality.md) - Writing maintainable, high-quality code
+- [Client Management](./docs/agenstra/features/client-management.md) - Managing remote agent-manager instances
+- [Agent Management](./docs/agenstra/features/agent-management.md) - Agent lifecycle and container management
+- [Server Provisioning](./docs/agenstra/features/server-provisioning.md) - Automated cloud server provisioning
+- [WebSocket Communication](./docs/agenstra/features/websocket-communication.md) - Real-time bidirectional communication
+- [File Management](./docs/agenstra/features/file-management.md) - File system operations in agent containers
+- [Version Control](./docs/agenstra/features/version-control.md) - Git operations from the web interface
+- [Web IDE](./docs/agenstra/features/web-ide.md) - Monaco Editor integration
+- [Chat Interface](./docs/agenstra/features/chat-interface.md) - AI chat functionality
+- [VNC Browser Access](./docs/agenstra/features/vnc-browser-access.md) - Graphical browser access via VNC
 
-### Tools & Integration
+### Deployment
 
-- [Development Tools](./docs/tools/README.md) - MCP servers, automation, and integrations
-- [GitHub Integration](./docs/tools/github-mcp-setup.md) - GitHub workflow automation
-- [Framework MCP Server](./docs/tools/devkit/mcp-proxy-architecture.md) - Workspace insights and diagnostics
+- [Docker Deployment](./docs/agenstra/deployment/docker-deployment.md) - Containerized deployment guide
+- [Production Checklist](./docs/agenstra/deployment/production-checklist.md) - Production deployment guide
+- [Environment Configuration](./docs/agenstra/deployment/environment-configuration.md) - Complete environment variables reference
 
-### Reference
+### API Reference
 
-- [Quick Commands](./docs/reference/quick-commands.md) - Essential daily commands
-- [AI Agent Rules](./docs/reference/rule-index.md) - Complete reference to all guidelines
-- [Troubleshooting](./docs/reference/troubleshooting.md) - Common issues and solutions
+- [API Reference](./docs/agenstra/api-reference/README.md) - Complete OpenAPI and AsyncAPI specifications
+
+### Troubleshooting
+
+- [Common Issues](./docs/agenstra/troubleshooting/common-issues.md) - Common problems and solutions
+- [Debugging Guide](./docs/agenstra/troubleshooting/debugging-guide.md) - Debugging strategies and tools
 
 ## License
 
@@ -104,10 +184,10 @@ These components are licensed under a source-available license that grants only 
 
 ## Contribution
 
-We welcome contributions! Whether you're fixing bugs, adding features, or improving documentation, your input helps make this framework better for everyone.
+We welcome contributions! Whether you're fixing bugs, adding features, or improving documentation, your input helps make Agenstra better for everyone.
 
 For detailed information on how to contribute, please see our [Contributing Guide](./CONTRIBUTING.md).
 
 ---
 
-_Built with ❤️ for developers who want to build better software, faster._
+_Built with ❤️ for developers who want to manage AI agents at scale._
