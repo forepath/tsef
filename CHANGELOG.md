@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.24.0](https://github.com/forepath/agenstra/compare/v1.23.1...v1.24.0) (2026-01-15)
+
+
+### Features
+
+* social media landingpage links ([#172](https://github.com/forepath/agenstra/issues/172)) ([e2eda96](https://github.com/forepath/agenstra/commit/e2eda96cd52a49927abc00d6d6ddca7148af6c45))
+
 ## [1.23.1](https://github.com/forepath/agenstra/compare/v1.23.0...v1.23.1) (2026-01-11)
 
 
