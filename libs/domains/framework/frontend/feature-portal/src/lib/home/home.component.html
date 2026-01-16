@@ -1239,38 +1239,106 @@
         </p>
       </div>
     </div>
-    <div class="row g-4">
-      <!-- Open Source / Personal Use -->
-      <div class="col-lg-4">
-        <div class="card h-100 border shadow-sm">
-          <div class="card-body p-5 d-flex flex-column">
-            <div class="text-center mb-4">
-              <h3 class="h4 m-0">Open Source</h3>
-              <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
-              <div class="my-3 bg-body-tertiary p-3 rounded-3">
-                <div class="display-6 fw-bold text-primary mb-2">Free</div>
-                <p class="text-muted small mb-0">AGPL-3.0 License</p>
+    <div class="position-relative">
+      <div class="pricing-carousel-scroll-buttons d-none d-lg-flex justify-content-between align-items-center">
+        <button
+          class="btn btn-primary pricing-carousel-scroll-button-left"
+          (click)="scrollPricingCarousel('left')"
+          [disabled]="!isLastCardVisible()"
+        >
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <button
+          class="btn btn-primary pricing-carousel-scroll-button-right"
+          (click)="scrollPricingCarousel('right')"
+          [disabled]="isLastCardVisible()"
+        >
+          <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
+      <div class="row g-4 flex-lg-nowrap overflow-x-hidden position-relative pb-5" #pricingCarousel>
+        <!-- Open Source / Personal Use -->
+        <div class="col-lg-4">
+          <div class="card h-100 border shadow-sm">
+            <div class="card-body p-5 d-flex flex-column">
+              <div class="text-center mb-4">
+                <h3 class="h4 m-0">Open Source</h3>
+                <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
+                <div class="my-3 bg-body-tertiary p-3 rounded-3">
+                  <div class="display-6 fw-bold text-primary mb-2">Free</div>
+                  <p class="text-muted small mb-0">AGPL-3.0 License</p>
+                </div>
+              </div>
+              <ul class="list-unstyled mb-4 flex-grow-1">
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span><strong>Agent Manager</strong> - Full agent lifecycle management</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Single-machine agent runtime</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Complete source code access</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Modify and customize freely</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-info-circle-fill text-muted mt-1"></i>
+                  <span class="text-muted small">Must share modifications if used as a service (AGPL requirement)</span>
+                </li>
+              </ul>
+              <div class="d-grid mt-auto">
+                <a
+                  href="https://github.com/forepath/agenstra"
+                  class="btn btn-outline-primary py-2 px-4"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  View on GitHub
+                </a>
               </div>
             </div>
-            <ul class="list-unstyled mb-4 flex-grow-1">
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span><strong>Agent Manager</strong> - Full agent lifecycle management</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span>Complete source code access</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span>Modify and customize freely</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-info-circle-fill text-muted mt-1"></i>
-                <span class="text-muted small">Must share modifications if used as a service (AGPL requirement)</span>
-              </li>
-            </ul>
-            <div class="d-grid mt-auto">
+          </div>
+        </div>
+
+        <!-- Free Business Use -->
+        <div class="col-lg-4">
+          <div class="card h-100 border shadow-sm">
+            <div class="card-body p-5 d-flex flex-column">
+              <div class="text-center mb-4">
+                <h3 class="h4 m-0">Startup</h3>
+                <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
+                <div class="my-3 bg-body-tertiary p-3 rounded-3">
+                  <div class="display-6 fw-bold text-primary mb-2">Free</div>
+                  <p class="text-muted small mb-0">BUSL-1.1 with Additional Use Grant</p>
+                </div>
+              </div>
+              <ul class="list-unstyled mb-4 flex-grow-1">
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span><strong>Everything in Open Source</strong></span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span><strong>Agent Controller</strong> - Centralized management & server provisioning</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Multi-machine agent runtime orchestration</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Extensive web-ui for agent management</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-info-circle-fill text-muted mt-1"></i>
+                  <span class="text-muted small">For businesses with Total Finances &lt; €2,000,000/year</span>
+                </li>
+              </ul>
               <a
                 href="https://github.com/forepath/agenstra"
                 class="btn btn-outline-primary py-2 px-4"
@@ -1282,95 +1350,82 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Free Business Use -->
-      <div class="col-lg-4">
-        <div class="card h-100 border-primary border-2 shadow-sm position-relative">
-          <div class="position-absolute top-0 start-50 translate-middle">
-            <span class="badge bg-primary px-3 py-2">Most Popular</span>
-          </div>
-          <div class="card-body p-5 d-flex flex-column">
-            <div class="text-center mb-4">
-              <h3 class="h4 m-0">Business</h3>
-              <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
-              <div class="my-3 bg-body-tertiary p-3 rounded-3">
-                <div class="display-6 fw-bold text-primary mb-2">Free</div>
-                <p class="text-muted small mb-0">BUSL-1.1 with Additional Use Grant</p>
-              </div>
+        <!-- Premium Business Use -->
+        <div class="col-lg-4">
+          <div class="card h-100 border-primary border-2 shadow-sm position-relative">
+            <div class="position-absolute top-0 start-50 translate-middle">
+              <span class="badge bg-primary px-3 py-2">Most Popular</span>
             </div>
-            <ul class="list-unstyled mb-4 flex-grow-1">
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span><strong>Agent Controller</strong> - Centralized management & server provisioning</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span>Production use included</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span>No source code sharing required</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span>Converts to AGPL-3.0 after 3 years</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-info-circle-fill text-muted mt-1"></i>
-                <span class="text-muted small">For businesses with Total Finances &lt; €2,000,000/year</span>
-              </li>
-            </ul>
-            <a
-              href="https://github.com/forepath/agenstra"
-              class="btn btn-primary py-2 px-4"
-              target="_blank"
-              rel="noopener"
-            >
-              View on GitHub
-            </a>
+            <div class="card-body p-5 d-flex flex-column">
+              <div class="text-center mb-4">
+                <h3 class="h4 m-0">Business</h3>
+                <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
+                <div class="my-3 bg-body-tertiary p-3 rounded-3">
+                  <div class="display-6 fw-bold text-primary mb-2">$499/mo</div>
+                  <p class="text-muted small mb-0">BUSL-1.1 with Additional Use Grant</p>
+                </div>
+              </div>
+              <ul class="list-unstyled mb-4 flex-grow-1">
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span><strong>Everything in Startup</strong></span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Personal onboarding</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Standard support (E-Mail, Phone)</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-info-circle-fill text-muted mt-1"></i>
+                  <span class="text-muted small">For businesses with Total Finances ≥ €2,000,000/year</span>
+                </li>
+              </ul>
+              <a href="mailto:hi@agenstra.com" class="btn btn-primary py-2 px-4" target="_blank" rel="noopener">
+                Book a Demo
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Enterprise -->
-      <div class="col-lg-4">
-        <div class="card h-100 border shadow-sm">
-          <div class="card-body p-5 d-flex flex-column">
-            <div class="text-center mb-4">
-              <h3 class="h4 m-0">Enterprise</h3>
-              <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
-              <div class="my-3 bg-body-tertiary p-3 rounded-3">
-                <div class="display-6 fw-bold text-primary mb-2">Custom</div>
-                <p class="text-muted small mb-0">Commercial License</p>
+        <!-- Enterprise -->
+        <div class="col-lg-4" #enterpriseCard>
+          <div class="card h-100 border shadow-sm">
+            <div class="card-body p-5 d-flex flex-column">
+              <div class="text-center mb-4">
+                <h3 class="h4 m-0">Enterprise</h3>
+                <span class="badge bg-primary px-3 py-2 my-2">Self-Hosted</span>
+                <div class="my-3 bg-body-tertiary p-3 rounded-3">
+                  <div class="display-6 fw-bold text-primary mb-2">Ask Us</div>
+                  <p class="text-muted small mb-0">Commercial License</p>
+                </div>
               </div>
-            </div>
-            <ul class="list-unstyled mb-4 flex-grow-1">
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span><strong>All Features</strong> - Complete platform access</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span>Unlimited production use</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span>Priority support & SLA</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span>Custom licensing terms</span>
-              </li>
-              <li class="mb-3 d-flex align-items-start gap-2">
-                <i class="bi bi-check-circle-fill text-primary mt-1"></i>
-                <span>For businesses with Total Finances ≥ €2,000,000/year</span>
-              </li>
-            </ul>
-            <div class="d-grid mt-auto">
-              <a href="mailto:hi@agenstra.com" class="btn btn-outline-primary py-2 px-4" target="_blank" rel="noopener">
-                Contact Sales
-              </a>
+              <ul class="list-unstyled mb-4 flex-grow-1">
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span><strong>Everything in Business</strong></span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Priority support (Microsoft Teams) & SLA</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Expert-led module customization and development</span>
+                </li>
+                <li class="mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-primary mt-1"></i>
+                  <span>Custom licensing terms</span>
+                </li>
+              </ul>
+              <div class="d-grid mt-auto">
+                <a href="mailto:hi@agenstra.com" class="btn btn-primary py-2 px-4" target="_blank" rel="noopener">
+                  Contact Sales
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -1378,19 +1433,19 @@
     </div>
 
     <!-- Hosted / SaaS Option -->
-    <div class="row mt-5">
+    <div class="row">
       <div class="col-12">
         <div class="card border-primary border-2 shadow-sm">
           <div class="card-body p-5">
             <div class="row align-items-end">
               <div class="col-md-8">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                  <h3 class="h4 m-0">Hosted</h3>
-                  <span class="badge bg-primary px-3 py-2">SaaS</span>
+                  <h3 class="h4 m-0">Cloud</h3>
+                  <span class="badge bg-primary px-3 py-2">Managed</span>
                 </div>
                 <p class="lead mb-4">
-                  Fully managed Agenstra platform hosted in the cloud. No infrastructure setup required - get started in
-                  minutes.
+                  Fully managed Agenstra platform hosted in the cloud. Made for any size of business. No infrastructure
+                  setup required.
                 </p>
                 <ul class="list-unstyled mb-0">
                   <li class="mb-2 d-flex align-items-start gap-2">
@@ -1421,12 +1476,11 @@
               <div class="col-md-4 text-center text-md-end">
                 <div class="mb-3 bg-body-tertiary p-3 rounded-3">
                   <div class="mb-2">Starting at</div>
-                  <div class="h3 fw-bold mb-2">€99<span class="fs-6 text-muted">/month</span></div>
-                  <p class="text-muted small mb-0">Per agent-manager instance</p>
+                  <div class="h3 fw-bold">$99<span class="fs-6 text-muted">/month</span></div>
                 </div>
                 <div class="d-grid">
                   <a href="mailto:hi@agenstra.com" class="btn btn-primary py-2 px-4" target="_blank" rel="noopener">
-                    Try for Free
+                    Book a Demo
                   </a>
                 </div>
               </div>

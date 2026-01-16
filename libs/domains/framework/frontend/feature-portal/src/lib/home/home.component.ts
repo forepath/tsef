@@ -1,5 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 
@@ -11,9 +21,14 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PortalHomeComponent implements OnInit {
+export class PortalHomeComponent implements OnInit, AfterViewInit {
   private readonly titleService = inject(Title);
   private readonly metaService = inject(Meta);
+
+  @ViewChild('pricingCarousel') pricingCarousel!: ElementRef<HTMLDivElement>;
+  @ViewChild('enterpriseCard') enterpriseCard!: ElementRef<HTMLDivElement>;
+
+  isLastCardVisible = signal<boolean>(true);
 
   ngOnInit(): void {
     this.titleService.setTitle('Agenstra - Centralized Control for Distributed AI Agent Infrastructure');
@@ -32,5 +47,42 @@ export class PortalHomeComponent implements OnInit {
       { name: 'robots', content: 'index, follow' },
       { name: 'canonical', content: 'https://agenstra.com' },
     ]);
+  }
+
+  ngAfterViewInit(): void {
+    if (this.pricingCarousel.nativeElement) {
+      this.pricingCarousel.nativeElement.scrollBy({
+        left: this.enterpriseCard.nativeElement.offsetLeft,
+        behavior: 'smooth',
+      });
+    }
+  }
+
+  scrollPricingCarousel(direction: 'left' | 'right'): void {
+    if (this.pricingCarousel.nativeElement) {
+      if (direction === 'left') {
+        this.isLastCardVisible.set(false);
+      } else {
+        this.isLastCardVisible.set(true);
+      }
+      this.pricingCarousel.nativeElement.scrollBy({
+        left:
+          direction === 'left'
+            ? -this.enterpriseCard.nativeElement.offsetLeft
+            : this.enterpriseCard.nativeElement.offsetLeft,
+        behavior: 'smooth',
+      });
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    if (this.pricingCarousel.nativeElement) {
+      this.isLastCardVisible.set(true);
+      this.pricingCarousel.nativeElement.scrollBy({
+        left: this.enterpriseCard.nativeElement.offsetLeft,
+        behavior: 'smooth',
+      });
+    }
   }
 }
