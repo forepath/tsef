@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.24.1](https://github.com/forepath/agenstra/compare/v1.24.0...v1.24.1) (2026-01-16)
+
+
+### Chores
+
+* plans and pricing adaption ([#174](https://github.com/forepath/agenstra/issues/174)) ([e3376b8](https://github.com/forepath/agenstra/commit/e3376b878f67967652f6192e64f321a35f812fab))
+
 ## [1.24.0](https://github.com/forepath/agenstra/compare/v1.23.1...v1.24.0) (2026-01-15)
 
 
