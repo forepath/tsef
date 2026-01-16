@@ -78,7 +78,7 @@ describe('AgentsGateway', () => {
     getSshConnectionDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-ssh:latest'),
     sendMessage: jest.fn(),
     sendInitialization: jest.fn(),
-    toParseableString: jest.fn(),
+    toParseableStrings: jest.fn(),
     toUnifiedResponse: jest.fn(),
   };
 
@@ -871,7 +871,7 @@ describe('AgentsGateway', () => {
         result: 'Hello from agent!',
       };
       mockAgentProvider.sendMessage.mockResolvedValue(mockAgentResponseJson);
-      mockAgentProvider.toParseableString.mockReturnValue(mockAgentResponseJson);
+      mockAgentProvider.toParseableStrings.mockReturnValue([mockAgentResponseJson]);
       mockAgentProvider.toUnifiedResponse.mockReturnValue(mockParsedResponse);
       const loggerLogSpy = jest.spyOn(gateway['logger'], 'log').mockImplementation();
 
@@ -1336,7 +1336,7 @@ describe('AgentsGateway', () => {
       const modifiedResponseString = JSON.stringify({ type: 'response', result: 'Modified response' });
       const originalResponseString = JSON.stringify(originalResponse);
       mockAgentProvider.sendMessage.mockResolvedValue(originalResponseString);
-      mockAgentProvider.toParseableString.mockReturnValue(originalResponseString);
+      mockAgentProvider.toParseableStrings.mockReturnValue([originalResponseString]);
       mockAgentProvider.toUnifiedResponse.mockReturnValue(originalResponse);
 
       const mockIncomingFilter: jest.Mocked<ChatFilter> = {
@@ -1618,7 +1618,7 @@ describe('AgentsGateway', () => {
       const agentResponseJson = JSON.stringify({ type: 'result', result: 'test-filter response' });
       const agentResponseParsed = { type: 'result', result: 'test-filter response' };
       mockAgentProvider.sendMessage.mockResolvedValue(agentResponseJson);
-      mockAgentProvider.toParseableString.mockReturnValue(agentResponseJson);
+      mockAgentProvider.toParseableStrings.mockReturnValue([agentResponseJson]);
       mockAgentProvider.toUnifiedResponse.mockReturnValue(agentResponseParsed);
       agentMessagesService.createUserMessage.mockResolvedValue({
         id: 'msg-2',
@@ -1735,7 +1735,7 @@ describe('AgentsGateway', () => {
       const agentResponseJson = JSON.stringify({ type: 'result', result: 'test-filter response' });
       const agentResponseParsed = { type: 'result', result: 'test-filter response' };
       mockAgentProvider.sendMessage.mockResolvedValue(agentResponseJson);
-      mockAgentProvider.toParseableString.mockReturnValue(agentResponseJson);
+      mockAgentProvider.toParseableStrings.mockReturnValue([agentResponseJson]);
       mockAgentProvider.toUnifiedResponse.mockReturnValue(agentResponseParsed);
       agentMessagesService.createUserMessage.mockResolvedValue({
         id: 'msg-2',
@@ -1849,7 +1849,7 @@ describe('AgentsGateway', () => {
       ]);
       const invalidJsonResponse = 'Invalid JSON response';
       mockAgentProvider.sendMessage.mockResolvedValue(invalidJsonResponse);
-      mockAgentProvider.toParseableString.mockReturnValue(invalidJsonResponse);
+      mockAgentProvider.toParseableStrings.mockReturnValue([invalidJsonResponse]);
       mockAgentProvider.toUnifiedResponse.mockImplementation(() => {
         throw new Error('Invalid JSON');
       });

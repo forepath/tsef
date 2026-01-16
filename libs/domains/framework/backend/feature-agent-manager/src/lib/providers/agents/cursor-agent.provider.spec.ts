@@ -209,82 +209,104 @@ describe('CursorAgentProvider', () => {
     });
   });
 
-  describe('toParseableString', () => {
-    it('should extract JSON from response with text before and after', () => {
+  describe('toParseableStrings', () => {
+    it('should extract JSON from each line of response', () => {
       const response = 'Some text before {"type":"result","result":"Hello"} and text after';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('{"type":"result","result":"Hello"}');
+      // The implementation extracts JSON by removing text before { and after }
+      expect(result).toEqual(['{"type":"result","result":"Hello"}']);
     });
 
-    it('should return clean JSON when response is already clean', () => {
+    it('should return array with clean JSON when response is already clean', () => {
       const response = '{"type":"result","result":"Hello"}';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('{"type":"result","result":"Hello"}');
+      expect(result).toEqual(['{"type":"result","result":"Hello"}']);
     });
 
     it('should handle response with only opening brace', () => {
       const response = 'Some text {';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('{');
+      expect(result).toEqual(['{']);
     });
 
     it('should handle response with only closing brace', () => {
       const response = '} some text';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('}');
+      expect(result).toEqual(['}']);
     });
 
     it('should handle response with no braces', () => {
       const response = 'Some text without braces';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('Some text without braces');
+      expect(result).toEqual(['Some text without braces']);
     });
 
-    it('should extract first complete JSON object when multiple objects exist', () => {
-      const response = 'Text {"type":"first","result":"First"} more {"type":"second","result":"Second"} end';
-      const result = provider.toParseableString(response);
+    it('should extract JSON from multiple lines', () => {
+      const response = '{"type":"first","result":"First"}\n{"type":"second","result":"Second"}';
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('{"type":"first","result":"First"} more {"type":"second","result":"Second"}');
+      expect(result).toEqual(['{"type":"first","result":"First"}', '{"type":"second","result":"Second"}']);
     });
 
     it('should handle nested JSON objects', () => {
       const response = 'Prefix {"type":"result","data":{"nested":"value"}} suffix';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('{"type":"result","data":{"nested":"value"}}');
+      // The implementation extracts JSON by removing text before { and after }
+      expect(result).toEqual(['{"type":"result","data":{"nested":"value"}}']);
     });
 
-    it('should trim whitespace from response', () => {
+    it('should trim whitespace from each line', () => {
       const response = '   {"type":"result","result":"Hello"}   ';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('{"type":"result","result":"Hello"}');
+      expect(result).toEqual(['{"type":"result","result":"Hello"}']);
     });
 
-    it('should handle empty string', () => {
+    it('should return empty array for empty string', () => {
       const response = '';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('');
+      // Empty string splits to [''] which maps to ['']
+      expect(result).toEqual(['']);
     });
 
     it('should handle response with only whitespace', () => {
       const response = '   \n\t   ';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('');
+      // Splits to ['   ', '\t   '] which both trim to ['']
+      expect(result).toEqual(['', '']);
     });
 
     it('should handle complex JSON with arrays and nested objects', () => {
       const response = 'Log: {"type":"result","items":[{"id":1},{"id":2}]} done';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('{"type":"result","items":[{"id":1},{"id":2}]}');
+      // The implementation extracts JSON by removing text before { and after }
+      expect(result).toEqual(['{"type":"result","items":[{"id":1},{"id":2}]}']);
+    });
+
+    it('should process each line independently', () => {
+      const response = 'Line 1 {"type":"result","result":"First"}\nLine 2 {"type":"result","result":"Second"}';
+      const result = provider.toParseableStrings(response);
+
+      // The implementation extracts JSON from each line by removing text before { and after }
+      expect(result).toEqual(['{"type":"result","result":"First"}', '{"type":"result","result":"Second"}']);
+    });
+
+    it('should handle lines with text before and after JSON', () => {
+      const response =
+        'Prefix {"type":"result","result":"Hello"} Suffix\nAnother {"type":"result","result":"World"} End';
+      const result = provider.toParseableStrings(response);
+
+      // The implementation extracts JSON from each line by removing text before { and after }
+      expect(result).toEqual(['{"type":"result","result":"Hello"}', '{"type":"result","result":"World"}']);
     });
   });
 

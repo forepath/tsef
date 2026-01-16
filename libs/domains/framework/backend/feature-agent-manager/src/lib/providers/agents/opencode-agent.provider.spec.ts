@@ -132,6 +132,62 @@ describe('OpenCodeAgentProvider', () => {
       );
     });
 
+    it('should send message without continue flag when continue is false', async () => {
+      const expectedResponse = 'Hello from agent!';
+      dockerService.sendCommandToContainer.mockResolvedValue(expectedResponse);
+
+      const response = await provider.sendMessage(agentId, containerId, message, { continue: false });
+
+      expect(response).toBe(expectedResponse);
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(containerId, 'opencode run', message);
+    });
+
+    it('should retry without continue flag when Session not found error occurs', async () => {
+      const sessionNotFoundResponse = 'Session not found';
+      const expectedResponse = 'Hello from agent!';
+      dockerService.sendCommandToContainer
+        .mockResolvedValueOnce(sessionNotFoundResponse)
+        .mockResolvedValueOnce(expectedResponse);
+
+      const response = await provider.sendMessage(agentId, containerId, message);
+
+      expect(response).toBe(expectedResponse);
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(2);
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        1,
+        containerId,
+        'opencode run --continue',
+        message,
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(2, containerId, 'opencode run', message);
+    });
+
+    it('should retry without continue flag and preserve model option when Session not found error occurs', async () => {
+      const sessionNotFoundResponse = 'Session not found';
+      const expectedResponse = 'Hello from agent!';
+      const model = 'gpt-4';
+      dockerService.sendCommandToContainer
+        .mockResolvedValueOnce(sessionNotFoundResponse)
+        .mockResolvedValueOnce(expectedResponse);
+
+      const response = await provider.sendMessage(agentId, containerId, message, { model });
+
+      expect(response).toBe(expectedResponse);
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledTimes(2);
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        1,
+        containerId,
+        `opencode run --continue --model ${model}`,
+        message,
+      );
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        2,
+        containerId,
+        `opencode run --model ${model}`,
+        message,
+      );
+    });
+
     it('should handle errors from docker service', async () => {
       const error = new Error('Container not found');
       dockerService.sendCommandToContainer.mockRejectedValue(error);
@@ -162,81 +218,111 @@ describe('OpenCodeAgentProvider', () => {
     });
   });
 
-  describe('toParseableString', () => {
-    it('should trim whitespace from response', () => {
-      const response = '   Hello, world!   ';
-      const result = provider.toParseableString(response);
+  describe('toParseableStrings', () => {
+    it('should extract JSON object with type text from response', () => {
+      const response = 'Some text before {"type":"text","text":"Hello"} and text after';
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('Hello, world!');
+      expect(result).toEqual(['{"type":"text","text":"Hello"}']);
     });
 
-    it('should return response unchanged if no whitespace', () => {
-      const response = 'Hello, world!';
-      const result = provider.toParseableString(response);
+    it('should return empty array when no type text object found', () => {
+      const response = 'Some text without type text';
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('Hello, world!');
+      expect(result).toEqual([]);
     });
 
-    it('should handle response with only leading whitespace', () => {
-      const response = '   Hello, world!';
-      const result = provider.toParseableString(response);
+    it('should return empty array when type text object has empty text', () => {
+      const response = 'Some text {"type":"text","text":""} more text';
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('Hello, world!');
+      expect(result).toEqual([]);
     });
 
-    it('should handle response with only trailing whitespace', () => {
-      const response = 'Hello, world!   ';
-      const result = provider.toParseableString(response);
+    it('should extract JSON object and clean braces', () => {
+      const response = 'Prefix {"type":"text","text":"Hello"} suffix';
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('Hello, world!');
+      expect(result).toEqual(['{"type":"text","text":"Hello"}']);
     });
 
-    it('should handle response with newlines and tabs', () => {
-      const response = '\n\tHello, world!\n\t';
-      const result = provider.toParseableString(response);
+    it('should handle response with text before and after JSON', () => {
+      const response = 'Log: {"type":"text","text":"Message"} done';
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('Hello, world!');
+      expect(result).toEqual(['{"type":"text","text":"Message"}']);
+    });
+
+    it('should handle multiline response with type text', () => {
+      const response = 'Line 1\n{"type":"text","text":"Hello"}\nLine 3';
+      const result = provider.toParseableStrings(response);
+
+      expect(result).toEqual(['{"type":"text","text":"Hello"}']);
+    });
+
+    it('should handle nested JSON objects', () => {
+      const response = 'Prefix {"type":"text","text":"Hello","data":{"nested":"value"}} suffix';
+      const result = provider.toParseableStrings(response);
+
+      expect(result).toEqual(['{"type":"text","text":"Hello","data":{"nested":"value"}}']);
+    });
+
+    it('should trim whitespace from extracted JSON', () => {
+      const response = '   {"type":"text","text":"Hello"}   ';
+      const result = provider.toParseableStrings(response);
+
+      expect(result).toEqual(['{"type":"text","text":"Hello"}']);
     });
 
     it('should handle empty string', () => {
       const response = '';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('');
+      expect(result).toEqual([]);
     });
 
     it('should handle response with only whitespace', () => {
       const response = '   \n\t   ';
-      const result = provider.toParseableString(response);
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('');
+      expect(result).toEqual([]);
     });
 
-    it('should preserve content with internal whitespace', () => {
-      const response = '  Hello,   world!  ';
-      const result = provider.toParseableString(response);
+    it('should extract first matching type text object when multiple exist', () => {
+      const response = 'Text {"type":"text","text":"First"} more {"type":"text","text":"Second"} end';
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('Hello,   world!');
+      // The implementation extracts from first { to last } on the line containing type:text
+      expect(result).toEqual(['{"type":"text","text":"First"} more {"type":"text","text":"Second"}']);
     });
 
-    it('should handle JSON strings', () => {
-      const response = '  {"type":"result","result":"Hello"}  ';
-      const result = provider.toParseableString(response);
+    it('should handle complex JSON with arrays and nested objects', () => {
+      const response = 'Log: {"type":"text","text":"Hello","items":[{"id":1},{"id":2}]} done';
+      const result = provider.toParseableStrings(response);
 
-      expect(result).toBe('{"type":"result","result":"Hello"}');
-    });
-
-    it('should handle multiline responses', () => {
-      const response = '\n  Line 1\n  Line 2\n  ';
-      const result = provider.toParseableString(response);
-
-      expect(result).toBe('Line 1\n  Line 2');
+      expect(result).toEqual(['{"type":"text","text":"Hello","items":[{"id":1},{"id":2}]}']);
     });
   });
 
   describe('toUnifiedResponse', () => {
-    it('should wrap plain text message in standard response object', () => {
-      const response = 'Hello from agent!';
+    it('should parse valid opencode response object', () => {
+      const response = JSON.stringify({
+        type: 'text',
+        timestamp: 1234567890,
+        sessionID: 'session-123',
+        part: {
+          id: 'part-1',
+          sessionID: 'session-123',
+          messageID: 'msg-1',
+          type: 'text',
+          text: 'Hello from agent!',
+          time: {
+            start: 1234567890,
+            end: 1234567900,
+          },
+        },
+      });
       const result = provider.toUnifiedResponse(response);
 
       expect(result).toEqual({
@@ -246,30 +332,49 @@ describe('OpenCodeAgentProvider', () => {
       });
     });
 
-    it('should trim whitespace from message before wrapping', () => {
-      const response = '   Hello from agent!   ';
+    it('should extract text from part object', () => {
+      const response = JSON.stringify({
+        type: 'text',
+        timestamp: 1234567890,
+        sessionID: 'session-123',
+        part: {
+          id: 'part-1',
+          sessionID: 'session-123',
+          messageID: 'msg-1',
+          type: 'text',
+          text: 'Response text',
+          time: {
+            start: 1234567890,
+            end: 1234567900,
+          },
+        },
+      });
       const result = provider.toUnifiedResponse(response);
 
       expect(result).toEqual({
         type: 'result',
         subtype: 'success',
-        result: 'Hello from agent!',
+        result: 'Response text',
       });
     });
 
-    it('should handle JSON string as plain text', () => {
-      const response = '{"type":"result","result":"Hello"}';
-      const result = provider.toUnifiedResponse(response);
-
-      expect(result).toEqual({
-        type: 'result',
-        subtype: 'success',
-        result: '{"type":"result","result":"Hello"}',
+    it('should handle empty text in part object', () => {
+      const response = JSON.stringify({
+        type: 'text',
+        timestamp: 1234567890,
+        sessionID: 'session-123',
+        part: {
+          id: 'part-1',
+          sessionID: 'session-123',
+          messageID: 'msg-1',
+          type: 'text',
+          text: '',
+          time: {
+            start: 1234567890,
+            end: 1234567900,
+          },
+        },
       });
-    });
-
-    it('should handle empty string', () => {
-      const response = '';
       const result = provider.toUnifiedResponse(response);
 
       expect(result).toEqual({
@@ -279,8 +384,23 @@ describe('OpenCodeAgentProvider', () => {
       });
     });
 
-    it('should handle multiline messages', () => {
-      const response = 'Line 1\nLine 2\nLine 3';
+    it('should handle multiline text in part object', () => {
+      const response = JSON.stringify({
+        type: 'text',
+        timestamp: 1234567890,
+        sessionID: 'session-123',
+        part: {
+          id: 'part-1',
+          sessionID: 'session-123',
+          messageID: 'msg-1',
+          type: 'text',
+          text: 'Line 1\nLine 2\nLine 3',
+          time: {
+            start: 1234567890,
+            end: 1234567900,
+          },
+        },
+      });
       const result = provider.toUnifiedResponse(response);
 
       expect(result).toEqual({
@@ -290,8 +410,23 @@ describe('OpenCodeAgentProvider', () => {
       });
     });
 
-    it('should handle messages with special characters', () => {
-      const response = 'Hello! @#$%^&*()_+-=[]{}|;:,.<>?';
+    it('should handle text with special characters', () => {
+      const response = JSON.stringify({
+        type: 'text',
+        timestamp: 1234567890,
+        sessionID: 'session-123',
+        part: {
+          id: 'part-1',
+          sessionID: 'session-123',
+          messageID: 'msg-1',
+          type: 'text',
+          text: 'Hello! @#$%^&*()_+-=[]{}|;:,.<>?',
+          time: {
+            start: 1234567890,
+            end: 1234567900,
+          },
+        },
+      });
       const result = provider.toUnifiedResponse(response);
 
       expect(result).toEqual({
@@ -301,8 +436,23 @@ describe('OpenCodeAgentProvider', () => {
       });
     });
 
-    it('should handle messages with unicode characters', () => {
-      const response = 'Hello 世界 🌍';
+    it('should handle text with unicode characters', () => {
+      const response = JSON.stringify({
+        type: 'text',
+        timestamp: 1234567890,
+        sessionID: 'session-123',
+        part: {
+          id: 'part-1',
+          sessionID: 'session-123',
+          messageID: 'msg-1',
+          type: 'text',
+          text: 'Hello 世界 🌍',
+          time: {
+            start: 1234567890,
+            end: 1234567900,
+          },
+        },
+      });
       const result = provider.toUnifiedResponse(response);
 
       expect(result).toEqual({
@@ -313,40 +463,81 @@ describe('OpenCodeAgentProvider', () => {
     });
 
     it('should always return type "result"', () => {
-      const response = 'Any message';
+      const response = JSON.stringify({
+        type: 'text',
+        timestamp: 1234567890,
+        sessionID: 'session-123',
+        part: {
+          id: 'part-1',
+          sessionID: 'session-123',
+          messageID: 'msg-1',
+          type: 'text',
+          text: 'Any message',
+          time: {
+            start: 1234567890,
+            end: 1234567900,
+          },
+        },
+      });
       const result = provider.toUnifiedResponse(response);
 
       expect(result.type).toBe('result');
     });
 
     it('should always return subtype "success"', () => {
-      const response = 'Any message';
+      const response = JSON.stringify({
+        type: 'text',
+        timestamp: 1234567890,
+        sessionID: 'session-123',
+        part: {
+          id: 'part-1',
+          sessionID: 'session-123',
+          messageID: 'msg-1',
+          type: 'text',
+          text: 'Any message',
+          time: {
+            start: 1234567890,
+            end: 1234567900,
+          },
+        },
+      });
       const result = provider.toUnifiedResponse(response);
 
       expect(result.subtype).toBe('success');
     });
 
-    it('should handle very long messages', () => {
-      const response = 'A'.repeat(10000);
+    it('should handle very long text', () => {
+      const longText = 'A'.repeat(10000);
+      const response = JSON.stringify({
+        type: 'text',
+        timestamp: 1234567890,
+        sessionID: 'session-123',
+        part: {
+          id: 'part-1',
+          sessionID: 'session-123',
+          messageID: 'msg-1',
+          type: 'text',
+          text: longText,
+          time: {
+            start: 1234567890,
+            end: 1234567900,
+          },
+        },
+      });
       const result = provider.toUnifiedResponse(response);
 
       expect(result).toEqual({
         type: 'result',
         subtype: 'success',
-        result: 'A'.repeat(10000),
+        result: longText,
       });
       expect(result.result.length).toBe(10000);
     });
 
-    it('should handle messages with only whitespace', () => {
-      const response = '   \n\t   ';
-      const result = provider.toUnifiedResponse(response);
+    it('should throw error for invalid JSON', () => {
+      const response = '{"type":"text","part":{"text":"Hello"'; // Missing closing brace
 
-      expect(result).toEqual({
-        type: 'result',
-        subtype: 'success',
-        result: '',
-      });
+      expect(() => provider.toUnifiedResponse(response)).toThrow();
     });
   });
 });

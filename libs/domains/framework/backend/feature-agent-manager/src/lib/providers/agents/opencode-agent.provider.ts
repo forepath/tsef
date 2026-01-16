@@ -90,61 +90,47 @@ export class OpenCodeAgentProvider implements AgentProvider {
   }
 
   /**
-   * Send an initialization message to the cursor-agent.
+   * Send an initialization message to the opencode-agent.
    * This establishes system context for the agent.
-   * @param agentId - The UUID of the agent
-   * @param containerId - The Docker container ID where the agent is running
-   * @param options - Optional configuration (e.g., model name)
+   * @param _agentId - The UUID of the agent (unused for opencode)
+   * @param _containerId - The Docker container ID where the agent is running (unused for opencode)
+   * @param _options - Optional configuration (e.g., model name) (unused for opencode)
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async sendInitialization(_agentId: string, _containerId: string, _options?: AgentProviderOptions): Promise<void> {
     return;
   }
 
   /**
-   * Convert the response from the agent to a parseable string.
+   * Convert the response from the agent to parseable strings.
    * Removes all characters that are not UTF-8 supported.
    * @param response - The response from the agent
-   * @returns The parseable string with only valid UTF-8 characters
+   * @returns Array of parseable strings with only valid UTF-8 characters
    */
-  toParseableString(response: string): string {
-    // Remove invalid UTF-8 replacement characters ()
-    let cleaned = response.replace(/\uFFFD/g, '');
-
-    // Remove non-printable control characters except common whitespace (space, tab, newline, carriage return)
-    // Filter out control characters: 0x00-0x1F (except 0x09 tab, 0x0A newline, 0x0D carriage return) and 0x7F-0x9F
-    cleaned = Array.from(cleaned)
-      .filter((char) => {
-        const code = char.charCodeAt(0);
-        // Keep printable ASCII (0x20-0x7E), tab (0x09), newline (0x0A), carriage return (0x0D)
-        if (code >= 0x20 && code <= 0x7e) return true;
-        if (code === 0x09 || code === 0x0a || code === 0x0d) return true;
-        // Keep valid Unicode characters above 0x9F
-        if (code > 0x9f) {
-          // Validate it's a valid UTF-8 character
-          try {
-            const encoded = new TextEncoder().encode(char);
-            const decoded = new TextDecoder('utf-8', { fatal: true }).decode(encoded);
-            return decoded === char;
-          } catch {
-            return false;
-          }
-        }
-        // Remove all other control characters
-        return false;
-      })
-      .join('');
-
-    // Remove any remaining invalid Unicode surrogate pairs
-    cleaned = cleaned.replace(/[\uD800-\uDFFF]/g, '');
-
-    // Remove first line if it only contains "_" (possibly with whitespace)
-    const lines = cleaned.split(/\r?\n/);
-    if (lines.length > 0 && lines[0].trim() === '_') {
-      lines.shift();
+  toParseableStrings(response: string): string[] {
+    // Extract the response object from the response
+    const lines = response.split('\n');
+    const responseObject = lines.find((line) => line.includes('"type":"text"') && !line.includes('"text":""'));
+    if (!responseObject) {
+      return [];
     }
-    cleaned = lines.join('\n');
 
-    return cleaned.trim();
+    // Clean the response: remove everything before first { and after last }
+    let toParse = responseObject.trim();
+
+    // Remove everything before the first { in the string
+    const firstBrace = toParse.indexOf('{');
+    if (firstBrace !== -1) {
+      toParse = toParse.slice(firstBrace);
+    }
+
+    // Remove everything after the last } in the string
+    const lastBrace = toParse.lastIndexOf('}');
+    if (lastBrace !== -1) {
+      toParse = toParse.slice(0, lastBrace + 1);
+    }
+
+    return toParse ? [toParse] : [];
   }
 
   /**
@@ -152,13 +138,28 @@ export class OpenCodeAgentProvider implements AgentProvider {
    * @param response - The response from the agent
    * @returns The unified response object
    */
-  toUnifiedResponse(chatMessage: string): AgentResponseObject {
-    const trimmedMessage = chatMessage.trim();
+  toUnifiedResponse(response: string): AgentResponseObject {
+    const responseObject = JSON.parse(response) as {
+      type: string;
+      timestamp: number;
+      sessionID: string;
+      part: {
+        id: string;
+        sessionID: string;
+        messageID: string;
+        type: 'text';
+        text: string;
+        time: {
+          start: number;
+          end: number;
+        };
+      };
+    };
 
     return {
       type: 'result',
       subtype: 'success',
-      result: trimmedMessage,
+      result: responseObject.part.text,
     };
   }
 }
