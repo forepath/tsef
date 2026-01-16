@@ -336,3 +336,20 @@ img {
     border-radius: var(--bs-border-radius);
   }
 }
+
+.pricing-carousel-scroll-buttons {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  z-index: 1;
+  width: 100%;
+
+  .pricing-carousel-scroll-button-left {
+    transform: translateX(-50%);
+  }
+
+  .pricing-carousel-scroll-button-right {
+    transform: translateX(50%);
+  }
+}
