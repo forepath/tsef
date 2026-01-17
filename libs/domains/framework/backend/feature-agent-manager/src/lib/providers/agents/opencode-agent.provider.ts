@@ -68,7 +68,7 @@ export class OpenCodeAgentProvider implements AgentProvider {
     options?: AgentProviderOptions,
   ): Promise<string> {
     // Build command: opencode agent with prompt mode and JSON output
-    let command = `opencode run`;
+    let command = `opencode run --format json`;
     if (options?.continue === undefined || options?.continue === true) {
       command += ` --continue`;
     }
@@ -110,27 +110,34 @@ export class OpenCodeAgentProvider implements AgentProvider {
   toParseableStrings(response: string): string[] {
     // Extract the response object from the response
     const lines = response.split('\n');
-    const responseObject = lines.find((line) => line.includes('"type":"text"') && !line.includes('"text":""'));
-    if (!responseObject) {
+    if (lines.length === 0) {
       return [];
     }
 
-    // Clean the response: remove everything before first { and after last }
-    let toParse = responseObject.trim();
-
-    // Remove everything before the first { in the string
-    const firstBrace = toParse.indexOf('{');
-    if (firstBrace !== -1) {
-      toParse = toParse.slice(firstBrace);
+    // Filter out lines that do not contain a "type":"text" object
+    const responseObjects = lines.filter((line) => line.includes('"type":"text"') && !line.includes('"text":""'));
+    if (!responseObjects.length) {
+      return [];
     }
 
-    // Remove everything after the last } in the string
-    const lastBrace = toParse.lastIndexOf('}');
-    if (lastBrace !== -1) {
-      toParse = toParse.slice(0, lastBrace + 1);
-    }
+    return responseObjects.map((line) => {
+      // Clean the response: remove everything before first { and after last }
+      let toParse = line.trim();
 
-    return toParse ? [toParse] : [];
+      // Remove everything before the first { in the string
+      const firstBrace = toParse.indexOf('{');
+      if (firstBrace !== -1) {
+        toParse = toParse.slice(firstBrace);
+      }
+
+      // Remove everything after the last } in the string
+      const lastBrace = toParse.lastIndexOf('}');
+      if (lastBrace !== -1) {
+        toParse = toParse.slice(0, lastBrace + 1);
+      }
+
+      return toParse;
+    });
   }
 
   /**

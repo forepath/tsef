@@ -112,7 +112,7 @@ describe('OpenCodeAgentProvider', () => {
       expect(response).toBe(expectedResponse);
       expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
         containerId,
-        'opencode run --continue',
+        'opencode run --format json --continue',
         message,
       );
     });
@@ -127,7 +127,7 @@ describe('OpenCodeAgentProvider', () => {
       expect(response).toBe(expectedResponse);
       expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
         containerId,
-        `opencode run --continue --model ${model}`,
+        `opencode run --format json --continue --model ${model}`,
         message,
       );
     });
@@ -139,7 +139,11 @@ describe('OpenCodeAgentProvider', () => {
       const response = await provider.sendMessage(agentId, containerId, message, { continue: false });
 
       expect(response).toBe(expectedResponse);
-      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(containerId, 'opencode run', message);
+      expect(dockerService.sendCommandToContainer).toHaveBeenCalledWith(
+        containerId,
+        'opencode run --format json',
+        message,
+      );
     });
 
     it('should retry without continue flag when Session not found error occurs', async () => {
@@ -156,10 +160,15 @@ describe('OpenCodeAgentProvider', () => {
       expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
         1,
         containerId,
-        'opencode run --continue',
+        'opencode run --format json --continue',
         message,
       );
-      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(2, containerId, 'opencode run', message);
+      expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
+        2,
+        containerId,
+        'opencode run --format json',
+        message,
+      );
     });
 
     it('should retry without continue flag and preserve model option when Session not found error occurs', async () => {
@@ -177,13 +186,13 @@ describe('OpenCodeAgentProvider', () => {
       expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
         1,
         containerId,
-        `opencode run --continue --model ${model}`,
+        `opencode run --format json --continue --model ${model}`,
         message,
       );
       expect(dockerService.sendCommandToContainer).toHaveBeenNthCalledWith(
         2,
         containerId,
-        `opencode run --model ${model}`,
+        `opencode run --format json --model ${model}`,
         message,
       );
     });
