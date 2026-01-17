@@ -20,6 +20,7 @@ import {
   ClientsFacade,
   ContainerType,
   DeploymentsService,
+  EnvFacade,
   FilesFacade,
   SocketsFacade,
   type AgentResponseDto,
@@ -28,11 +29,14 @@ import {
   type ClientResponseDto,
   type CreateAgentDto,
   type CreateClientDto,
+  type CreateEnvironmentVariableDto,
   type DeploymentRun,
+  type EnvironmentVariableResponseDto,
   type ForwardedEventPayload,
   type ProvisionServerDto,
   type UpdateAgentDto,
   type UpdateClientDto,
+  type UpdateEnvironmentVariableDto,
 } from '@forepath/framework/frontend/data-access-agent-console';
 import { ENVIRONMENT, LocaleService, type Environment } from '@forepath/framework/frontend/util-configuration';
 import {
@@ -99,6 +103,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   private readonly agentsFacade = inject(AgentsFacade);
   private readonly socketsFacade = inject(SocketsFacade);
   private readonly filesFacade = inject(FilesFacade);
+  private readonly envFacade = inject(EnvFacade);
   private readonly deploymentsService = inject(DeploymentsService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly sanitizer = inject(DomSanitizer);
@@ -128,6 +133,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   @ViewChild('updateAgentModal', { static: false })
   private updateAgentModal!: ElementRef<HTMLDivElement>;
+
+  @ViewChild('environmentVariablesModal', { static: false })
+  private environmentVariablesModal!: ElementRef<HTMLDivElement>;
 
   @ViewChild('fileEditor', { static: false })
   fileEditor!: FileEditorComponent;
@@ -485,6 +493,62 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     description: '',
     containerType: undefined,
   });
+
+  // Environment variables state
+  readonly editingEnvVarId = signal<string | null>(null);
+  readonly editingEnvVarValue = signal<string>('');
+  readonly managingEnvVarsAgentId = signal<string | null>(null);
+  readonly newEnvVar = signal<CreateEnvironmentVariableDto>({
+    variable: '',
+    content: '',
+  });
+
+  // Environment variables observables (computed based on active client and managing agent)
+  readonly managingEnvVarsAgentId$ = toObservable(this.managingEnvVarsAgentId);
+  readonly environmentVariables$: Observable<EnvironmentVariableResponseDto[]> = combineLatest([
+    this.activeClientId$,
+    this.managingEnvVarsAgentId$,
+  ]).pipe(
+    switchMap(([clientId, agentId]) => {
+      if (!clientId || !agentId) {
+        return of([]);
+      }
+      return this.envFacade.getEnvironmentVariables$(clientId, agentId).pipe(map((envVars) => envVars || []));
+    }),
+  );
+  readonly environmentVariablesLoading$: Observable<boolean> = combineLatest([
+    this.activeClientId$,
+    this.managingEnvVarsAgentId$,
+  ]).pipe(
+    switchMap(([clientId, agentId]) => {
+      if (!clientId || !agentId) {
+        return of(false);
+      }
+      return this.envFacade.isLoadingEnvironmentVariables$(clientId, agentId);
+    }),
+  );
+  readonly environmentVariablesCreating$: Observable<boolean> = combineLatest([
+    this.activeClientId$,
+    this.managingEnvVarsAgentId$,
+  ]).pipe(
+    switchMap(([clientId, agentId]) => {
+      if (!clientId || !agentId) {
+        return of(false);
+      }
+      return this.envFacade.isCreatingEnvironmentVariable$(clientId, agentId);
+    }),
+  );
+  readonly environmentVariablesError$: Observable<string | null> = combineLatest([
+    this.activeClientId$,
+    this.managingEnvVarsAgentId$,
+  ]).pipe(
+    switchMap(([clientId, agentId]) => {
+      if (!clientId || !agentId) {
+        return of(null);
+      }
+      return this.envFacade.getEnvError$(clientId, agentId);
+    }),
+  );
 
   private initialRouting: Record<string, boolean> = {
     client: false,
@@ -2431,6 +2495,120 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           containerType: undefined,
         });
       });
+  }
+
+  onManageEnvironmentVariablesClick(agent: AgentResponseDto): void {
+    const clientId = this.activeClientId;
+    if (!clientId) {
+      return;
+    }
+
+    // Store the agent ID for this modal session
+    this.managingEnvVarsAgentId.set(agent.id);
+
+    // Load environment variables when opening modal
+    this.envFacade.loadEnvironmentVariables(clientId, agent.id);
+
+    this.showModal(this.environmentVariablesModal);
+  }
+
+  onSubmitCreateEnvironmentVariable(): void {
+    const clientId = this.activeClientId;
+    const agentId = this.managingEnvVarsAgentId();
+    if (!clientId || !agentId) {
+      return;
+    }
+
+    const newEnvVar = this.newEnvVar();
+    if (!newEnvVar.variable || !newEnvVar.content) {
+      return;
+    }
+
+    this.envFacade.createEnvironmentVariable(clientId, agentId, newEnvVar);
+
+    // Subscribe to creation completion to reset form
+    this.environmentVariablesCreating$
+      .pipe(
+        filter((creating) => !creating),
+        take(1),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => {
+        // Reset form
+        this.newEnvVar.set({
+          variable: '',
+          content: '',
+        });
+      });
+  }
+
+  onEditEnvironmentVariableClick(envVar: EnvironmentVariableResponseDto): void {
+    this.editingEnvVarId.set(envVar.id);
+    this.editingEnvVarValue.set(envVar.content);
+  }
+
+  onCancelEditEnvironmentVariable(): void {
+    this.editingEnvVarId.set(null);
+    this.editingEnvVarValue.set('');
+  }
+
+  onSaveEnvironmentVariable(envVar: EnvironmentVariableResponseDto): void {
+    const clientId = this.activeClientId;
+    const agentId = this.managingEnvVarsAgentId();
+    if (!clientId || !agentId) {
+      return;
+    }
+
+    const newValue = this.editingEnvVarValue();
+    if (newValue === envVar.content) {
+      // No change, just cancel edit
+      this.onCancelEditEnvironmentVariable();
+      return;
+    }
+
+    const updateDto: UpdateEnvironmentVariableDto = {
+      variable: envVar.variable,
+      content: newValue,
+    };
+
+    this.envFacade.updateEnvironmentVariable(clientId, agentId, envVar.id, updateDto);
+
+    // Subscribe to update completion to cancel edit mode
+    this.envFacade
+      .isUpdatingEnvironmentVariable$(clientId, agentId, envVar.id)
+      .pipe(
+        filter((updating) => !updating),
+        take(1),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => {
+        this.onCancelEditEnvironmentVariable();
+      });
+  }
+
+  onDeleteEnvironmentVariable(envVarId: string): void {
+    const clientId = this.activeClientId;
+    const agentId = this.managingEnvVarsAgentId();
+    if (!clientId || !agentId) {
+      return;
+    }
+
+    this.envFacade.deleteEnvironmentVariable(clientId, agentId, envVarId);
+  }
+
+  updateEnvVarField(field: keyof CreateEnvironmentVariableDto, value: string): void {
+    this.newEnvVar.update((current: CreateEnvironmentVariableDto) => ({ ...current, [field]: value }));
+  }
+
+  onCloseEnvironmentVariablesModal(): void {
+    // Reset state when modal is closed
+    this.managingEnvVarsAgentId.set(null);
+    this.editingEnvVarId.set(null);
+    this.editingEnvVarValue.set('');
+    this.newEnvVar.set({
+      variable: '',
+      content: '',
+    });
   }
 
   formatTimestamp(timestamp: number): string {

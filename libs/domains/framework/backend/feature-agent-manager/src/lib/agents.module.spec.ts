@@ -4,6 +4,7 @@ import { AgentsDeploymentsController } from './agents-deployments.controller';
 import { AgentsController } from './agents.controller';
 import { AgentsGateway } from './agents.gateway';
 import { AgentsModule } from './agents.module';
+import { AgentEnvironmentVariableEntity } from './entities/agent-environment-variable.entity';
 import { AgentMessageEntity } from './entities/agent-message.entity';
 import { AgentEntity } from './entities/agent.entity';
 import { DeploymentConfigurationEntity } from './entities/deployment-configuration.entity';
@@ -19,9 +20,13 @@ import { OutgoingChatFilter } from './providers/filters/outgoing-chat-filter';
 import { PipelineProviderFactory } from './providers/pipeline-provider.factory';
 import { GitHubProvider } from './providers/pipelines/github.provider';
 import { GitLabProvider } from './providers/pipelines/gitlab.provider';
+import { AgentEnvironmentVariablesRepository } from './repositories/agent-environment-variables.repository';
+import { AgentMessagesRepository } from './repositories/agent-messages.repository';
 import { AgentsRepository } from './repositories/agents.repository';
 import { DeploymentConfigurationsRepository } from './repositories/deployment-configurations.repository';
 import { DeploymentRunsRepository } from './repositories/deployment-runs.repository';
+import { AgentEnvironmentVariablesService } from './services/agent-environment-variables.service';
+import { AgentMessagesService } from './services/agent-messages.service';
 import { AgentsService } from './services/agents.service';
 import { DeploymentsService } from './services/deployments.service';
 import { DockerService } from './services/docker.service';
@@ -46,6 +51,8 @@ describe('AgentsModule', () => {
       .overrideProvider(getRepositoryToken(AgentEntity))
       .useValue(mockRepository)
       .overrideProvider(getRepositoryToken(AgentMessageEntity))
+      .useValue(mockRepository)
+      .overrideProvider(getRepositoryToken(AgentEnvironmentVariableEntity))
       .useValue(mockRepository)
       .overrideProvider(getRepositoryToken(DeploymentConfigurationEntity))
       .useValue(mockRepository)
@@ -228,6 +235,30 @@ describe('AgentsModule', () => {
     const factory = module.get<PipelineProviderFactory>(PipelineProviderFactory);
     expect(factory).toBeDefined();
     expect(factory).toBeInstanceOf(PipelineProviderFactory);
+  });
+
+  it('should provide AgentEnvironmentVariablesService', () => {
+    const service = module.get<AgentEnvironmentVariablesService>(AgentEnvironmentVariablesService);
+    expect(service).toBeDefined();
+    expect(service).toBeInstanceOf(AgentEnvironmentVariablesService);
+  });
+
+  it('should provide AgentEnvironmentVariablesRepository', () => {
+    const repository = module.get<AgentEnvironmentVariablesRepository>(AgentEnvironmentVariablesRepository);
+    expect(repository).toBeDefined();
+    expect(repository).toBeInstanceOf(AgentEnvironmentVariablesRepository);
+  });
+
+  it('should provide AgentMessagesService', () => {
+    const service = module.get<AgentMessagesService>(AgentMessagesService);
+    expect(service).toBeDefined();
+    expect(service).toBeInstanceOf(AgentMessagesService);
+  });
+
+  it('should provide AgentMessagesRepository', () => {
+    const repository = module.get<AgentMessagesRepository>(AgentMessagesRepository);
+    expect(repository).toBeDefined();
+    expect(repository).toBeInstanceOf(AgentMessagesRepository);
   });
 
   it('should provide GitHubProvider', () => {

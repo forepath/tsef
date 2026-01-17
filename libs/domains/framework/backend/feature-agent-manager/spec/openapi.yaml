@@ -285,6 +285,171 @@ paths:
           description: Invalid path or destination
         '404':
           description: Agent or source file/directory not found
+  /agents/{agentId}/environment:
+    get:
+      summary: List environment variables
+      operationId: listEnvironmentVariables
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum number of environment variables to return (default 50)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of environment variables to skip (default 0)
+      responses:
+        '200':
+          description: Array of environment variables
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnvironmentVariableResponseDto'
+        '404':
+          description: Agent not found
+    post:
+      summary: Create environment variable
+      operationId: createEnvironmentVariable
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentVariableDto'
+      responses:
+        '201':
+          description: Environment variable created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentVariableResponseDto'
+        '400':
+          description: Invalid request
+        '404':
+          description: Agent not found
+    delete:
+      summary: Delete all environment variables
+      operationId: deleteAllEnvironmentVariables
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: All environment variables deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deletedCount]
+                properties:
+                  deletedCount:
+                    type: integer
+                    description: Number of environment variables deleted
+        '404':
+          description: Agent not found
+  /agents/{agentId}/environment/count:
+    get:
+      summary: Get count of environment variables
+      operationId: countEnvironmentVariables
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Count of environment variables
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [count]
+                properties:
+                  count:
+                    type: integer
+                    description: Total count of environment variables for the agent
+        '404':
+          description: Agent not found
+  /agents/{agentId}/environment/{id}:
+    put:
+      summary: Update environment variable
+      operationId: updateEnvironmentVariable
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEnvironmentVariableDto'
+      responses:
+        '200':
+          description: Environment variable updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentVariableResponseDto'
+        '400':
+          description: Invalid request
+        '404':
+          description: Agent or environment variable not found
+    delete:
+      summary: Delete environment variable
+      operationId: deleteEnvironmentVariable
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Environment variable deleted
+        '404':
+          description: Agent or environment variable not found
   /agents/{agentId}/vcs/status:
     get:
       summary: Get git status
@@ -1561,3 +1726,45 @@ components:
           type: string
           format: date-time
           description: When the job completed
+    CreateEnvironmentVariableDto:
+      type: object
+      required: [variable, content]
+      properties:
+        variable:
+          type: string
+          description: Environment variable name
+        content:
+          type: string
+          description: Environment variable content
+    UpdateEnvironmentVariableDto:
+      type: object
+      required: [variable, content]
+      properties:
+        variable:
+          type: string
+          description: Environment variable name
+        content:
+          type: string
+          description: Environment variable content
+    EnvironmentVariableResponseDto:
+      type: object
+      required: [id, agentId, variable, content, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+          format: uuid
+        variable:
+          type: string
+          description: Environment variable name
+        content:
+          type: string
+          description: Environment variable content
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

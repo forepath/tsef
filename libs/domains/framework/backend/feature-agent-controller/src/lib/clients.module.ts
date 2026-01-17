@@ -15,6 +15,7 @@ import { ClientsRepository } from './repositories/clients.repository';
 import { ProvisioningReferencesRepository } from './repositories/provisioning-references.repository';
 import { ClientAgentCredentialsService } from './services/client-agent-credentials.service';
 import { ClientAgentDeploymentsProxyService } from './services/client-agent-deployments-proxy.service';
+import { ClientAgentEnvironmentVariablesProxyService } from './services/client-agent-environment-variables-proxy.service';
 import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientAgentVcsProxyService } from './services/client-agent-vcs-proxy.service';
@@ -37,6 +38,7 @@ import { ProvisioningService } from './services/provisioning.service';
     ClientAgentFileSystemProxyService,
     ClientAgentVcsProxyService,
     ClientAgentDeploymentsProxyService,
+    ClientAgentEnvironmentVariablesProxyService,
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,
     ClientsGateway,
@@ -67,6 +69,7 @@ import { ProvisioningService } from './services/provisioning.service';
     ClientAgentFileSystemProxyService,
     ClientAgentVcsProxyService,
     ClientAgentDeploymentsProxyService,
+    ClientAgentEnvironmentVariablesProxyService,
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,
     ClientsGateway,

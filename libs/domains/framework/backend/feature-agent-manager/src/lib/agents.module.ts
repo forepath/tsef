@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AgentsDeploymentsController } from './agents-deployments.controller';
+import { AgentsEnvironmentVariablesController } from './agents-environment-variables.controller';
 import { AgentsFilesController } from './agents-files.controller';
 import { AgentsVcsController } from './agents-vcs.controller';
 import { AgentsController } from './agents.controller';
 import { AgentsGateway } from './agents.gateway';
 import { ConfigController } from './config.controller';
+import { AgentEnvironmentVariableEntity } from './entities/agent-environment-variable.entity';
 import { AgentMessageEntity } from './entities/agent-message.entity';
 import { AgentEntity } from './entities/agent.entity';
 import { DeploymentConfigurationEntity } from './entities/deployment-configuration.entity';
@@ -21,10 +23,12 @@ import { OutgoingChatFilter } from './providers/filters/outgoing-chat-filter';
 import { PipelineProviderFactory } from './providers/pipeline-provider.factory';
 import { GitHubProvider } from './providers/pipelines/github.provider';
 import { GitLabProvider } from './providers/pipelines/gitlab.provider';
+import { AgentEnvironmentVariablesRepository } from './repositories/agent-environment-variables.repository';
 import { AgentMessagesRepository } from './repositories/agent-messages.repository';
 import { AgentsRepository } from './repositories/agents.repository';
 import { DeploymentConfigurationsRepository } from './repositories/deployment-configurations.repository';
 import { DeploymentRunsRepository } from './repositories/deployment-runs.repository';
+import { AgentEnvironmentVariablesService } from './services/agent-environment-variables.service';
 import { AgentFileSystemService } from './services/agent-file-system.service';
 import { AgentMessagesService } from './services/agent-messages.service';
 import { AgentsVcsService } from './services/agents-vcs.service';
@@ -40,19 +44,27 @@ import { PasswordService } from './services/password.service';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AgentEntity, AgentMessageEntity, DeploymentConfigurationEntity, DeploymentRunEntity]),
+    TypeOrmModule.forFeature([
+      AgentEntity,
+      AgentMessageEntity,
+      AgentEnvironmentVariableEntity,
+      DeploymentConfigurationEntity,
+      DeploymentRunEntity,
+    ]),
   ],
   controllers: [
     AgentsController,
     AgentsFilesController,
     AgentsVcsController,
     AgentsDeploymentsController,
+    AgentsEnvironmentVariablesController,
     ConfigController,
   ],
   providers: [
     AgentsGateway,
     AgentsService,
     AgentMessagesService,
+    AgentEnvironmentVariablesService,
     AgentFileSystemService,
     AgentsVcsService,
     ConfigService,
@@ -60,6 +72,7 @@ import { PasswordService } from './services/password.service';
     DeploymentsService,
     AgentsRepository,
     AgentMessagesRepository,
+    AgentEnvironmentVariablesRepository,
     DeploymentConfigurationsRepository,
     DeploymentRunsRepository,
     DockerService,
@@ -120,9 +133,11 @@ import { PasswordService } from './services/password.service';
   ],
   exports: [
     AgentsService,
+    AgentEnvironmentVariablesService,
     AgentMessagesService,
     DeploymentsService,
     AgentsRepository,
+    AgentEnvironmentVariablesRepository,
     AgentMessagesRepository,
     DeploymentConfigurationsRepository,
     DeploymentRunsRepository,
