@@ -14,7 +14,7 @@ describe('ConfigService', () => {
     getSshConnectionDockerImage: jest.fn().mockReturnValue('ghcr.io/forepath/agenstra-manager-ssh:latest'),
     sendMessage: jest.fn(),
     sendInitialization: jest.fn(),
-    toParseableString: jest.fn(),
+    toParseableStrings: jest.fn(),
     toUnifiedResponse: jest.fn(),
   };
 
@@ -84,7 +84,7 @@ describe('ConfigService', () => {
         getSshConnectionDockerImage: jest.fn().mockReturnValue('openai-ssh-connection-image:latest'),
         sendMessage: jest.fn(),
         sendInitialization: jest.fn(),
-        toParseableString: jest.fn(),
+        toParseableStrings: jest.fn(),
         toUnifiedResponse: jest.fn(),
       };
       const mockAnthropicProvider = {
@@ -95,7 +95,7 @@ describe('ConfigService', () => {
         getSshConnectionDockerImage: jest.fn().mockReturnValue('anthropic-ssh-connection-image:latest'),
         sendMessage: jest.fn(),
         sendInitialization: jest.fn(),
-        toParseableString: jest.fn(),
+        toParseableStrings: jest.fn(),
         toUnifiedResponse: jest.fn(),
       };
 

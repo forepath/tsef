@@ -129,26 +129,36 @@ MESSAGE HANDLING:
   }
 
   /**
-   * Convert the response from the agent to a parseable string.
+   * Convert the response from the agent to a parseable strings.
+   * Removes all characters that are not UTF-8 supported.
    * @param response - The response from the agent
-   * @returns The parseable string
+   * @returns The parseable strings
    */
-  toParseableString(response: string): string {
-    // Clean the response: remove everything before first { and after last }
-    let toParse = response.trim();
-    // Remove everything before the first { in the string
-    const firstBrace = toParse.indexOf('{');
-    if (firstBrace !== -1) {
-      toParse = toParse.slice(firstBrace);
+  toParseableStrings(response: string): string[] {
+    // Extract the response object from the response
+    const lines = response.split('\n');
+    if (lines.length === 0) {
+      return [];
     }
 
-    // Remove everything after the last } in the string
-    const lastBrace = toParse.lastIndexOf('}');
-    if (lastBrace !== -1) {
-      toParse = toParse.slice(0, lastBrace + 1);
-    }
+    return lines.map((line) => {
+      // Clean the response: remove everything before first { and after last }
+      let toParse = line.trim();
 
-    return toParse;
+      // Remove everything before the first { in the string
+      const firstBrace = toParse.indexOf('{');
+      if (firstBrace !== -1) {
+        toParse = toParse.slice(firstBrace);
+      }
+
+      // Remove everything after the last } in the string
+      const lastBrace = toParse.lastIndexOf('}');
+      if (lastBrace !== -1) {
+        toParse = toParse.slice(0, lastBrace + 1);
+      }
+
+      return toParse;
+    });
   }
 
   /**
@@ -156,7 +166,7 @@ MESSAGE HANDLING:
    * @param response - The response from the agent
    * @returns The unified response object
    */
-  toUnifiedResponse(response: string): AgentResponseObject {
+  toUnifiedResponse(response: string): AgentResponseObject | undefined {
     return JSON.parse(response) as AgentResponseObject;
   }
 }

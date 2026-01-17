@@ -70,17 +70,18 @@ export interface AgentProvider {
 
   /**
    * Convert the response from the agent to a parseable string.
+   * OpenCode responses are split into multiple lines, each containing a separate JSON object.
    * @param response - The response from the agent
-   * @returns The parseable string
+   * @returns The parseable strings
    */
-  toParseableString(response: string): string;
+  toParseableStrings(response: string): string[];
 
   /**
    * Convert the response from the agent to a unified response object.
    * @param response - The response from the agent
    * @returns The unified response object
    */
-  toUnifiedResponse(response: string): AgentResponseObject;
+  toUnifiedResponse(response: string): AgentResponseObject | undefined;
 }
 
 /**

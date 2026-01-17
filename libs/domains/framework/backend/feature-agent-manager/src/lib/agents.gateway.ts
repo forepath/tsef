@@ -626,189 +626,194 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           // Emit agent's response if there is any
           if (agentResponse && agentResponse.trim()) {
             const agentResponseTimestamp = new Date().toISOString();
-            const toParse = provider.toParseableString(agentResponse);
+            const lines = provider.toParseableStrings(agentResponse);
 
-            try {
-              // Parse JSON response from agent
-              const parsedResponse = provider.toUnifiedResponse(toParse);
-
-              // Convert parsed response to string for filtering
-              const agentResponseString = JSON.stringify(parsedResponse);
-
-              // Apply outgoing filters before processing (single hook point for outgoing messages)
-              const outgoingFilterResult = await this.applyFilters(agentResponseString, FilterDirection.OUTGOING, {
-                agentId: agentUuid,
-                actor: 'agent',
-              });
-
-              // Broadcast filter result for outgoing filters
-              this.broadcastToAgent(
-                agentUuid,
-                'messageFilterResult',
-                createSuccessResponse<MessageFilterResultData>({
-                  direction: 'outgoing',
-                  ...outgoingFilterResult,
-                }),
-              );
-
-              // If filter says to drop, replace with fake agent response and persist it
-              if (outgoingFilterResult.status === 'dropped') {
-                this.logger.debug(
-                  `Dropped outgoing message for agent ${agentUuid} due to filter: ${outgoingFilterResult.matchedFilter?.reason || 'No reason provided'}`,
-                );
-
-                // Create fake agent response indicating message was dropped
-                const fakeAgentResponse = {
-                  type: 'error',
-                  is_error: true,
-                  result: 'MESSAGE_DROPPED',
-                  message: `Message was dropped by filter: ${outgoingFilterResult.matchedFilter?.reason || 'No reason provided'}`,
-                };
-
-                // Persist the fake agent response as if it was a valid agent response
-                try {
-                  await this.agentMessagesService.createAgentMessage(agentUuid, fakeAgentResponse, false);
-                } catch (persistError) {
-                  const err = persistError as { message?: string };
-                  this.logger.warn(`Failed to persist dropped message response: ${err.message}`);
+            for (const toParse of lines) {
+              try {
+                // Parse JSON response from agent
+                const parsedResponse = provider.toUnifiedResponse(toParse);
+                if (!parsedResponse) {
+                  continue;
                 }
 
-                // Broadcast the fake agent response
+                // Convert parsed response to string for filtering
+                const agentResponseString = JSON.stringify(parsedResponse);
+
+                // Apply outgoing filters before processing (single hook point for outgoing messages)
+                const outgoingFilterResult = await this.applyFilters(agentResponseString, FilterDirection.OUTGOING, {
+                  agentId: agentUuid,
+                  actor: 'agent',
+                });
+
+                // Broadcast filter result for outgoing filters
+                this.broadcastToAgent(
+                  agentUuid,
+                  'messageFilterResult',
+                  createSuccessResponse<MessageFilterResultData>({
+                    direction: 'outgoing',
+                    ...outgoingFilterResult,
+                  }),
+                );
+
+                // If filter says to drop, replace with fake agent response and persist it
+                if (outgoingFilterResult.status === 'dropped') {
+                  this.logger.debug(
+                    `Dropped outgoing message for agent ${agentUuid} due to filter: ${outgoingFilterResult.matchedFilter?.reason || 'No reason provided'}`,
+                  );
+
+                  // Create fake agent response indicating message was dropped
+                  const fakeAgentResponse = {
+                    type: 'error',
+                    is_error: true,
+                    result: 'MESSAGE_DROPPED',
+                    message: `Message was dropped by filter: ${outgoingFilterResult.matchedFilter?.reason || 'No reason provided'}`,
+                  };
+
+                  // Persist the fake agent response as if it was a valid agent response
+                  try {
+                    await this.agentMessagesService.createAgentMessage(agentUuid, fakeAgentResponse, false);
+                  } catch (persistError) {
+                    const err = persistError as { message?: string };
+                    this.logger.warn(`Failed to persist dropped message response: ${err.message}`);
+                  }
+
+                  // Broadcast the fake agent response
+                  this.broadcastToAgent(
+                    agentUuid,
+                    'chatMessage',
+                    createSuccessResponse<ChatMessageData>({
+                      from: ChatActor.AGENT,
+                      response: fakeAgentResponse,
+                      timestamp: agentResponseTimestamp,
+                    }),
+                  );
+
+                  return;
+                }
+
+                // Use modified response if filter provided one, otherwise use original
+                let responseToUse: AgentResponseObject | string = parsedResponse;
+                if (outgoingFilterResult.modifiedMessage !== undefined) {
+                  try {
+                    // Try to parse the modified message as JSON
+                    responseToUse = JSON.parse(outgoingFilterResult.modifiedMessage);
+                  } catch {
+                    // If parsing fails, use as string
+                    responseToUse = outgoingFilterResult.modifiedMessage;
+                  }
+                }
+
+                // Persist agent message (with filtered flag if filter matched)
+                // Use modified response if available
+                try {
+                  await this.agentMessagesService.createAgentMessage(
+                    agentUuid,
+                    responseToUse,
+                    outgoingFilterResult.status === 'filtered',
+                  );
+                } catch (persistError) {
+                  const err = persistError as { message?: string };
+                  this.logger.warn(`Failed to persist agent message: ${err.message}`);
+                  // Continue with message broadcasting even if persistence fails
+                }
+
+                // Broadcast agent response only to clients authenticated to this agent
+                // Use modified response if available
                 this.broadcastToAgent(
                   agentUuid,
                   'chatMessage',
                   createSuccessResponse<ChatMessageData>({
                     from: ChatActor.AGENT,
-                    response: fakeAgentResponse,
+                    response: responseToUse,
                     timestamp: agentResponseTimestamp,
                   }),
                 );
+              } catch (parseError) {
+                // If JSON parsing fails, log error but still emit the cleaned response in response field
+                const parseErr = parseError as { message?: string };
+                this.logger.warn(`Failed to parse agent response as JSON: ${parseErr.message}`);
 
-                return;
-              }
+                // Apply outgoing filters before processing (single hook point for outgoing messages)
+                const outgoingFilterResult = await this.applyFilters(toParse, FilterDirection.OUTGOING, {
+                  agentId: agentUuid,
+                  actor: 'agent',
+                });
 
-              // Use modified response if filter provided one, otherwise use original
-              let responseToUse: AgentResponseObject | string = parsedResponse;
-              if (outgoingFilterResult.modifiedMessage !== undefined) {
-                try {
-                  // Try to parse the modified message as JSON
-                  responseToUse = JSON.parse(outgoingFilterResult.modifiedMessage);
-                } catch {
-                  // If parsing fails, use as string
-                  responseToUse = outgoingFilterResult.modifiedMessage;
-                }
-              }
-
-              // Persist agent message (with filtered flag if filter matched)
-              // Use modified response if available
-              try {
-                await this.agentMessagesService.createAgentMessage(
+                // Broadcast filter result for outgoing filters
+                this.broadcastToAgent(
                   agentUuid,
-                  responseToUse,
-                  outgoingFilterResult.status === 'filtered',
-                );
-              } catch (persistError) {
-                const err = persistError as { message?: string };
-                this.logger.warn(`Failed to persist agent message: ${err.message}`);
-                // Continue with message broadcasting even if persistence fails
-              }
-
-              // Broadcast agent response only to clients authenticated to this agent
-              // Use modified response if available
-              this.broadcastToAgent(
-                agentUuid,
-                'chatMessage',
-                createSuccessResponse<ChatMessageData>({
-                  from: ChatActor.AGENT,
-                  response: responseToUse,
-                  timestamp: agentResponseTimestamp,
-                }),
-              );
-            } catch (parseError) {
-              // If JSON parsing fails, log error but still emit the cleaned response in response field
-              const parseErr = parseError as { message?: string };
-              this.logger.warn(`Failed to parse agent response as JSON: ${parseErr.message}`);
-
-              // Apply outgoing filters before processing (single hook point for outgoing messages)
-              const outgoingFilterResult = await this.applyFilters(toParse, FilterDirection.OUTGOING, {
-                agentId: agentUuid,
-                actor: 'agent',
-              });
-
-              // Broadcast filter result for outgoing filters
-              this.broadcastToAgent(
-                agentUuid,
-                'messageFilterResult',
-                createSuccessResponse<MessageFilterResultData>({
-                  direction: 'outgoing',
-                  ...outgoingFilterResult,
-                }),
-              );
-
-              // If filter says to drop, replace with fake agent response and persist it
-              if (outgoingFilterResult.status === 'dropped') {
-                this.logger.debug(
-                  `Dropped outgoing message for agent ${agentUuid} due to filter: ${outgoingFilterResult.matchedFilter?.reason || 'No reason provided'}`,
+                  'messageFilterResult',
+                  createSuccessResponse<MessageFilterResultData>({
+                    direction: 'outgoing',
+                    ...outgoingFilterResult,
+                  }),
                 );
 
-                // Create fake agent response indicating message was dropped
-                const fakeAgentResponse = {
-                  type: 'error',
-                  is_error: true,
-                  result: 'MESSAGE_DROPPED',
-                  message: `Message was dropped by filter: ${outgoingFilterResult.matchedFilter?.reason || 'No reason provided'}`,
-                };
+                // If filter says to drop, replace with fake agent response and persist it
+                if (outgoingFilterResult.status === 'dropped') {
+                  this.logger.debug(
+                    `Dropped outgoing message for agent ${agentUuid} due to filter: ${outgoingFilterResult.matchedFilter?.reason || 'No reason provided'}`,
+                  );
 
-                // Persist the fake agent response as if it was a valid agent response
+                  // Create fake agent response indicating message was dropped
+                  const fakeAgentResponse = {
+                    type: 'error',
+                    is_error: true,
+                    result: 'MESSAGE_DROPPED',
+                    message: `Message was dropped by filter: ${outgoingFilterResult.matchedFilter?.reason || 'No reason provided'}`,
+                  };
+
+                  // Persist the fake agent response as if it was a valid agent response
+                  try {
+                    await this.agentMessagesService.createAgentMessage(agentUuid, fakeAgentResponse, false);
+                  } catch (persistError) {
+                    const err = persistError as { message?: string };
+                    this.logger.warn(`Failed to persist dropped message response: ${err.message}`);
+                  }
+
+                  // Broadcast the fake agent response
+                  this.broadcastToAgent(
+                    agentUuid,
+                    'chatMessage',
+                    createSuccessResponse<ChatMessageData>({
+                      from: ChatActor.AGENT,
+                      response: fakeAgentResponse,
+                      timestamp: agentResponseTimestamp,
+                    }),
+                  );
+
+                  return;
+                }
+
+                // Use modified message if filter provided one, otherwise use cleaned string
+                const stringResponseToUse = outgoingFilterResult.modifiedMessage ?? toParse;
+
+                // Persist agent message (cleaned string or modified)
+                // This ensures we can attempt to parse it again when restoring chat history
                 try {
-                  await this.agentMessagesService.createAgentMessage(agentUuid, fakeAgentResponse, false);
+                  await this.agentMessagesService.createAgentMessage(
+                    agentUuid,
+                    stringResponseToUse,
+                    outgoingFilterResult.status === 'filtered',
+                  );
                 } catch (persistError) {
                   const err = persistError as { message?: string };
-                  this.logger.warn(`Failed to persist dropped message response: ${err.message}`);
+                  this.logger.warn(`Failed to persist agent message: ${err.message}`);
+                  // Continue with message broadcasting even if persistence fails
                 }
 
-                // Broadcast the fake agent response
+                // Broadcast agent response only to clients authenticated to this agent
+                // Use modified message if available
                 this.broadcastToAgent(
                   agentUuid,
                   'chatMessage',
                   createSuccessResponse<ChatMessageData>({
                     from: ChatActor.AGENT,
-                    response: fakeAgentResponse,
+                    response: stringResponseToUse,
                     timestamp: agentResponseTimestamp,
                   }),
                 );
-
-                return;
               }
-
-              // Use modified message if filter provided one, otherwise use cleaned string
-              const stringResponseToUse = outgoingFilterResult.modifiedMessage ?? toParse;
-
-              // Persist agent message (cleaned string or modified)
-              // This ensures we can attempt to parse it again when restoring chat history
-              try {
-                await this.agentMessagesService.createAgentMessage(
-                  agentUuid,
-                  stringResponseToUse,
-                  outgoingFilterResult.status === 'filtered',
-                );
-              } catch (persistError) {
-                const err = persistError as { message?: string };
-                this.logger.warn(`Failed to persist agent message: ${err.message}`);
-                // Continue with message broadcasting even if persistence fails
-              }
-
-              // Broadcast agent response only to clients authenticated to this agent
-              // Use modified message if available
-              this.broadcastToAgent(
-                agentUuid,
-                'chatMessage',
-                createSuccessResponse<ChatMessageData>({
-                  from: ChatActor.AGENT,
-                  response: stringResponseToUse,
-                  timestamp: agentResponseTimestamp,
-                }),
-              );
             }
           }
         } catch (error) {
