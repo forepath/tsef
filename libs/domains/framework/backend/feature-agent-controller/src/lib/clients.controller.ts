@@ -2,11 +2,14 @@ import {
   AgentResponseDto,
   CreateAgentDto,
   CreateAgentResponseDto,
+  CreateEnvironmentVariableDto,
   CreateFileDto,
+  EnvironmentVariableResponseDto,
   FileContentDto,
   FileNodeDto,
   MoveFileDto,
   UpdateAgentDto,
+  UpdateEnvironmentVariableDto,
   WriteFileDto,
 } from '@forepath/framework/backend/feature-agent-manager';
 import {
@@ -33,6 +36,7 @@ import { ProvisionServerDto } from './dto/provision-server.dto';
 import { ProvisionedServerResponseDto } from './dto/provisioned-server-response.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { ProvisioningProviderFactory } from './providers/provisioning-provider.factory';
+import { ClientAgentEnvironmentVariablesProxyService } from './services/client-agent-environment-variables-proxy.service';
 import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientsService } from './services/clients.service';
@@ -49,6 +53,7 @@ export class ClientsController {
     private readonly clientsService: ClientsService,
     private readonly clientAgentProxyService: ClientAgentProxyService,
     private readonly clientAgentFileSystemProxyService: ClientAgentFileSystemProxyService,
+    private readonly clientAgentEnvironmentVariablesProxyService: ClientAgentEnvironmentVariablesProxyService,
     private readonly provisioningService: ProvisioningService,
     private readonly provisioningProviderFactory: ProvisioningProviderFactory,
   ) {}
@@ -430,5 +435,113 @@ export class ClientsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteProvisionedServer(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<void> {
     await this.provisioningService.deleteProvisionedServer(id);
+  }
+
+  /**
+   * Get all environment variables for an agent with pagination (proxied).
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param limit - Maximum number of environment variables to return (default: 50)
+   * @param offset - Number of environment variables to skip (default: 0)
+   * @returns Array of environment variable response DTOs
+   */
+  @Get(':id/agents/:agentId/environment')
+  async getClientAgentEnvironmentVariables(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+  ): Promise<EnvironmentVariableResponseDto[]> {
+    return await this.clientAgentEnvironmentVariablesProxyService.getEnvironmentVariables(
+      id,
+      agentId,
+      limit ?? 50,
+      offset ?? 0,
+    );
+  }
+
+  /**
+   * Get count of environment variables for an agent (proxied).
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @returns Count of environment variables
+   */
+  @Get(':id/agents/:agentId/environment/count')
+  async countClientAgentEnvironmentVariables(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+  ): Promise<{ count: number }> {
+    return await this.clientAgentEnvironmentVariablesProxyService.countEnvironmentVariables(id, agentId);
+  }
+
+  /**
+   * Create a new environment variable for an agent (proxied).
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param createDto - Data transfer object for creating an environment variable
+   * @returns The created environment variable response DTO
+   */
+  @Post(':id/agents/:agentId/environment')
+  @HttpCode(HttpStatus.CREATED)
+  async createClientAgentEnvironmentVariable(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Body() createDto: CreateEnvironmentVariableDto,
+  ): Promise<EnvironmentVariableResponseDto> {
+    return await this.clientAgentEnvironmentVariablesProxyService.createEnvironmentVariable(id, agentId, createDto);
+  }
+
+  /**
+   * Update an existing environment variable (proxied).
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param envVarId - The UUID of the environment variable to update
+   * @param updateDto - Data transfer object for updating an environment variable
+   * @returns The updated environment variable response DTO
+   */
+  @Put(':id/agents/:agentId/environment/:envVarId')
+  async updateClientAgentEnvironmentVariable(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('envVarId', new ParseUUIDPipe({ version: '4' })) envVarId: string,
+    @Body() updateDto: UpdateEnvironmentVariableDto,
+  ): Promise<EnvironmentVariableResponseDto> {
+    return await this.clientAgentEnvironmentVariablesProxyService.updateEnvironmentVariable(
+      id,
+      agentId,
+      envVarId,
+      updateDto,
+    );
+  }
+
+  /**
+   * Delete an environment variable by ID (proxied).
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @param envVarId - The UUID of the environment variable to delete
+   */
+  @Delete(':id/agents/:agentId/environment/:envVarId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteClientAgentEnvironmentVariable(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('envVarId', new ParseUUIDPipe({ version: '4' })) envVarId: string,
+  ): Promise<void> {
+    await this.clientAgentEnvironmentVariablesProxyService.deleteEnvironmentVariable(id, agentId, envVarId);
+  }
+
+  /**
+   * Delete all environment variables for an agent (proxied).
+   * @param id - The UUID of the client
+   * @param agentId - The UUID of the agent
+   * @returns Number of environment variables deleted
+   */
+  @Delete(':id/agents/:agentId/environment')
+  @HttpCode(HttpStatus.OK)
+  async deleteAllClientAgentEnvironmentVariables(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+  ): Promise<{ deletedCount: number }> {
+    return await this.clientAgentEnvironmentVariablesProxyService.deleteAllEnvironmentVariables(id, agentId);
   }
 }

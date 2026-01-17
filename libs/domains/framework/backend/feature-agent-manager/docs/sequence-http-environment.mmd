@@ -1,0 +1,89 @@
+sequenceDiagram
+    participant Client as HTTP Client
+    participant API as AgentsEnvironmentVariablesController<br/>(/api/agents/:id/environment)
+    participant Service as AgentEnvironmentVariablesService
+    participant Repo as AgentEnvironmentVariablesRepository
+    participant DB as Database
+
+    Note over Client,DB: HTTP API - Environment Variables Management
+
+    rect rgb(255, 230, 240)
+        Note over Client,DB: List Environment Variables
+        Client->>API: GET /api/agents/:agentId/environment?limit=50&offset=0
+        API->>Service: getEnvironmentVariables(agentId, limit, offset)
+        Service->>Repo: findByAgentId(agentId, limit, offset)
+        Repo->>DB: SELECT env_vars WHERE agentId LIMIT/OFFSET
+        DB-->>Repo: environment variable entities[]
+        Repo-->>Service: environment variable entities[]
+        Service-->>API: AgentEnvironmentVariableEntity[]
+        API->>API: mapToResponseDto(entities)
+        API-->>Client: 200 OK<br/>[environment variables array]
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Client,DB: Count Environment Variables
+        Client->>API: GET /api/agents/:agentId/environment/count
+        API->>Service: countEnvironmentVariables(agentId)
+        Service->>Repo: countByAgentId(agentId)
+        Repo->>DB: SELECT COUNT(*) WHERE agentId
+        DB-->>Repo: count
+        Repo-->>Service: count
+        Service-->>API: count
+        API-->>Client: 200 OK<br/>{count: number}
+    end
+
+    rect rgb(240, 240, 255)
+        Note over Client,DB: Create Environment Variable
+        Client->>API: POST /api/agents/:agentId/environment<br/>{variable, content}
+        API->>Service: createEnvironmentVariable(agentId, variable, content)
+        Service->>Repo: create({agentId, variable, content})
+        Repo->>DB: INSERT environment_variable
+        DB-->>Repo: environment variable entity
+        Repo-->>Service: environment variable entity
+        Service-->>API: AgentEnvironmentVariableEntity
+        API->>API: mapToResponseDto(entity)
+        API-->>Client: 201 Created<br/>{id, agentId, variable, content, createdAt, updatedAt}
+    end
+
+    rect rgb(255, 255, 230)
+        Note over Client,DB: Update Environment Variable
+        Client->>API: PUT /api/agents/:agentId/environment/:id<br/>{variable, content}
+        API->>Service: updateEnvironmentVariable(id, variable, content)
+        Service->>Repo: update(id, {variable, content})
+        Repo->>Repo: findByIdOrThrow(id)
+        Repo->>DB: SELECT env_var WHERE id
+        DB-->>Repo: environment variable entity
+        Repo->>DB: UPDATE environment_variable
+        DB-->>Repo: updated entity
+        Repo-->>Service: updated entity
+        Service-->>API: AgentEnvironmentVariableEntity
+        API->>API: mapToResponseDto(entity)
+        API-->>Client: 200 OK<br/>{updated environment variable}
+    end
+
+    rect rgb(255, 230, 255)
+        Note over Client,DB: Delete Environment Variable
+        Client->>API: DELETE /api/agents/:agentId/environment/:id
+        API->>Service: deleteEnvironmentVariable(id)
+        Service->>Repo: delete(id)
+        Repo->>Repo: findByIdOrThrow(id)
+        Repo->>DB: SELECT env_var WHERE id
+        DB-->>Repo: environment variable entity
+        Repo->>DB: DELETE environment_variable WHERE id
+        DB-->>Repo: success
+        Repo-->>Service: success
+        Service-->>API: void
+        API-->>Client: 204 No Content
+    end
+
+    rect rgb(230, 255, 255)
+        Note over Client,DB: Delete All Environment Variables
+        Client->>API: DELETE /api/agents/:agentId/environment
+        API->>Service: deleteAllEnvironmentVariables(agentId)
+        Service->>Repo: deleteByAgentId(agentId)
+        Repo->>DB: DELETE environment_variable WHERE agentId
+        DB-->>Repo: affected count
+        Repo-->>Service: deletedCount
+        Service-->>API: deletedCount
+        API-->>Client: 200 OK<br/>{deletedCount: number}
+    end

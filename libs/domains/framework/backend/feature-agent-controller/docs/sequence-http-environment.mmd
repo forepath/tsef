@@ -1,0 +1,87 @@
+sequenceDiagram
+    participant Client as HTTP Client
+    participant API as ClientsController<br/>(/api/clients/:id/agents/:agentId/environment)
+    participant Proxy as ClientAgentEnvironmentVariablesProxyService
+    participant Repo as ClientsRepository
+    participant Service as ClientsService
+    participant Keycloak as KeycloakTokenService
+    participant Remote as Remote Agent-Manager<br/>(/api/agents/:agentId/environment)
+
+    Note over Client,Remote: HTTP API - Environment Variables Proxy Operations
+
+    rect rgb(255, 240, 230)
+        Note over Client,Remote: List Environment Variables (Proxied)
+        Client->>API: GET /api/clients/:id/agents/:agentId/environment?limit&offset
+        API->>Proxy: getEnvironmentVariables(clientId, agentId, limit, offset)
+        Proxy->>Repo: findByIdOrThrow(clientId)
+        Repo-->>Proxy: client entity
+        alt Authentication Type: API_KEY
+            Proxy->>Proxy: getAuthHeader(clientId)<br/>Returns: Bearer {apiKey}
+        else Authentication Type: KEYCLOAK
+            Proxy->>Service: getAccessToken(clientId)
+            Service->>Keycloak: getAccessToken(authServerUrl, realm, clientId, secret)
+            Keycloak-->>Service: JWT token
+            Service-->>Proxy: JWT token
+            Proxy->>Proxy: getAuthHeader(clientId)<br/>Returns: Bearer {token}
+        end
+        Proxy->>Proxy: buildAgentEnvironmentApiUrl(endpoint, agentId)
+        Proxy->>Remote: GET {endpoint}/api/agents/:agentId/environment?limit&offset<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>Proxy: 200 OK<br/>[environment variables array]
+        Proxy-->>API: EnvironmentVariableResponseDto[]
+        API-->>Client: 200 OK<br/>[environment variables array]
+    end
+
+    rect rgb(255, 245, 230)
+        Note over Client,Remote: Count Environment Variables (Proxied)
+        Client->>API: GET /api/clients/:id/agents/:agentId/environment/count
+        API->>Proxy: countEnvironmentVariables(clientId, agentId)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>Remote: GET {endpoint}/api/agents/:agentId/environment/count<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>Proxy: 200 OK<br/>{count: number}
+        Proxy-->>API: {count: number}
+        API-->>Client: 200 OK<br/>{count: number}
+    end
+
+    rect rgb(230, 255, 240)
+        Note over Client,Remote: Create Environment Variable (Proxied)
+        Client->>API: POST /api/clients/:id/agents/:agentId/environment<br/>{variable, content}
+        API->>Proxy: createEnvironmentVariable(clientId, agentId, createDto)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>Remote: POST {endpoint}/api/agents/:agentId/environment<br/>Authorization: Bearer {token/apiKey}<br/>{variable, content}
+        Remote-->>Proxy: 201 Created<br/>{id, agentId, variable, content, ...}
+        Proxy-->>API: EnvironmentVariableResponseDto
+        API-->>Client: 201 Created<br/>{environment variable}
+    end
+
+    rect rgb(240, 250, 255)
+        Note over Client,Remote: Update Environment Variable (Proxied)
+        Client->>API: PUT /api/clients/:id/agents/:agentId/environment/:envVarId<br/>{variable, content}
+        API->>Proxy: updateEnvironmentVariable(clientId, agentId, envVarId, updateDto)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>Remote: PUT {endpoint}/api/agents/:agentId/environment/:envVarId<br/>Authorization: Bearer {token/apiKey}<br/>{variable, content}
+        Remote-->>Proxy: 200 OK<br/>{id, agentId, variable, content, ...}
+        Proxy-->>API: EnvironmentVariableResponseDto
+        API-->>Client: 200 OK<br/>{updated environment variable}
+    end
+
+    rect rgb(255, 240, 245)
+        Note over Client,Remote: Delete Environment Variable (Proxied)
+        Client->>API: DELETE /api/clients/:id/agents/:agentId/environment/:envVarId
+        API->>Proxy: deleteEnvironmentVariable(clientId, agentId, envVarId)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>Remote: DELETE {endpoint}/api/agents/:agentId/environment/:envVarId<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>Proxy: 204 No Content
+        Proxy-->>API: void
+        API-->>Client: 204 No Content
+    end
+
+    rect rgb(255, 230, 240)
+        Note over Client,Remote: Delete All Environment Variables (Proxied)
+        Client->>API: DELETE /api/clients/:id/agents/:agentId/environment
+        API->>Proxy: deleteAllEnvironmentVariables(clientId, agentId)
+        Proxy->>Proxy: getAuthHeader(clientId)
+        Proxy->>Remote: DELETE {endpoint}/api/agents/:agentId/environment<br/>Authorization: Bearer {token/apiKey}
+        Remote-->>Proxy: 200 OK<br/>{deletedCount: number}
+        Proxy-->>API: {deletedCount: number}
+        API-->>Client: 200 OK<br/>{deletedCount: number}
+    end
