@@ -3,11 +3,14 @@ import {
   ContainerType,
   CreateAgentDto,
   CreateAgentResponseDto,
+  CreateEnvironmentVariableDto,
   CreateFileDto,
+  EnvironmentVariableResponseDto,
   FileContentDto,
   FileNodeDto,
   MoveFileDto,
   UpdateAgentDto,
+  UpdateEnvironmentVariableDto,
   WriteFileDto,
 } from '@forepath/framework/backend/feature-agent-manager';
 import { BadRequestException } from '@nestjs/common';
@@ -22,6 +25,7 @@ import { UpdateClientDto } from './dto/update-client.dto';
 import { AuthenticationType } from './entities/client.entity';
 import { ProvisioningProviderFactory } from './providers/provisioning-provider.factory';
 import { ProvisioningProvider } from './providers/provisioning-provider.interface';
+import { ClientAgentEnvironmentVariablesProxyService } from './services/client-agent-environment-variables-proxy.service';
 import { ClientAgentFileSystemProxyService } from './services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from './services/client-agent-proxy.service';
 import { ClientsService } from './services/clients.service';
@@ -32,6 +36,7 @@ describe('ClientsController', () => {
   let service: jest.Mocked<ClientsService>;
   let proxyService: jest.Mocked<ClientAgentProxyService>;
   let fileSystemProxyService: jest.Mocked<ClientAgentFileSystemProxyService>;
+  let environmentVariablesProxyService: jest.Mocked<ClientAgentEnvironmentVariablesProxyService>;
   let provisioningService: jest.Mocked<ProvisioningService>;
   let provisioningProviderFactory: jest.Mocked<ProvisioningProviderFactory>;
 
@@ -96,6 +101,15 @@ describe('ClientsController', () => {
     moveFileOrDirectory: jest.fn(),
   };
 
+  const mockEnvironmentVariablesProxyService = {
+    getEnvironmentVariables: jest.fn(),
+    countEnvironmentVariables: jest.fn(),
+    createEnvironmentVariable: jest.fn(),
+    updateEnvironmentVariable: jest.fn(),
+    deleteEnvironmentVariable: jest.fn(),
+    deleteAllEnvironmentVariables: jest.fn(),
+  };
+
   const mockProvisioningService = {
     provisionServer: jest.fn(),
     deleteProvisionedServer: jest.fn(),
@@ -126,6 +140,10 @@ describe('ClientsController', () => {
           useValue: mockFileSystemProxyService,
         },
         {
+          provide: ClientAgentEnvironmentVariablesProxyService,
+          useValue: mockEnvironmentVariablesProxyService,
+        },
+        {
           provide: ProvisioningService,
           useValue: mockProvisioningService,
         },
@@ -140,6 +158,7 @@ describe('ClientsController', () => {
     service = module.get(ClientsService);
     proxyService = module.get(ClientAgentProxyService);
     fileSystemProxyService = module.get(ClientAgentFileSystemProxyService);
+    environmentVariablesProxyService = module.get(ClientAgentEnvironmentVariablesProxyService);
     provisioningService = module.get(ProvisioningService);
     provisioningProviderFactory = module.get(ProvisioningProviderFactory);
   });
@@ -662,6 +681,136 @@ describe('ClientsController', () => {
       await controller.deleteProvisionedServer('client-uuid');
 
       expect(provisioningService.deleteProvisionedServer).toHaveBeenCalledWith('client-uuid');
+    });
+  });
+
+  describe('Environment Variables Proxy', () => {
+    const clientId = 'test-uuid';
+    const agentId = 'agent-uuid';
+    const envVarId = 'env-var-uuid';
+
+    const mockEnvVar: EnvironmentVariableResponseDto = {
+      id: envVarId,
+      agentId,
+      variable: 'API_KEY',
+      content: 'secret-api-key-value',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
+    };
+
+    describe('getClientAgentEnvironmentVariables', () => {
+      it('should proxy get environment variables request', async () => {
+        mockEnvironmentVariablesProxyService.getEnvironmentVariables.mockResolvedValue([mockEnvVar]);
+
+        const result = await controller.getClientAgentEnvironmentVariables(clientId, agentId, 50, 0);
+
+        expect(result).toEqual([mockEnvVar]);
+        expect(mockEnvironmentVariablesProxyService.getEnvironmentVariables).toHaveBeenCalledWith(
+          clientId,
+          agentId,
+          50,
+          0,
+        );
+      });
+
+      it('should use default pagination parameters', async () => {
+        mockEnvironmentVariablesProxyService.getEnvironmentVariables.mockResolvedValue([]);
+
+        await controller.getClientAgentEnvironmentVariables(clientId, agentId);
+
+        expect(mockEnvironmentVariablesProxyService.getEnvironmentVariables).toHaveBeenCalledWith(
+          clientId,
+          agentId,
+          50,
+          0,
+        );
+      });
+    });
+
+    describe('countClientAgentEnvironmentVariables', () => {
+      it('should proxy count environment variables request', async () => {
+        mockEnvironmentVariablesProxyService.countEnvironmentVariables.mockResolvedValue({ count: 5 });
+
+        const result = await controller.countClientAgentEnvironmentVariables(clientId, agentId);
+
+        expect(result).toEqual({ count: 5 });
+        expect(mockEnvironmentVariablesProxyService.countEnvironmentVariables).toHaveBeenCalledWith(clientId, agentId);
+      });
+    });
+
+    describe('createClientAgentEnvironmentVariable', () => {
+      it('should proxy create environment variable request', async () => {
+        const createDto: CreateEnvironmentVariableDto = {
+          variable: 'API_KEY',
+          content: 'secret-api-key-value',
+        };
+
+        mockEnvironmentVariablesProxyService.createEnvironmentVariable.mockResolvedValue(mockEnvVar);
+
+        const result = await controller.createClientAgentEnvironmentVariable(clientId, agentId, createDto);
+
+        expect(result).toEqual(mockEnvVar);
+        expect(mockEnvironmentVariablesProxyService.createEnvironmentVariable).toHaveBeenCalledWith(
+          clientId,
+          agentId,
+          createDto,
+        );
+      });
+    });
+
+    describe('updateClientAgentEnvironmentVariable', () => {
+      it('should proxy update environment variable request', async () => {
+        const updateDto: UpdateEnvironmentVariableDto = {
+          variable: 'UPDATED_API_KEY',
+          content: 'updated-secret-value',
+        };
+
+        const updatedEnvVar: EnvironmentVariableResponseDto = {
+          ...mockEnvVar,
+          variable: 'UPDATED_API_KEY',
+          content: 'updated-secret-value',
+        };
+
+        mockEnvironmentVariablesProxyService.updateEnvironmentVariable.mockResolvedValue(updatedEnvVar);
+
+        const result = await controller.updateClientAgentEnvironmentVariable(clientId, agentId, envVarId, updateDto);
+
+        expect(result).toEqual(updatedEnvVar);
+        expect(mockEnvironmentVariablesProxyService.updateEnvironmentVariable).toHaveBeenCalledWith(
+          clientId,
+          agentId,
+          envVarId,
+          updateDto,
+        );
+      });
+    });
+
+    describe('deleteClientAgentEnvironmentVariable', () => {
+      it('should proxy delete environment variable request', async () => {
+        mockEnvironmentVariablesProxyService.deleteEnvironmentVariable.mockResolvedValue(undefined);
+
+        await controller.deleteClientAgentEnvironmentVariable(clientId, agentId, envVarId);
+
+        expect(mockEnvironmentVariablesProxyService.deleteEnvironmentVariable).toHaveBeenCalledWith(
+          clientId,
+          agentId,
+          envVarId,
+        );
+      });
+    });
+
+    describe('deleteAllClientAgentEnvironmentVariables', () => {
+      it('should proxy delete all environment variables request', async () => {
+        mockEnvironmentVariablesProxyService.deleteAllEnvironmentVariables.mockResolvedValue({ deletedCount: 3 });
+
+        const result = await controller.deleteAllClientAgentEnvironmentVariables(clientId, agentId);
+
+        expect(result).toEqual({ deletedCount: 3 });
+        expect(mockEnvironmentVariablesProxyService.deleteAllEnvironmentVariables).toHaveBeenCalledWith(
+          clientId,
+          agentId,
+        );
+      });
     });
   });
 });

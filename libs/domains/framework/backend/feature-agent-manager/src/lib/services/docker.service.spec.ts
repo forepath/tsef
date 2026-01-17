@@ -16,6 +16,9 @@ describe('DockerService', () => {
     stop: jest.Mock;
     remove: jest.Mock;
     stats: jest.Mock;
+    update: jest.Mock;
+    restart: jest.Mock;
+    start: jest.Mock;
     modem: {
       demuxStream: jest.Mock;
     };
@@ -81,6 +84,9 @@ describe('DockerService', () => {
       stop: jest.fn(),
       remove: jest.fn(),
       stats: jest.fn(),
+      update: jest.fn().mockResolvedValue(undefined),
+      restart: jest.fn().mockResolvedValue(undefined),
+      start: jest.fn().mockResolvedValue(undefined),
       modem: {
         demuxStream: jest.fn(),
       },
@@ -234,6 +240,358 @@ describe('DockerService', () => {
     it('should set empty string when env value is undefined', async () => {
       await service.createContainer({ image: 'node:22-alpine', env: { EMPTY: undefined } });
       expect((mockDocker as any).createContainer).toHaveBeenCalledWith(expect.objectContaining({ Env: ['EMPTY='] }));
+    });
+  });
+
+  describe('updateContainer', () => {
+    const containerId = 'test-container-id';
+    const newContainerId = 'new-container-id';
+    let newContainer: { id: string; start: jest.Mock };
+
+    beforeEach(() => {
+      newContainer = {
+        id: newContainerId,
+        start: jest.fn().mockResolvedValue(undefined),
+      };
+
+      // Default mock setup: container exists with minimal config
+      mockContainer.inspect.mockResolvedValue({
+        Id: containerId,
+        Name: '/test-container',
+        Image: 'test-image:latest',
+        Config: {
+          Image: 'test-image:latest',
+          Env: [],
+          ExposedPorts: {},
+          Labels: {},
+        },
+        HostConfig: {
+          AutoRemove: false,
+          RestartPolicy: { Name: 'unless-stopped' },
+        },
+        NetworkSettings: {
+          Networks: {},
+        },
+        Mounts: [],
+      });
+
+      mockContainer.stop.mockResolvedValue(undefined);
+      mockContainer.remove.mockResolvedValue(undefined);
+      (mockDocker as any).createContainer = jest.fn().mockResolvedValue(newContainer);
+    });
+
+    it('should recreate container with updated env variables and return new container ID', async () => {
+      const result = await service.updateContainer(containerId, {
+        env: { FOO: 'bar', BAZ: 'qux' },
+      });
+
+      expect(result).toBe(newContainerId);
+      expect(mockDocker.getContainer).toHaveBeenCalledWith(containerId);
+      expect(mockContainer.inspect).toHaveBeenCalled();
+      expect(mockContainer.stop).toHaveBeenCalled();
+      expect(mockContainer.remove).toHaveBeenCalledWith({ force: true });
+      expect((mockDocker as any).createContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'test-container',
+          Image: 'test-image:latest',
+          Env: ['FOO=bar', 'BAZ=qux'],
+        }),
+      );
+      expect(newContainer.start).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when container does not exist', async () => {
+      mockContainer.inspect.mockRejectedValue({ statusCode: 404 });
+
+      await expect(service.updateContainer(containerId, { env: { FOO: 'bar' } })).rejects.toThrow(NotFoundException);
+      expect(mockContainer.stop).not.toHaveBeenCalled();
+      expect(mockContainer.remove).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when container removal fails with 404', async () => {
+      mockContainer.remove.mockRejectedValue({ statusCode: 404 });
+
+      await expect(service.updateContainer(containerId, { env: { FOO: 'bar' } })).rejects.toThrow(NotFoundException);
+    });
+
+    it('should merge new env variables with existing ones', async () => {
+      mockContainer.inspect.mockResolvedValue({
+        Id: containerId,
+        Name: '/test-container',
+        Image: 'test-image:latest',
+        Config: {
+          Image: 'test-image:latest',
+          Env: ['EXISTING=value', 'OTHER=other'],
+          ExposedPorts: {},
+          Labels: {},
+        },
+        HostConfig: {
+          AutoRemove: false,
+        },
+        NetworkSettings: {
+          Networks: {},
+        },
+        Mounts: [],
+      });
+
+      await service.updateContainer(containerId, {
+        env: { FOO: 'bar', EXISTING: 'newvalue' },
+      });
+
+      expect((mockDocker as any).createContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          Env: expect.arrayContaining(['EXISTING=newvalue', 'OTHER=other', 'FOO=bar']),
+        }),
+      );
+    });
+
+    it('should quote env values that contain whitespace', async () => {
+      await service.updateContainer(containerId, {
+        env: { FOO: 'hello world' },
+      });
+
+      expect((mockDocker as any).createContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          Env: ['FOO="hello world"'],
+        }),
+      );
+    });
+
+    it('should escape inner quotes and wrap in double quotes', async () => {
+      await service.updateContainer(containerId, {
+        env: { FOO: 'he said "hi"' },
+      });
+
+      expect((mockDocker as any).createContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          Env: ['FOO="he said \\"hi\\""'],
+        }),
+      );
+    });
+
+    it('should escape backslashes, newlines, carriage returns and tabs', async () => {
+      await service.updateContainer(containerId, {
+        env: { PATHS: 'C:\\tools\nline2\rline3\tend' },
+      });
+
+      expect((mockDocker as any).createContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          Env: ['PATHS=C:\\\\tools\\nline2\\rline3\\tend'],
+        }),
+      );
+    });
+
+    it('should set empty string when env value is undefined', async () => {
+      await service.updateContainer(containerId, {
+        env: { EMPTY: undefined },
+      });
+
+      expect((mockDocker as any).createContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          Env: ['EMPTY='],
+        }),
+      );
+    });
+
+    it('should handle empty env object', async () => {
+      const result = await service.updateContainer(containerId, {
+        env: {},
+      });
+
+      expect(result).toBe(newContainerId);
+      expect((mockDocker as any).createContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          Env: [],
+        }),
+      );
+      expect(newContainer.start).toHaveBeenCalled();
+    });
+
+    it('should handle undefined env', async () => {
+      const result = await service.updateContainer(containerId, {});
+
+      expect(result).toBe(newContainerId);
+      expect((mockDocker as any).createContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          Env: [],
+        }),
+      );
+      expect(newContainer.start).toHaveBeenCalled();
+    });
+
+    it('should preserve container configuration when recreating', async () => {
+      mockContainer.inspect.mockResolvedValue({
+        Id: containerId,
+        Name: '/test-container',
+        Image: 'test-image:latest',
+        Config: {
+          Image: 'test-image:latest',
+          Env: ['EXISTING=value'],
+          ExposedPorts: { '8080/tcp': {} },
+          Labels: { 'com.example.label': 'value' },
+        },
+        HostConfig: {
+          AutoRemove: false,
+          RestartPolicy: { Name: 'unless-stopped' },
+        },
+        NetworkSettings: {
+          Networks: {},
+        },
+        Mounts: [
+          {
+            Type: 'bind',
+            Source: '/host/path',
+            Destination: '/container/path',
+            RW: true,
+          },
+        ],
+      });
+
+      await service.updateContainer(containerId, {
+        env: { FOO: 'bar' },
+      });
+
+      expect((mockDocker as any).createContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'test-container',
+          Image: 'test-image:latest',
+          ExposedPorts: { '8080/tcp': {} },
+          Labels: { 'com.example.label': 'value' },
+          HostConfig: expect.objectContaining({
+            Binds: ['/host/path:/container/path'],
+            AutoRemove: false,
+          }),
+        }),
+      );
+    });
+
+    it('should reconnect container to networks', async () => {
+      const mockNetwork1 = {
+        connect: jest.fn().mockResolvedValue(undefined),
+      };
+      const mockNetwork2 = {
+        connect: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockDocker.getNetwork = jest.fn().mockReturnValueOnce(mockNetwork1).mockReturnValueOnce(mockNetwork2);
+
+      mockContainer.inspect.mockResolvedValue({
+        Id: containerId,
+        Name: '/test-container',
+        Image: 'test-image:latest',
+        Config: {
+          Image: 'test-image:latest',
+          Env: [],
+          ExposedPorts: {},
+          Labels: {},
+        },
+        HostConfig: {
+          AutoRemove: false,
+        },
+        NetworkSettings: {
+          Networks: {
+            network1: { NetworkID: 'net1' },
+            network2: { NetworkID: 'net2' },
+          },
+        },
+        Mounts: [],
+      });
+
+      await service.updateContainer(containerId, {
+        env: { FOO: 'bar' },
+      });
+
+      expect(mockDocker.getNetwork).toHaveBeenCalledWith('network1');
+      expect(mockDocker.getNetwork).toHaveBeenCalledWith('network2');
+      expect(mockNetwork1.connect).toHaveBeenCalledWith({ Container: newContainerId });
+      expect(mockNetwork2.connect).toHaveBeenCalledWith({ Container: newContainerId });
+    });
+
+    it('should handle network connection errors gracefully', async () => {
+      const mockNetwork = {
+        connect: jest.fn().mockRejectedValue(new Error('Network not found')),
+      };
+
+      mockDocker.getNetwork = jest.fn().mockReturnValue(mockNetwork);
+
+      mockContainer.inspect.mockResolvedValue({
+        Id: containerId,
+        Name: '/test-container',
+        Image: 'test-image:latest',
+        Config: {
+          Image: 'test-image:latest',
+          Env: [],
+          ExposedPorts: {},
+          Labels: {},
+        },
+        HostConfig: {
+          AutoRemove: false,
+        },
+        NetworkSettings: {
+          Networks: {
+            network1: { NetworkID: 'net1' },
+          },
+        },
+        Mounts: [],
+      });
+
+      // Should not throw, just log warning
+      const result = await service.updateContainer(containerId, {
+        env: { FOO: 'bar' },
+      });
+
+      expect(result).toBe(newContainerId);
+      expect(newContainer.start).toHaveBeenCalled();
+    });
+
+    it('should handle stop errors gracefully if container is already stopped', async () => {
+      mockContainer.stop.mockRejectedValue({ statusCode: 304 }); // Not Modified
+
+      const result = await service.updateContainer(containerId, {
+        env: { FOO: 'bar' },
+      });
+
+      expect(result).toBe(newContainerId);
+      expect(mockContainer.remove).toHaveBeenCalled();
+      expect((mockDocker as any).createContainer).toHaveBeenCalled();
+    });
+
+    it('should handle stop errors gracefully if container is not found', async () => {
+      mockContainer.stop.mockRejectedValue({ statusCode: 404 });
+
+      const result = await service.updateContainer(containerId, {
+        env: { FOO: 'bar' },
+      });
+
+      expect(result).toBe(newContainerId);
+      expect(mockContainer.remove).toHaveBeenCalled();
+    });
+
+    it('should propagate stop errors that are not 304 or 404', async () => {
+      const stopError = new Error('Stop failed');
+      mockContainer.stop.mockRejectedValue(stopError);
+
+      await expect(service.updateContainer(containerId, { env: { FOO: 'bar' } })).rejects.toThrow('Stop failed');
+    });
+
+    it('should handle createContainer errors', async () => {
+      const createError = new Error('Create failed');
+      (mockDocker as any).createContainer.mockRejectedValue(createError);
+
+      await expect(service.updateContainer(containerId, { env: { FOO: 'bar' } })).rejects.toThrow('Create failed');
+    });
+
+    it('should handle start errors', async () => {
+      const startError = new Error('Start failed');
+      newContainer.start.mockRejectedValue(startError);
+
+      await expect(service.updateContainer(containerId, { env: { FOO: 'bar' } })).rejects.toThrow('Start failed');
+    });
+
+    it('should call getContainer with correct containerId', async () => {
+      await service.updateContainer(containerId, { env: { FOO: 'bar' } });
+
+      expect(mockDocker.getContainer).toHaveBeenCalledWith(containerId);
     });
   });
 

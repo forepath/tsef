@@ -1,5 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import {
+  clearChatHistory,
   connectSocket,
   connectSocketFailure,
   connectSocketSuccess,
@@ -313,6 +314,12 @@ export const socketsReducer = createReducer(
   on(setAgent, (state, { agentId }) => ({
     ...state,
     selectedAgentId: agentId,
+  })),
+  // Clear Chat History
+  on(clearChatHistory, (state) => ({
+    ...state,
+    forwardedEvents: [],
+    messageFilterResults: [],
   })),
   // Remote Connection Disconnection (per clientId)
   on(remoteDisconnected, (state, { clientId }) => {

@@ -39,6 +39,8 @@ The library follows Domain-Driven Design (DDD) principles with clear separation 
 - **Services**:
   - `ClientsService` - Business logic orchestration for clients
   - `ClientAgentProxyService` - Proxies HTTP requests to remote agent-manager services
+  - `ClientAgentFileSystemProxyService` - Proxies file system operations to remote agent-manager services
+  - `ClientAgentEnvironmentVariablesProxyService` - Proxies environment variable operations to remote agent-manager services
   - `ClientAgentCredentialsService` - Manages stored agent credentials
   - `KeycloakTokenService` - Handles Keycloak OAuth2 Client Credentials flow with token caching
 - **DTOs**: Data transfer objects for API boundaries
@@ -63,6 +65,7 @@ All diagrams are available in the [`docs/`](./docs/) directory:
 
 - **[Overview Diagram](./docs/overview.mmd)** - High-level flowchart showing HTTP REST API for clients, proxied agent operations, and WebSocket event forwarding
 - **[HTTP Sequence Diagram](./docs/sequence-http.mmd)** - Detailed sequence diagram for all HTTP CRUD operations (client management and proxied agent operations)
+- **[HTTP Environment Variables Sequence Diagram](./docs/sequence-http-environment.mmd)** - Detailed sequence diagram for proxied environment variable operations
 - **[HTTP VCS Sequence Diagram](./docs/sequence-http-vcs.mmd)** - Detailed sequence diagram for proxied VCS (Git) operations
 - **[WebSocket Forwarding Diagram](./docs/sequence-ws-forward.mmd)** - Sequence diagram for WebSocket connection, client context setup, event forwarding, and auto-login
 - **[Lifecycle Diagram](./docs/lifecycle.mmd)** - End-to-end sequence diagram showing the complete lifecycle from client creation through proxied agent operations to WebSocket event forwarding
@@ -150,6 +153,17 @@ Base URL: `/api/clients`
 - `PUT /api/clients/:id/agents/:agentId/files/:path` - Write file content (proxied)
 - `DELETE /api/clients/:id/agents/:agentId/files/:path` - Delete file or directory (proxied)
 - `PATCH /api/clients/:id/agents/:agentId/files/:path` - Move file or directory (proxied)
+
+### Proxied Agent Environment Variables Operations
+
+- `GET /api/clients/:id/agents/:agentId/environment` - List environment variables (proxied, supports `limit` and `offset` query parameters)
+- `GET /api/clients/:id/agents/:agentId/environment/count` - Get count of environment variables (proxied)
+- `POST /api/clients/:id/agents/:agentId/environment` - Create environment variable (proxied)
+- `PUT /api/clients/:id/agents/:agentId/environment/:envVarId` - Update environment variable (proxied)
+- `DELETE /api/clients/:id/agents/:agentId/environment/:envVarId` - Delete environment variable (proxied)
+- `DELETE /api/clients/:id/agents/:agentId/environment` - Delete all environment variables (proxied)
+
+**Note**: Environment variable changes are automatically synchronized with the Docker container. When an environment variable is created, updated, or deleted, the agent's Docker container environment is automatically updated and the container is restarted to apply the changes.
 
 ### Proxied Agent VCS Operations
 

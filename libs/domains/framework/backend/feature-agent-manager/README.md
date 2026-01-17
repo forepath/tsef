@@ -31,12 +31,17 @@ Agents are entities that can be created, authenticated, and interacted with thro
 
 The library follows Domain-Driven Design (DDD) principles with clear separation of concerns:
 
-- **Entities**: `AgentEntity` - Domain model representing an agent
-- **Repositories**: `AgentsRepository` - Data access layer abstracting database operations
+- **Entities**:
+  - `AgentEntity` - Domain model representing an agent
+  - `AgentEnvironmentVariableEntity` - Domain model representing an agent environment variable
+- **Repositories**:
+  - `AgentsRepository` - Data access layer abstracting database operations
+  - `AgentEnvironmentVariablesRepository` - Data access layer for agent environment variables
 - **Services**:
   - `AgentsService` - Business logic orchestration
   - `PasswordService` - Password hashing and verification
-  - `DockerService` - Container log streaming and command execution
+  - `DockerService` - Container log streaming, command execution, and environment variable updates
+  - `AgentEnvironmentVariablesService` - Business logic for environment variable management with automatic Docker container synchronization
 - **Providers**: Plugin-based provider systems
   - **Agent Providers**: Plugin-based agent provider system
     - `AgentProvider` - Interface for agent implementations
@@ -54,7 +59,12 @@ The library follows Domain-Driven Design (DDD) principles with clear separation 
   - `UpdateAgentDto` - Input validation for updating agents (includes optional `agentType`)
   - `AgentResponseDto` - Safe API responses (excludes password hash, includes `agentType`)
   - `CreateAgentResponseDto` - Response when creating agent (includes auto-generated password)
-- **Controllers**: `AgentsController` - HTTP endpoints for agent management (protected by Keycloak)
+  - `CreateEnvironmentVariableDto` - Input validation for creating environment variables
+  - `UpdateEnvironmentVariableDto` - Input validation for updating environment variables
+  - `EnvironmentVariableResponseDto` - Safe API responses for environment variables
+- **Controllers**:
+  - `AgentsController` - HTTP endpoints for agent management (protected by Keycloak)
+  - `AgentsEnvironmentVariablesController` - HTTP endpoints for environment variable management (protected by Keycloak)
 - **Gateways**: `AgentsGateway` - WebSocket gateway for agent chat with database-backed authentication
 - **Modules**: `AgentsModule` - NestJS module wiring all dependencies
 
@@ -71,6 +81,7 @@ All diagrams are available in the [`docs/`](./docs/) directory:
 
 - **[Overview Diagram](./docs/overview.mmd)** - High-level flowchart showing when to use HTTP vs WebSocket protocols and their respective use cases
 - **[HTTP Sequence Diagram](./docs/sequence-http.mmd)** - Detailed sequence diagram for all HTTP CRUD operations (create, list, get, update, delete)
+- **[HTTP Environment Variables Sequence Diagram](./docs/sequence-http-environment.mmd)** - Detailed sequence diagram for environment variable operations (create, list, get, update, delete)
 - **[HTTP VCS Sequence Diagram](./docs/sequence-http-vcs.mmd)** - Detailed sequence diagram for all VCS (Git) operations (status, branches, diff, stage, commit, push, pull, etc.)
 - **[WebSocket Auth & Logs Diagram](./docs/sequence-ws-auth-logs.mmd)** - Sequence diagram for WebSocket connection, authentication flow, and container log streaming
 - **[WebSocket Chat Diagram](./docs/sequence-ws-chat.mmd)** - Sequence diagram for WebSocket chat message flow and disconnection handling
@@ -135,6 +146,17 @@ Base URL: `/api/agents`
 Base URL: `/api/config`
 
 - `GET /api/config` - Get configuration parameters including Git repository URL and available agent types with display names
+
+Base URL: `/api/agents/:agentId/environment`
+
+- `GET /api/agents/:agentId/environment` - List environment variables (supports `limit` and `offset` query parameters, default: limit=50, offset=0)
+- `GET /api/agents/:agentId/environment/count` - Get count of environment variables
+- `POST /api/agents/:agentId/environment` - Create environment variable (returns 201 Created)
+- `PUT /api/agents/:agentId/environment/:id` - Update environment variable
+- `DELETE /api/agents/:agentId/environment/:id` - Delete environment variable
+- `DELETE /api/agents/:agentId/environment` - Delete all environment variables
+
+**Note**: Environment variable changes are automatically synchronized with the Docker container. When an environment variable is created, updated, or deleted, the agent's Docker container environment is automatically updated and the container is restarted to apply the changes. This ensures that the container always has the latest environment variables configured.
 
 Base URL: `/api/agents/:agentId/vcs`
 
@@ -391,7 +413,7 @@ This library requires the following dependencies:
 The library uses TypeORM and requires a database connection to be configured in your application:
 
 1. Configure TypeORM connection in your application module
-2. Run database migrations to create the `agents` table
+2. Run database migrations to create the `agents` and `agent_environment_variables` tables
 3. Ensure the database supports UUID primary keys
 
 The `AgentEntity` includes:
@@ -403,6 +425,15 @@ The `AgentEntity` includes:
 - `containerId` (string, optional - Docker container ID for agent container)
 - `volumePath` (string, optional - Host path to agent volume where git repository is cloned)
 - `agentType` (string, default: 'cursor' - Type identifier for the agent provider plugin)
+- `createdAt` (timestamp)
+- `updatedAt` (timestamp)
+
+The `AgentEnvironmentVariableEntity` includes:
+
+- `id` (UUID, primary key)
+- `agentId` (UUID, foreign key to `agents.id`, CASCADE delete)
+- `variable` (string, required - Environment variable name)
+- `content` (string, optional - Environment variable content/value)
 - `createdAt` (timestamp)
 - `updatedAt` (timestamp)
 

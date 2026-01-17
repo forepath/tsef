@@ -457,6 +457,219 @@ paths:
           description: Invalid request
         '404':
           description: Client or agent not found
+  /clients/{id}/agents/{agentId}/environment:
+    get:
+      summary: List environment variables for an agent (proxied)
+      operationId: listClientAgentEnvironmentVariables
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum number of environment variables to return (default 50)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of environment variables to skip (default 0)
+      responses:
+        '200':
+          description: Array of environment variables
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnvironmentVariableResponseDto'
+        '404':
+          description: Client or agent not found
+    post:
+      summary: Create environment variable for an agent (proxied)
+      operationId: createClientAgentEnvironmentVariable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentVariableDto'
+      responses:
+        '201':
+          description: Created environment variable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentVariableResponseDto'
+        '400':
+          description: Invalid request
+        '404':
+          description: Client or agent not found
+    delete:
+      summary: Delete all environment variables for an agent (proxied)
+      operationId: deleteAllClientAgentEnvironmentVariables
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      responses:
+        '200':
+          description: Number of environment variables deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deletedCount]
+                properties:
+                  deletedCount:
+                    type: integer
+        '404':
+          description: Client or agent not found
+  /clients/{id}/agents/{agentId}/environment/count:
+    get:
+      summary: Get count of environment variables for an agent (proxied)
+      operationId: countClientAgentEnvironmentVariables
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      responses:
+        '200':
+          description: Count of environment variables
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [count]
+                properties:
+                  count:
+                    type: integer
+        '404':
+          description: Client or agent not found
+  /clients/{id}/agents/{agentId}/environment/{envVarId}:
+    put:
+      summary: Update environment variable for an agent (proxied)
+      operationId: updateClientAgentEnvironmentVariable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: envVarId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the environment variable to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEnvironmentVariableDto'
+      responses:
+        '200':
+          description: Updated environment variable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentVariableResponseDto'
+        '400':
+          description: Invalid request
+        '404':
+          description: Client, agent, or environment variable not found
+    delete:
+      summary: Delete environment variable for an agent (proxied)
+      operationId: deleteClientAgentEnvironmentVariable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: envVarId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the environment variable to delete
+      responses:
+        '204':
+          description: Environment variable deleted successfully
+        '404':
+          description: Client, agent, or environment variable not found
   /clients/{id}/agents/{agentId}/vcs/status:
     get:
       summary: Get git status (proxied)
@@ -2000,3 +2213,43 @@ components:
           type: string
           enum: [hetzner, digital-ocean]
           description: Provider type used for provisioning (e.g., 'hetzner', 'digital-ocean')
+    CreateEnvironmentVariableDto:
+      type: object
+      required: [variable, content]
+      properties:
+        variable:
+          type: string
+          description: Environment variable name
+        content:
+          type: string
+          description: Environment variable content
+    UpdateEnvironmentVariableDto:
+      type: object
+      required: [variable, content]
+      properties:
+        variable:
+          type: string
+          description: Environment variable name
+        content:
+          type: string
+          description: Environment variable content
+    EnvironmentVariableResponseDto:
+      type: object
+      required: [id, agentId, variable, content, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+          format: uuid
+        variable:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

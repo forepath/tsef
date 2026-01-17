@@ -29,6 +29,17 @@ flowchart TB
         FILES_USE --> FILES5["🗑️ Delete File/Dir (Proxied)<br/>DELETE /api/clients/:id/agents/:agentId/files/*path<br/>Returns: 204 No Content"]
     end
 
+    subgraph ENV["🌍 HTTP REST API - Proxied Environment Variables (/api/clients/:id/agents/:agentId/environment)"]
+        direction TB
+        ENV_USE["Use Case: Environment Variable Management via Client<br/>Proxy to Remote Agent-Manager<br/>Request-Response Pattern"]
+        ENV_USE --> ENV1["📋 List Environment Variables (Proxied)<br/>GET /api/clients/:id/agents/:agentId/environment?limit&offset<br/>Returns: Paginated Environment Variables"]
+        ENV_USE --> ENV2["🔢 Count Environment Variables (Proxied)<br/>GET /api/clients/:id/agents/:agentId/environment/count<br/>Returns: Count"]
+        ENV_USE --> ENV3["➕ Create Environment Variable (Proxied)<br/>POST /api/clients/:id/agents/:agentId/environment<br/>Returns: Created Environment Variable"]
+        ENV_USE --> ENV4["✏️ Update Environment Variable (Proxied)<br/>PUT /api/clients/:id/agents/:agentId/environment/:envVarId<br/>Returns: Updated Environment Variable"]
+        ENV_USE --> ENV5["🗑️ Delete Environment Variable (Proxied)<br/>DELETE /api/clients/:id/agents/:agentId/environment/:envVarId<br/>Returns: 204 No Content"]
+        ENV_USE --> ENV6["🗑️ Delete All Environment Variables (Proxied)<br/>DELETE /api/clients/:id/agents/:agentId/environment<br/>Returns: Deleted Count"]
+    end
+
     subgraph WS["🔶 WebSocket Gateway (namespace: /clients)"]
         direction TB
         WS_USE["Use Case: Real-time Event Forwarding<br/>Bidirectional Messages<br/>Persistent Connection"]
@@ -39,20 +50,24 @@ flowchart TB
     Start([Agent Controller Feature]) --> HTTP
     Start --> PROXY
     Start --> FILES
+    Start --> ENV
     Start --> WS
 
     HTTP -.->|"Stateless<br/>Request-Response"| HTTP_USE
     PROXY -.->|"Proxy to Remote<br/>Agent-Manager"| PROXY_USE
     FILES -.->|"Proxy to Remote<br/>Agent-Manager"| FILES_USE
+    ENV -.->|"Proxy to Remote<br/>Agent-Manager"| ENV_USE
     WS -.->|"Stateful<br/>Persistent Connection"| WS_USE
 
     style HTTP fill:#e6f0ff,stroke:#4a90e2,stroke-width:3px
     style PROXY fill:#e6f0ff,stroke:#4a90e2,stroke-width:3px
     style FILES fill:#e6ffe6,stroke:#4a9e2,stroke-width:3px
+    style ENV fill:#fff0e6,stroke:#ff6b42,stroke-width:3px
     style WS fill:#fff4e6,stroke:#ff8c42,stroke-width:3px
     style HTTP_USE fill:#d6e9ff,stroke:#4a90e2
     style PROXY_USE fill:#d6e9ff,stroke:#4a90e2
     style FILES_USE fill:#d6ffd6,stroke:#4a9e2
+    style ENV_USE fill:#ffe6d6,stroke:#ff6b42
     style WS_USE fill:#ffe6cc,stroke:#ff8c42
     style HTTP1 fill:#f0f7ff,stroke:#4a90e2
     style HTTP2 fill:#f0f7ff,stroke:#4a90e2
@@ -69,5 +84,11 @@ flowchart TB
     style FILES3 fill:#f0fff0,stroke:#4a9e2
     style FILES4 fill:#f0fff0,stroke:#4a9e2
     style FILES5 fill:#f0fff0,stroke:#4a9e2
+    style ENV1 fill:#fff5f0,stroke:#ff6b42
+    style ENV2 fill:#fff5f0,stroke:#ff6b42
+    style ENV3 fill:#fff5f0,stroke:#ff6b42
+    style ENV4 fill:#fff5f0,stroke:#ff6b42
+    style ENV5 fill:#fff5f0,stroke:#ff6b42
+    style ENV6 fill:#fff5f0,stroke:#ff6b42
     style WS1 fill:#fff9f0,stroke:#ff8c42
     style WS2 fill:#fff9f0,stroke:#ff8c42

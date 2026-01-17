@@ -74,3 +74,6 @@ export const remoteReconnectFailed = createAction(
 
 // Agent Actions
 export const setAgent = createAction('[Sockets] Set Agent', props<{ agentId: string | null }>());
+
+// Clear Chat History Actions
+export const clearChatHistory = createAction('[Sockets] Clear Chat History');
