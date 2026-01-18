@@ -359,6 +359,14 @@
                         <button
                           type="button"
                           class="btn btn-sm btn-outline-primary"
+                          (click)="onManageEnvironmentVariablesClick(agent); $event.stopPropagation()"
+                          title="Manage environment variables"
+                        >
+                          <i class="bi bi-sliders"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary"
                           (click)="onEditAgentClick(agent); $event.stopPropagation()"
                           [disabled]="(agentsUpdating$ | async) === true"
                           title="Edit environment"
@@ -1925,6 +1933,202 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Environment Variables Modal -->
+<div
+  class="modal fade"
+  id="environmentVariablesModal"
+  tabindex="-1"
+  aria-labelledby="environmentVariablesModalLabel"
+  aria-hidden="true"
+  #environmentVariablesModal
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="environmentVariablesModalLabel">Manage Environment Variables</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          (click)="onCloseEnvironmentVariablesModal()"
+          aria-label="Close"
+          [disabled]="(environmentVariablesCreating$ | async) === true"
+        ></button>
+      </div>
+      <div class="modal-body">
+        @if (environmentVariablesError$ | async; as error) {
+          <div class="alert alert-danger mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error }}
+          </div>
+        }
+        <!-- Add New Environment Variable Form -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h6 class="mb-0">Add New Environment Variable</h6>
+          </div>
+          <div class="card-body">
+            <form #addEnvVarForm="ngForm" (ngSubmit)="onSubmitCreateEnvironmentVariable()">
+              <div class="row g-3">
+                <div class="col-md-5">
+                  <label for="envVarName" class="form-label">Variable Name <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="envVarName"
+                    name="variable"
+                    [ngModel]="newEnvVar().variable"
+                    (ngModelChange)="updateEnvVarField('variable', $event)"
+                    required
+                    placeholder="VARIABLE_NAME"
+                    [disabled]="(environmentVariablesCreating$ | async) === true"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="envVarContent" class="form-label">Value <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="envVarContent"
+                    name="content"
+                    [ngModel]="newEnvVar().content"
+                    (ngModelChange)="updateEnvVarField('content', $event)"
+                    required
+                    placeholder="variable value"
+                    [disabled]="(environmentVariablesCreating$ | async) === true"
+                  />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                  <button
+                    type="submit"
+                    class="btn btn-primary w-100"
+                    [disabled]="!addEnvVarForm.valid || (environmentVariablesCreating$ | async) === true"
+                    title="Add environment variable"
+                  >
+                    @if (environmentVariablesCreating$ | async) {
+                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    } @else {
+                      <i class="bi bi-plus-lg"></i>
+                    }
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Environment Variables List -->
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Environment Variables</h6>
+            @if (environmentVariablesLoading$ | async) {
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            }
+          </div>
+          <div class="card-body">
+            @if (environmentVariablesLoading$ | async) {
+              <div class="d-flex justify-content-center align-items-center p-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading environment variables...</span>
+                </div>
+              </div>
+            } @else {
+              @if (environmentVariables$ | async; as envVars) {
+                @if (envVars.length === 0) {
+                  <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    <p class="mb-0">No environment variables configured</p>
+                  </div>
+                } @else {
+                  <div class="list-group list-group-flush">
+                    @for (envVar of envVars; track envVar.id) {
+                      <div class="list-group-item border-bottom">
+                        <div class="d-flex justify-content-between align-items-start">
+                          <div class="flex-grow-1 me-3">
+                            <div class="fw-semibold mb-1">{{ envVar.variable }}</div>
+                            @if (editingEnvVarId() === envVar.id) {
+                              <div class="input-group input-group-sm">
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  [value]="editingEnvVarValue()"
+                                  (input)="editingEnvVarValue.set($any($event.target).value)"
+                                  placeholder="Enter value"
+                                />
+                                <button
+                                  type="button"
+                                  class="btn btn-success"
+                                  (click)="onSaveEnvironmentVariable(envVar)"
+                                  title="Save"
+                                >
+                                  <i class="bi bi-check-lg"></i>
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn btn-secondary"
+                                  (click)="onCancelEditEnvironmentVariable()"
+                                  title="Cancel"
+                                >
+                                  <i class="bi bi-x-lg"></i>
+                                </button>
+                              </div>
+                            } @else {
+                              <div class="text-muted small font-monospace">{{ envVar.content }}</div>
+                            }
+                          </div>
+                          <div class="btn-group" role="group">
+                            @if (editingEnvVarId() !== envVar.id) {
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                (click)="onEditEnvironmentVariableClick(envVar)"
+                                title="Edit value"
+                              >
+                                <i class="bi bi-pencil"></i>
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                (click)="onDeleteEnvironmentVariable(envVar.id)"
+                                title="Delete"
+                              >
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Container Reset Hint -->
+        <div class="alert alert-warning mt-3">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Changing the environment variables will re-create the agent's container. Context may be lost.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+          (click)="onCloseEnvironmentVariablesModal()"
+          [disabled]="(environmentVariablesCreating$ | async) === true"
+        >
+          Close
+        </button>
+      </div>
     </div>
   </div>
 </div>

@@ -20,6 +20,17 @@ flowchart TB
         FILES_USE --> FILES6["📦 Move File/Dir<br/>PATCH /api/agents/:id/files/*path<br/>Returns: 204 No Content"]
     end
 
+    subgraph ENV["🔐 HTTP REST API - Environment Variables (/api/agents/:id/environment)"]
+        direction TB
+        ENV_USE["Use Case: Environment Variable Management<br/>CRUD Operations<br/>Container Environment Variables"]
+        ENV_USE --> ENV1["📋 List Variables<br/>GET /api/agents/:id/environment?limit&offset<br/>Returns: Paginated List"]
+        ENV_USE --> ENV2["🔢 Count Variables<br/>GET /api/agents/:id/environment/count<br/>Returns: Count"]
+        ENV_USE --> ENV3["➕ Create Variable<br/>POST /api/agents/:id/environment<br/>Returns: Created Variable"]
+        ENV_USE --> ENV4["✏️ Update Variable<br/>PUT /api/agents/:id/environment/:id<br/>Returns: Updated Variable"]
+        ENV_USE --> ENV5["🗑️ Delete Variable<br/>DELETE /api/agents/:id/environment/:id<br/>Returns: 204 No Content"]
+        ENV_USE --> ENV6["🗑️ Delete All Variables<br/>DELETE /api/agents/:id/environment<br/>Returns: Deleted Count"]
+    end
+
     subgraph WS["🔶 WebSocket Gateway (namespace: /agents)"]
         direction TB
         WS_USE["Use Case: Real-time Communication<br/>Bidirectional Messages<br/>Persistent Connection"]
@@ -29,17 +40,21 @@ flowchart TB
 
     Start([Agent Manager Feature]) --> HTTP
     Start --> FILES
+    Start --> ENV
     Start --> WS
 
     HTTP -.->|"Stateless<br/>Request-Response"| HTTP_USE
     FILES -.->|"Stateless<br/>Request-Response"| FILES_USE
+    ENV -.->|"Stateless<br/>Request-Response"| ENV_USE
     WS -.->|"Stateful<br/>Persistent Connection"| WS_USE
 
     style HTTP fill:#e6f0ff,stroke:#4a90e2,stroke-width:3px
     style FILES fill:#e6ffe6,stroke:#4a9e2,stroke-width:3px
+    style ENV fill:#ffe6f0,stroke:#e24a9e,stroke-width:3px
     style WS fill:#fff4e6,stroke:#ff8c42,stroke-width:3px
     style HTTP_USE fill:#d6e9ff,stroke:#4a90e2
     style FILES_USE fill:#d6ffd6,stroke:#4a9e2
+    style ENV_USE fill:#ffd6f0,stroke:#e24a9e
     style WS_USE fill:#ffe6cc,stroke:#ff8c42
     style HTTP1 fill:#f0f7ff,stroke:#4a90e2
     style HTTP2 fill:#f0f7ff,stroke:#4a90e2
@@ -51,5 +66,11 @@ flowchart TB
     style FILES3 fill:#f0fff0,stroke:#4a9e2
     style FILES4 fill:#f0fff0,stroke:#4a9e2
     style FILES5 fill:#f0fff0,stroke:#4a9e2
+    style ENV1 fill:#fff0f7,stroke:#e24a9e
+    style ENV2 fill:#fff0f7,stroke:#e24a9e
+    style ENV3 fill:#fff0f7,stroke:#e24a9e
+    style ENV4 fill:#fff0f7,stroke:#e24a9e
+    style ENV5 fill:#fff0f7,stroke:#e24a9e
+    style ENV6 fill:#fff0f7,stroke:#e24a9e
     style WS1 fill:#fff9f0,stroke:#ff8c42
     style WS2 fill:#fff9f0,stroke:#ff8c42

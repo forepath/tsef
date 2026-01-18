@@ -107,6 +107,166 @@ export class DockerService {
   }
 
   /**
+   * Update a Docker container's environment variables.
+   * Since Docker's update API doesn't support environment variables,
+   * this method recreates the container with updated environment variables.
+   * @param containerId - The ID of the container to update
+   * @param options - Options for updating the container
+   * @param options.env - New environment variables to set (will replace existing ones with the same keys)
+   * @returns The new container ID (since the container is recreated)
+   * @throws NotFoundException if container is not found
+   */
+  async updateContainer(
+    containerId: string,
+    options: {
+      env?: Record<string, string | undefined>;
+    },
+  ): Promise<string> {
+    const { env } = options;
+
+    // Map env object to KEY=VALUE strings as required by Docker API
+    // Escape special characters in the value to preserve intent (no quoting)
+    const escapeEnvValue = (val: string): string =>
+      val.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+
+    const maybeQuote = (val: string): string => {
+      // Quote if contains whitespace or quotes
+      if (/\s|"|'/u.test(val)) {
+        const inner = val.replace(/"/g, '\\"');
+        return `"${inner}"`;
+      }
+      return val;
+    };
+
+    try {
+      const container = this.docker.getContainer(containerId);
+      let inspectInfo: Docker.ContainerInspectInfo;
+
+      try {
+        inspectInfo = await container.inspect();
+      } catch (inspectError: unknown) {
+        const err = inspectError as { statusCode?: number };
+        if (err.statusCode === 404) {
+          throw new NotFoundException(`Container with ID '${containerId}' not found`);
+        }
+        throw inspectError;
+      }
+
+      // Get current environment variables
+      const currentEnvArray = inspectInfo.Config?.Env || [];
+      const currentEnvMap: Record<string, string> = {};
+      for (const envVar of currentEnvArray) {
+        const [key, ...valueParts] = envVar.split('=');
+        if (key) {
+          currentEnvMap[key] = valueParts.join('=');
+        }
+      }
+
+      // Merge new environment variables (new values override existing ones)
+      const mergedEnv: Record<string, string | undefined> = { ...currentEnvMap };
+      if (env) {
+        Object.assign(mergedEnv, env);
+      }
+
+      // Convert merged env to array format
+      const envArray = Object.entries(mergedEnv).map(([key, value]) => {
+        const raw = value == null ? '' : escapeEnvValue(String(value));
+        const quoted = maybeQuote(raw);
+        return `${key}=${quoted}`;
+      });
+
+      // Extract container configuration
+      const containerName = inspectInfo.Name.startsWith('/') ? inspectInfo.Name.slice(1) : inspectInfo.Name;
+      const image = inspectInfo.Config?.Image || inspectInfo.Image;
+      const hostConfig = inspectInfo.HostConfig || {};
+      const exposedPorts = inspectInfo.Config?.ExposedPorts || {};
+      const labels = inspectInfo.Config?.Labels || {};
+      const networkSettings = inspectInfo.NetworkSettings;
+      const mounts = inspectInfo.Mounts || [];
+
+      // Stop the container before removing it
+      try {
+        await container.stop();
+      } catch (stopError: unknown) {
+        const err = stopError as { statusCode?: number; message?: string };
+        // Ignore error if container is already stopped (304) or not found (404)
+        if (err.statusCode === 304 || err.statusCode === 404) {
+          // Container is already stopped or doesn't exist, continue with removal
+        } else {
+          // Propagate other errors
+          throw stopError;
+        }
+      }
+
+      // Remove the container
+      try {
+        await container.remove({ force: true });
+      } catch (removeError: unknown) {
+        const err = removeError as { statusCode?: number; message?: string };
+        if (err.statusCode === 404) {
+          throw new NotFoundException(`Container with ID '${containerId}' not found`);
+        }
+        throw removeError;
+      }
+
+      // Build volume binds from mounts
+      const binds = mounts
+        .map((mount) => {
+          if (mount.Type === 'bind' || mount.Type === 'volume') {
+            const readOnly = mount.RW === false ? ':ro' : '';
+            return `${mount.Source}:${mount.Destination}${readOnly}`;
+          }
+          return null;
+        })
+        .filter((bind): bind is string => bind !== null);
+
+      // Recreate container with updated environment variables
+      const newContainer = await this.docker.createContainer({
+        name: containerName,
+        Image: image,
+        Env: envArray,
+        ExposedPorts: Object.keys(exposedPorts).length ? exposedPorts : undefined,
+        HostConfig: {
+          ...hostConfig,
+          Binds: binds.length ? binds : undefined,
+          AutoRemove: hostConfig.AutoRemove ?? false,
+        },
+        Labels: Object.keys(labels).length ? labels : undefined,
+      });
+
+      // Reconnect to networks if the container was connected to any
+      const networks = networkSettings?.Networks;
+      if (networks) {
+        for (const networkName of Object.keys(networks)) {
+          try {
+            const network = this.docker.getNetwork(networkName);
+            await network.connect({ Container: newContainer.id });
+          } catch (networkError: unknown) {
+            // Log but don't fail if network connection fails (network might not exist)
+            this.logger.warn(
+              `Failed to connect container to network ${networkName}: ${(networkError as Error).message}`,
+            );
+          }
+        }
+      }
+
+      // Start the new container
+      await newContainer.start();
+
+      const newContainerId = newContainer.id as unknown as string;
+      this.logger.log(`Successfully updated container ${containerId} (recreated as ${newContainerId})`);
+      return newContainerId;
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      const err = error as { message?: string; stack?: string };
+      this.logger.error(`Error updating container: ${err.message}`, err.stack);
+      throw error;
+    }
+  }
+
+  /**
    * Delete a Docker container by ID.
    * Stops the container if it's running, then removes it.
    * @param containerId - The ID of the container to delete

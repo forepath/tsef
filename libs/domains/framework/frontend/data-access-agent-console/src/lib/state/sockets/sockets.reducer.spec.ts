@@ -1,4 +1,5 @@
 import {
+  clearChatHistory,
   connectSocket,
   connectSocketFailure,
   connectSocketSuccess,
@@ -590,6 +591,70 @@ describe('socketsReducer', () => {
       const newState = socketsReducer(state, setAgent({ agentId: null }));
 
       expect(newState.selectedAgentId).toBeNull();
+    });
+  });
+
+  describe('clearChatHistory', () => {
+    it('should clear forwardedEvents and messageFilterResults', () => {
+      const state: SocketsState = {
+        ...initialSocketsState,
+        forwardedEvents: [
+          {
+            event: 'chatMessage',
+            payload: mockForwardedPayload,
+            timestamp: Date.now(),
+          },
+        ],
+        messageFilterResults: [
+          {
+            direction: 'incoming',
+            status: 'allowed',
+            message: 'Test message',
+            appliedFilters: [],
+            timestamp: Date.now(),
+            receivedAt: Date.now(),
+          },
+        ],
+      };
+
+      const newState = socketsReducer(state, clearChatHistory());
+
+      expect(newState.forwardedEvents).toEqual([]);
+      expect(newState.messageFilterResults).toEqual([]);
+    });
+
+    it('should preserve other state properties', () => {
+      const state: SocketsState = {
+        ...initialSocketsState,
+        connected: true,
+        selectedClientId: 'client-1',
+        selectedAgentId: 'agent-1',
+        forwardedEvents: [
+          {
+            event: 'chatMessage',
+            payload: mockForwardedPayload,
+            timestamp: Date.now(),
+          },
+        ],
+        messageFilterResults: [
+          {
+            direction: 'incoming',
+            status: 'allowed',
+            message: 'Test message',
+            appliedFilters: [],
+            timestamp: Date.now(),
+            receivedAt: Date.now(),
+          },
+        ],
+      };
+
+      const newState = socketsReducer(state, clearChatHistory());
+
+      expect(newState.connected).toBe(true);
+      expect(newState.selectedClientId).toBe('client-1');
+      expect(newState.selectedAgentId).toBe('agent-1');
+      expect(newState.forwardedEvents).toEqual([]);
+      expect(newState.messageFilterResults).toEqual([]);
     });
   });
 
