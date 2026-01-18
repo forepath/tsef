@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.25.0](https://github.com/forepath/agenstra/compare/v1.24.1...v1.25.0) (2026-01-18)
+
+
+### Features
+
+* custom agent container environment ([#175](https://github.com/forepath/agenstra/issues/175)) ([e9cb5e8](https://github.com/forepath/agenstra/commit/e9cb5e8456b00a4f4dcde5b611712e392b36729c))
+
+
+### Code Refactoring
+
+* opencode ai agent communication ([#173](https://github.com/forepath/agenstra/issues/173)) ([4421089](https://github.com/forepath/agenstra/commit/442108985fd26398e7b1647743702a088babb1b3))
+
 ## [1.24.1](https://github.com/forepath/agenstra/compare/v1.24.0...v1.24.1) (2026-01-16)
 
 
