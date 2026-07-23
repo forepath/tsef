@@ -17,6 +17,11 @@ export class AgentResponseDto {
    * Capabilities of the agent's provider (mirrors config agentTypes capabilities).
    */
   capabilities?: AgentTypeCapabilities;
+  /** Present when browser-only Preview is enabled for this agent. */
+  browserPreview?: {
+    enabled: true;
+  };
+  /** Present only when full noVNC desktop access was enabled (published host port). */
   vnc?: {
     port: number;
     password: string;
