@@ -23,11 +23,12 @@ The `.agenstra/` context is a **single source of truth** for agent rules, comman
 ├── skills/                # Reusable skill docs (.skill.mdc)
 ├── agents/                # Primary agent configs (.agent.mdc)
 ├── subagents/             # Subagent configs (.subagent.mdc)
-├── mcp-definitions/       # MCP server definitions (JSON)
+├── mcp-definitions/       # MCP server definitions (JSON) → Cursor/OpenCode/Copilot MCP config
 └── overrides/             # Manual overrides (copied last, can overwrite generated content)
     ├── .cursor/           # Cursor-specific overrides
     ├── .opencode/         # OpenCode-specific overrides
-    ├── .github/           # GitHub Copilot-specific overrides
+    ├── .github/           # GitHub Copilot instruction overrides
+    ├── .vscode/           # GitHub Copilot MCP overrides (.vscode/mcp.json)
     ├── AGENTS.md          # Override OpenCode AGENTS.md
     └── opencode.json      # Override OpenCode config
 ```
@@ -44,7 +45,7 @@ Reusable slash-style commands with prompts and optional agent binding. Stored as
 
 ### [Skills](./skills.md)
 
-Domain-specific knowledge (patterns, best practices) as **MDC** (`.skill.mdc`) in `skills/`. Tools that support skills get them as separate files; others receive skills merged into rules or instructions.
+Domain-specific knowledge (patterns, best practices) as **MDC** (`.skill.mdc`) in `skills/`. Tools that support skills get them as separate skill folders (`SKILL.md`); legacy merge into instructions is unused for current targets.
 
 ### [Knowledge graph](./knowledge-graph.md)
 
@@ -52,11 +53,11 @@ Pre-computed monorepo map at `graph/graph.json` (projects, OpenAPI/AsyncAPI, doc
 
 ### [Agents](./agents.md)
 
-Primary agents and subagents defined as **MDC** (YAML frontmatter + body) in `agents/` (`.agent.mdc`) and `subagents/` (`.subagent.mdc`). Frontmatter includes id, name, description, mode, temperature, model, tools; body is the prompt/instructions. Transformed into Cursor agents (`.md`), OpenCode agents (`.md`), and GitHub Copilot instructions (`.github/instructions/agents.instructions.md` with both agents and subagents; Copilot has no native subagent config).
+Primary agents and subagents defined as **MDC** (YAML frontmatter + body) in `agents/` (`.agent.mdc`) and `subagents/` (`.subagent.mdc`). Frontmatter includes id, name, description, mode, temperature, model, tools; body is the prompt/instructions. Transformed into Cursor agents (`.md`), OpenCode agents (`.md`), and GitHub Copilot custom agents (`.github/agents/<id>.agent.md`).
 
 ### [MCP definitions](./mcp-definitions.md)
 
-Model Context Protocol server definitions (local command or remote URL) in `mcp-definitions/`. Transformed into Cursor `.cursor/mcp.json` (single `mcpServers` object) and OpenCode `opencode.json` (`mcp` object).
+MCP server definitions (local command or remote URL) in `mcp-definitions/`. Transformed into Cursor `.cursor/mcp.json`, OpenCode `opencode.json` (`mcp` object), and GitHub Copilot `.vscode/mcp.json` (`servers` object). Workspace servers: `ai`, `code`, `knowledge-graph`.
 
 ### Overrides
 
@@ -67,6 +68,7 @@ Manual overrides in `overrides/` are copied to the output directory **after** tr
 - `.agenstra/overrides/AGENTS.md` → copied to `outputDir/AGENTS.md` (OpenCode)
 - `.agenstra/overrides/opencode.json` → copied to `outputDir/opencode.json` (OpenCode)
 - `.agenstra/overrides/.github/...` → copied to `outputDir/.github/...` (GitHub Copilot)
+- `.agenstra/overrides/.vscode/...` → copied to `outputDir/.vscode/...` (GitHub Copilot MCP)
 
 Use overrides to:
 

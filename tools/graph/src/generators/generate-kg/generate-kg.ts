@@ -19,14 +19,17 @@ export async function generateKgGenerator(tree: Tree, options: GenerateKgGenerat
     workspaceRoot,
   });
 
-  writeKnowledgeGraphArtifacts({
+  const { jsonChanged } = writeKnowledgeGraphArtifacts({
     graph,
     outDir,
     skipHtml: options.skipHtml === true,
   });
 
   const jsonRel = path.relative(workspaceRoot, path.join(outDir, 'graph.json')).replace(/\\/g, '/');
-  tree.write(jsonRel, `${JSON.stringify(graph, null, 2)}\n`);
+  // Only touch the Nx tree when graph.json actually changed (ignore generatedAt-only churn).
+  if (jsonChanged) {
+    tree.write(jsonRel, fs.readFileSync(path.join(outDir, 'graph.json'), 'utf8'));
+  }
 
   if (options.skipHtml !== true) {
     const htmlPath = path.join(outDir, 'graph.html');

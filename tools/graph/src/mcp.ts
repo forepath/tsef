@@ -21,6 +21,7 @@ import {
   resolveGraphJsonPath,
   resolveWorkspaceRoot,
 } from './lib/query';
+import { registerMcpSkill } from './lib/mcp/register-skill';
 
 /**
  * MCP SDK 1.18 validates tool args with Zod v3 (`_parse`). The workspace often
@@ -110,6 +111,8 @@ const server = new McpServer({
   name: 'knowledge-graph',
   version: '1.0.0',
 });
+
+registerMcpSkill(server, 'graph');
 
 server.tool(
   'graph_r1',

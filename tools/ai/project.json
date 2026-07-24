@@ -49,6 +49,12 @@
         "jestConfig": "tools/ai/jest.config.ts"
       }
     },
+    "mcp": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/ai/mcp-run.cjs"
+      }
+    },
     "scripts-binary": {
       "executor": "nx:run-commands",
       "dependsOn": ["build"],

@@ -1,6 +1,9 @@
+import { isMcpOwnedSkill } from '../lib/mcp/agenstra-skill';
+import { collectMcpOwnedSkillStubs } from '../lib/mcp/mcp-skill-stub';
 import type { AgenstraAgent, AgenstraContext, AgenstraSubagent, ToolOutput } from '../types';
 
 import { BaseTransformer } from './base.transformer';
+import { skillToFolderSkillMd } from './skill-folder';
 
 const CURSOR_DIR = '.cursor';
 
@@ -49,22 +52,6 @@ function commandToMarkdown(id: string, cmd: Record<string, unknown>): string {
 }
 
 /**
- * Build Cursor skill as folder with SKILL.md and YAML frontmatter (name, description).
- * @see https://cursor.com/docs/context/skills - "Each skill is a folder containing a SKILL.md file"
- */
-function skillToCursorSkill(name: string, content: string): string {
-  const firstLine = content.trim().split('\n')[0]?.replace(/^#\s*/, '') || name;
-  const description = firstLine.length > 120 ? firstLine.slice(0, 117) + '...' : firstLine;
-
-  return `---
-name: ${name.replace(/\s+/g, '-').toLowerCase()}
-description: ${yamlEscape(description)}
----
-
-${content}`;
-}
-
-/**
  * Build Cursor agent/subagent as .md with YAML frontmatter (name, description) and prompt body.
  * Uses MDC body when present; otherwise description.
  * @see https://cursor.com/docs/context/subagents
@@ -84,7 +71,7 @@ ${bodyContent || 'Execute tasks according to the agent configuration.'}\n`;
 
 /**
  * Map .agenstra MCP definition to Cursor mcp.json entry.
- * Cursor uses a single .cursor/mcp.json with mcpServers: { "name": { command?, args?, env?, url?, headers? } }.
+ * Cursor uses a single .cursor/mcp.json with mcpServers: { "name": { command?, args?, env?, url?, headers?, enabled? } }.
  * @see https://cursor.com/docs/context/mcp
  */
 function toCursorMcpServerEntry(def: Record<string, unknown>): Record<string, unknown> {
@@ -113,11 +100,23 @@ function toCursorMcpServerEntry(def: Record<string, unknown>): Record<string, un
     if (def.headers != null && typeof def.headers === 'object') entry.headers = def.headers;
   }
 
+  if (typeof def.enabled === 'boolean') {
+    entry.enabled = def.enabled;
+  }
+
   return entry;
 }
 
 export class CursorTransformer extends BaseTransformer {
   readonly name = 'cursor' as const;
+
+  /**
+   * @param workspaceRoot Workspace root for resolving package MCP skills.
+   *   Pass `false` to skip dual-publish stubs (unit tests). Omit to resolve from cwd.
+   */
+  constructor(private readonly workspaceRoot?: string | false) {
+    super();
+  }
 
   canUseComponent(): boolean {
     return true;
@@ -139,7 +138,19 @@ export class CursorTransformer extends BaseTransformer {
     }
 
     for (const [name, entry] of Object.entries(context.skills)) {
-      out.set(`${CURSOR_DIR}/skills/${name}/SKILL.md`, skillToCursorSkill(name, entry.content));
+      // Full bodies for ai / code / graph live in tools/*/src/lib/mcp/SKILL.md (MCP).
+      // Thin Cursor stubs are dual-published below from that source of truth.
+      if (isMcpOwnedSkill(name)) continue;
+
+      out.set(`${CURSOR_DIR}/skills/${name}/SKILL.md`, skillToFolderSkillMd(name, entry));
+    }
+
+    if (this.workspaceRoot !== false) {
+      const stubRoot = this.workspaceRoot === undefined ? undefined : this.workspaceRoot;
+
+      for (const [relPath, content] of collectMcpOwnedSkillStubs('cursor', stubRoot)) {
+        out.set(relPath, content);
+      }
     }
 
     // Primary agents → .cursor/agents/*.md, subagents → .cursor/agents/*.md (both as markdown with frontmatter)

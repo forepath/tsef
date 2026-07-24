@@ -1,0 +1,9 @@
+{
+  "id": "ai",
+  "name": "AI",
+  "description": "Validate and transform .agenstra agent context (ai_validate, ai_read_context, ai_transform)",
+  "type": "local",
+  "command": ["node", "${workspaceFolder}/tools/ai/mcp-run.cjs"],
+  "environment": {},
+  "enabled": true
+}

@@ -13,6 +13,7 @@ import type { ToolName } from '../types';
  * - `.agenstra/overrides/AGENTS.md` → `outputDir/AGENTS.md`
  * - `.agenstra/overrides/opencode.json` → `outputDir/opencode.json`
  * - `.agenstra/overrides/.github/...` → `outputDir/.github/...`
+ * - `.agenstra/overrides/.vscode/...` → `outputDir/.vscode/...` (Copilot MCP via VS Code)
  *
  * Both the transform (CLI/executor) and the generator write directly to outputDir with these paths.
  *
@@ -32,7 +33,7 @@ export function copyOverrides(agenstraDir: string, toolName: ToolName, outputDir
   const overridePaths: Record<ToolName, string[]> = {
     cursor: ['.cursor'],
     opencode: ['.opencode', 'AGENTS.md', 'opencode.json'],
-    'github-copilot': ['.github'],
+    'github-copilot': ['.github', '.vscode'],
   };
   const pathsToCopy = overridePaths[toolName] || [];
 

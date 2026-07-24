@@ -47,6 +47,8 @@ export {
 } from './lib/schema';
 
 export { buildKnowledgeGraph, writeKnowledgeGraphArtifacts } from './lib/build-knowledge-graph';
+export { knowledgeGraphPayloadEquals, writeGraphJsonAtomic } from './lib/write-graph';
+export type { WriteGraphJsonResult } from './lib/write-graph';
 export { buildClusterSlice, inferDomainFromPath } from './lib/build-clusters';
 export { fromProjectGraph } from './lib/from-project-graph';
 export { discoverFiles, isNgrxStateSliceDir, isSensitivePath } from './lib/discover-files';

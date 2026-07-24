@@ -10,7 +10,7 @@ This directory (`.agenstra/`) is the single source of truth for AI coding assist
 - **skills/** – Reusable skill documentation (`.skill.mdc`)
 - **agents/** – Primary agent configs (`.agent.mdc`: YAML frontmatter + body)
 - **subagents/** – Subagent configs (`.subagent.mdc`: YAML frontmatter + body)
-- **mcp-definitions/** – MCP (Model Context Protocol) server definitions (JSON)
+- **mcp-definitions/** – MCP server definitions (JSON); transformer emits Cursor/OpenCode/Copilot MCP config
 - **overrides/** – Manual overrides (copied last, can overwrite generated content)
 
 ## Usage

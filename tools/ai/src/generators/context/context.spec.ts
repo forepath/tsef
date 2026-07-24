@@ -111,6 +111,7 @@ describe('context generator', () => {
     expect(tree.exists(path.join(relativeBase, 'generated/.cursor/mcp.json'))).toBe(true);
     expect(tree.exists(path.join(relativeBase, 'generated/AGENTS.md'))).toBe(true);
     expect(tree.exists(path.join(relativeBase, 'generated/.github/copilot-instructions.md'))).toBe(true);
+    expect(tree.exists(path.join(relativeBase, 'generated/.vscode/mcp.json'))).toBe(true);
 
     fs.rmSync(base, { recursive: true, force: true });
   });

@@ -26,13 +26,17 @@ async function main(): Promise<void> {
     projectGraph,
     workspaceRoot,
   });
-  const { jsonPath, htmlPath } = writeKnowledgeGraphArtifacts({
+  const { jsonPath, htmlPath, jsonChanged } = writeKnowledgeGraphArtifacts({
     graph,
     outDir,
     skipHtml,
   });
 
-  console.log(`[forepath/graph] Wrote ${jsonPath}`);
+  if (jsonChanged) {
+    console.log(`[forepath/graph] Wrote ${jsonPath}`);
+  } else {
+    console.log(`[forepath/graph] Unchanged ${jsonPath} (skipped write; generatedAt-only)`);
+  }
   if (htmlPath) {
     console.log(`[forepath/graph] Wrote ${htmlPath}`);
   }

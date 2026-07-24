@@ -1,0 +1,9 @@
+{
+  "id": "code",
+  "name": "Code",
+  "description": "List schemas and run @forepath/code generators (code_list_generators, code_generator_schema, code_generate)",
+  "type": "local",
+  "command": ["node", "${workspaceFolder}/tools/code/mcp-run.cjs"],
+  "environment": {},
+  "enabled": true
+}

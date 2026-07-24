@@ -1,5 +1,4 @@
 ---
-id: graph-kg
 name: Knowledge Graph Skill
 description: >
   Use when you need structural understanding of this Nx monorepo.
@@ -19,6 +18,7 @@ Prefer the **knowledge-graph MCP** (or `nx run graph:query`) over loading `graph
 4. **Stale tree** — if the working tree changed since the last commit and the task depends on structure, run `nx run graph:generate-kg` first. MCP launcher builds `dist` on demand if missing; rebuild explicitly after graph tool source changes (`nx run graph:build`).
 5. **Missing edges are normal** — fall back to source when `implements` / `documents` are absent; do not invent links.
 6. **Declared vs mentions** — `depends_on` / `graph_r1` = build & boundary blast radius. For textual/copy-paste consumers, run `graph_mentions` after R1 (soft references).
+7. **Client stubs** — `.cursor/skills/graph/SKILL.md` and `.opencode/skills/graph/SKILL.md` are thin discovery stubs only; full recipes live here and on the MCP prompt `graph` / resource `skill://graph`.
 
 ## MCP tools (preferred)
 
@@ -45,7 +45,7 @@ nx run graph:query -- mentions <project>
 
 ## Generating / viewing
 
-Pre-commit regenerates and stages `graph/graph.json` + `graph/graph.html` via `nx run graph:generate-kg`.
+Pre-commit regenerates and stages `graph/graph.json` + `graph/graph.html` via `nx run graph:generate-kg`. `graph.json` is left untouched when only `generatedAt` would change (Git stays clean).
 
 ```bash
 nx run graph:generate-kg          # refresh artifacts
