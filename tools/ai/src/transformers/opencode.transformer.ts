@@ -1,6 +1,9 @@
+import { isMcpOwnedSkill } from '../lib/mcp/agenstra-skill';
+import { collectMcpOwnedSkillStubs } from '../lib/mcp/mcp-skill-stub';
 import type { AgenstraAgent, AgenstraContext, AgenstraSubagent, ToolOutput } from '../types';
 
 import { BaseTransformer } from './base.transformer';
+import { skillToFolderSkillMd } from './skill-folder';
 
 const OPENCODE_DIR = '.opencode';
 
@@ -69,6 +72,14 @@ function agentToOpenCodeMd(id: string, config: AgenstraAgent | AgenstraSubagent)
 export class OpenCodeTransformer extends BaseTransformer {
   readonly name = 'opencode' as const;
 
+  /**
+   * @param workspaceRoot Workspace root for resolving package MCP skills.
+   *   Pass `false` to skip dual-publish stubs (unit tests). Omit to resolve from cwd.
+   */
+  constructor(private readonly workspaceRoot?: string | false) {
+    super();
+  }
+
   canUseComponent(): boolean {
     return true;
   }
@@ -82,6 +93,22 @@ export class OpenCodeTransformer extends BaseTransformer {
 
     for (const [id, cmd] of Object.entries(context.commands)) {
       out.set(`${OPENCODE_DIR}/commands/${id}.md`, commandToMarkdown(id, cmd));
+    }
+
+    // Same skill folder layout as Cursor: `.opencode/skills/<stem>/SKILL.md`
+    // @see https://opencode.ai/docs/skills/
+    for (const [name, entry] of Object.entries(context.skills)) {
+      if (isMcpOwnedSkill(name)) continue;
+
+      out.set(`${OPENCODE_DIR}/skills/${name}/SKILL.md`, skillToFolderSkillMd(name, entry));
+    }
+
+    if (this.workspaceRoot !== false) {
+      const stubRoot = this.workspaceRoot === undefined ? undefined : this.workspaceRoot;
+
+      for (const [relPath, content] of collectMcpOwnedSkillStubs('opencode', stubRoot)) {
+        out.set(relPath, content);
+      }
     }
 
     const allAgents = { ...context.agents, ...context.subagents };

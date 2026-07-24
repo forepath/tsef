@@ -44,6 +44,12 @@
       "options": {
         "jestConfig": "tools/code/jest.config.ts"
       }
+    },
+    "mcp": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/code/mcp-run.cjs"
+      }
     }
   }
 }

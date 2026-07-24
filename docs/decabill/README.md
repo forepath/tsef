@@ -53,6 +53,10 @@ Compliance-oriented transparency, accepted-risk register, vulnerability reportin
 
 Billing Manager HTTP OpenAPI and WebSocket AsyncAPI specifications.
 
+### [AI Agents](./ai-agents/README.md)
+
+AI coding assistant guides for Decabill: workspace `.agenstra` context (rules, commands, skills, agents, MCP, agentctx, knowledge graph) plus Decabill project map and graph recipes.
+
 ### [Troubleshooting](./troubleshooting/README.md)
 
 - [Common Issues](./troubleshooting/common-issues.md)

@@ -74,6 +74,12 @@ repomix-output.xml
 AGENTS.md
 !.agenstra/overrides/AGENTS.md
 opencode.json
+.vscode/mcp.json
+.github/agents/
+!.agenstra/overrides/.github/agents/
+.github/skills/
+!.agenstra/overrides/.github/skills/
+.github/.gitkeep
 
 # Environment variables
 *.env

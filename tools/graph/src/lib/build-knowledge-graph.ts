@@ -325,12 +325,13 @@ export interface WriteKnowledgeGraphArtifactsOptions {
 export function writeKnowledgeGraphArtifacts(options: WriteKnowledgeGraphArtifactsOptions): {
   jsonPath: string;
   htmlPath?: string;
+  jsonChanged: boolean;
 } {
   const outDir = path.resolve(options.outDir);
-  const jsonPath = writeGraphJsonAtomic(outDir, options.graph);
+  const { path: jsonPath, changed: jsonChanged } = writeGraphJsonAtomic(outDir, options.graph);
   let htmlPath: string | undefined;
   if (!options.skipHtml) {
     htmlPath = writeGraphHtml(outDir);
   }
-  return { jsonPath, htmlPath };
+  return { jsonPath, htmlPath, jsonChanged };
 }

@@ -109,7 +109,7 @@ function copyOverridesToTree(tree: Tree, agenstraDir: string, toolName: ToolName
   const overridePaths: Record<ToolName, string[]> = {
     cursor: ['.cursor'],
     opencode: ['.opencode', 'AGENTS.md', 'opencode.json'],
-    'github-copilot': ['.github'],
+    'github-copilot': ['.github', '.vscode'],
   };
   const pathsToCopy = overridePaths[toolName] || [];
 

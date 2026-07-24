@@ -9,8 +9,8 @@ Use this skill when adding new applications, domain libraries, domains, MCP serv
 
 ## Guardrails (non-negotiable)
 
-- **Generators first:** Use `@forepath/code` and `@forepath/ai` generators. Do **not** hand-create `project.json`, `apps/` trees, or `libs/domains/` layout when a generator exists
-- **Schema is source of truth:** Read `tools/code/src/generators/<name>/schema.json` (or `tools/ai/src/generators/<name>/schema.json`) before choosing flags. Do not guess option names from memory
+- **Generators first:** Use `@forepath/code` and `@forepath/ai` generators. Do **not** hand-create `project.json`, `apps/` trees, or `libs/domains/` layout when a generator exists. Prefer the **code** / **ai** skills and their MCP tools (`code_*`, `ai_*`) when those servers are enabled; otherwise use `nx generate`
+- **Schema is source of truth:** Read `tools/code/src/generators/<name>/schema.json` (or `tools/ai/src/generators/<name>/schema.json`) — or call `code_generator_schema` — before choosing flags. Do not guess option names from memory
 - **Domain before apps:** If the target domain folder does not exist under `apps/<domain>/` or `libs/domains/<domain>/`, run `@forepath/code:domain` first
 - **Respect boundaries:** Generators set Nx tags (`domain:*`, `scope:*`, `type:*`) and update `.eslintrc.json` / `tsconfig.base.json`. Do not bypass tags to wire forbidden imports
 - **Capture output once:** When running generators from the shell, follow **`nx-cli.mdc`** — persist logs under `tmp/nx-agent/` and read buffers instead of re-running to inspect output
@@ -20,8 +20,8 @@ Use this skill when adding new applications, domain libraries, domains, MCP serv
 
 | Package | Role | Invoke as |
 |---------|------|-----------|
-| `@forepath/code` | Apps, domains, domain libraries, MCP, Keycloak themes, Electron natives, repo init | `nx generate @forepath/code:<generator>` |
-| `@forepath/ai` | Validate/transform `.agenstra/` agent context | `nx generate @forepath/ai:context` or `nx run <project>:agenstra-transform` |
+| `@forepath/code` | Apps, domains, domain libraries, MCP, Keycloak themes, Electron natives, repo init | **code** MCP skill (`tools/code/src/lib/mcp/SKILL.md`) / `code_*` tools, or `nx generate @forepath/code:<generator>` |
+| `@forepath/ai` | Validate/transform `.agenstra/` agent context | **ai** MCP skill (`tools/ai/src/lib/mcp/SKILL.md`) / `ai_*` tools, or `agentctx` / `@forepath/ai:context` |
 
 Reference READMEs: `tools/code/README.md`, `tools/ai/README.md`.
 

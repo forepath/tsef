@@ -47,6 +47,8 @@ export {
 } from './lib/schema';
 
 export { buildKnowledgeGraph, writeKnowledgeGraphArtifacts } from './lib/build-knowledge-graph';
+export { knowledgeGraphPayloadEquals, writeGraphJsonAtomic } from './lib/write-graph';
+export type { WriteGraphJsonResult } from './lib/write-graph';
 export { buildClusterSlice, inferDomainFromPath } from './lib/build-clusters';
 export { fromProjectGraph } from './lib/from-project-graph';
 export { discoverFiles, isNgrxStateSliceDir, isSensitivePath } from './lib/discover-files';
@@ -104,3 +106,27 @@ export {
   resolveToolIdentities,
 } from './lib/link-tool-usage';
 export { linkDocuments } from './lib/link-documents';
+export {
+  KnowledgeGraphIndex,
+  collectImpactPaths,
+  computeImpact,
+  findMentions,
+  recipeR1,
+  recipeR2,
+  recipeR3,
+  recipeR5,
+  resolveGraphJsonPath,
+  resolveWorkspaceRoot,
+} from './lib/query';
+export type {
+  CollectImpactPathsOptions,
+  ImpactResult,
+  MentionsOptions,
+  MentionsResult,
+  NodeSummary,
+  RecipeR1Result,
+  RecipeR2Result,
+  RecipeR3Query,
+  RecipeR3Result,
+  RecipeR5Result,
+} from './lib/query';

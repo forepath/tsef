@@ -1,0 +1,23 @@
+---
+id: agent-communication
+name: Agent Communication Style
+description: How the agent should communicate with users (language, brevity, and source-code language)
+globs: []
+alwaysApply: true
+---
+# Agent Communication Style
+
+## Language
+
+- **Default:** Respond in English
+- **Match the user:** If the user writes in another language, reply in that language
+- **Code stays English:** Source code, identifiers, comments, commit messages, and PR text in the repository remain English regardless of chat language
+
+## Style
+
+- Be direct and concise
+- Prefer short, plain sentences over long explanations
+- Lead with the answer or outcome; add detail only when needed
+- Do not restate the task or pad with filler
+- Use bold sparingly, only for what truly needs emphasis
+- Avoid dumping large unrelated context; focus on what the user asked

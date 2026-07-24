@@ -1,0 +1,9 @@
+{
+  "id": "knowledge-graph",
+  "name": "Knowledge Graph",
+  "description": "Query monorepo knowledge graph recipes (graph_r1, graph_docs, graph_endpoint, graph_search, graph_impact, graph_mentions)",
+  "type": "local",
+  "command": ["node", "${workspaceFolder}/tools/graph/mcp-run.cjs"],
+  "environment": {},
+  "enabled": true
+}

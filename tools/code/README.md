@@ -109,11 +109,24 @@ Initializes the repository for use with AI agents (e.g. adds or configures agent
 nx generate @forepath/code:init
 ```
 
+## MCP server
+
+Local stdio MCP for agents (no CI job). Launch via `nx run code:mcp` or `node tools/code/mcp-run.cjs`.
+
+| Tool                    | Purpose                                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| `code_list_generators`  | Names + descriptions                                                                            |
+| `code_generator_schema` | JSON schema for one generator                                                                   |
+| `code_generate`         | Run `nx generate @forepath/code:<name>` (`confirm=true` required to mutate; `dryRun` supported) |
+
+Registered in `.agenstra/mcp-definitions/code.mcp.json`. Prefer MCP when available; otherwise use `nx generate` as below. Skill: `tools/code/src/lib/mcp/SKILL.md` (MCP prompt/resource).
+
 ## Building and testing
 
 - `nx build code` – build the library
 - `nx test code` – run unit tests
+- `nx run code:mcp` – start the MCP server (builds on demand if dist is missing)
 
 ## Exports
 
-This package exposes **Nx generators only**; there is no programmatic API. Use `nx generate @forepath/code:...` as shown above.
+Generators remain the primary surface (`nx generate @forepath/code:...`). The package also exports MCP helpers: `listGenerators`, `getGeneratorSchema`, `runGenerate`.
