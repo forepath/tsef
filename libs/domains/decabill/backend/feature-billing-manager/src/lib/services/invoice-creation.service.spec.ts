@@ -40,6 +40,8 @@ describe('InvoiceCreationService', () => {
       subscriptionChargePeriodService?: SubscriptionChargePeriodService;
       taxCalculationService?: any;
       invoiceTaxContextService?: any;
+      subscriptionAddonsRepository?: any;
+      billingScheduleService?: any;
     } = {},
   ) {
     const invoicesRepository =
@@ -83,6 +85,11 @@ describe('InvoiceCreationService', () => {
       deps.subscriptionChargePeriodService ?? createChargePeriodService(invoicesRepository, itemsRepository),
       taxCalculationService,
       invoiceTaxContextService,
+      deps.subscriptionAddonsRepository ??
+        ({
+          findBillableBySubscriptionId: jest.fn().mockResolvedValue([]),
+        } as any),
+      deps.billingScheduleService ?? ({ calculateSchedule: jest.fn() } as any),
     );
   }
 

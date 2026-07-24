@@ -35,7 +35,11 @@ import {
 } from '../utils/server-type-billing.utils';
 import { getProvisioningCredentials, normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
 import { generateSshKeyPair } from '../utils/ssh-key.utils';
+import { assertAddonConfigsMatchSelection } from '../utils/addon-config.utils';
+import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
 
+import { AddonService } from './addon.service';
+import { AddonLifecycleService } from './addon-lifecycle.service';
 import { AvailabilityService } from './availability.service';
 import { BackorderService } from './backorder.service';
 import { BillingScheduleService } from './billing-schedule.service';
@@ -56,6 +60,7 @@ import { BillingNotificationPublisher } from '../notifications/billing-notificat
 import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { CustomerTrustScoreService } from '../trust-score/customer-trust-score.service';
 import { SubscriptionPeriodChargeService } from './subscription-period-charge.service';
+import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
 
 @Injectable()
 export class SubscriptionService {
@@ -75,6 +80,8 @@ export class SubscriptionService {
     private readonly cloudflareDnsService: CloudflareDnsService,
     private readonly customerProfilesService: CustomerProfilesService,
     private readonly cloudInitConfigService: CloudInitConfigService,
+    private readonly addonService: AddonService,
+    private readonly addonLifecycleService: AddonLifecycleService,
     private readonly providerServerTypesService: ProviderServerTypesService,
     private readonly pricingService: PricingService,
     private readonly taxCalculationService: TaxCalculationService,
@@ -96,6 +103,8 @@ export class SubscriptionService {
     autoBackorder = false,
     promotionCode?: string,
     promotionBenefitStartsAt?: string,
+    addonIds?: string[],
+    addonConfigs?: Record<string, Record<string, string>>,
   ) {
     const profile = await this.customerProfilesService.getByUserId(userId);
 
@@ -107,6 +116,15 @@ export class SubscriptionService {
 
     const plan = await this.servicePlansRepository.findByIdOrThrow(planId);
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
+    const selectedAddonIds = [...new Set((addonIds ?? []).filter(Boolean))];
+
+    assertAddonConfigsMatchSelection(selectedAddonIds, addonConfigs);
+
+    const selectedAddons = await this.addonService.assertAddonIdsForOrder(
+      plan.serviceTypeId,
+      parsePlanAllowedAddonIds(plan.providerConfigDefaults),
+      selectedAddonIds,
+    );
     const allowCustomerLocationSelection = plan.allowCustomerLocationSelection === true;
     const allowCustomerServerTypeSelection = plan.allowCustomerServerTypeSelection === true;
     let sanitizedRequested = allowCustomerLocationSelection
@@ -252,6 +270,13 @@ export class SubscriptionService {
       configSnapshot: effectiveConfig,
     });
 
+    await this.addonLifecycleService.createPendingSubscriptionAddons({
+      subscriptionId: subscription.id,
+      addons: selectedAddons,
+      plan,
+      addonConfigs,
+    });
+
     if (promotionCode?.trim()) {
       try {
         await this.promotionRedemptionService.redeem(
@@ -281,9 +306,19 @@ export class SubscriptionService {
       );
     }
 
-    this.billingNotificationPublisher.publishSubscription('subscription.created', created, plan);
+    const addonSummaries = selectedAddons.map((addon) => ({
+      id: addon.id,
+      key: addon.key,
+      name: addon.name,
+      periodPrice: convertAddonPriceToPlanPeriod(addon, plan),
+    }));
+
+    this.billingNotificationPublisher.publishSubscription('subscription.created', created, plan, {
+      addons: addonSummaries,
+    });
     await this.billingEmailPublisher.publishSubscriptionCreated(created, plan.name, {
       billInAdvance: plan.billInAdvance === true,
+      addons: addonSummaries.map((addon) => ({ name: addon.name, periodPrice: addon.periodPrice })),
     });
     this.customerTrustScoreService.triggerRecomputeForUser(created.userId);
 
@@ -363,7 +398,7 @@ export class SubscriptionService {
       await this.subscriptionItemsRepository.updateSshPrivateKey(itemId, privateKey);
       effectiveConfig.sshPublicKey = publicKey;
       const baseDomain = process.env.DNS_BASE_DOMAIN ?? 'spirde.com';
-      const userData = buildProvisioningUserData({
+      let userData = buildProvisioningUserData({
         service,
         effectiveConfig,
         hostname,
@@ -371,6 +406,12 @@ export class SubscriptionService {
         customTemplate,
         resolvedCustomEnv,
       });
+
+      const subscriptionAddons = await this.addonLifecycleService.listForSubscription(subscription.id);
+      const scripts = this.addonLifecycleService.collectInterpolatedCloudInitScripts(subscriptionAddons);
+
+      userData = this.addonLifecycleService.appendScriptsToUserData(userData, scripts);
+
       const provisioned = await this.provisioningService.provision(
         provider,
         {
@@ -404,6 +445,18 @@ export class SubscriptionService {
               `DNS record creation failed for ${hostname}, server provisioned with IP ${publicIp}: ${(dnsError as Error).message}`,
             );
           }
+        }
+
+        const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);
+        const refreshedItem = await this.subscriptionItemsRepository.findByIdWithRelations(itemId);
+
+        if (refreshedItem) {
+          await this.addonLifecycleService.activateAfterProvisioning({
+            subscription,
+            plan,
+            item: refreshedItem,
+            provider,
+          });
         }
       }
 

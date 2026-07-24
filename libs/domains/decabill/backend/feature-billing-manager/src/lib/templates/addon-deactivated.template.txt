@@ -1,0 +1,5 @@
+Dear {{recipientName}},
+
+The addon "{{addonName}}" has been deactivated on your subscription "{{planName}}"{{#if subscriptionNumber}} ({{subscriptionNumber}}){{/if}}.
+
+You can review your subscription from your billing account.

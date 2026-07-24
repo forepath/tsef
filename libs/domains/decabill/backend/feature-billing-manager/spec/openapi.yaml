@@ -798,6 +798,132 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /addons:
+    get:
+      summary: List addons (admin only)
+      operationId: listAddons
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Addons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddonResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create addon (admin only)
+      operationId: createAddon
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAddonDto'
+      responses:
+        '201':
+          description: Addon created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddonResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /addons/{id}:
+    get:
+      summary: Get addon (admin only)
+      operationId: getAddon
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Addon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddonResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Update addon (admin only)
+      operationId: updateAddon
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAddonDto'
+      responses:
+        '200':
+          description: Addon updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddonResponse'
+    delete:
+      summary: Delete addon (admin only)
+      operationId: deleteAddon
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Addon deleted
+  /service-plans/{id}/addons:
+    get:
+      summary: List orderable addons for a plan
+      operationId: listServicePlanAddons
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Plan addon options (empty when provider does not support addons)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlanAddonOption'
   /availability/check:
     post:
       summary: Check availability
@@ -4325,6 +4451,11 @@ components:
           description: Platform environment variables that can be overridden per service type (e.g. HETZNER_API_TOKEN).
           items:
             $ref: '#/components/schemas/ProviderEnvDefaultField'
+        supportsAddons:
+          type: boolean
+          description: |
+            When true, plans for this provider may offer customer-selectable addons.
+            Omitted or false means the provider lacks required provision/teardown or cloud-init append hooks (fail closed).
     ProviderEnvDefaultField:
       type: object
       required: [envKey, label, sensitive, type]
@@ -4883,6 +5014,16 @@ components:
         planId: { type: string, format: uuid }
         requestedConfig:
           $ref: '#/components/schemas/RequestedConfig'
+        addonIds:
+          type: array
+          description: Selected plan addon IDs (must be subset of plan allowedAddonIds; provider must support addons)
+          items: { type: string, format: uuid }
+        addonConfigs:
+          type: object
+          description: Per-addon customer config keyed by addon UUID (merged with admin defaults and random fills)
+          additionalProperties:
+            type: object
+            additionalProperties: { type: string }
         preferredAlternatives: { type: object }
         autoBackorder: { type: boolean }
         promotionCode: { type: string }
@@ -5073,6 +5214,9 @@ components:
       properties:
         planId: { type: string, format: uuid }
         requestedConfig: { type: object }
+        addonIds:
+          type: array
+          items: { type: string, format: uuid }
     PricingPreviewResponse:
       type: object
       properties:
@@ -5082,7 +5226,21 @@ components:
         totalPrice:
           {
             type: number,
-            description: Net price per billing period (excl. VAT),
+            description: Plan net price per billing period (excl. VAT),
+          }
+        addonLines:
+          type: array
+          items:
+            type: object
+            properties:
+              addonId: { type: string, format: uuid }
+              name: { type: string }
+              periodPrice: { type: number }
+        addonsTotal: { type: number, description: Sum of addon period prices }
+        grandTotal:
+          {
+            type: number,
+            description: Plan totalPrice plus addonsTotal (excl. VAT base for tax enrichment),
           }
         taxTotal:
           { type: number, description: VAT amount for the billing period }
@@ -5098,6 +5256,95 @@ components:
             enum: [standard, reduced],
             description: Plan VAT category used for this preview,
           }
+    AddonResponse:
+      type: object
+      required:
+        [
+          id,
+          key,
+          name,
+          implementationType,
+          configSchema,
+          compatibleProviders,
+          isActive,
+          createdAt,
+          updatedAt,
+        ]
+      properties:
+        id: { type: string, format: uuid }
+        key: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        implementationType: { type: string, enum: [module, cloud_init_script] }
+        moduleKey: { type: string, nullable: true }
+        scriptTemplate: { type: string, nullable: true }
+        configSchema: { type: object }
+        defaultValues: { type: object, additionalProperties: { type: string } }
+        compatibleProviders:
+          type: array
+          items: { type: string }
+        basePrice: { type: string, nullable: true }
+        priceIntervalType:
+          { type: string, enum: [hour, day, month, year], nullable: true }
+        priceIntervalValue: { type: integer, nullable: true }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    PlanAddonOption:
+      type: object
+      required: [id, key, name, implementationType, periodPrice, orderFields]
+      properties:
+        id: { type: string, format: uuid }
+        key: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        implementationType: { type: string, enum: [module, cloud_init_script] }
+        basePrice: { type: string, nullable: true }
+        priceIntervalType:
+          { type: string, enum: [hour, day, month, year], nullable: true }
+        priceIntervalValue: { type: integer, nullable: true }
+        periodPrice: { type: number }
+        orderFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudInitConfigOrderField'
+    CreateAddonDto:
+      type: object
+      required: [key, name, implementationType]
+      properties:
+        key: { type: string }
+        name: { type: string }
+        description: { type: string }
+        implementationType: { type: string, enum: [module, cloud_init_script] }
+        moduleKey: { type: string }
+        scriptTemplate: { type: string }
+        configSchema: { type: object }
+        defaultValues: { type: object, additionalProperties: { type: string } }
+        compatibleProviders:
+          type: array
+          items: { type: string }
+        basePrice: { type: string }
+        priceIntervalType: { type: string, enum: [hour, day, month, year] }
+        priceIntervalValue: { type: integer, minimum: 1 }
+        isActive: { type: boolean }
+    UpdateAddonDto:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        implementationType: { type: string, enum: [module, cloud_init_script] }
+        moduleKey: { type: string, nullable: true }
+        scriptTemplate: { type: string, nullable: true }
+        configSchema: { type: object }
+        defaultValues: { type: object, additionalProperties: { type: string } }
+        compatibleProviders:
+          type: array
+          items: { type: string }
+        basePrice: { type: string, nullable: true }
+        priceIntervalType:
+          { type: string, enum: [hour, day, month, year], nullable: true }
+        priceIntervalValue: { type: integer, nullable: true }
+        isActive: { type: boolean }
     TaxPreviewRequest:
       type: object
       properties:

@@ -7,6 +7,7 @@ import {
   ServiceTypesFacade,
   ServiceTypesService,
   CloudInitConfigsFacade,
+  AddonsFacade,
   AdminBillingService,
   buildProvisioningOptionsFromKeys,
   collectPlanProductEnvFields,
@@ -27,6 +28,7 @@ import {
   type IntegratedProductService,
   type PlanProductEnvField,
   type BillingIntervalType,
+  type AddonResponse,
   type CloudInitConfigResponse,
   type CreateServicePlanDto,
   type ProviderDetail,
@@ -82,6 +84,7 @@ export class ServicePlansPageComponent implements OnInit {
   private readonly plansFacade = inject(ServicePlansFacade);
   private readonly typesFacade = inject(ServiceTypesFacade);
   private readonly cloudInitConfigsFacade = inject(CloudInitConfigsFacade);
+  private readonly addonsFacade = inject(AddonsFacade);
   private readonly serviceTypesService = inject(ServiceTypesService);
   private readonly adminBillingService = inject(AdminBillingService);
   private readonly destroyRef = inject(DestroyRef);
@@ -112,6 +115,7 @@ export class ServicePlansPageComponent implements OnInit {
   );
   readonly serviceTypes$ = this.typesFacade.getServiceTypes$();
   readonly cloudInitConfigs$ = this.cloudInitConfigsFacade.getActiveCloudInitConfigs$();
+  readonly activeAddons$ = this.addonsFacade.getActiveAddons$();
   /** Combined service types + provider details for template (single async). */
   readonly typesAndProviders$ = combineLatest([
     this.typesFacade.getServiceTypes$(),
@@ -287,6 +291,57 @@ export class ServicePlansPageComponent implements OnInit {
       target.add(optionKey);
     } else {
       target.delete(optionKey);
+    }
+  }
+
+  availableAddonsForServiceType(
+    addons: AddonResponse[] | null,
+    serviceTypes: ServiceTypeResponse[] | null,
+    providerDetails: ProviderDetail[] | null,
+    serviceTypeId: string,
+  ): AddonResponse[] {
+    if (!this.providerSupportsAddons(serviceTypes, providerDetails, serviceTypeId)) return [];
+
+    const providerId = this.getProviderId(serviceTypes ?? [], serviceTypeId);
+
+    return (addons ?? []).filter(
+      (addon) =>
+        addon.compatibleProviders.length === 0 ||
+        (providerId != null && addon.compatibleProviders.includes(providerId)),
+    );
+  }
+
+  providerSupportsAddons(
+    serviceTypes: ServiceTypeResponse[] | null,
+    providerDetails: ProviderDetail[] | null,
+    serviceTypeId: string,
+  ): boolean {
+    const providerId = this.getProviderId(serviceTypes ?? [], serviceTypeId);
+
+    return providerDetails?.find((provider) => provider.id === providerId)?.supportsAddons === true;
+  }
+
+  isAddonSelected(form: 'create' | 'edit', addonId: string): boolean {
+    const defaults = form === 'create' ? this.createForm.providerConfigDefaults : this.editForm.providerConfigDefaults;
+    const selected = defaults?.['allowedAddonIds'];
+
+    return Array.isArray(selected) && selected.includes(addonId);
+  }
+
+  toggleAddon(form: 'create' | 'edit', addonId: string, checked: boolean): void {
+    const target = form === 'create' ? this.createForm : this.editForm;
+    target.providerConfigDefaults = target.providerConfigDefaults ?? {};
+    const current = Array.isArray(target.providerConfigDefaults['allowedAddonIds'])
+      ? (target.providerConfigDefaults['allowedAddonIds'] as unknown[]).filter(
+          (value): value is string => typeof value === 'string',
+        )
+      : [];
+    const next = checked ? [...new Set([...current, addonId])] : current.filter((id) => id !== addonId);
+
+    if (next.length > 0) {
+      target.providerConfigDefaults['allowedAddonIds'] = next;
+    } else {
+      delete target.providerConfigDefaults['allowedAddonIds'];
     }
   }
 
@@ -658,6 +713,10 @@ export class ServicePlansPageComponent implements OnInit {
     const schema = this.getProviderSchema(serviceTypes, providerDetails, this.createForm.serviceTypeId);
 
     this.createForm.providerConfigDefaults = this.createForm.providerConfigDefaults ?? {};
+
+    if (!this.providerSupportsAddons(serviceTypes, providerDetails, this.createForm.serviceTypeId)) {
+      delete this.createForm.providerConfigDefaults['allowedAddonIds'];
+    }
 
     if (schema) {
       const basePriceField = this.getBasePriceFromField(serviceTypes, providerDetails, this.createForm.serviceTypeId);
@@ -1053,6 +1112,7 @@ export class ServicePlansPageComponent implements OnInit {
     this.typesFacade.loadServiceTypes();
     this.typesFacade.loadProviderDetails();
     this.cloudInitConfigsFacade.loadCloudInitConfigs();
+    this.addonsFacade.loadAddons();
     this.refreshIssuerTaxRates();
     this.registerModalCloseWatchers();
   }
@@ -1258,6 +1318,14 @@ export class ServicePlansPageComponent implements OnInit {
 
       if (key === 'env' && value && typeof value === 'object' && !Array.isArray(value)) {
         result[key] = value;
+
+        continue;
+      }
+
+      if (key === 'allowedAddonIds' && Array.isArray(value)) {
+        const ids = value.filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0);
+
+        if (ids.length > 0) result[key] = [...new Set(ids)];
 
         continue;
       }

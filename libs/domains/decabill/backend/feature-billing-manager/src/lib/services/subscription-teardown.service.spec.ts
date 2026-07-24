@@ -38,6 +38,9 @@ describe('SubscriptionTeardownService', () => {
     publishSubscriptionCanceled: jest.fn(),
     publishSubscriptionWithdrawn: jest.fn(),
   };
+  const addonLifecycleService = {
+    teardownForSubscription: jest.fn().mockResolvedValue(undefined),
+  };
 
   const service = new SubscriptionTeardownService(
     subscriptionsRepository as never,
@@ -50,6 +53,7 @@ describe('SubscriptionTeardownService', () => {
     withdrawalRefundService as never,
     billingNotificationPublisher as never,
     billingEmailPublisher as never,
+    addonLifecycleService as never,
   );
 
   beforeEach(() => {

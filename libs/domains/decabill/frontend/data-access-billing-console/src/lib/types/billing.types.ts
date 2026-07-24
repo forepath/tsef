@@ -22,6 +22,7 @@ export interface ProviderDetail {
   displayName: string;
   configSchema?: Record<string, unknown>;
   envDefaultFields?: ProviderEnvDefaultField[];
+  supportsAddons?: boolean;
 }
 
 // Provider server type with specs and pricing (GET .../providers/:id/server-types)
@@ -204,6 +205,92 @@ export interface UpdateCloudInitConfigDto {
   isActive?: boolean;
 }
 
+// Addons
+export type AddonImplementationType = 'module' | 'cloud_init_script';
+
+/** Same shape as CloudInit env vars; stored under addon `configSchema.environmentVariables`. */
+export type AddonConfigEnvVariableDefinition = CloudInitConfigEnvVariableDefinition;
+
+/** Admin write payload (server derives `hasDefault`). */
+export type AddonConfigEnvVariableInput = Omit<CloudInitConfigEnvVariableDefinition, 'hasDefault'> & {
+  hasDefault?: boolean;
+};
+
+export interface AddonConfigSchema {
+  environmentVariables: AddonConfigEnvVariableDefinition[];
+}
+
+export interface AddonConfigSchemaInput {
+  environmentVariables: AddonConfigEnvVariableInput[];
+}
+
+export type AddonConfigOrderField = CloudInitConfigOrderField;
+
+export interface AddonResponse {
+  id: string;
+  key: string;
+  name: string;
+  description?: string | null;
+  implementationType: AddonImplementationType;
+  moduleKey?: string | null;
+  scriptTemplate?: string | null;
+  configSchema: AddonConfigSchema | Record<string, unknown>;
+  /** Decrypted defaults; only on admin GET by id / create / update. */
+  defaultValues?: Record<string, string>;
+  compatibleProviders: string[];
+  basePrice?: string | null;
+  priceIntervalType?: BillingIntervalType | null;
+  priceIntervalValue?: number | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlanAddonOptionDto {
+  id: string;
+  key: string;
+  name: string;
+  description?: string | null;
+  implementationType: AddonImplementationType;
+  basePrice?: string | null;
+  priceIntervalType?: BillingIntervalType | null;
+  priceIntervalValue?: number | null;
+  periodPrice: number;
+  /** Customer-visible config fields (no secret values). */
+  orderFields: AddonConfigOrderField[];
+}
+
+export interface CreateAddonDto {
+  key: string;
+  name: string;
+  description?: string;
+  implementationType: AddonImplementationType;
+  moduleKey?: string;
+  scriptTemplate?: string;
+  configSchema?: AddonConfigSchemaInput | Record<string, unknown>;
+  defaultValues?: Record<string, string>;
+  compatibleProviders?: string[];
+  basePrice?: string;
+  priceIntervalType?: BillingIntervalType;
+  priceIntervalValue?: number;
+  isActive?: boolean;
+}
+
+export interface UpdateAddonDto {
+  name?: string;
+  description?: string;
+  implementationType?: AddonImplementationType;
+  moduleKey?: string | null;
+  scriptTemplate?: string | null;
+  configSchema?: AddonConfigSchemaInput | Record<string, unknown>;
+  defaultValues?: Record<string, string>;
+  compatibleProviders?: string[];
+  basePrice?: string | null;
+  priceIntervalType?: BillingIntervalType | null;
+  priceIntervalValue?: number | null;
+  isActive?: boolean;
+}
+
 // Service Plans
 export interface ServicePlanOrderingHighlight {
   icon: string;
@@ -357,6 +444,9 @@ export interface RequestedConfigCloudInit {
 
 export interface CreateSubscriptionDto {
   planId: string;
+  addonIds?: string[];
+  /** Per-addon order-form values, keyed by addon UUID then env key. */
+  addonConfigs?: Record<string, Record<string, string>>;
   requestedConfig?: Record<string, unknown>;
   preferredAlternatives?: Record<string, unknown>;
   autoBackorder?: boolean;
@@ -462,7 +552,14 @@ export interface AvailabilityResponse {
 // Pricing
 export interface PricingPreviewDto {
   planId: string;
+  addonIds?: string[];
   requestedConfig?: Record<string, unknown>;
+}
+
+export interface PricingPreviewAddonLine {
+  addonId: string;
+  name: string;
+  periodPrice: number;
 }
 
 export interface PricingPreviewResponse {
@@ -475,6 +572,9 @@ export interface PricingPreviewResponse {
   totalGross: number;
   taxRate: number;
   taxCategory?: TaxCategory;
+  addonLines?: PricingPreviewAddonLine[];
+  addonsTotal?: number;
+  grandTotal?: number;
 }
 
 export interface TaxPreviewRates {

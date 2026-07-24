@@ -1,0 +1,9 @@
+{{#> email-layout}}
+<h1 class="email-title">Addon deactivated</h1>
+<p>Dear {{recipientName}},</p>
+<p>
+  The addon "<strong>{{addonName}}</strong>" has been deactivated on your subscription
+  "<strong>{{planName}}</strong>"{{#if subscriptionNumber}} (<strong>{{subscriptionNumber}}</strong>){{/if}}.
+</p>
+<p>You can review your subscription from your billing account.</p>
+{{/email-layout}}

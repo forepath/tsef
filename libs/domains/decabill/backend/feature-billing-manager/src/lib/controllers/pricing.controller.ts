@@ -3,14 +3,18 @@ import { BadRequestException, Body, Controller, Post, Req } from '@nestjs/common
 
 import { PricingPreviewDto } from '../dto/pricing-preview.dto';
 import { TaxPreviewRequestDto } from '../dto/tax-preview.dto';
+import { AddonsRepository } from '../repositories/addons.repository';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
 import { ServiceTypesRepository } from '../repositories/service-types.repository';
+import { AddonService } from '../services/addon.service';
 import { InvoiceTaxContextService } from '../services/invoice-tax-context.service';
 import { PricingService } from '../services/pricing.service';
 import { ProviderServerTypesService } from '../services/provider-server-types.service';
 import { TaxCalculationService } from '../services/tax-calculation.service';
 import { TaxPreviewService } from '../services/tax-preview.service';
+import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
 import { getUserFromRequest, type RequestWithUser } from '../utils/billing-access.utils';
+import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
 import { normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
 import { enrichPricingWithTax } from '../utils/pricing-tax.utils';
 import { resolvePlanTaxCategory } from '../utils/plan-tax.utils';
@@ -27,6 +31,8 @@ export class PricingController {
     private readonly servicePlansRepository: ServicePlansRepository,
     private readonly serviceTypesRepository: ServiceTypesRepository,
     private readonly providerServerTypesService: ProviderServerTypesService,
+    private readonly addonService: AddonService,
+    private readonly addonsRepository: AddonsRepository,
   ) {}
 
   @Post('preview')
@@ -41,6 +47,9 @@ export class PricingController {
         totalGross: 0,
         taxRate: 0,
         taxCategory: 'standard',
+        addonLines: [],
+        addonsTotal: 0,
+        grandTotal: 0,
       };
     }
 
@@ -65,6 +74,8 @@ export class PricingController {
           ? String(plan.providerConfigDefaults['serverType']).trim()
           : '';
 
+    let planPricing = this.pricingService.calculate(plan);
+
     if (serverTypeId) {
       const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
       const providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
@@ -76,21 +87,40 @@ export class PricingController {
       );
 
       if (priceMonthly != null) {
-        return enrichPricingWithTax(
-          this.pricingService.calculate(plan, priceMonthly),
-          taxCategory,
-          this.taxCalculationService,
-          computeOptions,
-        );
+        planPricing = this.pricingService.calculate(plan, priceMonthly);
       }
     }
 
-    return enrichPricingWithTax(
-      this.pricingService.calculate(plan),
+    const selectedAddonIds = [...new Set((dto.addonIds ?? []).filter(Boolean))];
+    const addons = await this.addonService.assertAddonIdsForOrder(
+      plan.serviceTypeId,
+      parsePlanAllowedAddonIds(plan.providerConfigDefaults),
+      selectedAddonIds,
+    );
+    const addonLines = addons.map((addon) => ({
+      addonId: addon.id,
+      name: addon.name,
+      periodPrice: convertAddonPriceToPlanPeriod(addon, plan),
+    }));
+    const addonsTotal = Math.round(addonLines.reduce((sum, line) => sum + line.periodPrice, 0) * 100) / 100;
+    const grandTotal = Math.round((planPricing.totalPrice + addonsTotal) * 100) / 100;
+    const taxed = enrichPricingWithTax(
+      { ...planPricing, totalPrice: grandTotal },
       taxCategory,
       this.taxCalculationService,
       computeOptions,
     );
+
+    return {
+      ...taxed,
+      basePrice: planPricing.basePrice,
+      marginPercent: planPricing.marginPercent,
+      marginFixed: planPricing.marginFixed,
+      totalPrice: planPricing.totalPrice,
+      addonLines,
+      addonsTotal,
+      grandTotal,
+    };
   }
 
   @Post('tax-preview')

@@ -21,6 +21,10 @@ export const BILLING_EMAIL_SUBJECTS: EmailSubjectRegistry = {
   'subscription-canceled': (ctx) => `Subscription ended: ${asString(ctx.planName)}`,
   'subscription-resumed': (ctx) => `Subscription resumed: ${asString(ctx.planName)}`,
   'subscription-withdrawn': (ctx) => `Withdrawal completed: ${asString(ctx.planName)}`,
+  'addon-activated': (ctx) => `Addon activated: ${asString(ctx.addonName)}`,
+  'addon-deactivated': (ctx) => `Addon deactivated: ${asString(ctx.addonName)}`,
+  'addon-provision-failed': (ctx) => `Addon provisioning failed: ${asString(ctx.addonName)}`,
+  'addon-teardown-failed': (ctx) => `Addon teardown failed: ${asString(ctx.addonName)}`,
 };
 
 export const BILLING_EMAIL_EVENTS = [
@@ -36,6 +40,10 @@ export const BILLING_EMAIL_EVENTS = [
   'subscription.canceled',
   'subscription.resumed',
   'subscription.withdrawn',
+  'addon.activated',
+  'addon.deactivated',
+  'addon.provision_failed',
+  'addon.teardown_failed',
 ] as const;
 
 export type BillingEmailEventType = (typeof BILLING_EMAIL_EVENTS)[number];

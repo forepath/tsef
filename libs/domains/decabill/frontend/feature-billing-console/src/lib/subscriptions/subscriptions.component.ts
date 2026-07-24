@@ -30,6 +30,7 @@ import {
   type CreateSubscriptionDto,
   type CustomerProfileDto,
   type OrderProvisioningOption,
+  type PlanAddonOptionDto,
   type PricingPreviewResponse,
   type ProviderDetail,
   type ServicePlanResponse,
@@ -182,6 +183,11 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   autoBillingSetupFeedback: AutoBillingSetupFeedback | null = null;
 
   orderPlanId = '';
+  orderAddons: PlanAddonOptionDto[] = [];
+  orderAddonIds = new Set<string>();
+  /** Per-addon order field values, keyed by addon id then env key. */
+  orderAddonConfigs: Record<string, Record<string, string>> = {};
+  orderAddonsLoading = false;
   orderPromotionCode = signal('');
   readonly orderPromotionValidationPreview = toSignal(this.promotionsFacade.getValidationPreview$('new'), {
     initialValue: null,
@@ -204,17 +210,21 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
       : undefined;
     const plan = this.servicePlans().find((entry) => entry.id === this.orderPlanId.trim()) ?? null;
 
-    return buildPromotionAdjustedOrderPricing(preview, pricing, {
-      benefitEndsLabel,
-      billing: plan
-        ? {
-            billingIntervalType: plan.billingIntervalType,
-            billingIntervalValue: plan.billingIntervalValue,
-            billingDayOfMonth: plan.billingDayOfMonth,
-          }
-        : undefined,
-      periodStart: preview.benefitStartsAt ? new Date(preview.benefitStartsAt) : undefined,
-    });
+    return buildPromotionAdjustedOrderPricing(
+      preview,
+      { ...pricing, totalPrice: pricing.grandTotal ?? pricing.totalPrice },
+      {
+        benefitEndsLabel,
+        billing: plan
+          ? {
+              billingIntervalType: plan.billingIntervalType,
+              billingIntervalValue: plan.billingIntervalValue,
+              billingDayOfMonth: plan.billingDayOfMonth,
+            }
+          : undefined,
+        periodStart: preview.benefitStartsAt ? new Date(preview.benefitStartsAt) : undefined,
+      },
+    );
   });
   readonly hasOrderPromotionCheckResult = computed(
     () => this.orderPromotionValidationPreview() != null || this.orderPromotionValidationError() != null,
@@ -628,6 +638,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
             this.syncOrderProvisioningLocationState();
             this.syncOrderServerTypeState();
             this.syncOrderProvisioningOptions();
+            this.syncOrderAddons();
             this.syncOrderPricingPreview();
 
             return;
@@ -638,6 +649,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
         this.syncOrderProvisioningLocationState();
         this.syncOrderServerTypeState();
         this.syncOrderProvisioningOptions();
+        this.syncOrderAddons();
         this.syncOrderPricingPreview();
       });
     showBillingModal(this.orderPlanModal);
@@ -649,7 +661,75 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     this.syncOrderProvisioningLocationState();
     this.syncOrderServerTypeState();
     this.syncOrderProvisioningOptions();
+    this.syncOrderAddons();
     this.syncOrderPricingPreview();
+  }
+
+  isOrderAddonSelected(addonId: string): boolean {
+    return this.orderAddonIds.has(addonId);
+  }
+
+  toggleOrderAddon(addonId: string, checked: boolean): void {
+    if (checked) {
+      this.orderAddonIds.add(addonId);
+      const addon = this.orderAddons.find((entry) => entry.id === addonId);
+
+      if (addon?.orderFields?.length) {
+        this.orderAddonConfigs = {
+          ...this.orderAddonConfigs,
+          [addonId]: Object.fromEntries(addon.orderFields.map((field) => [field.key, ''])),
+        };
+      }
+    } else {
+      this.orderAddonIds.delete(addonId);
+      const nextConfigs = { ...this.orderAddonConfigs };
+
+      delete nextConfigs[addonId];
+      this.orderAddonConfigs = nextConfigs;
+    }
+
+    this.clampOrderWizardStepIndex();
+    this.syncOrderPricingPreview();
+  }
+
+  setOrderAddonConfigValue(addonId: string, key: string, value: string): void {
+    this.orderAddonConfigs = {
+      ...this.orderAddonConfigs,
+      [addonId]: {
+        ...(this.orderAddonConfigs[addonId] ?? {}),
+        [key]: value,
+      },
+    };
+  }
+
+  getOrderAddonConfigValue(addonId: string, key: string): string {
+    return this.orderAddonConfigs[addonId]?.[key] ?? '';
+  }
+
+  showOrderAddonFields(addon: PlanAddonOptionDto): boolean {
+    return this.isOrderAddonSelected(addon.id) && (addon.orderFields?.length ?? 0) > 0;
+  }
+
+  selectedOrderAddonsWithConfigFields(): PlanAddonOptionDto[] {
+    return this.orderAddons.filter((addon) => this.showOrderAddonFields(addon));
+  }
+
+  hasSelectedOrderAddonConfigFields(): boolean {
+    return this.selectedOrderAddonsWithConfigFields().length > 0;
+  }
+
+  orderAddonConfigCardTitle(addonName: string): string {
+    return $localize`:@@featureSubscriptions-addonConfigCardTitle:Addon: ${addonName}:addonName:`;
+  }
+
+  selectedOrderAddons(): PlanAddonOptionDto[] {
+    return this.orderAddons.filter((addon) => this.orderAddonIds.has(addon.id));
+  }
+
+  formatOrderAddonsSummary(): string {
+    return this.selectedOrderAddons()
+      .map((addon) => addon.name)
+      .join(', ');
   }
 
   onOrderServerTypeChange(): void {
@@ -678,7 +758,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return this.servicePlans().find((entry) => entry.id === this.orderPlanId.trim()) ?? null;
   }
 
-  orderHasConfigurationStep(): boolean {
+  orderHasProvisioningConfigurationContent(): boolean {
     if (!this.orderPlanId.trim()) {
       return false;
     }
@@ -704,8 +784,17 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return this.showIntegratedOrderConfiguration(null);
   }
 
+  orderHasConfigurationStep(): boolean {
+    return this.orderHasProvisioningConfigurationContent() || this.hasSelectedOrderAddonConfigFields();
+  }
+
   getOrderWizardSteps(): OrderWizardStep[] {
-    const steps: OrderWizardStep[] = [{ id: 'plan', label: 'Plan' }];
+    const steps: OrderWizardStep[] = [
+      {
+        id: 'plan',
+        label: $localize`:@@featureSubscriptions-orderStepPlanAddons:Plan & addons`,
+      },
+    ];
 
     if (this.orderHasInfrastructureStep()) {
       steps.push({ id: 'infrastructure', label: 'Server & region' });
@@ -755,7 +844,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
       case 'infrastructure':
         return this.isOrderInfrastructureStepReady();
       case 'configuration':
-        return this.isOrderProvisioningReady();
+        return this.isOrderProvisioningReady() && this.areOrderAddonConfigsReady();
       case 'summary':
         return false;
       default:
@@ -843,6 +932,10 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     this.orderAutoBackorder = true;
     this.orderAcceptLegal = false;
     this.orderPricingPreview.set(null);
+    this.orderAddons = [];
+    this.orderAddonIds = new Set();
+    this.orderAddonConfigs = {};
+    this.orderAddonsLoading = false;
     this.orderPricingLoading = false;
     this.orderWizardStepIndex.set(0);
     this.orderOrderComplete.set(false);
@@ -875,7 +968,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
     this.orderPricingLoading = true;
 
-    this.availabilityService.previewPricing({ planId, requestedConfig }).subscribe({
+    this.availabilityService.previewPricing({ planId, requestedConfig, addonIds: [...this.orderAddonIds] }).subscribe({
       next: (response) => {
         if (requestId !== this.orderPricingRequestId) {
           return;
@@ -895,6 +988,88 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  private syncOrderAddons(): void {
+    const planId = this.orderPlanId.trim();
+    this.orderAddons = [];
+    this.orderAddonIds = new Set();
+    this.orderAddonConfigs = {};
+
+    if (!planId) {
+      this.orderAddonsLoading = false;
+      return;
+    }
+
+    this.orderAddonsLoading = true;
+    this.servicePlansService
+      .getOrderAddons(planId)
+      .pipe(take(1))
+      .subscribe({
+        next: (addons) => {
+          if (planId !== this.orderPlanId.trim()) return;
+
+          this.orderAddons = addons.map((addon) => ({
+            ...addon,
+            orderFields: addon.orderFields ?? [],
+          }));
+          this.orderAddonsLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          if (planId !== this.orderPlanId.trim()) return;
+
+          this.orderAddons = [];
+          this.orderAddonsLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  private areOrderAddonConfigsReady(): boolean {
+    for (const addonId of this.orderAddonIds) {
+      const addon = this.orderAddons.find((entry) => entry.id === addonId);
+
+      if (!addon?.orderFields?.length) {
+        continue;
+      }
+
+      for (const field of addon.orderFields) {
+        if (field.required && !(this.orderAddonConfigs[addonId]?.[field.key] ?? '').trim()) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  private buildOrderAddonConfigs(): Record<string, Record<string, string>> | undefined {
+    const result: Record<string, Record<string, string>> = {};
+
+    for (const addonId of this.orderAddonIds) {
+      const addon = this.orderAddons.find((entry) => entry.id === addonId);
+
+      if (!addon?.orderFields?.length) {
+        continue;
+      }
+
+      const env: Record<string, string> = {};
+
+      for (const field of addon.orderFields) {
+        const value = (this.orderAddonConfigs[addonId]?.[field.key] ?? '').trim();
+
+        if (value || field.required) {
+          env[field.key] = value;
+        }
+      }
+
+      if (Object.keys(env).length > 0) {
+        result[addonId] = env;
+      }
+    }
+
+    return Object.keys(result).length > 0 ? result : undefined;
   }
 
   showOrderProvisioningPicker(): boolean {
@@ -1233,7 +1408,14 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   }
 
   onSubmitOrderPlan(): void {
-    if (!this.orderPlanId?.trim() || !this.isOrderProvisioningReady() || !this.canSubmitOrderWithPromotion()) return;
+    if (
+      !this.orderPlanId?.trim() ||
+      !this.areOrderAddonConfigsReady() ||
+      !this.isOrderProvisioningReady() ||
+      !this.canSubmitOrderWithPromotion()
+    ) {
+      return;
+    }
 
     const cfg = this.orderRequestedConfig;
 
@@ -1265,6 +1447,8 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
       const dto: CreateSubscriptionDto = this.withPromotionCode({
         planId: this.orderPlanId.trim(),
+        addonIds: [...this.orderAddonIds],
+        addonConfigs: this.buildOrderAddonConfigs(),
         requestedConfig,
         autoBackorder: this.orderAutoBackorder,
       });
@@ -1347,6 +1531,8 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
     const dto: CreateSubscriptionDto = this.withPromotionCode({
       planId: this.orderPlanId.trim(),
+      addonIds: [...this.orderAddonIds],
+      addonConfigs: this.buildOrderAddonConfigs(),
       requestedConfig,
       autoBackorder: this.orderAutoBackorder,
     });

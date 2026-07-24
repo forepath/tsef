@@ -40,6 +40,8 @@ export class SubscriptionsController {
       dto.autoBackorder ?? false,
       dto.promotionCode,
       dto.promotionBenefitStartsAt,
+      dto.addonIds,
+      dto.addonConfigs,
     );
 
     return (await this.subscriptionService.mapManyToResponses([subscription]))[0];

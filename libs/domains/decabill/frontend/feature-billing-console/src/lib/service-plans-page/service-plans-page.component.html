@@ -811,6 +811,44 @@
                 }
               }
             }
+            @if (activeAddons$ | async; as addons) {
+              @if (
+                availableAddonsForServiceType(
+                  addons,
+                  data.serviceTypes,
+                  data.providerDetails,
+                  createForm.serviceTypeId
+                );
+                as availableAddons
+              ) {
+                @if (availableAddons.length > 0) {
+                  <div class="mb-3 border rounded p-3 bg-body-secondary">
+                    <h6 class="mb-2" i18n="@@featureServicePlans-addons">Customer-selectable addons</h6>
+                    <p class="form-text text-body-secondary small mb-3" i18n="@@featureServicePlans-addonsHelp">
+                      Choose which addons customers may add when ordering this plan.
+                    </p>
+                    @for (addon of availableAddons; track addon.id) {
+                      <div class="form-check mb-2">
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [id]="'createAddon_' + addon.id"
+                          [checked]="isAddonSelected('create', addon.id)"
+                          (change)="toggleAddon('create', addon.id, $any($event.target).checked)"
+                          [disabled]="(creating$ | async) === true"
+                        />
+                        <label class="form-check-label" [for]="'createAddon_' + addon.id">
+                          {{ addon.name }}
+                          @if (addon.description) {
+                            <span class="d-block small text-body-secondary">{{ addon.description }}</span>
+                          }
+                        </label>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            }
             @if (supportsCustomerLocationSelection(data.serviceTypes, data.providerDetails, createForm.serviceTypeId)) {
               <div class="form-check mb-3">
                 <input
@@ -1586,6 +1624,45 @@
                         </div>
                       }
                     </div>
+                  </div>
+                }
+              }
+            }
+            @if (activeAddons$ | async; as addons) {
+              @if (
+                editingPlan &&
+                  availableAddonsForServiceType(
+                    addons,
+                    data.serviceTypes,
+                    data.providerDetails,
+                    editingPlan.serviceTypeId
+                  );
+                as availableAddons
+              ) {
+                @if (availableAddons.length > 0) {
+                  <div class="mb-3 border rounded p-3 bg-body-secondary">
+                    <h6 class="mb-2" i18n="@@featureServicePlans-addons">Customer-selectable addons</h6>
+                    <p class="form-text text-body-secondary small mb-3" i18n="@@featureServicePlans-addonsHelp">
+                      Choose which addons customers may add when ordering this plan.
+                    </p>
+                    @for (addon of availableAddons; track addon.id) {
+                      <div class="form-check mb-2">
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [id]="'editAddon_' + addon.id"
+                          [checked]="isAddonSelected('edit', addon.id)"
+                          (change)="toggleAddon('edit', addon.id, $any($event.target).checked)"
+                          [disabled]="(updating$ | async) === true"
+                        />
+                        <label class="form-check-label" [for]="'editAddon_' + addon.id">
+                          {{ addon.name }}
+                          @if (addon.description) {
+                            <span class="d-block small text-body-secondary">{{ addon.description }}</span>
+                          }
+                        </label>
+                      </div>
+                    }
                   </div>
                 }
               }

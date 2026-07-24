@@ -3,7 +3,9 @@ import { getTenantIdOrDefault, NotificationDispatcherService } from '@forepath/s
 import { Injectable } from '@nestjs/common';
 
 import type { InvoiceEntity } from '../entities/invoice.entity';
+import type { AddonEntity } from '../entities/addon.entity';
 import type { ServicePlanEntity } from '../entities/service-plan.entity';
+import type { SubscriptionAddonEntity } from '../entities/subscription-addon.entity';
 import type { SubscriptionEntity } from '../entities/subscription.entity';
 import type { DatevExportEntity } from '../entities/datev-export.entity';
 import type { ProjectMilestoneResponseDto } from '../projects/dto/project-milestone.dto';
@@ -126,8 +128,48 @@ export class BillingNotificationPublisher implements IIdentityNotificationPublis
     type: SubscriptionWebhookEventType,
     subscription: SubscriptionEntity,
     plan?: SubscriptionPlanBillingFields,
+    extras?: { addons?: Array<{ id: string; key: string; name: string; periodPrice?: number }> },
   ): void {
-    this.publish(type, this.toSubscriptionPayload(subscription, plan), subscription.userId);
+    this.publish(
+      type,
+      {
+        ...this.toSubscriptionPayload(subscription, plan),
+        ...(extras?.addons && extras.addons.length > 0 ? { addons: extras.addons } : {}),
+      },
+      subscription.userId,
+    );
+  }
+
+  publishAddon(
+    type: 'addon.activated' | 'addon.deactivated' | 'addon.provision_failed' | 'addon.teardown_failed',
+    params: {
+      subscription: SubscriptionEntity;
+      plan: Pick<ServicePlanEntity, 'id' | 'name' | 'billInAdvance' | 'billingIntervalType'>;
+      addon: Pick<AddonEntity, 'id' | 'key' | 'name'>;
+      subscriptionAddon: Pick<SubscriptionAddonEntity, 'id' | 'status' | 'activatedAt' | 'deactivatedAt'>;
+      errorMessage?: string;
+    },
+  ): void {
+    this.publish(
+      type,
+      {
+        subscriptionId: params.subscription.id,
+        subscriptionNumber: params.subscription.number ?? null,
+        planId: params.plan.id,
+        planName: params.plan.name,
+        billInAdvance: params.plan.billInAdvance,
+        billingIntervalType: params.plan.billingIntervalType,
+        addonId: params.addon.id,
+        addonKey: params.addon.key,
+        addonName: params.addon.name,
+        subscriptionAddonId: params.subscriptionAddon.id,
+        status: params.subscriptionAddon.status,
+        activatedAt: this.toIsoString(params.subscriptionAddon.activatedAt),
+        deactivatedAt: this.toIsoString(params.subscriptionAddon.deactivatedAt),
+        ...(params.errorMessage ? { errorMessage: params.errorMessage } : {}),
+      },
+      params.subscription.userId,
+    );
   }
 
   publishPeriodCharged(

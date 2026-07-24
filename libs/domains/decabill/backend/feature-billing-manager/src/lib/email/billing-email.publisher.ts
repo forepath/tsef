@@ -175,7 +175,10 @@ export class BillingEmailPublisher {
   async publishSubscriptionCreated(
     subscription: SubscriptionEntity,
     planName: string,
-    options?: { billInAdvance?: boolean },
+    options?: {
+      billInAdvance?: boolean;
+      addons?: Array<{ name: string; periodPrice?: number }>;
+    },
   ): Promise<void> {
     const profile = await this.customerProfilesRepository.findByUserId(subscription.userId);
     const to = await this.resolveRecipientEmail(subscription.userId, profile);
@@ -201,6 +204,61 @@ export class BillingEmailPublisher {
         billInAdvance: options?.billInAdvance === true,
         ...(subscription.number ? { subscriptionNumber: subscription.number } : {}),
         ...(periodEndDate ? { periodEndDate } : {}),
+        ...(options?.addons && options.addons.length > 0 ? { addons: options.addons } : {}),
+      },
+    });
+  }
+
+  async publishAddonActivated(subscription: SubscriptionEntity, planName: string, addonName: string): Promise<void> {
+    await this.publishAddonEmail('addon.activated', 'addon-activated', subscription, planName, addonName);
+  }
+
+  async publishAddonDeactivated(subscription: SubscriptionEntity, planName: string, addonName: string): Promise<void> {
+    await this.publishAddonEmail('addon.deactivated', 'addon-deactivated', subscription, planName, addonName);
+  }
+
+  async publishAddonProvisionFailed(
+    subscription: SubscriptionEntity,
+    planName: string,
+    addonName: string,
+  ): Promise<void> {
+    await this.publishAddonEmail('addon.provision_failed', 'addon-provision-failed', subscription, planName, addonName);
+  }
+
+  async publishAddonTeardownFailed(
+    subscription: SubscriptionEntity,
+    planName: string,
+    addonName: string,
+  ): Promise<void> {
+    await this.publishAddonEmail('addon.teardown_failed', 'addon-teardown-failed', subscription, planName, addonName);
+  }
+
+  private async publishAddonEmail(
+    eventType: 'addon.activated' | 'addon.deactivated' | 'addon.provision_failed' | 'addon.teardown_failed',
+    templateKey: 'addon-activated' | 'addon-deactivated' | 'addon-provision-failed' | 'addon-teardown-failed',
+    subscription: SubscriptionEntity,
+    planName: string,
+    addonName: string,
+  ): Promise<void> {
+    const profile = await this.customerProfilesRepository.findByUserId(subscription.userId);
+    const to = await this.resolveRecipientEmail(subscription.userId, profile);
+
+    if (!to) {
+      this.logger.warn(`No billing email for user ${subscription.userId}, skipping ${eventType} email`);
+
+      return;
+    }
+
+    await this.emailDispatcher.publish({
+      eventType,
+      scopeKey: getTenantIdOrDefault(),
+      to,
+      templateKey,
+      templateContext: {
+        recipientName: this.greeting(profile),
+        planName,
+        addonName,
+        ...(subscription.number ? { subscriptionNumber: subscription.number } : {}),
       },
     });
   }

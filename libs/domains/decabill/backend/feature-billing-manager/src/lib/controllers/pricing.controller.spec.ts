@@ -8,7 +8,9 @@ import { PricingService } from '../services/pricing.service';
 import { ProviderServerTypesService } from '../services/provider-server-types.service';
 import { TaxCalculationService } from '../services/tax-calculation.service';
 import { TaxPreviewService } from '../services/tax-preview.service';
+import { AddonService } from '../services/addon.service';
 import { TaxRateConfigService } from '../services/tax-rate-config.service';
+import { AddonsRepository } from '../repositories/addons.repository';
 
 import { PricingController } from './pricing.controller';
 
@@ -34,6 +36,7 @@ describe('PricingController', () => {
   let findServiceTypeById: jest.Mock;
   let calculate: jest.Mock;
   let getServerTypes: jest.Mock;
+  let assertAddonIdsForOrder: jest.Mock;
 
   beforeEach(async () => {
     findPlanById = jest.fn().mockResolvedValue(planRow);
@@ -52,6 +55,7 @@ describe('PricingController', () => {
       { id: 'cx11', priceMonthly: 4.15 },
       { id: 'cpx11', priceMonthly: 6.49 },
     ]);
+    assertAddonIdsForOrder = jest.fn().mockResolvedValue([]);
 
     const moduleRef = await Test.createTestingModule({
       controllers: [PricingController],
@@ -82,7 +86,8 @@ describe('PricingController', () => {
           provide: TaxPreviewService,
           useValue: { preview: jest.fn() },
         },
-        { provide: ProviderServerTypesService, useValue: { getServerTypes } },
+        { provide: AddonService, useValue: { assertAddonIdsForOrder } },
+        { provide: AddonsRepository, useValue: { findByIds: jest.fn().mockResolvedValue([]) } },
       ],
     }).compile();
 
@@ -101,6 +106,9 @@ describe('PricingController', () => {
       totalGross: 0,
       taxRate: 0,
       taxCategory: 'standard',
+      addonLines: [],
+      addonsTotal: 0,
+      grandTotal: 0,
     });
     expect(findPlanById).not.toHaveBeenCalled();
   });

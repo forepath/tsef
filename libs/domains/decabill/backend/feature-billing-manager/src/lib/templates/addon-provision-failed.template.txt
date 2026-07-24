@@ -1,0 +1,5 @@
+Dear {{recipientName}},
+
+We could not activate the addon "{{addonName}}" on your subscription "{{planName}}"{{#if subscriptionNumber}} ({{subscriptionNumber}}){{/if}}.
+
+Please contact support if this issue continues.

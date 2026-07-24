@@ -191,4 +191,28 @@ describe('ServicePlansService', () => {
       req.flush(null);
     });
   });
+
+  describe('getOrderAddons', () => {
+    it('should return plan addon options', (done) => {
+      const options = [
+        {
+          id: 'addon-1',
+          key: 'backup',
+          name: 'Backup',
+          implementationType: 'module' as const,
+          periodPrice: 1,
+          orderFields: [{ key: 'REGION', label: 'Region', required: true, hasDefault: false }],
+        },
+      ];
+
+      service.getOrderAddons('sp-1').subscribe((result) => {
+        expect(result).toEqual(options);
+        done();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/service-plans/sp-1/addons`);
+      expect(req.request.method).toBe('GET');
+      req.flush(options);
+    });
+  });
 });
