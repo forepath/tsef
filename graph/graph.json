@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-24T07:56:54.081Z",
+  "generatedAt": "2026-07-24T15:09:40.424Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -1783,7 +1783,7 @@
       "type": "package",
       "attrs": {
         "name": "express",
-        "version": "4.21.2"
+        "version": "4.22.2"
       }
     },
     {
@@ -2199,7 +2199,7 @@
       "type": "package",
       "attrs": {
         "name": "mermaid",
-        "version": "11.12.2"
+        "version": "11.16.0"
       }
     },
     {
@@ -26785,6 +26785,11 @@
     {
       "from": "project:agenstra-backend-agent-manager",
       "to": "package:express",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:handlebars",
       "type": "depends_on"
     },
     {

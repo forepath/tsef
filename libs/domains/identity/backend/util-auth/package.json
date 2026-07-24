@@ -11,7 +11,7 @@
     "@nestjs/common": "11.1.6",
     "@nestjs/throttler": "6.5.0",
     "nest-keycloak-connect": "2.0.0-alpha.2",
-    "express": "4.21.2",
+    "express": "4.22.2",
     "typeorm": "0.3.27",
     "bcrypt": "6.0.0"
   }
