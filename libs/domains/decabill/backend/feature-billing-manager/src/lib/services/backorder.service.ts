@@ -200,15 +200,17 @@ export class BackorderService {
     const providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
 
     if (provider === 'hetzner' || provider === 'digital-ocean') {
-      const billingBasePrice = await resolveServerTypePriceMonthly(
-        this.providerServerTypesService,
-        provider,
-        serverType,
-        providerDefaults,
-      );
+      if (allowCustomerServerTypeSelection) {
+        const billingBasePrice = await resolveServerTypePriceMonthly(
+          this.providerServerTypesService,
+          provider,
+          serverType,
+          providerDefaults,
+        );
 
-      if (billingBasePrice != null) {
-        effectiveConfig[BILLING_BASE_PRICE_CONFIG_KEY] = billingBasePrice;
+        if (billingBasePrice != null) {
+          effectiveConfig[BILLING_BASE_PRICE_CONFIG_KEY] = billingBasePrice;
+        }
       }
     }
 

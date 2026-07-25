@@ -164,6 +164,10 @@ describe('SubscriptionService', () => {
     activateAfterProvisioning: jest.fn().mockResolvedValue(undefined),
     teardownForSubscription: jest.fn(),
   };
+  const sshExecutor = {
+    waitUntilReachable: jest.fn().mockResolvedValue(undefined),
+    exec: jest.fn().mockResolvedValue({ stdout: '', stderr: '', code: 0 }),
+  };
   const service = new SubscriptionService(
     plansRepository,
     typesRepository,
@@ -192,6 +196,7 @@ describe('SubscriptionService', () => {
     billingEmailPublisher as never,
     customerTrustScoreService as never,
     subscriptionPeriodChargeService as never,
+    sshExecutor as never,
   );
 
   beforeEach(() => {
@@ -228,6 +233,8 @@ describe('SubscriptionService', () => {
         return info?.publicIp || undefined;
       },
     );
+    sshExecutor.waitUntilReachable.mockResolvedValue(undefined);
+    sshExecutor.exec.mockResolvedValue({ stdout: '', stderr: '', code: 0 });
   });
 
   // Provisioning is deferred to a job: after createSubscription records a pending item, this
@@ -1098,6 +1105,131 @@ describe('SubscriptionService', () => {
       expect(hostnameReservationService.reserveHostname).toHaveBeenCalledWith('item-1');
       expect(provisioningService.provision).toHaveBeenCalled();
       expect(itemsRepository.updateProviderReference).toHaveBeenCalledWith('item-1', 'srv-1');
+      expect(sshExecutor.waitUntilReachable).toHaveBeenCalledWith('1.2.3.4', 22, {
+        timeoutMs: 29_000,
+      });
+      expect(sshExecutor.exec).toHaveBeenCalledWith('1.2.3.4', 22, 'root', expect.any(String), 'true', {
+        commandTimeoutMs: 15_000,
+      });
+      expect(itemsRepository.updateProvisioningStatus).toHaveBeenCalledWith('item-1', 'active');
+    });
+
+    it('retries SSH login until success within the retry window', async () => {
+      jest.useFakeTimers();
+      (itemsRepository.findByIdWithRelations as jest.Mock).mockResolvedValue({
+        id: 'item-1',
+        serviceTypeId: 'stype-1',
+        provisioningStatus: 'pending',
+        providerReference: undefined,
+        configSnapshot: {
+          ...controllerProvisioningDefaults,
+          region: 'fsn1',
+          serverType: 'cx23',
+        },
+        subscription: {
+          id: 'sub-1',
+          userId: 'user-1',
+          planId: 'plan-1',
+          status: SubscriptionStatus.ACTIVE,
+          autoBackorder: false,
+        },
+        serviceType: { id: 'stype-1', provider: 'hetzner' },
+      });
+      (provisioningService.provision as jest.Mock).mockResolvedValue({ serverId: 'srv-1' });
+      sshExecutor.exec
+        .mockResolvedValueOnce({ stdout: '', stderr: 'Permission denied', code: 255 })
+        .mockResolvedValueOnce({ stdout: '', stderr: '', code: 0 });
+
+      const promise = service.provisionSubscriptionItem('item-1');
+      await jest.runAllTimersAsync();
+      await promise;
+
+      expect(sshExecutor.exec).toHaveBeenCalledTimes(2);
+      expect(itemsRepository.updateProvisioningStatus).toHaveBeenCalledWith('item-1', 'active');
+      jest.useRealTimers();
+    });
+
+    it('continues provisioning when SSH login probe fails after server creation', async () => {
+      jest.useFakeTimers();
+      (itemsRepository.findByIdWithRelations as jest.Mock).mockResolvedValue({
+        id: 'item-1',
+        serviceTypeId: 'stype-1',
+        provisioningStatus: 'pending',
+        providerReference: undefined,
+        configSnapshot: {
+          ...controllerProvisioningDefaults,
+          region: 'fsn1',
+          serverType: 'cx23',
+        },
+        subscription: {
+          id: 'sub-1',
+          userId: 'user-1',
+          planId: 'plan-1',
+          status: SubscriptionStatus.ACTIVE,
+          autoBackorder: false,
+        },
+        serviceType: { id: 'stype-1', provider: 'hetzner' },
+      });
+      (provisioningService.provision as jest.Mock).mockResolvedValue({ serverId: 'srv-1' });
+      sshExecutor.exec.mockResolvedValue({ stdout: '', stderr: 'Permission denied', code: 255 });
+
+      const promise = service.provisionSubscriptionItem('item-1');
+      await jest.runAllTimersAsync();
+      await promise;
+
+      expect(sshExecutor.exec.mock.calls.length).toBeGreaterThan(1);
+      expect(itemsRepository.updateProviderReference).toHaveBeenCalledWith('item-1', 'srv-1');
+      expect(itemsRepository.updateProvisioningStatus).toHaveBeenCalledWith('item-1', 'active');
+      expect(itemsRepository.updateProvisioningStatus).not.toHaveBeenCalledWith('item-1', 'failed');
+      expect(cloudflareDnsService.createARecord).toHaveBeenCalledWith('awesome-armadillo-abc12', '1.2.3.4');
+      jest.useRealTimers();
+    });
+
+    it('skips SSH readiness when the provisioned server has no public IP', async () => {
+      (itemsRepository.findByIdWithRelations as jest.Mock).mockResolvedValue({
+        id: 'item-1',
+        serviceTypeId: 'stype-1',
+        provisioningStatus: 'pending',
+        providerReference: undefined,
+        configSnapshot: {
+          ...controllerProvisioningDefaults,
+          region: 'fsn1',
+          serverType: 'cx23',
+        },
+        subscription: {
+          id: 'sub-1',
+          userId: 'user-1',
+          planId: 'plan-1',
+          status: SubscriptionStatus.ACTIVE,
+          autoBackorder: false,
+        },
+        serviceType: { id: 'stype-1', provider: 'hetzner' },
+      });
+      (provisioningService.provision as jest.Mock).mockResolvedValue({ serverId: 'srv-1' });
+      provisioningService.getServerInfo.mockResolvedValue({ publicIp: undefined });
+      provisioningService.ensurePublicIpForDns.mockResolvedValue(undefined);
+
+      await service.provisionSubscriptionItem('item-1');
+
+      expect(sshExecutor.waitUntilReachable).not.toHaveBeenCalled();
+      expect(sshExecutor.exec).not.toHaveBeenCalled();
+      expect(itemsRepository.updateProvisioningStatus).toHaveBeenCalledWith('item-1', 'active');
+      expect(cloudflareDnsService.createARecord).not.toHaveBeenCalled();
+    });
+
+    it('skips SSH readiness for non-server providers', async () => {
+      (itemsRepository.findByIdWithRelations as jest.Mock).mockResolvedValue({
+        id: 'item-1',
+        provisioningStatus: 'pending',
+        subscription: { status: SubscriptionStatus.ACTIVE },
+        serviceType: { provider: 'manual' },
+      });
+
+      await service.provisionSubscriptionItem('item-1');
+
+      expect(provisioningService.provision).not.toHaveBeenCalled();
+      expect(sshExecutor.waitUntilReachable).not.toHaveBeenCalled();
+      expect(sshExecutor.exec).not.toHaveBeenCalled();
       expect(itemsRepository.updateProvisioningStatus).toHaveBeenCalledWith('item-1', 'active');
     });
   });

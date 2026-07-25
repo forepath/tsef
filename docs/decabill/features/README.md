@@ -62,8 +62,13 @@ Order service plans, manage lifecycle (cancel, resume), and provision cloud inst
 - Subscription creation with availability checks and provider config validation
 - Optional `promotionCode` at order time (validated before submit)
 - Cancel and resume with effective dates (`cancel_scheduled` vs final cancel)
+- Mid-life [config change](./subscription-config-change.md) (server type up-/downgrade and addon add/remove)
 - Subscription items with provisioning status and hostname reservation
 - Usage records for usage-based pricing (arrear plans only)
+
+### [Subscription Config Change](./subscription-config-change.md)
+
+Modify the configuration of an active subscription: in-place server type resize and addon add/remove, with prorated billing and async BullMQ processing.
 
 ### [Advance billing and yearly interval](./advance-billing-and-yearly-interval.md)
 

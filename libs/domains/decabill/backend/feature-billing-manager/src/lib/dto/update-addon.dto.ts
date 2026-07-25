@@ -41,6 +41,10 @@ export class UpdateAddonDto {
   scriptTemplate?: string | null;
 
   @IsOptional()
+  @IsString({ message: 'Deprovision script template must be a string' })
+  deprovisionScriptTemplate?: string | null;
+
+  @IsOptional()
   @IsObject({ message: 'Config schema must be an object' })
   configSchema?: Record<string, unknown>;
 

@@ -113,7 +113,7 @@ For Hetzner and DigitalOcean, `region` and `location` are treated as aliases dur
 
 When `allowCustomerServerTypeSelection` is true **and** the effective provider schema has `basePriceFromField: 'serverType'`, admins configure `allowedServerTypes` and customers may pass `serverType` in `POST /subscriptions` `requestedConfig`. The value must be in `allowedServerTypes`; otherwise the request is rejected. When the flag is false, `serverType` is stripped from `requestedConfig` before merge.
 
-The resolved server type’s `priceMonthly` is snapshotted as `billingBasePrice` on subscription items for recurring billing and withdrawal refunds.
+When customer server type selection is enabled, the resolved server type’s `priceMonthly` is snapshotted as `billingBasePrice` on subscription items for recurring billing and withdrawal refunds. Pricing preview follows the same rule: live catalog prices override `basePrice` only when selection is enabled. When selection is disabled, commercial pricing uses the plan’s stored `basePrice` even if `providerConfigDefaults` still contains a provisioning `serverType`.
 
 ### CloudInit Configs Admin Route
 

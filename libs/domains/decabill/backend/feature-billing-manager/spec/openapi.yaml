@@ -1696,6 +1696,103 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/config-change/preview:
+    post:
+      summary: Preview a subscription configuration change
+      operationId: previewSubscriptionConfigChange
+      description: |
+        Validates a mid-life configuration change (server type resize, addon add/remove) and returns
+        the price delta, the prorated immediate adjustment, and the billing disclaimer the customer
+        must accept. Rejections carry a stable machine-readable `code`.
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestDto'
+      responses:
+        '200':
+          description: Configuration change preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangePreviewResponse'
+        '400':
+          description: Configuration change not permitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/config-change:
+    post:
+      summary: Request a subscription configuration change
+      operationId: requestSubscriptionConfigChange
+      description: |
+        Moves the subscription to `pending_config_change` and records a pending change run.
+        The change is applied asynchronously; poll the returned run for its status.
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestDto'
+      responses:
+        '201':
+          description: Configuration change accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeResponse'
+        '400':
+          description: Configuration change not permitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/config-change/eligibility:
+    get:
+      summary: Get configuration change eligibility
+      operationId: getSubscriptionConfigChangeEligibility
+      description: |
+        Reports whether the subscription can currently be reconfigured, plus the server types and
+        addons the plan offers. Provider capabilities are fail-closed.
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+      responses:
+        '200':
+          description: Configuration change eligibility
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeEligibility'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /subscriptions/{subscriptionId}/items:
     get:
       summary: List subscription items
@@ -5116,6 +5213,119 @@ components:
       type: object
       properties:
         reason: { type: string }
+    ConfigChangeRequestDto:
+      type: object
+      description: |
+        Mid-life configuration change for an active subscription. Location is intentionally not
+        changeable: moving a provisioned server across regions is a re-provision, not an in-place change.
+      properties:
+        serverType:
+          type: string
+          description: Target provider server type; must be offered by the plan.
+        addAddonIds:
+          type: array
+          items: { type: string, format: uuid }
+        removeAddonIds:
+          type: array
+          items: { type: string, format: uuid }
+        addonConfigs:
+          type: object
+          description: Per-addon config keyed by addon UUID; only allowed for addons being added.
+          additionalProperties:
+            type: object
+            additionalProperties: { type: string }
+    ConfigChangeEligibility:
+      type: object
+      required:
+        - canRequestChange
+        - hasPendingChange
+        - allowedServerTypes
+        - supportsServerTypeUpgrade
+        - supportsServerTypeDowngrade
+        - availableAddonIds
+        - activeAddonIds
+      properties:
+        canRequestChange: { type: boolean }
+        reasonCode:
+          type: string
+          nullable: true
+          enum:
+            - CONFIG_CHANGE_NOT_ELIGIBLE
+            - CONFIG_CHANGE_NOOP
+            - CONFIG_CHANGE_SERVER_TYPE_UNSUPPORTED
+            - CONFIG_CHANGE_SERVER_TYPE_LATERAL_UNSUPPORTED
+            - CONFIG_CHANGE_ADDON_INVALID
+            - CONFIG_CHANGE_ADDON_CONFIG_IMMUTABLE
+            - CONFIG_CHANGE_FAILED
+        reason: { type: string, nullable: true }
+        hasPendingChange: { type: boolean }
+        currentServerType: { type: string, nullable: true }
+        allowedServerTypes:
+          type: array
+          items: { type: string }
+        supportsServerTypeUpgrade: { type: boolean }
+        supportsServerTypeDowngrade: { type: boolean }
+        availableAddonIds:
+          type: array
+          items: { type: string, format: uuid }
+        activeAddonIds:
+          type: array
+          items: { type: string, format: uuid }
+    ConfigChangeAmounts:
+      type: object
+      properties:
+        currency: { type: string }
+        currentPeriodNet: { type: number }
+        newPeriodNet: { type: number }
+        periodDeltaNet: { type: number }
+        immediateAdjustmentNet:
+          type: number
+          description: Prorated net settled with the change; positive is charged, negative is credited.
+        remainingPeriodRatio:
+          type: number
+          description: Share of the current billing period still unconsumed, in [0, 1].
+    ConfigChangeDisclaimer:
+      type: object
+      properties:
+        kind: { type: string, enum: [charge, credit, none] }
+        effectiveAt: { type: string, format: date-time }
+        notes:
+          type: array
+          items: { type: string }
+    ConfigChangeDiscount:
+      type: object
+      properties:
+        redemptionId: { type: string, format: uuid }
+        code: { type: string }
+        advantageType: { type: string }
+        remainingBillingPeriods: { type: integer, nullable: true }
+        remainingAmountNet: { type: number, nullable: true }
+    ConfigChangePreviewResponse:
+      type: object
+      properties:
+        eligibility: { $ref: '#/components/schemas/ConfigChangeEligibility' }
+        amounts: { $ref: '#/components/schemas/ConfigChangeAmounts' }
+        disclaimer: { $ref: '#/components/schemas/ConfigChangeDisclaimer' }
+        discounts:
+          type: array
+          items: { $ref: '#/components/schemas/ConfigChangeDiscount' }
+    ConfigChangeResponse:
+      type: object
+      description: Status view of a config change run; never contains the requested payload.
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [pending, processing, completed, failed] }
+        errorCode: { type: string, nullable: true }
+        errorMessage: { type: string, nullable: true }
+        appliedSteps:
+          type: array
+          items: { type: string }
+        billingOutcome:
+          type: string
+          nullable: true
+          enum: [none, charged, credited, deferred]
+        requestedAt: { type: string, format: date-time }
+        processedAt: { type: string, format: date-time, nullable: true }
     SubscriptionItemResponse:
       type: object
       properties:
@@ -5278,6 +5488,7 @@ components:
         implementationType: { type: string, enum: [module, cloud_init_script] }
         moduleKey: { type: string, nullable: true }
         scriptTemplate: { type: string, nullable: true }
+        deprovisionScriptTemplate: { type: string, nullable: true }
         configSchema: { type: object }
         defaultValues: { type: object, additionalProperties: { type: string } }
         compatibleProviders:
@@ -5318,6 +5529,7 @@ components:
         implementationType: { type: string, enum: [module, cloud_init_script] }
         moduleKey: { type: string }
         scriptTemplate: { type: string }
+        deprovisionScriptTemplate: { type: string }
         configSchema: { type: object }
         defaultValues: { type: object, additionalProperties: { type: string } }
         compatibleProviders:
@@ -5335,6 +5547,7 @@ components:
         implementationType: { type: string, enum: [module, cloud_init_script] }
         moduleKey: { type: string, nullable: true }
         scriptTemplate: { type: string, nullable: true }
+        deprovisionScriptTemplate: { type: string, nullable: true }
         configSchema: { type: object }
         defaultValues: { type: object, additionalProperties: { type: string } }
         compatibleProviders:

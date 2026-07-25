@@ -1,0 +1,12 @@
+{{#> email-layout}}
+<h1 class="email-title">Configuration change received</h1>
+<p>Dear {{recipientName}},</p>
+<p>
+  We received your configuration change for the subscription "<strong>{{planName}}</strong>"{{#if subscriptionNumber}}
+  (<strong>{{subscriptionNumber}}</strong>){{/if}}.
+</p>
+<p>
+  The change is being applied now. We will send another email as soon as it is finished. Your service may restart
+  briefly while the change is applied.
+</p>
+{{/email-layout}}

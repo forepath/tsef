@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-24T18:02:25.363Z",
+  "generatedAt": "2026-07-25T15:21:44.141Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -2958,6 +2958,23 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/subscription-config-change",
+      "type": "state",
+      "attrs": {
+        "path": "libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/subscription-config-change",
+        "languageOrKind": "ts",
+        "projectName": "decabill-frontend-data-access-billing-console",
+        "sliceName": "subscription-config-change",
+        "memberFiles": [
+          "subscription-config-change.actions.ts",
+          "subscription-config-change.effects.ts",
+          "subscription-config-change.facade.ts",
+          "subscription-config-change.reducer.ts",
+          "subscription-config-change.selectors.ts"
+        ]
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/subscription-server-info",
       "type": "state",
       "attrs": {
@@ -5319,6 +5336,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/docs/sequence-subscription-config-change.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/docs/sequence-subscription-config-change.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/docs/sequence-subscription-item-update.mmd",
       "type": "diagram",
       "attrs": {
@@ -5674,6 +5700,33 @@
       "type": "dto",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/cloud-init-config-response.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/config-change-preview-response.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/config-change-preview-response.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/config-change-request.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/config-change-request.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/config-change-response.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/config-change-response.dto.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -6268,6 +6321,15 @@
       "type": "entity",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-addon.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-config-change.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-config-change.entity.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -6912,6 +6974,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-config-changes.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-config-changes.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
       "type": "repository",
       "attrs": {
@@ -7501,6 +7572,33 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-charge-period.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "type": "job",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -10231,6 +10329,48 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-config-change-applied",
+      "type": "email",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-config-change-applied",
+        "languageOrKind": "template",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "templateName": "subscription-config-change-applied",
+        "memberFiles": [
+          "subscription-config-change-applied.template.html",
+          "subscription-config-change-applied.template.txt"
+        ]
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-config-change-failed",
+      "type": "email",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-config-change-failed",
+        "languageOrKind": "template",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "templateName": "subscription-config-change-failed",
+        "memberFiles": [
+          "subscription-config-change-failed.template.html",
+          "subscription-config-change-failed.template.txt"
+        ]
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-config-change-requested",
+      "type": "email",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-config-change-requested",
+        "languageOrKind": "template",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "templateName": "subscription-config-change-requested",
+        "memberFiles": [
+          "subscription-config-change-requested.template.html",
+          "subscription-config-change-requested.template.txt"
+        ]
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-created",
       "type": "email",
       "attrs": {
@@ -11165,6 +11305,14 @@
       "type": "doc",
       "attrs": {
         "path": "docs/decabill/features/service-types-and-plans.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/decabill/features/subscription-config-change.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/subscription-config-change.md",
         "languageOrKind": "md"
       }
     },
@@ -13934,6 +14082,39 @@
       }
     },
     {
+      "id": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change/preview",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/subscriptions/{subscriptionId}/config-change/preview",
+        "operationId": "previewSubscriptionConfigChange",
+        "summary": "Preview a subscription configuration change",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/subscriptions/{subscriptionId}/config-change",
+        "operationId": "requestSubscriptionConfigChange",
+        "summary": "Request a subscription configuration change",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/subscriptions/{subscriptionId}/config-change/eligibility",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/subscriptions/{subscriptionId}/config-change/eligibility",
+        "operationId": "getSubscriptionConfigChangeEligibility",
+        "summary": "Get configuration change eligibility",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
       "type": "endpoint",
       "attrs": {
@@ -15398,6 +15579,33 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "subscription.canceled",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.config_change_failed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.config_change_failed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.config_change_requested",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.config_change_requested",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.config_changed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.config_changed",
         "projectName": "decabill-backend-feature-billing-manager",
         "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
       }
@@ -24142,6 +24350,76 @@
       }
     },
     {
+      "id": "concept:decabill-subscription-config-change-up-downgrade",
+      "type": "concept",
+      "attrs": {
+        "title": "Subscription Config Change (Up-/Downgrade)",
+        "docPath": "docs/decabill/features/subscription-config-change.md",
+        "sectionAnchor": "subscription-config-change-up-downgrade",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-eligibility",
+      "type": "concept",
+      "attrs": {
+        "title": "Eligibility",
+        "docPath": "docs/decabill/features/subscription-config-change.md",
+        "sectionAnchor": "eligibility",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-provider-capabilities",
+      "type": "concept",
+      "attrs": {
+        "title": "Provider capabilities",
+        "docPath": "docs/decabill/features/subscription-config-change.md",
+        "sectionAnchor": "provider-capabilities",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-api",
+      "type": "concept",
+      "attrs": {
+        "title": "API",
+        "docPath": "docs/decabill/features/subscription-config-change.md",
+        "sectionAnchor": "api",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-async-processing",
+      "type": "concept",
+      "attrs": {
+        "title": "Async processing",
+        "docPath": "docs/decabill/features/subscription-config-change.md",
+        "sectionAnchor": "async-processing",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-billing",
+      "type": "concept",
+      "attrs": {
+        "title": "Billing",
+        "docPath": "docs/decabill/features/subscription-config-change.md",
+        "sectionAnchor": "billing",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-operations",
+      "type": "concept",
+      "attrs": {
+        "title": "Operations",
+        "docPath": "docs/decabill/features/subscription-config-change.md",
+        "sectionAnchor": "operations",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-subscriptions",
       "type": "concept",
       "attrs": {
@@ -24218,6 +24496,16 @@
         "title": "Pricing Preview",
         "docPath": "docs/decabill/features/subscriptions.md",
         "sectionAnchor": "pricing-preview",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-config-change-up-downgrade",
+      "type": "concept",
+      "attrs": {
+        "title": "Config Change (Up-/Downgrade)",
+        "docPath": "docs/decabill/features/subscriptions.md",
+        "sectionAnchor": "config-change-up-downgrade",
         "domain": "decabill"
       }
     },
@@ -28265,6 +28553,11 @@
     },
     {
       "from": "project:decabill-frontend-data-access-billing-console",
+      "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/subscription-config-change",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-frontend-data-access-billing-console",
       "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/subscription-server-info",
       "type": "contains"
     },
@@ -29460,6 +29753,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/docs/sequence-subscription-config-change.mmd",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/docs/sequence-subscription-item-update.mmd",
       "type": "contains"
     },
@@ -29656,6 +29954,21 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/cloud-init-config-response.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/config-change-preview-response.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/config-change-request.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/config-change-response.dto.ts",
       "type": "contains"
     },
     {
@@ -29986,6 +30299,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-addon.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-config-change.entity.ts",
       "type": "contains"
     },
     {
@@ -30345,6 +30663,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-config-changes.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
       "type": "contains"
     },
@@ -30671,6 +30994,21 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-charge-period.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
       "type": "contains"
     },
     {
@@ -32140,6 +32478,21 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-config-change-applied",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-config-change-failed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-config-change-requested",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-created",
       "type": "contains"
     },
@@ -33525,6 +33878,21 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change/preview",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/config-change/eligibility",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
       "type": "contains"
     },
@@ -34216,6 +34584,21 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.canceled",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.config_change_failed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.config_change_requested",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.config_changed",
       "type": "contains"
     },
     {
@@ -40139,6 +40522,66 @@
       "type": "contains"
     },
     {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-subscription-config-change-up-downgrade",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-eligibility",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-provider-capabilities",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-addons",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-ui",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-api",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-async-processing",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-billing",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-notifications",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-security",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-operations",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
+      "to": "concept:decabill-related",
+      "type": "contains"
+    },
+    {
       "from": "file:docs/decabill/features/subscriptions.md",
       "to": "concept:decabill-subscriptions",
       "type": "contains"
@@ -40181,6 +40624,11 @@
     {
       "from": "file:docs/decabill/features/subscriptions.md",
       "to": "concept:decabill-pricing-preview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/subscriptions.md",
+      "to": "concept:decabill-config-change-up-downgrade",
       "type": "contains"
     },
     {
@@ -43505,6 +43953,36 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change/preview",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change/preview",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/config-change/eligibility",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/config-change/eligibility",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
       "type": "implements"
     },
@@ -46604,6 +47082,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/usage.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/usage.service.ts",
       "type": "injects"
@@ -46921,6 +47404,21 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-lifecycle.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-module-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-lifecycle.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/addons.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-lifecycle.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provisioning.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-lifecycle.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/ssh-executor.service.ts",
       "type": "injects"
     },
     {
@@ -47306,6 +47804,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-document-archive.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/digitalocean-provisioning.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/ssh-executor.service.ts",
       "type": "injects"
     },
     {
@@ -47904,6 +48407,161 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/open-positions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/invoices.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/invoice-credit-documents.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-profiles.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/tax-calculation.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-tax-context.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/promotion-application.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-issuer-config.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-pdf.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-audit-log.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-config-changes.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/service-plans.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provider-server-types.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provisioning.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-lifecycle.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/service-plans.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-addons.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/addons.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-config-changes.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/promotion-redemptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/open-positions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provider-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provider-server-types.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/pricing.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-expiration.job-handler.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
       "type": "injects"
@@ -48176,6 +48834,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-period-charge.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/ssh-executor.service.ts",
       "type": "injects"
     },
     {
@@ -48826,6 +49489,11 @@
     {
       "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-provisioning.job-handler.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
       "type": "injects"
     },
     {
@@ -49750,6 +50418,16 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/public-withdrawal.service.ts",
       "type": "provides"
     },
@@ -49880,6 +50558,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-renewal-reminder.job-handler.ts",
       "type": "provides"
     },
@@ -49991,6 +50674,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-addons.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-config-changes.repository.ts",
       "type": "provides"
     },
     {
@@ -51006,6 +51694,21 @@
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscriptions.service.ts",
       "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/resume",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscriptions.service.ts",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/config-change/eligibility",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscriptions.service.ts",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change/preview",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscriptions.service.ts",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change",
       "type": "calls"
     },
     {
@@ -54495,6 +55198,21 @@
     },
     {
       "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change/preview",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/config-change",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/config-change/eligibility",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
       "type": "documents"
     },
@@ -54516,6 +55234,11 @@
     {
       "from": "concept:decabill-api-endpoints",
       "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/actions/restart",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:GET:/config",
       "type": "documents"
     },
     {
@@ -56124,6 +56847,36 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-provider-capabilities",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-operations",
+      "to": "api:HTTP:GET:/addons",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-operations",
+      "to": "api:HTTP:POST:/addons",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-subscriptions",
       "to": "api:HTTP:GET:/subscriptions",
       "type": "documents"
@@ -56306,6 +57059,16 @@
     {
       "from": "concept:decabill-pricing-preview",
       "to": "api:HTTP:POST:/pricing/preview",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-config-change-up-downgrade",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-config-change-up-downgrade",
+      "to": "api:HTTP:POST:/subscriptions",
       "type": "documents"
     },
     {
@@ -58040,6 +58803,11 @@
     },
     {
       "from": "file:docs/decabill/features/service-types-and-plans.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/decabill/features/subscription-config-change.md",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -61969,6 +62737,41 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:decabill-subscription-config-change-up-downgrade",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-eligibility",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-provider-capabilities",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-api",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-async-processing",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-billing",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-operations",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:decabill-subscriptions",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -62005,6 +62808,11 @@
     },
     {
       "from": "concept:decabill-pricing-preview",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-config-change-up-downgrade",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

@@ -65,11 +65,10 @@ export class AddonsController {
       defaultValues: dto.defaultValues,
     });
 
-    this.assertScriptTemplateInterpolable(
-      dto.implementationType,
-      dto.scriptTemplate,
-      sanitized.configSchema.environmentVariables.map((field) => field.key),
-    );
+    const envKeys = sanitized.configSchema.environmentVariables.map((field) => field.key);
+
+    this.assertScriptTemplateInterpolable(dto.implementationType, dto.scriptTemplate, envKeys);
+    this.assertScriptTemplateInterpolable(dto.implementationType, dto.deprovisionScriptTemplate, envKeys);
 
     const row = await this.addonsRepository.create({
       key: dto.key.trim(),
@@ -78,6 +77,8 @@ export class AddonsController {
       implementationType: dto.implementationType,
       moduleKey: dto.implementationType === 'module' ? dto.moduleKey?.trim() || null : null,
       scriptTemplate: dto.implementationType === 'cloud_init_script' ? dto.scriptTemplate?.trim() || null : null,
+      deprovisionScriptTemplate:
+        dto.implementationType === 'cloud_init_script' ? dto.deprovisionScriptTemplate?.trim() || null : null,
       configSchema: { ...sanitized.configSchema } as Record<string, unknown>,
       configDefaultValues:
         Object.keys(sanitized.configDefaultValues).length > 0 ? sanitized.configDefaultValues : undefined,
@@ -115,6 +116,12 @@ export class AddonsController {
     updatePayload.scriptTemplate =
       validated.implementationType === 'cloud_init_script' ? validated.scriptTemplate?.trim() || null : null;
 
+    const mergedDeprovisionScriptTemplate =
+      dto.deprovisionScriptTemplate !== undefined ? dto.deprovisionScriptTemplate : existing.deprovisionScriptTemplate;
+
+    updatePayload.deprovisionScriptTemplate =
+      validated.implementationType === 'cloud_init_script' ? mergedDeprovisionScriptTemplate?.trim() || null : null;
+
     if (
       dto.configSchema !== undefined ||
       dto.defaultValues !== undefined ||
@@ -141,6 +148,11 @@ export class AddonsController {
     const envKeys = parseAddonConfigFields(schemaForScript).map((field) => field.key);
 
     this.assertScriptTemplateInterpolable(validated.implementationType, scriptTemplate ?? undefined, envKeys);
+    this.assertScriptTemplateInterpolable(
+      validated.implementationType,
+      updatePayload.deprovisionScriptTemplate ?? undefined,
+      envKeys,
+    );
 
     if (dto.compatibleProviders !== undefined) {
       updatePayload.compatibleProviders = dto.compatibleProviders.map((p) => p.trim()).filter(Boolean);
@@ -209,6 +221,7 @@ export class AddonsController {
       implementationType: row.implementationType,
       moduleKey: row.moduleKey ?? null,
       scriptTemplate: row.scriptTemplate ?? null,
+      deprovisionScriptTemplate: row.deprovisionScriptTemplate ?? null,
       configSchema: row.configSchema ?? {},
       ...(includeDefaults && row.configDefaultValues ? { defaultValues: { ...row.configDefaultValues } } : {}),
       compatibleProviders: row.compatibleProviders ?? [],

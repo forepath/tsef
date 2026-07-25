@@ -1,0 +1,5 @@
+Dear {{recipientName}},
+
+The configuration change for your subscription "{{planName}}"{{#if subscriptionNumber}} ({{subscriptionNumber}}){{/if}} could not be completed.
+
+Your subscription is active again and you were not charged for this change. Please try again from your billing account, or contact support if the problem persists.

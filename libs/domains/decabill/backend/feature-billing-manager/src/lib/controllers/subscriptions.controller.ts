@@ -13,16 +13,23 @@ import {
 } from '@nestjs/common';
 
 import { CancelSubscriptionDto } from '../dto/cancel-subscription.dto';
+import { ConfigChangeEligibilityDto, ConfigChangePreviewResponseDto } from '../dto/config-change-preview-response.dto';
+import { ConfigChangeRequestDto } from '../dto/config-change-request.dto';
+import { ConfigChangeResponseDto } from '../dto/config-change-response.dto';
 import { CreateSubscriptionDto } from '../dto/create-subscription.dto';
 import { ResumeSubscriptionDto } from '../dto/resume-subscription.dto';
 import { SubscriptionResponseDto } from '../dto/subscription-response.dto';
 import { WithdrawSubscriptionDto } from '../dto/withdraw-subscription.dto';
+import { SubscriptionConfigChangeService } from '../services/subscription-config-change.service';
 import { SubscriptionService } from '../services/subscription.service';
 import { getUserFromRequest, type RequestWithUser } from '../utils/billing-access.utils';
 
 @Controller('subscriptions')
 export class SubscriptionsController {
-  constructor(private readonly subscriptionService: SubscriptionService) {}
+  constructor(
+    private readonly subscriptionService: SubscriptionService,
+    private readonly subscriptionConfigChangeService: SubscriptionConfigChangeService,
+  ) {}
 
   @RequireScopes('subscriptions:write')
   @Post()
@@ -136,5 +143,52 @@ export class SubscriptionsController {
     const row = await this.subscriptionService.resumeSubscription(id, userInfo.userId);
 
     return (await this.subscriptionService.mapManyToResponses([row]))[0];
+  }
+
+  @RequireScopes('subscriptions:read')
+  @Post(':id/config-change/preview')
+  async previewConfigChange(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() dto: ConfigChangeRequestDto,
+    @Req() req?: RequestWithUser,
+  ): Promise<ConfigChangePreviewResponseDto> {
+    const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.subscriptionConfigChangeService.preview(id, userInfo.userId, dto);
+  }
+
+  @RequireScopes('subscriptions:write')
+  @Post(':id/config-change')
+  async requestConfigChange(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() dto: ConfigChangeRequestDto,
+    @Req() req?: RequestWithUser,
+  ): Promise<ConfigChangeResponseDto> {
+    const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.subscriptionConfigChangeService.submit(id, userInfo.userId, dto);
+  }
+
+  @RequireScopes('subscriptions:read')
+  @Get(':id/config-change/eligibility')
+  async getConfigChangeEligibility(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Req() req?: RequestWithUser,
+  ): Promise<ConfigChangeEligibilityDto> {
+    const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.subscriptionConfigChangeService.getEligibility(id, userInfo.userId);
   }
 }

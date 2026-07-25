@@ -19,6 +19,8 @@ describe('ProviderRegistryService', () => {
         displayName: 'Hetzner Cloud',
         configSchema: { required: ['location'] },
         supportsAddons: false,
+        supportsServerTypeUpgrade: false,
+        supportsServerTypeDowngrade: false,
       },
     ]);
   });
@@ -47,7 +49,15 @@ describe('ProviderRegistryService', () => {
   it('should overwrite when registering same id twice', () => {
     service.register({ id: 'hetzner', displayName: 'Hetzner Cloud' });
     service.register({ id: 'hetzner', displayName: 'Hetzner Cloud v2' });
-    expect(service.getProviders()).toEqual([{ id: 'hetzner', displayName: 'Hetzner Cloud v2', supportsAddons: false }]);
+    expect(service.getProviders()).toEqual([
+      {
+        id: 'hetzner',
+        displayName: 'Hetzner Cloud v2',
+        supportsAddons: false,
+        supportsServerTypeUpgrade: false,
+        supportsServerTypeDowngrade: false,
+      },
+    ]);
   });
 
   it('defaults supportsAddons to false and opts in when true', () => {
@@ -55,6 +65,20 @@ describe('ProviderRegistryService', () => {
     service.register({ id: 'hetzner', displayName: 'Hetzner', supportsAddons: true });
     expect(service.getProvider('legacy')?.supportsAddons).toBe(false);
     expect(service.getProvider('hetzner')?.supportsAddons).toBe(true);
+  });
+
+  it('defaults server type upgrade/downgrade to false and opts in when true', () => {
+    service.register({ id: 'legacy', displayName: 'Legacy' });
+    service.register({
+      id: 'hetzner',
+      displayName: 'Hetzner',
+      supportsServerTypeUpgrade: true,
+      supportsServerTypeDowngrade: true,
+    });
+    expect(service.getProvider('legacy')?.supportsServerTypeUpgrade).toBe(false);
+    expect(service.getProvider('legacy')?.supportsServerTypeDowngrade).toBe(false);
+    expect(service.getProvider('hetzner')?.supportsServerTypeUpgrade).toBe(true);
+    expect(service.getProvider('hetzner')?.supportsServerTypeDowngrade).toBe(true);
   });
 
   it('hasProvider returns false for unregistered id', () => {

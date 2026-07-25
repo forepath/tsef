@@ -27,6 +27,18 @@ export class OpenPositionEntity {
   @Column({ type: 'boolean', name: 'skip_if_no_billable_amount', default: true })
   skipIfNoBillableAmount!: boolean;
 
+  /** Signed net adjustment (positive = extra charge, negative = credit) for non-recurring corrections. */
+  @Column({ type: 'numeric', precision: 12, scale: 4, nullable: true, name: 'adjustment_net' })
+  adjustmentNet?: string | null;
+
+  /** Discriminator for the adjustment source, e.g. `config_change_server_type`. */
+  @Column({ type: 'varchar', length: 64, nullable: true, name: 'adjustment_kind' })
+  adjustmentKind?: string | null;
+
+  /** Durable idempotency key for one-shot billing side effects (e.g. `config_change:{changeId}`). */
+  @Column({ type: 'varchar', length: 128, nullable: true, name: 'source_ref' })
+  sourceRef?: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

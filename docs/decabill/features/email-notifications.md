@@ -32,26 +32,29 @@ If no company name is resolved, header and footer are omitted. On Decabill, leav
 
 ## Event catalog (implemented)
 
-| Event                               | Template                        | Trigger                              |
-| ----------------------------------- | ------------------------------- | ------------------------------------ |
-| `invoice.issued`                    | `invoice-issued`                | Invoice issuance / project billing   |
-| `invoice.voided`                    | `invoice-voided`                | Invoice void                         |
-| `invoice.partial_credit_issued`     | `invoice-partial-credit`        | Statutory withdrawal credit          |
-| `subscription.created`              | `subscription-created`          | Order confirmation on subscribe      |
-| `subscription.renewal_reminder`     | `subscription-renewal-reminder` | Renewal / next-charge reminder job   |
-| `withdrawal.confirmation_requested` | `withdrawal-confirmation`       | Public withdrawal OTP                |
-| `payment.succeeded`                 | `payment-succeeded`             | Payment webhook success              |
-| `payment.failed`                    | `payment-failed`                | Payment webhook failure              |
-| `subscription.cancel_scheduled`     | `subscription-cancel-scheduled` | Cancel request (pending cancel)      |
-| `subscription.canceled`             | `subscription-canceled`         | Final cancel teardown (not withdraw) |
-| `subscription.resumed`              | `subscription-resumed`          | Resume from pending cancel           |
-| `subscription.withdrawn`            | `subscription-withdrawn`        | Statutory withdrawal teardown done   |
-| `addon.activated`                   | `addon-activated`               | Addon activated after provision      |
-| `addon.deactivated`                 | `addon-deactivated`             | Addon deactivated on teardown        |
-| `addon.provision_failed`            | `addon-provision-failed`        | Addon module provision failed        |
-| `addon.teardown_failed`             | `addon-teardown-failed`         | Addon module teardown failed         |
-| `user.email_confirmation_requested` | `email-confirmation`            | Identity registration / email change |
-| `user.password_reset_requested`     | `password-reset`                | Password reset                       |
+| Event                                  | Template                               | Trigger                              |
+| -------------------------------------- | -------------------------------------- | ------------------------------------ |
+| `invoice.issued`                       | `invoice-issued`                       | Invoice issuance / project billing   |
+| `invoice.voided`                       | `invoice-voided`                       | Invoice void                         |
+| `invoice.partial_credit_issued`        | `invoice-partial-credit`               | Statutory withdrawal credit          |
+| `subscription.created`                 | `subscription-created`                 | Order confirmation on subscribe      |
+| `subscription.renewal_reminder`        | `subscription-renewal-reminder`        | Renewal / next-charge reminder job   |
+| `withdrawal.confirmation_requested`    | `withdrawal-confirmation`              | Public withdrawal OTP                |
+| `payment.succeeded`                    | `payment-succeeded`                    | Payment webhook success              |
+| `payment.failed`                       | `payment-failed`                       | Payment webhook failure              |
+| `subscription.cancel_scheduled`        | `subscription-cancel-scheduled`        | Cancel request (pending cancel)      |
+| `subscription.canceled`                | `subscription-canceled`                | Final cancel teardown (not withdraw) |
+| `subscription.resumed`                 | `subscription-resumed`                 | Resume from pending cancel           |
+| `subscription.withdrawn`               | `subscription-withdrawn`               | Statutory withdrawal teardown done   |
+| `subscription.config_change_requested` | `subscription-config-change-requested` | Config change accepted, apply queued |
+| `subscription.config_changed`          | `subscription-config-change-applied`   | Config change applied by the worker  |
+| `subscription.config_change_failed`    | `subscription-config-change-failed`    | Config change could not be applied   |
+| `addon.activated`                      | `addon-activated`                      | Addon activated after provision      |
+| `addon.deactivated`                    | `addon-deactivated`                    | Addon deactivated on teardown        |
+| `addon.provision_failed`               | `addon-provision-failed`               | Addon module provision failed        |
+| `addon.teardown_failed`                | `addon-teardown-failed`                | Addon module teardown failed         |
+| `user.email_confirmation_requested`    | `email-confirmation`                   | Identity registration / email change |
+| `user.password_reset_requested`        | `password-reset`                       | Password reset                       |
 
 ## Delivery & retries
 

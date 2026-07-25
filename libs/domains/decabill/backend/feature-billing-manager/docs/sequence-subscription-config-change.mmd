@@ -1,0 +1,42 @@
+sequenceDiagram
+    participant User
+    participant API as SubscriptionsController
+    participant Svc as SubscriptionConfigChangeService
+    participant DB as PostgreSQL
+    participant Coord as ConfigChangeCoordinator
+    participant Unit as ConfigChangeUnitJob
+    participant Prov as ProvisioningService
+    participant Addon as AddonLifecycleService
+    participant Bill as ConfigChangeBillingService
+
+    User->>API: POST /subscriptions/{id}/config-change
+    API->>Svc: submit(payload)
+    Svc->>DB: CAS active to pending_config_change
+    Svc->>DB: insert config_change pending (encrypted payload)
+    Svc-->>User: ConfigChangeResponse
+    Note over Svc: webhook/email config_change_requested
+
+    Coord->>DB: findPending + reclaim stuck
+    Coord->>Unit: enqueue unit (stable jobId)
+
+    Unit->>DB: claimForProcessing
+    alt Server type change
+        Unit->>Prov: changeServerType
+        Unit->>DB: commit configSnapshot + appliedSteps
+    end
+    alt Addon removals
+        Unit->>Addon: deprovisionMidLife
+        Unit->>DB: commit addon rows + appliedSteps
+    end
+    alt Addon additions
+        Unit->>Addon: provisionMidLife
+        Unit->>DB: commit addon rows + appliedSteps
+    end
+    alt All steps succeeded
+        Unit->>Bill: apply one-shot billing
+        Unit->>DB: completed + subscription active
+        Note over Unit: webhook/email config_changed
+    else Step failed
+        Unit->>DB: failed + subscription active
+        Note over Unit: webhook/email config_change_failed
+    end

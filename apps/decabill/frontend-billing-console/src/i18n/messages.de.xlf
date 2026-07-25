@@ -3258,6 +3258,178 @@
         <source>Learn more</source>
         <target>Mehr erfahren</target>
       </trans-unit>
+      <trans-unit id="featureBilling-subscriptionStatusPendingConfigChange" datatype="html">
+        <source>Applying configuration change</source>
+        <target>Konfigurationsänderung wird angewendet</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-modifyConfigButtonTitle" datatype="html">
+        <source>Upgrade or downgrade</source>
+        <target>Upgrade oder Downgrade</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeTitle" datatype="html">
+        <source> Upgrade or downgrade </source>
+        <target> Upgrade oder Downgrade </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeConfirmationTitle" datatype="html">
+        <source> Configuration change requested </source>
+        <target> Konfigurationsänderung angefordert </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeConfirmationMessage" datatype="html">
+        <source> We are applying your changes. You can close this dialog and track progress in your subscriptions list. The final amounts are settled with your next invoice. </source>
+        <target> Wir wenden Ihre Änderungen an. Sie können diesen Dialog schließen und den Fortschritt in Ihrer Abonnementliste verfolgen. Die endgültigen Beträge werden mit Ihrer nächsten Rechnung abgerechnet. </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeLoadingEligibility" datatype="html">
+        <source>Checking available changes…</source>
+        <target>Verfügbare Änderungen werden geprüft…</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeStepsAria" datatype="html">
+        <source>Configuration change steps</source>
+        <target>Schritte der Konfigurationsänderung</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeCurrentServerType" datatype="html">
+        <source>Current server type</source>
+        <target>Aktueller Servertyp</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeLoadingServerTypes" datatype="html">
+        <source>Loading server types…</source>
+        <target>Servertypen werden geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNewServerType" datatype="html">
+        <source>New server type</source>
+        <target>Neuer Servertyp</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeServerTypeHint" datatype="html">
+        <source> Your server keeps its current location. Choosing a server type at the same price is not possible. </source>
+        <target> Ihr Server behält seinen aktuellen Standort. Ein Servertyp zum gleichen Preis ist nicht möglich. </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNoServerTypes" datatype="html">
+        <source> No alternative server types are available for this plan. </source>
+        <target> Für diesen Plan sind keine alternativen Servertypen verfügbar. </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeAddonActive" datatype="html">
+        <source>Active</source>
+        <target>Aktiv</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeAddonRemoved" datatype="html">
+        <source>Will be removed</source>
+        <target>Wird entfernt</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeAddonConfigLocked" datatype="html">
+        <source> The configuration of this addon is locked and cannot be changed here. </source>
+        <target> Die Konfiguration dieses Add-ons ist gesperrt und kann hier nicht geändert werden. </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNoAddons" datatype="html">
+        <source> No addons are available for this plan. </source>
+        <target> Für diesen Plan sind keine Add-ons verfügbar. </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeSummaryTitle" datatype="html">
+        <source>Your changes</source>
+        <target>Ihre Änderungen</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNoChanges" datatype="html">
+        <source> You have not selected any changes yet. Go back and pick a different server type or adjust your addons. </source>
+        <target> Sie haben noch keine Änderungen ausgewählt. Gehen Sie zurück und wählen Sie einen anderen Servertyp oder passen Sie Ihre Add-ons an. </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeSummaryServerType" datatype="html">
+        <source>Server type</source>
+        <target>Servertyp</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeDisclaimerTitle" datatype="html">
+        <source> Billing information </source>
+        <target> Abrechnungshinweise </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeEffectiveAt" datatype="html">
+        <source>Effective</source>
+        <target>Wirksam</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeAdvisoryNote" datatype="html">
+        <source> All amounts shown are advisory. The final amounts are recalculated when the change is confirmed. </source>
+        <target> Alle angezeigten Beträge sind unverbindlich. Die endgültigen Beträge werden bei der Bestätigung der Änderung neu berechnet. </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangePriceTitle" datatype="html">
+        <source> Price preview </source>
+        <target> Preisvorschau </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeCurrentPeriodNet" datatype="html">
+        <source> Current period (net) </source>
+        <target> Aktuelle Periode (netto) </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNewPeriodNet" datatype="html">
+        <source> New period (net) </source>
+        <target> Neue Periode (netto) </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangePeriodDelta" datatype="html">
+        <source> Difference per period </source>
+        <target> Differenz pro Periode </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeImmediateAdjustment" datatype="html">
+        <source> Settled now (net) </source>
+        <target> Jetzt abgerechnet (netto) </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNoPreview" datatype="html">
+        <source> Select a change to see its effect on your price. </source>
+        <target> Wählen Sie eine Änderung, um deren Auswirkung auf Ihren Preis zu sehen. </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeDiscountsTitle" datatype="html">
+        <source> Active promotions </source>
+        <target> Aktive Aktionen </target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeDiscountPeriodsLeft" datatype="html">
+        <source>periods left</source>
+        <target>Perioden verbleibend</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeInProgress" datatype="html">
+        <source>Configuration change in progress, please wait</source>
+        <target>Konfigurationsänderung läuft, bitte warten</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeSubmit" datatype="html">
+        <source>Apply changes</source>
+        <target>Änderungen übernehmen</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeStepServerType" datatype="html">
+        <source>Server type</source>
+        <target>Servertyp</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeStepAddons" datatype="html">
+        <source>Addons</source>
+        <target>Add-ons</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeStepSummary" datatype="html">
+        <source>Summary</source>
+        <target>Zusammenfassung</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorNotEligible" datatype="html">
+        <source>This subscription cannot be reconfigured right now. Please try again once any pending change has finished.</source>
+        <target>Dieses Abonnement kann derzeit nicht umkonfiguriert werden. Bitte versuchen Sie es erneut, sobald eine laufende Änderung abgeschlossen ist.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorNoop" datatype="html">
+        <source>Select at least one change before continuing.</source>
+        <target>Wählen Sie mindestens eine Änderung aus, um fortzufahren.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorServerTypeUnsupported" datatype="html">
+        <source>This server type change is not supported for your service.</source>
+        <target>Dieser Wechsel des Servertyps wird für Ihren Dienst nicht unterstützt.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorServerTypeLateral" datatype="html">
+        <source>The selected server type costs the same as your current one. Choose a larger or a smaller server type.</source>
+        <target>Der ausgewählte Servertyp kostet genauso viel wie Ihr aktueller. Wählen Sie einen größeren oder kleineren Servertyp.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorAddonInvalid" datatype="html">
+        <source>One of the selected addons is not available for this subscription.</source>
+        <target>Eines der ausgewählten Add-ons ist für dieses Abonnement nicht verfügbar.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorAddonConfigImmutable" datatype="html">
+        <source>The configuration of an addon that is already active cannot be changed here.</source>
+        <target>Die Konfiguration eines bereits aktiven Add-ons kann hier nicht geändert werden.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorFailed" datatype="html">
+        <source>The configuration change could not be applied. Please try again later.</source>
+        <target>Die Konfigurationsänderung konnte nicht angewendet werden. Bitte versuchen Sie es später erneut.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorGeneric" datatype="html">
+        <source>The configuration change could not be processed. Please try again.</source>
+        <target>Die Konfigurationsänderung konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

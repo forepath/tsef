@@ -102,6 +102,14 @@ export class SubscriptionItemsRepository {
     return await qb.getOne();
   }
 
+  async updateConfigSnapshot(id: string, configSnapshot: Record<string, unknown>): Promise<SubscriptionItemEntity> {
+    const entity = await this.findByIdInTenant(id);
+
+    entity.configSnapshot = configSnapshot;
+
+    return await this.repository.save(entity);
+  }
+
   async updateServerInfoSnapshot(id: string, snapshot: Record<string, unknown>): Promise<SubscriptionItemEntity> {
     const entity = await this.findByIdInTenant(id);
 

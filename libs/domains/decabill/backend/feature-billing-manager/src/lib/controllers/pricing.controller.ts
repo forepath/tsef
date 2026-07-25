@@ -66,13 +66,21 @@ export class PricingController {
     };
     const plan = await this.servicePlansRepository.findByIdOrThrow(dto.planId);
     const taxCategory = resolvePlanTaxCategory(plan);
-    const requestedServerType = dto.requestedConfig?.['serverType'];
-    const serverTypeId =
-      typeof requestedServerType === 'string' && requestedServerType.trim()
-        ? requestedServerType.trim()
-        : typeof plan.providerConfigDefaults?.['serverType'] === 'string'
-          ? String(plan.providerConfigDefaults['serverType']).trim()
-          : '';
+    const allowCustomerServerTypeSelection = plan.allowCustomerServerTypeSelection === true;
+    // Live catalog prices apply only when customers can pick a server type. Fixed-price plans may
+    // still store a provisioning serverType in providerConfigDefaults — that must not override basePrice.
+    let serverTypeId = '';
+
+    if (allowCustomerServerTypeSelection) {
+      const requestedServerType = dto.requestedConfig?.['serverType'];
+
+      serverTypeId =
+        typeof requestedServerType === 'string' && requestedServerType.trim()
+          ? requestedServerType.trim()
+          : typeof plan.providerConfigDefaults?.['serverType'] === 'string'
+            ? String(plan.providerConfigDefaults['serverType']).trim()
+            : '';
+    }
 
     let planPricing = this.pricingService.calculate(plan);
 

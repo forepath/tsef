@@ -40,6 +40,7 @@ interface AddonForm {
   implementationType: AddonImplementationType;
   moduleKey: string;
   scriptTemplate: string;
+  deprovisionScriptTemplate: string;
   compatibleProviders: string[];
   basePrice: string;
   priceIntervalType: BillingIntervalType;
@@ -91,6 +92,7 @@ export class AddonsPageComponent implements OnInit {
   readonly intervalTypes: BillingIntervalType[] = ['hour', 'day', 'month', 'year'];
   readonly minRandomDefaultLength = MIN_RANDOM_DEFAULT_LENGTH;
   readonly scriptEnvHint = $localize`:@@featureAddons-scriptEnvHint:Use {{env.KEY}} placeholders in the script for configured environment variables.`;
+  readonly deprovisionScriptHint = $localize`:@@featureAddons-deprovisionScriptHint:Leave empty for status-only mid-life removal (no SSH reverse script).`;
   readonly compareProviderId = (left: string, right: string): boolean => left === right;
 
   createForm = this.defaultForm();
@@ -124,6 +126,7 @@ export class AddonsPageComponent implements OnInit {
           implementationType: detail.implementationType,
           moduleKey: detail.moduleKey ?? '',
           scriptTemplate: detail.scriptTemplate ?? '',
+          deprovisionScriptTemplate: detail.deprovisionScriptTemplate ?? '',
           compatibleProviders: [...detail.compatibleProviders],
           basePrice: detail.basePrice ?? '',
           priceIntervalType: detail.priceIntervalType ?? 'month',
@@ -215,6 +218,7 @@ export class AddonsPageComponent implements OnInit {
   onImplementationTypeChange(form: AddonForm): void {
     if (form.implementationType === 'module') {
       form.scriptTemplate = '';
+      form.deprovisionScriptTemplate = '';
       form.environmentVariableRows = [];
     } else {
       form.moduleKey = '';
@@ -305,6 +309,8 @@ export class AddonsPageComponent implements OnInit {
       implementationType: form.implementationType,
       moduleKey: form.implementationType === 'module' ? form.moduleKey.trim() : undefined,
       scriptTemplate: form.implementationType === 'cloud_init_script' ? form.scriptTemplate.trim() : undefined,
+      deprovisionScriptTemplate:
+        form.implementationType === 'cloud_init_script' ? form.deprovisionScriptTemplate.trim() : undefined,
       compatibleProviders: [...form.compatibleProviders],
       basePrice: price || undefined,
       priceIntervalType: price ? form.priceIntervalType : undefined,
@@ -326,6 +332,7 @@ export class AddonsPageComponent implements OnInit {
       implementationType: createDto.implementationType,
       moduleKey: createDto.moduleKey ?? null,
       scriptTemplate: createDto.scriptTemplate ?? null,
+      deprovisionScriptTemplate: createDto.deprovisionScriptTemplate ?? null,
       configSchema: createDto.configSchema,
       defaultValues: createDto.defaultValues,
       compatibleProviders: createDto.compatibleProviders,
@@ -430,6 +437,7 @@ export class AddonsPageComponent implements OnInit {
       implementationType: 'module',
       moduleKey: '',
       scriptTemplate: '',
+      deprovisionScriptTemplate: '',
       compatibleProviders: [],
       basePrice: '',
       priceIntervalType: 'month',

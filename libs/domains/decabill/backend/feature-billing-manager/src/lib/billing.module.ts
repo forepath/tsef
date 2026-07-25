@@ -110,6 +110,7 @@ import { ReservedHostnameEntity } from './entities/reserved-hostname.entity';
 import { AddonEntity } from './entities/addon.entity';
 import { CloudInitConfigEntity } from './entities/cloud-init-config.entity';
 import { SubscriptionAddonEntity } from './entities/subscription-addon.entity';
+import { SubscriptionConfigChangeEntity } from './entities/subscription-config-change.entity';
 import { ServicePlanEntity } from './entities/service-plan.entity';
 import { ServiceTypeEntity } from './entities/service-type.entity';
 import { SubscriptionItemEntity } from './entities/subscription-item.entity';
@@ -151,6 +152,7 @@ import { ReservedHostnamesRepository } from './repositories/reserved-hostnames.r
 import { AddonsRepository } from './repositories/addons.repository';
 import { CloudInitConfigsRepository } from './repositories/cloud-init-configs.repository';
 import { SubscriptionAddonsRepository } from './repositories/subscription-addons.repository';
+import { SubscriptionConfigChangesRepository } from './repositories/subscription-config-changes.repository';
 import { ServicePlansRepository } from './repositories/service-plans.repository';
 import { ServiceTypesRepository } from './repositories/service-types.repository';
 import { SubscriptionItemsRepository } from './repositories/subscription-items.repository';
@@ -228,6 +230,9 @@ import { SubscriptionWithdrawalJobHandler } from './services/subscription-withdr
 import { SubscriptionItemServerService } from './services/subscription-item-server.service';
 import { SubscriptionItemUpdateJobHandler } from './services/subscription-item-update.job-handler';
 import { SubscriptionRenewalReminderJobHandler } from './services/subscription-renewal-reminder.job-handler';
+import { SubscriptionConfigChangeService } from './services/subscription-config-change.service';
+import { SubscriptionConfigChangeBillingService } from './services/subscription-config-change-billing.service';
+import { SubscriptionConfigChangeJobHandler } from './services/subscription-config-change.job-handler';
 import { SubscriptionService } from './services/subscription.service';
 import { PublicWithdrawalService } from './services/public-withdrawal.service';
 import { TaxCalculationService } from './services/tax-calculation.service';
@@ -442,6 +447,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
       AddonEntity,
       SubscriptionAddonEntity,
       SubscriptionEntity,
+      SubscriptionConfigChangeEntity,
       SubscriptionItemEntity,
       ReservedHostnameEntity,
       UsageRecordEntity,
@@ -634,6 +640,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     PricingService,
     ProviderPricingService,
     SubscriptionService,
+    SubscriptionConfigChangeService,
+    SubscriptionConfigChangeBillingService,
     PublicWithdrawalService,
     UsageService,
     CustomerProfilesService,
@@ -660,6 +668,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionExpirationJobHandler,
     SubscriptionWithdrawalJobHandler,
     SubscriptionProvisioningJobHandler,
+    SubscriptionConfigChangeJobHandler,
     SubscriptionRenewalReminderJobHandler,
     OpenPositionInvoiceJobHandler,
     SubscriptionItemUpdateJobHandler,
@@ -684,6 +693,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     CloudInitConfigsRepository,
     AddonsRepository,
     SubscriptionAddonsRepository,
+    SubscriptionConfigChangesRepository,
     ServicePlansRepository,
     ServiceTypesRepository,
     ReservedHostnamesRepository,
@@ -743,6 +753,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     PricingService,
     ProviderPricingService,
     SubscriptionService,
+    SubscriptionConfigChangeService,
+    SubscriptionConfigChangeBillingService,
     PublicWithdrawalService,
     UsageService,
     CustomerProfilesService,
@@ -751,6 +763,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionExpirationJobHandler,
     SubscriptionWithdrawalJobHandler,
     SubscriptionProvisioningJobHandler,
+    SubscriptionConfigChangeJobHandler,
     SubscriptionRenewalReminderJobHandler,
     OpenPositionInvoiceJobHandler,
     SubscriptionItemUpdateJobHandler,
@@ -795,6 +808,8 @@ export class BillingModule implements OnModuleInit {
       configSchema: HETZNER_CONFIG_SCHEMA,
       envDefaultFields: HETZNER_ENV_DEFAULT_FIELDS,
       supportsAddons: true,
+      supportsServerTypeUpgrade: true,
+      supportsServerTypeDowngrade: true,
     });
     this.providerRegistry.register({
       id: 'digital-ocean',
@@ -802,6 +817,8 @@ export class BillingModule implements OnModuleInit {
       configSchema: DIGITALOCEAN_CONFIG_SCHEMA,
       envDefaultFields: DIGITALOCEAN_ENV_DEFAULT_FIELDS,
       supportsAddons: true,
+      supportsServerTypeUpgrade: true,
+      supportsServerTypeDowngrade: true,
     });
 
     await registerDynamicProviderMetadata({

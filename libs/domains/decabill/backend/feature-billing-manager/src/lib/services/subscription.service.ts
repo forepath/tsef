@@ -54,6 +54,7 @@ import { ProviderServerTypesService } from './provider-server-types.service';
 import { PricingService } from './pricing.service';
 import { ProvisioningService } from './provisioning.service';
 import { PromotionRedemptionService } from './promotion-redemption.service';
+import { SshExecutorService } from './ssh-executor.service';
 import { TaxCalculationService } from './tax-calculation.service';
 import { InvoiceTaxContextService } from './invoice-tax-context.service';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
@@ -61,6 +62,14 @@ import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { CustomerTrustScoreService } from '../trust-score/customer-trust-score.service';
 import { SubscriptionPeriodChargeService } from './subscription-period-charge.service';
 import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
+
+const PROVISIONING_SSH_USER = 'root';
+const PROVISIONING_SSH_PORT = 22;
+/** Lightweight auth probe; success means cloud-init at least installed our key and sshd accepts it. */
+const PROVISIONING_SSH_PROBE_COMMAND = 'true';
+const PROVISIONING_SSH_PROBE_TIMEOUT_MS = 15_000;
+const PROVISIONING_SSH_RETRY_INTERVAL_MS = 30_000;
+const PROVISIONING_SSH_RETRY_WINDOW_MS = 5 * 60_000;
 
 @Injectable()
 export class SubscriptionService {
@@ -94,6 +103,7 @@ export class SubscriptionService {
     private readonly billingEmailPublisher: BillingEmailPublisher,
     private readonly customerTrustScoreService: CustomerTrustScoreService,
     private readonly subscriptionPeriodChargeService: SubscriptionPeriodChargeService,
+    private readonly sshExecutor: SshExecutorService,
   ) {}
 
   async createSubscription(
@@ -212,15 +222,17 @@ export class SubscriptionService {
     const providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
 
     if (provider === 'hetzner' || provider === 'digital-ocean') {
-      const billingBasePrice = await resolveServerTypePriceMonthly(
-        this.providerServerTypesService,
-        provider,
-        serverType,
-        providerDefaults,
-      );
+      if (allowCustomerServerTypeSelection) {
+        const billingBasePrice = await resolveServerTypePriceMonthly(
+          this.providerServerTypesService,
+          provider,
+          serverType,
+          providerDefaults,
+        );
 
-      if (billingBasePrice != null) {
-        effectiveConfig[BILLING_BASE_PRICE_CONFIG_KEY] = billingBasePrice;
+        if (billingBasePrice != null) {
+          effectiveConfig[BILLING_BASE_PRICE_CONFIG_KEY] = billingBasePrice;
+        }
       }
     }
 
@@ -428,7 +440,6 @@ export class SubscriptionService {
 
       if (provisioned?.serverId) {
         await this.subscriptionItemsRepository.updateProviderReference(itemId, provisioned.serverId);
-        await this.subscriptionItemsRepository.updateProvisioningStatus(itemId, 'active');
         const serverInfo = await this.provisioningService.getServerInfo(provider, provisioned.serverId, credentials);
         const publicIp = await this.provisioningService.ensurePublicIpForDns(
           provider,
@@ -436,6 +447,22 @@ export class SubscriptionService {
           serverInfo,
           credentials,
         );
+
+        if (publicIp?.trim()) {
+          try {
+            await this.waitForProvisionedSshAccess(publicIp.trim(), privateKey);
+          } catch (sshError) {
+            this.logger.warn(
+              `SSH readiness check failed for ${hostname} (${publicIp}); continuing provisioning: ${(sshError as Error).message}`,
+            );
+          }
+        } else {
+          this.logger.warn(
+            `Provisioned server ${provisioned.serverId} has no public IP yet; skipping SSH readiness check`,
+          );
+        }
+
+        await this.subscriptionItemsRepository.updateProvisioningStatus(itemId, 'active');
 
         if (publicIp) {
           try {
@@ -502,6 +529,77 @@ export class SubscriptionService {
 
       this.logger.error(`Provisioning item ${itemId} failed: ${(error as Error).message}`);
     }
+  }
+
+  /**
+   * Confirms the generated key can authenticate as root. Port-open alone is not enough:
+   * sshd may accept TCP before cloud-init writes authorized_keys.
+   * Retries every 30s for up to 5 minutes.
+   */
+  private async waitForProvisionedSshAccess(publicIp: string, privateKey: string): Promise<void> {
+    const deadline = Date.now() + PROVISIONING_SSH_RETRY_WINDOW_MS;
+    let attempt = 0;
+    let lastError: Error | undefined;
+
+    this.logger.log(
+      `Waiting for SSH login on ${publicIp}:${PROVISIONING_SSH_PORT} after provisioning ` +
+        `(retry every ${PROVISIONING_SSH_RETRY_INTERVAL_MS / 1000}s for ${PROVISIONING_SSH_RETRY_WINDOW_MS / 1000}s)`,
+    );
+
+    while (Date.now() <= deadline) {
+      attempt += 1;
+
+      try {
+        const remainingMs = Math.max(1_000, deadline - Date.now());
+        await this.sshExecutor.waitUntilReachable(publicIp, PROVISIONING_SSH_PORT, {
+          timeoutMs: Math.min(PROVISIONING_SSH_RETRY_INTERVAL_MS - 1_000, remainingMs),
+        });
+
+        const result = await this.sshExecutor.exec(
+          publicIp,
+          PROVISIONING_SSH_PORT,
+          PROVISIONING_SSH_USER,
+          privateKey,
+          PROVISIONING_SSH_PROBE_COMMAND,
+          { commandTimeoutMs: PROVISIONING_SSH_PROBE_TIMEOUT_MS },
+        );
+
+        if (result.code !== 0) {
+          throw new Error(
+            `SSH login probe on ${publicIp} exited with code ${result.code}` +
+              (result.stderr?.trim() ? `: ${result.stderr.trim()}` : ''),
+          );
+        }
+
+        this.logger.log(`SSH login succeeded on ${publicIp}:${PROVISIONING_SSH_PORT} (attempt ${attempt})`);
+
+        return;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        this.logger.warn(
+          `SSH login attempt ${attempt} on ${publicIp}:${PROVISIONING_SSH_PORT} failed: ${lastError.message}`,
+        );
+      }
+
+      const remainingMs = deadline - Date.now();
+
+      if (remainingMs <= 0) {
+        break;
+      }
+
+      await this.delay(Math.min(PROVISIONING_SSH_RETRY_INTERVAL_MS, remainingMs));
+    }
+
+    throw (
+      lastError ??
+      new Error(
+        `SSH login did not succeed on ${publicIp}:${PROVISIONING_SSH_PORT} within ${PROVISIONING_SSH_RETRY_WINDOW_MS}ms`,
+      )
+    );
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async listSubscriptions(userId: string, limit: number, offset: number) {
