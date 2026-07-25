@@ -127,4 +127,35 @@ export class ProvisioningService {
       await this.digitaloceanProvisioningService.restartServer(serverId, credentials?.apiToken);
     }
   }
+
+  /**
+   * In-place server type / size change. Never recreates the VM.
+   * Disk size is never grown so later downgrades remain possible on providers that
+   * reject shrinking a previously expanded disk (Hetzner / DigitalOcean).
+   */
+  async changeServerType(
+    provider: string,
+    serverId: string,
+    serverType: string,
+    options?: { isUpgrade?: boolean; credentials?: ProvisioningCredentials; sshPrivateKey?: string },
+  ): Promise<void> {
+    void options?.isUpgrade;
+
+    if (provider === 'hetzner') {
+      await this.hetznerProvisioningService.changeServerType(serverId, serverType, {
+        upgradeDisk: false,
+        apiToken: options?.credentials?.apiToken,
+      });
+
+      return;
+    }
+
+    if (provider === 'digital-ocean') {
+      await this.digitaloceanProvisioningService.changeServerType(serverId, serverType, {
+        resizeDisk: false,
+        apiToken: options?.credentials?.apiToken,
+        sshPrivateKey: options?.sshPrivateKey,
+      });
+    }
+  }
 }

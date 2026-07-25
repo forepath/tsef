@@ -15,6 +15,7 @@ export enum SubscriptionStatus {
   PENDING_BACKORDER = 'pending_backorder',
   PENDING_CANCEL = 'pending_cancel',
   PENDING_WITHDRAWAL = 'pending_withdrawal',
+  PENDING_CONFIG_CHANGE = 'pending_config_change',
   CANCELED = 'canceled',
 }
 

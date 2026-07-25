@@ -23,10 +23,14 @@ import {
   ServicePlansService,
   ServiceTypesFacade,
   ServiceTypesService,
+  SubscriptionConfigChangeFacade,
   SubscriptionsFacade,
   SubscriptionServerInfoFacade,
   type BackorderResponse,
   type CloudInitConfigOrderField,
+  type ConfigChangeEligibility,
+  type ConfigChangeErrorCode,
+  type ConfigChangeRequest,
   type CreateSubscriptionDto,
   type CustomerProfileDto,
   type OrderProvisioningOption,
@@ -45,7 +49,7 @@ import {
   type ValidatePromotionRequest,
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import { ENVIRONMENT, type Environment } from '@forepath/shared/frontend/util-configuration';
-import { combineLatest, filter, interval, of, pairwise, switchMap, take, withLatestFrom } from 'rxjs';
+import { combineLatest, filter, interval, map, of, pairwise, switchMap, take, withLatestFrom } from 'rxjs';
 
 import {
   getBackorderStatusBadgeClass,
@@ -78,6 +82,13 @@ type OrderWizardStep = {
   label: string;
 };
 
+type ConfigChangeWizardStepId = 'serverType' | 'addons' | 'summary';
+
+type ConfigChangeWizardStep = {
+  id: ConfigChangeWizardStepId;
+  label: string;
+};
+
 @Component({
   selector: 'framework-billing-subscriptions',
   standalone: true,
@@ -92,6 +103,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   readonly subscriptionsSearch = signal('');
   readonly backordersSearch = signal('');
   @ViewChild('orderPlanModal', { static: false }) private orderPlanModal!: ElementRef<HTMLDivElement>;
+  @ViewChild('modifyConfigModal', { static: false }) private modifyConfigModal!: ElementRef<HTMLDivElement>;
   @ViewChild('cancelSubscriptionModal', { static: false }) private cancelSubscriptionModal!: ElementRef<HTMLDivElement>;
   @ViewChild('withdrawSubscriptionModal', { static: false })
   private withdrawSubscriptionModal!: ElementRef<HTMLDivElement>;
@@ -100,6 +112,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   @ViewChild('editProfileModal', { static: false }) private editProfileModal!: ElementRef<HTMLDivElement>;
 
   private readonly subscriptionsFacade = inject(SubscriptionsFacade);
+  private readonly configChangeFacade = inject(SubscriptionConfigChangeFacade);
   private readonly serverInfoFacade = inject(SubscriptionServerInfoFacade);
   private readonly servicePlansFacade = inject(ServicePlansFacade);
   private readonly servicePlansService = inject(ServicePlansService);
@@ -274,11 +287,53 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   private orderProvisioningRequestId = 0;
   private orderCustomFieldsRequestId = 0;
   private orderPricingRequestId = 0;
+  private orderServerTypesRequestId = 0;
   orderPricingLoading = false;
   /** Signal for reactive conditional form fields; kept in sync with orderRequestedConfig.authenticationMethod. */
   authMethod = signal<'users' | 'api-key' | 'keycloak'>('users');
   readonly orderWizardStepIndex = signal(0);
   readonly orderOrderComplete = signal(false);
+
+  subscriptionToModify: SubscriptionResponse | null = null;
+  configChangeServerType = '';
+  configChangeServerTypeOptions: ServerType[] = [];
+  configChangeServerTypesLoading = false;
+  configChangeAddons: PlanAddonOptionDto[] = [];
+  configChangeAddonsLoading = false;
+  /** Target addon selection: active addons stay selected unless the customer removes them. */
+  configChangeSelectedAddonIds = new Set<string>();
+  /** Per-addon order field values for newly added addons, keyed by addon id then field key. */
+  configChangeAddonConfigs: Record<string, Record<string, string>> = {};
+  readonly configChangeWizardStepIndex = signal(0);
+  readonly configChangeComplete = signal(false);
+  private configChangeServerTypesRequestId = 0;
+  private configChangeAddonsRequestId = 0;
+
+  readonly configChangeSubmitting$ = this.configChangeFacade.getSubmitting$();
+  readonly configChangeEligibility = toSignal(this.configChangeFacade.getEligibility$(), { initialValue: null });
+  readonly configChangeEligibilityLoading = toSignal(this.configChangeFacade.getEligibilityLoading$(), {
+    initialValue: false,
+  });
+  readonly configChangeEligibilityError = toSignal(this.configChangeFacade.getEligibilityError$(), {
+    initialValue: null,
+  });
+  readonly configChangePreview = toSignal(this.configChangeFacade.getPreview$(), { initialValue: null });
+  readonly configChangePreviewLoading = toSignal(this.configChangeFacade.getPreviewLoading$(), { initialValue: false });
+  readonly configChangePreviewErrorCode = toSignal(this.configChangeFacade.getPreviewErrorCode$(), {
+    initialValue: null,
+  });
+  readonly configChangePreviewFailed = toSignal(
+    this.configChangeFacade.getPreviewError$().pipe(map((error) => error != null)),
+    { initialValue: false },
+  );
+  readonly configChangeSubmitting = toSignal(this.configChangeFacade.getSubmitting$(), { initialValue: false });
+  readonly configChangeSubmitErrorCode = toSignal(this.configChangeFacade.getSubmitErrorCode$(), {
+    initialValue: null,
+  });
+  readonly configChangeSubmitFailed = toSignal(
+    this.configChangeFacade.getSubmitError$().pipe(map((error) => error != null)),
+    { initialValue: false },
+  );
 
   onServiceChange(value: 'controller' | 'manager'): void {
     this.orderRequestedConfig = { ...this.orderRequestedConfig, service: value };
@@ -507,12 +562,34 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   }
 
   formatServerTypeOptionLabel(st: ServerType): string {
-    return formatServerTypeOption(st, { includePrice: false });
+    return this.formatCustomerServerTypeOptionLabel(st, this.getCurrentOrderPlan());
   }
 
   /** Formats plan price for display (e.g. "€4.51" or "-"). */
   formatPlanPrice(plan: ServicePlanResponse): string {
-    return this.formatOrderPlanPrice(plan, this.orderProvisioningServerType);
+    return this.formatPlanOptionPrice(plan);
+  }
+
+  /**
+   * Customer-facing server type label: specs plus plan price including margins
+   * (same total formula as plan options / pricing preview).
+   */
+  private formatCustomerServerTypeOptionLabel(st: ServerType, plan: ServicePlanResponse | null): string {
+    const baseLabel = formatServerTypeOption(st, { includePrice: false });
+
+    if (!plan) {
+      return baseLabel;
+    }
+
+    const total = this.getPlanTotalPrice(plan, st);
+
+    if (total === null) {
+      return baseLabel;
+    }
+
+    const interval = getBillingIntervalLabel(plan.billingIntervalValue, plan.billingIntervalType);
+
+    return `${baseLabel} - ${this.formatCurrencyAmount(total)} / ${interval}`;
   }
 
   private parsePlanNumber(value: string | number | null | undefined): number {
@@ -524,7 +601,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   }
 
   formatCurrencyAmount(amount: number): string {
-    return `€${Number.isInteger(amount) ? String(amount) : amount.toFixed(2)}`;
+    return `€${amount.toFixed(2)}`;
   }
 
   formatEntryPeriodPrice(totalPrice: number | null | undefined, plan: ServicePlanResponse | null): string {
@@ -551,10 +628,25 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
   /** Option label for plan select: name + price + billing interval. */
   formatPlanOptionLabel(plan: ServicePlanResponse): string {
-    const price = this.formatPlanPrice(plan);
+    const price = this.formatPlanOptionPrice(plan);
     const interval = `${plan.billingIntervalValue} ${plan.billingIntervalType}(s)`;
 
     return `${plan.name}: ${price} / ${interval}`;
+  }
+
+  /**
+   * Each plan option uses that plan's own base price.
+   * Server-type override applies only to the currently selected plan when it offers Server & region.
+   */
+  private formatPlanOptionPrice(plan: ServicePlanResponse): string {
+    const isSelected = plan.id === this.orderPlanId.trim();
+    const useSelectedServerType =
+      isSelected &&
+      plan.allowCustomerServerTypeSelection === true &&
+      this.orderProvisioningServerType.trim().length > 0 &&
+      this.orderServerTypeOptions.length > 0;
+
+    return this.formatOrderPlanPrice(plan, useSelectedServerType ? this.orderProvisioningServerType : undefined);
   }
 
   /** Returns the plan matching planId from the list, or null. */
@@ -1125,6 +1217,13 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return true;
   }
 
+  /** Order fields carrying credentials are masked; the API never returns their values. */
+  isSecretOrderField(field: CloudInitConfigOrderField): boolean {
+    const key = field.key.toLowerCase();
+
+    return key.includes('password') || key.includes('secret') || key.includes('token');
+  }
+
   showOrderFieldDescription(field: CloudInitConfigOrderField): boolean {
     const description = field.description?.trim();
 
@@ -1353,6 +1452,8 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   }
 
   private syncOrderServerTypeState(): void {
+    const requestId = ++this.orderServerTypesRequestId;
+
     this.orderProvisioningServerType = '';
     this.orderServerTypeOptions = [];
     this.orderServerTypesLoading = false;
@@ -1366,6 +1467,10 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     ])
       .pipe(take(1))
       .subscribe(([plans, serviceTypes, providerDetails]) => {
+        if (requestId !== this.orderServerTypesRequestId) {
+          return;
+        }
+
         const plan = plans.find((p) => p.id === this.orderPlanId);
 
         if (
@@ -1383,6 +1488,10 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
         const allowed = new Set(normalizeAllowedServerTypeIds(plan.allowedServerTypes));
         this.serviceTypesService.getProviderServerTypes(serviceType.provider, plan.serviceTypeId).subscribe({
           next: (types) => {
+            if (requestId !== this.orderServerTypesRequestId) {
+              return;
+            }
+
             this.orderServerTypeOptions = types.filter((st) => allowed.has(st.id));
             const defaults = plan.providerConfigDefaults ?? {};
             const fromPlan = defaults['serverType'];
@@ -1396,6 +1505,10 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
             this.cdr.detectChanges();
           },
           error: () => {
+            if (requestId !== this.orderServerTypesRequestId) {
+              return;
+            }
+
             this.orderServerTypeOptions = [];
             this.orderProvisioningServerType = '';
             this.orderServerTypesLoading = false;
@@ -1577,6 +1690,511 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     };
   }
 
+  canModifyConfiguration(sub: SubscriptionResponse): boolean {
+    return sub.status === 'active';
+  }
+
+  openModifyConfigModal(sub: SubscriptionResponse): void {
+    this.resetConfigChangeState();
+    this.subscriptionToModify = sub;
+    this.configChangeFacade.reset();
+    this.configChangeFacade.loadEligibility(sub.id);
+    this.loadConfigChangeAddons(sub.planId);
+
+    this.configChangeFacade
+      .getEligibility$()
+      .pipe(
+        filter((eligibility): eligibility is ConfigChangeEligibility => eligibility !== null),
+        take(1),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((eligibility) => {
+        if (this.subscriptionToModify?.id !== sub.id) {
+          return;
+        }
+
+        this.configChangeServerType = eligibility.currentServerType?.trim() ?? '';
+        this.configChangeSelectedAddonIds = new Set(eligibility.activeAddonIds);
+        this.loadConfigChangeServerTypes(sub.planId, eligibility.allowedServerTypes);
+        this.cdr.detectChanges();
+      });
+
+    showBillingModal(this.modifyConfigModal);
+  }
+
+  onModifyConfigModalHidden(): void {
+    this.resetConfigChangeState();
+    this.configChangeFacade.reset();
+  }
+
+  private resetConfigChangeState(): void {
+    this.subscriptionToModify = null;
+    this.configChangeServerType = '';
+    this.configChangeServerTypeOptions = [];
+    this.configChangeServerTypesLoading = false;
+    this.configChangeAddons = [];
+    this.configChangeAddonsLoading = false;
+    this.configChangeSelectedAddonIds = new Set();
+    this.configChangeAddonConfigs = {};
+    this.configChangeWizardStepIndex.set(0);
+    this.configChangeComplete.set(false);
+    this.configChangeServerTypesRequestId++;
+    this.configChangeAddonsRequestId++;
+  }
+
+  private getConfigChangePlan(): ServicePlanResponse | null {
+    const planId = this.subscriptionToModify?.planId;
+
+    return planId ? (this.servicePlans().find((plan) => plan.id === planId) ?? null) : null;
+  }
+
+  private loadConfigChangeAddons(planId: string): void {
+    const requestId = ++this.configChangeAddonsRequestId;
+
+    this.configChangeAddons = [];
+    this.configChangeAddonsLoading = true;
+
+    this.servicePlansService
+      .getOrderAddons(planId)
+      .pipe(take(1))
+      .subscribe({
+        next: (addons) => {
+          if (requestId !== this.configChangeAddonsRequestId) {
+            return;
+          }
+
+          this.configChangeAddons = addons.map((addon) => ({ ...addon, orderFields: addon.orderFields ?? [] }));
+          this.configChangeAddonsLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          if (requestId !== this.configChangeAddonsRequestId) {
+            return;
+          }
+
+          this.configChangeAddons = [];
+          this.configChangeAddonsLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  private loadConfigChangeServerTypes(planId: string, allowedServerTypes: string[]): void {
+    const requestId = ++this.configChangeServerTypesRequestId;
+
+    this.configChangeServerTypeOptions = [];
+
+    if (allowedServerTypes.length === 0) {
+      this.configChangeServerTypesLoading = false;
+
+      return;
+    }
+
+    this.configChangeServerTypesLoading = true;
+
+    combineLatest([this.servicePlans$, this.serviceTypesFacade.getServiceTypes$()])
+      .pipe(take(1))
+      .subscribe(([plans, serviceTypes]) => {
+        const plan = plans.find((entry) => entry.id === planId);
+        const serviceType = serviceTypes?.find((entry) => entry.id === plan?.serviceTypeId);
+
+        if (!serviceType?.provider) {
+          this.configChangeServerTypesLoading = false;
+          this.cdr.detectChanges();
+
+          return;
+        }
+
+        const allowed = new Set(allowedServerTypes);
+
+        this.serviceTypesService.getProviderServerTypes(serviceType.provider, serviceType.id).subscribe({
+          next: (types) => {
+            if (requestId !== this.configChangeServerTypesRequestId) {
+              return;
+            }
+
+            this.configChangeServerTypeOptions = types.filter((type) => allowed.has(type.id));
+            this.configChangeServerTypesLoading = false;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            if (requestId !== this.configChangeServerTypesRequestId) {
+              return;
+            }
+
+            this.configChangeServerTypeOptions = [];
+            this.configChangeServerTypesLoading = false;
+            this.cdr.detectChanges();
+          },
+        });
+      });
+  }
+
+  configChangeHasServerTypeStep(): boolean {
+    const eligibility = this.configChangeEligibility();
+    const plan = this.getConfigChangePlan();
+
+    if (!eligibility || !plan?.allowCustomerServerTypeSelection) {
+      return false;
+    }
+
+    if (!eligibility.supportsServerTypeUpgrade && !eligibility.supportsServerTypeDowngrade) {
+      return false;
+    }
+
+    return eligibility.allowedServerTypes.length > 0;
+  }
+
+  configChangeHasAddonsStep(): boolean {
+    const eligibility = this.configChangeEligibility();
+
+    if (!eligibility) {
+      return false;
+    }
+
+    return eligibility.availableAddonIds.length > 0 || eligibility.activeAddonIds.length > 0;
+  }
+
+  getConfigChangeWizardSteps(): ConfigChangeWizardStep[] {
+    const steps: ConfigChangeWizardStep[] = [];
+
+    if (this.configChangeHasServerTypeStep()) {
+      steps.push({
+        id: 'serverType',
+        label: $localize`:@@featureSubscriptions-configChangeStepServerType:Server type`,
+      });
+    }
+
+    if (this.configChangeHasAddonsStep()) {
+      steps.push({ id: 'addons', label: $localize`:@@featureSubscriptions-configChangeStepAddons:Addons` });
+    }
+
+    steps.push({ id: 'summary', label: $localize`:@@featureSubscriptions-configChangeStepSummary:Summary` });
+
+    return steps;
+  }
+
+  getActiveConfigChangeStepId(): ConfigChangeWizardStepId {
+    return this.getConfigChangeWizardSteps()[this.configChangeWizardStepIndex()]?.id ?? 'summary';
+  }
+
+  isConfigChangeStepActive(stepIndex: number): boolean {
+    return !this.configChangeComplete() && stepIndex === this.configChangeWizardStepIndex();
+  }
+
+  isConfigChangeStepComplete(stepIndex: number): boolean {
+    return this.configChangeComplete() || stepIndex < this.configChangeWizardStepIndex();
+  }
+
+  showConfigChangeBackButton(): boolean {
+    return !this.configChangeComplete() && this.configChangeWizardStepIndex() > 0;
+  }
+
+  showConfigChangeNextButton(): boolean {
+    return !this.configChangeComplete() && this.getActiveConfigChangeStepId() !== 'summary';
+  }
+
+  showConfigChangeSubmitButton(): boolean {
+    return !this.configChangeComplete() && this.getActiveConfigChangeStepId() === 'summary';
+  }
+
+  canAdvanceConfigChangeStep(): boolean {
+    switch (this.getActiveConfigChangeStepId()) {
+      case 'serverType':
+        return !this.configChangeServerTypesLoading;
+      case 'addons':
+        return !this.configChangeAddonsLoading && this.areConfigChangeAddonConfigsReady();
+      default:
+        return false;
+    }
+  }
+
+  goConfigChangeNext(): void {
+    if (!this.canAdvanceConfigChangeStep()) {
+      return;
+    }
+
+    const maxIndex = this.getConfigChangeWizardSteps().length - 1;
+
+    if (this.configChangeWizardStepIndex() < maxIndex) {
+      this.configChangeWizardStepIndex.update((index) => index + 1);
+
+      if (this.getActiveConfigChangeStepId() === 'summary') {
+        this.syncConfigChangePreview();
+      }
+    }
+  }
+
+  goConfigChangeBack(): void {
+    if (this.configChangeWizardStepIndex() > 0) {
+      this.configChangeWizardStepIndex.update((index) => index - 1);
+    }
+  }
+
+  configChangeServerTypeOptionLabel(serverType: ServerType): string {
+    return this.formatCustomerServerTypeOptionLabel(serverType, this.getConfigChangePlan());
+  }
+
+  configChangeCurrentServerTypeLabel(): string {
+    const current = this.configChangeEligibility()?.currentServerType?.trim();
+
+    if (!current) {
+      return '-';
+    }
+
+    const match = this.configChangeServerTypeOptions.find((option) => option.id === current);
+
+    return match ? this.configChangeServerTypeOptionLabel(match) : current;
+  }
+
+  onConfigChangeServerTypeChange(): void {
+    this.syncConfigChangePreview();
+  }
+
+  /** Addons the plan offers that are either active on the subscription or still available. */
+  configChangeAddonOptions(): PlanAddonOptionDto[] {
+    const eligibility = this.configChangeEligibility();
+
+    if (!eligibility) {
+      return [];
+    }
+
+    const selectable = new Set([...eligibility.activeAddonIds, ...eligibility.availableAddonIds]);
+
+    return this.configChangeAddons.filter((addon) => selectable.has(addon.id));
+  }
+
+  isConfigChangeAddonActive(addonId: string): boolean {
+    return this.configChangeEligibility()?.activeAddonIds.includes(addonId) === true;
+  }
+
+  isConfigChangeAddonSelected(addonId: string): boolean {
+    return this.configChangeSelectedAddonIds.has(addonId);
+  }
+
+  isConfigChangeAddonAdded(addonId: string): boolean {
+    return this.isConfigChangeAddonSelected(addonId) && !this.isConfigChangeAddonActive(addonId);
+  }
+
+  isConfigChangeAddonRemoved(addonId: string): boolean {
+    return this.isConfigChangeAddonActive(addonId) && !this.isConfigChangeAddonSelected(addonId);
+  }
+
+  toggleConfigChangeAddon(addonId: string, checked: boolean): void {
+    if (checked) {
+      this.configChangeSelectedAddonIds.add(addonId);
+
+      const addon = this.configChangeAddons.find((entry) => entry.id === addonId);
+
+      if (!this.isConfigChangeAddonActive(addonId) && addon?.orderFields?.length) {
+        this.configChangeAddonConfigs = {
+          ...this.configChangeAddonConfigs,
+          [addonId]: Object.fromEntries(addon.orderFields.map((field) => [field.key, ''])),
+        };
+      }
+    } else {
+      this.configChangeSelectedAddonIds.delete(addonId);
+
+      const nextConfigs = { ...this.configChangeAddonConfigs };
+
+      delete nextConfigs[addonId];
+      this.configChangeAddonConfigs = nextConfigs;
+    }
+
+    this.syncConfigChangePreview();
+  }
+
+  showConfigChangeAddonFields(addon: PlanAddonOptionDto): boolean {
+    return this.isConfigChangeAddonAdded(addon.id) && (addon.orderFields?.length ?? 0) > 0;
+  }
+
+  setConfigChangeAddonConfigValue(addonId: string, key: string, value: string): void {
+    this.configChangeAddonConfigs = {
+      ...this.configChangeAddonConfigs,
+      [addonId]: {
+        ...(this.configChangeAddonConfigs[addonId] ?? {}),
+        [key]: value,
+      },
+    };
+  }
+
+  getConfigChangeAddonConfigValue(addonId: string, key: string): string {
+    return this.configChangeAddonConfigs[addonId]?.[key] ?? '';
+  }
+
+  private areConfigChangeAddonConfigsReady(): boolean {
+    for (const addon of this.configChangeAddonOptions()) {
+      if (!this.isConfigChangeAddonAdded(addon.id)) {
+        continue;
+      }
+
+      for (const field of addon.orderFields ?? []) {
+        if (field.required && !(this.configChangeAddonConfigs[addon.id]?.[field.key] ?? '').trim()) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  configChangeAddedAddons(): PlanAddonOptionDto[] {
+    return this.configChangeAddonOptions().filter((addon) => this.isConfigChangeAddonAdded(addon.id));
+  }
+
+  configChangeRemovedAddons(): PlanAddonOptionDto[] {
+    return this.configChangeAddonOptions().filter((addon) => this.isConfigChangeAddonRemoved(addon.id));
+  }
+
+  private buildConfigChangeRequest(): ConfigChangeRequest {
+    const request: ConfigChangeRequest = {};
+    const eligibility = this.configChangeEligibility();
+    const targetServerType = this.configChangeServerType.trim();
+
+    if (
+      this.configChangeHasServerTypeStep() &&
+      targetServerType &&
+      targetServerType !== (eligibility?.currentServerType?.trim() ?? '')
+    ) {
+      request.serverType = targetServerType;
+    }
+
+    const addAddonIds = this.configChangeAddedAddons().map((addon) => addon.id);
+    const removeAddonIds = this.configChangeRemovedAddons().map((addon) => addon.id);
+
+    if (addAddonIds.length > 0) {
+      request.addAddonIds = addAddonIds;
+
+      const addonConfigs: Record<string, Record<string, string>> = {};
+
+      for (const addon of this.configChangeAddedAddons()) {
+        const values: Record<string, string> = {};
+
+        for (const field of addon.orderFields ?? []) {
+          const value = (this.configChangeAddonConfigs[addon.id]?.[field.key] ?? '').trim();
+
+          if (value || field.required) {
+            values[field.key] = value;
+          }
+        }
+
+        if (Object.keys(values).length > 0) {
+          addonConfigs[addon.id] = values;
+        }
+      }
+
+      if (Object.keys(addonConfigs).length > 0) {
+        request.addonConfigs = addonConfigs;
+      }
+    }
+
+    if (removeAddonIds.length > 0) {
+      request.removeAddonIds = removeAddonIds;
+    }
+
+    return request;
+  }
+
+  hasConfigChanges(): boolean {
+    const request = this.buildConfigChangeRequest();
+
+    return Boolean(request.serverType || request.addAddonIds?.length || request.removeAddonIds?.length);
+  }
+
+  private syncConfigChangePreview(): void {
+    const subscriptionId = this.subscriptionToModify?.id;
+
+    if (!subscriptionId || !this.hasConfigChanges()) {
+      this.configChangeFacade.clearPreview();
+
+      return;
+    }
+
+    this.configChangeFacade.preview(subscriptionId, this.buildConfigChangeRequest());
+  }
+
+  canSubmitConfigChange(): boolean {
+    const eligibility = this.configChangeEligibility();
+
+    return (
+      eligibility?.canRequestChange === true &&
+      this.hasConfigChanges() &&
+      this.areConfigChangeAddonConfigsReady() &&
+      !this.configChangeSubmitting()
+    );
+  }
+
+  onSubmitConfigChange(): void {
+    const subscriptionId = this.subscriptionToModify?.id;
+
+    if (!subscriptionId || !this.canSubmitConfigChange()) {
+      return;
+    }
+
+    this.configChangeFacade.submit(subscriptionId, this.buildConfigChangeRequest());
+  }
+
+  formatConfigChangeAmount(amount: number | null | undefined, currency?: string | null): string {
+    if (amount == null || !Number.isFinite(amount)) {
+      return '-';
+    }
+
+    const code = currency?.trim().toUpperCase() ?? '';
+
+    if (!/^[A-Z]{3}$/.test(code)) {
+      return this.formatCurrencyAmount(amount);
+    }
+
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: code }).format(amount);
+  }
+
+  formatConfigChangeEffectiveAt(value: string | null | undefined): string {
+    if (!value) {
+      return '-';
+    }
+
+    return this.datePipe.transform(value, 'medium') ?? '-';
+  }
+
+  /**
+   * Maps stable backend codes to generic customer-facing messages.
+   * Raw API messages are never surfaced; unknown codes fall back to a generic hint.
+   */
+  configChangeErrorMessage(code: ConfigChangeErrorCode | null | undefined): string {
+    switch (code) {
+      case 'CONFIG_CHANGE_NOT_ELIGIBLE':
+        return $localize`:@@featureSubscriptions-configChangeErrorNotEligible:This subscription cannot be reconfigured right now. Please try again once any pending change has finished.`;
+      case 'CONFIG_CHANGE_NOOP':
+        return $localize`:@@featureSubscriptions-configChangeErrorNoop:Select at least one change before continuing.`;
+      case 'CONFIG_CHANGE_SERVER_TYPE_UNSUPPORTED':
+        return $localize`:@@featureSubscriptions-configChangeErrorServerTypeUnsupported:This server type change is not supported for your service.`;
+      case 'CONFIG_CHANGE_SERVER_TYPE_LATERAL_UNSUPPORTED':
+        return $localize`:@@featureSubscriptions-configChangeErrorServerTypeLateral:The selected server type costs the same as your current one. Choose a larger or a smaller server type.`;
+      case 'CONFIG_CHANGE_ADDON_INVALID':
+        return $localize`:@@featureSubscriptions-configChangeErrorAddonInvalid:One of the selected addons is not available for this subscription.`;
+      case 'CONFIG_CHANGE_ADDON_CONFIG_IMMUTABLE':
+        return $localize`:@@featureSubscriptions-configChangeErrorAddonConfigImmutable:The configuration of an addon that is already active cannot be changed here.`;
+      case 'CONFIG_CHANGE_FAILED':
+        return $localize`:@@featureSubscriptions-configChangeErrorFailed:The configuration change could not be applied. Please try again later.`;
+      default:
+        return $localize`:@@featureSubscriptions-configChangeErrorGeneric:The configuration change could not be processed. Please try again.`;
+    }
+  }
+
+  configChangeEligibilityMessage(): string | null {
+    if (this.configChangeEligibilityError()) {
+      return this.configChangeErrorMessage(null);
+    }
+
+    const eligibility = this.configChangeEligibility();
+
+    if (!eligibility || eligibility.canRequestChange) {
+      return null;
+    }
+
+    return this.configChangeErrorMessage(eligibility.reasonCode ?? 'CONFIG_CHANGE_NOT_ELIGIBLE');
+  }
+
   openCancelConfirm(sub: SubscriptionResponse): void {
     this.subscriptionToCancel = sub;
     showBillingModal(this.cancelSubscriptionModal);
@@ -1712,6 +2330,19 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
       )
       .subscribe(() => {
         this.orderOrderComplete.set(true);
+        this.cdr.detectChanges();
+      });
+    this.configChangeSubmitting$
+      .pipe(
+        pairwise(),
+        filter(([wasSubmitting, submitting]) => wasSubmitting && !submitting),
+        withLatestFrom(this.configChangeFacade.getSubmitError$()),
+        filter(([, error]) => !error),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.configChangeComplete.set(true);
+        this.subscriptionsFacade.loadSubscriptions();
         this.cdr.detectChanges();
       });
     watchBillingMutationModalClose({

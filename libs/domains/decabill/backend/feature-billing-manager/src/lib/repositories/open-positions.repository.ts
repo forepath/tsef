@@ -3,7 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, IsNull, Repository } from 'typeorm';
 
 import { OpenPositionEntity } from '../entities/open-position.entity';
+import {
+  configChangeCarrySourceRef,
+  configChangePrimarySourceRef,
+} from '../utils/config-change-billing-source-ref.util';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
+import { isUniqueConstraintViolation } from '../utils/postgres-unique-violation.util';
 
 @Injectable()
 export class OpenPositionsRepository {
@@ -16,6 +21,44 @@ export class OpenPositionsRepository {
     const entity = this.repository.create(dto);
 
     return await this.repository.save(entity);
+  }
+
+  async findBySourceRef(sourceRef: string): Promise<OpenPositionEntity | null> {
+    const qb = this.repository
+      .createQueryBuilder('pos')
+      .innerJoin('users', 'user', 'user.id = pos.user_id')
+      .where('pos.source_ref = :sourceRef', { sourceRef })
+      .take(1);
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getOne();
+  }
+
+  async createUniqueBySourceRef(
+    dto: Partial<OpenPositionEntity> & { sourceRef: string },
+    manager?: EntityManager,
+  ): Promise<{ entity: OpenPositionEntity; created: boolean }> {
+    const repository = manager ? manager.getRepository(OpenPositionEntity) : this.repository;
+    const entity = repository.create(dto);
+
+    try {
+      const saved = await repository.save(entity);
+
+      return { entity: saved, created: true };
+    } catch (error) {
+      if (!isUniqueConstraintViolation(error)) {
+        throw error;
+      }
+
+      const existing = await this.findBySourceRef(dto.sourceRef);
+
+      if (!existing) {
+        throw error;
+      }
+
+      return { entity: existing, created: false };
+    }
   }
 
   async findUnbilledByUserId(userId: string, manager?: EntityManager): Promise<OpenPositionEntity[]> {
@@ -72,6 +115,37 @@ export class OpenPositionsRepository {
     applyUserTenantFilter(qb, 'user');
 
     return await qb.getMany();
+  }
+
+  /**
+   * Finds a config-change adjustment whether or not it has already been invoiced.
+   * Used as a durable idempotency marker across billing retries.
+   */
+  async findConfigChangeAdjustment(subscriptionId: string, configChangeId: string): Promise<OpenPositionEntity | null> {
+    const bySourceRef = await this.findBySourceRef(configChangePrimarySourceRef(configChangeId));
+
+    if (bySourceRef?.subscriptionId === subscriptionId) {
+      return bySourceRef;
+    }
+
+    const carry = await this.findBySourceRef(configChangeCarrySourceRef(configChangeId));
+
+    if (carry?.subscriptionId === subscriptionId) {
+      return carry;
+    }
+
+    const qb = this.repository
+      .createQueryBuilder('pos')
+      .innerJoin('users', 'user', 'user.id = pos.user_id')
+      .where('pos.subscription_id = :subscriptionId', { subscriptionId })
+      .andWhere('pos.adjustment_kind LIKE :kindPrefix', { kindPrefix: 'config_change_%' })
+      .andWhere('pos.description LIKE :marker', { marker: `%${configChangeId}%` })
+      .orderBy('pos.createdAt', 'ASC')
+      .take(1);
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getOne();
   }
 
   async updateUnbilledBillUntil(subscriptionId: string, billUntil: Date): Promise<number> {

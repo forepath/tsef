@@ -19,6 +19,8 @@ stateDiagram-v2
     active --> pending_backorder: unavailable
     pending_backorder --> active: provisioned
     pending_backorder --> canceled: cancel
+    active --> pending_config_change: config change request
+    pending_config_change --> active: applied or failed
 ```
 
 ### Active
@@ -28,6 +30,10 @@ Subscription is in good standing. Recurring charges create open positions accord
 ### Pending Cancel
 
 User requested cancellation. Subscription remains active until `effective_at`. User may resume before that date.
+
+### Pending Config Change
+
+Customer requested a mid-life configuration change (server type and/or addons). See [Subscription Config Change](./subscription-config-change.md). The subscription returns to `active` when the async worker finishes (success or failure).
 
 ### Canceled
 
@@ -164,6 +170,10 @@ Usage-based plans accept metering via `POST /admin/usage/record` (billing admin 
 
 `POST /pricing/preview` returns estimated customer total for a plan and optional config before ordering.
 
+## Config Change (Up-/Downgrade)
+
+Active subscriptions can change server type and addons without switching plans. See **[Subscription Config Change](./subscription-config-change.md)**.
+
 ## Availability
 
 - `POST /availability/check` - Check whether requested config is available at the provider
@@ -179,6 +189,9 @@ Usage-based plans accept metering via `POST /admin/usage/record` (billing admin 
 | POST   | `/subscriptions/{subscriptionId}/cancel`                         | Cancel subscription       |
 | POST   | `/subscriptions/{subscriptionId}/withdraw`                       | Statutory withdrawal      |
 | POST   | `/subscriptions/{subscriptionId}/resume`                         | Resume pending cancel     |
+| GET    | `/subscriptions/{subscriptionId}/config-change/eligibility`      | Config-change options     |
+| POST   | `/subscriptions/{subscriptionId}/config-change/preview`          | Advisory pricing delta    |
+| POST   | `/subscriptions/{subscriptionId}/config-change`                  | Submit config change      |
 | GET    | `/subscriptions/{subscriptionId}/items`                          | List subscription items   |
 | GET    | `/subscriptions/{subscriptionId}/items/{itemId}/server-info`     | Live server info          |
 | POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/start`   | Start server              |
@@ -191,6 +204,7 @@ See [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) for schemas.
 
 - **[Customer Profiles](./customer-profiles.md)** - Required before ordering
 - **[Service Types and Plans](./service-types-and-plans.md)** - Catalog and provider schemas
+- **[Subscription Config Change](./subscription-config-change.md)** - Mid-life server type and addon changes
 - **[Invoices](./invoices.md)** - Open positions and billing-day accumulation
 - **[Backorders](./backorders.md)** - Capacity retry queue
 - **[Server Provisioning](./server-provisioning.md)** - Cloud-init and bundled stacks

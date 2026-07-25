@@ -1,0 +1,548 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { DataSource, EntityManager } from 'typeorm';
+
+import { InvoiceStatus } from '../constants/invoice-status.constants';
+import type { InvoiceCreditDocumentEntity } from '../entities/invoice-credit-document.entity';
+import { InvoiceEntity } from '../entities/invoice.entity';
+import type { ServicePlanEntity } from '../entities/service-plan.entity';
+import type {
+  SubscriptionConfigChangeBillingOutcome,
+  SubscriptionConfigChangeEntity,
+} from '../entities/subscription-config-change.entity';
+import type { SubscriptionEntity } from '../entities/subscription.entity';
+import { BillingEmailPublisher } from '../email/billing-email.publisher';
+import { CustomerProfilesRepository } from '../repositories/customer-profiles.repository';
+import { InvoiceCreditDocumentsRepository } from '../repositories/invoice-credit-documents.repository';
+import { InvoicesRepository } from '../repositories/invoices.repository';
+import { OpenPositionsRepository } from '../repositories/open-positions.repository';
+import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
+import {
+  configChangeCarrySourceRef,
+  configChangePrimarySourceRef,
+} from '../utils/config-change-billing-source-ref.util';
+import { resolvePlanTaxCategory } from '../utils/plan-tax.utils';
+import { roundMoney } from '../utils/promotion-advantage.util';
+
+import { BillingAuditLogService } from './billing-audit-log.service';
+import { BillingIssuerConfigService } from './billing-issuer-config.service';
+import { InvoicePdfService } from './invoice-pdf.service';
+import { InvoiceTaxContextService } from './invoice-tax-context.service';
+import { resolveInvoicingPeriod } from './invoicing-period.util';
+import { PromotionApplicationService } from './promotion-application.service';
+import { resolvePurchaseOrderReference } from './purchase-order-reference.util';
+import { TaxCalculationService } from './tax-calculation.service';
+
+/** Discriminators written to `billing_open_positions.adjustment_kind` by this service. */
+export const CONFIG_CHANGE_ADJUSTMENT_KINDS = {
+  /** Elapsed part of a post-usage period settled at the pre-change price. */
+  ARREAR: 'config_change_arrear',
+  /** Extra amount owed because the new configuration costs more. */
+  CHARGE: 'config_change_charge',
+  /** Amount owed back to the customer because the new configuration costs less. */
+  CREDIT: 'config_change_credit',
+} as const;
+
+/** Credit document reason for config-change credits, distinct from statutory withdrawal credits. */
+export const CONFIG_CHANGE_CREDIT_REASON = 'config_change';
+
+/** Floor below which an adjustment is not worth a ledger entry. */
+const MIN_BILLABLE_AMOUNT = 0.01;
+
+export interface ConfigChangeBillingParams {
+  subscription: SubscriptionEntity;
+  plan: ServicePlanEntity;
+  change: SubscriptionConfigChangeEntity;
+  changedAt: Date;
+}
+
+/**
+ * Settles the money side of an applied subscription configuration change.
+ *
+ * Amounts come from the disclaimer snapshot frozen when the customer accepted the change, so the
+ * customer is never charged something other than what was shown. How the delta is settled depends
+ * on the plan's billing direction (preview computes `immediateAdjustmentNet` to match):
+ *
+ * - post-usage: settle the elapsed share of the old period price, then move the period anchor so
+ *   the remainder bills at the new price;
+ * - pre-usage, period not invoiced yet: the pending invoice uses the new price for the whole
+ *   period, so the frozen adjustment is the elapsed share of the delta corrected out;
+ * - pre-usage, period already invoiced: the remaining share of the delta is charged on top, or
+ *   credited through a partial credit document.
+ */
+@Injectable()
+export class SubscriptionConfigChangeBillingService {
+  private readonly logger = new Logger(SubscriptionConfigChangeBillingService.name);
+
+  constructor(
+    private readonly openPositionsRepository: OpenPositionsRepository,
+    private readonly subscriptionsRepository: SubscriptionsRepository,
+    private readonly invoicesRepository: InvoicesRepository,
+    private readonly invoiceCreditDocumentsRepository: InvoiceCreditDocumentsRepository,
+    private readonly customerProfilesRepository: CustomerProfilesRepository,
+    private readonly taxCalculationService: TaxCalculationService,
+    private readonly invoiceTaxContextService: InvoiceTaxContextService,
+    private readonly promotionApplicationService: PromotionApplicationService,
+    private readonly billingIssuerConfig: BillingIssuerConfigService,
+    private readonly invoicePdfService: InvoicePdfService,
+    private readonly billingEmailPublisher: BillingEmailPublisher,
+    private readonly auditLog: BillingAuditLogService,
+    private readonly dataSource: DataSource,
+  ) {}
+
+  async apply(params: ConfigChangeBillingParams): Promise<SubscriptionConfigChangeBillingOutcome> {
+    const existingOutcome = await this.findExistingOutcome(params);
+
+    if (existingOutcome) {
+      // Post-usage retries must still move the period floor even when the OP already exists.
+      if (params.plan.billInAdvance !== true) {
+        await this.resetPeriodAnchor(params.subscription, params.changedAt);
+      }
+
+      this.logger.log(
+        `Config change ${params.change.id} already has billing side effects (${existingOutcome}); skipping re-settlement`,
+      );
+
+      return existingOutcome;
+    }
+
+    const snapshot = params.change.billingDisclaimerSnapshot;
+
+    if (!snapshot) {
+      this.logger.warn(`Config change ${params.change.id} has no disclaimer snapshot; skipping one-shot billing`);
+
+      return 'none';
+    }
+
+    const currentPeriodNet = Number(snapshot.currentPeriodNet);
+    const periodDeltaNet = Number(snapshot.periodDeltaNet);
+    const immediateAdjustmentNet = Number(snapshot.immediateAdjustmentNet);
+
+    if (
+      !Number.isFinite(currentPeriodNet) ||
+      !Number.isFinite(periodDeltaNet) ||
+      !Number.isFinite(immediateAdjustmentNet)
+    ) {
+      this.logger.warn(`Config change ${params.change.id} has an unusable disclaimer snapshot; skipping billing`);
+
+      return 'none';
+    }
+
+    // Settle exactly what the customer accepted on preview/submit — never re-derive amounts.
+    return params.plan.billInAdvance === true
+      ? await this.applyPreUsage(params, immediateAdjustmentNet)
+      : await this.applyPostUsage(params, immediateAdjustmentNet);
+  }
+
+  /**
+   * Arrear plans invoice the running period after it ends, and pricing is resolved from the live
+   * configuration at that time. The one-shot OP locks in the elapsed share at the pre-change price;
+   * resetting the period floor then bills the remainder at the new price.
+   */
+  private async applyPostUsage(
+    params: ConfigChangeBillingParams,
+    immediateAdjustmentNet: number,
+  ): Promise<SubscriptionConfigChangeBillingOutcome> {
+    const { subscription, changedAt } = params;
+    const elapsedNet = roundMoney(immediateAdjustmentNet);
+    const gross = await this.computeGross(elapsedNet, params.plan, subscription.userId);
+
+    if (Math.abs(gross) < MIN_BILLABLE_AMOUNT) {
+      await this.resetPeriodAnchor(subscription, changedAt);
+
+      return 'none';
+    }
+
+    await this.recordAdjustmentPosition(params, elapsedNet, CONFIG_CHANGE_ADJUSTMENT_KINDS.ARREAR);
+    await this.resetPeriodAnchor(subscription, changedAt);
+    await this.logOutcome(params, 'charged', {
+      adjustmentNet: elapsedNet,
+      kind: CONFIG_CHANGE_ADJUSTMENT_KINDS.ARREAR,
+    });
+
+    return 'charged';
+  }
+
+  private async applyPreUsage(
+    params: ConfigChangeBillingParams,
+    immediateAdjustmentNet: number,
+  ): Promise<SubscriptionConfigChangeBillingOutcome> {
+    const adjustmentNet = roundMoney(immediateAdjustmentNet);
+
+    if (adjustmentNet < 0) {
+      const hasUnbilled = await this.openPositionsRepository.hasUnbilledForSubscription(params.subscription.id);
+
+      // Unbilled advance periods already pick up the new price on the pending invoice, so the
+      // frozen adjustment is a small elapsed correction (credit for upgrades, charge for downgrades)
+      // booked as an OP. Already-invoiced periods need a partial credit document instead.
+      if (hasUnbilled) {
+        return await this.settleAdjustment(params, adjustmentNet);
+      }
+
+      return await this.applyPartialCredit(params, Math.abs(adjustmentNet));
+    }
+
+    return await this.settleAdjustment(params, adjustmentNet);
+  }
+
+  /** Books a signed correction as an open position so it lands on the customer's next invoice. */
+  private async settleAdjustment(
+    params: ConfigChangeBillingParams,
+    adjustmentNet: number,
+  ): Promise<SubscriptionConfigChangeBillingOutcome> {
+    const gross = await this.computeGross(adjustmentNet, params.plan, params.subscription.userId);
+
+    if (Math.abs(gross) < MIN_BILLABLE_AMOUNT) {
+      return 'none';
+    }
+
+    const kind = adjustmentNet < 0 ? CONFIG_CHANGE_ADJUSTMENT_KINDS.CREDIT : CONFIG_CHANGE_ADJUSTMENT_KINDS.CHARGE;
+    const outcome: SubscriptionConfigChangeBillingOutcome = adjustmentNet < 0 ? 'credited' : 'charged';
+
+    await this.recordAdjustmentPosition(params, adjustmentNet, kind);
+    await this.logOutcome(params, outcome, { adjustmentNet, kind });
+
+    return outcome;
+  }
+
+  /**
+   * Issues a partial credit document against the invoice that already charged the old price.
+   * The credit is capped at the amount the customer effectively paid after promotions, and any
+   * part that cannot be taken off an open balance is carried forward as a credit position.
+   */
+  private async applyPartialCredit(
+    params: ConfigChangeBillingParams,
+    creditNetRequested: number,
+  ): Promise<SubscriptionConfigChangeBillingOutcome> {
+    const { subscription, plan, changedAt } = params;
+    const invoice = await this.invoicesRepository.findLatestBillableBySubscription(subscription.id);
+
+    if (!invoice?.invoiceNumber) {
+      return await this.settleAdjustment(params, roundMoney(-creditNetRequested));
+    }
+
+    const sourceRef = configChangePrimarySourceRef(params.change.id);
+    const existingCredit = await this.invoiceCreditDocumentsRepository.findBySourceRef(sourceRef);
+
+    if (existingCredit) {
+      await this.finalizePartialCreditSettlement(params, existingCredit);
+
+      return 'credited';
+    }
+
+    const creditNet = roundMoney(creditNetRequested * (await this.resolvePromotionRetentionRatio(params)));
+    const creditGross = await this.computeGross(creditNet, plan, subscription.userId);
+
+    if (creditGross < MIN_BILLABLE_AMOUNT) {
+      return 'none';
+    }
+
+    const buyer = await this.customerProfilesRepository.findByUserId(subscription.userId);
+
+    if (!buyer) {
+      throw new Error('Customer profile not found for configuration change credit');
+    }
+
+    const lineDescription = `Configuration change ${params.change.id} credit (${subscription.number})`;
+    const taxCategory = resolvePlanTaxCategory(plan);
+    const { storageKey, documentNumber } = await this.invoicePdfService.generatePartialCreditDocumentAndStore(
+      invoice,
+      changedAt,
+      this.billingIssuerConfig.getConfig(),
+      buyer,
+      resolvePurchaseOrderReference(subscription.number, subscription.id),
+      resolveInvoicingPeriod(invoice, subscription, plan),
+      creditNet,
+      creditGross,
+      lineDescription,
+      changedAt.getTime().toString(36),
+      taxCategory,
+    );
+
+    const { created, entity: credit } = await this.invoiceCreditDocumentsRepository.createUniqueBySourceRef({
+      invoiceId: invoice.id,
+      documentNumber,
+      creditNet,
+      creditGross,
+      pdfStorageKey: storageKey,
+      reason: CONFIG_CHANGE_CREDIT_REASON,
+      withdrawnAt: changedAt,
+      taxCategory,
+      description: lineDescription,
+      sourceRef,
+    });
+
+    if (!created) {
+      await this.finalizePartialCreditSettlement(params, credit);
+
+      return 'credited';
+    }
+
+    await this.billingEmailPublisher.publishPartialCreditDocument(invoice, storageKey, documentNumber, creditGross);
+
+    const { appliedGross, carriedGross } = await this.finalizePartialCreditSettlement(params, credit);
+
+    await this.logOutcome(params, 'credited', {
+      creditNet,
+      creditGross,
+      creditNoteNumber: documentNumber,
+      invoiceId: invoice.id,
+      carriedGross,
+    });
+
+    return 'credited';
+  }
+
+  /**
+   * Applies invoice balance reduction and any carry-forward OP inside a transaction so retries
+   * can finish settlement after the credit row was persisted.
+   */
+  private async finalizePartialCreditSettlement(
+    params: ConfigChangeBillingParams,
+    credit: InvoiceCreditDocumentEntity,
+  ): Promise<{ appliedGross: number; carriedGross: number }> {
+    return await this.dataSource.transaction(async (manager) => {
+      const lockedCredit = await this.invoiceCreditDocumentsRepository.findByIdForUpdate(credit.id, manager);
+
+      if (!lockedCredit || lockedCredit.settlementComplete) {
+        return { appliedGross: 0, carriedGross: 0 };
+      }
+
+      const invoice = await this.invoicesRepository.findByIdForUpdate(lockedCredit.invoiceId, manager);
+
+      if (!invoice) {
+        throw new Error(`Invoice ${lockedCredit.invoiceId} not found for partial credit settlement`);
+      }
+
+      const creditGross = Number(lockedCredit.creditGross);
+      const creditNet = Number(lockedCredit.creditNet);
+      const appliedGross = await this.applyCreditToInvoiceBalance(invoice, creditGross, manager);
+      const carriedGross = roundMoney(creditGross - appliedGross);
+
+      if (carriedGross >= MIN_BILLABLE_AMOUNT && creditGross > 0) {
+        const carriedNet = roundMoney(-creditNet * (carriedGross / creditGross));
+
+        await this.openPositionsRepository.createUniqueBySourceRef(
+          {
+            subscriptionId: params.subscription.id,
+            userId: params.subscription.userId,
+            description: this.buildAdjustmentDescription(params),
+            billUntil: params.changedAt,
+            skipIfNoBillableAmount: true,
+            adjustmentNet: carriedNet.toFixed(4),
+            adjustmentKind: CONFIG_CHANGE_ADJUSTMENT_KINDS.CREDIT,
+            sourceRef: configChangeCarrySourceRef(params.change.id),
+          },
+          manager,
+        );
+      }
+
+      await this.invoiceCreditDocumentsRepository.markSettlementComplete(lockedCredit.id, manager);
+
+      return { appliedGross, carriedGross };
+    });
+  }
+
+  /** Returns the gross amount actually taken off the invoice balance. */
+  private async applyCreditToInvoiceBalance(
+    invoice: InvoiceEntity,
+    creditGross: number,
+    manager: EntityManager,
+  ): Promise<number> {
+    const balanceDue = Number(invoice.balanceDue);
+
+    if (!Number.isFinite(balanceDue) || balanceDue <= 0) {
+      return 0;
+    }
+
+    const applied = Math.min(creditGross, balanceDue);
+    const newBalanceDue = Math.max(0, roundMoney(balanceDue - applied));
+
+    invoice.balanceDue = newBalanceDue;
+
+    if (newBalanceDue <= 0) {
+      invoice.status = InvoiceStatus.PAID;
+    }
+
+    await manager.getRepository(InvoiceEntity).save(invoice);
+
+    return roundMoney(applied);
+  }
+
+  /**
+   * Share of a period charge the customer actually pays once running promotions are applied.
+   * Crediting the undiscounted amount would hand back more than was ever invoiced.
+   */
+  private async resolvePromotionRetentionRatio(params: ConfigChangeBillingParams): Promise<number> {
+    const snapshot = params.change.billingDisclaimerSnapshot;
+    const currentPeriodNet = Number(snapshot?.currentPeriodNet ?? 0);
+
+    if (!Number.isFinite(currentPeriodNet) || currentPeriodNet <= 0) {
+      return 1;
+    }
+
+    const taxCategory = resolvePlanTaxCategory(params.plan);
+    const promotions = await this.promotionApplicationService.calculatePromotions({
+      userId: params.subscription.userId,
+      subscriptionId: params.subscription.id,
+      chargeLines: [
+        {
+          description: 'Subscription period',
+          quantity: 1,
+          unitPriceNet: currentPeriodNet,
+          taxCategory,
+        },
+      ],
+      defaultTaxCategory: taxCategory,
+      subscriptionChargeNet: currentPeriodNet,
+      ...(params.subscription.currentPeriodStart && params.subscription.currentPeriodEnd
+        ? {
+            chargePeriod: {
+              start: params.subscription.currentPeriodStart,
+              end: params.subscription.currentPeriodEnd,
+            },
+          }
+        : {}),
+    });
+
+    if (promotions.rawSubtotalNet <= 0) {
+      return 1;
+    }
+
+    return Math.min(1, Math.max(0, promotions.adjustedSubtotalNet / promotions.rawSubtotalNet));
+  }
+
+  private async recordAdjustmentPosition(
+    params: ConfigChangeBillingParams,
+    adjustmentNet: number,
+    adjustmentKind: string,
+    sourceRef: string = configChangePrimarySourceRef(params.change.id),
+  ): Promise<void> {
+    await this.openPositionsRepository.createUniqueBySourceRef({
+      subscriptionId: params.subscription.id,
+      userId: params.subscription.userId,
+      description: this.buildAdjustmentDescription(params),
+      billUntil: params.changedAt,
+      skipIfNoBillableAmount: true,
+      adjustmentNet: adjustmentNet.toFixed(4),
+      adjustmentKind,
+      sourceRef,
+    });
+  }
+
+  private buildAdjustmentDescription(params: ConfigChangeBillingParams): string {
+    return `Configuration change ${params.change.id} (${params.subscription.number})`;
+  }
+
+  /**
+   * Idempotency guard: if an open position or credit document for this change already exists
+   * (even after the position was invoiced), do not settle again.
+   */
+  private async findExistingOutcome(
+    params: ConfigChangeBillingParams,
+  ): Promise<SubscriptionConfigChangeBillingOutcome | null> {
+    const changeId = params.change.id;
+    const primarySourceRef = configChangePrimarySourceRef(changeId);
+
+    const credit = await this.invoiceCreditDocumentsRepository.findBySourceRef(primarySourceRef);
+
+    if (credit) {
+      if (credit.settlementComplete) {
+        return 'credited';
+      }
+
+      await this.finalizePartialCreditSettlement(params, credit);
+
+      return 'credited';
+    }
+
+    const primaryPosition = await this.openPositionsRepository.findBySourceRef(primarySourceRef);
+
+    if (primaryPosition?.subscriptionId === params.subscription.id) {
+      return this.deriveOutcomeFromOpenPosition(primaryPosition);
+    }
+
+    const carryPosition = await this.openPositionsRepository.findBySourceRef(configChangeCarrySourceRef(changeId));
+
+    if (carryPosition?.subscriptionId === params.subscription.id) {
+      return 'credited';
+    }
+
+    const marker = changeId;
+    const matching = await this.openPositionsRepository.findConfigChangeAdjustment(params.subscription.id, marker);
+
+    if (matching) {
+      return this.deriveOutcomeFromOpenPosition(matching);
+    }
+
+    const legacyCredit = await this.invoiceCreditDocumentsRepository.findConfigChangeCredit(marker);
+
+    if (legacyCredit) {
+      return 'credited';
+    }
+
+    return null;
+  }
+
+  private deriveOutcomeFromOpenPosition(position: {
+    adjustmentNet?: string | null;
+    adjustmentKind?: string | null;
+  }): SubscriptionConfigChangeBillingOutcome {
+    const net = Number(position.adjustmentNet ?? 0);
+
+    if (position.adjustmentKind === CONFIG_CHANGE_ADJUSTMENT_KINDS.CREDIT || net < 0) {
+      return 'credited';
+    }
+
+    if (Math.abs(net) < MIN_BILLABLE_AMOUNT) {
+      return 'none';
+    }
+
+    return 'charged';
+  }
+
+  /**
+   * Moves the charge floor to the change instant so the next regular invoice only prices the
+   * period after the change at the new configuration.
+   */
+  private async resetPeriodAnchor(subscription: SubscriptionEntity, changedAt: Date): Promise<void> {
+    await this.subscriptionsRepository.update(subscription.id, { currentPeriodStart: changedAt });
+  }
+
+  private async computeGross(net: number, plan: ServicePlanEntity, userId: string): Promise<number> {
+    const taxContext = await this.invoiceTaxContextService.resolveForUser(userId);
+
+    return this.taxCalculationService.computeLines(
+      [
+        {
+          description: 'Configuration change adjustment',
+          quantity: 1,
+          unitPriceNet: net,
+          taxCategory: resolvePlanTaxCategory(plan),
+        },
+      ],
+      {
+        taxTreatment: taxContext.treatment,
+        forceChargeNonEuIssuerEuB2b: taxContext.forceChargeNonEuIssuerEuB2b,
+      },
+    ).totalGross;
+  }
+
+  private async logOutcome(
+    params: ConfigChangeBillingParams,
+    outcome: SubscriptionConfigChangeBillingOutcome,
+    context: Record<string, unknown>,
+  ): Promise<void> {
+    await this.auditLog.log({
+      process: 'subscription.config_change.billing',
+      level: 'info',
+      message: `Settled configuration change with outcome ${outcome}`,
+      userId: params.subscription.userId,
+      context: {
+        subscriptionId: params.subscription.id,
+        configChangeId: params.change.id,
+        outcome,
+        ...context,
+      },
+    });
+  }
+}

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { SubscriptionEntity } from '../entities/subscription.entity';
+import { SubscriptionEntity, SubscriptionStatus } from '../entities/subscription.entity';
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
@@ -147,6 +147,23 @@ export class SubscriptionsRepository {
     const entity = await this.findByIdOrThrow(id);
 
     await this.repository.remove(entity);
+  }
+
+  /**
+   * Compare-and-set on status so concurrent requests cannot both move a subscription
+   * out of the same state. Returns false when another writer won the race.
+   */
+  async compareAndSetStatus(id: string, expected: SubscriptionStatus, next: SubscriptionStatus): Promise<boolean> {
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(SubscriptionEntity)
+      .set({ status: next })
+      .where('id = :id', { id })
+      .andWhere('status = :expected', { expected })
+      .andWhere('user_id IN (SELECT id FROM users WHERE tenant_id = :tenantId)', { tenantId: getRequiredTenantId() })
+      .execute();
+
+    return (result.affected ?? 0) > 0;
   }
 
   async findDueForBilling(now: Date = new Date(), limit = 100): Promise<SubscriptionEntity[]> {

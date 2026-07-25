@@ -20,6 +20,8 @@ export class ProviderRegistryService {
       ...detail,
       // Fail closed: dynamic metadata plugins must opt in explicitly.
       supportsAddons: detail.supportsAddons === true,
+      supportsServerTypeUpgrade: detail.supportsServerTypeUpgrade === true,
+      supportsServerTypeDowngrade: detail.supportsServerTypeDowngrade === true,
     });
   }
 

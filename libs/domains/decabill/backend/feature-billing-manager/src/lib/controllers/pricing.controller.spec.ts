@@ -113,7 +113,13 @@ describe('PricingController', () => {
     expect(findPlanById).not.toHaveBeenCalled();
   });
 
-  it('uses requested server type price when catalog match exists', async () => {
+  it('uses requested server type price when customer server type selection is enabled', async () => {
+    findPlanById.mockResolvedValue({
+      ...planRow,
+      allowCustomerServerTypeSelection: true,
+      allowedServerTypes: ['cx11', 'cpx11'],
+    });
+
     const result = await controller.preview(
       {
         planId: planRow.id,
@@ -123,14 +129,39 @@ describe('PricingController', () => {
     );
 
     expect(getServerTypes).toHaveBeenCalledWith('hetzner', { HETZNER_API_TOKEN: 'tenant-token' });
-    expect(calculate).toHaveBeenCalledWith(planRow, 6.49);
+    expect(calculate).toHaveBeenCalledWith(expect.objectContaining({ allowCustomerServerTypeSelection: true }), 6.49);
     expect(result.totalPrice).toBe(6.49);
     expect(result.totalGross).toBeCloseTo(7.72, 2);
     expect(result.taxRate).toBe(19);
     expect(result.taxCategory).toBe('standard');
   });
 
+  it('ignores provisioning default server type when customer selection is disabled', async () => {
+    findPlanById.mockResolvedValue({
+      ...planRow,
+      allowCustomerServerTypeSelection: false,
+      providerConfigDefaults: { serverType: 'cpx11' },
+    });
+
+    const result = await controller.preview(
+      {
+        planId: planRow.id,
+        requestedConfig: { serverType: 'cpx11' },
+      },
+      authReq as never,
+    );
+
+    expect(getServerTypes).not.toHaveBeenCalled();
+    expect(calculate).toHaveBeenCalledWith(expect.objectContaining({ allowCustomerServerTypeSelection: false }));
+    expect(result.totalPrice).toBe(10);
+  });
+
   it('falls back to plan pricing when server type catalog price is missing', async () => {
+    findPlanById.mockResolvedValue({
+      ...planRow,
+      allowCustomerServerTypeSelection: true,
+      allowedServerTypes: ['cx11', 'cpx11'],
+    });
     getServerTypes.mockResolvedValue([{ id: 'cx11', priceMonthly: 4.15 }]);
 
     const result = await controller.preview(
@@ -141,7 +172,7 @@ describe('PricingController', () => {
       authReq as never,
     );
 
-    expect(calculate).toHaveBeenCalledWith(planRow);
+    expect(calculate).toHaveBeenCalledWith(expect.objectContaining({ allowCustomerServerTypeSelection: true }));
     expect(result.totalPrice).toBe(10);
     expect(result.totalGross).toBeCloseTo(11.9, 2);
   });

@@ -186,7 +186,10 @@ export class InvoiceCreationService {
       return undefined;
     }
 
-    const groups = groupOpenPositionsBySubscription(positions);
+    const adjustmentPositions = positions.filter((position) => this.parseAdjustmentNet(position) != null);
+    const groups = groupOpenPositionsBySubscription(
+      positions.filter((position) => this.parseAdjustmentNet(position) == null),
+    );
     const billableGroups: {
       group: (typeof groups)[number];
       chargePeriod: ChargePeriodResult;
@@ -205,9 +208,15 @@ export class InvoiceCreationService {
       }
     }
 
-    const total = billableGroups.reduce((sum, entry) => sum + entry.amount, 0);
+    const adjustmentLines = await this.buildAdjustmentLines(adjustmentPositions, userId);
+    const recurringTotal = billableGroups.reduce((sum, entry) => sum + entry.amount, 0);
+    const adjustmentTotal = adjustmentLines.reduce((sum, line) => sum + line.unitPriceNet, 0);
 
-    if (total < MIN_BILLABLE_AMOUNT) {
+    if (billableGroups.length === 0 && adjustmentLines.length === 0) {
+      return undefined;
+    }
+
+    if (Math.abs(Math.round((recurringTotal + adjustmentTotal) * 100) / 100) < MIN_BILLABLE_AMOUNT) {
       return undefined;
     }
 
@@ -270,13 +279,25 @@ export class InvoiceCreationService {
       redemptionUpdates.push(...promoResult.redemptionUpdates);
     }
 
-    const primarySubscriptionId = billableGroups[0].group.subscriptionId;
+    lineInputs.push(...adjustmentLines);
+
+    const primarySubscriptionId = billableGroups[0]?.group.subscriptionId ?? adjustmentPositions[0].subscriptionId;
     const taxContext = await this.invoiceTaxContextService.resolveForUser(userId);
     const totals = this.taxCalculationService.computeLines(lineInputs, {
       taxTreatment: taxContext.treatment,
       forceChargeNonEuIssuerEuB2b: taxContext.forceChargeNonEuIssuerEuB2b,
     });
     const minCheckoutPaymentAmount = getMinCheckoutPaymentAmount();
+
+    // A credit-heavy run must not become a negative invoice; hold the positions so the credit
+    // nets against the next charge instead.
+    if (totals.totalGross < 0) {
+      this.logger.debug(
+        `Holding open positions for user ${userId}: credits exceed charges by ${Math.abs(totals.totalGross).toFixed(2)}`,
+      );
+
+      return undefined;
+    }
 
     // Hold unbilled positions when there is a positive payable amount below the Checkout minimum.
     // Zero-gross (e.g. fully promotional) invoices are still issued.
@@ -295,7 +316,10 @@ export class InvoiceCreationService {
       promotionApplications,
       redemptionUpdates,
     });
-    const positionIds = billableGroups.flatMap(({ group }) => group.positions.map((position) => position.id));
+    const positionIds = [
+      ...billableGroups.flatMap(({ group }) => group.positions.map((position) => position.id)),
+      ...adjustmentPositions.map((position) => position.id),
+    ];
 
     await this.openPositionsRepository.markManyBilled(positionIds, result.invoiceRefId);
 
@@ -304,8 +328,10 @@ export class InvoiceCreationService {
 
   async getUnbilledTotalForUser(userId: string): Promise<number> {
     const positions = await this.openPositionsRepository.findUnbilledByUserId(userId);
-    const groups = groupOpenPositionsBySubscription(positions);
-    let total = 0;
+    const groups = groupOpenPositionsBySubscription(
+      positions.filter((position) => this.parseAdjustmentNet(position) == null),
+    );
+    let total = positions.reduce((sum, position) => sum + (this.parseAdjustmentNet(position) ?? 0), 0);
 
     for (const group of groups) {
       const netTotal = await this.getBillableNetTotalAfterPromotionsForPosition(group.representative, userId);
@@ -316,6 +342,48 @@ export class InvoiceCreationService {
     }
 
     return Math.round(total * 100) / 100;
+  }
+
+  /**
+   * Signed corrections (e.g. mid-life configuration changes) carry their own frozen amount and
+   * bypass period pricing, which would otherwise reprice them at the current configuration.
+   */
+  private async buildAdjustmentLines(positions: OpenPositionEntity[], userId: string): Promise<LineItemInput[]> {
+    const lines: LineItemInput[] = [];
+
+    for (const position of positions) {
+      if (position.userId !== userId) {
+        throw new BadRequestException('Position does not belong to user');
+      }
+
+      const amount = this.parseAdjustmentNet(position);
+
+      if (amount == null || Math.abs(amount) < MIN_BILLABLE_AMOUNT) {
+        continue;
+      }
+
+      const subscription = await this.subscriptionsRepository.findByIdOrThrow(position.subscriptionId);
+      const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);
+
+      lines.push({
+        description: position.description ?? 'Adjustment',
+        quantity: 1,
+        unitPriceNet: Math.round(amount * 100) / 100,
+        taxCategory: resolvePlanTaxCategory(plan),
+      });
+    }
+
+    return lines;
+  }
+
+  private parseAdjustmentNet(position: OpenPositionEntity): number | null {
+    if (position.adjustmentNet == null) {
+      return null;
+    }
+
+    const parsed = Number(position.adjustmentNet);
+
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   private async getBillableNetTotalAfterPromotionsForPosition(

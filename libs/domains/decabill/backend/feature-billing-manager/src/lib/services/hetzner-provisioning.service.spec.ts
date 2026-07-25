@@ -1,10 +1,17 @@
 import { BadRequestException } from '@nestjs/common';
 import axios from 'axios';
 
+import { waitForTcpPort } from '../utils/wait-for-tcp-port.util';
 import { HetznerProvisioningService } from './hetzner-provisioning.service';
 
 jest.mock('axios');
+jest.mock('../utils/wait-for-tcp-port.util', () => ({
+  waitForTcpPort: jest.fn().mockResolvedValue(undefined),
+  isTcpPortOpen: jest.fn(),
+}));
+
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedWaitForTcpPort = waitForTcpPort as jest.MockedFunction<typeof waitForTcpPort>;
 
 describe('HetznerProvisioningService', () => {
   const originalEnv = process.env;
@@ -345,6 +352,108 @@ describe('HetznerProvisioningService', () => {
 
       await expect(service.restartServer('12345')).rejects.toThrow(BadRequestException);
       await expect(service.restartServer('12345')).rejects.toThrow('Failed to restart server');
+    });
+  });
+
+  describe('changeServerType', () => {
+    const serverPayload = (status: string) => ({
+      data: {
+        server: {
+          id: 12345,
+          name: 'test-server',
+          status,
+          public_net: { ipv4: { ip: '1.2.3.4' } },
+        },
+      },
+    });
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      mockedWaitForTcpPort.mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      jest.restoreAllMocks();
+    });
+
+    it('stops a running server, changes type without growing disk, and waits for running', async () => {
+      mockedAxios.get
+        .mockResolvedValueOnce(serverPayload('running'))
+        .mockResolvedValueOnce(serverPayload('off'))
+        .mockResolvedValueOnce(serverPayload('running'))
+        .mockResolvedValueOnce(serverPayload('running'));
+      mockedAxios.post.mockResolvedValueOnce({ data: { action: { id: 1 } } }).mockResolvedValueOnce({ data: {} });
+
+      const service = new HetznerProvisioningService();
+      const promise = service.changeServerType('12345', 'cx21', { upgradeDisk: true });
+
+      await jest.runAllTimersAsync();
+      await promise;
+
+      expect(mockedAxios.get).toHaveBeenNthCalledWith(1, 'https://api.hetzner.cloud/v1/servers/12345', {
+        headers: { Authorization: 'Bearer test-token' },
+      });
+      expect(mockedAxios.post).toHaveBeenNthCalledWith(
+        1,
+        'https://api.hetzner.cloud/v1/servers/12345/actions/poweroff',
+        {},
+        { headers: { Authorization: 'Bearer test-token' } },
+      );
+      expect(mockedAxios.post).toHaveBeenNthCalledWith(
+        2,
+        'https://api.hetzner.cloud/v1/servers/12345/actions/change_type',
+        { server_type: 'cx21', upgrade_disk: true },
+        { headers: { Authorization: 'Bearer test-token' } },
+      );
+      expect(mockedWaitForTcpPort).toHaveBeenCalledWith('1.2.3.4', 22, { timeoutMs: 90 * 1000 });
+    });
+
+    it('skips poweroff when server is already off and defaults upgrade_disk to false', async () => {
+      mockedAxios.get
+        .mockResolvedValueOnce(serverPayload('off'))
+        .mockResolvedValueOnce(serverPayload('running'))
+        .mockResolvedValueOnce(serverPayload('running'));
+      mockedAxios.post.mockResolvedValueOnce({ data: {} });
+
+      const service = new HetznerProvisioningService();
+      const promise = service.changeServerType('12345', 'cx21');
+
+      await jest.runAllTimersAsync();
+      await promise;
+
+      expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+      expect(mockedAxios.post).toHaveBeenCalledWith(
+        'https://api.hetzner.cloud/v1/servers/12345/actions/change_type',
+        { server_type: 'cx21', upgrade_disk: false },
+        { headers: { Authorization: 'Bearer test-token' } },
+      );
+      expect(mockedWaitForTcpPort).toHaveBeenCalledWith('1.2.3.4', 22, { timeoutMs: 90 * 1000 });
+    });
+
+    it('throws when API token not set', async () => {
+      delete process.env.HETZNER_API_TOKEN;
+      const service = new HetznerProvisioningService();
+
+      await expect(service.changeServerType('12345', 'cx21')).rejects.toThrow(BadRequestException);
+      expect(mockedAxios.get).not.toHaveBeenCalled();
+    });
+
+    it('throws BadRequestException with Hetzner error details on change_type failure', async () => {
+      mockedAxios.get.mockResolvedValueOnce(serverPayload('off'));
+      mockedAxios.post.mockRejectedValueOnce({
+        message: 'Request failed with status code 422',
+        response: {
+          status: 422,
+          data: { error: { code: 'invalid_server_type', message: 'Server type is not available' } },
+        },
+      });
+
+      const service = new HetznerProvisioningService();
+
+      await expect(service.changeServerType('12345', 'invalid-type')).rejects.toThrow(
+        'Failed to change server type: invalid_server_type: Server type is not available',
+      );
     });
   });
 });

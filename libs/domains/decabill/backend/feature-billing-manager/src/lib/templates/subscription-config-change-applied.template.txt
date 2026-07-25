@@ -1,0 +1,5 @@
+Dear {{recipientName}},
+
+The configuration change for your subscription "{{planName}}"{{#if subscriptionNumber}} ({{subscriptionNumber}}){{/if}} has been applied.
+
+Any price difference for the current billing period is settled with your next invoice.

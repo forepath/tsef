@@ -10,6 +10,7 @@ export class AddonResponseDto {
   implementationType!: AddonImplementationType;
   moduleKey?: string | null;
   scriptTemplate?: string | null;
+  deprovisionScriptTemplate?: string | null;
   configSchema!: Record<string, unknown>;
   /** Decrypted defaults; only included on admin GET by id / create / update. */
   defaultValues?: Record<string, string>;

@@ -1,7 +1,7 @@
 import { UserEntity } from '@forepath/identity/backend';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 import { AutoPaymentStatus } from '../constants/auto-payment-status.constants';
 import {
@@ -116,6 +116,19 @@ export class InvoicesRepository {
       .where('inv.id = :id', { id })
       .andWhere('user.tenant_id = :tenantId', { tenantId: getRequiredTenantId() })
       .getOne();
+  }
+
+  async findByIdForUpdate(id: string, manager: EntityManager): Promise<InvoiceEntity | null> {
+    const qb = manager
+      .getRepository(InvoiceEntity)
+      .createQueryBuilder('inv')
+      .innerJoin('users', 'user', 'user.id = inv.user_id')
+      .where('inv.id = :id', { id })
+      .setLock('pessimistic_write');
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getOne();
   }
 
   /**

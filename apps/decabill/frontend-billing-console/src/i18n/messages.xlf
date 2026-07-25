@@ -903,7 +903,8 @@
       <trans-unit id="featureAddons-compatibleProviders" datatype="html"><source>Compatible providers</source></trans-unit>
       <trans-unit id="featureAddons-compatibleProvidersHelp" datatype="html"><source>Hold Ctrl/Cmd to select multiple. Leave empty for all addon-capable providers.</source></trans-unit>
       <trans-unit id="featureAddons-moduleKey" datatype="html"><source>Module key</source></trans-unit>
-      <trans-unit id="featureAddons-scriptTemplate" datatype="html"><source>Cloud-init script template</source></trans-unit>
+      <trans-unit id="featureAddons-scriptTemplate" datatype="html"><source>Cloud-init provision script template</source></trans-unit>
+      <trans-unit id="featureAddons-deprovisionScriptTemplate" datatype="html"><source>Cloud-init deprovision script template</source></trans-unit>
       <trans-unit id="featureAddons-basePrice" datatype="html"><source>Base price</source></trans-unit>
       <trans-unit id="featureAddons-priceIntervalType" datatype="html"><source>Price interval</source></trans-unit>
       <trans-unit id="featureAddons-priceIntervalValue" datatype="html"><source>Interval value</source></trans-unit>
@@ -920,6 +921,7 @@
       <trans-unit id="featureAddons-moduleDefaultsHelp" datatype="html"><source>Defaults for module environment variables. Schema is defined by the registered module; leave blank when unused.</source></trans-unit>
       <trans-unit id="featureAddons-randomDefaultHint" datatype="html"><source>Uses a random default at provision time.</source></trans-unit>
       <trans-unit id="featureAddons-scriptEnvHint" datatype="html"><source>Use {{env.KEY}} placeholders in the script for configured environment variables.</source></trans-unit>
+      <trans-unit id="featureAddons-deprovisionScriptHint" datatype="html"><source>Leave empty for status-only mid-life removal (no SSH reverse script).</source></trans-unit>
       <trans-unit id="featureAddons-envVariables" datatype="html"><source>Environment variables</source></trans-unit>
       <trans-unit id="featureAddons-addEnvVar" datatype="html"><source>Add line</source></trans-unit>
       <trans-unit id="featureAddons-envKey" datatype="html"><source>Key</source></trans-unit>
@@ -945,6 +947,7 @@
       <trans-unit id="featureSubscriptions-addonConfigFields" datatype="html"><source>Configuration for this addon</source></trans-unit>
       <trans-unit id="featureSubscriptions-addonConfigSection" datatype="html"><source>Addon configuration</source></trans-unit>
       <trans-unit id="featureSubscriptions-addonConfigCardTitle" datatype="html"><source>Addon: <x id="addonName" equiv-text="addonName"/></source></trans-unit>
+      <trans-unit id="featureSubscriptions-productBase" datatype="html"><source>Product total (net)</source></trans-unit>
       <trans-unit id="featureSubscriptions-addonsTotal" datatype="html"><source>Addons total</source></trans-unit>
       <trans-unit id="featureSubscriptions-grandTotal" datatype="html"><source>Plan and addons</source></trans-unit>
       <trans-unit id="featureCloudInitConfigs-title" datatype="html">
@@ -3637,6 +3640,135 @@
         </trans-unit>
       <trans-unit id="utilCookieConsent-link" datatype="html">
         <source>Learn more</source>
+        </trans-unit>
+      <trans-unit id="featureBilling-subscriptionStatusPendingConfigChange" datatype="html">
+        <source>Applying configuration change</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-modifyConfigButtonTitle" datatype="html">
+        <source>Modify configuration</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeTitle" datatype="html">
+        <source> Modify configuration </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeConfirmationTitle" datatype="html">
+        <source> Configuration change requested </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeConfirmationMessage" datatype="html">
+        <source> We are applying your changes. You can close this dialog and track progress in your subscriptions list. The final amounts are settled with your next invoice. </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeLoadingEligibility" datatype="html">
+        <source>Checking available changes…</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeStepsAria" datatype="html">
+        <source>Configuration change steps</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeCurrentServerType" datatype="html">
+        <source>Current server type</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeLoadingServerTypes" datatype="html">
+        <source>Loading server types…</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNewServerType" datatype="html">
+        <source>New server type</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeServerTypeHint" datatype="html">
+        <source> Your server keeps its current location. Choosing a server type at the same price is not possible. </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNoServerTypes" datatype="html">
+        <source> No alternative server types are available for this plan. </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeAddonActive" datatype="html">
+        <source>Active</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeAddonRemoved" datatype="html">
+        <source>Will be removed</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeAddonConfigLocked" datatype="html">
+        <source> The configuration of this addon is locked and cannot be changed here. </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNoAddons" datatype="html">
+        <source> No addons are available for this plan. </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeSummaryTitle" datatype="html">
+        <source>Your changes</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNoChanges" datatype="html">
+        <source> You have not selected any changes yet. Go back and pick a different server type or adjust your addons. </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeSummaryServerType" datatype="html">
+        <source>Server type</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeDisclaimerTitle" datatype="html">
+        <source> Billing information </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeEffectiveAt" datatype="html">
+        <source>Effective</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeAdvisoryNote" datatype="html">
+        <source> All amounts shown are advisory. The final amounts are recalculated when the change is confirmed. </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangePriceTitle" datatype="html">
+        <source> Price preview </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeCurrentPeriodNet" datatype="html">
+        <source> Current period (net) </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNewPeriodNet" datatype="html">
+        <source> New period (net) </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangePeriodDelta" datatype="html">
+        <source> Difference per period </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeImmediateAdjustment" datatype="html">
+        <source> Settled now (net) </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeNoPreview" datatype="html">
+        <source> Select a change to see its effect on your price. </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeDiscountsTitle" datatype="html">
+        <source> Active promotions </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeDiscountPeriodsLeft" datatype="html">
+        <source>periods left</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeInProgress" datatype="html">
+        <source>Configuration change in progress, please wait</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeSubmit" datatype="html">
+        <source>Apply changes</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeStepServerType" datatype="html">
+        <source>Server type</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeStepAddons" datatype="html">
+        <source>Addons</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeStepSummary" datatype="html">
+        <source>Summary</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorNotEligible" datatype="html">
+        <source>This subscription cannot be reconfigured right now. Please try again once any pending change has finished.</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorNoop" datatype="html">
+        <source>Select at least one change before continuing.</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorServerTypeUnsupported" datatype="html">
+        <source>This server type change is not supported for your service.</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorServerTypeLateral" datatype="html">
+        <source>The selected server type costs the same as your current one. Choose a larger or a smaller server type.</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorAddonInvalid" datatype="html">
+        <source>One of the selected addons is not available for this subscription.</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorAddonConfigImmutable" datatype="html">
+        <source>The configuration of an addon that is already active cannot be changed here.</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorFailed" datatype="html">
+        <source>The configuration change could not be applied. Please try again later.</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-configChangeErrorGeneric" datatype="html">
+        <source>The configuration change could not be processed. Please try again.</source>
         </trans-unit>
     </body>
   </file>

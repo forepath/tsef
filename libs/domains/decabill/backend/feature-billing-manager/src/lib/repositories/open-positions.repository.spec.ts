@@ -1,3 +1,5 @@
+import { QueryFailedError } from 'typeorm';
+
 import { runWithTenantId } from '@forepath/shared/backend';
 
 import { OpenPositionsRepository } from './open-positions.repository';
@@ -8,6 +10,7 @@ describe('OpenPositionsRepository', () => {
   const mockGetOne = jest.fn();
   const mockSetLock = jest.fn().mockReturnThis();
   const mockOrderBy = jest.fn().mockReturnThis();
+  const mockTake = jest.fn().mockReturnThis();
   const mockAndWhere = jest.fn().mockReturnThis();
   const mockWhere = jest.fn().mockReturnThis();
   const mockInnerJoin = jest.fn().mockReturnThis();
@@ -28,6 +31,7 @@ describe('OpenPositionsRepository', () => {
     where: mockWhere,
     andWhere: mockAndWhere,
     orderBy: mockOrderBy,
+    take: mockTake,
     setLock: mockSetLock,
     select: mockSelect,
     getMany: mockGetMany,
@@ -50,6 +54,7 @@ describe('OpenPositionsRepository', () => {
     mockWhere.mockReturnThis();
     mockAndWhere.mockReturnThis();
     mockOrderBy.mockReturnThis();
+    mockTake.mockReturnThis();
     mockSetLock.mockReturnThis();
     mockSelect.mockReturnThis();
     mockUpdateSet.mockReturnThis();
@@ -77,6 +82,50 @@ describe('OpenPositionsRepository', () => {
       expect(mockRepository.create).toHaveBeenCalledWith(dto);
       expect(mockRepository.save).toHaveBeenCalledWith(created);
       expect(result).toEqual(created);
+    });
+  });
+
+  describe('createUniqueBySourceRef', () => {
+    it('returns created true when save succeeds', async () => {
+      const dto = {
+        subscriptionId: 'sub-1',
+        userId: 'user-1',
+        sourceRef: 'config_change:change-1',
+        billUntil: new Date('2024-02-01'),
+        skipIfNoBillableAmount: true,
+      };
+      const saved = { id: 'pos-1', ...dto, createdAt: new Date() };
+
+      mockRepository.create.mockReturnValue(saved);
+      mockRepository.save.mockResolvedValue(saved);
+
+      const repository = new OpenPositionsRepository(mockRepository as never);
+      const result = await repository.createUniqueBySourceRef(dto);
+
+      expect(result).toEqual({ entity: saved, created: true });
+    });
+
+    it('reloads by sourceRef when save hits a unique violation', async () => {
+      const dto = {
+        subscriptionId: 'sub-1',
+        userId: 'user-1',
+        sourceRef: 'config_change:change-1',
+        billUntil: new Date('2024-02-01'),
+        skipIfNoBillableAmount: true,
+      };
+      const existing = { id: 'pos-existing', ...dto, createdAt: new Date() };
+
+      mockRepository.create.mockReturnValue(dto);
+      mockRepository.save.mockRejectedValue(new QueryFailedError('INSERT', [], { code: '23505' } as never));
+      mockGetOne.mockResolvedValue(existing);
+
+      const repository = new OpenPositionsRepository(mockRepository as never);
+      const result = await runWithTenantId('default', () => repository.createUniqueBySourceRef(dto));
+
+      expect(result).toEqual({ entity: existing, created: false });
+      expect(mockWhere).toHaveBeenCalledWith('pos.source_ref = :sourceRef', {
+        sourceRef: 'config_change:change-1',
+      });
     });
   });
 

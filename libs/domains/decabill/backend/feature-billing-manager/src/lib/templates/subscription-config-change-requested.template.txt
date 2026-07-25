@@ -1,0 +1,5 @@
+Dear {{recipientName}},
+
+We received your configuration change for the subscription "{{planName}}"{{#if subscriptionNumber}} ({{subscriptionNumber}}){{/if}}.
+
+The change is being applied now. We will send another email as soon as it is finished. Your service may restart briefly while the change is applied.

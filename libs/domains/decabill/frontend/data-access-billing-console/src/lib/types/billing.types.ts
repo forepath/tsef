@@ -3,7 +3,13 @@
 // Enums
 export type BillingIntervalType = 'hour' | 'day' | 'month' | 'year';
 
-export type SubscriptionStatus = 'active' | 'pending_backorder' | 'pending_cancel' | 'pending_withdrawal' | 'canceled';
+export type SubscriptionStatus =
+  | 'active'
+  | 'pending_backorder'
+  | 'pending_cancel'
+  | 'pending_config_change'
+  | 'pending_withdrawal'
+  | 'canceled';
 
 export type BackorderStatus = 'pending' | 'retrying' | 'fulfilled' | 'cancelled' | 'failed';
 
@@ -234,6 +240,7 @@ export interface AddonResponse {
   implementationType: AddonImplementationType;
   moduleKey?: string | null;
   scriptTemplate?: string | null;
+  deprovisionScriptTemplate?: string | null;
   configSchema: AddonConfigSchema | Record<string, unknown>;
   /** Decrypted defaults; only on admin GET by id / create / update. */
   defaultValues?: Record<string, string>;
@@ -267,6 +274,7 @@ export interface CreateAddonDto {
   implementationType: AddonImplementationType;
   moduleKey?: string;
   scriptTemplate?: string;
+  deprovisionScriptTemplate?: string;
   configSchema?: AddonConfigSchemaInput | Record<string, unknown>;
   defaultValues?: Record<string, string>;
   compatibleProviders?: string[];
@@ -282,6 +290,7 @@ export interface UpdateAddonDto {
   implementationType?: AddonImplementationType;
   moduleKey?: string | null;
   scriptTemplate?: string | null;
+  deprovisionScriptTemplate?: string | null;
   configSchema?: AddonConfigSchemaInput | Record<string, unknown>;
   defaultValues?: Record<string, string>;
   compatibleProviders?: string[];

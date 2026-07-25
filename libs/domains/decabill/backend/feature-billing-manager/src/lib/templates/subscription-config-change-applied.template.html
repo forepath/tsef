@@ -1,0 +1,9 @@
+{{#> email-layout}}
+<h1 class="email-title">Configuration change applied</h1>
+<p>Dear {{recipientName}},</p>
+<p>
+  The configuration change for your subscription "<strong>{{planName}}</strong>"{{#if subscriptionNumber}}
+  (<strong>{{subscriptionNumber}}</strong>){{/if}} has been applied.
+</p>
+<p>Any price difference for the current billing period is settled with your next invoice.</p>
+{{/email-layout}}

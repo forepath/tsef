@@ -10,6 +10,7 @@ import {
   InvoiceOverdueJobHandler,
   OpenPositionInvoiceJobHandler,
   SubscriptionBillingJobHandler,
+  SubscriptionConfigChangeJobHandler,
   SubscriptionExpirationJobHandler,
   SubscriptionItemUpdateJobHandler,
   SubscriptionProvisioningJobHandler,
@@ -56,6 +57,7 @@ export class BillingJobsProcessor extends WorkerHost {
     private readonly subscriptionExpiration: SubscriptionExpirationJobHandler,
     private readonly subscriptionWithdrawal: SubscriptionWithdrawalJobHandler,
     private readonly subscriptionProvisioning: SubscriptionProvisioningJobHandler,
+    private readonly subscriptionConfigChange: SubscriptionConfigChangeJobHandler,
     private readonly invoiceOverdue: InvoiceOverdueJobHandler,
     private readonly invoiceAutoPayment: InvoiceAutoPaymentJobHandler,
     private readonly openPositionInvoice: OpenPositionInvoiceJobHandler,
@@ -95,6 +97,9 @@ export class BillingJobsProcessor extends WorkerHost {
         break;
       case BillingJobName.SUBSCRIPTION_PROVISIONING_COORDINATOR:
         await this.runSubscriptionProvisioningCoordinator();
+        break;
+      case BillingJobName.SUBSCRIPTION_CONFIG_CHANGE_COORDINATOR:
+        await this.runSubscriptionConfigChangeCoordinator();
         break;
       case BillingJobName.INVOICE_OVERDUE_COORDINATOR:
         await this.runInvoiceOverdueCoordinator();
@@ -160,6 +165,11 @@ export class BillingJobsProcessor extends WorkerHost {
             case BillingJobName.SUBSCRIPTION_PROVISIONING_UNIT:
               await this.subscriptionProvisioning.processItemProvisioning(
                 (job.data as { subscriptionItemId: string }).subscriptionItemId,
+              );
+              break;
+            case BillingJobName.SUBSCRIPTION_CONFIG_CHANGE_UNIT:
+              await this.subscriptionConfigChange.processConfigChange(
+                (job.data as { configChangeId: string }).configChangeId,
               );
               break;
             case BillingJobName.INVOICE_OVERDUE_UNIT:
@@ -295,6 +305,24 @@ export class BillingJobsProcessor extends WorkerHost {
           payload: { subscriptionItemId, tenantId },
           jobIdNamespace: 'provisioning:subscription-item',
           jobIdParts: [tenantId, subscriptionItemId],
+        });
+      }
+    });
+  }
+
+  private async runSubscriptionConfigChangeCoordinator(): Promise<void> {
+    await this.forEachConfiguredTenant(async (tenantId) => {
+      await this.subscriptionConfigChange.reclaimStuckProcessing();
+
+      const ids = await this.subscriptionConfigChange.findPendingConfigChangeIds();
+
+      for (const configChangeId of ids) {
+        await this.enqueueBillingUnitJob({
+          queue: this.billingQueue,
+          jobName: BillingJobName.SUBSCRIPTION_CONFIG_CHANGE_UNIT,
+          payload: { configChangeId, tenantId },
+          jobIdNamespace: 'config-change:subscription',
+          jobIdParts: [tenantId, configChangeId],
         });
       }
     });

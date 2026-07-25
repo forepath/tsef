@@ -88,6 +88,13 @@ Run after Compose or orchestrated bring-up. Prefer staging with production-like 
 - [ ] Keep previous image tags available; practice rollback on staging (billing migrations may be forward-only)
 - [ ] Replace or rotate SMTP, Stripe, and cloud credentials on a defined schedule
 
+### Subscription config change
+
+- [ ] Confirm `CONFIG_CHANGE_SCHEDULER_INTERVAL`, `CONFIG_CHANGE_SCHEDULER_BATCH_SIZE`, and `CONFIG_CHANGE_PROCESSING_TIMEOUT_MS` match expected load (defaults: 30s / 100 / 15m) — see [Environment configuration](./environment-configuration.md)
+- [ ] For cloud-init addons offered for mid-life remove: either set `deprovisionScriptTemplate` for real remote undo, or accept that empty/unset means **status-only** removal (row inactive, snapshot cleared, no SSH undo)
+- [ ] Dynamic billing provider plugins that support in-place resize must set `supportsServerTypeUpgrade` / `supportsServerTypeDowngrade` on metadata (fail-closed when omitted) — see [Subscription config change](../features/subscription-config-change.md) and [Dynamic provider plugins](../features/dynamic-provider-plugins.md)
+- [ ] After a failed config change: treat committed snapshots as billing authority; expect customers to resubmit; do not assume infra rollback
+
 ### Logging and access
 
 - [ ] Centralize structured logs from all queue roles; correlate with `X-Correlation-Id` / `X-Request-Id`

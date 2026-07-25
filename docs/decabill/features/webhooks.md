@@ -53,9 +53,12 @@ Events are published from the **billing** service after successful mutations.
 - `payment_method.attached`
 - `customer_trust.level_changed`
 - `subscription.created`, `subscription.updated`, `subscription.cancel_scheduled`, `subscription.canceled`, `subscription.resumed`, `subscription.period_charged`
+- `subscription.config_change_requested`, `subscription.config_changed`, `subscription.config_change_failed`
 - `addon.activated`, `addon.deactivated`, `addon.provision_failed`, `addon.teardown_failed`
 
 Addon payloads include subscription id/number, plan id/name, addon id/key/name, and status timestamps. Config snapshots and secrets are never included. See [Addons](./addons.md).
+
+Config-change payloads carry the subscription payload plus `configChangeId`, `appliedSteps` (step keys such as `serverType` or `addonAdd:<addonId>`), `billingOutcome` (`none` | `charged` | `credited` | `deferred`), and `errorCode`. The requested payload is never included because addon configuration can hold credentials.
 
 Subscription payloads include `billInAdvance` and `billingIntervalType`. **Breaking:** cancel requests emit `subscription.cancel_scheduled`; `subscription.canceled` is reserved for final teardown. See [Advance billing and yearly interval](./advance-billing-and-yearly-interval.md).
 

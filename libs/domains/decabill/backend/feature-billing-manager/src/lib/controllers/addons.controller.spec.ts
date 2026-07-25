@@ -112,6 +112,53 @@ describe('AddonsController', () => {
       expect(result.defaultValues).toEqual({ REGION: 'eu' });
     });
 
+    it('persists the deprovision script template for script addons', async () => {
+      const repository = { create: jest.fn().mockResolvedValue(sampleRow) };
+      const addonService = {
+        validateCreatePayload: jest.fn(),
+        resolveConfigForWrite: jest.fn().mockReturnValue({
+          configSchema: sampleRow.configSchema,
+          configDefaultValues: {},
+        }),
+      };
+      const controller = await createModule(repository, addonService);
+
+      await controller.create({
+        key: 'av',
+        name: 'Antivirus',
+        implementationType: 'cloud_init_script',
+        scriptTemplate: '#!/bin/bash\necho {{env.REGION}}',
+        deprovisionScriptTemplate: '#!/bin/bash\nremove {{env.REGION}}',
+      } as never);
+
+      expect(repository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ deprovisionScriptTemplate: '#!/bin/bash\nremove {{env.REGION}}' }),
+      );
+    });
+
+    it('rejects deprovision script templates that cannot interpolate', async () => {
+      const repository = { create: jest.fn() };
+      const addonService = {
+        validateCreatePayload: jest.fn(),
+        resolveConfigForWrite: jest.fn().mockReturnValue({
+          configSchema: { environmentVariables: [{ key: 'REGION', label: 'Region', showInOrderForm: true }] },
+          configDefaultValues: {},
+        }),
+      };
+      const controller = await createModule(repository, addonService);
+
+      await expect(
+        controller.create({
+          key: 'av',
+          name: 'Antivirus',
+          implementationType: 'cloud_init_script',
+          scriptTemplate: '#!/bin/bash\necho {{env.REGION}}',
+          deprovisionScriptTemplate: '#!/bin/bash\nremove {{env.MISSING}}',
+        } as never),
+      ).rejects.toThrow(BadRequestException);
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
     it('rejects invalid script templates that cannot interpolate', async () => {
       const repository = { create: jest.fn() };
       const addonService = {
@@ -159,6 +206,32 @@ describe('AddonsController', () => {
         expect.objectContaining({ name: 'Renamed', implementationType: 'cloud_init_script' }),
       );
       expect(result.name).toBe('Renamed');
+    });
+
+    it('keeps the stored deprovision script when the payload omits it', async () => {
+      const existing = { ...sampleRow, deprovisionScriptTemplate: '#!/bin/bash\nremove {{env.REGION}}' };
+      const repository = {
+        findByIdOrThrow: jest.fn().mockResolvedValue(existing),
+        update: jest.fn().mockResolvedValue(existing),
+      };
+      const addonService = {
+        validateUpdatePayload: jest.fn().mockReturnValue({
+          implementationType: 'cloud_init_script',
+          moduleKey: null,
+          scriptTemplate: sampleRow.scriptTemplate,
+        }),
+        resolveConfigForWrite: jest.fn(),
+        assertNotReferencedByActivePlans: jest.fn(),
+      };
+      const controller = await createModule(repository, addonService);
+
+      const result = await controller.update(sampleRow.id, { name: 'Renamed' } as never);
+
+      expect(repository.update).toHaveBeenCalledWith(
+        sampleRow.id,
+        expect.objectContaining({ deprovisionScriptTemplate: '#!/bin/bash\nremove {{env.REGION}}' }),
+      );
+      expect(result.deprovisionScriptTemplate).toBe('#!/bin/bash\nremove {{env.REGION}}');
     });
 
     it('resolves config when schema or defaults change', async () => {

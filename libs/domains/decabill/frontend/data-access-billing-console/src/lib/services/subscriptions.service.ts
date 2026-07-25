@@ -12,6 +12,12 @@ import type {
   SubscriptionResponse,
   WithdrawSubscriptionDto,
 } from '../types/billing.types';
+import type {
+  ConfigChangeEligibility,
+  ConfigChangePreviewResponse,
+  ConfigChangeRequest,
+  ConfigChangeResponse,
+} from '../types/config-change.types';
 
 @Injectable({
   providedIn: 'root',
@@ -79,5 +85,29 @@ export class SubscriptionsService {
    */
   resumeSubscription(id: string, dto?: ResumeSubscriptionDto): Observable<SubscriptionResponse> {
     return this.http.post<SubscriptionResponse>(`${this.apiUrl}/subscriptions/${id}/resume`, dto ?? {});
+  }
+
+  /**
+   * Report whether a subscription can be reconfigured, plus the server types and addons the plan offers.
+   */
+  getConfigChangeEligibility(id: string): Observable<ConfigChangeEligibility> {
+    return this.http.get<ConfigChangeEligibility>(`${this.apiUrl}/subscriptions/${id}/config-change/eligibility`);
+  }
+
+  /**
+   * Advisory preview of a configuration change; final amounts are recalculated on submit.
+   */
+  previewConfigChange(id: string, request: ConfigChangeRequest): Observable<ConfigChangePreviewResponse> {
+    return this.http.post<ConfigChangePreviewResponse>(
+      `${this.apiUrl}/subscriptions/${id}/config-change/preview`,
+      request,
+    );
+  }
+
+  /**
+   * Request a configuration change; the change is applied asynchronously.
+   */
+  submitConfigChange(id: string, request: ConfigChangeRequest): Observable<ConfigChangeResponse> {
+    return this.http.post<ConfigChangeResponse>(`${this.apiUrl}/subscriptions/${id}/config-change`, request);
   }
 }

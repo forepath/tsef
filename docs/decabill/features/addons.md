@@ -79,6 +79,22 @@ Stored in `providerConfigDefaults.allowedAddonIds` (UUID array). Delete/deactiva
 4. On subscription teardown → module `teardown` → `inactive` + `addon.deactivated`
 5. Failures emit `addon.provision_failed` / `addon.teardown_failed` (webhook + email)
 
+### Mid-life changes
+
+Addons can also be added to or removed from a running subscription:
+
+- **Add:** a `pending` row is created for every addon that is not already pending or active, then the module `provision` runs, or the interpolated `scriptTemplate` is executed over SSH (`root`, port 22, item SSH key). Exit code `0` activates the row; anything else fails it and aborts the batch.
+- **Remove:** the row goes to `tearing_down`, then module `teardown` runs, or the interpolated `deprovisionScriptTemplate` is executed over SSH. **Empty / null `deprovisionScriptTemplate` = status-only** (no SSH undo): the row still becomes `inactive` and `configSnapshot` is cleared. Operators who need remote cleanup must supply a reverse script.
+- **Subscription teardown:** a configured `deprovisionScriptTemplate` also runs before the server is deleted, and is skipped when the item has no SSH key or no reachable public IP.
+
+Customer-facing notifications carry generic messages; script output, config values, and keys are never logged or published.
+
+| Variable                               | Default  | Purpose                                  |
+| -------------------------------------- | -------- | ---------------------------------------- |
+| `BILLING_ADDON_SSH_COMMAND_TIMEOUT_MS` | `120000` | Hard stop for a remote addon script (ms) |
+
+Ops checklist for mid-life addon remove and related env knobs: [Subscription Config Change → Operations](./subscription-config-change.md#operations).
+
 ## Admin API
 
 | Method          | Path           | Purpose               |

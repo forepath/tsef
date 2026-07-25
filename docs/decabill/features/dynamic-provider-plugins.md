@@ -16,7 +16,15 @@ This page covers **Decabill billing manager** registries only.
 | `DYNAMIC_BILLING_PROVIDER_METADATA` | optional    | Admin UI provider metadata (`providerMetadata` export)                      |
 | `DYNAMIC_ADDON_MODULES`             | optional    | Addon lifecycle modules (`provision` / `teardown`, optional `configFields`) |
 
-Provider metadata should set `supportsAddons: true` only when the provider supports addon hook points. When omitted, Decabill treats `supportsAddons` as **false**. See [Addons](./addons.md).
+Provider metadata capability flags (all **fail closed** when omitted — treated as `false`):
+
+| Flag                          | When to set `true`                                    |
+| ----------------------------- | ----------------------------------------------------- |
+| `supportsAddons`              | Provider has addon hook points (module or cloud-init) |
+| `supportsServerTypeUpgrade`   | In-place resize to a more expensive server type works |
+| `supportsServerTypeDowngrade` | In-place resize to a cheaper server type works        |
+
+See [Addons](./addons.md) and [Subscription Config Change](./subscription-config-change.md). Operators shipping dynamic providers must set the resize flags explicitly; built-in Hetzner/DigitalOcean already register both.
 
 Addon modules may declare `configFields` (CloudInit-style env metadata). Decabill persists that list onto the catalog addon’s `configSchema` at create/update; admins set encrypted defaults only. At order time, customer `addonConfigs` merge with defaults and random fills into `configSnapshot` for `provision` / `teardown`.
 
@@ -107,7 +115,9 @@ Built-in: `stripe` via `StripePaymentProcessor`. See [Payment Processing](./paym
 
 `DYNAMIC_BILLING_PROVIDER_METADATA` adds entries to `GET /service-types/providers` for admin UI dropdowns and config schema rendering without implementing full provisioning in the same package.
 
-Built-in Hetzner and DigitalOcean providers register statically when API tokens are present.
+Built-in Hetzner and DigitalOcean providers register statically when API tokens are present. They set `supportsAddons`, `supportsServerTypeUpgrade`, and `supportsServerTypeDowngrade` to `true`.
+
+Dynamic metadata packages that implement (or wrap) in-place `changeServerType` must export the matching upgrade/downgrade flags. If both stay unset, mid-life server-type change stays disabled in eligibility/preview/submit even when other provider APIs work.
 
 ## Baked-in Plugins
 

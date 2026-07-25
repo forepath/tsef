@@ -204,6 +204,34 @@ describe('ProvisioningService', () => {
     expect(digitalocean.restartServer).not.toHaveBeenCalled();
   });
 
+  it('routes changeServerType to Hetzner', async () => {
+    const hetzner: { changeServerType: jest.Mock } = {
+      changeServerType: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new ProvisioningService(hetzner as never, digitalocean as never);
+
+    await service.changeServerType('hetzner', '123', 'cx21', { isUpgrade: true });
+    expect(hetzner.changeServerType).toHaveBeenCalledWith('123', 'cx21', {
+      upgradeDisk: false,
+      apiToken: undefined,
+    });
+  });
+
+  it('routes changeServerType to DigitalOcean', async () => {
+    const hetzner: { changeServerType: jest.Mock } = { changeServerType: jest.fn() };
+    const doProv = {
+      ...digitalocean,
+      changeServerType: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new ProvisioningService(hetzner as never, doProv as never);
+
+    await service.changeServerType('digital-ocean', '456', 's-2vcpu-2gb', { isUpgrade: false });
+    expect(doProv.changeServerType).toHaveBeenCalledWith('456', 's-2vcpu-2gb', {
+      resizeDisk: false,
+      apiToken: undefined,
+    });
+  });
+
   it('ensurePublicIpForDns returns IP from initial when already set', async () => {
     const hetzner = { getServerInfo: jest.fn() };
     const digitalocean = { getServerInfo: jest.fn() };

@@ -298,8 +298,8 @@
         </div>
       }
     } @else {
-      <div class="col-12">
-        <label class="form-label" i18n="@@featureAddons-scriptTemplate">Cloud-init script template</label>
+      <div class="col-md-6">
+        <label class="form-label" i18n="@@featureAddons-scriptTemplate">Cloud-init provision script template</label>
         <framework-monaco-editor-wrapper
           [value]="form.scriptTemplate"
           (valueChange)="form.scriptTemplate = $event"
@@ -307,6 +307,18 @@
           editorHeight="20rem"
         ></framework-monaco-editor-wrapper>
         <div class="form-text">{{ scriptEnvHint }}</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" i18n="@@featureAddons-deprovisionScriptTemplate"
+          >Cloud-init deprovision script template</label
+        >
+        <framework-monaco-editor-wrapper
+          [value]="form.deprovisionScriptTemplate"
+          (valueChange)="form.deprovisionScriptTemplate = $event"
+          language="shell"
+          editorHeight="20rem"
+        ></framework-monaco-editor-wrapper>
+        <div class="form-text">{{ deprovisionScriptHint }}</div>
       </div>
       <div class="col-12">
         <div class="border rounded p-3 bg-body-secondary">

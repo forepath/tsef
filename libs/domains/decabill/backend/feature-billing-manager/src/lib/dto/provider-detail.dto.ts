@@ -35,4 +35,16 @@ export class ProviderDetailDto {
    * Omitted / false for providers that lack provision/teardown or cloud-init append hooks.
    */
   supportsAddons?: boolean;
+
+  /**
+   * When true, in-place server type upgrades are supported for this provider.
+   * Fail-closed: omitted / false means upgrades are not offered.
+   */
+  supportsServerTypeUpgrade?: boolean;
+
+  /**
+   * When true, in-place server type downgrades are supported for this provider.
+   * Fail-closed: omitted / false means downgrades are not offered.
+   */
+  supportsServerTypeDowngrade?: boolean;
 }

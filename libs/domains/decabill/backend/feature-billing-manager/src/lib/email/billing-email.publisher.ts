@@ -209,6 +209,68 @@ export class BillingEmailPublisher {
     });
   }
 
+  async publishConfigChangeRequested(subscription: SubscriptionEntity, planName: string): Promise<void> {
+    await this.publishConfigChangeEmail(
+      'subscription.config_change_requested',
+      'subscription-config-change-requested',
+      subscription,
+      planName,
+    );
+  }
+
+  async publishConfigChangeApplied(subscription: SubscriptionEntity, planName: string): Promise<void> {
+    await this.publishConfigChangeEmail(
+      'subscription.config_changed',
+      'subscription-config-change-applied',
+      subscription,
+      planName,
+    );
+  }
+
+  async publishConfigChangeFailed(subscription: SubscriptionEntity, planName: string): Promise<void> {
+    await this.publishConfigChangeEmail(
+      'subscription.config_change_failed',
+      'subscription-config-change-failed',
+      subscription,
+      planName,
+    );
+  }
+
+  /** Config-change emails stay generic: requested payloads may hold addon credentials. */
+  private async publishConfigChangeEmail(
+    eventType:
+      | 'subscription.config_change_requested'
+      | 'subscription.config_changed'
+      | 'subscription.config_change_failed',
+    templateKey:
+      | 'subscription-config-change-requested'
+      | 'subscription-config-change-applied'
+      | 'subscription-config-change-failed',
+    subscription: SubscriptionEntity,
+    planName: string,
+  ): Promise<void> {
+    const profile = await this.customerProfilesRepository.findByUserId(subscription.userId);
+    const to = await this.resolveRecipientEmail(subscription.userId, profile);
+
+    if (!to) {
+      this.logger.warn(`No billing email for user ${subscription.userId}, skipping ${eventType} email`);
+
+      return;
+    }
+
+    await this.emailDispatcher.publish({
+      eventType,
+      scopeKey: getTenantIdOrDefault(),
+      to,
+      templateKey,
+      templateContext: {
+        recipientName: this.greeting(profile),
+        planName,
+        ...(subscription.number ? { subscriptionNumber: subscription.number } : {}),
+      },
+    });
+  }
+
   async publishAddonActivated(subscription: SubscriptionEntity, planName: string, addonName: string): Promise<void> {
     await this.publishAddonEmail('addon.activated', 'addon-activated', subscription, planName, addonName);
   }

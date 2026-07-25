@@ -28,7 +28,21 @@ export type SubscriptionWebhookEventType =
   | 'subscription.updated'
   | 'subscription.cancel_scheduled'
   | 'subscription.canceled'
-  | 'subscription.resumed';
+  | 'subscription.resumed'
+  | 'subscription.config_change_requested'
+  | 'subscription.config_changed'
+  | 'subscription.config_change_failed';
+
+/**
+ * Config-change webhook context. Only identifiers and status live here: the requested payload can
+ * carry addon credentials and must never leave the database.
+ */
+export type ConfigChangeNotificationContext = {
+  configChangeId: string;
+  appliedSteps?: string[];
+  billingOutcome?: string | null;
+  errorCode?: string | null;
+};
 
 export type MilestoneNotificationPayload = {
   id: string;
@@ -169,6 +183,49 @@ export class BillingNotificationPublisher implements IIdentityNotificationPublis
         ...(params.errorMessage ? { errorMessage: params.errorMessage } : {}),
       },
       params.subscription.userId,
+    );
+  }
+
+  publishConfigChangeRequested(
+    subscription: SubscriptionEntity,
+    plan: SubscriptionPlanBillingFields,
+    context: ConfigChangeNotificationContext,
+  ): void {
+    this.publishConfigChange('subscription.config_change_requested', subscription, plan, context);
+  }
+
+  publishConfigChanged(
+    subscription: SubscriptionEntity,
+    plan: SubscriptionPlanBillingFields,
+    context: ConfigChangeNotificationContext,
+  ): void {
+    this.publishConfigChange('subscription.config_changed', subscription, plan, context);
+  }
+
+  publishConfigChangeFailed(
+    subscription: SubscriptionEntity,
+    plan: SubscriptionPlanBillingFields,
+    context: ConfigChangeNotificationContext,
+  ): void {
+    this.publishConfigChange('subscription.config_change_failed', subscription, plan, context);
+  }
+
+  private publishConfigChange(
+    type: 'subscription.config_change_requested' | 'subscription.config_changed' | 'subscription.config_change_failed',
+    subscription: SubscriptionEntity,
+    plan: SubscriptionPlanBillingFields,
+    context: ConfigChangeNotificationContext,
+  ): void {
+    this.publish(
+      type,
+      {
+        ...this.toSubscriptionPayload(subscription, plan),
+        configChangeId: context.configChangeId,
+        appliedSteps: context.appliedSteps ?? [],
+        billingOutcome: context.billingOutcome ?? null,
+        errorCode: context.errorCode ?? null,
+      },
+      subscription.userId,
     );
   }
 

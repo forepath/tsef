@@ -5,6 +5,7 @@ export * from './lib/interceptors/tenant.interceptor';
 export * from './lib/types/billing.types';
 export * from './lib/types/promotions.types';
 export * from './lib/types/projects.types';
+export * from './lib/types/config-change.types';
 
 // Utils
 export * from './lib/utils/server-info-provider.utils';
@@ -13,6 +14,7 @@ export * from './lib/utils/provider-config-schema.utils';
 export * from './lib/utils/server-type-format.utils';
 export * from './lib/utils/server-type-list.utils';
 export * from './lib/utils/tax-preview.utils';
+export * from './lib/utils/config-change-error.utils';
 
 // Constants
 export * from './lib/constants/supported-countries';
@@ -73,6 +75,13 @@ export * from './lib/state/subscriptions/subscriptions.effects';
 export * from './lib/state/subscriptions/subscriptions.facade';
 export * from './lib/state/subscriptions/subscriptions.reducer';
 export * from './lib/state/subscriptions/subscriptions.selectors';
+
+// Subscription Config Change State
+export * from './lib/state/subscription-config-change/subscription-config-change.actions';
+export * from './lib/state/subscription-config-change/subscription-config-change.effects';
+export * from './lib/state/subscription-config-change/subscription-config-change.facade';
+export * from './lib/state/subscription-config-change/subscription-config-change.reducer';
+export * from './lib/state/subscription-config-change/subscription-config-change.selectors';
 
 // Billing dashboard WebSocket
 export * from './lib/state/billing-dashboard-socket/billing-dashboard-socket.actions';

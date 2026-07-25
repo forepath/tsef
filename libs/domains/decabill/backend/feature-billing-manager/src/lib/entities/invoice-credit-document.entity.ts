@@ -46,6 +46,17 @@ export class InvoiceCreditDocumentEntity {
   @Column({ type: 'timestamp', name: 'withdrawn_at' })
   withdrawnAt!: Date;
 
+  /** Durable idempotency key for one-shot billing side effects (e.g. `config_change:{changeId}`). */
+  @Column({ type: 'varchar', length: 128, nullable: true, name: 'source_ref' })
+  sourceRef?: string | null;
+
+  /**
+   * True once invoice balance reduction and any carry-forward OP for this credit have been applied.
+   * Lets retries finish settlement if the worker died after inserting the credit row.
+   */
+  @Column({ type: 'boolean', name: 'settlement_complete', default: false })
+  settlementComplete!: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 }

@@ -34,6 +34,13 @@ export class AddonEntity {
   @Column({ type: 'text', nullable: true, name: 'script_template' })
   scriptTemplate?: string | null;
 
+  /**
+   * Optional reverse script run over SSH when removing a cloud_init_script addon mid-life.
+   * Empty / null = status-only teardown (no remote undo).
+   */
+  @Column({ type: 'text', nullable: true, name: 'deprovision_script_template' })
+  deprovisionScriptTemplate?: string | null;
+
   /** JSON schema for addon config; `environmentVariables` drives admin defaults and order fields. */
   @Column({ type: 'jsonb', name: 'config_schema', default: () => "'{}'::jsonb" })
   configSchema!: Record<string, unknown>;

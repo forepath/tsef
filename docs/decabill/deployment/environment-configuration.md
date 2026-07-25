@@ -164,26 +164,30 @@ Provisioning SSH posture is documented under accepted risk **[DR-001](../securit
 
 These variables control repeatable **coordinator** intervals in milliseconds:
 
-| Variable                                   | Default    | Purpose                          |
-| ------------------------------------------ | ---------- | -------------------------------- |
-| `BILLING_SCHEDULER_INTERVAL`               | `60000`    | Subscription billing coordinator |
-| `BILLING_SCHEDULER_BATCH_SIZE`             | `100`      | Batch size for billing runs      |
-| `EXPIRATION_SCHEDULER_INTERVAL`            | `60000`    | Subscription expiration          |
-| `EXPIRATION_SCHEDULER_BATCH_SIZE`          | `100`      | Expiration batch size            |
-| `WITHDRAWAL_SCHEDULER_INTERVAL`            | `60000`    | Subscription withdrawal teardown |
-| `WITHDRAWAL_SCHEDULER_BATCH_SIZE`          | `100`      | Withdrawal batch size            |
-| `PROVISIONING_SCHEDULER_INTERVAL`          | `30000`    | Subscription server provisioning |
-| `PROVISIONING_SCHEDULER_BATCH_SIZE`        | `100`      | Provisioning batch size          |
-| `REMINDER_SCHEDULER_INTERVAL`              | `3600000`  | Renewal reminders                |
-| `REMINDER_SCHEDULER_BATCH_SIZE`            | `100`      | Reminder batch size              |
-| `REMINDER_DAYS`                            | `3`        | Days before renewal to remind    |
-| `BACKORDER_RETRY_INTERVAL_MS`              | `60000`    | Backorder retry coordinator      |
-| `BACKORDER_RETRY_BATCH_SIZE`               | `100`      | Backorder batch size             |
-| `INVOICE_OVERDUE_SCHEDULER_INTERVAL`       | `86400000` | Invoice overdue coordinator      |
-| `INVOICE_OVERDUE_SCHEDULER_BATCH_SIZE`     | `100`      | Overdue batch size               |
-| `OPEN_POSITION_INVOICE_SCHEDULER_INTERVAL` | `86400000` | Open position invoicing          |
-| `SUBSCRIPTION_UPDATE_SCHEDULER_INTERVAL`   | `86400000` | Subscription item updates        |
-| `STATUS_POLL_INTERVAL`                     | `15000`    | Dashboard status polling         |
+| Variable                                   | Default    | Purpose                                      |
+| ------------------------------------------ | ---------- | -------------------------------------------- |
+| `BILLING_SCHEDULER_INTERVAL`               | `60000`    | Subscription billing coordinator             |
+| `BILLING_SCHEDULER_BATCH_SIZE`             | `100`      | Batch size for billing runs                  |
+| `EXPIRATION_SCHEDULER_INTERVAL`            | `60000`    | Subscription expiration                      |
+| `EXPIRATION_SCHEDULER_BATCH_SIZE`          | `100`      | Expiration batch size                        |
+| `WITHDRAWAL_SCHEDULER_INTERVAL`            | `60000`    | Subscription withdrawal teardown             |
+| `WITHDRAWAL_SCHEDULER_BATCH_SIZE`          | `100`      | Withdrawal batch size                        |
+| `PROVISIONING_SCHEDULER_INTERVAL`          | `30000`    | Subscription server provisioning             |
+| `PROVISIONING_SCHEDULER_BATCH_SIZE`        | `100`      | Provisioning batch size                      |
+| `CONFIG_CHANGE_SCHEDULER_INTERVAL`         | `30000`    | Mid-life subscription config change          |
+| `CONFIG_CHANGE_SCHEDULER_BATCH_SIZE`       | `100`      | Config-change coordinator batch size         |
+| `CONFIG_CHANGE_PROCESSING_TIMEOUT_MS`      | `900000`   | Stuck config-change reclaim (15m)            |
+| `BILLING_ADDON_SSH_COMMAND_TIMEOUT_MS`     | `120000`   | Mid-life / teardown addon SSH script timeout |
+| `REMINDER_SCHEDULER_INTERVAL`              | `3600000`  | Renewal reminders                            |
+| `REMINDER_SCHEDULER_BATCH_SIZE`            | `100`      | Reminder batch size                          |
+| `REMINDER_DAYS`                            | `3`        | Days before renewal to remind                |
+| `BACKORDER_RETRY_INTERVAL_MS`              | `60000`    | Backorder retry coordinator                  |
+| `BACKORDER_RETRY_BATCH_SIZE`               | `100`      | Backorder batch size                         |
+| `INVOICE_OVERDUE_SCHEDULER_INTERVAL`       | `86400000` | Invoice overdue coordinator                  |
+| `INVOICE_OVERDUE_SCHEDULER_BATCH_SIZE`     | `100`      | Overdue batch size                           |
+| `OPEN_POSITION_INVOICE_SCHEDULER_INTERVAL` | `86400000` | Open position invoicing                      |
+| `SUBSCRIPTION_UPDATE_SCHEDULER_INTERVAL`   | `86400000` | Subscription item updates                    |
+| `STATUS_POLL_INTERVAL`                     | `15000`    | Dashboard status polling                     |
 
 DATEV export uses a **cron** coordinator (not `everyMs`):
 
