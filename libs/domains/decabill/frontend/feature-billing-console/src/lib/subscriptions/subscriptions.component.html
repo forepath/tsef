@@ -309,10 +309,10 @@
           type="button"
           class="btn btn-outline-primary"
           (click)="openModifyConfigModal(sub)"
-          title="Modify configuration"
+          title="Upgrade or downgrade"
           i18n-title="@@featureSubscriptions-modifyConfigButtonTitle"
         >
-          <i class="bi bi-sliders" aria-hidden="true"></i>
+          <i class="bi bi-arrow-down-up" aria-hidden="true"></i>
         </button>
       }
       @if (sub.status === 'active') {
@@ -1720,7 +1720,7 @@
   </div>
 </div>
 
-<!-- Modify configuration modal -->
+<!-- Upgrade or downgrade modal -->
 <div
   class="modal fade"
   id="modifyConfigModal"
@@ -1734,7 +1734,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modifyConfigModalLabel" i18n="@@featureSubscriptions-configChangeTitle">
-          Modify configuration
+          Upgrade or downgrade
         </h5>
         <button
           type="button"

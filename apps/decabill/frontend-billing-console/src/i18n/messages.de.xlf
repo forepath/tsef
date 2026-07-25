@@ -3263,12 +3263,12 @@
         <target>Konfigurationsänderung wird angewendet</target>
       </trans-unit>
       <trans-unit id="featureSubscriptions-modifyConfigButtonTitle" datatype="html">
-        <source>Modify configuration</source>
-        <target>Konfiguration ändern</target>
+        <source>Upgrade or downgrade</source>
+        <target>Upgrade oder Downgrade</target>
       </trans-unit>
       <trans-unit id="featureSubscriptions-configChangeTitle" datatype="html">
-        <source> Modify configuration </source>
-        <target> Konfiguration ändern </target>
+        <source> Upgrade or downgrade </source>
+        <target> Upgrade oder Downgrade </target>
       </trans-unit>
       <trans-unit id="featureSubscriptions-configChangeConfirmationTitle" datatype="html">
         <source> Configuration change requested </source>

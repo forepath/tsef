@@ -20,6 +20,7 @@ import type {
   SubscriptionConfigChangeRequestedPayload,
 } from '../entities/subscription-config-change.entity';
 import type { SubscriptionItemEntity } from '../entities/subscription-item.entity';
+import { ProvisioningStatus } from '../entities/subscription-item.entity';
 import { SubscriptionEntity, SubscriptionStatus } from '../entities/subscription.entity';
 import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
@@ -232,6 +233,9 @@ export class SubscriptionConfigChangeService {
     } else if (hasPendingChange) {
       reasonCode = CONFIG_CHANGE_ERROR_CODES.NOT_ELIGIBLE;
       reason = 'A configuration change is already in progress';
+    } else if (this.hasIncompleteInitialServerProvisioning(context.items)) {
+      reasonCode = CONFIG_CHANGE_ERROR_CODES.NOT_ELIGIBLE;
+      reason = 'Subscription is still being provisioned';
     }
 
     return {
@@ -249,6 +253,19 @@ export class SubscriptionConfigChangeService {
       availableAddonIds: planAddonIds.filter((id) => !activeAddonIds.includes(id)),
       activeAddonIds,
     };
+  }
+
+  /** Cloud servers must finish first-time provisioning before mid-life config changes. */
+  private hasIncompleteInitialServerProvisioning(items: SubscriptionItemEntity[]): boolean {
+    return items.some((item) => {
+      const provider = item.serviceType?.provider?.trim();
+
+      if (provider !== 'hetzner' && provider !== 'digital-ocean') {
+        return false;
+      }
+
+      return item.provisioningStatus !== ProvisioningStatus.ACTIVE;
+    });
   }
 
   private async resolveRequest(

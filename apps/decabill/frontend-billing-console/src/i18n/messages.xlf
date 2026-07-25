@@ -3645,10 +3645,10 @@
         <source>Applying configuration change</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-modifyConfigButtonTitle" datatype="html">
-        <source>Modify configuration</source>
+        <source>Upgrade or downgrade</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-configChangeTitle" datatype="html">
-        <source> Modify configuration </source>
+        <source> Upgrade or downgrade </source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-configChangeConfirmationTitle" datatype="html">
         <source> Configuration change requested </source>

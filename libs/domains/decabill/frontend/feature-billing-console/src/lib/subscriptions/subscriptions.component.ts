@@ -1691,10 +1691,25 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   }
 
   canModifyConfiguration(sub: SubscriptionResponse): boolean {
-    return sub.status === 'active';
+    if (sub.status !== 'active') {
+      return false;
+    }
+
+    const provisioningStatus = this.provisioningStatusForSubscription(sub.id);
+
+    // First-time cloud provisioning must finish successfully before mid-life config changes.
+    if (provisioningStatus === 'pending' || provisioningStatus === 'failed') {
+      return false;
+    }
+
+    return true;
   }
 
   openModifyConfigModal(sub: SubscriptionResponse): void {
+    if (!this.canModifyConfiguration(sub)) {
+      return;
+    }
+
     this.resetConfigChangeState();
     this.subscriptionToModify = sub;
     this.configChangeFacade.reset();

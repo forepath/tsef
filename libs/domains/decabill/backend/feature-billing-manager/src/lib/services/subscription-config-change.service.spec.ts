@@ -80,6 +80,7 @@ describe('SubscriptionConfigChangeService', () => {
     subscriptionItemsRepository.findBySubscription.mockResolvedValue([
       {
         id: 'item-1',
+        provisioningStatus: 'active',
         configSnapshot: { serverType: 'cx11', billingBasePrice: 5 },
         serviceType: { provider: 'hetzner', providerDefaults: {} },
       },
@@ -129,6 +130,38 @@ describe('SubscriptionConfigChangeService', () => {
 
     expect(eligibility.canRequestChange).toBe(false);
     expect(eligibility.reasonCode).toBe('CONFIG_CHANGE_NOT_ELIGIBLE');
+  });
+
+  it('getEligibility rejects while initial server provisioning is still pending', async () => {
+    subscriptionItemsRepository.findBySubscription.mockResolvedValue([
+      {
+        id: 'item-1',
+        provisioningStatus: 'pending',
+        configSnapshot: { serverType: 'cx11', billingBasePrice: 5 },
+        serviceType: { provider: 'hetzner', providerDefaults: {} },
+      },
+    ]);
+
+    const eligibility = await service.getEligibility('sub-1', 'user-1');
+
+    expect(eligibility.canRequestChange).toBe(false);
+    expect(eligibility.reason).toBe('Subscription is still being provisioned');
+  });
+
+  it('rejects submit while initial server provisioning is still pending', async () => {
+    subscriptionItemsRepository.findBySubscription.mockResolvedValue([
+      {
+        id: 'item-1',
+        provisioningStatus: 'pending',
+        configSnapshot: { serverType: 'cx11', billingBasePrice: 5 },
+        serviceType: { provider: 'digital-ocean', providerDefaults: {} },
+      },
+    ]);
+
+    const error = await service.submit('sub-1', 'user-1', { serverType: 'cx21' }).catch((caught) => caught);
+
+    expect(extractErrorCode(error)).toBe('CONFIG_CHANGE_NOT_ELIGIBLE');
+    expect(subscriptionsRepository.compareAndSetStatus).not.toHaveBeenCalled();
   });
 
   it('rejects requests for subscriptions that are not active', async () => {
@@ -264,6 +297,7 @@ describe('SubscriptionConfigChangeService', () => {
     subscriptionItemsRepository.findBySubscription.mockResolvedValue([
       {
         id: 'item-1',
+        provisioningStatus: 'active',
         configSnapshot: { serverType: 'cx21', billingBasePrice: 10 },
         serviceType: { provider: 'hetzner', providerDefaults: {} },
       },
