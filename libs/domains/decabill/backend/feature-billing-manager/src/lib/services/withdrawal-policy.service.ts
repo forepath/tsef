@@ -31,6 +31,7 @@ export interface WithdrawalEvaluationInput {
   subscriptionStatus: SubscriptionStatus;
   items: Pick<SubscriptionItemEntity, 'provisioningStatus' | 'provisionedAt' | 'createdAt'>[];
   serviceType: Pick<ServiceTypeEntity, 'disallowStatutoryWithdrawal'>;
+  statutoryWithdrawalRestartedAt?: Date | null;
   now?: Date;
 }
 
@@ -80,7 +81,8 @@ export class WithdrawalPolicyService {
 
       return reference < earliest ? reference : earliest;
     }, activeItems[0].provisionedAt ?? activeItems[0].createdAt);
-    const deadline = new Date(earliestProvisionedAt);
+    const windowStart = input.statutoryWithdrawalRestartedAt ?? earliestProvisionedAt;
+    const deadline = new Date(windowStart);
 
     deadline.setDate(deadline.getDate() + periodDays);
 

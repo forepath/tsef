@@ -23,6 +23,7 @@ export interface PublicServicePlanOffering {
   billingIntervalType: BillingIntervalType;
   billingIntervalValue: number;
   billInAdvance: boolean;
+  autoRecalculatePriceDaily: boolean;
   totalPrice: number;
   totalGross: number;
   taxRate: number;

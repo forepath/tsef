@@ -49,8 +49,9 @@ Registered by the scheduler from `getBillingRepeatableJobs()`:
 | `subscription-item-update.coordinator`   | `SUBSCRIPTION_UPDATE_SCHEDULER_INTERVAL`   | 24h              |
 | `backorder-retry.coordinator`            | `BACKORDER_RETRY_INTERVAL_MS`              | 60s              |
 | `datev-export.coordinator`               | `BILLING_DATEV_EXPORT_CRON` (cron)         | 1st of month     |
+| `price-recalc.coordinator`               | `BILLING_PRICE_RECALC_CRON` (cron)         | daily 00:00      |
 
-The DATEV coordinator is registered only when `BILLING_DATEV_EXPORT_ENABLED=true`. It enqueues per-tenant unit jobs and optionally one unified unit job when `BILLING_DATEV_UNIFIED_EXPORT_ENABLED=true`.
+The DATEV coordinator is registered only when `BILLING_DATEV_EXPORT_ENABLED=true`. The price-recalc coordinator is registered only when `BILLING_PRICE_RECALC_ENABLED=true` (default true). See [Automatic daily price recalculation](../features/automatic-price-recalculation.md).
 
 Coordinator job IDs use dot separators (for example `coordinator.subscription-billing`) via `buildCoordinatorJobId`.
 
@@ -69,6 +70,7 @@ Coordinators fan out unit jobs such as:
 - `renewal-reminder.unit`
 - `subscription-item-update.unit`
 - `backorder-retry.unit`
+- `price-recalc.unit` (when `BILLING_PRICE_RECALC_ENABLED=true`)
 - Admin bill-now coordinator and unit jobs (`AdminBillNowJobName`)
 - `datev-export.coordinator` and `datev-export.unit` (when `BILLING_DATEV_EXPORT_ENABLED=true`)
 - `webhook-deliver` — outbound webhook notification delivery

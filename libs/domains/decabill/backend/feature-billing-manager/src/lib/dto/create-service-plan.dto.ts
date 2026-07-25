@@ -57,6 +57,10 @@ export class CreateServicePlanDto {
   billInAdvance?: boolean;
 
   @IsOptional()
+  @IsBoolean({ message: 'autoRecalculatePriceDaily must be a boolean' })
+  autoRecalculatePriceDaily?: boolean;
+
+  @IsOptional()
   @IsInt({ message: 'minCommitmentDays must be an integer' })
   @Min(0)
   minCommitmentDays?: number;

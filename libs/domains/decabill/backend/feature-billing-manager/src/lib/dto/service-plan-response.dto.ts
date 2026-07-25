@@ -14,6 +14,11 @@ export class ServicePlanResponseDto {
   cancelAtPeriodEnd!: boolean;
   /** When true, the period is billed at start (prepaid). */
   billInAdvance!: boolean;
+  /**
+   * When true, nightly automatic price recalculation from the provider catalog is enabled
+   * for this plan (opt-in; default false).
+   */
+  autoRecalculatePriceDaily!: boolean;
   minCommitmentDays!: number;
   noticeDays!: number;
   basePrice?: string;

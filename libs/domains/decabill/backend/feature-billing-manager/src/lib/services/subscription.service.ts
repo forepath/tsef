@@ -758,6 +758,7 @@ export class SubscriptionService {
         subscriptionStatus: subscription.status,
         items,
         serviceType,
+        statutoryWithdrawalRestartedAt: subscription.statutoryWithdrawalRestartedAt,
       });
       let estimatedRefundGross: number | undefined;
 

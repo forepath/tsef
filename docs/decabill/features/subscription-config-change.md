@@ -74,6 +74,8 @@ Stuck `processing` rows are reclaimed once after `CONFIG_CHANGE_PROCESSING_TIMEO
 
 Rounding and tax follow `TaxCalculationService` (half-up to 2 decimals; net → tax → gross). Active promotions carry over; discounts apply to net before tax.
 
+Settlement is implemented via shared `SubscriptionConfigChangeBillingService.applySettlement` (also used by [automatic daily price recalculation](./automatic-price-recalculation.md) with `price_recalc_*` source refs and credit reason).
+
 **Recurring billing authority:** After any step commits to item/addon snapshots, subsequent period charges use those committed prices **even if** the config-change row ends `failed`.
 
 ## Notifications

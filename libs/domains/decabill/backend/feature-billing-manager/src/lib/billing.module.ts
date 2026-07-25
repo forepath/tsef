@@ -233,6 +233,8 @@ import { SubscriptionRenewalReminderJobHandler } from './services/subscription-r
 import { SubscriptionConfigChangeService } from './services/subscription-config-change.service';
 import { SubscriptionConfigChangeBillingService } from './services/subscription-config-change-billing.service';
 import { SubscriptionConfigChangeJobHandler } from './services/subscription-config-change.job-handler';
+import { PriceRecalcJobHandler } from './services/price-recalc.job-handler';
+import { ServicePlanPriceRecalcService } from './services/service-plan-price-recalc.service';
 import { SubscriptionService } from './services/subscription.service';
 import { PublicWithdrawalService } from './services/public-withdrawal.service';
 import { TaxCalculationService } from './services/tax-calculation.service';
@@ -642,6 +644,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionService,
     SubscriptionConfigChangeService,
     SubscriptionConfigChangeBillingService,
+    ServicePlanPriceRecalcService,
     PublicWithdrawalService,
     UsageService,
     CustomerProfilesService,
@@ -669,6 +672,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionWithdrawalJobHandler,
     SubscriptionProvisioningJobHandler,
     SubscriptionConfigChangeJobHandler,
+    PriceRecalcJobHandler,
     SubscriptionRenewalReminderJobHandler,
     OpenPositionInvoiceJobHandler,
     SubscriptionItemUpdateJobHandler,
@@ -755,6 +759,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionService,
     SubscriptionConfigChangeService,
     SubscriptionConfigChangeBillingService,
+    ServicePlanPriceRecalcService,
     PublicWithdrawalService,
     UsageService,
     CustomerProfilesService,
@@ -764,6 +769,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionWithdrawalJobHandler,
     SubscriptionProvisioningJobHandler,
     SubscriptionConfigChangeJobHandler,
+    PriceRecalcJobHandler,
     SubscriptionRenewalReminderJobHandler,
     OpenPositionInvoiceJobHandler,
     SubscriptionItemUpdateJobHandler,

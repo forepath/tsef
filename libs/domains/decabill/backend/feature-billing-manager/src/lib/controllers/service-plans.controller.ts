@@ -161,6 +161,7 @@ export class ServicePlansController {
       billingDayOfMonth: dto.billingDayOfMonth,
       cancelAtPeriodEnd: dto.cancelAtPeriodEnd ?? true,
       billInAdvance: dto.billInAdvance ?? false,
+      autoRecalculatePriceDaily: dto.autoRecalculatePriceDaily ?? false,
       minCommitmentDays: dto.minCommitmentDays ?? 0,
       noticeDays: dto.noticeDays ?? 0,
       basePrice: dto.basePrice,
@@ -231,6 +232,9 @@ export class ServicePlansController {
       billingDayOfMonth: dto.billingDayOfMonth,
       cancelAtPeriodEnd: dto.cancelAtPeriodEnd,
       ...(dto.billInAdvance !== undefined ? { billInAdvance: dto.billInAdvance } : {}),
+      ...(dto.autoRecalculatePriceDaily !== undefined
+        ? { autoRecalculatePriceDaily: dto.autoRecalculatePriceDaily }
+        : {}),
       minCommitmentDays: dto.minCommitmentDays,
       noticeDays: dto.noticeDays,
       basePrice: dto.basePrice,
@@ -279,6 +283,7 @@ export class ServicePlansController {
       billingDayOfMonth: row.billingDayOfMonth,
       cancelAtPeriodEnd: row.cancelAtPeriodEnd,
       billInAdvance: row.billInAdvance === true,
+      autoRecalculatePriceDaily: row.autoRecalculatePriceDaily === true,
       minCommitmentDays: row.minCommitmentDays,
       noticeDays: row.noticeDays,
       basePrice: row.basePrice,

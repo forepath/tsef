@@ -3,6 +3,7 @@ import { getTenantIdOrDefault } from '@forepath/shared/backend/util-http-context
 
 import type { InvoiceEntity } from '../entities/invoice.entity';
 import { InvoiceStatus } from '../constants/invoice-status.constants';
+import { BillingIntervalType } from '../entities/service-plan.entity';
 import { SubscriptionStatus } from '../entities/subscription.entity';
 import type { SubscriptionEntity } from '../entities/subscription.entity';
 
@@ -277,6 +278,82 @@ describe('BillingNotificationPublisher', () => {
       scopeKey: 'tenant-a',
       clientId: undefined,
       data: payload,
+    });
+  });
+
+  it('publishes service plan price recalculated webhook payload', () => {
+    const dispatcher = {
+      publishFireAndForget: jest.fn(),
+    } as unknown as NotificationDispatcherService;
+    const publisher = new BillingNotificationPublisher(dispatcher);
+
+    publisher.publishServicePlanPriceRecalculated(
+      { id: 'plan-1', name: 'Pro VPS' },
+      {
+        runDate: '2026-07-25',
+        oldPeriodPriceNet: 10,
+        newPeriodPriceNet: 12,
+        subscriptionsAffected: 3,
+      },
+    );
+
+    expect(dispatcher.publishFireAndForget).toHaveBeenCalledWith({
+      type: 'service_plan.price_recalculated',
+      scopeKey: 'tenant-a',
+      clientId: undefined,
+      data: {
+        servicePlanId: 'plan-1',
+        servicePlanName: 'Pro VPS',
+        runDate: '2026-07-25',
+        oldPeriodPriceNet: 10,
+        newPeriodPriceNet: 12,
+        subscriptionsAffected: 3,
+      },
+    });
+  });
+
+  it('publishes subscription price changed webhook payload', () => {
+    const dispatcher = {
+      publishFireAndForget: jest.fn(),
+    } as unknown as NotificationDispatcherService;
+    const publisher = new BillingNotificationPublisher(dispatcher);
+    const subscription = {
+      id: 'sub-1',
+      number: 'SUB-001',
+      planId: 'plan-1',
+      userId: 'user-1',
+      status: SubscriptionStatus.ACTIVE,
+      createdAt: new Date('2026-07-01T10:00:00.000Z'),
+      updatedAt: new Date('2026-07-02T10:00:00.000Z'),
+    } as SubscriptionEntity;
+
+    publisher.publishSubscriptionPriceChanged(
+      subscription,
+      { billInAdvance: true, billingIntervalType: BillingIntervalType.MONTH },
+      {
+        runDate: '2026-07-25',
+        productName: 'Pro VPS',
+        oldNet: 10,
+        oldTax: 1.9,
+        oldTotal: 11.9,
+        newNet: 12,
+        newTax: 2.28,
+        newTotal: 14.28,
+      },
+    );
+
+    expect(dispatcher.publishFireAndForget).toHaveBeenCalledWith({
+      type: 'subscription.price_changed',
+      scopeKey: 'tenant-a',
+      clientId: 'user-1',
+      data: expect.objectContaining({
+        id: 'sub-1',
+        number: 'SUB-001',
+        runDate: '2026-07-25',
+        productName: 'Pro VPS',
+        oldTotal: 11.9,
+        newTotal: 14.28,
+      }),
     });
   });
 });

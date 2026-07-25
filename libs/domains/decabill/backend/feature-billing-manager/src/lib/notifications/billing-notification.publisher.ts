@@ -294,6 +294,56 @@ export class BillingNotificationPublisher implements IIdentityNotificationPublis
     this.publish(type, this.toDatevExportPayload(exportRecord));
   }
 
+  publishServicePlanPriceRecalculated(
+    servicePlan: Pick<ServicePlanEntity, 'id' | 'name'>,
+    context: {
+      runDate: string;
+      oldPeriodPriceNet?: number | null;
+      newPeriodPriceNet?: number | null;
+      subscriptionsAffected?: number;
+    },
+  ): void {
+    this.publish('service_plan.price_recalculated', {
+      servicePlanId: servicePlan.id,
+      servicePlanName: servicePlan.name,
+      runDate: context.runDate,
+      oldPeriodPriceNet: context.oldPeriodPriceNet ?? null,
+      newPeriodPriceNet: context.newPeriodPriceNet ?? null,
+      subscriptionsAffected: context.subscriptionsAffected ?? null,
+    });
+  }
+
+  publishSubscriptionPriceChanged(
+    subscription: SubscriptionEntity,
+    plan: SubscriptionPlanBillingFields,
+    context: {
+      runDate: string;
+      productName: string;
+      oldNet: number;
+      oldTax: number;
+      oldTotal: number;
+      newNet: number;
+      newTax: number;
+      newTotal: number;
+    },
+  ): void {
+    this.publish(
+      'subscription.price_changed',
+      {
+        ...this.toSubscriptionPayload(subscription, plan),
+        runDate: context.runDate,
+        productName: context.productName,
+        oldNet: context.oldNet,
+        oldTax: context.oldTax,
+        oldTotal: context.oldTotal,
+        newNet: context.newNet,
+        newTax: context.newTax,
+        newTotal: context.newTotal,
+      },
+      subscription.userId,
+    );
+  }
+
   private toInvoicePayload(invoice: InvoiceEntity): Record<string, unknown> {
     return {
       id: invoice.id,

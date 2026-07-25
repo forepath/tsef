@@ -37,6 +37,8 @@ describe('BILLING_NOTIFICATION_EVENTS', () => {
         'subscription.cancel_scheduled',
         'subscription.resumed',
         'subscription.period_charged',
+        'service_plan.price_recalculated',
+        'subscription.price_changed',
       ]),
     );
   });

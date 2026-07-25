@@ -95,6 +95,7 @@ Service plans belong to a service type and define customer-facing pricing and bi
 - Title, description, and active flag
 - Billing interval (hourly, daily, monthly, **yearly**)
 - **`billInAdvance`** — when true, charge at period start (prepaid); default false (arrear). Incompatible with usage-based metering. See [Advance billing and yearly interval](./advance-billing-and-yearly-interval.md).
+- **`autoRecalculatePriceDaily`** — when true, nightly job refreshes catalog base price from the provider and migrates eligible subscriptions (default false, opt-in). See [Automatic daily price recalculation](./automatic-price-recalculation.md).
 - Base price, margin, and computed customer total
 - `providerConfigDefaults` merged with customer `requestedConfig` on order
 - For provisioning plans, customers choose from `provisioningOptions` (integrated `controller`/`manager` and/or custom CloudInit configs). Admins configure these exclusively via **Customer-selectable options** checkboxes in the plan editor; **Product defaults** fields are scoped to the checked options only. New plans default to both Agenstra Controller and Agenstra Manager selected. Existing legacy plans are reconciled by migration `1772000000000_CloudInitAndPlanProvisioningConsolidated`.

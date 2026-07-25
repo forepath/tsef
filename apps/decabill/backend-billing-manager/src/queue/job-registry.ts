@@ -36,6 +36,8 @@ export const BillingJobName = {
   ADMIN_BILL_NOW_UNIT: AdminBillNowJobName.UNIT,
   DATEV_EXPORT_COORDINATOR: DatevExportJobName.COORDINATOR,
   DATEV_EXPORT_UNIT: DatevExportJobName.UNIT,
+  PRICE_RECALC_COORDINATOR: 'price-recalc.coordinator',
+  PRICE_RECALC_UNIT: 'price-recalc.unit',
   VAT_ID_VALIDATION_UNIT: VatIdValidationJobName.UNIT,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
 } as const;
@@ -147,6 +149,15 @@ export function getBillingRepeatableJobs(): BillingRepeatableJobDefinition[] {
       coordinatorJobId: buildCoordinatorJobId('datev-export'),
       pattern: process.env.BILLING_DATEV_EXPORT_CRON ?? '0 0 1 * *',
       tz: process.env.BILLING_DATEV_EXPORT_TIMEZONE ?? 'Europe/Berlin',
+    });
+  }
+
+  if (parseBooleanEnv('BILLING_PRICE_RECALC_ENABLED', true)) {
+    jobs.push({
+      name: BillingJobName.PRICE_RECALC_COORDINATOR,
+      coordinatorJobId: buildCoordinatorJobId('price-recalc'),
+      pattern: process.env.BILLING_PRICE_RECALC_CRON ?? '0 0 * * *',
+      tz: process.env.BILLING_PRICE_RECALC_TIMEZONE ?? 'Europe/Berlin',
     });
   }
 

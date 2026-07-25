@@ -9,6 +9,7 @@ import {
   InvoiceAutoPaymentJobHandler,
   InvoiceOverdueJobHandler,
   OpenPositionInvoiceJobHandler,
+  PriceRecalcJobHandler,
   SubscriptionBillingJobHandler,
   SubscriptionConfigChangeJobHandler,
   SubscriptionExpirationJobHandler,
@@ -67,6 +68,7 @@ export class BillingJobsProcessor extends WorkerHost {
     private readonly adminBillNow: AdminBillNowService,
     private readonly datevExportConfig: DatevExportConfigService,
     private readonly datevExportJobHandler: DatevExportJobHandler,
+    private readonly priceRecalc: PriceRecalcJobHandler,
     private readonly vatIdValidationJobHandler: VatIdValidationJobHandler,
     private readonly webhookDeliveryService: WebhookDeliveryService,
     private readonly webhookDeliveryRetentionService: WebhookDeliveryRetentionService,
@@ -121,6 +123,9 @@ export class BillingJobsProcessor extends WorkerHost {
         break;
       case BillingJobName.DATEV_EXPORT_COORDINATOR:
         await this.runDatevExportCoordinator();
+        break;
+      case BillingJobName.PRICE_RECALC_COORDINATOR:
+        await this.runPriceRecalcCoordinator();
         break;
       case BillingJobName.DATEV_EXPORT_UNIT:
         await this.runDatevExportUnit(
@@ -201,6 +206,9 @@ export class BillingJobsProcessor extends WorkerHost {
               break;
             case BillingJobName.ADMIN_BILL_NOW_UNIT:
               await this.runOpenPositionInvoiceUnit(job.data as AdminBillNowCoordinatorPayload & { userId: string });
+              break;
+            case BillingJobName.PRICE_RECALC_UNIT:
+              await this.runPriceRecalcUnit(job.data as { tenantId: string; runDate: string });
               break;
             default:
               this.logger.warn(`Unknown billing job name: ${job.name}`);
@@ -543,6 +551,68 @@ export class BillingJobsProcessor extends WorkerHost {
     }
 
     await this.datevExportJobHandler.runUnit(data);
+  }
+
+  private isPriceRecalcEnabled(): boolean {
+    const raw = process.env.BILLING_PRICE_RECALC_ENABLED;
+
+    if (raw === undefined || raw.trim() === '') {
+      return true;
+    }
+
+    const normalized = raw.trim().toLowerCase();
+
+    if (normalized === 'true' || normalized === '1') {
+      return true;
+    }
+
+    if (normalized === 'false' || normalized === '0') {
+      return false;
+    }
+
+    return true;
+  }
+
+  private resolvePriceRecalcRunDate(reference = new Date()): string {
+    const timezone = process.env.BILLING_PRICE_RECALC_TIMEZONE ?? 'Europe/Berlin';
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+
+    return formatter.format(reference);
+  }
+
+  private async runPriceRecalcCoordinator(): Promise<void> {
+    if (!this.isPriceRecalcEnabled()) {
+      this.logger.debug('Price recalc disabled — skipping coordinator');
+
+      return;
+    }
+
+    const runDate = this.resolvePriceRecalcRunDate();
+
+    await this.forEachConfiguredTenant(async (tenantId) => {
+      await this.enqueueBillingUnitJob({
+        queue: this.billingQueue,
+        jobName: BillingJobName.PRICE_RECALC_UNIT,
+        payload: { tenantId, runDate },
+        jobIdNamespace: 'price-recalc',
+        jobIdParts: ['tenant', tenantId, runDate],
+      });
+    });
+  }
+
+  private async runPriceRecalcUnit(data: { tenantId: string; runDate: string }): Promise<void> {
+    if (!this.isPriceRecalcEnabled()) {
+      this.logger.debug('Price recalc disabled — skipping unit job');
+
+      return;
+    }
+
+    await this.priceRecalc.processTenant(data.tenantId, data.runDate);
   }
 
   private async runAdminBillNowCoordinator(data: AdminBillNowCoordinatorPayload): Promise<void> {

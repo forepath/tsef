@@ -948,6 +948,7 @@ describe('SubscriptionService', () => {
       id: 'plan-1',
       cancelAtPeriodEnd: true,
       billInAdvance: false,
+      autoRecalculatePriceDaily: false,
       minCommitmentDays: 10,
       noticeDays: 0,
     });

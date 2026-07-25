@@ -531,6 +531,35 @@
                               </ul>
                             </div>
                           }
+                          @if (selectedPlan?.autoRecalculatePriceDaily === true && selectedPlan?.withdrawalPolicy) {
+                            <div class="mt-3 p-3 bg-body border rounded">
+                              <h6 class="mb-2" i18n="@@featureSubscriptions-autoRecalculatePriceDailyTitle">
+                                Automatic price adjustment
+                              </h6>
+                              <p
+                                class="text-body-secondary small mb-2"
+                                i18n="@@featureSubscriptions-autoRecalculatePriceDailyIntro"
+                              >
+                                This plan may have its price adjusted automatically each day based on the provider
+                                catalog.
+                              </p>
+                              <p
+                                class="text-body-secondary small mb-2"
+                                i18n="@@featureSubscriptions-autoRecalculatePriceDailyEmail"
+                              >
+                                You will receive an email if the price changes.
+                              </p>
+                              <p class="text-body-secondary small mb-0">
+                                <span i18n="@@featureSubscriptions-autoRecalculatePriceDailyWithdrawalPrefix"
+                                  >From then on, you have</span
+                                >
+                                <strong class="mx-1">{{ selectedPlan!.withdrawalPolicy!.periodDays }}</strong>
+                                <span i18n="@@featureSubscriptions-autoRecalculatePriceDailyWithdrawalSuffix"
+                                  >days to withdraw without negative impact.</span
+                                >
+                              </p>
+                            </div>
+                          }
                         </div>
                       </div>
                     }
@@ -1352,6 +1381,35 @@
                                 </div>
                               }
                             </div>
+                            @if (plan.autoRecalculatePriceDaily === true && plan.withdrawalPolicy) {
+                              <div class="p-3 bg-body border rounded mb-3">
+                                <h6 class="mb-2" i18n="@@featureSubscriptions-autoRecalculatePriceDailyTitle">
+                                  Automatic price adjustment
+                                </h6>
+                                <p
+                                  class="text-body-secondary small mb-2"
+                                  i18n="@@featureSubscriptions-autoRecalculatePriceDailyIntro"
+                                >
+                                  This plan may have its price adjusted automatically each day based on the provider
+                                  catalog.
+                                </p>
+                                <p
+                                  class="text-body-secondary small mb-2"
+                                  i18n="@@featureSubscriptions-autoRecalculatePriceDailyEmail"
+                                >
+                                  You will receive an email if the price changes.
+                                </p>
+                                <p class="text-body-secondary small mb-0">
+                                  <span i18n="@@featureSubscriptions-autoRecalculatePriceDailyWithdrawalPrefix"
+                                    >From then on, you have</span
+                                  >
+                                  <strong class="mx-1">{{ plan.withdrawalPolicy.periodDays }}</strong>
+                                  <span i18n="@@featureSubscriptions-autoRecalculatePriceDailyWithdrawalSuffix"
+                                    >days to withdraw without negative impact.</span
+                                  >
+                                </p>
+                              </div>
+                            }
                             @if (plan.withdrawalPolicy) {
                               <div class="p-3 bg-body border rounded mb-3">
                                 <h6 class="mb-2" i18n="@@featureSubscriptions-withdrawalPolicyTitle">
@@ -2011,6 +2069,39 @@
                                   }
                                 </ul>
                               }
+                            </div>
+                          }
+                          @if (
+                            getConfigChangePlan()?.autoRecalculatePriceDaily === true &&
+                              getConfigChangePlan()?.withdrawalPolicy;
+                            as withdrawalPolicy
+                          ) {
+                            <div class="mt-3 p-3 bg-body border rounded">
+                              <h6 class="mb-2" i18n="@@featureSubscriptions-autoRecalculatePriceDailyTitle">
+                                Automatic price adjustment
+                              </h6>
+                              <p
+                                class="text-body-secondary small mb-2"
+                                i18n="@@featureSubscriptions-autoRecalculatePriceDailyIntro"
+                              >
+                                This plan may have its price adjusted automatically each day based on the provider
+                                catalog.
+                              </p>
+                              <p
+                                class="text-body-secondary small mb-2"
+                                i18n="@@featureSubscriptions-autoRecalculatePriceDailyEmail"
+                              >
+                                You will receive an email if the price changes.
+                              </p>
+                              <p class="text-body-secondary small mb-0">
+                                <span i18n="@@featureSubscriptions-autoRecalculatePriceDailyWithdrawalPrefix"
+                                  >From then on, you have</span
+                                >
+                                <strong class="mx-1">{{ withdrawalPolicy.periodDays }}</strong>
+                                <span i18n="@@featureSubscriptions-autoRecalculatePriceDailyWithdrawalSuffix"
+                                  >days to withdraw without negative impact.</span
+                                >
+                              </p>
                             </div>
                           }
                           <p

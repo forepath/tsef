@@ -4794,6 +4794,7 @@ components:
         - billingIntervalType
         - billingIntervalValue
         - billInAdvance
+        - autoRecalculatePriceDaily
         - totalPrice
         - totalGross
         - taxRate
@@ -4824,6 +4825,9 @@ components:
         billInAdvance:
           type: boolean
           description: When true, the billing period is charged at period start (prepaid). When false, debt is created at period end (arrear). Usage-based metering is not available for advance-billed plans.
+        autoRecalculatePriceDaily:
+          type: boolean
+          description: When true, the package may have its price recalculated nightly from the provider catalog. Checkout UIs must disclose this and the statutory withdrawal restart on change.
         totalPrice:
           type: number
           description: Customer-facing net total price (same formula as internal pricing preview; margin breakdown not exposed)
@@ -4878,6 +4882,9 @@ components:
         billInAdvance:
           type: boolean
           description: When true, debt is created at period start. Default false (arrear). Incompatible with usage-based metering.
+        autoRecalculatePriceDaily:
+          type: boolean
+          description: When true, nightly automatic price recalculation from the provider catalog is enabled. Default false (opt-in).
         minCommitmentDays:
           type: integer
         noticeDays:
@@ -4932,6 +4939,9 @@ components:
         billInAdvance:
           type: boolean
           description: When true, debt is created at period start. Default false (arrear). Incompatible with usage-based metering.
+        autoRecalculatePriceDaily:
+          type: boolean
+          description: When true, nightly automatic price recalculation from the provider catalog is enabled. Default false (opt-in).
         minCommitmentDays: { type: integer }
         noticeDays: { type: integer }
         basePrice: { type: string }
@@ -4966,6 +4976,9 @@ components:
         billInAdvance:
           type: boolean
           description: When true, the period is billed at start (prepaid). Usage-based metering is not available.
+        autoRecalculatePriceDaily:
+          type: boolean
+          description: When true, nightly automatic price recalculation from the provider catalog is enabled (opt-in; default false).
         minCommitmentDays: { type: integer }
         noticeDays: { type: integer }
         basePrice: { type: string, nullable: true }

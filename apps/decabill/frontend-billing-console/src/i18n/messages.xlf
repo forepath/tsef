@@ -2202,6 +2202,12 @@
       <trans-unit id="featureServicePlans-billInAdvanceHelp" datatype="html">
         <source>Charge the full period at its start (prepaid). Usage-based metering cannot be used with advance billing. Cancellation always takes effect at the end of the already-billed period.</source>
         </trans-unit>
+      <trans-unit id="featureServicePlans-autoRecalculatePriceDaily" datatype="html">
+        <source>Automatic daily price recalculation</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-autoRecalculatePriceDailyHelp" datatype="html">
+        <source>Opt in only when required for EU compliance. When enabled, the package price is recalculated nightly at midnight from the provider catalog. Checkout must disclose this and the statutory withdrawal restart when the price changes.</source>
+        </trans-unit>
       <trans-unit id="featureServicePlans-active" datatype="html">
         <source>Active</source>
         </trans-unit>
@@ -2525,6 +2531,21 @@
         </trans-unit>
       <trans-unit id="featureSubscriptions-withdrawalBeforeProvisioningOnly" datatype="html">
         <source> Statutory withdrawal is only available before the service is provisioned. </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyTitle" datatype="html">
+        <source>Automatic price adjustment</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyIntro" datatype="html">
+        <source>This plan may have its price adjusted automatically each day based on the provider catalog.</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyEmail" datatype="html">
+        <source>You will receive an email if the price changes.</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyWithdrawalPrefix" datatype="html">
+        <source>From then on, you have</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyWithdrawalSuffix" datatype="html">
+        <source>days to withdraw without negative impact.</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-autoBackorder" datatype="html">
         <source>Backorder if unavailable</source>

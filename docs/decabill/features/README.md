@@ -70,6 +70,10 @@ Order service plans, manage lifecycle (cancel, resume), and provision cloud inst
 
 Modify the configuration of an active subscription: in-place server type resize and addon add/remove, with prorated billing and async BullMQ processing.
 
+### [Automatic daily price recalculation](./automatic-price-recalculation.md)
+
+Opt-in nightly refresh of service-plan catalog prices from the provider, with prorated subscription settlement, statutory withdrawal restart, and consolidated customer email.
+
 ### [Advance billing and yearly interval](./advance-billing-and-yearly-interval.md)
 
 Plan flag `billInAdvance` for prepaid period charges, `year` billing interval, withdrawal accounting for unbilled vs invoiced advance debt, and related webhook/email events.

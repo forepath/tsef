@@ -12,6 +12,7 @@ describe('formatPublicOfferingPrice', () => {
     billingIntervalType: 'month',
     billingIntervalValue: 1,
     billInAdvance: false,
+    autoRecalculatePriceDaily: false,
     totalPrice: 10,
     totalGross: 11.9,
     taxRate: 19,

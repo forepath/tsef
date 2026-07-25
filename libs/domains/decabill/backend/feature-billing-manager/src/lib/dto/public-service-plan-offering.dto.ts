@@ -13,6 +13,11 @@ export class PublicServicePlanOfferingDto {
   billingIntervalValue!: number;
   /** When true, the period is billed at start (prepaid). */
   billInAdvance!: boolean;
+  /**
+   * When true, the package may have its price recalculated nightly from the provider catalog.
+   * Checkout UIs must disclose this and the statutory withdrawal restart on change.
+   */
+  autoRecalculatePriceDaily!: boolean;
   /** Customer-facing total (base + margin); margin breakdown is not exposed. */
   totalPrice!: number;
   /** Customer-facing gross total (incl. VAT) for the default server type. */

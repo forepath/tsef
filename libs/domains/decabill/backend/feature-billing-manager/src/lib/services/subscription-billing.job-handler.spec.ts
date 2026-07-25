@@ -55,6 +55,7 @@ describe('SubscriptionBillingJobHandler', () => {
       billingIntervalType: BillingIntervalType.MONTH,
       billingIntervalValue: 1,
       billInAdvance: false,
+      autoRecalculatePriceDaily: false,
     };
 
     subscriptionsRepository.findByIdOrThrow.mockResolvedValue(subscription);

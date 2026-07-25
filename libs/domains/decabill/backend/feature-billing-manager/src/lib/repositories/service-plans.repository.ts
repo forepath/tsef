@@ -93,6 +93,18 @@ export class ServicePlansRepository {
     return await qb.getMany();
   }
 
+  async findAutoRecalculatePriceDaily(): Promise<ServicePlanEntity[]> {
+    const qb = this.repository
+      .createQueryBuilder('plan')
+      .innerJoinAndSelect('plan.serviceType', 'st')
+      .where('plan.auto_recalculate_price_daily = :enabled', { enabled: true })
+      .orderBy('plan.createdAt', 'ASC');
+
+    applyServiceTypeTenantFilter(qb, 'st');
+
+    return await qb.getMany();
+  }
+
   async create(dto: Partial<ServicePlanEntity>): Promise<ServicePlanEntity> {
     const entity = this.repository.create(dto);
 

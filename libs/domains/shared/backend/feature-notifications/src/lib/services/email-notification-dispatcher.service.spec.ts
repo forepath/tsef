@@ -59,6 +59,24 @@ describe('EmailNotificationDispatcherService', () => {
     );
   });
 
+  it('maps non-UUID correlation ids to UUID event ids for delivery persistence', async () => {
+    const service = new EmailNotificationDispatcherService(options, queue as never, emailService as never);
+
+    await service.publish({
+      eventType: 'invoice.issued',
+      scopeKey: 'default',
+      to: 'a@example.com',
+      templateKey: 'invoice-issued',
+      templateContext: {},
+      correlationId: 'price-recalc:tenant-a:user-1:2026-07-25',
+    });
+
+    const payload = queue.add.mock.calls[0][1] as { eventId: string };
+
+    expect(payload.eventId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    expect(payload.eventId).not.toBe('price-recalc:tenant-a:user-1:2026-07-25');
+  });
+
   it('encrypts sensitive context fields out of the Redis payload', async () => {
     const service = new EmailNotificationDispatcherService(options, queue as never, emailService as never);
 

@@ -304,4 +304,62 @@ describe('BillingEmailPublisher', () => {
       }),
     );
   });
+
+  it('publishes consolidated price-change email with idempotent correlation id', async () => {
+    await publisher.publishPriceChangedConsolidated({
+      tenantId: 'tenant-a',
+      userId: 'user-1',
+      runDate: '2026-07-25',
+      withdrawalPeriodDays: 14,
+      changes: [
+        {
+          subscriptionNumber: 'SUB-1',
+          productName: 'Pro VPS',
+          oldNet: 10,
+          oldTax: 1.9,
+          oldTotal: 11.9,
+          newNet: 12,
+          newTax: 2.28,
+          newTotal: 14.28,
+        },
+      ],
+    });
+
+    expect(emailDispatcher.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'subscription.price_changed',
+        templateKey: 'price-change',
+        correlationId: 'price-recalc:tenant-a:user-1:2026-07-25',
+        to: 'billing@example.com',
+        templateContext: expect.objectContaining({
+          recipientName: 'Ada',
+          withdrawalPeriodDays: 14,
+          changes: [
+            expect.objectContaining({
+              subscriptionNumber: 'SUB-1',
+              productName: 'Pro VPS',
+              oldNet: '10.00 EUR',
+              oldTax: '1.90 EUR',
+              oldTotal: '11.90 EUR',
+              newNet: '12.00 EUR',
+              newTax: '2.28 EUR',
+              newTotal: '14.28 EUR',
+            }),
+          ],
+        }),
+      }),
+    );
+  });
+
+  it('skips consolidated price-change email when changes are empty', async () => {
+    await publisher.publishPriceChangedConsolidated({
+      tenantId: 'tenant-a',
+      userId: 'user-1',
+      runDate: '2026-07-25',
+      withdrawalPeriodDays: 14,
+      changes: [],
+    });
+
+    expect(emailDispatcher.publish).not.toHaveBeenCalled();
+  });
 });
