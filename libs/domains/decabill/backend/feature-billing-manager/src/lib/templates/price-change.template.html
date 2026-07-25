@@ -1,0 +1,55 @@
+{{#> email-layout}}
+<style>
+  .price-change-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 20px;
+    font-size: 14px;
+  }
+
+  .price-change-table th,
+  .price-change-table td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .price-change-table th {
+    background: var(--surface-subtle);
+    color: var(--body-emphasis);
+    font-weight: 600;
+  }
+</style>
+<h1 class="email-title">Subscription price adjustments</h1>
+<p>Dear {{recipientName}},</p>
+<p>
+  Automatic price adjustment is enabled for your subscriptions. The prices below have been updated based on current
+  provider costs.
+</p>
+<table class="price-change-table">
+  <thead>
+    <tr>
+      <th>Subscription</th>
+      <th>Product</th>
+      <th>Previous total</th>
+      <th>New total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each changes}}
+    <tr>
+      <td>{{#if subscriptionNumber}}{{subscriptionNumber}}{{else}}—{{/if}}</td>
+      <td>{{productName}}</td>
+      <td>{{oldTotal}}</td>
+      <td>{{newTotal}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+<p class="muted">
+  Statutory withdrawal: You may withdraw from this contract change within {{withdrawalPeriodDays}} days under applicable
+  consumer protection rules.
+</p>
+<p>Any price difference for the current billing period is settled with your next invoice.</p>
+{{/email-layout}}

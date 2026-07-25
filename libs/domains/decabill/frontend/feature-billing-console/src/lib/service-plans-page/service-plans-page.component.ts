@@ -1067,6 +1067,7 @@ export class ServicePlansPageComponent implements OnInit {
       billingDayOfMonth: undefined,
       cancelAtPeriodEnd: true,
       billInAdvance: false,
+      autoRecalculatePriceDaily: false,
       minCommitmentDays: 0,
       noticeDays: 0,
       basePrice: undefined,
@@ -1092,6 +1093,7 @@ export class ServicePlansPageComponent implements OnInit {
       billingDayOfMonth: undefined,
       cancelAtPeriodEnd: false,
       billInAdvance: false,
+      autoRecalculatePriceDaily: false,
       minCommitmentDays: 0,
       noticeDays: 0,
       basePrice: undefined,
@@ -1103,6 +1105,7 @@ export class ServicePlansPageComponent implements OnInit {
       allowCustomerServerTypeSelection: false,
       allowedServerTypes: [],
       taxCategory: 'standard',
+      migrateExistingSubscriptions: false,
       isActive: true,
     };
   }
@@ -1164,6 +1167,7 @@ export class ServicePlansPageComponent implements OnInit {
       billingDayOfMonth: plan.billingDayOfMonth ?? undefined,
       cancelAtPeriodEnd: plan.cancelAtPeriodEnd,
       billInAdvance: plan.billInAdvance === true,
+      autoRecalculatePriceDaily: plan.autoRecalculatePriceDaily === true,
       minCommitmentDays: plan.minCommitmentDays,
       noticeDays: plan.noticeDays,
       basePrice: plan.basePrice ?? undefined,
@@ -1180,6 +1184,7 @@ export class ServicePlansPageComponent implements OnInit {
       allowCustomerServerTypeSelection: plan.allowCustomerServerTypeSelection === true,
       allowedServerTypes: normalizeAllowedServerTypeIds(plan.allowedServerTypes),
       taxCategory: plan.taxCategory ?? 'standard',
+      migrateExistingSubscriptions: false,
       isActive: plan.isActive,
     };
     this.typesAndProviders$.pipe(take(1)).subscribe((data) => {
@@ -1235,6 +1240,7 @@ export class ServicePlansPageComponent implements OnInit {
             this.createForm.billingDayOfMonth != null ? Number(this.createForm.billingDayOfMonth) : undefined,
           cancelAtPeriodEnd: this.createForm.cancelAtPeriodEnd ?? true,
           billInAdvance: this.createForm.billInAdvance === true,
+          autoRecalculatePriceDaily: this.createForm.autoRecalculatePriceDaily === true,
           minCommitmentDays: Number(this.createForm.minCommitmentDays) || 0,
           noticeDays: Number(this.createForm.noticeDays) || 0,
           basePrice: this.createForm.basePrice?.trim() || undefined,
@@ -1281,6 +1287,7 @@ export class ServicePlansPageComponent implements OnInit {
             this.editForm.billingDayOfMonth != null ? Number(this.editForm.billingDayOfMonth) : undefined,
           cancelAtPeriodEnd: this.editForm.cancelAtPeriodEnd,
           billInAdvance: this.editForm.billInAdvance === true,
+          autoRecalculatePriceDaily: this.editForm.autoRecalculatePriceDaily === true,
           minCommitmentDays: Number(this.editForm.minCommitmentDays) ?? 0,
           noticeDays: Number(this.editForm.noticeDays) ?? 0,
           basePrice: this.editForm.basePrice?.trim() || undefined,
@@ -1293,6 +1300,7 @@ export class ServicePlansPageComponent implements OnInit {
           allowedServerTypes:
             this.editForm.allowCustomerServerTypeSelection === true ? [...this.editAllowedServerTypes] : [],
           taxCategory: this.editForm.taxCategory ?? 'standard',
+          migrateExistingSubscriptions: this.editForm.migrateExistingSubscriptions === true,
           isActive: this.editForm.isActive,
         });
       });

@@ -18,6 +18,7 @@ describe('ServicePlansService', () => {
     billingIntervalValue: 1,
     cancelAtPeriodEnd: false,
     billInAdvance: false,
+    autoRecalculatePriceDaily: false,
     minCommitmentDays: 0,
     noticeDays: 0,
     providerConfigDefaults: {},

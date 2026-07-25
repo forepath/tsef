@@ -12,10 +12,14 @@ import { AddonService } from '../services/addon.service';
 import { CloudInitConfigService } from '../services/cloud-init-config.service';
 import { WithdrawalPolicyService } from '../services/withdrawal-policy.service';
 import { AddonsRepository } from '../repositories/addons.repository';
+import { PLAN_PRICE_MIGRATE_ENQUEUE } from '../queue/plan-price-migrate-enqueue.token';
 
 import { ServicePlansController } from './service-plans.controller';
 
 describe('ServicePlansController', () => {
+  const planPriceMigrateEnqueueStub = {
+    enqueueUnit: jest.fn().mockResolvedValue(undefined),
+  };
   const basePlanRow: ServicePlanEntity = {
     id: '11111111-1111-4111-8111-111111111111',
     serviceTypeId: '22222222-2222-4222-8222-222222222222',
@@ -26,6 +30,7 @@ describe('ServicePlansController', () => {
     billingDayOfMonth: undefined,
     cancelAtPeriodEnd: true,
     billInAdvance: false,
+    autoRecalculatePriceDaily: false,
     minCommitmentDays: 0,
     noticeDays: 0,
     basePrice: '10',
@@ -71,6 +76,8 @@ describe('ServicePlansController', () => {
   };
 
   beforeEach(() => {
+    planPriceMigrateEnqueueStub.enqueueUnit.mockReset();
+    planPriceMigrateEnqueueStub.enqueueUnit.mockResolvedValue(undefined);
     serviceTypesRepoStub.findByIdOrThrow.mockReset();
     serviceTypesRepoStub.findByIdOrThrow.mockResolvedValue({
       id: basePlanRow.serviceTypeId,
@@ -101,6 +108,7 @@ describe('ServicePlansController', () => {
         { provide: AddonService, useValue: addonServiceStub },
         { provide: AddonsRepository, useValue: addonsRepositoryStub },
         { provide: WithdrawalPolicyService, useValue: new WithdrawalPolicyService() },
+        { provide: PLAN_PRICE_MIGRATE_ENQUEUE, useValue: planPriceMigrateEnqueueStub },
       ],
     }).compile();
   }

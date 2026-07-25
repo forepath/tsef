@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto';
-
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { enqueueUnitJob } from '@forepath/shared/backend/util-queue';
@@ -15,6 +13,7 @@ import {
 import type { EmailDeliverJobPayload, EmailPublishContext } from '../interfaces/notification.interfaces';
 import type { NotificationsModuleOptions } from '../interfaces/notifications-module.options';
 import { assertEmailDeliveryAllowed } from '../utils/assert-email-delivery-allowed';
+import { resolveEmailEventId } from '../utils/resolve-email-event-id';
 import { sealEmailTemplateContext } from '../utils/seal-email-template-context';
 
 @Injectable()
@@ -42,7 +41,7 @@ export class EmailNotificationDispatcherService {
 
     assertEmailDeliveryAllowed(this.options.email, context.eventType, context.templateKey);
 
-    const eventId = context.correlationId ?? randomUUID();
+    const eventId = resolveEmailEventId(context.correlationId);
     const sealed = sealEmailTemplateContext(context.templateContext);
     const payload: EmailDeliverJobPayload = {
       eventId,

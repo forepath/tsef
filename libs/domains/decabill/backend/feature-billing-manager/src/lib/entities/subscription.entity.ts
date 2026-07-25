@@ -64,6 +64,13 @@ export class SubscriptionEntity {
   @Column({ type: 'timestamp', nullable: true, name: 'withdrawn_at' })
   withdrawnAt?: Date;
 
+  /**
+   * When set, statutory withdrawal is measured from this instant instead of earliest
+   * item provisionedAt (e.g. after an automatic price migration).
+   */
+  @Column({ type: 'timestamp', nullable: true, name: 'statutory_withdrawal_restarted_at' })
+  statutoryWithdrawalRestartedAt?: Date;
+
   @Column({ type: 'varchar', length: 30, nullable: true, name: 'withdraw_phase' })
   withdrawPhase?: WithdrawalTeardownPhase;
 

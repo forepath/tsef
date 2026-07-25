@@ -137,6 +137,7 @@ export class PublicServicePlanOfferingsController {
       billingIntervalType: row.billingIntervalType,
       billingIntervalValue: row.billingIntervalValue,
       billInAdvance: row.billInAdvance === true,
+      autoRecalculatePriceDaily: row.autoRecalculatePriceDaily === true,
       totalPrice: pricingWithTax.totalPrice,
       totalGross: pricingWithTax.totalGross,
       taxRate: pricingWithTax.taxRate,

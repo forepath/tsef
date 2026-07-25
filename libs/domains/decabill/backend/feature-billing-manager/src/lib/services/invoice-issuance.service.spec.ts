@@ -162,6 +162,7 @@ describe('InvoiceIssuanceService', () => {
       id: 'plan-1',
       billingIntervalType: 'month',
       billInAdvance: false,
+      autoRecalculatePriceDaily: false,
       billingIntervalValue: 1,
       billingDayOfMonth: 1,
     });

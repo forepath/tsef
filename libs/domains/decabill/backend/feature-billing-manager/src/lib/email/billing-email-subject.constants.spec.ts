@@ -81,7 +81,14 @@ describe('BILLING_EMAIL_SUBJECTS', () => {
         'subscription.cancel_scheduled',
         'subscription.created',
         'subscription.withdrawn',
+        'subscription.price_changed',
       ]),
+    );
+  });
+
+  it('uses static price-change subject', () => {
+    expect(resolveEmailSubject(BILLING_EMAIL_SUBJECTS, 'price-change', {})).toBe(
+      'Your subscription prices have been updated',
     );
   });
 });

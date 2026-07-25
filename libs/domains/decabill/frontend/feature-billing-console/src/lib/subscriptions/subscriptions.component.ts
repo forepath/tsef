@@ -1757,7 +1757,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     this.configChangeAddonsRequestId++;
   }
 
-  private getConfigChangePlan(): ServicePlanResponse | null {
+  getConfigChangePlan(): ServicePlanResponse | null {
     const planId = this.subscriptionToModify?.planId;
 
     return planId ? (this.servicePlans().find((plan) => plan.id === planId) ?? null) : null;

@@ -317,6 +317,8 @@ export interface ServicePlanResponse {
   cancelAtPeriodEnd: boolean;
   /** When true, the period is billed at start (prepaid). */
   billInAdvance: boolean;
+  /** When true, price may be recalculated nightly from the provider catalog. */
+  autoRecalculatePriceDaily: boolean;
   minCommitmentDays: number;
   noticeDays: number;
   basePrice?: string | null;
@@ -343,6 +345,7 @@ export interface CreateServicePlanDto {
   billingDayOfMonth?: number;
   cancelAtPeriodEnd?: boolean;
   billInAdvance?: boolean;
+  autoRecalculatePriceDaily?: boolean;
   minCommitmentDays?: number;
   noticeDays?: number;
   basePrice?: string;
@@ -365,6 +368,7 @@ export interface UpdateServicePlanDto {
   billingDayOfMonth?: number;
   cancelAtPeriodEnd?: boolean;
   billInAdvance?: boolean;
+  autoRecalculatePriceDaily?: boolean;
   minCommitmentDays?: number;
   noticeDays?: number;
   basePrice?: string;
@@ -376,6 +380,8 @@ export interface UpdateServicePlanDto {
   allowCustomerServerTypeSelection?: boolean;
   allowedServerTypes?: string[];
   taxCategory?: TaxCategory;
+  /** Request-only: migrate eligible subscriptions when commercial pricing fields change. */
+  migrateExistingSubscriptions?: boolean;
   isActive?: boolean;
 }
 

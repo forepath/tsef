@@ -19,6 +19,7 @@ describe('ServicePlansFacade', () => {
     billingIntervalType: 'month',
     billingIntervalValue: 1,
     billInAdvance: false,
+    autoRecalculatePriceDaily: false,
     totalPrice: 99,
     totalGross: 117.81,
     taxRate: 19,

@@ -70,6 +70,7 @@ describe('SubscriptionTeardownService', () => {
       id: 'plan-1',
       name: 'Plan',
       billInAdvance: false,
+      autoRecalculatePriceDaily: false,
       billingIntervalType: 'month',
     });
     subscriptionItemsRepository.findBySubscription.mockResolvedValue([
@@ -188,6 +189,7 @@ describe('SubscriptionTeardownService', () => {
         id: 'plan-1',
         name: 'Advance Plan',
         billInAdvance: true,
+        autoRecalculatePriceDaily: false,
         billingIntervalType: 'year',
       });
       openPositionsRepository.findUnbilledBySubscription.mockResolvedValue([{ id: 'pos-1' }]);
@@ -215,6 +217,7 @@ describe('SubscriptionTeardownService', () => {
         id: 'plan-1',
         name: 'Advance Plan',
         billInAdvance: true,
+        autoRecalculatePriceDaily: false,
         billingIntervalType: 'year',
       });
       openPositionsRepository.findUnbilledBySubscription.mockResolvedValue([]);
@@ -268,6 +271,7 @@ describe('SubscriptionTeardownService', () => {
         id: 'plan-1',
         name: 'Advance Plan',
         billInAdvance: true,
+        autoRecalculatePriceDaily: false,
         billingIntervalType: 'year',
       });
       openPositionsRepository.findUnbilledBySubscription.mockResolvedValue([{ id: 'pos-1' }]);

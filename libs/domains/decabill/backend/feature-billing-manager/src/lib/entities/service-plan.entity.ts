@@ -59,6 +59,13 @@ export class ServicePlanEntity {
   @Column({ type: 'boolean', name: 'bill_in_advance', default: false })
   billInAdvance!: boolean;
 
+  /**
+   * When true, a nightly job refreshes catalog base price from the provider and migrates
+   * eligible subscriptions. Default false — explicit opt-in (price adjustments are regulated).
+   */
+  @Column({ type: 'boolean', name: 'auto_recalculate_price_daily', default: false })
+  autoRecalculatePriceDaily!: boolean;
+
   @Column({ type: 'int', name: 'min_commitment_days', default: 0 })
   minCommitmentDays!: number;
 

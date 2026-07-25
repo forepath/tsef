@@ -52,6 +52,18 @@ export class UpdateServicePlanDto {
   billInAdvance?: boolean;
 
   @IsOptional()
+  @IsBoolean({ message: 'autoRecalculatePriceDaily must be a boolean' })
+  autoRecalculatePriceDaily?: boolean;
+
+  /**
+   * When true and commercial pricing fields change (basePrice, margins, taxCategory),
+   * enqueue migration of eligible subscriptions on this plan. Not persisted.
+   */
+  @IsOptional()
+  @IsBoolean({ message: 'migrateExistingSubscriptions must be a boolean' })
+  migrateExistingSubscriptions?: boolean;
+
+  @IsOptional()
   @IsInt({ message: 'minCommitmentDays must be an integer' })
   @Min(0)
   minCommitmentDays?: number;

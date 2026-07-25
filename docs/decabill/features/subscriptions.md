@@ -112,12 +112,14 @@ Customers who are not logged in can use the public **[Public Statutory Withdrawa
 
 ### Eligibility
 
-| Phase             | Condition                                                                                               | Withdraw allowed                 |
-| ----------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| Unprovisioned     | No subscription item is `active`                                                                        | Always                           |
-| Withdrawal period | Item provisioned within `BILLING_STATUTORY_WITHDRAWAL_PERIOD_DAYS` (default 14) and service type allows | Yes                              |
-| Expired           | Statutory window elapsed                                                                                | No (use Cancel per plan rules)   |
-| Excluded type     | Service type has `disallowStatutoryWithdrawal` and item is provisioned                                  | No (unprovisioned still allowed) |
+| Phase             | Condition                                                                                                                                                                                                   | Withdraw allowed                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Unprovisioned     | No subscription item is `active`                                                                                                                                                                            | Always                           |
+| Withdrawal period | Within `BILLING_STATUTORY_WITHDRAWAL_PERIOD_DAYS` (default 14) of earliest `provisionedAt`, or of `statutoryWithdrawalRestartedAt` when set (e.g. after automatic price migration), and service type allows | Yes                              |
+| Expired           | Statutory window elapsed                                                                                                                                                                                    | No (use Cancel per plan rules)   |
+| Excluded type     | Service type has `disallowStatutoryWithdrawal` and item is provisioned                                                                                                                                      | No (unprovisioned still allowed) |
+
+After an [automatic price recalculation](./automatic-price-recalculation.md) migrates a subscription to a new price, `statutoryWithdrawalRestartedAt` restarts the statutory window from that moment (unless the service type disallows post-provisioning withdrawal).
 
 `GET /subscriptions` and `GET /subscriptions/{id}` include `withdrawalEligibility` with `canWithdraw`, `phase`, optional `deadline`, and `estimatedRefundGross` for provisioned withdrawals.
 

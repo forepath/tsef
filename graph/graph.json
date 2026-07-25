@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-25T15:21:44.141Z",
+  "generatedAt": "2026-07-25T19:46:00.262Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -7451,6 +7451,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/price-recalc.job-handler.ts",
+      "type": "job",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/price-recalc.job-handler.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/pricing.service.ts",
       "type": "service",
       "attrs": {
@@ -7545,6 +7554,15 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/public-withdrawal.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -10301,6 +10319,20 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/price-change",
+      "type": "email",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/price-change",
+        "languageOrKind": "template",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "templateName": "price-change",
+        "memberFiles": [
+          "price-change.template.html",
+          "price-change.template.txt"
+        ]
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-cancel-scheduled",
       "type": "email",
       "attrs": {
@@ -11161,6 +11193,14 @@
       "type": "doc",
       "attrs": {
         "path": "docs/decabill/features/auto-billing.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/automatic-price-recalculation.md",
         "languageOrKind": "md"
       }
     },
@@ -15566,6 +15606,15 @@
       }
     },
     {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:service_plan.price_recalculated",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "service_plan.price_recalculated",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
       "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.cancel_scheduled",
       "type": "webhook-event",
       "attrs": {
@@ -15624,6 +15673,15 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "subscription.period_charged",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.price_changed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.price_changed",
         "projectName": "decabill-backend-feature-billing-manager",
         "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
       }
@@ -22970,6 +23028,116 @@
       }
     },
     {
+      "id": "concept:decabill-automatic-daily-price-recalculation",
+      "type": "concept",
+      "attrs": {
+        "title": "Automatic daily price recalculation",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "automatic-daily-price-recalculation",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-feature-switches",
+      "type": "concept",
+      "attrs": {
+        "title": "Feature switches",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "feature-switches",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-what-is-recalculated",
+      "type": "concept",
+      "attrs": {
+        "title": "What is recalculated",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "what-is-recalculated",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-subscription-eligibility",
+      "type": "concept",
+      "attrs": {
+        "title": "Subscription eligibility",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "subscription-eligibility",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-billing-settlement",
+      "type": "concept",
+      "attrs": {
+        "title": "Billing settlement",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "billing-settlement",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-datev",
+      "type": "concept",
+      "attrs": {
+        "title": "DATEV",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "datev",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-statutory-withdrawal",
+      "type": "concept",
+      "attrs": {
+        "title": "Statutory withdrawal",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "statutory-withdrawal",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-admin-commercial-plan-updates",
+      "type": "concept",
+      "attrs": {
+        "title": "Admin commercial plan updates",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "admin-commercial-plan-updates",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-job-failure-and-retries",
+      "type": "concept",
+      "attrs": {
+        "title": "Job failure and retries",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "job-failure-and-retries",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-customer-disclosure",
+      "type": "concept",
+      "attrs": {
+        "title": "Customer disclosure",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "customer-disclosure",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-related-code",
+      "type": "concept",
+      "attrs": {
+        "title": "Related code",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "related-code",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-backorders",
       "type": "concept",
       "attrs": {
@@ -24076,16 +24244,6 @@
         "title": "Product scoping",
         "docPath": "docs/decabill/features/promotions.md",
         "sectionAnchor": "product-scoping",
-        "domain": "decabill"
-      }
-    },
-    {
-      "id": "concept:decabill-subscription-eligibility",
-      "type": "concept",
-      "attrs": {
-        "title": "Subscription eligibility",
-        "docPath": "docs/decabill/features/promotions.md",
-        "sectionAnchor": "subscription-eligibility",
         "domain": "decabill"
       }
     },
@@ -30928,6 +31086,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/price-recalc.job-handler.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/pricing.service.ts",
       "type": "contains"
     },
@@ -30979,6 +31142,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/public-withdrawal.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
       "type": "contains"
     },
     {
@@ -32464,6 +32632,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/payment-succeeded",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/price-change",
       "type": "contains"
     },
     {
@@ -34578,6 +34751,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:service_plan.price_recalculated",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.cancel_scheduled",
       "type": "contains"
     },
@@ -34609,6 +34787,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.period_charged",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.price_changed",
       "type": "contains"
     },
     {
@@ -39589,6 +39772,71 @@
     {
       "from": "file:docs/decabill/features/auto-billing.md",
       "to": "concept:decabill-related",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-automatic-daily-price-recalculation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-overview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-feature-switches",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-what-is-recalculated",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-subscription-eligibility",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-billing-settlement",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-datev",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-statutory-withdrawal",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-notifications",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-admin-commercial-plan-updates",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-job-failure-and-retries",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-customer-disclosure",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-related-code",
       "type": "contains"
     },
     {
@@ -48232,6 +48480,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/price-recalc.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/promotion-admin.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/promotions.repository.ts",
       "type": "injects"
@@ -48369,6 +48622,56 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/public-withdrawal.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-issuer-config.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/service-plans.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-addons.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/open-positions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provider-server-types.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/pricing.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-tax-context.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/tax-calculation.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change-billing.service.ts",
       "type": "injects"
     },
     {
@@ -49543,6 +49846,11 @@
     },
     {
       "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/price-recalc.job-handler.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/vat-id-validation.job-handler.ts",
       "type": "injects"
     },
@@ -50428,6 +50736,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/service-plan-price-recalc.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/public-withdrawal.service.ts",
       "type": "provides"
     },
@@ -50559,6 +50872,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-config-change.job-handler.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/price-recalc.job-handler.ts",
       "type": "provides"
     },
     {
@@ -55307,6 +55625,36 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-feature-switches",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:GET:/service-plans",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:POST:/service-plans",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:GET:/service-plans/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:POST:/service-plans/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:DELETE:/service-plans/{id}",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-backorders",
       "to": "api:HTTP:GET:/backorders",
       "type": "documents"
@@ -58717,6 +59065,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "file:docs/decabill/features/backorders.md",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -62047,6 +62400,61 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:decabill-automatic-daily-price-recalculation",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-feature-switches",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-what-is-recalculated",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-subscription-eligibility",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-billing-settlement",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-datev",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-statutory-withdrawal",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-job-failure-and-retries",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-customer-disclosure",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-related-code",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:decabill-backorders",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -62598,11 +63006,6 @@
     },
     {
       "from": "concept:decabill-product-scoping",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
-      "from": "concept:decabill-subscription-eligibility",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

@@ -197,6 +197,55 @@ describe('DatevExportService', () => {
     );
   });
 
+  it('includes price_recalc partial credits from findWithdrawnInPeriod without reason filter', async () => {
+    const invoice = {
+      id: 'inv-credit',
+      userId: 'user-1',
+      invoiceNumber: 'INV-2026-00009',
+      issuedAt: new Date('2026-01-05'),
+      createdAt: new Date('2026-01-05'),
+      lineItems: [{ description: 'Line', lineGross: 100, taxCategory: 'standard' }],
+    };
+    const credit = {
+      id: 'credit-1',
+      invoiceId: invoice.id,
+      invoice,
+      documentNumber: 'CN-2026-00001',
+      creditNet: '10',
+      creditGross: '11.9',
+      reason: 'price_recalc',
+      withdrawnAt: new Date('2026-01-15'),
+      taxCategory: 'standard',
+      description: 'Price recalc credit',
+      sourceRef: 'price_recalc:2026-01-15:sub-1',
+    };
+
+    creditDocumentsRepository.findWithdrawnInPeriod.mockResolvedValue([credit]);
+    customerProfilesRepository.findByUserId.mockResolvedValue({ userId: 'user-1', company: 'Co' });
+    debtorAccountService.resolveDebtorNumber.mockResolvedValue(10_001);
+    bookingMapper.mapPartialCreditDocument.mockReturnValue(['credit-row']);
+
+    const result = await runWithTenantId('default', () =>
+      service.runExport({
+        scope: DatevExportScope.TENANT,
+        tenantId: 'default',
+        year: 2026,
+        month: 1,
+        periodStart: new Date('2026-01-01'),
+        periodEnd: new Date('2026-01-31'),
+        triggeredBy: 'scheduler',
+      }),
+    );
+
+    expect(result.status).toBe(DatevExportStatus.COMPLETED);
+    expect(creditDocumentsRepository.findWithdrawnInPeriod).toHaveBeenCalled();
+    expect(bookingMapper.mapPartialCreditDocument).toHaveBeenCalledWith(
+      expect.objectContaining({
+        credit: expect.objectContaining({ reason: 'price_recalc' }),
+      }),
+    );
+  });
+
   it('uses distinct PDF paths for unified exports with same invoice numbers', async () => {
     const invoice = {
       id: 'inv-1',

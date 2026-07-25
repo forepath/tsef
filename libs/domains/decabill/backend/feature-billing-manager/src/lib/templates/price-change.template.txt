@@ -1,0 +1,11 @@
+Dear {{recipientName}},
+
+Automatic price adjustment is enabled for your subscriptions. The prices below have been updated based on current provider costs.
+
+{{#each changes}}
+- {{productName}}{{#if subscriptionNumber}} ({{subscriptionNumber}}){{/if}}: previous total {{oldTotal}}, new total {{newTotal}} (net {{oldNet}} -> {{newNet}}, tax {{oldTax}} -> {{newTax}})
+{{/each}}
+
+Statutory withdrawal: You may withdraw from this contract change within {{withdrawalPeriodDays}} days under applicable consumer protection rules.
+
+Any price difference for the current billing period is settled with your next invoice.

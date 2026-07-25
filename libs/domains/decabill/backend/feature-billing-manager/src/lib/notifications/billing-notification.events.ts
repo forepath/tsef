@@ -30,6 +30,8 @@ export const BILLING_NOTIFICATION_EVENTS = [
   'subscription.config_change_requested',
   'subscription.config_changed',
   'subscription.config_change_failed',
+  'service_plan.price_recalculated',
+  'subscription.price_changed',
   'addon.activated',
   'addon.deactivated',
   'addon.provision_failed',

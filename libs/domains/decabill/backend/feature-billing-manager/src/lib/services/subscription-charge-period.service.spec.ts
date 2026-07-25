@@ -40,6 +40,7 @@ describe('SubscriptionChargePeriodService', () => {
     const plan = {
       billingIntervalType: 'day',
       billInAdvance: false,
+      autoRecalculatePriceDaily: false,
       billingIntervalValue: 1,
     } as never;
 

@@ -9,6 +9,7 @@ describe('calculateProratedAmount', () => {
     billingIntervalType: BillingIntervalType.DAY,
     billingIntervalValue: 1,
     billInAdvance: false,
+    autoRecalculatePriceDaily: false,
     billingDayOfMonth: undefined,
   };
 

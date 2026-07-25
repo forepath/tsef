@@ -427,6 +427,60 @@ export class BillingEmailPublisher {
     });
   }
 
+  async publishPriceChangedConsolidated(params: {
+    tenantId: string;
+    userId: string;
+    runDate: string;
+    withdrawalPeriodDays: number;
+    changes: Array<{
+      subscriptionNumber?: string;
+      productName: string;
+      oldNet: number;
+      oldTax: number;
+      oldTotal: number;
+      newNet: number;
+      newTax: number;
+      newTotal: number;
+    }>;
+  }): Promise<void> {
+    if (params.changes.length === 0) {
+      return;
+    }
+
+    const profile = await this.customerProfilesRepository.findByUserId(params.userId);
+    const to = await this.resolveRecipientEmail(params.userId, profile);
+
+    if (!to) {
+      this.logger.warn(`No billing email for user ${params.userId}, skipping price-change email`);
+
+      return;
+    }
+
+    const currency = 'EUR';
+
+    await this.emailDispatcher.publish({
+      eventType: 'subscription.price_changed',
+      scopeKey: getTenantIdOrDefault(),
+      to,
+      templateKey: 'price-change',
+      correlationId: `price-recalc:${params.tenantId}:${params.userId}:${params.runDate}`,
+      templateContext: {
+        recipientName: this.greeting(profile),
+        withdrawalPeriodDays: params.withdrawalPeriodDays,
+        changes: params.changes.map((change) => ({
+          ...(change.subscriptionNumber ? { subscriptionNumber: change.subscriptionNumber } : {}),
+          productName: change.productName,
+          oldNet: this.formatAmount(change.oldNet, currency),
+          oldTax: this.formatAmount(change.oldTax, currency),
+          oldTotal: this.formatAmount(change.oldTotal, currency),
+          newNet: this.formatAmount(change.newNet, currency),
+          newTax: this.formatAmount(change.newTax, currency),
+          newTotal: this.formatAmount(change.newTotal, currency),
+        })),
+      },
+    });
+  }
+
   private async publishPaymentEmail(
     eventType: 'payment.succeeded' | 'payment.failed',
     templateKey: 'payment-succeeded' | 'payment-failed',

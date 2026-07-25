@@ -65,6 +65,7 @@ describe('SubscriptionPeriodChargeService', () => {
       billingIntervalValue: 1,
       billingDayOfMonth: 1,
       billInAdvance: false,
+      autoRecalculatePriceDaily: false,
     } as never;
 
     subscriptionsRepository.update.mockResolvedValue({ id: 'sub-1' });
@@ -95,6 +96,7 @@ describe('SubscriptionPeriodChargeService', () => {
       billingIntervalValue: 1,
       billingDayOfMonth: undefined,
       billInAdvance: true,
+      autoRecalculatePriceDaily: false,
     } as never;
 
     subscriptionsRepository.update.mockResolvedValue({ id: 'sub-1' });

@@ -72,9 +72,21 @@ Billing data and users are partitioned by **`tenant_id`**. HTTP clients send **`
 | `BILLING_OSS_REGISTERED`                   | When `true`, always use destination-country VAT for EU B2C (skip €10k threshold ledger)                                          |
 | `BILLING_OSS_THRESHOLD_EUR`                | Cross-border EU B2C net threshold (default `10000`)                                                                              |
 | `BILLING_NON_EU_ISSUER_EU_B2B_CHARGE_VAT`  | When `true`, non-EU issuer → EU B2B charges customer-country VAT instead of default no-VAT                                       |
-| `BILLING_STATUTORY_WITHDRAWAL_PERIOD_DAYS` | Days after provisioning during which statutory withdrawal is allowed (default `14`)                                              |
+| `BILLING_STATUTORY_WITHDRAWAL_PERIOD_DAYS` | Days after provisioning (or price-migration restart) during which statutory withdrawal is allowed (default `14`)                 |
 | `BILLING_INVOICE_PDF_STORAGE_PATH`         | PDF output path (default `/data/invoices`)                                                                                       |
 | `BILLING_SKIP_FILE_CACHE`                  | Skip PDF file cache when `true`                                                                                                  |
+
+### Automatic daily price recalculation
+
+Nightly refresh of opt-in service-plan catalog prices from the provider. See [Automatic daily price recalculation](../features/automatic-price-recalculation.md). Disabled entirely when `BILLING_PRICE_RECALC_ENABLED=false` (no coordinator registration).
+
+| Variable                        | Description                                         | Default         |
+| ------------------------------- | --------------------------------------------------- | --------------- |
+| `BILLING_PRICE_RECALC_ENABLED`  | Master kill switch for the nightly price-recalc job | `true`          |
+| `BILLING_PRICE_RECALC_CRON`     | BullMQ cron for the coordinator                     | `0 0 * * *`     |
+| `BILLING_PRICE_RECALC_TIMEZONE` | Timezone for cron and run-date (`YYYY-MM-DD`)       | `Europe/Berlin` |
+
+Per-plan opt-in remains `autoRecalculatePriceDaily` (default `false`) on the service plan API/UI.
 
 ### DATEV EXTF Export
 

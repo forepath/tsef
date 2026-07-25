@@ -237,4 +237,20 @@ export class SubscriptionsRepository {
 
     return await qb.getMany();
   }
+
+  async findEligibleForPriceRecalcByPlanId(planId: string): Promise<SubscriptionEntity[]> {
+    const qb = this.repository
+      .createQueryBuilder('subscription')
+      .innerJoin('users', 'user', 'user.id = subscription.user_id')
+      .leftJoinAndSelect('subscription.plan', 'plan')
+      .where('subscription.plan_id = :planId', { planId })
+      .andWhere('subscription.status IN (:...statuses)', {
+        statuses: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING_CANCEL],
+      })
+      .orderBy('subscription.createdAt', 'ASC');
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getMany();
+  }
 }

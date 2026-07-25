@@ -21,6 +21,7 @@ describe('PublicServicePlanOfferingsController', () => {
     billingIntervalType: BillingIntervalType.MONTH,
     billingIntervalValue: 1,
     billInAdvance: false,
+    autoRecalculatePriceDaily: false,
     orderingHighlights: [{ icon: 'check', text: 'Included' }],
     serviceType: { name: 'Agent Hosting' },
   } as ServicePlanEntity;
@@ -88,6 +89,7 @@ describe('PublicServicePlanOfferingsController', () => {
       billingIntervalType: BillingIntervalType.MONTH,
       billingIntervalValue: 1,
       billInAdvance: false,
+      autoRecalculatePriceDaily: false,
       totalPrice: 12,
       totalGross: 14.28,
       taxRate: 19,
