@@ -248,7 +248,7 @@ describe('DigitaloceanProvisioningService', () => {
     });
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ advanceTimers: true });
       mockedWaitForTcpPort.mockResolvedValue(undefined);
     });
 
@@ -500,6 +500,205 @@ describe('DigitaloceanProvisioningService', () => {
 
       await expect(service.changeServerType('98765', 's-2vcpu-2gb')).rejects.toThrow(BadRequestException);
       expect(mockedAxios.get).not.toHaveBeenCalled();
+    });
+
+    it('skips SSH wait after resize when droplet has no public IP', async () => {
+      let dropletStatus = 'off';
+      mockedAxios.get.mockImplementation(async (url: string) => {
+        if (url.includes('/actions/')) {
+          return { data: { action: { id: Number(url.split('/').pop()), status: 'completed' } } };
+        }
+
+        return {
+          data: {
+            droplet: {
+              id: 98765,
+              name: 'test-droplet',
+              status: dropletStatus,
+              networks: { v4: [] },
+              region: { slug: 'fra1', name: 'Frankfurt' },
+            },
+          },
+        };
+      });
+      mockedAxios.post.mockImplementation(async (_url: string, body?: { type?: string }) => {
+        if (body?.type === 'power_on') {
+          dropletStatus = 'active';
+        }
+
+        return { data: { action: { id: body?.type === 'resize' ? 9 : 2, status: 'in-progress' } } };
+      });
+
+      const service = new DigitaloceanProvisioningService();
+      const promise = service.changeServerType('98765', 's-2vcpu-2gb');
+      await jest.runAllTimersAsync();
+      await promise;
+
+      expect(mockedWaitForTcpPort).not.toHaveBeenCalled();
+    });
+
+    it('continues when SSH wait after resize times out', async () => {
+      mockDoApi({ initialStatus: 'off', afterResizeStatus: 'active' });
+      mockedWaitForTcpPort.mockRejectedValueOnce(new Error('Timed out waiting'));
+
+      const service = new DigitaloceanProvisioningService();
+      const promise = service.changeServerType('98765', 's-2vcpu-2gb');
+      await jest.runAllTimersAsync();
+      await expect(promise).resolves.toBeUndefined();
+    });
+
+    it('throws when resize does not return an action id', async () => {
+      mockedAxios.get.mockResolvedValue(dropletPayload('off'));
+      mockedAxios.post.mockResolvedValue({ data: { action: {} } });
+
+      const service = new DigitaloceanProvisioningService();
+
+      await expect(service.changeServerType('98765', 's-2vcpu-2gb')).rejects.toThrow(
+        'DigitalOcean resize did not return an action id',
+      );
+    });
+
+    it('formats DigitalOcean API errors when resize fails unexpectedly', async () => {
+      mockedAxios.get.mockResolvedValue(dropletPayload('off'));
+      const axiosError = Object.assign(new Error('Request failed'), {
+        isAxiosError: true,
+        response: { status: 422, data: { id: 'unprocessable', message: 'size unavailable' } },
+        message: 'Request failed',
+      });
+      mockedAxios.post.mockRejectedValue(axiosError);
+
+      const service = new DigitaloceanProvisioningService();
+
+      await expect(service.changeServerType('98765', 's-2vcpu-2gb')).rejects.toThrow('unprocessable: size unavailable');
+    });
+
+    it('skips guest SSH poweroff when droplet has no public IP', async () => {
+      let dropletStatus = 'active';
+      mockedAxios.get.mockImplementation(async (url: string) => {
+        if (url.includes('/actions/')) {
+          return { data: { action: { id: Number(url.split('/').pop()), status: 'completed' } } };
+        }
+
+        return {
+          data: {
+            droplet: {
+              id: 98765,
+              name: 'test-droplet',
+              status: dropletStatus,
+              networks: { v4: [] },
+              region: { slug: 'fra1', name: 'Frankfurt' },
+            },
+          },
+        };
+      });
+      mockedAxios.post.mockImplementation(async (_url: string, body?: { type?: string }) => {
+        if (body?.type === 'shutdown' || body?.type === 'power_off') {
+          dropletStatus = 'off';
+        }
+
+        if (body?.type === 'power_on' || body?.type === 'resize') {
+          if (body?.type === 'power_on') {
+            dropletStatus = 'active';
+          }
+
+          return { data: { action: { id: body?.type === 'resize' ? 9 : 2, status: 'in-progress' } } };
+        }
+
+        return { data: { action: { id: 1, status: 'in-progress' } } };
+      });
+
+      const sshExecutor = {
+        waitUntilReachable: jest.fn(),
+        exec: jest.fn(),
+      };
+      const service = new DigitaloceanProvisioningService(sshExecutor as never);
+      const promise = service.changeServerType('98765', 's-2vcpu-2gb', { sshPrivateKey: 'key' });
+      await jest.runAllTimersAsync();
+      await promise;
+
+      expect(sshExecutor.waitUntilReachable).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('error paths', () => {
+    it('throws when deprovision fails', async () => {
+      mockedAxios.delete.mockRejectedValueOnce({
+        message: 'delete failed',
+        response: { status: 500 },
+      });
+
+      const service = new DigitaloceanProvisioningService();
+
+      await expect(service.deprovisionServer('98765')).rejects.toThrow('Failed to deprovision server: delete failed');
+    });
+
+    it('throws not found when getServerInfo returns 404', async () => {
+      mockedAxios.get.mockRejectedValueOnce({
+        message: 'Not Found',
+        response: { status: 404 },
+      });
+
+      const service = new DigitaloceanProvisioningService();
+
+      await expect(service.getServerInfo('98765')).rejects.toThrow('Server 98765 not found');
+    });
+
+    it('throws when getServerInfo returns an invalid payload', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: {} });
+
+      const service = new DigitaloceanProvisioningService();
+
+      await expect(service.getServerInfo('98765')).rejects.toThrow('Invalid response from DigitalOcean API');
+    });
+
+    it('throws when power action fails', async () => {
+      mockedAxios.post.mockRejectedValueOnce({ message: 'power failed' });
+
+      const service = new DigitaloceanProvisioningService();
+
+      await expect(service.startServer('98765')).rejects.toThrow('Failed to start server: power failed');
+    });
+
+    it('throws when power action token is missing', async () => {
+      delete process.env.DIGITALOCEAN_API_TOKEN;
+      const service = new DigitaloceanProvisioningService();
+
+      await expect(service.stopServer('98765')).rejects.toThrow(
+        'DIGITALOCEAN_API_TOKEN environment variable is not set',
+      );
+    });
+
+    it('formats message-only DigitalOcean API errors on resize failure', async () => {
+      mockedAxios.get.mockResolvedValue({
+        data: {
+          droplet: {
+            id: 98765,
+            name: 'test-droplet',
+            status: 'off',
+            networks: { v4: [{ ip_address: '5.6.7.8', type: 'public' }] },
+            region: { slug: 'fra1', name: 'Frankfurt' },
+          },
+        },
+      });
+      mockedAxios.post.mockRejectedValue({
+        message: 'Request failed',
+        response: { status: 400, data: { message: 'size is not available' } },
+      });
+
+      const service = new DigitaloceanProvisioningService();
+
+      await expect(service.changeServerType('98765', 's-2vcpu-2gb')).rejects.toThrow('size is not available');
+    });
+
+    it('throws generic getServerInfo failures', async () => {
+      mockedAxios.get.mockRejectedValueOnce({
+        message: 'network down',
+        response: { status: 503 },
+      });
+
+      const service = new DigitaloceanProvisioningService();
+
+      await expect(service.getServerInfo('98765')).rejects.toThrow('Failed to get server info: network down');
     });
   });
 });

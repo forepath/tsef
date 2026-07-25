@@ -455,5 +455,61 @@ describe('HetznerProvisioningService', () => {
         'Failed to change server type: invalid_server_type: Server type is not available',
       );
     });
+
+    it('skips SSH wait after type change when server has no public IP', async () => {
+      const noIpPayload = (status: string) => ({
+        data: {
+          server: {
+            id: 12345,
+            name: 'test-server',
+            status,
+            public_net: {},
+          },
+        },
+      });
+      mockedAxios.get
+        .mockResolvedValueOnce(noIpPayload('off'))
+        .mockResolvedValueOnce(noIpPayload('running'))
+        .mockResolvedValueOnce(noIpPayload('running'));
+      mockedAxios.post.mockResolvedValueOnce({ data: {} });
+
+      const service = new HetznerProvisioningService();
+      const promise = service.changeServerType('12345', 'cx21');
+      await jest.runAllTimersAsync();
+      await promise;
+
+      expect(mockedWaitForTcpPort).not.toHaveBeenCalled();
+    });
+
+    it('continues when SSH wait after type change times out', async () => {
+      mockedAxios.get
+        .mockResolvedValueOnce(serverPayload('off'))
+        .mockResolvedValueOnce(serverPayload('running'))
+        .mockResolvedValueOnce(serverPayload('running'));
+      mockedAxios.post.mockResolvedValueOnce({ data: {} });
+      mockedWaitForTcpPort.mockRejectedValueOnce(new Error('Timed out waiting'));
+
+      const service = new HetznerProvisioningService();
+      const promise = service.changeServerType('12345', 'cx21');
+      await jest.runAllTimersAsync();
+      await expect(promise).resolves.toBeUndefined();
+    });
+
+    it('formats message-only Hetzner API errors', async () => {
+      mockedAxios.get.mockResolvedValueOnce(serverPayload('off'));
+      mockedAxios.post.mockRejectedValueOnce({
+        message: 'Request failed',
+        response: {
+          status: 500,
+          data: { error: { message: 'temporary outage' } },
+        },
+      });
+
+      const service = new HetznerProvisioningService();
+
+      await expect(service.changeServerType('12345', 'cx21')).rejects.toThrow(
+        'Failed to change server type: temporary outage',
+      );
+    });
   });
 });

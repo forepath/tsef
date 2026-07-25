@@ -164,6 +164,37 @@ describe('SubscriptionConfigChangeService', () => {
     expect(subscriptionsRepository.compareAndSetStatus).not.toHaveBeenCalled();
   });
 
+  it('getEligibility rejects when initial server provisioning failed', async () => {
+    subscriptionItemsRepository.findBySubscription.mockResolvedValue([
+      {
+        id: 'item-1',
+        provisioningStatus: 'failed',
+        configSnapshot: { serverType: 'cx11', billingBasePrice: 5 },
+        serviceType: { provider: 'hetzner', providerDefaults: {} },
+      },
+    ]);
+
+    const eligibility = await service.getEligibility('sub-1', 'user-1');
+
+    expect(eligibility.canRequestChange).toBe(false);
+    expect(eligibility.reason).toBe('Subscription is still being provisioned');
+  });
+
+  it('getEligibility allows non-server providers regardless of item provisioningStatus', async () => {
+    subscriptionItemsRepository.findBySubscription.mockResolvedValue([
+      {
+        id: 'item-1',
+        provisioningStatus: 'pending',
+        configSnapshot: {},
+        serviceType: { provider: 'manual', providerDefaults: {} },
+      },
+    ]);
+
+    const eligibility = await service.getEligibility('sub-1', 'user-1');
+
+    expect(eligibility.canRequestChange).toBe(true);
+  });
+
   it('rejects requests for subscriptions that are not active', async () => {
     subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
       id: 'sub-1',
@@ -235,6 +266,126 @@ describe('SubscriptionConfigChangeService', () => {
     const error = await service.preview('sub-1', 'user-1', { removeAddonIds: ['addon-1'] }).catch((caught) => caught);
 
     expect(extractErrorCode(error)).toBe('CONFIG_CHANGE_ADDON_INVALID');
+  });
+
+  it('previews adding an addon and includes addon notes in the disclaimer', async () => {
+    addonsRepository.findByIds.mockResolvedValue([
+      {
+        id: 'addon-1',
+        key: 'backup',
+        name: 'Backup',
+        isActive: true,
+        compatibleProviders: ['hetzner'],
+        basePrice: '2',
+        priceIntervalType: BillingIntervalType.MONTH,
+        priceIntervalValue: 1,
+      },
+    ]);
+
+    const preview = await service.preview('sub-1', 'user-1', { addAddonIds: ['addon-1'] });
+
+    expect(preview.amounts.newPeriodNet).toBeGreaterThan(preview.amounts.currentPeriodNet);
+    expect(preview.disclaimer.notes.some((note) => note.includes('addon(s) will be provisioned'))).toBe(true);
+  });
+
+  it('previews removing an active addon', async () => {
+    subscriptionAddonsRepository.findBySubscriptionId.mockResolvedValue([
+      {
+        id: 'sub-addon-1',
+        addonId: 'addon-1',
+        status: 'active',
+        unitPriceSnapshot: '2',
+      },
+    ]);
+
+    const preview = await service.preview('sub-1', 'user-1', { removeAddonIds: ['addon-1'] });
+
+    expect(preview.amounts.newPeriodNet).toBeLessThan(preview.amounts.currentPeriodNet);
+    expect(preview.disclaimer.notes.some((note) => note.includes('addon(s) will be removed'))).toBe(true);
+  });
+
+  it('rejects adding an addon that is already active', async () => {
+    subscriptionAddonsRepository.findBySubscriptionId.mockResolvedValue([
+      { id: 'sub-addon-1', addonId: 'addon-1', status: 'active', unitPriceSnapshot: '2' },
+    ]);
+
+    const error = await service.preview('sub-1', 'user-1', { addAddonIds: ['addon-1'] }).catch((caught) => caught);
+
+    expect(extractErrorCode(error)).toBe('CONFIG_CHANGE_ADDON_INVALID');
+  });
+
+  it('rejects addons when the provider does not support them', async () => {
+    addonService.providerSupportsAddons.mockReturnValue(false);
+
+    const error = await service.preview('sub-1', 'user-1', { addAddonIds: ['addon-1'] }).catch((caught) => caught);
+
+    expect(extractErrorCode(error)).toBe('CONFIG_CHANGE_ADDON_INVALID');
+  });
+
+  it('rejects inactive or incompatible addons', async () => {
+    addonsRepository.findByIds.mockResolvedValueOnce([
+      {
+        id: 'addon-1',
+        key: 'backup',
+        isActive: false,
+        compatibleProviders: ['hetzner'],
+        basePrice: '2',
+        priceIntervalType: BillingIntervalType.MONTH,
+        priceIntervalValue: 1,
+      },
+    ]);
+
+    const inactive = await service.preview('sub-1', 'user-1', { addAddonIds: ['addon-1'] }).catch((caught) => caught);
+
+    expect(extractErrorCode(inactive)).toBe('CONFIG_CHANGE_ADDON_INVALID');
+
+    addonsRepository.findByIds.mockResolvedValueOnce([
+      {
+        id: 'addon-1',
+        key: 'backup',
+        isActive: true,
+        compatibleProviders: ['digital-ocean'],
+        basePrice: '2',
+        priceIntervalType: BillingIntervalType.MONTH,
+        priceIntervalValue: 1,
+      },
+    ]);
+
+    const incompatible = await service
+      .preview('sub-1', 'user-1', { addAddonIds: ['addon-1'] })
+      .catch((caught) => caught);
+
+    expect(extractErrorCode(incompatible)).toBe('CONFIG_CHANGE_ADDON_INVALID');
+  });
+
+  it('submits an addon addition with requested payload fields', async () => {
+    addonsRepository.findByIds.mockResolvedValue([
+      {
+        id: 'addon-1',
+        key: 'backup',
+        name: 'Backup',
+        isActive: true,
+        compatibleProviders: [],
+        basePrice: '2',
+        priceIntervalType: BillingIntervalType.MONTH,
+        priceIntervalValue: 1,
+      },
+    ]);
+
+    const response = await service.submit('sub-1', 'user-1', {
+      addAddonIds: ['addon-1'],
+      addonConfigs: { 'addon-1': { TOKEN: 'x' } },
+    });
+
+    expect(response.id).toBe('change-1');
+    expect(configChangesRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestedPayload: expect.objectContaining({
+          addAddonIds: ['addon-1'],
+          addonConfigs: { 'addon-1': { TOKEN: 'x' } },
+        }),
+      }),
+    );
   });
 
   it('previews an arrear upgrade as elapsed settlement at the old price', async () => {

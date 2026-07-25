@@ -1185,6 +1185,38 @@ describe('SubscriptionService', () => {
       jest.useRealTimers();
     });
 
+    it('skips SSH readiness when the provisioned server has no public IP', async () => {
+      (itemsRepository.findByIdWithRelations as jest.Mock).mockResolvedValue({
+        id: 'item-1',
+        serviceTypeId: 'stype-1',
+        provisioningStatus: 'pending',
+        providerReference: undefined,
+        configSnapshot: {
+          ...controllerProvisioningDefaults,
+          region: 'fsn1',
+          serverType: 'cx23',
+        },
+        subscription: {
+          id: 'sub-1',
+          userId: 'user-1',
+          planId: 'plan-1',
+          status: SubscriptionStatus.ACTIVE,
+          autoBackorder: false,
+        },
+        serviceType: { id: 'stype-1', provider: 'hetzner' },
+      });
+      (provisioningService.provision as jest.Mock).mockResolvedValue({ serverId: 'srv-1' });
+      provisioningService.getServerInfo.mockResolvedValue({ publicIp: undefined });
+      provisioningService.ensurePublicIpForDns.mockResolvedValue(undefined);
+
+      await service.provisionSubscriptionItem('item-1');
+
+      expect(sshExecutor.waitUntilReachable).not.toHaveBeenCalled();
+      expect(sshExecutor.exec).not.toHaveBeenCalled();
+      expect(itemsRepository.updateProvisioningStatus).toHaveBeenCalledWith('item-1', 'active');
+      expect(cloudflareDnsService.createARecord).not.toHaveBeenCalled();
+    });
+
     it('skips SSH readiness for non-server providers', async () => {
       (itemsRepository.findByIdWithRelations as jest.Mock).mockResolvedValue({
         id: 'item-1',
