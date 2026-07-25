@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-25T14:34:53.478Z",
+  "generatedAt": "2026-07-25T15:21:44.141Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -48834,6 +48834,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-period-charge.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/ssh-executor.service.ts",
       "type": "injects"
     },
     {
