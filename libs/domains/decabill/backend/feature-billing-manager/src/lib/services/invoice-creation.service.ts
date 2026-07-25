@@ -8,9 +8,11 @@ import type { SubscriptionEntity } from '../entities/subscription.entity';
 import { InvoicesRepository } from '../repositories/invoices.repository';
 import { OpenPositionsRepository } from '../repositories/open-positions.repository';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
+import { SubscriptionAddonsRepository } from '../repositories/subscription-addons.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { UsageRecordsRepository } from '../repositories/usage-records.repository';
+import { calculateProratedAmount } from '../utils/billing-proration.util';
 import { groupOpenPositionsBySubscription } from '../utils/open-position-grouping.util';
 import { resolveSubscriptionBillingBaseOverride } from '../utils/server-type-billing.utils';
 import { resolvePlanTaxCategory } from '../utils/plan-tax.utils';
@@ -22,6 +24,7 @@ import { InvoiceTaxContextService } from './invoice-tax-context.service';
 import { PricingService } from './pricing.service';
 import { PromotionApplicationService, type PromotionRedemptionUpdate } from './promotion-application.service';
 import { ProviderServerTypesService } from './provider-server-types.service';
+import { BillingScheduleService } from './billing-schedule.service';
 import { SubscriptionChargePeriodService, type SubscriptionChargePeriod } from './subscription-charge-period.service';
 import type { InvoicePromotionApplicationDraft } from '../dto/promotion.dto';
 
@@ -52,6 +55,8 @@ export class InvoiceCreationService {
     private readonly subscriptionChargePeriodService: SubscriptionChargePeriodService,
     private readonly taxCalculationService: TaxCalculationService,
     private readonly invoiceTaxContextService: InvoiceTaxContextService,
+    private readonly subscriptionAddonsRepository: SubscriptionAddonsRepository,
+    private readonly billingScheduleService: BillingScheduleService,
   ) {}
 
   async createInvoice(subscriptionId: string, userId: string, description?: string, options?: InvoiceCreationOptions) {
@@ -103,15 +108,45 @@ export class InvoiceCreationService {
       unitPriceNet: roundedTotal,
       taxCategory,
     };
+    const billableAddons = await this.subscriptionAddonsRepository.findBillableBySubscriptionId(subscriptionId);
+    const addonChargeLines = billableAddons
+      .map((row) => {
+        const fullAddonPrice = Number(row.unitPriceSnapshot ?? 0);
+
+        if (!Number.isFinite(fullAddonPrice) || fullAddonPrice <= 0) {
+          return null;
+        }
+
+        const prorated = calculateProratedAmount(
+          plan,
+          fullAddonPrice,
+          chargePeriod.periodStart,
+          chargePeriod.periodEnd,
+          this.billingScheduleService,
+        );
+
+        if (prorated < MIN_BILLABLE_AMOUNT) {
+          return null;
+        }
+
+        return {
+          description: `Addon: ${row.addonNameSnapshot}`,
+          quantity: 1,
+          unitPriceNet: Math.round(prorated * 100) / 100,
+          taxCategory,
+        };
+      })
+      .filter((line): line is NonNullable<typeof line> => line != null);
+
     const promoResult = await this.promotionApplicationService.calculatePromotions({
       userId,
       subscriptionId,
-      chargeLines: [chargeLine],
+      chargeLines: [chargeLine, ...addonChargeLines],
       defaultTaxCategory: taxCategory,
       chargePeriod: { start: chargePeriod.periodStart, end: chargePeriod.periodEnd },
       subscriptionChargeNet: Math.round(chargePeriod.baseAmount * 100) / 100,
     });
-    const lineInputs = [...promoResult.discountLines, chargeLine];
+    const lineInputs = [...promoResult.discountLines, chargeLine, ...addonChargeLines];
     const taxContext = await this.invoiceTaxContextService.resolveForUser(userId);
     const totals = this.taxCalculationService.computeLines(lineInputs, {
       taxTreatment: taxContext.treatment,
@@ -184,22 +219,53 @@ export class InvoiceCreationService {
       const subscription = await this.subscriptionsRepository.findByIdOrThrow(group.subscriptionId);
       const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);
       const taxCategory = resolvePlanTaxCategory(plan);
+      const billableAddons = await this.subscriptionAddonsRepository.findBillableBySubscriptionId(group.subscriptionId);
+      const addonChargeLines = billableAddons
+        .map((row) => {
+          const fullAddonPrice = Number(row.unitPriceSnapshot ?? 0);
+
+          if (!Number.isFinite(fullAddonPrice) || fullAddonPrice <= 0) {
+            return null;
+          }
+
+          const prorated = calculateProratedAmount(
+            plan,
+            fullAddonPrice,
+            chargePeriod.periodStart,
+            chargePeriod.periodEnd,
+            this.billingScheduleService,
+          );
+
+          if (prorated < MIN_BILLABLE_AMOUNT) {
+            return null;
+          }
+
+          return {
+            description: `Addon: ${row.addonNameSnapshot}`,
+            quantity: 1,
+            unitPriceNet: Math.round(prorated * 100) / 100,
+            taxCategory,
+          };
+        })
+        .filter((line): line is NonNullable<typeof line> => line != null);
+      const addonTotal = addonChargeLines.reduce((sum, line) => sum + line.unitPriceNet, 0);
+      const planAmount = Math.max(0, Math.round((amount - addonTotal) * 100) / 100);
       const chargeLine = {
         description: group.representative.description ?? 'Subscription',
         quantity: 1,
-        unitPriceNet: Math.round(amount * 100) / 100,
+        unitPriceNet: planAmount,
         taxCategory,
       };
       const promoResult = await this.promotionApplicationService.calculatePromotions({
         userId,
         subscriptionId: group.subscriptionId,
-        chargeLines: [chargeLine],
+        chargeLines: [chargeLine, ...addonChargeLines],
         defaultTaxCategory: taxCategory,
         chargePeriod: { start: chargePeriod.periodStart, end: chargePeriod.periodEnd },
         subscriptionChargeNet: Math.round(chargePeriod.baseAmount * 100) / 100,
       });
 
-      lineInputs.push(...promoResult.discountLines, chargeLine);
+      lineInputs.push(...promoResult.discountLines, chargeLine, ...addonChargeLines);
       promotionApplications.push(...promoResult.applications);
       redemptionUpdates.push(...promoResult.redemptionUpdates);
     }
@@ -294,6 +360,14 @@ export class InvoiceCreationService {
 
     const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);
     const pricing = await this.resolveSubscriptionPricing(position.subscriptionId, plan);
+    const billableAddons = await this.subscriptionAddonsRepository.findBillableBySubscriptionId(
+      position.subscriptionId,
+    );
+    const addonsFullPeriod = billableAddons.reduce((sum, row) => {
+      const price = Number(row.unitPriceSnapshot ?? 0);
+
+      return sum + (Number.isFinite(price) && price > 0 ? price : 0);
+    }, 0);
     const usageCost =
       plan.billInAdvance === true
         ? 0
@@ -303,7 +377,7 @@ export class InvoiceCreationService {
     const chargePeriod = await this.subscriptionChargePeriodService.resolveChargePeriod(
       subscription,
       plan,
-      pricing.totalPrice,
+      pricing.totalPrice + addonsFullPeriod,
       position.billUntil,
     );
 

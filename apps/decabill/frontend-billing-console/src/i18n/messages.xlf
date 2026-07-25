@@ -887,6 +887,66 @@
       <trans-unit id="featureBilling-triggeredBySystem" datatype="html">
         <source>System</source>
         </trans-unit>
+      <trans-unit id="featureAddons-title" datatype="html"><source>Addons</source></trans-unit>
+      <trans-unit id="featureAddons-add" datatype="html"><source>Add addon</source></trans-unit>
+      <trans-unit id="featureAddons-searchPlaceholder" datatype="html"><source>Search addons</source></trans-unit>
+      <trans-unit id="featureAddons-loading" datatype="html"><source>Loading...</source></trans-unit>
+      <trans-unit id="featureAddons-empty" datatype="html"><source>No addons.</source></trans-unit>
+      <trans-unit id="featureAddons-edit" datatype="html"><source>Edit addon</source></trans-unit>
+      <trans-unit id="featureAddons-delete" datatype="html"><source>Delete addon</source></trans-unit>
+      <trans-unit id="featureAddons-createTitle" datatype="html"><source>Add addon</source></trans-unit>
+      <trans-unit id="featureAddons-editTitle" datatype="html"><source>Edit addon</source></trans-unit>
+      <trans-unit id="featureAddons-key" datatype="html"><source>Key</source></trans-unit>
+      <trans-unit id="featureAddons-name" datatype="html"><source>Name</source></trans-unit>
+      <trans-unit id="featureAddons-description" datatype="html"><source>Description</source></trans-unit>
+      <trans-unit id="featureAddons-implementationType" datatype="html"><source>Implementation type</source></trans-unit>
+      <trans-unit id="featureAddons-compatibleProviders" datatype="html"><source>Compatible providers</source></trans-unit>
+      <trans-unit id="featureAddons-compatibleProvidersHelp" datatype="html"><source>Hold Ctrl/Cmd to select multiple. Leave empty for all addon-capable providers.</source></trans-unit>
+      <trans-unit id="featureAddons-moduleKey" datatype="html"><source>Module key</source></trans-unit>
+      <trans-unit id="featureAddons-scriptTemplate" datatype="html"><source>Cloud-init script template</source></trans-unit>
+      <trans-unit id="featureAddons-basePrice" datatype="html"><source>Base price</source></trans-unit>
+      <trans-unit id="featureAddons-priceIntervalType" datatype="html"><source>Price interval</source></trans-unit>
+      <trans-unit id="featureAddons-priceIntervalValue" datatype="html"><source>Interval value</source></trans-unit>
+      <trans-unit id="featureAddons-active" datatype="html"><source>Active</source></trans-unit>
+      <trans-unit id="featureAddons-create" datatype="html"><source>Create</source></trans-unit>
+      <trans-unit id="featureAddons-save" datatype="html"><source>Save</source></trans-unit>
+      <trans-unit id="featureAddons-deleteTitle" datatype="html"><source>Delete addon</source></trans-unit>
+      <trans-unit id="featureAddons-deleteConfirm" datatype="html"><source>Delete addon &quot;<x id="INTERPOLATION" equiv-text="{{ addonToDelete.name }}"/>&quot;?</source></trans-unit>
+      <trans-unit id="featureAddons-cannotUndo" datatype="html"><source>This action cannot be undone.</source></trans-unit>
+      <trans-unit id="featureAddons-module" datatype="html"><source>Module</source></trans-unit>
+      <trans-unit id="featureAddons-cloudInitScript" datatype="html"><source>Cloud-init script</source></trans-unit>
+      <trans-unit id="featureAddons-free" datatype="html"><source>Free</source></trans-unit>
+      <trans-unit id="featureAddons-moduleDefaults" datatype="html"><source>Module defaults</source></trans-unit>
+      <trans-unit id="featureAddons-moduleDefaultsHelp" datatype="html"><source>Defaults for module environment variables. Schema is defined by the registered module; leave blank when unused.</source></trans-unit>
+      <trans-unit id="featureAddons-randomDefaultHint" datatype="html"><source>Uses a random default at provision time.</source></trans-unit>
+      <trans-unit id="featureAddons-scriptEnvHint" datatype="html"><source>Use {{env.KEY}} placeholders in the script for configured environment variables.</source></trans-unit>
+      <trans-unit id="featureAddons-envVariables" datatype="html"><source>Environment variables</source></trans-unit>
+      <trans-unit id="featureAddons-addEnvVar" datatype="html"><source>Add line</source></trans-unit>
+      <trans-unit id="featureAddons-envKey" datatype="html"><source>Key</source></trans-unit>
+      <trans-unit id="featureAddons-envLabel" datatype="html"><source>Label</source></trans-unit>
+      <trans-unit id="featureAddons-envDescription" datatype="html"><source>Description</source></trans-unit>
+      <trans-unit id="featureAddons-envRandom" datatype="html"><source>Random</source></trans-unit>
+      <trans-unit id="featureAddons-envDefault" datatype="html"><source>Default</source></trans-unit>
+      <trans-unit id="featureAddons-envRandomLength" datatype="html"><source>Length</source></trans-unit>
+      <trans-unit id="featureAddons-envRandomSpecial" datatype="html"><source>Special chars</source></trans-unit>
+      <trans-unit id="featureAddons-envOrder" datatype="html"><source>Order</source></trans-unit>
+      <trans-unit id="featureAddons-configFieldCount" datatype="html">
+        <source><x id="INTERPOLATION" equiv-text="{{ configFieldCount(addon) }}"/> config fields</source>
+      </trans-unit>
+      <trans-unit id="featureAddons-allProviders" datatype="html"><source>All providers</source></trans-unit>
+      <trans-unit id="featureAddons-addonActionsAria" datatype="html"><source>Addon actions</source></trans-unit>
+      <trans-unit id="featureContainer-addonsPage" datatype="html"><source>Addons</source></trans-unit>
+      <trans-unit id="featureContainer-addonsTitle" datatype="html"><source>Addons</source></trans-unit>
+      <trans-unit id="featureContainer-addons" datatype="html"><source>Addons</source></trans-unit>
+      <trans-unit id="featureServicePlans-addons" datatype="html"><source>Customer-selectable addons</source></trans-unit>
+      <trans-unit id="featureServicePlans-addonsHelp" datatype="html"><source>Choose which addons customers may add when ordering this plan.</source></trans-unit>
+      <trans-unit id="featureSubscriptions-loadingAddons" datatype="html"><source>Loading addons…</source></trans-unit>
+      <trans-unit id="featureSubscriptions-addons" datatype="html"><source>Addons</source></trans-unit>
+      <trans-unit id="featureSubscriptions-addonConfigFields" datatype="html"><source>Configuration for this addon</source></trans-unit>
+      <trans-unit id="featureSubscriptions-addonConfigSection" datatype="html"><source>Addon configuration</source></trans-unit>
+      <trans-unit id="featureSubscriptions-addonConfigCardTitle" datatype="html"><source>Addon: <x id="addonName" equiv-text="addonName"/></source></trans-unit>
+      <trans-unit id="featureSubscriptions-addonsTotal" datatype="html"><source>Addons total</source></trans-unit>
+      <trans-unit id="featureSubscriptions-grandTotal" datatype="html"><source>Plan and addons</source></trans-unit>
       <trans-unit id="featureCloudInitConfigs-title" datatype="html">
         <source>CloudInit Configs</source>
         </trans-unit>
@@ -2504,6 +2564,9 @@
         </trans-unit>
       <trans-unit id="featureSubscriptions-orderStepBack" datatype="html">
         <source> Back </source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-orderStepPlanAddons" datatype="html">
+        <source>Plan &amp; addons</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-orderStepNext" datatype="html">
         <source> Next </source>

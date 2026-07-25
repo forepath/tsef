@@ -10,10 +10,15 @@ This page covers **Decabill billing manager** registries only.
 
 ## Registries
 
-| Env var                             | Criticality | Registers                                              |
-| ----------------------------------- | ----------- | ------------------------------------------------------ |
-| `DYNAMIC_PAYMENT_PROCESSORS`        | critical    | Payment processor implementations                      |
-| `DYNAMIC_BILLING_PROVIDER_METADATA` | optional    | Admin UI provider metadata (`providerMetadata` export) |
+| Env var                             | Criticality | Registers                                                                   |
+| ----------------------------------- | ----------- | --------------------------------------------------------------------------- |
+| `DYNAMIC_PAYMENT_PROCESSORS`        | critical    | Payment processor implementations                                           |
+| `DYNAMIC_BILLING_PROVIDER_METADATA` | optional    | Admin UI provider metadata (`providerMetadata` export)                      |
+| `DYNAMIC_ADDON_MODULES`             | optional    | Addon lifecycle modules (`provision` / `teardown`, optional `configFields`) |
+
+Provider metadata should set `supportsAddons: true` only when the provider supports addon hook points. When omitted, Decabill treats `supportsAddons` as **false**. See [Addons](./addons.md).
+
+Addon modules may declare `configFields` (CloudInit-style env metadata). Decabill persists that list onto the catalog addon’s `configSchema` at create/update; admins set encrypted defaults only. At order time, customer `addonConfigs` merge with defaults and random fills into `configSnapshot` for `provision` / `teardown`.
 
 Shared tuning:
 

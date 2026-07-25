@@ -16,7 +16,18 @@ export class ProviderRegistryService {
    * Register a provider. Overwrites if id already exists.
    */
   register(detail: ProviderDetailDto): void {
-    this.providers.set(detail.id, { ...detail });
+    this.providers.set(detail.id, {
+      ...detail,
+      // Fail closed: dynamic metadata plugins must opt in explicitly.
+      supportsAddons: detail.supportsAddons === true,
+    });
+  }
+
+  /**
+   * Get a single provider detail by id, if registered.
+   */
+  getProvider(id: string): ProviderDetailDto | undefined {
+    return this.providers.get(id);
   }
 
   /**

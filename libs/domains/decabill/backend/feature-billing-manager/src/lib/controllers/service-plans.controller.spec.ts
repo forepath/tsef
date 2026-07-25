@@ -8,8 +8,10 @@ import { TaxCategory } from '../constants/tax-category.constants';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
 import { ServiceTypesRepository } from '../repositories/service-types.repository';
 import { ProviderRegistryService } from '../services/provider-registry.service';
+import { AddonService } from '../services/addon.service';
 import { CloudInitConfigService } from '../services/cloud-init-config.service';
 import { WithdrawalPolicyService } from '../services/withdrawal-policy.service';
+import { AddonsRepository } from '../repositories/addons.repository';
 
 import { ServicePlansController } from './service-plans.controller';
 
@@ -60,6 +62,13 @@ describe('ServicePlansController', () => {
     buildOrderProvisioningOptions: jest.fn().mockResolvedValue([]),
     getOrderFieldsForPlan: jest.fn().mockResolvedValue([]),
   };
+  const addonServiceStub = {
+    assertAllowedAddonIdsForPlan: jest.fn().mockResolvedValue(undefined),
+    providerSupportsAddons: jest.fn().mockReturnValue(true),
+  };
+  const addonsRepositoryStub = {
+    findByIds: jest.fn().mockResolvedValue([]),
+  };
 
   beforeEach(() => {
     serviceTypesRepoStub.findByIdOrThrow.mockReset();
@@ -73,6 +82,12 @@ describe('ServicePlansController', () => {
     providerRegistryStub.getProviders.mockReturnValue([]);
     cloudInitConfigServiceStub.assertActiveConfigForPlanDefaults.mockReset();
     cloudInitConfigServiceStub.assertActiveConfigForPlanDefaults.mockResolvedValue(undefined);
+    addonServiceStub.assertAllowedAddonIdsForPlan.mockReset();
+    addonServiceStub.assertAllowedAddonIdsForPlan.mockResolvedValue(undefined);
+    addonServiceStub.providerSupportsAddons.mockReset();
+    addonServiceStub.providerSupportsAddons.mockReturnValue(true);
+    addonsRepositoryStub.findByIds.mockReset();
+    addonsRepositoryStub.findByIds.mockResolvedValue([]);
   });
 
   function setupRepositoryMock(mock: Partial<jest.Mocked<ServicePlansRepository>>) {
@@ -83,6 +98,8 @@ describe('ServicePlansController', () => {
         { provide: ServiceTypesRepository, useValue: serviceTypesRepoStub },
         { provide: ProviderRegistryService, useValue: providerRegistryStub },
         { provide: CloudInitConfigService, useValue: cloudInitConfigServiceStub },
+        { provide: AddonService, useValue: addonServiceStub },
+        { provide: AddonsRepository, useValue: addonsRepositoryStub },
         { provide: WithdrawalPolicyService, useValue: new WithdrawalPolicyService() },
       ],
     }).compile();

@@ -29,4 +29,10 @@ export class ProviderDetailDto {
    * Platform env vars that can be overridden per service type (e.g. HETZNER_API_TOKEN).
    */
   envDefaultFields?: ProviderEnvDefaultField[];
+
+  /**
+   * When true, plans for this provider may offer customer-selectable addons.
+   * Omitted / false for providers that lack provision/teardown or cloud-init append hooks.
+   */
+  supportsAddons?: boolean;
 }

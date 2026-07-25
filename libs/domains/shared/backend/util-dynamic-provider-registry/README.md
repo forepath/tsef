@@ -31,18 +31,19 @@ Plugin packages should declare Nest/host dependencies as **peerDependencies** so
 
 ## Environment variables
 
-| Variable                            | Criticality | Purpose                                                       |
-| ----------------------------------- | ----------- | ------------------------------------------------------------- |
-| `DYNAMIC_PROVISIONING_PROVIDERS`    | critical    | Extra provisioning providers                                  |
-| `DYNAMIC_CONTEXT_IMPORT_PROVIDERS`  | optional    | Extra context import providers                                |
-| `DYNAMIC_AGENT_PROVIDERS`           | optional    | Extra agent backends                                          |
-| `DYNAMIC_PIPELINE_PROVIDERS`        | optional    | Extra CI/CD providers                                         |
-| `DYNAMIC_CHAT_FILTERS`              | optional    | Extra chat filters                                            |
-| `DYNAMIC_PAYMENT_PROCESSORS`        | critical    | Extra payment processors                                      |
-| `DYNAMIC_BILLING_PROVIDER_METADATA` | optional    | Extra billing UI provider metadata                            |
-| `DYNAMIC_PROVIDERS_FAIL_FAST`       | —           | When `true`, critical registries abort startup on load errors |
-| `DYNAMIC_PROVIDER_PLUGIN_PATH`      | —           | Absolute plugin root for post-build loading                   |
-| `DYNAMIC_PROVIDER_PLUGIN_INSTALL`   | —           | Comma-separated `npm install` targets at startup              |
+| Variable                            | Criticality | Purpose                                                                             |
+| ----------------------------------- | ----------- | ----------------------------------------------------------------------------------- |
+| `DYNAMIC_PROVISIONING_PROVIDERS`    | critical    | Extra provisioning providers                                                        |
+| `DYNAMIC_CONTEXT_IMPORT_PROVIDERS`  | optional    | Extra context import providers                                                      |
+| `DYNAMIC_AGENT_PROVIDERS`           | optional    | Extra agent backends                                                                |
+| `DYNAMIC_PIPELINE_PROVIDERS`        | optional    | Extra CI/CD providers                                                               |
+| `DYNAMIC_CHAT_FILTERS`              | optional    | Extra chat filters                                                                  |
+| `DYNAMIC_PAYMENT_PROCESSORS`        | critical    | Extra payment processors                                                            |
+| `DYNAMIC_BILLING_PROVIDER_METADATA` | optional    | Extra billing UI provider metadata                                                  |
+| `DYNAMIC_ADDON_MODULES`             | optional    | Billing addon lifecycle modules (`provision` / `teardown`, optional `configFields`) |
+| `DYNAMIC_PROVIDERS_FAIL_FAST`       | —           | When `true`, critical registries abort startup on load errors                       |
+| `DYNAMIC_PROVIDER_PLUGIN_PATH`      | —           | Absolute plugin root for post-build loading                                         |
+| `DYNAMIC_PROVIDER_PLUGIN_INSTALL`   | —           | Comma-separated `npm install` targets at startup                                    |
 
 ### Provider config format
 

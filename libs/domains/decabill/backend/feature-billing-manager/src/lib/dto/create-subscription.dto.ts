@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, IsObject, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @IsNotEmpty({ message: 'Plan ID is required' })
@@ -12,6 +12,18 @@ export class CreateSubscriptionDto {
   @IsOptional()
   @IsObject({ message: 'Requested config must be an object' })
   requestedConfig?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsArray({ message: 'Addon IDs must be an array' })
+  @IsUUID('4', { each: true, message: 'Each addon ID must be a UUID' })
+  addonIds?: string[];
+
+  /**
+   * Per-addon customer config keyed by addon UUID (merged with admin defaults / random at order).
+   */
+  @IsOptional()
+  @IsObject({ message: 'Addon configs must be an object' })
+  addonConfigs?: Record<string, Record<string, string>>;
 
   @IsOptional()
   @IsObject({ message: 'Preferred alternatives must be an object' })

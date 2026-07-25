@@ -331,6 +331,13 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
         label: $localize`:@@featureContainer-cloudInitConfigs:Configs`,
       },
       {
+        routerLink: ['/administration/addons'],
+        activePaths: ['/administration/addons'],
+        icon: 'bi-puzzle',
+        title: $localize`:@@featureContainer-addonsTitle:Addons`,
+        label: $localize`:@@featureContainer-addons:Addons`,
+      },
+      {
         routerLink: ['/administration/service-plans'],
         activePaths: ['/administration/service-plans'],
         icon: 'bi-cart',

@@ -78,6 +78,7 @@ import { PricingController } from './controllers/pricing.controller';
 import { PublicServicePlanOfferingsController } from './controllers/public-service-plan-offerings.controller';
 import { PublicWithdrawalController } from './controllers/public-withdrawal.controller';
 import { ServicePlansController } from './controllers/service-plans.controller';
+import { AddonsController } from './controllers/addons.controller';
 import { CloudInitConfigsController } from './controllers/cloud-init-configs.controller';
 import { ServiceTypesController } from './controllers/service-types.controller';
 import { SubscriptionItemsController } from './controllers/subscription-items.controller';
@@ -106,7 +107,9 @@ import { PaymentWebhookEventEntity } from './entities/payment-webhook-event.enti
 import { ProviderPriceSnapshotEntity } from './entities/provider-price-snapshot.entity';
 import { PublicWithdrawalRequestEntity } from './entities/public-withdrawal-request.entity';
 import { ReservedHostnameEntity } from './entities/reserved-hostname.entity';
+import { AddonEntity } from './entities/addon.entity';
 import { CloudInitConfigEntity } from './entities/cloud-init-config.entity';
+import { SubscriptionAddonEntity } from './entities/subscription-addon.entity';
 import { ServicePlanEntity } from './entities/service-plan.entity';
 import { ServiceTypeEntity } from './entities/service-type.entity';
 import { SubscriptionItemEntity } from './entities/subscription-item.entity';
@@ -145,7 +148,9 @@ import { PaymentRefundsRepository } from './repositories/payment-refunds.reposit
 import { PaymentWebhookEventsRepository } from './repositories/payment-webhook-events.repository';
 import { ProviderPriceSnapshotsRepository } from './repositories/provider-price-snapshots.repository';
 import { ReservedHostnamesRepository } from './repositories/reserved-hostnames.repository';
+import { AddonsRepository } from './repositories/addons.repository';
 import { CloudInitConfigsRepository } from './repositories/cloud-init-configs.repository';
+import { SubscriptionAddonsRepository } from './repositories/subscription-addons.repository';
 import { ServicePlansRepository } from './repositories/service-plans.repository';
 import { ServiceTypesRepository } from './repositories/service-types.repository';
 import { SubscriptionItemsRepository } from './repositories/subscription-items.repository';
@@ -167,7 +172,11 @@ import { CancellationPolicyService } from './services/cancellation-policy.servic
 import { WithdrawalPolicyService } from './services/withdrawal-policy.service';
 import { WithdrawalRefundService } from './services/withdrawal-refund.service';
 import { SubscriptionTeardownService } from './services/subscription-teardown.service';
+import { AddonModuleRegistryService } from './services/addon-module-registry.service';
+import { AddonLifecycleService } from './services/addon-lifecycle.service';
+import { AddonService } from './services/addon.service';
 import { CloudInitConfigService } from './services/cloud-init-config.service';
+import type { BillingAddonModule } from './services/addon-module-registry.service';
 import { CloudflareDnsService } from './services/cloudflare-dns.service';
 import { CustomerProfilesService } from './services/customer-profiles.service';
 import { CustomerProfilesAdminService } from './services/customer-profiles-admin.service';
@@ -430,6 +439,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
       ServiceTypeEntity,
       ServicePlanEntity,
       CloudInitConfigEntity,
+      AddonEntity,
+      SubscriptionAddonEntity,
       SubscriptionEntity,
       SubscriptionItemEntity,
       ReservedHostnameEntity,
@@ -472,6 +483,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
   controllers: [
     ServiceTypesController,
     CloudInitConfigsController,
+    AddonsController,
     PublicServicePlanOfferingsController,
     PublicWithdrawalController,
     ServicePlansController,
@@ -509,6 +521,9 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionTeardownService,
     SubscriptionPeriodChargeService,
     CloudInitConfigService,
+    AddonService,
+    AddonLifecycleService,
+    AddonModuleRegistryService,
     CloudflareDnsService,
     DigitaloceanProvisioningService,
     HostnameReservationService,
@@ -667,6 +682,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     UsersBillingDayRepository,
     ProviderPriceSnapshotsRepository,
     CloudInitConfigsRepository,
+    AddonsRepository,
+    SubscriptionAddonsRepository,
     ServicePlansRepository,
     ServiceTypesRepository,
     ReservedHostnamesRepository,
@@ -768,6 +785,7 @@ export class BillingModule implements OnModuleInit {
     private readonly dynamicLoader: DynamicProviderLoaderService,
     private readonly trustScoreProviderRegistry: TrustScoreProviderRegistry,
     private readonly internalBillingTrustScoreProvider: InternalBillingTrustScoreProvider,
+    private readonly addonModuleRegistry: AddonModuleRegistryService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -776,12 +794,14 @@ export class BillingModule implements OnModuleInit {
       displayName: 'Hetzner Cloud-Init',
       configSchema: HETZNER_CONFIG_SCHEMA,
       envDefaultFields: HETZNER_ENV_DEFAULT_FIELDS,
+      supportsAddons: true,
     });
     this.providerRegistry.register({
       id: 'digital-ocean',
       displayName: 'DigitalOcean Cloud-Init',
       configSchema: DIGITALOCEAN_CONFIG_SCHEMA,
       envDefaultFields: DIGITALOCEAN_ENV_DEFAULT_FIELDS,
+      supportsAddons: true,
     });
 
     await registerDynamicProviderMetadata({
@@ -790,6 +810,14 @@ export class BillingModule implements OnModuleInit {
       register: (metadata) => this.providerRegistry.register(metadata),
       dynamicLoader: this.dynamicLoader,
       loggerContext: 'ProviderRegistryService',
+    });
+
+    await registerDynamicProviders<BillingAddonModule>({
+      envKey: 'DYNAMIC_ADDON_MODULES',
+      criticality: 'optional',
+      register: (module) => this.addonModuleRegistry.register(module),
+      dynamicLoader: this.dynamicLoader,
+      loggerContext: 'AddonModuleRegistryService',
     });
 
     this.trustScoreProviderRegistry.register(this.internalBillingTrustScoreProvider);

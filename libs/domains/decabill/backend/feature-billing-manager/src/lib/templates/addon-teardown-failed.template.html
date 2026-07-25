@@ -1,0 +1,9 @@
+{{#> email-layout}}
+<h1 class="email-title">Addon teardown failed</h1>
+<p>Dear {{recipientName}},</p>
+<p>
+  We could not fully deactivate the addon "<strong>{{addonName}}</strong>" on your subscription
+  "<strong>{{planName}}</strong>"{{#if subscriptionNumber}} (<strong>{{subscriptionNumber}}</strong>){{/if}}.
+</p>
+<p>Please contact support if this issue continues.</p>
+{{/email-layout}}

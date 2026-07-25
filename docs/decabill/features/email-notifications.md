@@ -46,6 +46,10 @@ If no company name is resolved, header and footer are omitted. On Decabill, leav
 | `subscription.canceled`             | `subscription-canceled`         | Final cancel teardown (not withdraw) |
 | `subscription.resumed`              | `subscription-resumed`          | Resume from pending cancel           |
 | `subscription.withdrawn`            | `subscription-withdrawn`        | Statutory withdrawal teardown done   |
+| `addon.activated`                   | `addon-activated`               | Addon activated after provision      |
+| `addon.deactivated`                 | `addon-deactivated`             | Addon deactivated on teardown        |
+| `addon.provision_failed`            | `addon-provision-failed`        | Addon module provision failed        |
+| `addon.teardown_failed`             | `addon-teardown-failed`         | Addon module teardown failed         |
 | `user.email_confirmation_requested` | `email-confirmation`            | Identity registration / email change |
 | `user.password_reset_requested`     | `password-reset`                | Password reset                       |
 

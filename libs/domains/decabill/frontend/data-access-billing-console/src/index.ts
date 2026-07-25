@@ -20,6 +20,7 @@ export * from './lib/constants/supported-countries';
 // Services
 export * from './lib/services/service-types.service';
 export * from './lib/services/cloud-init-configs.service';
+export * from './lib/services/addons.service';
 export * from './lib/services/service-plans.service';
 export * from './lib/services/subscriptions.service';
 export * from './lib/services/backorders.service';
@@ -51,6 +52,13 @@ export * from './lib/state/cloud-init-configs/cloud-init-configs.effects';
 export * from './lib/state/cloud-init-configs/cloud-init-configs.facade';
 export * from './lib/state/cloud-init-configs/cloud-init-configs.reducer';
 export * from './lib/state/cloud-init-configs/cloud-init-configs.selectors';
+
+// Addons State
+export * from './lib/state/addons/addons.actions';
+export * from './lib/state/addons/addons.effects';
+export * from './lib/state/addons/addons.facade';
+export * from './lib/state/addons/addons.reducer';
+export * from './lib/state/addons/addons.selectors';
 
 // Service Plans State
 export * from './lib/state/service-plans/service-plans.actions';

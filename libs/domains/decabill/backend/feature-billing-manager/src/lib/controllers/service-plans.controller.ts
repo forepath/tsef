@@ -16,17 +16,22 @@ import {
 
 import { CreateServicePlanDto } from '../dto/create-service-plan.dto';
 import { CloudInitConfigOrderFieldDto } from '../dto/cloud-init-config-response.dto';
+import { PlanAddonOptionDto } from '../dto/addon-response.dto';
 import { OrderProvisioningOptionDto } from '../dto/order-provisioning-option.dto';
 import { ServicePlanResponseDto } from '../dto/service-plan-response.dto';
 import { UpdateServicePlanDto } from '../dto/update-service-plan.dto';
 import { ServicePlanEntity } from '../entities/service-plan.entity';
 import { TaxCategory } from '../constants/tax-category.constants';
+import { AddonsRepository } from '../repositories/addons.repository';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
 import { ServiceTypesRepository } from '../repositories/service-types.repository';
+import { AddonService } from '../services/addon.service';
 import { CloudInitConfigService } from '../services/cloud-init-config.service';
 import { ProviderRegistryService } from '../services/provider-registry.service';
 import { WithdrawalPolicyService } from '../services/withdrawal-policy.service';
+import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
 import { normalizePlanProviderConfigDefaults } from '../utils/cloud-init/plan-provisioning-options.utils';
+import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
 import { effectiveSchemaSupportsLocationSelection } from '../utils/provider-location.utils';
 import {
   effectiveSchemaSupportsServerTypeSelection,
@@ -40,6 +45,8 @@ export class ServicePlansController {
     private readonly serviceTypesRepository: ServiceTypesRepository,
     private readonly providerRegistry: ProviderRegistryService,
     private readonly cloudInitConfigService: CloudInitConfigService,
+    private readonly addonService: AddonService,
+    private readonly addonsRepository: AddonsRepository,
     private readonly withdrawalPolicyService: WithdrawalPolicyService,
   ) {}
 
@@ -67,6 +74,43 @@ export class ServicePlansController {
     const row = await this.servicePlansRepository.findByIdOrThrow(id);
 
     return this.cloudInitConfigService.buildOrderProvisioningOptions(row.providerConfigDefaults ?? {});
+  }
+
+  @RequireScopes('subscriptions:read')
+  @Get(':id/addons')
+  async listOrderAddons(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<PlanAddonOptionDto[]> {
+    const plan = await this.servicePlansRepository.findByIdOrThrow(id);
+    const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
+
+    if (!this.addonService.providerSupportsAddons(serviceType.provider)) {
+      return [];
+    }
+
+    const allowedIds = parsePlanAllowedAddonIds(plan.providerConfigDefaults);
+
+    if (allowedIds.length === 0) {
+      return [];
+    }
+
+    const addons = await this.addonsRepository.findByIds(allowedIds);
+
+    return addons
+      .filter((addon) => addon.isActive)
+      .filter(
+        (addon) => addon.compatibleProviders.length === 0 || addon.compatibleProviders.includes(serviceType.provider),
+      )
+      .map((addon) => ({
+        id: addon.id,
+        key: addon.key,
+        name: addon.name,
+        description: addon.description ?? null,
+        implementationType: addon.implementationType,
+        basePrice: addon.basePrice ?? null,
+        priceIntervalType: addon.priceIntervalType ?? null,
+        priceIntervalValue: addon.priceIntervalValue ?? null,
+        periodPrice: convertAddonPriceToPlanPeriod(addon, plan),
+        orderFields: this.addonService.getOrderFieldsForAddon(addon),
+      }));
   }
 
   @RequireScopes('subscriptions:read')
@@ -104,6 +148,10 @@ export class ServicePlansController {
       : [];
 
     await this.cloudInitConfigService.assertActiveConfigForPlanDefaults(dto.serviceTypeId, normalizedDefaults);
+    await this.addonService.assertAllowedAddonIdsForPlan(
+      dto.serviceTypeId,
+      parsePlanAllowedAddonIds(normalizedDefaults),
+    );
     const row = await this.servicePlansRepository.create({
       serviceTypeId: dto.serviceTypeId,
       name: dto.name,
@@ -169,6 +217,10 @@ export class ServicePlansController {
       const normalizedDefaults = normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
 
       await this.cloudInitConfigService.assertActiveConfigForPlanDefaults(existing.serviceTypeId, normalizedDefaults);
+      await this.addonService.assertAllowedAddonIdsForPlan(
+        existing.serviceTypeId,
+        parsePlanAllowedAddonIds(normalizedDefaults),
+      );
     }
 
     const row = await this.servicePlansRepository.update(id, {

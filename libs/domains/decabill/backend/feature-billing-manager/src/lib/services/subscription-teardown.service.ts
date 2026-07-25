@@ -11,6 +11,7 @@ import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { CloudflareDnsService } from './cloudflare-dns.service';
 import { HostnameReservationService } from './hostname-reservation.service';
+import { AddonLifecycleService } from './addon-lifecycle.service';
 import { ProvisioningService } from './provisioning.service';
 import { WithdrawalRefundService } from './withdrawal-refund.service';
 
@@ -35,6 +36,7 @@ export class SubscriptionTeardownService {
     private readonly withdrawalRefundService: WithdrawalRefundService,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
     private readonly billingEmailPublisher: BillingEmailPublisher,
+    private readonly addonLifecycleService: AddonLifecycleService,
   ) {}
 
   /**
@@ -79,6 +81,21 @@ export class SubscriptionTeardownService {
     const items = await this.subscriptionItemsRepository.findBySubscription(subscription.id);
 
     this.logger.log(`Tearing down subscription ${subscription.id} with ${items.length} item(s)`);
+
+    const providerByItemId = new Map<string, string>();
+
+    for (const item of items) {
+      if (item.serviceType?.provider) {
+        providerByItemId.set(item.id, item.serviceType.provider);
+      }
+    }
+
+    await this.addonLifecycleService.teardownForSubscription({
+      subscription,
+      plan,
+      items,
+      providerByItemId,
+    });
 
     for (const item of items) {
       if (item.hostname) {

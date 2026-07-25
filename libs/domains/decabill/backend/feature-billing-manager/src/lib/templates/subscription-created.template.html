@@ -7,6 +7,13 @@
 </p>
 {{#if periodEndDate}}
 <p>Current period ends on <strong>{{periodEndDate}}</strong>.</p>
+{{/if}} {{#if addons}}
+<p>Selected addons:</p>
+<ul>
+  {{#each addons}}
+  <li><strong>{{name}}</strong>{{#if periodPrice}} — {{periodPrice}} per billing period{{/if}}</li>
+  {{/each}}
+</ul>
 {{/if}} {{#if billInAdvance}}
 <p>
   This plan is billed in advance. The charge for the current period has been recorded and will appear on your next

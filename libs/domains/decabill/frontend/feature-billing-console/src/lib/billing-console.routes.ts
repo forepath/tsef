@@ -6,6 +6,8 @@ import {
   AdminInvoiceManagerFacade,
   AdminSubscriptionsFacade,
   BillingCapabilitiesFacade,
+  AddonsFacade,
+  addonsReducer,
   adminCustomerProfilesReducer,
   adminInvoiceManagerReducer,
   adminSubscriptionsReducer,
@@ -60,6 +62,7 @@ import {
   createServicePlan$,
   createServiceType$,
   createSubscription$,
+  createAddon$,
   CloudInitConfigsFacade,
   cloudInitConfigsReducer,
   createCloudInitConfig$,
@@ -68,6 +71,11 @@ import {
   loadCloudInitConfigs$,
   loadCloudInitConfigsBatch$,
   loadCloudInitConfig$,
+  loadAddons$,
+  loadAddonsBatch$,
+  loadAddon$,
+  updateAddon$,
+  deleteAddon$,
   CustomerProfileFacade,
   customerProfileReducer,
   deleteServicePlan$,
@@ -218,6 +226,7 @@ import { publicWithdrawalAccessGuard } from './guards/public-withdrawal-access.g
 import { InvoicesComponent } from './invoices/invoices.component';
 import { OverviewComponent } from './overview/overview.component';
 import { CloudInitConfigsPageComponent } from './cloud-init-configs-page/cloud-init-configs-page.component';
+import { AddonsPageComponent } from './addons-page/addons-page.component';
 import { ServicePlansPageComponent } from './service-plans-page/service-plans-page.component';
 import { ServiceTypesPageComponent } from './service-types-page/service-types-page.component';
 import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
@@ -319,6 +328,12 @@ export const billingConsoleRoutes: Route[] = [
             title: () => buildPageTitle($localize`:@@featureContainer-cloudInitConfigsPage:Configs`),
           },
           {
+            path: 'addons',
+            canActivate: [authGuard, billingAdminGuard],
+            component: AddonsPageComponent,
+            title: () => buildPageTitle($localize`:@@featureContainer-addonsPage:Addons`),
+          },
+          {
             path: 'service-plans',
             canActivate: [authGuard, billingAdminGuard],
             component: ServicePlansPageComponent,
@@ -388,6 +403,7 @@ export const billingConsoleRoutes: Route[] = [
       ...identityAuthProviders,
       ...notificationAdminProviders,
       CloudInitConfigsFacade,
+      AddonsFacade,
       SubscriptionsFacade,
       SubscriptionServerInfoFacade,
       BillingDashboardSocketFacade,
@@ -414,6 +430,7 @@ export const billingConsoleRoutes: Route[] = [
       provideState('servicePlans', servicePlansReducer),
       provideState('serviceTypes', serviceTypesReducer),
       provideState('cloudInitConfigs', cloudInitConfigsReducer),
+      provideState('addons', addonsReducer),
       provideState('invoices', invoicesReducer),
       provideState('adminBilling', adminBillingReducer),
       provideState('billingCapabilities', billingCapabilitiesReducer),
@@ -454,6 +471,12 @@ export const billingConsoleRoutes: Route[] = [
         createCloudInitConfig$,
         updateCloudInitConfig$,
         deleteCloudInitConfig$,
+        loadAddons$,
+        loadAddonsBatch$,
+        loadAddon$,
+        createAddon$,
+        updateAddon$,
+        deleteAddon$,
         loadServicePlans$,
         loadServicePlansBatch$,
         loadServicePlan$,

@@ -9,6 +9,7 @@ import type {
   CloudInitConfigOrderField,
   ListParams,
   OrderProvisioningOption,
+  PlanAddonOptionDto,
   ServicePlanResponse,
   UpdateServicePlanDto,
 } from '../types/billing.types';
@@ -57,6 +58,10 @@ export class ServicePlansService {
     return this.http.get<OrderProvisioningOption[]>(
       `${this.apiUrl}/service-plans/${planId}/order-provisioning-options`,
     );
+  }
+
+  getOrderAddons(planId: string): Observable<PlanAddonOptionDto[]> {
+    return this.http.get<PlanAddonOptionDto[]>(`${this.apiUrl}/service-plans/${planId}/addons`);
   }
 
   getCloudInitOrderFields(planId: string, configId: string): Observable<CloudInitConfigOrderField[]> {

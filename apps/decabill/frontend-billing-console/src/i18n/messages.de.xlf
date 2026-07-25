@@ -834,6 +834,68 @@
         <source>System</source>
         <target>System</target>
       </trans-unit>
+      <trans-unit id="featureAddons-title" datatype="html"><source>Addons</source><target>Add-ons</target></trans-unit>
+      <trans-unit id="featureAddons-add" datatype="html"><source>Add addon</source><target>Add-on hinzufügen</target></trans-unit>
+      <trans-unit id="featureAddons-searchPlaceholder" datatype="html"><source>Search addons</source><target>Add-ons durchsuchen</target></trans-unit>
+      <trans-unit id="featureAddons-loading" datatype="html"><source>Loading...</source><target>Laden...</target></trans-unit>
+      <trans-unit id="featureAddons-empty" datatype="html"><source>No addons.</source><target>Keine Add-ons.</target></trans-unit>
+      <trans-unit id="featureAddons-edit" datatype="html"><source>Edit addon</source><target>Add-on bearbeiten</target></trans-unit>
+      <trans-unit id="featureAddons-delete" datatype="html"><source>Delete addon</source><target>Add-on löschen</target></trans-unit>
+      <trans-unit id="featureAddons-createTitle" datatype="html"><source>Add addon</source><target>Add-on hinzufügen</target></trans-unit>
+      <trans-unit id="featureAddons-editTitle" datatype="html"><source>Edit addon</source><target>Add-on bearbeiten</target></trans-unit>
+      <trans-unit id="featureAddons-key" datatype="html"><source>Key</source><target>Schlüssel</target></trans-unit>
+      <trans-unit id="featureAddons-name" datatype="html"><source>Name</source><target>Name</target></trans-unit>
+      <trans-unit id="featureAddons-description" datatype="html"><source>Description</source><target>Beschreibung</target></trans-unit>
+      <trans-unit id="featureAddons-implementationType" datatype="html"><source>Implementation type</source><target>Implementierungstyp</target></trans-unit>
+      <trans-unit id="featureAddons-compatibleProviders" datatype="html"><source>Compatible providers</source><target>Kompatible Anbieter</target></trans-unit>
+      <trans-unit id="featureAddons-compatibleProvidersHelp" datatype="html"><source>Hold Ctrl/Cmd to select multiple. Leave empty for all addon-capable providers.</source><target>Mit Strg/Cmd mehrere auswählen. Für alle Add-on-fähigen Anbieter leer lassen.</target></trans-unit>
+      <trans-unit id="featureAddons-moduleKey" datatype="html"><source>Module key</source><target>Modulschlüssel</target></trans-unit>
+      <trans-unit id="featureAddons-scriptTemplate" datatype="html"><source>Cloud-init script template</source><target>Cloud-init-Skriptvorlage</target></trans-unit>
+      <trans-unit id="featureAddons-basePrice" datatype="html"><source>Base price</source><target>Grundpreis</target></trans-unit>
+      <trans-unit id="featureAddons-priceIntervalType" datatype="html"><source>Price interval</source><target>Preisintervall</target></trans-unit>
+      <trans-unit id="featureAddons-priceIntervalValue" datatype="html"><source>Interval value</source><target>Intervallwert</target></trans-unit>
+      <trans-unit id="featureAddons-active" datatype="html"><source>Active</source><target>Aktiv</target></trans-unit>
+      <trans-unit id="featureAddons-create" datatype="html"><source>Create</source><target>Erstellen</target></trans-unit>
+      <trans-unit id="featureAddons-save" datatype="html"><source>Save</source><target>Speichern</target></trans-unit>
+      <trans-unit id="featureAddons-deleteTitle" datatype="html"><source>Delete addon</source><target>Add-on löschen</target></trans-unit>
+      <trans-unit id="featureAddons-deleteConfirm" datatype="html"><source>Delete addon &quot;<x id="INTERPOLATION" equiv-text="{{ addonToDelete.name }}"/>&quot;?</source><target>Add-on &quot;<x id="INTERPOLATION" equiv-text="{{ addonToDelete.name }}"/>&quot; löschen?</target></trans-unit>
+      <trans-unit id="featureAddons-cannotUndo" datatype="html"><source>This action cannot be undone.</source><target>Diese Aktion kann nicht rückgängig gemacht werden.</target></trans-unit>
+      <trans-unit id="featureAddons-module" datatype="html"><source>Module</source><target>Modul</target></trans-unit>
+      <trans-unit id="featureAddons-cloudInitScript" datatype="html"><source>Cloud-init script</source><target>Cloud-init-Skript</target></trans-unit>
+      <trans-unit id="featureAddons-free" datatype="html"><source>Free</source><target>Kostenlos</target></trans-unit>
+      <trans-unit id="featureAddons-moduleDefaults" datatype="html"><source>Module defaults</source><target>Modul-Standardwerte</target></trans-unit>
+      <trans-unit id="featureAddons-moduleDefaultsHelp" datatype="html"><source>Defaults for module environment variables. Schema is defined by the registered module; leave blank when unused.</source><target>Standardwerte für Modul-Umgebungsvariablen. Das Schema kommt vom registrierten Modul; leer lassen, wenn ungenutzt.</target></trans-unit>
+      <trans-unit id="featureAddons-randomDefaultHint" datatype="html"><source>Uses a random default at provision time.</source><target>Verwendet bei der Bereitstellung einen zufälligen Standardwert.</target></trans-unit>
+      <trans-unit id="featureAddons-scriptEnvHint" datatype="html"><source>Use {{env.KEY}} placeholders in the script for configured environment variables.</source><target>Verwenden Sie {{env.KEY}}-Platzhalter im Skript für konfigurierte Umgebungsvariablen.</target></trans-unit>
+      <trans-unit id="featureAddons-envVariables" datatype="html"><source>Environment variables</source><target>Umgebungsvariablen</target></trans-unit>
+      <trans-unit id="featureAddons-addEnvVar" datatype="html"><source>Add line</source><target>Zeile hinzufügen</target></trans-unit>
+      <trans-unit id="featureAddons-envKey" datatype="html"><source>Key</source><target>Schlüssel</target></trans-unit>
+      <trans-unit id="featureAddons-envLabel" datatype="html"><source>Label</source><target>Bezeichnung</target></trans-unit>
+      <trans-unit id="featureAddons-envDescription" datatype="html"><source>Description</source><target>Beschreibung</target></trans-unit>
+      <trans-unit id="featureAddons-envRandom" datatype="html"><source>Random</source><target>Zufällig</target></trans-unit>
+      <trans-unit id="featureAddons-envDefault" datatype="html"><source>Default</source><target>Standard</target></trans-unit>
+      <trans-unit id="featureAddons-envRandomLength" datatype="html"><source>Length</source><target>Länge</target></trans-unit>
+      <trans-unit id="featureAddons-envRandomSpecial" datatype="html"><source>Special chars</source><target>Sonderzeichen</target></trans-unit>
+      <trans-unit id="featureAddons-envOrder" datatype="html"><source>Order</source><target>Bestellung</target></trans-unit>
+      <trans-unit id="featureAddons-configFieldCount" datatype="html">
+        <source><x id="INTERPOLATION" equiv-text="{{ configFieldCount(addon) }}"/> config fields</source>
+        <target><x id="INTERPOLATION" equiv-text="{{ configFieldCount(addon) }}"/> Konfigurationsfelder</target>
+      </trans-unit>
+      <trans-unit id="featureAddons-allProviders" datatype="html"><source>All providers</source><target>Alle Anbieter</target></trans-unit>
+      <trans-unit id="featureAddons-addonActionsAria" datatype="html"><source>Addon actions</source><target>Add-on-Aktionen</target></trans-unit>
+      <trans-unit id="featureContainer-addonsPage" datatype="html"><source>Addons</source><target>Add-ons</target></trans-unit>
+      <trans-unit id="featureContainer-addonsTitle" datatype="html"><source>Addons</source><target>Add-ons</target></trans-unit>
+      <trans-unit id="featureContainer-addons" datatype="html"><source>Addons</source><target>Add-ons</target></trans-unit>
+      <trans-unit id="featureServicePlans-addons" datatype="html"><source>Customer-selectable addons</source><target>Vom Kunden auswählbare Add-ons</target></trans-unit>
+      <trans-unit id="featureServicePlans-addonsHelp" datatype="html"><source>Choose which addons customers may add when ordering this plan.</source><target>Wählen Sie, welche Add-ons Kunden bei der Bestellung dieses Plans hinzufügen dürfen.</target></trans-unit>
+      <trans-unit id="featureSubscriptions-loadingAddons" datatype="html"><source>Loading addons…</source><target>Add-ons werden geladen…</target></trans-unit>
+      <trans-unit id="featureSubscriptions-addons" datatype="html"><source>Addons</source><target>Add-ons</target></trans-unit>
+      <trans-unit id="featureSubscriptions-addonConfigFields" datatype="html"><source>Configuration for this addon</source><target>Konfiguration für dieses Add-on</target></trans-unit>
+      <trans-unit id="featureSubscriptions-addonConfigSection" datatype="html"><source>Addon configuration</source><target>Add-on-Konfiguration</target></trans-unit>
+      <trans-unit id="featureSubscriptions-addonConfigCardTitle" datatype="html"><source>Addon: <x id="addonName" equiv-text="addonName"/></source><target>Add-on: <x id="addonName" equiv-text="addonName"/></target></trans-unit>
+      <trans-unit id="featureSubscriptions-addonsTotal" datatype="html"><source>Addons total</source><target>Add-ons gesamt</target></trans-unit>
+      <trans-unit id="featureSubscriptions-grandTotal" datatype="html"><source>Plan and addons</source><target>Plan und Add-ons</target></trans-unit>
+      <trans-unit id="featureSubscriptions-orderStepPlanAddons" datatype="html"><source>Plan &amp; addons</source><target>Plan &amp; Add-ons</target></trans-unit>
       <trans-unit id="featureCloudInitConfigs-title" datatype="html">
         <source>CloudInit Configs</source>
         <target>CloudInit-Konfigurationen</target>

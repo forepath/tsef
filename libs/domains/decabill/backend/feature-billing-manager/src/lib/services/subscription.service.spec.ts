@@ -151,6 +151,19 @@ describe('SubscriptionService', () => {
     recordOpenPositionForPeriod: jest.fn(),
     processDueBilling: jest.fn(),
   };
+  const addonService = {
+    assertAddonIdsForOrder: jest.fn().mockResolvedValue([]),
+    providerSupportsAddons: jest.fn().mockReturnValue(true),
+  };
+  const addonLifecycleService = {
+    createPendingSubscriptionAddons: jest.fn().mockResolvedValue([]),
+    listForSubscription: jest.fn().mockResolvedValue([]),
+    collectCloudInitScripts: jest.fn().mockReturnValue([]),
+    collectInterpolatedCloudInitScripts: jest.fn().mockReturnValue([]),
+    appendScriptsToUserData: jest.fn((userData: string) => userData),
+    activateAfterProvisioning: jest.fn().mockResolvedValue(undefined),
+    teardownForSubscription: jest.fn(),
+  };
   const service = new SubscriptionService(
     plansRepository,
     typesRepository,
@@ -165,6 +178,8 @@ describe('SubscriptionService', () => {
     cloudflareDnsService,
     customerProfilesService,
     cloudInitConfigService,
+    addonService as never,
+    addonLifecycleService as never,
     providerServerTypesService,
     pricingService,
     taxCalculationService,
