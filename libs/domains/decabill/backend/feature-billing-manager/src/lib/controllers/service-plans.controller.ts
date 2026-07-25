@@ -1,4 +1,5 @@
 import { KeycloakRoles, RequireScopes, UserRole, UsersRoles } from '@forepath/identity/backend';
+import { getTenantIdOrDefault } from '@forepath/shared/backend';
 import {
   BadRequestException,
   Body,
@@ -7,12 +8,15 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
+  Logger,
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
   Post,
   Query,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 
 import { CreateServicePlanDto } from '../dto/create-service-plan.dto';
 import { CloudInitConfigOrderFieldDto } from '../dto/cloud-init-config-response.dto';
@@ -29,9 +33,14 @@ import { AddonService } from '../services/addon.service';
 import { CloudInitConfigService } from '../services/cloud-init-config.service';
 import { ProviderRegistryService } from '../services/provider-registry.service';
 import { WithdrawalPolicyService } from '../services/withdrawal-policy.service';
+import {
+  PLAN_PRICE_MIGRATE_ENQUEUE,
+  type PlanPriceMigrateEnqueuePort,
+} from '../queue/plan-price-migrate-enqueue.token';
 import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
 import { normalizePlanProviderConfigDefaults } from '../utils/cloud-init/plan-provisioning-options.utils';
 import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
+import { commercialPricingFieldsChanged, snapshotCommercialPricing } from '../utils/plan-commercial-pricing.utils';
 import { effectiveSchemaSupportsLocationSelection } from '../utils/provider-location.utils';
 import {
   effectiveSchemaSupportsServerTypeSelection,
@@ -40,6 +49,8 @@ import {
 
 @Controller('service-plans')
 export class ServicePlansController {
+  private readonly logger = new Logger(ServicePlansController.name);
+
   constructor(
     private readonly servicePlansRepository: ServicePlansRepository,
     private readonly serviceTypesRepository: ServiceTypesRepository,
@@ -48,6 +59,8 @@ export class ServicePlansController {
     private readonly addonService: AddonService,
     private readonly addonsRepository: AddonsRepository,
     private readonly withdrawalPolicyService: WithdrawalPolicyService,
+    @Inject(PLAN_PRICE_MIGRATE_ENQUEUE)
+    private readonly planPriceMigrateEnqueue: PlanPriceMigrateEnqueuePort,
   ) {}
 
   @RequireScopes('subscriptions:read')
@@ -224,26 +237,30 @@ export class ServicePlansController {
       );
     }
 
+    const shouldMigrate = dto.migrateExistingSubscriptions === true && commercialPricingFieldsChanged(existing, dto);
+    const previousPricing = shouldMigrate ? snapshotCommercialPricing(existing) : null;
+
+    // Only assign defined DTO fields — Object.assign + TypeORM save would otherwise persist `undefined` as NULL
+    // and wipe commercial pricing on partial admin updates (e.g. marginFixed-only + migrateExistingSubscriptions).
     const row = await this.servicePlansRepository.update(id, {
-      name: dto.name,
-      description: dto.description,
-      billingIntervalType: dto.billingIntervalType,
-      billingIntervalValue: dto.billingIntervalValue,
-      billingDayOfMonth: dto.billingDayOfMonth,
-      cancelAtPeriodEnd: dto.cancelAtPeriodEnd,
+      ...(dto.name !== undefined ? { name: dto.name } : {}),
+      ...(dto.description !== undefined ? { description: dto.description } : {}),
+      ...(dto.billingIntervalType !== undefined ? { billingIntervalType: dto.billingIntervalType } : {}),
+      ...(dto.billingIntervalValue !== undefined ? { billingIntervalValue: dto.billingIntervalValue } : {}),
+      ...(dto.billingDayOfMonth !== undefined ? { billingDayOfMonth: dto.billingDayOfMonth } : {}),
+      ...(dto.cancelAtPeriodEnd !== undefined ? { cancelAtPeriodEnd: dto.cancelAtPeriodEnd } : {}),
       ...(dto.billInAdvance !== undefined ? { billInAdvance: dto.billInAdvance } : {}),
       ...(dto.autoRecalculatePriceDaily !== undefined
         ? { autoRecalculatePriceDaily: dto.autoRecalculatePriceDaily }
         : {}),
-      minCommitmentDays: dto.minCommitmentDays,
-      noticeDays: dto.noticeDays,
-      basePrice: dto.basePrice,
-      marginPercent: dto.marginPercent,
-      marginFixed: dto.marginFixed,
-      providerConfigDefaults:
-        dto.providerConfigDefaults !== undefined
-          ? normalizePlanProviderConfigDefaults(dto.providerConfigDefaults)
-          : undefined,
+      ...(dto.minCommitmentDays !== undefined ? { minCommitmentDays: dto.minCommitmentDays } : {}),
+      ...(dto.noticeDays !== undefined ? { noticeDays: dto.noticeDays } : {}),
+      ...(dto.basePrice !== undefined ? { basePrice: dto.basePrice } : {}),
+      ...(dto.marginPercent !== undefined ? { marginPercent: dto.marginPercent } : {}),
+      ...(dto.marginFixed !== undefined ? { marginFixed: dto.marginFixed } : {}),
+      ...(dto.providerConfigDefaults !== undefined
+        ? { providerConfigDefaults: normalizePlanProviderConfigDefaults(dto.providerConfigDefaults) }
+        : {}),
       ...(dto.orderingHighlights !== undefined ? { orderingHighlights: dto.orderingHighlights } : {}),
       ...(dto.allowCustomerLocationSelection !== undefined
         ? { allowCustomerLocationSelection: dto.allowCustomerLocationSelection }
@@ -255,8 +272,30 @@ export class ServicePlansController {
         ? { allowedServerTypes }
         : {}),
       ...(dto.taxCategory !== undefined ? { taxCategory: dto.taxCategory } : {}),
-      isActive: dto.isActive,
+      ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
     });
+
+    if (shouldMigrate && previousPricing) {
+      const changeId = randomUUID();
+      const runDate = new Intl.DateTimeFormat('en-CA', {
+        timeZone: process.env.BILLING_PRICE_RECALC_TIMEZONE ?? 'Europe/Berlin',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
+
+      try {
+        await this.planPriceMigrateEnqueue.enqueueUnit({
+          tenantId: getTenantIdOrDefault(),
+          planId: id,
+          changeId,
+          runDate,
+          previousPricing,
+        });
+      } catch (error) {
+        this.logger.error(`Failed to enqueue plan price migration for service plan ${id}: ${(error as Error).message}`);
+      }
+    }
 
     return await this.mapToResponse(row);
   }

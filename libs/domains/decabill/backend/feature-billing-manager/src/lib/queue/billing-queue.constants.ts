@@ -13,3 +13,5 @@ export const DatevExportJobName = {
 export const VatIdValidationJobName = {
   UNIT: 'vat-id-validation.unit',
 } as const;
+
+export { PlanPriceMigrateJobName } from './plan-price-migrate.payload';

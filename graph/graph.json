@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-25T18:36:15.191Z",
+  "generatedAt": "2026-07-25T19:46:00.262Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -23098,6 +23098,16 @@
       }
     },
     {
+      "id": "concept:decabill-admin-commercial-plan-updates",
+      "type": "concept",
+      "attrs": {
+        "title": "Admin commercial plan updates",
+        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
+        "sectionAnchor": "admin-commercial-plan-updates",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-job-failure-and-retries",
       "type": "concept",
       "attrs": {
@@ -39811,6 +39821,11 @@
     },
     {
       "from": "file:docs/decabill/features/automatic-price-recalculation.md",
+      "to": "concept:decabill-admin-commercial-plan-updates",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/automatic-price-recalculation.md",
       "to": "concept:decabill-job-failure-and-retries",
       "type": "contains"
     },
@@ -55615,6 +55630,31 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:GET:/service-plans",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:POST:/service-plans",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:GET:/service-plans/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:POST:/service-plans/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
+      "to": "api:HTTP:DELETE:/service-plans/{id}",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-backorders",
       "to": "api:HTTP:GET:/backorders",
       "type": "documents"
@@ -62391,6 +62431,11 @@
     },
     {
       "from": "concept:decabill-statutory-withdrawal",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-admin-commercial-plan-updates",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

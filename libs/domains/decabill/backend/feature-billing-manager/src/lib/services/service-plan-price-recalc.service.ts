@@ -17,12 +17,20 @@ import {
   priceRecalcCarrySourceRef,
   priceRecalcPrimarySourceRef,
 } from '../utils/price-recalc-billing-source-ref.util';
+import {
+  PLAN_PRICE_MIGRATE_ADJUSTMENT_KINDS,
+  PLAN_PRICE_MIGRATE_CREDIT_REASON,
+  planPriceMigrateCarrySourceRef,
+  planPriceMigratePrimarySourceRef,
+} from '../utils/plan-price-migrate-billing-source-ref.util';
 import { resolvePlanTaxCategory } from '../utils/plan-tax.utils';
 import {
   BILLING_BASE_PRICE_CONFIG_KEY,
   resolveServerTypePriceMonthly,
   resolveSubscriptionBillingBaseOverride,
 } from '../utils/server-type-billing.utils';
+import type { PlanCommercialPricingSnapshot } from '../queue/plan-price-migrate.payload';
+import type { TaxCategory } from '../constants/tax-category.constants';
 
 import type { PeriodPriceChangeBillingOutcome } from './period-price-change-billing.types';
 import { InvoiceTaxContextService } from './invoice-tax-context.service';
@@ -121,6 +129,55 @@ export class ServicePlanPriceRecalcService {
     }
 
     return { planEvents, migrationsByUserId };
+  }
+
+  /**
+   * Migrates eligible subscriptions after an admin commercial plan change
+   * (base price, margins, and/or VAT category), using previous pricing for the "old" side.
+   */
+  async processCommercialPlanUpdate(params: {
+    planId: string;
+    changeId: string;
+    runDate: string;
+    changedAt: Date;
+    previousPricing: PlanCommercialPricingSnapshot;
+  }): Promise<ServicePlanPriceRecalcResult> {
+    const plan = await this.servicePlansRepository.findByIdOrThrow(params.planId);
+    const previousPlan = this.clonePlanWithPricing(plan, params.previousPricing);
+    const oldPeriodPriceNet = this.pricingService.calculate(previousPlan).totalPrice;
+    const newPeriodPriceNet = this.pricingService.calculate(plan).totalPrice;
+    const subscriptions = await this.subscriptionsRepository.findEligibleForPriceRecalcByPlanId(plan.id);
+    const migrations: PriceRecalcSubscriptionMigration[] = [];
+
+    for (const subscription of subscriptions) {
+      try {
+        const migration = await this.processCommercialSubscription({
+          subscription,
+          previousPlan,
+          plan,
+          runDate: params.runDate,
+          changeId: params.changeId,
+          changedAt: params.changedAt,
+        });
+
+        if (migration) {
+          migrations.push(migration);
+        }
+      } catch (error) {
+        this.logger.error(
+          `Commercial plan price migration failed for subscription ${subscription.id}: ${(error as Error).message}`,
+        );
+      }
+    }
+
+    return {
+      planId: plan.id,
+      planName: plan.name,
+      planUpdated: true,
+      oldPeriodPriceNet,
+      newPeriodPriceNet,
+      migrations,
+    };
   }
 
   async processPlan(plan: ServicePlanEntity, runDate: string, changedAt: Date): Promise<ServicePlanPriceRecalcResult> {
@@ -309,6 +366,105 @@ export class ServicePlanPriceRecalcService {
       newTotal: nextTotals.total,
       billingOutcome,
     };
+  }
+
+  private async processCommercialSubscription(params: {
+    subscription: SubscriptionEntity;
+    previousPlan: ServicePlanEntity;
+    plan: ServicePlanEntity;
+    runDate: string;
+    changeId: string;
+    changedAt: Date;
+  }): Promise<PriceRecalcSubscriptionMigration | null> {
+    const { subscription, previousPlan, plan, runDate, changeId, changedAt } = params;
+    const items = await this.subscriptionItemsRepository.findBySubscription(subscription.id);
+    const activeAddons = await this.subscriptionAddonsRepository.findActiveBySubscriptionId(subscription.id);
+    const billingBase = await resolveSubscriptionBillingBaseOverride(items, this.providerServerTypesService);
+    const addonTotalNet = activeAddons.reduce((sum, addon) => sum + this.parseAddonPrice(addon), 0);
+    const currentPeriodNet = roundMoney(
+      this.pricingService.calculate(previousPlan, billingBase).totalPrice + addonTotalNet,
+    );
+    const newPeriodNet = roundMoney(this.pricingService.calculate(plan, billingBase).totalPrice + addonTotalNet);
+    const periodDeltaNet = roundMoney(newPeriodNet - currentPeriodNet);
+    const previousTaxCategory = resolvePlanTaxCategory(previousPlan);
+    const nextTaxCategory = resolvePlanTaxCategory(plan);
+    const taxCategoryChanged = previousTaxCategory !== nextTaxCategory;
+
+    if (Math.abs(periodDeltaNet) < MIN_BILLABLE_AMOUNT && !taxCategoryChanged) {
+      return null;
+    }
+
+    let billingOutcome: PeriodPriceChangeBillingOutcome = 'none';
+
+    if (Math.abs(periodDeltaNet) >= MIN_BILLABLE_AMOUNT) {
+      const remainingPeriodRatio = this.resolveRemainingPeriodRatio(subscription, changedAt);
+      const elapsedPeriodRatio = Math.min(1, Math.max(0, 1 - remainingPeriodRatio));
+      const immediateAdjustmentNet = await this.resolveImmediateAdjustmentNet({
+        plan,
+        subscriptionId: subscription.id,
+        currentPeriodNet,
+        periodDeltaNet,
+        remainingPeriodRatio,
+        elapsedPeriodRatio,
+      });
+
+      billingOutcome = await this.billingService.applySettlement({
+        subscription,
+        plan,
+        changedAt,
+        snapshot: {
+          currentPeriodNet,
+          periodDeltaNet,
+          immediateAdjustmentNet,
+        },
+        primarySourceRef: planPriceMigratePrimarySourceRef(changeId, subscription.id),
+        carrySourceRef: planPriceMigrateCarrySourceRef(changeId, subscription.id),
+        adjustmentKinds: PLAN_PRICE_MIGRATE_ADJUSTMENT_KINDS,
+        creditReason: PLAN_PRICE_MIGRATE_CREDIT_REASON,
+        description: `Service plan price update ${runDate} (${subscription.number})`,
+        creditLineDescription: `Service plan price update ${runDate} credit (${subscription.number})`,
+        auditProcess: 'subscription.plan_price_migrate.billing',
+        auditIdKey: 'planPriceMigrateRef',
+        auditIdValue: planPriceMigratePrimarySourceRef(changeId, subscription.id),
+      });
+    }
+
+    await this.subscriptionsRepository.update(subscription.id, {
+      statutoryWithdrawalRestartedAt: changedAt,
+    });
+
+    const taxContext = await this.invoiceTaxContextService.resolveForUser(subscription.userId);
+    const previousTotals = this.computePeriodTotals(currentPeriodNet, previousPlan, taxContext);
+    const nextTotals = this.computePeriodTotals(newPeriodNet, plan, taxContext);
+
+    return {
+      subscription,
+      planBilling: {
+        billInAdvance: plan.billInAdvance,
+        billingIntervalType: plan.billingIntervalType,
+      },
+      userId: subscription.userId,
+      subscriptionNumber: subscription.number,
+      productName: plan.name,
+      runDate,
+      oldNet: currentPeriodNet,
+      oldTax: previousTotals.tax,
+      oldTotal: previousTotals.total,
+      newNet: newPeriodNet,
+      newTax: nextTotals.tax,
+      newTotal: nextTotals.total,
+      billingOutcome,
+    };
+  }
+
+  private clonePlanWithPricing(plan: ServicePlanEntity, pricing: PlanCommercialPricingSnapshot): ServicePlanEntity {
+    return {
+      ...plan,
+      basePrice: pricing.basePrice ?? undefined,
+      marginPercent: pricing.marginPercent ?? undefined,
+      marginFixed: pricing.marginFixed ?? undefined,
+      taxCategory: pricing.taxCategory as TaxCategory,
+    } as ServicePlanEntity;
   }
 
   private resolvePlanPricingServerType(plan: ServicePlanEntity): string | undefined {

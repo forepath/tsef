@@ -38,6 +38,7 @@ export const BillingJobName = {
   DATEV_EXPORT_UNIT: DatevExportJobName.UNIT,
   PRICE_RECALC_COORDINATOR: 'price-recalc.coordinator',
   PRICE_RECALC_UNIT: 'price-recalc.unit',
+  PLAN_PRICE_MIGRATE_UNIT: 'plan-price-migrate.unit',
   VAT_ID_VALIDATION_UNIT: VatIdValidationJobName.UNIT,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
 } as const;

@@ -198,6 +198,8 @@ export * from './lib/services/subscription-renewal-reminder.job-handler';
 export * from './lib/queue/admin-bill-now-enqueue.token';
 export * from './lib/queue/admin-bill-now.payload';
 export * from './lib/queue/billing-queue.constants';
+export * from './lib/queue/plan-price-migrate.payload';
+export * from './lib/queue/plan-price-migrate-enqueue.token';
 export * from './lib/services/admin-bill-now.service';
 export * from './lib/services/open-position-invoice.job-handler';
 export * from './lib/services/subscription-item-update.job-handler';

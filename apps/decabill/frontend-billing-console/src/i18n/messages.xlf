@@ -2208,6 +2208,12 @@
       <trans-unit id="featureServicePlans-autoRecalculatePriceDailyHelp" datatype="html">
         <source>Opt in only when required for EU compliance. When enabled, the package price is recalculated nightly at midnight from the provider catalog. Checkout must disclose this and the statutory withdrawal restart when the price changes.</source>
         </trans-unit>
+      <trans-unit id="featureServicePlans-migrateExistingSubscriptions" datatype="html">
+        <source>Apply base price, margin, and VAT changes to existing subscriptions</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-migrateExistingSubscriptionsHelp" datatype="html">
+        <source>When checked, changing base price, margins, or VAT rate queues a job that migrates eligible subscriptions (differential billing, statutory withdrawal restart, and customer email). Leave unchecked to update the catalog only for new orders.</source>
+        </trans-unit>
       <trans-unit id="featureServicePlans-active" datatype="html">
         <source>Active</source>
         </trans-unit>

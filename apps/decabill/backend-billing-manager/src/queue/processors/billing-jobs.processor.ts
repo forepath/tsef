@@ -10,6 +10,7 @@ import {
   InvoiceOverdueJobHandler,
   OpenPositionInvoiceJobHandler,
   PriceRecalcJobHandler,
+  type PlanPriceMigrateUnitPayload,
   SubscriptionBillingJobHandler,
   SubscriptionConfigChangeJobHandler,
   SubscriptionExpirationJobHandler,
@@ -209,6 +210,9 @@ export class BillingJobsProcessor extends WorkerHost {
               break;
             case BillingJobName.PRICE_RECALC_UNIT:
               await this.runPriceRecalcUnit(job.data as { tenantId: string; runDate: string });
+              break;
+            case BillingJobName.PLAN_PRICE_MIGRATE_UNIT:
+              await this.priceRecalc.processPlanCommercialMigrate(job.data as PlanPriceMigrateUnitPayload);
               break;
             default:
               this.logger.warn(`Unknown billing job name: ${job.name}`);

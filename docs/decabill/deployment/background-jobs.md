@@ -71,6 +71,7 @@ Coordinators fan out unit jobs such as:
 - `subscription-item-update.unit`
 - `backorder-retry.unit`
 - `price-recalc.unit` (when `BILLING_PRICE_RECALC_ENABLED=true`)
+- `plan-price-migrate.unit` (enqueued from admin plan update when `migrateExistingSubscriptions` is true and commercial pricing fields change)
 - Admin bill-now coordinator and unit jobs (`AdminBillNowJobName`)
 - `datev-export.coordinator` and `datev-export.unit` (when `BILLING_DATEV_EXPORT_ENABLED=true`)
 - `webhook-deliver` — outbound webhook notification delivery

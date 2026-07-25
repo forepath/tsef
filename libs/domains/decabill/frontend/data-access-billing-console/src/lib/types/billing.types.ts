@@ -380,6 +380,8 @@ export interface UpdateServicePlanDto {
   allowCustomerServerTypeSelection?: boolean;
   allowedServerTypes?: string[];
   taxCategory?: TaxCategory;
+  /** Request-only: migrate eligible subscriptions when commercial pricing fields change. */
+  migrateExistingSubscriptions?: boolean;
   isActive?: boolean;
 }
 

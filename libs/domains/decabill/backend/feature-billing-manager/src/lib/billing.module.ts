@@ -126,6 +126,8 @@ import { AdminBillNowEnqueueAdapter } from './queue/admin-bill-now-enqueue.adapt
 import { ADMIN_BILL_NOW_ENQUEUE } from './queue/admin-bill-now-enqueue.token';
 import { DatevExportEnqueueAdapter } from './queue/datev-export-enqueue.adapter';
 import { DATEV_EXPORT_ENQUEUE } from './queue/datev-export-enqueue.token';
+import { PlanPriceMigrateEnqueueAdapter } from './queue/plan-price-migrate-enqueue.adapter';
+import { PLAN_PRICE_MIGRATE_ENQUEUE } from './queue/plan-price-migrate-enqueue.token';
 import { VatIdValidationEnqueueAdapter } from './queue/vat-id-validation-enqueue.adapter';
 import { VAT_ID_VALIDATION_ENQUEUE } from './queue/vat-id-validation-enqueue.token';
 import { AvailabilitySnapshotsRepository } from './repositories/availability-snapshots.repository';
@@ -556,6 +558,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     BillingIssuerConfigService,
     AdminBillNowEnqueueAdapter,
     DatevExportEnqueueAdapter,
+    PlanPriceMigrateEnqueueAdapter,
     {
       provide: ADMIN_BILL_NOW_ENQUEUE,
       useExisting: AdminBillNowEnqueueAdapter,
@@ -563,6 +566,10 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     {
       provide: DATEV_EXPORT_ENQUEUE,
       useExisting: DatevExportEnqueueAdapter,
+    },
+    {
+      provide: PLAN_PRICE_MIGRATE_ENQUEUE,
+      useExisting: PlanPriceMigrateEnqueueAdapter,
     },
     AdminBillNowService,
     BillingAdminService,

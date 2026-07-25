@@ -71,6 +71,10 @@ Email `correlationId` / event dedupe key: `price-recalc:{tenantId}:{userId}:{run
 
 Emails list subscription number, product name, old/new net, tax, and total (VAT from customer profile tax treatment), plus a disclaimer with the configured withdrawal day count.
 
+## Admin commercial plan updates
+
+Manual edits to `basePrice`, `marginPercent`, `marginFixed`, or `taxCategory` do **not** migrate existing subscriptions by default (catalog-only). On `POST /service-plans/{id}`, when request field **`migrateExistingSubscriptions: true`** and one of those commercial fields actually changed vs the stored plan, the API enqueues `plan-price-migrate.unit` with a snapshot of the previous pricing. The worker migrates eligible subscriptions (`active` / `pending_cancel`) using the same settlement / withdrawal restart / consolidated `price-change` email path as the nightly job (distinct source refs `plan_price_migrate:{changeId}:…`).
+
 ## Job failure and retries
 
 - Unit jobs: 3 attempts, exponential backoff 5s (shared queue defaults); failed jobs retained for Bull Board

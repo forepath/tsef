@@ -4942,6 +4942,12 @@ components:
         autoRecalculatePriceDaily:
           type: boolean
           description: When true, nightly automatic price recalculation from the provider catalog is enabled. Default false (opt-in).
+        migrateExistingSubscriptions:
+          type: boolean
+          description: >
+            Request-only. When true and basePrice, marginPercent, marginFixed, or taxCategory change,
+            enqueue migration of eligible subscriptions (settlement, withdrawal restart, price-change email).
+            Default false. Not stored on the plan.
         minCommitmentDays: { type: integer }
         noticeDays: { type: integer }
         basePrice: { type: string }

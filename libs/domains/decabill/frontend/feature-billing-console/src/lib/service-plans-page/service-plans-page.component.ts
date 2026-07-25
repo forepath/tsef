@@ -1105,6 +1105,7 @@ export class ServicePlansPageComponent implements OnInit {
       allowCustomerServerTypeSelection: false,
       allowedServerTypes: [],
       taxCategory: 'standard',
+      migrateExistingSubscriptions: false,
       isActive: true,
     };
   }
@@ -1183,6 +1184,7 @@ export class ServicePlansPageComponent implements OnInit {
       allowCustomerServerTypeSelection: plan.allowCustomerServerTypeSelection === true,
       allowedServerTypes: normalizeAllowedServerTypeIds(plan.allowedServerTypes),
       taxCategory: plan.taxCategory ?? 'standard',
+      migrateExistingSubscriptions: false,
       isActive: plan.isActive,
     };
     this.typesAndProviders$.pipe(take(1)).subscribe((data) => {
@@ -1298,6 +1300,7 @@ export class ServicePlansPageComponent implements OnInit {
           allowedServerTypes:
             this.editForm.allowCustomerServerTypeSelection === true ? [...this.editAllowedServerTypes] : [],
           taxCategory: this.editForm.taxCategory ?? 'standard',
+          migrateExistingSubscriptions: this.editForm.migrateExistingSubscriptions === true,
           isActive: this.editForm.isActive,
         });
       });
