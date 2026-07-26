@@ -22,7 +22,7 @@ describe('ServicePlanPriceRecalcService', () => {
     findActiveBySubscriptionId: jest.fn(),
   };
   const openPositionsRepository = {
-    hasUnbilledForSubscription: jest.fn(),
+    hasUnbilledPeriodChargeForSubscription: jest.fn(),
   };
   const providerServerTypesService = {
     getServerTypes: jest.fn(),
@@ -89,7 +89,7 @@ describe('ServicePlanPriceRecalcService', () => {
     subscriptionsRepository.findEligibleForPriceRecalcByPlanId.mockResolvedValue([]);
     subscriptionItemsRepository.findBySubscription.mockResolvedValue([]);
     subscriptionAddonsRepository.findActiveBySubscriptionId.mockResolvedValue([]);
-    openPositionsRepository.hasUnbilledForSubscription.mockResolvedValue(false);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(false);
     invoiceTaxContextService.resolveForUser.mockResolvedValue({
       treatment: undefined,
       forceChargeNonEuIssuerEuB2b: false,
@@ -200,6 +200,39 @@ describe('ServicePlanPriceRecalcService', () => {
         newTax: 3.4,
         newTotal: 20.4,
         billingOutcome: 'charged',
+      }),
+    );
+  });
+
+  it('uses elapsed-delta credit when an unbilled period charge is still open', async () => {
+    providerServerTypesService.getServerTypes.mockResolvedValue([{ id: 'cpx11', priceMonthly: 12 }]);
+    subscriptionsRepository.findEligibleForPriceRecalcByPlanId.mockResolvedValue([subscription]);
+    subscriptionItemsRepository.findBySubscription.mockResolvedValue([
+      {
+        id: 'item-1',
+        subscriptionId: 'sub-1',
+        configSnapshot: {
+          serverType: 'cpx11',
+          billingBasePrice: 10,
+        },
+        serviceType: {
+          provider: 'hetzner',
+          providerDefaults: {},
+        },
+      },
+    ]);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(true);
+
+    await service.processPlan(plan as never, runDate, changedAt);
+
+    expect(billingService.applySettlement).toHaveBeenCalledWith(
+      expect.objectContaining({
+        snapshot: {
+          currentPeriodNet: 10,
+          periodDeltaNet: 2,
+          // Half period elapsed; pending invoice uses new price so elapsed delta is credited.
+          immediateAdjustmentNet: -1,
+        },
       }),
     );
   });

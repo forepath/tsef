@@ -1703,7 +1703,10 @@ paths:
       description: |
         Validates a mid-life configuration change (server type resize, addon add/remove) and returns
         the price delta, the prorated immediate adjustment, and the billing disclaimer the customer
-        must accept. Rejections carry a stable machine-readable `code`.
+        must accept. For prepaid plans, an unbilled **recurring period charge** (open position with
+        null `adjustmentNet`) uses an elapsed signed correction; an already-invoiced period uses the
+        remaining-period delta (charge OP or partial credit document). Rejections carry a stable
+        machine-readable `code`.
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
       requestBody:
@@ -5299,7 +5302,12 @@ components:
         periodDeltaNet: { type: number }
         immediateAdjustmentNet:
           type: number
-          description: Prorated net settled with the change; positive is charged, negative is credited.
+          description: |
+            Prorated net settled with the change; positive is charged, negative is credited.
+            Prepaid with an unbilled recurring period charge uses `-periodDeltaNet × elapsed`;
+            prepaid with the period already invoiced uses `periodDeltaNet × remaining`.
+            Post-usage uses the elapsed share of the old period net. End state matches a new
+            booking (`old×elapsed + new×remaining`).
         remainingPeriodRatio:
           type: number
           description: Share of the current billing period still unconsumed, in [0, 1].
@@ -5311,6 +5319,9 @@ components:
         notes:
           type: array
           items: { type: string }
+          description: |
+            Human-readable settlement notes (e.g. next-invoice charge/credit, or pending period
+            reprice with elapsed correction). Not a cash refund promise.
     ConfigChangeDiscount:
       type: object
       properties:
@@ -5343,6 +5354,10 @@ components:
           type: string
           nullable: true
           enum: [none, charged, credited, deferred]
+          description: |
+            One-shot settlement result. `credited` may be an open-position correction (next invoice)
+            or a partial credit document (PDF/eInvoice; DATEV on later export) when the prepaid
+            period charge was already invoiced.
         requestedAt: { type: string, format: date-time }
         processedAt: { type: string, format: date-time, nullable: true }
     SubscriptionItemResponse:

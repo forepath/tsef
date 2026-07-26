@@ -12,6 +12,7 @@ import {
   OPEN_OVERDUE_INVOICE_STATUSES,
 } from '../constants/invoice-status.constants';
 import { InvoiceEntity } from '../entities/invoice.entity';
+import { OpenPositionEntity } from '../entities/open-position.entity';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
 export interface OpenOverdueSummary {
@@ -79,7 +80,21 @@ export class InvoicesRepository {
     return await qb.getOne();
   }
 
+  /**
+   * Latest billable invoice that covers this subscription.
+   *
+   * Accumulated billing-day invoices stamp `subscription_id` with a primary row only, while other
+   * subscriptions on the same invoice are linked solely via `billing_open_positions.invoice_ref_id`.
+   * Prefer that OP linkage (period charges first) so prepaid partial credits / withdrawals do not
+   * fall back to an open-position credit when the stamped subscription differs.
+   */
   async findLatestBillableBySubscription(subscriptionId: string): Promise<InvoiceEntity | null> {
+    const viaOpenPositions = await this.findLatestBillableCoveringOpenPositions(subscriptionId);
+
+    if (viaOpenPositions) {
+      return viaOpenPositions;
+    }
+
     const qb = this.repository
       .createQueryBuilder('inv')
       .innerJoin('users', 'user', 'user.id = inv.user_id')
@@ -90,6 +105,42 @@ export class InvoicesRepository {
       .andWhere('inv.invoice_number IS NOT NULL')
       .orderBy('inv.createdAt', 'DESC')
       .take(1);
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getOne();
+  }
+
+  private async findLatestBillableCoveringOpenPositions(subscriptionId: string): Promise<InvoiceEntity | null> {
+    const viaPeriodCharge = await this.findLatestBillableCoveringOpenPositionsInternal(subscriptionId, true);
+
+    if (viaPeriodCharge) {
+      return viaPeriodCharge;
+    }
+
+    return await this.findLatestBillableCoveringOpenPositionsInternal(subscriptionId, false);
+  }
+
+  private async findLatestBillableCoveringOpenPositionsInternal(
+    subscriptionId: string,
+    periodChargeOnly: boolean,
+  ): Promise<InvoiceEntity | null> {
+    const qb = this.repository
+      .createQueryBuilder('inv')
+      .innerJoin('users', 'user', 'user.id = inv.user_id')
+      .innerJoin(OpenPositionEntity, 'pos', 'pos.invoiceRefId = inv.id AND pos.subscriptionId = :subscriptionId', {
+        subscriptionId,
+      })
+      .andWhere('inv.status IN (:...statuses)', {
+        statuses: [InvoiceStatus.ISSUED, InvoiceStatus.PAID, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE],
+      })
+      .andWhere('inv.invoice_number IS NOT NULL')
+      .orderBy('inv.createdAt', 'DESC')
+      .take(1);
+
+    if (periodChargeOnly) {
+      qb.andWhere('pos.adjustmentNet IS NULL');
+    }
 
     applyUserTenantFilter(qb, 'user');
 
