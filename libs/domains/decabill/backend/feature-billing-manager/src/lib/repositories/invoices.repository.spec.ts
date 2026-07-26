@@ -11,6 +11,7 @@ const createMockQueryBuilder = () => ({
   where: jest.fn().mockReturnThis(),
   andWhere: jest.fn().mockReturnThis(),
   orderBy: jest.fn().mockReturnThis(),
+  addOrderBy: jest.fn().mockReturnThis(),
   select: jest.fn().mockReturnThis(),
   addSelect: jest.fn().mockReturnThis(),
   groupBy: jest.fn().mockReturnThis(),
@@ -149,6 +150,39 @@ describe('InvoicesRepository', () => {
         InvoiceStatus.PAID,
         InvoiceStatus.VOID,
       ],
+    });
+  });
+
+  it('findLatestBillableBySubscription prefers invoices linked via open positions', async () => {
+    const invoice = { id: 'inv-covering', invoiceNumber: 'INV-1', status: InvoiceStatus.ISSUED };
+
+    mockQueryBuilder.getOne.mockResolvedValueOnce(invoice);
+
+    await expect(repository.findLatestBillableBySubscription('sub-billed')).resolves.toEqual(invoice);
+    expect(mockQueryBuilder.innerJoin).toHaveBeenCalledWith(
+      expect.anything(),
+      'pos',
+      'pos.invoiceRefId = inv.id AND pos.subscriptionId = :subscriptionId',
+      { subscriptionId: 'sub-billed' },
+    );
+    expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('pos.adjustmentNet IS NULL');
+    expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('inv.createdAt', 'DESC');
+    // Period-charge OP coverage found an invoice; skip adjustment-only and stamped-id lookups.
+    expect(mockRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+  });
+
+  it('findLatestBillableBySubscription falls back to stamped subscription_id', async () => {
+    const invoice = { id: 'inv-direct', invoiceNumber: 'INV-2', status: InvoiceStatus.ISSUED };
+
+    mockQueryBuilder.getOne
+      .mockResolvedValueOnce(null) // no period-charge coverage
+      .mockResolvedValueOnce(null) // no adjustment OP coverage
+      .mockResolvedValueOnce(invoice);
+
+    await expect(repository.findLatestBillableBySubscription('sub-1')).resolves.toEqual(invoice);
+    expect(mockRepository.createQueryBuilder).toHaveBeenCalledTimes(3);
+    expect(mockQueryBuilder.where).toHaveBeenCalledWith('inv.subscription_id = :subscriptionId', {
+      subscriptionId: 'sub-1',
     });
   });
 

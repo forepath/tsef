@@ -40,6 +40,8 @@ Same eligibility as arrear. Accounting:
 2. **Unbilled open position for the current prepaid period** (including unprovisioned withdraw after an immediate advance charge) — set `billUntil = withdrawnAt` on unbilled rows; no credit note (even if older invoices exist); no extra open position.
 3. **Neither** — fall back to arrear teardown OP with `billUntil = withdrawnAt`.
 
+Mid-life [config change](./subscription-config-change.md) and [automatic price recalculation](./automatic-price-recalculation.md) use the same prepaid notion of an **unbilled recurring period charge** (`adjustment_net IS NULL`) when choosing between an open-position correction and a partial credit document. Unrelated adjustment open positions do not flip that branch.
+
 ## Notifications
 
 | Event                           | When                                                                                         |

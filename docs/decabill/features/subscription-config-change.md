@@ -65,16 +65,16 @@ Stuck `processing` rows are reclaimed once after `CONFIG_CHANGE_PROCESSING_TIMEO
 
 ## Billing
 
-| Mode                                   | Behavior                                                                                          |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Post-usage (`billInAdvance === false`) | Partial open position for elapsed period at **old** price; billing anchor reset to change instant |
-| Pre-usage, not yet billed              | Negative open-position adjustment (`adjustmentKind: config_change_credit`)                        |
-| Pre-usage, already billed              | Partial credit note (`reason: config_change`) via the existing credit/eInvoice/DATEV path         |
-| Absolute gross &lt; €0.01              | `billingOutcome: none` (audit only); post-usage still resets the anchor when the change succeeds  |
+| Mode                                    | Behavior                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Post-usage (`billInAdvance === false`)  | Partial open position for elapsed period at **old** price; billing anchor reset to change instant                                                                                                                                                                                                                                                  |
+| Pre-usage, unbilled **period charge**   | Signed open-position correction (`config_change_credit` or `config_change_charge`) for the elapsed share of the delta; the pending period invoice uses the new full-period price. End state equals `old×elapsed + new×remaining`.                                                                                                                  |
+| Pre-usage, period charge already billed | Remaining share of the delta: charge OP, or partial credit note (`reason: config_change`) against the invoice that billed the period charge (including accumulated invoices stamped with another subscription via OP `invoice_ref_id`). PDF/eInvoice; DATEV on later export. Leftover **adjustment** open positions alone do not flip this branch. |
+| Absolute gross &lt; €0.01               | `billingOutcome: none` (audit only); post-usage still resets the anchor when the change succeeds                                                                                                                                                                                                                                                   |
 
 Rounding and tax follow `TaxCalculationService` (half-up to 2 decimals; net → tax → gross). Active promotions carry over; discounts apply to net before tax.
 
-Settlement is implemented via shared `SubscriptionConfigChangeBillingService.applySettlement` (also used by [automatic daily price recalculation](./automatic-price-recalculation.md) with `price_recalc_*` source refs and credit reason).
+Settlement is implemented via shared `SubscriptionConfigChangeBillingService.applySettlement` (also used by [automatic daily price recalculation](./automatic-price-recalculation.md) with `price_recalc_*` source refs and credit reason). Prepaid branching uses `hasUnbilledPeriodChargeForSubscription` (unbilled OP with `adjustment_net IS NULL`), not “any open position.”
 
 **Recurring billing authority:** After any step commits to item/addon snapshots, subsequent period charges use those committed prices **even if** the config-change row ends `failed`.
 

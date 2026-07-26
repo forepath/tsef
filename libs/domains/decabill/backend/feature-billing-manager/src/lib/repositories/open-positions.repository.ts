@@ -104,6 +104,27 @@ export class OpenPositionsRepository {
     return count > 0;
   }
 
+  /**
+   * True when the subscription still has an unbilled recurring period charge.
+   * Period charges never set `adjustment_net`; one-shot corrections always do.
+   * Use this for prepaid period-price settlement so leftover adjustment OPs do not
+   * steal an already-invoiced period off the partial-credit path.
+   */
+  async hasUnbilledPeriodChargeForSubscription(subscriptionId: string): Promise<boolean> {
+    const qb = this.repository
+      .createQueryBuilder('pos')
+      .innerJoin('users', 'user', 'user.id = pos.user_id')
+      .where('pos.subscription_id = :subscriptionId', { subscriptionId })
+      .andWhere('pos.invoice_ref_id IS NULL')
+      .andWhere('pos.adjustment_net IS NULL');
+
+    applyUserTenantFilter(qb, 'user');
+
+    const count = await qb.getCount();
+
+    return count > 0;
+  }
+
   async findUnbilledBySubscription(subscriptionId: string): Promise<OpenPositionEntity[]> {
     const qb = this.repository
       .createQueryBuilder('pos')

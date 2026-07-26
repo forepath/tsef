@@ -520,9 +520,11 @@ export class ServicePlanPriceRecalcService {
     const { plan, currentPeriodNet, periodDeltaNet, remainingPeriodRatio, elapsedPeriodRatio } = params;
 
     if (plan.billInAdvance === true) {
-      const hasUnbilled = await this.openPositionsRepository.hasUnbilledForSubscription(params.subscriptionId);
+      const hasUnbilledPeriodCharge = await this.openPositionsRepository.hasUnbilledPeriodChargeForSubscription(
+        params.subscriptionId,
+      );
 
-      if (hasUnbilled) {
+      if (hasUnbilledPeriodCharge) {
         return roundMoney(-periodDeltaNet * elapsedPeriodRatio);
       }
 

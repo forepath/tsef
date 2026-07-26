@@ -200,12 +200,15 @@ export class SubscriptionConfigChangeBillingService {
     const adjustmentNet = roundMoney(immediateAdjustmentNet);
 
     if (adjustmentNet < 0) {
-      const hasUnbilled = await this.openPositionsRepository.hasUnbilledForSubscription(params.subscription.id);
+      const hasUnbilledPeriodCharge = await this.openPositionsRepository.hasUnbilledPeriodChargeForSubscription(
+        params.subscription.id,
+      );
 
-      // Unbilled advance periods already pick up the new price on the pending invoice, so the
+      // Unbilled advance period charges already pick up the new price on the pending invoice, so the
       // frozen adjustment is a small elapsed correction (credit for upgrades, charge for downgrades)
-      // booked as an OP. Already-invoiced periods need a partial credit document instead.
-      if (hasUnbilled) {
+      // booked as an OP. Already-invoiced periods need a partial credit document instead; leftover
+      // adjustment OPs alone must not take that path.
+      if (hasUnbilledPeriodCharge) {
         return await this.settleAdjustment(params, adjustmentNet);
       }
 
@@ -236,9 +239,11 @@ export class SubscriptionConfigChangeBillingService {
   }
 
   /**
-   * Issues a partial credit document against the invoice that already charged the old price.
-   * The credit is capped at the amount the customer effectively paid after promotions, and any
-   * part that cannot be taken off an open balance is carried forward as a credit position.
+   * Issues a partial credit document against the invoice that already charged the old price
+   * (resolved via open-position coverage, including accumulated invoices stamped with another
+   * subscription). The credit is capped at the amount the customer effectively paid after
+   * promotions, and any part that cannot be taken off an open balance is carried forward as a
+   * credit position.
    */
   private async applyPartialCredit(
     params: PeriodPriceChangeSettlementParams,

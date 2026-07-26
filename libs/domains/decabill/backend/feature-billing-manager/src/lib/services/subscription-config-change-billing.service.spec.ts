@@ -49,7 +49,7 @@ describe('SubscriptionConfigChangeBillingService', () => {
     create: jest.fn(),
     createUniqueBySourceRef: jest.fn(),
     findBySourceRef: jest.fn(),
-    hasUnbilledForSubscription: jest.fn(),
+    hasUnbilledPeriodChargeForSubscription: jest.fn(),
     findUnbilledBySubscription: jest.fn(),
     findConfigChangeAdjustment: jest.fn(),
   };
@@ -122,6 +122,7 @@ describe('SubscriptionConfigChangeBillingService', () => {
     openPositionsRepository.findUnbilledBySubscription.mockResolvedValue([]);
     openPositionsRepository.findConfigChangeAdjustment.mockResolvedValue(null);
     openPositionsRepository.findBySourceRef.mockResolvedValue(null);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(false);
     openPositionsRepository.createUniqueBySourceRef.mockImplementation(async (dto) => ({
       entity: { id: 'pos-new', ...dto },
       created: true,
@@ -191,7 +192,7 @@ describe('SubscriptionConfigChangeBillingService', () => {
   });
 
   it('credits the elapsed share of the delta when the advance period is not invoiced yet', async () => {
-    openPositionsRepository.hasUnbilledForSubscription.mockResolvedValue(true);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(true);
 
     const outcome = await service.apply({
       subscription: subscription as never,
@@ -229,7 +230,7 @@ describe('SubscriptionConfigChangeBillingService', () => {
   });
 
   it('issues a partial credit document when the advance period was already invoiced', async () => {
-    openPositionsRepository.hasUnbilledForSubscription.mockResolvedValue(false);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(false);
     invoicesRepository.findLatestBillableBySubscription.mockResolvedValue({
       id: 'inv-1',
       invoiceNumber: 'INV-1',
@@ -351,7 +352,7 @@ describe('SubscriptionConfigChangeBillingService', () => {
   });
 
   it('finalizes settlement when createUniqueBySourceRef reports an existing credit document', async () => {
-    openPositionsRepository.hasUnbilledForSubscription.mockResolvedValue(false);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(false);
     invoicesRepository.findLatestBillableBySubscription.mockResolvedValue({
       id: 'inv-1',
       invoiceNumber: 'INV-1',
@@ -395,7 +396,7 @@ describe('SubscriptionConfigChangeBillingService', () => {
   });
 
   it('caps the credit at what the customer pays after promotions', async () => {
-    openPositionsRepository.hasUnbilledForSubscription.mockResolvedValue(false);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(false);
     promotionApplicationService.calculatePromotions.mockResolvedValue({
       rawSubtotalNet: 100,
       adjustedSubtotalNet: 50,
@@ -425,7 +426,7 @@ describe('SubscriptionConfigChangeBillingService', () => {
   });
 
   it('charges the frozen remaining delta when the advance period was already invoiced', async () => {
-    openPositionsRepository.hasUnbilledForSubscription.mockResolvedValue(false);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(false);
 
     const outcome = await service.apply({
       subscription: subscription as never,
@@ -445,6 +446,43 @@ describe('SubscriptionConfigChangeBillingService', () => {
         adjustmentKind: CONFIG_CHANGE_ADJUSTMENT_KINDS.CHARGE,
       }),
     );
+  });
+
+  it('issues a partial credit when the period is invoiced even if an unrelated adjustment OP is open', async () => {
+    // Period charge already billed; leftover adjustment OP alone must not take the OP-credit path.
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(false);
+    invoicesRepository.findLatestBillableBySubscription.mockResolvedValue({
+      id: 'inv-1',
+      invoiceNumber: 'INV-1',
+      balanceDue: '30.00',
+      currency: 'EUR',
+      createdAt: PERIOD_START,
+      issuedAt: PERIOD_START,
+      // Accumulated invoices may stamp a different subscription_id; resolution is the repository's job.
+      subscriptionId: 'sub-other',
+    });
+
+    const outcome = await service.apply({
+      subscription: subscription as never,
+      plan: buildPlan(true) as never,
+      change: buildChange({
+        currentPeriodNet: 100,
+        periodDeltaNet: -20,
+        immediateAdjustmentNet: -10,
+      }) as never,
+      changedAt: CHANGED_AT,
+    });
+
+    expect(outcome).toBe('credited');
+    expect(invoiceCreditDocumentsRepository.createUniqueBySourceRef).toHaveBeenCalledWith(
+      expect.objectContaining({
+        invoiceId: 'inv-1',
+        creditNet: 10,
+        reason: CONFIG_CHANGE_CREDIT_REASON,
+        sourceRef: 'config_change:change-1',
+      }),
+    );
+    expect(openPositionsRepository.createUniqueBySourceRef).not.toHaveBeenCalled();
   });
 
   it('skips billing when the accepted disclaimer snapshot is missing', async () => {

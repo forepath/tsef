@@ -558,9 +558,11 @@ export class SubscriptionConfigChangeService {
     const { plan, currentPeriodNet, periodDeltaNet, remainingPeriodRatio, elapsedPeriodRatio } = params;
 
     if (plan.billInAdvance === true) {
-      const hasUnbilled = await this.openPositionsRepository.hasUnbilledForSubscription(params.subscriptionId);
+      const hasUnbilledPeriodCharge = await this.openPositionsRepository.hasUnbilledPeriodChargeForSubscription(
+        params.subscriptionId,
+      );
 
-      if (hasUnbilled) {
+      if (hasUnbilledPeriodCharge) {
         // Pending period invoice will use the new price for the whole period; correct elapsed delta.
         return roundMoney(-periodDeltaNet * elapsedPeriodRatio);
       }

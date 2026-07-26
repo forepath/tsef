@@ -44,9 +44,10 @@ If the computed period net is unchanged, no billing, email, or withdrawal restar
 Reuses the shared period-price-change settlement path used by config changes:
 
 1. Branch on `plan.billInAdvance`
-2. Prepaid: `OpenPositionsRepository.hasUnbilledForSubscription` (`invoice_ref_id IS NULL`) decides unbilled vs already-invoiced
+2. Prepaid: `OpenPositionsRepository.hasUnbilledPeriodChargeForSubscription` (`invoice_ref_id IS NULL` **and** `adjustment_net IS NULL`) decides unbilled period charge vs already-invoiced. Leftover adjustment OPs alone do not count as an unbilled period.
 3. Arrear: elapsed share of old period net as OP; move `currentPeriodStart` to change time
-4. Prepaid + already billed + negative delta: partial credit document (PDF + eInvoice), not a payment-processor cash refund
+4. Prepaid + unbilled period charge: signed OP correction (`-delta × elapsed`) so pending period reprice + correction equals `old×elapsed + new×remaining`
+5. Prepaid + already billed + negative delta: partial credit document (PDF + eInvoice) against the invoice that covers the subscription’s billed period charge (`invoice_ref_id`), not only invoices stamped with that `subscription_id`; DATEV picks credits up on export
 
 Idempotency source refs: `price_recalc:{runDate}:{subscriptionId}` (+ `:carry`). Adjustment kinds: `price_recalc_arrear` / `price_recalc_charge` / `price_recalc_credit`. Credit reason: `price_recalc`.
 

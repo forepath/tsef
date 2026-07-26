@@ -152,6 +152,33 @@ describe('OpenPositionsRepository', () => {
     });
   });
 
+  describe('hasUnbilledPeriodChargeForSubscription', () => {
+    it('returns true when an unbilled period charge exists', async () => {
+      mockGetCount.mockResolvedValue(1);
+
+      const repository = new OpenPositionsRepository(mockRepository as never);
+      const result = await runWithTenantId('default', () => repository.hasUnbilledPeriodChargeForSubscription('sub-1'));
+
+      expect(result).toBe(true);
+      expect(mockWhere).toHaveBeenCalledWith('pos.subscription_id = :subscriptionId', {
+        subscriptionId: 'sub-1',
+      });
+      expect(mockAndWhere).toHaveBeenCalledWith('pos.invoice_ref_id IS NULL');
+      expect(mockAndWhere).toHaveBeenCalledWith('pos.adjustment_net IS NULL');
+      expect(mockAndWhere).toHaveBeenCalledWith('user.tenant_id = :tenantId', { tenantId: 'default' });
+    });
+
+    it('returns false when only unbilled adjustment positions exist', async () => {
+      mockGetCount.mockResolvedValue(0);
+
+      const repository = new OpenPositionsRepository(mockRepository as never);
+      const result = await runWithTenantId('default', () => repository.hasUnbilledPeriodChargeForSubscription('sub-1'));
+
+      expect(result).toBe(false);
+      expect(mockAndWhere).toHaveBeenCalledWith('pos.adjustment_net IS NULL');
+    });
+  });
+
   describe('markBilled', () => {
     it('updates position with invoiceRefId when in tenant', async () => {
       const entity = {

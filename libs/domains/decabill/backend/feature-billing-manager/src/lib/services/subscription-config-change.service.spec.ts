@@ -30,7 +30,7 @@ describe('SubscriptionConfigChangeService', () => {
   const addonsRepository = { findByIds: jest.fn() };
   const configChangesRepository = { findLatestForSubscription: jest.fn(), create: jest.fn() };
   const promotionRedemptionsRepository = { findActiveBySubscription: jest.fn() };
-  const openPositionsRepository = { hasUnbilledForSubscription: jest.fn() };
+  const openPositionsRepository = { hasUnbilledPeriodChargeForSubscription: jest.fn() };
   const providerRegistry = { getProvider: jest.fn() };
   const providerServerTypesService = { getServerTypes: jest.fn() };
   const addonService = { providerSupportsAddons: jest.fn() };
@@ -94,7 +94,7 @@ describe('SubscriptionConfigChangeService', () => {
       ...dto,
     }));
     promotionRedemptionsRepository.findActiveBySubscription.mockResolvedValue([]);
-    openPositionsRepository.hasUnbilledForSubscription.mockResolvedValue(false);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(false);
     providerRegistry.getProvider.mockReturnValue({
       id: 'hetzner',
       displayName: 'Hetzner',
@@ -436,14 +436,44 @@ describe('SubscriptionConfigChangeService', () => {
       allowedServerTypes: ['cx11', 'cx21', 'cpx11'],
       providerConfigDefaults: { allowedAddonIds: ['addon-1'] },
     });
-    openPositionsRepository.hasUnbilledForSubscription.mockResolvedValue(true);
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(true);
 
     const preview = await service.preview('sub-1', 'user-1', { serverType: 'cx21' });
 
     expect(preview.amounts.periodDeltaNet).toBe(5);
     // Elapsed share of the upgrade delta is credited because the pending invoice uses the new price.
     expect(preview.amounts.immediateAdjustmentNet).toBeCloseTo(-2.5, 2);
+    // Pending period (new) + elapsed credit equals old×elapsed + new×remaining.
+    const elapsed = 1 - preview.amounts.remainingPeriodRatio;
+    expect(preview.amounts.newPeriodNet + preview.amounts.immediateAdjustmentNet).toBeCloseTo(
+      preview.amounts.currentPeriodNet * elapsed + preview.amounts.newPeriodNet * preview.amounts.remainingPeriodRatio,
+      2,
+    );
     expect(preview.disclaimer.kind).toBe('credit');
+  });
+
+  it('previews remaining-period math when only leftover adjustment OPs are open', async () => {
+    servicePlansRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'plan-1',
+      basePrice: '0',
+      marginPercent: '0',
+      marginFixed: '0',
+      billingIntervalType: BillingIntervalType.MONTH,
+      billingIntervalValue: 1,
+      billInAdvance: true,
+      autoRecalculatePriceDaily: false,
+      allowCustomerServerTypeSelection: true,
+      allowedServerTypes: ['cx11', 'cx21', 'cpx11'],
+      providerConfigDefaults: { allowedAddonIds: ['addon-1'] },
+    });
+    // Period charge already invoiced; hasUnbilledPeriodCharge is false even if adjustment OPs exist.
+    openPositionsRepository.hasUnbilledPeriodChargeForSubscription.mockResolvedValue(false);
+
+    const preview = await service.preview('sub-1', 'user-1', { serverType: 'cx21' });
+
+    expect(preview.amounts.periodDeltaNet).toBe(5);
+    expect(preview.amounts.immediateAdjustmentNet).toBeCloseTo(2.5, 2);
+    expect(preview.disclaimer.kind).toBe('charge');
   });
 
   it('previews an arrear downgrade as elapsed settlement (not a remaining-period credit)', async () => {
