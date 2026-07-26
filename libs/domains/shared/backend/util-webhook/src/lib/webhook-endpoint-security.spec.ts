@@ -1,7 +1,19 @@
 import { assertProductionWebhookEscapeHatchesDisabled, assertSafeWebhookUrlOrThrow } from './webhook-endpoint-security';
 
+jest.mock('@forepath/shared/backend/util-otel', () => ({
+  recordSharedCounter: jest.fn(),
+}));
+
+import { recordSharedCounter } from '@forepath/shared/backend/util-otel';
+
+const mockedRecordSharedCounter = recordSharedCounter as jest.MockedFunction<typeof recordSharedCounter>;
+
 describe('assertSafeWebhookUrlOrThrow', () => {
   const originalNodeEnv = process.env.NODE_ENV;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   afterEach(() => {
     process.env.NODE_ENV = originalNodeEnv;
@@ -21,6 +33,10 @@ describe('assertSafeWebhookUrlOrThrow', () => {
     expect(() => assertSafeWebhookUrlOrThrow('https://localhost:4242/webhook')).toThrow(
       'Webhook URL must not target private or loopback addresses',
     );
+    expect(mockedRecordSharedCounter).toHaveBeenCalledWith('ssrf.guard.blocked_total', {
+      guard: 'webhook',
+      reason: 'private_host',
+    });
   });
 
   it('rejects http in production', () => {

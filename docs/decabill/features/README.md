@@ -26,6 +26,7 @@ Decabill provides a complete set of capabilities for subscription billing, invoi
 - **CloudInit Configs** - Admin-managed Docker templates for the custom service kind
 - **Projects** - Customer-assigned work tracking with admin CRUD and billable time
 - **Project Board** - Live ticket board with swimlanes and WebSocket updates
+- **OpenTelemetry** - Optional Prometheus metrics and OTLP export (disabled by default)
 
 ## Features
 
@@ -254,6 +255,18 @@ Live Kanban board for project tickets with Socket.IO on namespace **`projects`**
 - Admin ticket and milestone CRUD; one-way lock for delivery scope freeze
 - Customer comments; room-based broadcasts after REST mutations
 - `setProject` handshake to join `project:{projectId}`
+
+### [OpenTelemetry](./opentelemetry.md)
+
+Optional Prometheus metrics scrape and OTLP export for the billing manager. Disabled by default; requires `OTEL_ENABLED=true` and Basic auth credentials.
+
+**Key Capabilities**:
+
+- Kill switch via `OTEL_ENABLED`
+- Prometheus exposition at `/otel/metrics` (outside `/api`)
+- HTTP Basic auth for scrapers
+- BullMQ queue job gauges for the billing queue
+- Host and runtime metrics
 
 ## Feature Relationships
 

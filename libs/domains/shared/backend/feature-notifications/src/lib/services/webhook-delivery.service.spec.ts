@@ -3,6 +3,31 @@ import type { NotificationEventEnvelope } from '../interfaces/notification.inter
 
 import { WebhookDeliveryService } from './webhook-delivery.service';
 
+jest.mock('@forepath/shared/backend/util-otel', () => ({
+  httpStatusClass: (status: number | null | undefined) => {
+    if (status === null || status === undefined) {
+      return 'none';
+    }
+
+    if (status >= 200 && status < 300) {
+      return '2xx';
+    }
+
+    if (status >= 500) {
+      return '5xx';
+    }
+
+    return 'other';
+  },
+  recordSharedCounter: jest.fn(),
+  recordSharedHistogram: jest.fn(),
+}));
+
+import { recordSharedCounter, recordSharedHistogram } from '@forepath/shared/backend/util-otel';
+
+const mockedRecordSharedCounter = recordSharedCounter as jest.MockedFunction<typeof recordSharedCounter>;
+const mockedRecordSharedHistogram = recordSharedHistogram as jest.MockedFunction<typeof recordSharedHistogram>;
+
 describe('WebhookDeliveryService', () => {
   const envelope: NotificationEventEnvelope = {
     id: 'event-1',
@@ -100,6 +125,15 @@ describe('WebhookDeliveryService', () => {
     expect(deliveriesRepository.create).toHaveBeenCalledWith(expect.objectContaining({ attempt: 1, success: true }));
     expect(deliveryRetentionService.applyRetentionForEndpointFireAndForget).toHaveBeenCalledWith(endpoint);
     expect(endpointsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ consecutiveFailures: 0 }));
+    expect(mockedRecordSharedCounter).toHaveBeenCalledWith(
+      'notifications.delivery.attempts_total',
+      expect.objectContaining({ channel: 'webhook', outcome: 'success', http_status_class: '2xx' }),
+    );
+    expect(mockedRecordSharedHistogram).toHaveBeenCalledWith(
+      'notifications.delivery.duration_ms',
+      expect.any(Number),
+      expect.objectContaining({ channel: 'webhook', outcome: 'success' }),
+    );
   });
 
   it('throws on HTTP failure so BullMQ can retry without incrementing consecutive failures', async () => {
@@ -183,6 +217,9 @@ describe('WebhookDeliveryService', () => {
         consecutiveFailures: WEBHOOK_CONSECUTIVE_FAILURE_DISABLE_THRESHOLD,
       }),
     );
+    expect(mockedRecordSharedCounter).toHaveBeenCalledWith('notifications.delivery.auto_disabled_total', {
+      channel: 'webhook',
+    });
   });
 
   it('returns failed test delivery without throwing or updating endpoint counters', async () => {

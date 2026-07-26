@@ -1,4 +1,4 @@
-import { AgentsModule } from '@forepath/agenstra/backend/feature-agent-manager';
+import { AgentsModule, AgenstraOtelModule } from '@forepath/agenstra/backend/feature-agent-manager';
 import { MonitoringModule } from '@forepath/shared/backend';
 import { getHybridAuthGuards, getRateLimitConfig, KeycloakModule, KeycloakService } from '@forepath/identity/backend';
 import { Module } from '@nestjs/common';
@@ -16,6 +16,7 @@ import { typeormConfig } from '../typeorm.config';
     KeycloakModule,
     KeycloakConnectModule.registerAsync({ useExisting: KeycloakService }),
     AgentsModule,
+    AgenstraOtelModule,
     MonitoringModule,
   ],
   // Use hybrid guards (checks STATIC_API_KEY to determine authentication method)

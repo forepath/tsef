@@ -4,6 +4,14 @@ import {
   createCorrelationIdMiddleware,
   registerAxiosCorrelationIdPropagation,
 } from '@forepath/shared/backend/util-http-context';
+import {
+  getOtelMetricsGlobalPrefixExcludes,
+  isOtelEffectivelyEnabled,
+  logOtelStartupStatus,
+  resolveOtelRuntimeConfig,
+  shutdownOtelSdk,
+  startOtelSdk,
+} from '@forepath/shared/backend/util-otel';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import axios from 'axios';
@@ -37,6 +45,16 @@ export async function bootstrap(): Promise<void> {
 
   Logger.overrideLogger(appLogger);
   registerAxiosCorrelationIdPropagation(axios);
+
+  const otelConfig = resolveOtelRuntimeConfig(process.env, 'forepath-communication');
+  logOtelStartupStatus(appLogger, otelConfig);
+
+  if (isOtelEffectivelyEnabled(otelConfig)) {
+    startOtelSdk(otelConfig);
+    process.on('SIGTERM', () => {
+      void shutdownOtelSdk();
+    });
+  }
 
   assertProductionConfigOrExit(new Logger('ProductionConfig'));
 
@@ -79,7 +97,9 @@ export async function bootstrap(): Promise<void> {
     }),
   );
 
-  app.setGlobalPrefix('api');
+  const otelExcludes = getOtelMetricsGlobalPrefixExcludes();
+
+  app.setGlobalPrefix('api', otelExcludes.length > 0 ? { exclude: otelExcludes } : undefined);
 
   const port = parseInt(process.env.PORT || '3300', 10);
 

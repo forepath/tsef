@@ -287,6 +287,18 @@ Used by **backend billing manager only**. See **[Background Jobs](./background-j
 | `QUEUE_BULL_BOARD_USERNAME` | Bull Board HTTP Basic user             | `admin`                               |
 | `QUEUE_BULL_BOARD_PASSWORD` | Bull Board HTTP Basic password         | required in production                |
 
+## OpenTelemetry
+
+Applies to **Backend Billing Manager**. See [OpenTelemetry](../features/opentelemetry.md).
+
+| Variable                          | Description                                                                         |
+| --------------------------------- | ----------------------------------------------------------------------------------- |
+| `OTEL_ENABLED`                    | Must be exactly `true` to enable (default: disabled)                                |
+| `OTEL_USERNAME` / `OTEL_PASSWORD` | HTTP Basic credentials for the metrics scrape endpoint (both required when enabled) |
+| `OTEL_METRICS_PATH`               | Prometheus path on the HTTP root, outside `/api` (default `/otel/metrics`)          |
+| `OTEL_SERVICE_NAME`               | Service resource name (default `decabill-billing-manager`)                          |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`     | Optional OTLP HTTP endpoint for traces and logs                                     |
+
 ## Environment-Specific Defaults
 
 ### Development

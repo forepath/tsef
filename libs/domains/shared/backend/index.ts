@@ -7,4 +7,5 @@ export * from './feature-monitoring/src';
 export * from './util-dynamic-provider-registry/src';
 export * from './util-redis-cache/src';
 export * from './util-webhook/src';
+export * from './util-otel/src';
 export * from './feature-notifications/src';

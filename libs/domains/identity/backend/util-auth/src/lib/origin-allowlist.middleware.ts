@@ -1,7 +1,9 @@
+import { recordSharedCounter } from '@forepath/shared/backend/util-otel/metrics';
 import { ForbiddenException, Logger } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
 
 import { isBullBoardRequestPath } from './bull-board-request-path';
+import { isOtelMetricsRequestPath } from './otel-metrics-request-path';
 
 /**
  * Comma-separated allowlist parsing (trim, lowercase, drop empties).
@@ -52,7 +54,7 @@ export function createOriginAllowlistMiddleware(
   return (req, _res, next) => {
     const requestPath = (req.originalUrl ?? req.url ?? '').split('?')[0] ?? '';
 
-    if (isBullBoardRequestPath(requestPath)) {
+    if (isBullBoardRequestPath(requestPath) || isOtelMetricsRequestPath(requestPath)) {
       next();
 
       return;
@@ -90,6 +92,7 @@ export function createOriginAllowlistMiddleware(
 
     if (allowlist.length === 0) {
       logger.warn(`Rejecting request with Origin=${originHeader} because CORS_ORIGIN is not configured`);
+      recordSharedCounter('origin_allowlist.rejected_total');
       next(new ForbiddenException('Origin not allowed'));
 
       return;
@@ -102,6 +105,7 @@ export function createOriginAllowlistMiddleware(
     }
 
     logger.warn(`Rejecting request with Origin=${originHeader} (not in allowlist)`);
+    recordSharedCounter('origin_allowlist.rejected_total');
     next(new ForbiddenException('Origin not allowed'));
   };
 }

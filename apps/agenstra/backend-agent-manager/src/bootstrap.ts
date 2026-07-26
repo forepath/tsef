@@ -11,6 +11,14 @@ import {
 } from '@forepath/shared/backend/util-http-context';
 import { createOriginAllowlistMiddleware } from '@forepath/identity/backend';
 import { assertProductionEncryptionKeyOrExit } from '@forepath/shared/backend';
+import {
+  getOtelMetricsGlobalPrefixExcludes,
+  isOtelEffectivelyEnabled,
+  logOtelStartupStatus,
+  resolveOtelRuntimeConfig,
+  shutdownOtelSdk,
+  startOtelSdk,
+} from '@forepath/shared/backend/util-otel';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import axios from 'axios';
@@ -60,12 +68,22 @@ async function preloadWorkspaceConfigurationOverrides(): Promise<void> {
 }
 
 export async function bootstrap(): Promise<void> {
-  assertProductionEncryptionKeyOrExit(new Logger('EncryptionKey'));
-
   const appLogger = new CorrelationAwareConsoleLogger({ json: true, colors: false });
 
   Logger.overrideLogger(appLogger);
   registerAxiosCorrelationIdPropagation(axios);
+
+  const otelConfig = resolveOtelRuntimeConfig(process.env, 'agenstra-agent-manager');
+  logOtelStartupStatus(appLogger, otelConfig);
+
+  if (isOtelEffectivelyEnabled(otelConfig)) {
+    startOtelSdk(otelConfig);
+    process.on('SIGTERM', () => {
+      void shutdownOtelSdk();
+    });
+  }
+
+  assertProductionEncryptionKeyOrExit(new Logger('EncryptionKey'));
 
   await preloadWorkspaceConfigurationOverrides();
 
@@ -129,8 +147,9 @@ export async function bootstrap(): Promise<void> {
   }
 
   const globalPrefix = 'api';
+  const otelExcludes = getOtelMetricsGlobalPrefixExcludes();
 
-  app.setGlobalPrefix(globalPrefix);
+  app.setGlobalPrefix(globalPrefix, otelExcludes.length > 0 ? { exclude: otelExcludes } : undefined);
   const port = parseInt(process.env.PORT || '3000', 10);
 
   await app.listen(port);

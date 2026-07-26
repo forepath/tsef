@@ -7,9 +7,12 @@ import {
 
 import { isBullBoardRequestPath } from './bull-board-request-path';
 import { getHttpRequestPath } from './http-request-path.util';
+import { isOtelMetricsRequestPath } from './otel-metrics-request-path';
 
-function shouldSkipForBullBoard(context: ExecutionContext): boolean {
-  return isBullBoardRequestPath(getHttpRequestPath(context));
+function shouldSkipForOpsBasicAuth(context: ExecutionContext): boolean {
+  const path = getHttpRequestPath(context);
+
+  return isBullBoardRequestPath(path) || isOtelMetricsRequestPath(path);
 }
 
 function isPatAuthenticated(context: ExecutionContext): boolean {
@@ -19,10 +22,10 @@ function isPatAuthenticated(context: ExecutionContext): boolean {
 }
 
 function shouldSkipKeycloakGuard(context: ExecutionContext): boolean {
-  return shouldSkipForBullBoard(context) || isPatAuthenticated(context);
+  return shouldSkipForOpsBasicAuth(context) || isPatAuthenticated(context);
 }
 
-/** Keycloak AuthGuard that skips Bull Board routes and app-signed PAT JWTs. */
+/** Keycloak AuthGuard that skips Bull Board / OTEL metrics routes and app-signed PAT JWTs. */
 @Injectable()
 export class BullBoardSkippingAuthGuard extends KeycloakAuthGuard {
   canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,7 +37,7 @@ export class BullBoardSkippingAuthGuard extends KeycloakAuthGuard {
   }
 }
 
-/** Keycloak ResourceGuard that skips Bull Board routes and app-signed PAT JWTs. */
+/** Keycloak ResourceGuard that skips Bull Board / OTEL metrics routes and app-signed PAT JWTs. */
 @Injectable()
 export class BullBoardSkippingResourceGuard extends KeycloakResourceGuard {
   canActivate(context: ExecutionContext): Promise<boolean> {
@@ -46,7 +49,7 @@ export class BullBoardSkippingResourceGuard extends KeycloakResourceGuard {
   }
 }
 
-/** Keycloak RoleGuard that skips Bull Board routes and app-signed PAT JWTs. */
+/** Keycloak RoleGuard that skips Bull Board / OTEL metrics routes and app-signed PAT JWTs. */
 @Injectable()
 export class BullBoardSkippingRoleGuard extends KeycloakRoleGuard {
   canActivate(context: ExecutionContext): Promise<boolean> {

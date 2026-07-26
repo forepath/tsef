@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 
 import { applyProjectTenantFilter, getRequiredTenantId } from '../../utils/tenant-query.utils';
 import { ProjectEntity } from '../entities/project.entity';
+import { ProjectStatus } from '../entities/project.enums';
 
 @Injectable()
 export class ProjectsRepository {
@@ -100,6 +101,14 @@ export class ProjectsRepository {
       .getRawOne<{ count: string }>();
 
     return parseInt(result?.count ?? '0', 10);
+  }
+
+  async countByStatus(status: ProjectStatus): Promise<number> {
+    const qb = this.repository.createQueryBuilder('project').where('project.status = :status', { status });
+
+    applyProjectTenantFilter(qb, 'project');
+
+    return await qb.getCount();
   }
 
   async create(dto: Partial<ProjectEntity>): Promise<ProjectEntity> {

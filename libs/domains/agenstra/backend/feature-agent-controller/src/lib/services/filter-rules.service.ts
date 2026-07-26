@@ -54,6 +54,25 @@ export class FilterRulesService {
     return out;
   }
 
+  /** Counts for OTEL gauges: rules by enabled flag and sync targets by status. */
+  async countForMetrics(): Promise<{
+    rulesEnabled: number;
+    rulesDisabled: number;
+    syncPending: number;
+    syncSynced: number;
+    syncFailed: number;
+  }> {
+    const [rulesEnabled, rulesDisabled, syncPending, syncSynced, syncFailed] = await Promise.all([
+      this.rulesRepo.count({ where: { enabled: true } }),
+      this.rulesRepo.count({ where: { enabled: false } }),
+      this.targetsRepo.count({ where: { syncStatus: 'pending' } }),
+      this.targetsRepo.count({ where: { syncStatus: 'synced' } }),
+      this.targetsRepo.count({ where: { syncStatus: 'failed' } }),
+    ]);
+
+    return { rulesEnabled, rulesDisabled, syncPending, syncSynced, syncFailed };
+  }
+
   async findOne(id: string): Promise<FilterRuleResponseDto> {
     const rule = await this.rulesRepo.findOne({ where: { id }, relations: { clientLinks: true } });
 

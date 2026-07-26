@@ -22,6 +22,7 @@ Agenstra provides a complete set of features for managing distributed AI agent i
 - **Message Filter Rules** - Global and per-agent regex policies for chat traffic
 - **Atlassian import** - Admin-managed site connections and import configs (Jira and Confluence) into tickets and knowledge
 - **Dynamic provider plugins** - Extend provisioning, agents, pipelines, context import, and chat filters via env-configured packages
+- **OpenTelemetry** - Optional Prometheus metrics and OTLP export (disabled by default)
 
 ## Features
 
@@ -219,6 +220,18 @@ Extend Agenstra backends with extra provider packages **without forking** the co
 - Add agent backends, CI/CD providers, and chat filters on the manager
 - Mount `./provider-plugins` or install from registry/tarballs at container startup
 - Tiered fail-fast for critical provisioning registry (`DYNAMIC_PROVIDERS_FAIL_FAST`)
+
+### [OpenTelemetry](./opentelemetry.md)
+
+Optional Prometheus metrics scrape and OTLP export for the agent controller and agent manager. Disabled by default; requires `OTEL_ENABLED=true` and Basic auth credentials.
+
+**Key Capabilities**:
+
+- Kill switch via `OTEL_ENABLED`
+- Prometheus exposition at `/otel/metrics` (outside `/api`)
+- HTTP Basic auth for scrapers
+- BullMQ queue job gauges on the controller
+- Host and runtime metrics on both backends
 
 ## Feature Relationships
 

@@ -18,6 +18,14 @@ import {
   runPendingMigrationsIfRoleAllows,
   shouldRunApiHttp,
 } from '@forepath/shared/backend';
+import {
+  getOtelMetricsGlobalPrefixExcludes,
+  isOtelEffectivelyEnabled,
+  logOtelStartupStatus,
+  resolveOtelRuntimeConfig,
+  shutdownOtelSdk,
+  startOtelSdk,
+} from '@forepath/shared/backend/util-otel';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import axios from 'axios';
@@ -26,14 +34,24 @@ import { AppModule } from './app/app.module';
 import { typeormConfig } from './typeorm.config';
 
 export async function bootstrap(): Promise<void> {
-  assertProductionEncryptionKeyOrExit(new Logger('EncryptionKey'));
-  assertProductionClientEndpointAllowlistConfigured(new Logger('ClientEndpointAllowlist'));
-  assertProductionWebhookEscapeHatchesDisabled(new Logger('WebhookSafety'));
-
   const appLogger = new CorrelationAwareConsoleLogger({ json: true, colors: false });
 
   Logger.overrideLogger(appLogger);
   registerAxiosCorrelationIdPropagation(axios);
+
+  const otelConfig = resolveOtelRuntimeConfig(process.env, 'agenstra-agent-controller');
+  logOtelStartupStatus(appLogger, otelConfig);
+
+  if (isOtelEffectivelyEnabled(otelConfig)) {
+    startOtelSdk(otelConfig);
+    process.on('SIGTERM', () => {
+      void shutdownOtelSdk();
+    });
+  }
+
+  assertProductionEncryptionKeyOrExit(new Logger('EncryptionKey'));
+  assertProductionClientEndpointAllowlistConfigured(new Logger('ClientEndpointAllowlist'));
+  assertProductionWebhookEscapeHatchesDisabled(new Logger('WebhookSafety'));
 
   const role = getQueueRole();
 
@@ -95,9 +113,9 @@ export async function bootstrap(): Promise<void> {
   );
 
   const globalPrefix = 'api';
-  const bullBoardExcludes = getBullBoardGlobalPrefixExcludes();
+  const globalPrefixExcludes = [...getBullBoardGlobalPrefixExcludes(), ...getOtelMetricsGlobalPrefixExcludes()];
 
-  app.setGlobalPrefix(globalPrefix, bullBoardExcludes.length > 0 ? { exclude: bullBoardExcludes } : undefined);
+  app.setGlobalPrefix(globalPrefix, globalPrefixExcludes.length > 0 ? { exclude: globalPrefixExcludes } : undefined);
   const port = parseInt(process.env.PORT || '3100', 10);
 
   await app.listen(port);

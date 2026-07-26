@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { incrementCounter, recordHistogram } from '@forepath/shared/backend/util-otel/metrics';
 import { Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
 
@@ -28,6 +29,7 @@ export class ChatwootApiError extends Error {
 @Injectable()
 export class ChatwootApiService {
   private readonly logger = new Logger(ChatwootApiService.name);
+  private readonly otelMeterName = 'forepath.communication';
   private readonly baseUrl: string;
   private readonly apiToken: string;
   private readonly accountId: number;
@@ -129,6 +131,9 @@ export class ChatwootApiService {
       throw new ChatwootApiError('Chatwoot API is not configured');
     }
 
+    const operation = resolveChatwootOperation(path);
+    const startedAt = Date.now();
+
     try {
       const response = await axios.request<T>({
         method,
@@ -143,6 +148,8 @@ export class ChatwootApiService {
         validateStatus: (status) => status < 500,
       });
 
+      this.recordChatwootRequestMetrics(operation, response.status, Date.now() - startedAt);
+
       if (response.status >= 400) {
         this.logger.error(`Chatwoot API ${method} ${path} failed with status ${response.status}`);
         throw new ChatwootApiError('Chatwoot API request failed', response.status);
@@ -151,13 +158,61 @@ export class ChatwootApiService {
       return response.data;
     } catch (error) {
       if (error instanceof ChatwootApiError) {
+        if (error.statusCode != null) {
+          this.recordChatwootRequestMetrics(operation, error.statusCode, Date.now() - startedAt);
+        } else {
+          this.recordChatwootRequestMetrics(operation, undefined, Date.now() - startedAt);
+        }
+
         throw error;
       }
 
       const axiosError = error as AxiosError;
 
+      this.recordChatwootRequestMetrics(operation, undefined, Date.now() - startedAt);
       this.logger.error(`Chatwoot API ${method} ${path} error: ${axiosError.message}`);
       throw new ChatwootApiError('Chatwoot API request failed');
     }
   }
+
+  private recordChatwootRequestMetrics(operation: string, statusCode: number | undefined, durationMs: number): void {
+    const statusClass = resolveHttpStatusClass(statusCode);
+
+    incrementCounter(this.otelMeterName, 'communication.chatwoot.requests', {
+      operation,
+      status_class: statusClass,
+    });
+    recordHistogram(this.otelMeterName, 'communication.chatwoot.request.duration_ms', durationMs, {
+      operation,
+      status_class: statusClass,
+    });
+  }
+}
+
+function resolveChatwootOperation(path: string): string {
+  if (path.includes('/contacts/search')) {
+    return 'search_contacts';
+  }
+
+  if (path.includes('/contact_inboxes')) {
+    return 'create_contact_inbox';
+  }
+
+  if (path.includes('/conversations')) {
+    return 'create_conversation';
+  }
+
+  if (path.includes('/contacts')) {
+    return 'create_contact';
+  }
+
+  return 'unknown';
+}
+
+function resolveHttpStatusClass(statusCode: number | undefined): string {
+  if (statusCode == null || !Number.isFinite(statusCode)) {
+    return 'error';
+  }
+
+  return `${Math.floor(statusCode / 100)}xx`;
 }

@@ -13,6 +13,9 @@ describe('HybridAuthGuard', () => {
   let reflector: Reflector;
   let mockExecutionContext: jest.Mocked<ExecutionContext>;
   let originalStaticApiKey: string | undefined;
+  let originalOtelEnabled: string | undefined;
+  let originalOtelUsername: string | undefined;
+  let originalOtelPassword: string | undefined;
 
   beforeEach(() => {
     reflector = new Reflector();
@@ -20,6 +23,9 @@ describe('HybridAuthGuard', () => {
 
     // Save original STATIC_API_KEY
     originalStaticApiKey = process.env.STATIC_API_KEY;
+    originalOtelEnabled = process.env.OTEL_ENABLED;
+    originalOtelUsername = process.env.OTEL_USERNAME;
+    originalOtelPassword = process.env.OTEL_PASSWORD;
 
     // Mock ExecutionContext (handler/class required for Reflector metadata on @Public routes)
     mockExecutionContext = {
@@ -40,6 +46,24 @@ describe('HybridAuthGuard', () => {
       process.env.STATIC_API_KEY = originalStaticApiKey;
     } else {
       delete process.env.STATIC_API_KEY;
+    }
+
+    if (originalOtelEnabled !== undefined) {
+      process.env.OTEL_ENABLED = originalOtelEnabled;
+    } else {
+      delete process.env.OTEL_ENABLED;
+    }
+
+    if (originalOtelUsername !== undefined) {
+      process.env.OTEL_USERNAME = originalOtelUsername;
+    } else {
+      delete process.env.OTEL_USERNAME;
+    }
+
+    if (originalOtelPassword !== undefined) {
+      process.env.OTEL_PASSWORD = originalOtelPassword;
+    } else {
+      delete process.env.OTEL_PASSWORD;
     }
 
     jest.clearAllMocks();
@@ -143,6 +167,25 @@ describe('HybridAuthGuard', () => {
       });
 
       expect(guard.canActivate(mockExecutionContext)).toBe(true);
+    });
+
+    it('does not bypass API key auth for OTEL path when OTEL Basic auth is not enabled', () => {
+      process.env.OTEL_ENABLED = 'true';
+      process.env.OTEL_USERNAME = 'otel';
+      process.env.OTEL_PASSWORD = '   ';
+
+      const mockRequest = {
+        originalUrl: '/otel/metrics',
+        url: '/otel/metrics',
+        headers: {},
+      };
+
+      mockExecutionContext.switchToHttp = jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+      });
+
+      expect(() => guard.canActivate(mockExecutionContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockExecutionContext)).toThrow('Missing authorization header');
     });
 
     it('should throw UnauthorizedException when authorization header is missing', () => {

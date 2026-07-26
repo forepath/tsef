@@ -1,5 +1,6 @@
 import { Logger as NestLogger } from '@nestjs/common';
 import type { Logger as TypeOrmLogger, QueryRunner } from 'typeorm';
+import { recordSharedCounter, recordSharedHistogram } from '@forepath/shared/backend/util-otel/metrics';
 
 import { sanitizeLogPayload } from './sanitize-log-payload';
 
@@ -52,6 +53,8 @@ export class CorrelationAwareTypeOrmLogger implements TypeOrmLogger {
   }
 
   logQuerySlow(time: number, query: string, parameters?: unknown[], queryRunner?: QueryRunner): void {
+    recordSharedCounter('typeorm.query.slow_total');
+    recordSharedHistogram('typeorm.query.slow_duration_ms', time);
     this.logger.warn({
       msg: 'typeorm_query_slow',
       time,

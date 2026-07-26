@@ -11,7 +11,30 @@ function isBullBoardRequestPath(urlPath: string): boolean {
 }
 
 /**
- * Paths that must not require tenant resolution (health probes, payment webhooks, Bull Board).
+ * Fail closed: only exclude when OTEL is effectively enabled (same rules as identity util-auth).
+ * Duplicated here so util-http-context does not depend on identity.
+ */
+function isOtelMetricsRequestPath(urlPath: string, env: NodeJS.ProcessEnv = process.env): boolean {
+  if (env['OTEL_ENABLED'] !== 'true') {
+    return false;
+  }
+
+  const username = env['OTEL_USERNAME']?.trim() ?? '';
+  const password = env['OTEL_PASSWORD']?.trim() ?? '';
+
+  if (!username || !password) {
+    return false;
+  }
+
+  const metricsPath = (env['OTEL_METRICS_PATH']?.trim() || '/otel/metrics').replace(/\/+$/, '');
+  const base = metricsPath.startsWith('/') ? metricsPath : `/${metricsPath}`;
+  const path = normalizeRequestPath(urlPath);
+
+  return path === base || path.startsWith(`${base}/`);
+}
+
+/**
+ * Paths that must not require tenant resolution (health probes, payment webhooks, Bull Board, OTEL).
  * Mirrors auth bypass rules in HybridAuthGuard.
  */
 export function isTenantMiddlewareExcludedPath(urlPath: string): boolean {
@@ -22,6 +45,10 @@ export function isTenantMiddlewareExcludedPath(urlPath: string): boolean {
   }
 
   if (path === '/api/webhooks/payments/stripe' || path.startsWith('/api/webhooks/payments/')) {
+    return true;
+  }
+
+  if (isOtelMetricsRequestPath(path)) {
     return true;
   }
 

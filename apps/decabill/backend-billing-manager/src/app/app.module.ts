@@ -4,6 +4,7 @@ import {
   BillingModule,
   BillingPatAuthModule,
   BillingUsersAuthModule,
+  DecabillOtelModule,
 } from '@forepath/decabill/backend';
 import {
   BullBoardSkippingThrottlerGuard,
@@ -42,6 +43,7 @@ const authMethod = getAuthenticationMethod();
         ]
       : []),
     ...(authMethod === 'users' ? [BillingUsersAuthModule] : []),
+    DecabillOtelModule,
     MonitoringModule,
   ],
   providers: [

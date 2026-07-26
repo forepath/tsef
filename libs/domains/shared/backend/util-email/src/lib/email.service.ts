@@ -1,3 +1,4 @@
+import { recordSharedCounter, recordSharedHistogram } from '@forepath/shared/backend/util-otel';
 import { Injectable, Logger } from '@nestjs/common';
 import type { Transporter } from 'nodemailer';
 import * as nodemailer from 'nodemailer';
@@ -79,18 +80,33 @@ export class EmailService {
   async sendOrThrow(options: EmailOptions): Promise<void> {
     if (!this.transporter) {
       this.logger.debug('Email not sent (SMTP not configured):', options.subject, 'to', options.to);
+      recordSharedCounter('email.smtp.send_total', { outcome: 'disabled' });
       throw new Error('Email service is disabled: SMTP_HOST and SMTP_PORT not set');
     }
 
-    await this.transporter.sendMail({
-      from: this.from,
-      to: options.to,
-      subject: options.subject,
-      text: options.text,
-      html: options.html ?? options.text.replace(/\n/g, '<br>'),
-      ...(options.attachments?.length ? { attachments: options.attachments } : {}),
-    });
-    this.logger.debug(`Email sent: ${options.subject} to ${options.to}`);
+    const startedAt = Date.now();
+
+    try {
+      await this.transporter.sendMail({
+        from: this.from,
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html ?? options.text.replace(/\n/g, '<br>'),
+        ...(options.attachments?.length ? { attachments: options.attachments } : {}),
+      });
+      const durationMs = Date.now() - startedAt;
+
+      recordSharedCounter('email.smtp.send_total', { outcome: 'success' });
+      recordSharedHistogram('email.smtp.send_duration_ms', durationMs, { outcome: 'success' });
+      this.logger.debug(`Email sent: ${options.subject} to ${options.to}`);
+    } catch (error) {
+      const durationMs = Date.now() - startedAt;
+
+      recordSharedCounter('email.smtp.send_total', { outcome: 'failed' });
+      recordSharedHistogram('email.smtp.send_duration_ms', durationMs, { outcome: 'failed' });
+      throw error;
+    }
   }
 
   isEnabled(): boolean {

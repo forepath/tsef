@@ -2,6 +2,16 @@ import { Logger as NestLogger } from '@nestjs/common';
 
 import { CorrelationAwareTypeOrmLogger } from './typeorm-logger';
 
+jest.mock('@forepath/shared/backend/util-otel/metrics', () => ({
+  recordSharedCounter: jest.fn(),
+  recordSharedHistogram: jest.fn(),
+}));
+
+import { recordSharedCounter, recordSharedHistogram } from '@forepath/shared/backend/util-otel/metrics';
+
+const mockedRecordSharedCounter = recordSharedCounter as jest.MockedFunction<typeof recordSharedCounter>;
+const mockedRecordSharedHistogram = recordSharedHistogram as jest.MockedFunction<typeof recordSharedHistogram>;
+
 describe('CorrelationAwareTypeOrmLogger', () => {
   let debugSpy: jest.SpiedFunction<NestLogger['debug']>;
   let logSpy: jest.SpiedFunction<NestLogger['log']>;
@@ -118,6 +128,8 @@ describe('CorrelationAwareTypeOrmLogger', () => {
         query: 'slow-q',
       }),
     );
+    expect(mockedRecordSharedCounter).toHaveBeenCalledWith('typeorm.query.slow_total');
+    expect(mockedRecordSharedHistogram).toHaveBeenCalledWith('typeorm.query.slow_duration_ms', 99);
 
     logger.logSchemaBuild('schema ok');
     expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ msg: 'typeorm_schema_build', message: 'schema ok' }));

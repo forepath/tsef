@@ -104,6 +104,12 @@ x-backend-billing-manager-environment: &backend-billing-manager-environment
   DNS_BASE_DOMAIN: ${DNS_BASE_DOMAIN:-spirde.com}
   TENANTS: ${TENANTS:-}
   TENANTS_ALLOW_DEFAULT: ${TENANTS_ALLOW_DEFAULT:-true}
+  OTEL_ENABLED: ${OTEL_ENABLED:-false}
+  OTEL_USERNAME: ${OTEL_USERNAME:-}
+  OTEL_PASSWORD: ${OTEL_PASSWORD:-}
+  OTEL_METRICS_PATH: ${OTEL_METRICS_PATH:-/otel/metrics}
+  OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-}
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
 
 services:
   postgres:

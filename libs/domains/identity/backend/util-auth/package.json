@@ -13,6 +13,7 @@
     "nest-keycloak-connect": "2.0.0-alpha.2",
     "express": "4.21.2",
     "typeorm": "0.3.27",
-    "bcrypt": "6.0.0"
+    "bcrypt": "6.0.0",
+    "@forepath/shared/backend/util-otel": "0.0.1"
   }
 }

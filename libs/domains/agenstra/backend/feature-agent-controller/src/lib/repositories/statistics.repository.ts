@@ -803,6 +803,98 @@ export class StatisticsRepository {
     return { rows, total };
   }
 
+  /**
+   * Grouped chat I/O totals for OTEL gauges (original workspace id + direction + kind).
+   */
+  async countChatIoGroupedForMetrics(): Promise<
+    Array<{
+      clientId: string;
+      direction: string;
+      interactionKind: string;
+      count: number;
+      wordCount: number;
+      charCount: number;
+    }>
+  > {
+    const rows = await this.statisticsChatIo
+      .createQueryBuilder('cio')
+      .innerJoin('cio.statisticsClient', 'client')
+      .select('client.original_client_id', 'clientId')
+      .addSelect('cio.direction', 'direction')
+      .addSelect('cio.interaction_kind', 'interactionKind')
+      .addSelect('COUNT(cio.id)', 'count')
+      .addSelect('COALESCE(SUM(cio.word_count), 0)', 'wordCount')
+      .addSelect('COALESCE(SUM(cio.char_count), 0)', 'charCount')
+      .groupBy('client.original_client_id')
+      .addGroupBy('cio.direction')
+      .addGroupBy('cio.interaction_kind')
+      .getRawMany<{
+        clientId: string;
+        direction: string;
+        interactionKind: string;
+        count: string;
+        wordCount: string;
+        charCount: string;
+      }>();
+
+    return rows.map((row) => ({
+      clientId: row.clientId,
+      direction: row.direction,
+      interactionKind: row.interactionKind,
+      count: parseInt(row.count ?? '0', 10),
+      wordCount: parseInt(row.wordCount ?? '0', 10),
+      charCount: parseInt(row.charCount ?? '0', 10),
+    }));
+  }
+
+  /** Grouped filter-drop totals for OTEL gauges. */
+  async countFilterDropsGroupedForMetrics(): Promise<
+    Array<{ clientId: string; direction: string; filterType: string; count: number }>
+  > {
+    const rows = await this.statisticsChatFilterDrops
+      .createQueryBuilder('fd')
+      .innerJoin('fd.statisticsClient', 'client')
+      .select('client.original_client_id', 'clientId')
+      .addSelect('fd.direction', 'direction')
+      .addSelect('fd.filter_type', 'filterType')
+      .addSelect('COUNT(fd.id)', 'count')
+      .groupBy('client.original_client_id')
+      .addGroupBy('fd.direction')
+      .addGroupBy('fd.filter_type')
+      .getRawMany<{ clientId: string; direction: string; filterType: string; count: string }>();
+
+    return rows.map((row) => ({
+      clientId: row.clientId,
+      direction: row.direction,
+      filterType: row.filterType,
+      count: parseInt(row.count ?? '0', 10),
+    }));
+  }
+
+  /** Grouped filter-flag totals for OTEL gauges. */
+  async countFilterFlagsGroupedForMetrics(): Promise<
+    Array<{ clientId: string; direction: string; filterType: string; count: number }>
+  > {
+    const rows = await this.statisticsChatFilterFlags
+      .createQueryBuilder('ff')
+      .innerJoin('ff.statisticsClient', 'client')
+      .select('client.original_client_id', 'clientId')
+      .addSelect('ff.direction', 'direction')
+      .addSelect('ff.filter_type', 'filterType')
+      .addSelect('COUNT(ff.id)', 'count')
+      .groupBy('client.original_client_id')
+      .addGroupBy('ff.direction')
+      .addGroupBy('ff.filter_type')
+      .getRawMany<{ clientId: string; direction: string; filterType: string; count: string }>();
+
+    return rows.map((row) => ({
+      clientId: row.clientId,
+      direction: row.direction,
+      filterType: row.filterType,
+      count: parseInt(row.count ?? '0', 10),
+    }));
+  }
+
   private async loadEntityEventsWithRelations(ids: string[]): Promise<StatisticsEntityEventEntity[]> {
     const entities = await this.statisticsEntityEvents.find({
       where: { id: In(ids) },
