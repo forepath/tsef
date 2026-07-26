@@ -1,0 +1,56 @@
+name: Upsert PR comment
+description: Create or update a sticky PR comment identified by an HTML marker in the body
+
+inputs:
+  marker:
+    description: Unique HTML comment marker that identifies the sticky comment
+    required: true
+  body-path:
+    description: Path to a markdown file used as the comment body
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Upsert sticky PR comment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const marker = ${{ toJSON(inputs.marker) }};
+          const bodyPath = ${{ toJSON(inputs.body-path) }};
+          if (!fs.existsSync(bodyPath)) {
+            core.setFailed(`Comment body file not found: ${bodyPath}`);
+            return;
+          }
+          const body = fs.readFileSync(bodyPath, 'utf8');
+          if (!body.includes(marker)) {
+            core.setFailed(`Comment body is missing required marker: ${marker}`);
+            return;
+          }
+          const { owner, repo } = context.repo;
+          const issue_number = context.issue.number;
+          const { data: comments } = await github.rest.issues.listComments({
+            owner,
+            repo,
+            issue_number,
+            per_page: 100,
+          });
+          const existing = comments.find((c) => c.body && c.body.includes(marker));
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner,
+              repo,
+              comment_id: existing.id,
+              body,
+            });
+            core.info(`Updated PR comment ${existing.id} (${marker})`);
+          } else {
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body,
+            });
+            core.info(`Created PR comment (${marker})`);
+          }

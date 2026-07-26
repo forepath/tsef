@@ -48,6 +48,7 @@ import { ClientAgentFileSystemProxyService } from '../services/client-agent-file
 import { ClientAgentProxyService } from '../services/client-agent-proxy.service';
 import { ClientsService } from '../services/clients.service';
 import { ExternalImportSyncMarkerService } from '../services/external-import-sync-marker.service';
+import { FilterRulesService } from '../services/filter-rules.service';
 
 import { ClientsModule } from './clients.module';
 import { AgenstraNotificationsModule } from './agenstra-notifications.module';
@@ -55,7 +56,23 @@ import { ContextImportModule } from './context-import.module';
 import { FilterRulesModule } from './filter-rules.module';
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
 
-@Module({})
+@Module({
+  providers: [
+    {
+      provide: FilterRulesService,
+      useValue: {
+        countForMetrics: jest.fn().mockResolvedValue({
+          rulesEnabled: 0,
+          rulesDisabled: 0,
+          syncPending: 0,
+          syncSynced: 0,
+          syncFailed: 0,
+        }),
+      },
+    },
+  ],
+  exports: [FilterRulesService],
+})
 class StubFilterRulesModule {}
 
 @Module({
