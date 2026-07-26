@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.20.0](https://github.com/forepath/one/compare/v2.19.0...v2.20.0) (2026-07-26)
+
+
+### Features
+
+* decabill plan addons ([#523](https://github.com/forepath/one/issues/523)) ([db9f6cf](https://github.com/forepath/one/commit/db9f6cff0239fb7f0bbaf4d6c0e31fa81f87572b))
+* decabill plan upgrades and downgrades ([#524](https://github.com/forepath/one/issues/524)) ([6548706](https://github.com/forepath/one/commit/6548706a98ed9b019f46e122fd20a0683cfde346))
+* decabill price auto updates ([#525](https://github.com/forepath/one/issues/525)) ([7fb44f1](https://github.com/forepath/one/commit/7fb44f1afe01c076bd055d21dabf11c18707f57e))
+* graph mcp server ([#519](https://github.com/forepath/one/issues/519)) ([9b84d3a](https://github.com/forepath/one/commit/9b84d3aa7f7b6b8a3000a284d583431f5debf8ad))
+
+
+### Bug Fixes
+
+* period scoped prepaid settlement gate ([#526](https://github.com/forepath/one/issues/526)) ([66f83a1](https://github.com/forepath/one/commit/66f83a129dacdb9f9b2a5434caf579aec1bd12bc))
+
 ## [2.19.0](https://github.com/forepath/one/compare/v2.18.1...v2.19.0) (2026-07-23)
 
 
