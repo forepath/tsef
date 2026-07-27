@@ -1,3 +1,4 @@
+import { recordSharedCounter } from '@forepath/shared/backend/util-otel/metrics';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 
@@ -8,6 +9,7 @@ import {
 } from './bull-board-keycloak.guards';
 import { isBullBoardRequestPath } from './bull-board-request-path';
 import { IS_PUBLIC_KEY } from './decorators/public.decorator';
+import { isOtelMetricsRequestPath } from './otel-metrics-request-path';
 
 /** Supported authentication methods. */
 export type AuthenticationMethod = 'api-key' | 'keycloak' | 'users';
@@ -60,8 +62,8 @@ export class HybridAuthGuard implements CanActivate {
       return true;
     }
 
-    // Bull Board uses its own HTTP Basic auth (QUEUE_BULL_BOARD_*), not API key / Keycloak
-    if (isBullBoardRequestPath(path)) {
+    // Bull Board / OTEL metrics use their own HTTP Basic auth, not API key / Keycloak
+    if (isBullBoardRequestPath(path) || isOtelMetricsRequestPath(path)) {
       return true;
     }
 
@@ -80,7 +82,7 @@ export class HybridAuthGuard implements CanActivate {
     const useApiKey = authMethod === 'api-key' && staticApiKey;
 
     if (authMethod === 'api-key' && !staticApiKey) {
-      throw new UnauthorizedException(
+      this.rejectUnauthorized(
         'API key authentication is configured but STATIC_API_KEY is not set. Set STATIC_API_KEY or use a different AUTHENTICATION_METHOD.',
       );
     }
@@ -90,14 +92,14 @@ export class HybridAuthGuard implements CanActivate {
       const authHeader = request.headers.authorization;
 
       if (!authHeader) {
-        throw new UnauthorizedException('Missing authorization header');
+        this.rejectUnauthorized('Missing authorization header');
       }
 
       // Support both "Bearer <key>" and "ApiKey <key>" formats
       const parts = authHeader.split(' ');
 
       if (parts.length !== 2) {
-        throw new UnauthorizedException('Invalid authorization header format');
+        this.rejectUnauthorized('Invalid authorization header format');
       }
 
       const [scheme, providedKey] = parts;
@@ -117,11 +119,16 @@ export class HybridAuthGuard implements CanActivate {
       }
 
       // API key doesn't match - reject (no Keycloak fallback, no anonymous access)
-      throw new UnauthorizedException('Invalid API key');
+      this.rejectUnauthorized('Invalid API key');
     }
 
     // keycloak or users: let respective guards handle authentication
     return true;
+  }
+
+  private rejectUnauthorized(message: string): never {
+    recordSharedCounter('auth.requests.total', { outcome: 'unauthorized' });
+    throw new UnauthorizedException(message);
   }
 }
 

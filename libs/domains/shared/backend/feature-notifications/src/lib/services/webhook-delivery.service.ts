@@ -4,6 +4,7 @@ import {
   WebhookSignatureService,
   type WebhookAuthConfig,
 } from '@forepath/shared/backend/util-webhook';
+import { httpStatusClass, recordSharedCounter, recordSharedHistogram } from '@forepath/shared/backend/util-otel';
 
 import {
   WEBHOOK_CONSECUTIVE_FAILURE_DISABLE_THRESHOLD,
@@ -44,12 +45,14 @@ export class WebhookDeliveryService {
 
     if (!endpoint) {
       this.logger.debug(`Skipping webhook delivery; endpoint ${payload.endpointId} no longer exists`);
+      this.recordWebhookDeliveryMetrics({ outcome: 'skipped', httpStatus: null, durationMs: 0 });
 
       return this.buildSkippedDeliveryResponse(payload);
     }
 
     if (!endpoint.enabled) {
       this.logger.debug(`Skipping webhook delivery; endpoint ${payload.endpointId} is disabled`);
+      this.recordWebhookDeliveryMetrics({ outcome: 'skipped', httpStatus: null, durationMs: 0 });
 
       return this.buildSkippedDeliveryResponse(payload, { success: false, errorMessage: 'Endpoint disabled' });
     }
@@ -63,6 +66,7 @@ export class WebhookDeliveryService {
       authHeaderName: endpoint.authHeaderName,
     };
 
+    const startedAt = Date.now();
     const result = await this.httpClient.deliver({
       url: endpoint.url,
       method: endpoint.httpMethod,
@@ -72,6 +76,13 @@ export class WebhookDeliveryService {
         'Forepath-Signature': signature,
         'Forepath-Event-Id': payload.eventId,
       },
+    });
+    const durationMs = Date.now() - startedAt;
+
+    this.recordWebhookDeliveryMetrics({
+      outcome: result.success ? 'success' : 'failed',
+      httpStatus: result.httpStatus,
+      durationMs,
     });
 
     const endpointAfterDeliver = await this.endpointsRepository.findByIdAndScope(payload.endpointId, payload.scopeKey);
@@ -110,6 +121,7 @@ export class WebhookDeliveryService {
           endpointAfterDeliver.enabled = false;
           endpointAfterDeliver.disabledReason = `Disabled after ${WEBHOOK_CONSECUTIVE_FAILURE_DISABLE_THRESHOLD} consecutive delivery failures`;
           this.logger.warn(`Disabled webhook endpoint ${endpointAfterDeliver.id} after repeated failures`);
+          recordSharedCounter('notifications.delivery.auto_disabled_total', { channel: 'webhook' });
         }
 
         endpointChanged = true;
@@ -146,6 +158,21 @@ export class WebhookDeliveryService {
       },
       { throwOnFailure: false, trackConsecutiveFailures: false },
     );
+  }
+
+  private recordWebhookDeliveryMetrics(params: {
+    outcome: 'success' | 'failed' | 'skipped';
+    httpStatus: number | null;
+    durationMs: number;
+  }): void {
+    const attrs = {
+      channel: 'webhook',
+      outcome: params.outcome,
+      http_status_class: httpStatusClass(params.httpStatus),
+    };
+
+    recordSharedCounter('notifications.delivery.attempts_total', attrs);
+    recordSharedHistogram('notifications.delivery.duration_ms', params.durationMs, attrs);
   }
 
   private buildSkippedDeliveryResponse(

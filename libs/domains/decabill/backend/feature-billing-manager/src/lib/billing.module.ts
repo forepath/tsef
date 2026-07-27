@@ -167,6 +167,7 @@ import { AvailabilityService } from './services/availability.service';
 import { BackorderRetryJobHandler } from './services/backorder-retry.job-handler';
 import { BackorderService } from './services/backorder.service';
 import { BillingAdminService } from './services/billing-admin.service';
+import { BillingMetricsCollectorService } from './services/billing-metrics-collector.service';
 import { BillingAuditLogService } from './services/billing-audit-log.service';
 import { BillingTenantService } from './services/billing-tenant.service';
 import { BillingIssuerConfigService } from './services/billing-issuer-config.service';
@@ -573,6 +574,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     },
     AdminBillNowService,
     BillingAdminService,
+    BillingMetricsCollectorService,
     BillingAuditLogService,
     BillingTenantService,
     BillingStatisticsQueryService,

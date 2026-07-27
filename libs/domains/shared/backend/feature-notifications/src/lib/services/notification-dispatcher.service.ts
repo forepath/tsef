@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { enqueueUnitJob } from '@forepath/shared/backend';
+import { recordSharedCounter } from '@forepath/shared/backend/util-otel';
 
 import {
   NOTIFICATIONS_API_VERSION,
@@ -59,6 +60,12 @@ export class NotificationDispatcherService {
           jobIdNamespace: 'webhook',
           jobIdParts: this.buildJobIdParts(context, envelope.id, endpoint.id),
           opts: { attempts: WEBHOOK_DELIVER_MAX_ATTEMPTS },
+        });
+
+        recordSharedCounter('notifications.events.published_total', {
+          channel: 'webhook',
+          event_type: context.type,
+          ...(this.options.applicationId ? { app: this.options.applicationId } : {}),
         });
       }),
     );

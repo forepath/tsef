@@ -1,3 +1,5 @@
+import { getTenantIdOrDefault } from '@forepath/shared/backend/util-http-context';
+import { incrementCounter } from '@forepath/shared/backend/util-otel/metrics';
 import { Injectable, Logger } from '@nestjs/common';
 
 import { InvoiceStatus } from '../constants/invoice-status.constants';
@@ -43,6 +45,9 @@ export class InvoiceOverdueJobHandler {
 
     if (due < today) {
       await this.invoicesRepository.update(invoiceId, { status: InvoiceStatus.OVERDUE });
+      incrementCounter('forepath.decabill', 'decabill.invoices.overdue_marked', {
+        tenant_id: getTenantIdOrDefault(),
+      });
       this.logger.log(`Marked invoice ${invoiceId} as overdue`);
     }
   }

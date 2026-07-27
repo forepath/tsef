@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
+import { recordSharedCounter, recordSharedHistogram } from '@forepath/shared/backend/util-otel/metrics';
 
 import { readRedisConnectionConfig } from './redis-connection.config';
 
@@ -58,9 +59,12 @@ export class RedisCacheService implements OnModuleDestroy {
   }
 
   async getJson<T>(key: string): Promise<T | null> {
+    const startedAt = Date.now();
     const client = await this.ensureConnected();
 
     if (!client) {
+      this.recordCacheOperation('get', 'disabled', Date.now() - startedAt);
+
       return null;
     }
 
@@ -68,29 +72,50 @@ export class RedisCacheService implements OnModuleDestroy {
       const raw = await client.get(key);
 
       if (!raw) {
+        this.recordCacheOperation('get', 'miss', Date.now() - startedAt);
+
         return null;
       }
+
+      this.recordCacheOperation('get', 'hit', Date.now() - startedAt);
 
       return JSON.parse(raw) as T;
     } catch (error) {
       this.logger.warn(`Redis cache get failed for key ${key}: ${(error as Error).message}`);
+      this.recordCacheOperation('get', 'error', Date.now() - startedAt);
 
       return null;
     }
   }
 
   async setJson<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
+    const startedAt = Date.now();
     const client = await this.ensureConnected();
 
     if (!client) {
+      this.recordCacheOperation('set', 'disabled', Date.now() - startedAt);
+
       return;
     }
 
     try {
       await client.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+      this.recordCacheOperation('set', 'hit', Date.now() - startedAt);
     } catch (error) {
       this.logger.warn(`Redis cache set failed for key ${key}: ${(error as Error).message}`);
+      this.recordCacheOperation('set', 'error', Date.now() - startedAt);
     }
+  }
+
+  private recordCacheOperation(
+    operation: 'get' | 'set',
+    outcome: 'hit' | 'miss' | 'error' | 'disabled',
+    durationMs: number,
+  ): void {
+    const attrs = { operation, outcome };
+
+    recordSharedCounter('redis_cache.operations_total', attrs);
+    recordSharedHistogram('redis_cache.operation_duration_ms', durationMs, attrs);
   }
 
   async onModuleDestroy(): Promise<void> {

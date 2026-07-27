@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { EmailService, EmailTemplateRendererService, resolveEmailSubject } from '@forepath/shared/backend/util-email';
+import { recordSharedCounter, recordSharedHistogram } from '@forepath/shared/backend/util-otel';
 
 import {
   EMAIL_ATTACHMENT_RESOLVER,
@@ -47,6 +48,8 @@ export class EmailDeliveryService {
       ...(companyFrom ? { companyFrom } : {}),
     };
 
+    const startedAt = Date.now();
+
     try {
       const subject = resolveEmailSubject(emailOptions.subjectRegistry, payload.templateKey, renderContext);
       const bodies = this.templateRenderer.render(emailOptions.templateRoots, payload.templateKey, renderContext);
@@ -71,6 +74,8 @@ export class EmailDeliveryService {
         attempt: payload.attempt,
         errorMessage: null,
       });
+
+      this.recordEmailDeliveryMetrics({ outcome: 'success', durationMs: Date.now() - startedAt });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Email delivery failed';
 
@@ -86,12 +91,25 @@ export class EmailDeliveryService {
         errorMessage: message,
       });
 
+      this.recordEmailDeliveryMetrics({ outcome: 'failed', durationMs: Date.now() - startedAt });
+
       this.logger.warn(
         `Email delivery failed for ${payload.eventType} (attempt ${payload.attempt}/${maxAttempts}): ${message}`,
       );
 
       throw error instanceof Error ? error : new Error(message);
     }
+  }
+
+  private recordEmailDeliveryMetrics(params: { outcome: 'success' | 'failed'; durationMs: number }): void {
+    const attrs = {
+      channel: 'email',
+      outcome: params.outcome,
+      http_status_class: 'none',
+    };
+
+    recordSharedCounter('notifications.delivery.attempts_total', attrs);
+    recordSharedHistogram('notifications.delivery.duration_ms', params.durationMs, attrs);
   }
 
   private async resolveAttachments(

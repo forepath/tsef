@@ -1,0 +1,30 @@
+{
+  "name": "shared-backend-util-otel",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domains/shared/backend/util-otel/src",
+  "projectType": "library",
+  "tags": ["domain:shared", "scope:backend", "type:util"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/domains/shared/backend/util-otel",
+        "main": "libs/domains/shared/backend/util-otel/src/index.ts",
+        "tsConfig": "libs/domains/shared/backend/util-otel/tsconfig.lib.json",
+        "assets": ["libs/domains/shared/backend/util-otel/*.md"],
+        "additionalEntryPoints": [
+          "libs/domains/shared/backend/util-otel/src/metrics.ts",
+          "libs/domains/shared/backend/util-otel/src/bullmq.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/domains/shared/backend/util-otel/jest.config.cts"
+      }
+    }
+  }
+}

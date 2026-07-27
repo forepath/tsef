@@ -1,0 +1,40 @@
+{
+  "name": "@forepath/shared/backend/util-otel",
+  "version": "0.0.1",
+  "private": true,
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./metrics": {
+      "types": "./src/metrics.d.ts",
+      "default": "./src/metrics.js"
+    },
+    "./bullmq": {
+      "types": "./src/bullmq.d.ts",
+      "default": "./src/bullmq.js"
+    }
+  },
+  "dependencies": {
+    "tslib": "^2.3.0",
+    "@nestjs/common": "11.1.6",
+    "@nestjs/core": "11.1.6",
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/auto-instrumentations-node": "0.79.0",
+    "@opentelemetry/exporter-logs-otlp-http": "0.221.0",
+    "@opentelemetry/exporter-prometheus": "0.221.0",
+    "@opentelemetry/exporter-trace-otlp-http": "0.221.0",
+    "@opentelemetry/resources": "2.10.0",
+    "@opentelemetry/sdk-logs": "0.221.0",
+    "@opentelemetry/sdk-node": "0.220.0",
+    "@opentelemetry/semantic-conventions": "1.43.0",
+    "bullmq": "5.76.10",
+    "express": "4.21.2",
+    "nestjs-otel": "8.1.0",
+    "@opentelemetry/sdk-metrics": "2.10.0"
+  }
+}

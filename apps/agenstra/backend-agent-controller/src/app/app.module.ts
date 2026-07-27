@@ -1,4 +1,5 @@
 import {
+  AgenstraOtelModule,
   ClientsModule,
   IdentityEmailBridgeModule,
   IdentityNotificationBridgeModule,
@@ -48,6 +49,7 @@ const authMethod = getAuthenticationMethod();
     IdentityStatisticsBridgeModule,
     IdentityNotificationBridgeModule,
     IdentityEmailBridgeModule,
+    AgenstraOtelModule,
     MonitoringModule,
   ],
   providers: [

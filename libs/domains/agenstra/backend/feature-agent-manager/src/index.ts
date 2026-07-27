@@ -42,6 +42,7 @@ export * from './lib/entities/regex-filter-rule.entity';
 export * from './lib/entities/workspace-configuration-override.entity';
 export * from './lib/gateways/agents.gateway';
 export * from './lib/modules/agents.module';
+export * from './lib/modules/agenstra-otel.module';
 export * from './lib/repositories/agent-messages.repository';
 export * from './lib/repositories/agents.repository';
 export * from './lib/services/agent-messages.service';

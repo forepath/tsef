@@ -66,6 +66,7 @@ import { TicketAutomationRunsStatusRepository } from '../repositories/ticket-aut
 import { UserEnvironmentReadStateRepository } from '../repositories/user-environment-read-state.repository';
 import { AgentConsoleStatusRealtimeService } from '../services/agent-console-status-realtime.service';
 import { AgentConsoleStatusService } from '../services/agent-console-status.service';
+import { AgenstraMetricsCollectorService } from '../services/agenstra-metrics-collector.service';
 import { AutoContextResolverService } from '../services/auto-context-resolver.service';
 import { AutonomousRunOrchestratorService } from '../services/autonomous-run-orchestrator.service';
 import { ClientAgentAutonomyService } from '../services/client-agent-autonomy.service';
@@ -149,6 +150,7 @@ const authMethod = getAuthenticationMethod();
     ClientsAgentAutomationProxyController,
   ],
   providers: [
+    AgenstraMetricsCollectorService,
     ClientsService,
     TicketsService,
     KnowledgeTreeService,

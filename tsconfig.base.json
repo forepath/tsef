@@ -169,6 +169,15 @@
       "@forepath/shared/backend/util-webhook": [
         "libs/domains/shared/backend/util-webhook/src/index.ts"
       ],
+      "@forepath/shared/backend/util-otel": [
+        "libs/domains/shared/backend/util-otel/src/index.ts"
+      ],
+      "@forepath/shared/backend/util-otel/metrics": [
+        "libs/domains/shared/backend/util-otel/src/metrics.ts"
+      ],
+      "@forepath/shared/backend/util-otel/bullmq": [
+        "libs/domains/shared/backend/util-otel/src/bullmq.ts"
+      ],
       "@forepath/shared/backend/util-email": [
         "libs/domains/shared/backend/util-email/src/index.ts"
       ],

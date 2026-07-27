@@ -1,3 +1,4 @@
+import { recordSharedCounter } from '@forepath/shared/backend/util-otel';
 import axios from 'axios';
 
 import type { ProviderLocationDto } from './provider-location.types';
@@ -44,17 +45,43 @@ function mapDigitalOceanRegion(region: DigitalOceanRegionResponse): ProviderLoca
 }
 
 export async function fetchHetznerLocations(apiToken: string): Promise<ProviderLocationDto[]> {
-  const response = await axios.get<{ locations: HetznerLocationResponse[] }>(`${HETZNER_API_BASE}/locations`, {
-    headers: { Authorization: `Bearer ${apiToken}` },
-  });
+  try {
+    const response = await axios.get<{ locations: HetznerLocationResponse[] }>(`${HETZNER_API_BASE}/locations`, {
+      headers: { Authorization: `Bearer ${apiToken}` },
+    });
 
-  return (response.data.locations ?? []).map(mapHetznerLocation);
+    recordSharedCounter('provisioning_geography.catalog_fetch_total', {
+      provider: 'hetzner',
+      outcome: 'success',
+    });
+
+    return (response.data.locations ?? []).map(mapHetznerLocation);
+  } catch (error) {
+    recordSharedCounter('provisioning_geography.catalog_fetch_total', {
+      provider: 'hetzner',
+      outcome: 'failed',
+    });
+    throw error;
+  }
 }
 
 export async function fetchDigitalOceanRegions(apiToken: string): Promise<ProviderLocationDto[]> {
-  const response = await axios.get<{ regions: DigitalOceanRegionResponse[] }>(`${DIGITALOCEAN_API_BASE}/regions`, {
-    headers: { Authorization: `Bearer ${apiToken}` },
-  });
+  try {
+    const response = await axios.get<{ regions: DigitalOceanRegionResponse[] }>(`${DIGITALOCEAN_API_BASE}/regions`, {
+      headers: { Authorization: `Bearer ${apiToken}` },
+    });
 
-  return (response.data.regions ?? []).filter((region) => region.available).map(mapDigitalOceanRegion);
+    recordSharedCounter('provisioning_geography.catalog_fetch_total', {
+      provider: 'digitalocean',
+      outcome: 'success',
+    });
+
+    return (response.data.regions ?? []).filter((region) => region.available).map(mapDigitalOceanRegion);
+  } catch (error) {
+    recordSharedCounter('provisioning_geography.catalog_fetch_total', {
+      provider: 'digitalocean',
+      outcome: 'failed',
+    });
+    throw error;
+  }
 }

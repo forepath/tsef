@@ -10,6 +10,8 @@ info:
 servers:
   - url: http://localhost:3100/api
     description: Local development
+  - url: http://localhost:3100
+    description: Root (OpenTelemetry metrics; outside /api prefix)
 security:
   - bearerAuth: []
 paths:
@@ -4211,12 +4213,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedWebhookDeliveriesResponseDto'
+  /otel/metrics:
+    get:
+      summary: Prometheus metrics scrape
+      description: |
+        OpenTelemetry Prometheus exposition endpoint. Mounted at the HTTP root, **outside** the `/api` global prefix.
+        Path is configurable via `OTEL_METRICS_PATH` (default `/otel/metrics`). Requires HTTP Basic authentication
+        with `OTEL_USERNAME` and `OTEL_PASSWORD`. Disabled when `OTEL_ENABLED` is not exactly `true`.
+      operationId: getOtelMetrics
+      servers:
+        - url: http://localhost:3100
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Prometheus text exposition format
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Missing or invalid Basic auth credentials
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    basicAuth:
+      type: http
+      scheme: basic
   parameters:
     fileManagerContext:
       name: context

@@ -4,6 +4,7 @@
  * to avoid pulling TypeORM entities, migrations, and Keycloak modules into the bundle.
  */
 export * from '../lib/bull-board-request-path';
+export * from '../lib/otel-metrics-request-path';
 export * from '../lib/bull-board-throttler.guard';
 export * from '../lib/decorators/public.decorator';
 export * from '../lib/http-request-path.util';

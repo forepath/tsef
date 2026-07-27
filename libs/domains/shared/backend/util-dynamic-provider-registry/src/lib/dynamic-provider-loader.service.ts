@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import { recordSharedCounter } from '@forepath/shared/backend/util-otel';
 
 import { readPluginPathFromEnv } from './install-provider-plugins';
 import { loadProviderModule } from './load-provider-module';
@@ -40,7 +41,9 @@ export class DynamicProviderLoaderService {
         const instance = await this.loadInstance<T>(entry, envKey, loaderOptions);
 
         instances.push(instance);
+        recordSharedCounter('dynamic_provider.load_total', { outcome: 'success' });
       } catch (error) {
+        recordSharedCounter('dynamic_provider.load_total', { outcome: 'failed' });
         handleDynamicProviderError(error, {
           criticality,
           failFast: options.failFast,
@@ -77,7 +80,9 @@ export class DynamicProviderLoaderService {
         }
 
         metadataRecords.push(metadata);
+        recordSharedCounter('dynamic_provider.load_total', { outcome: 'success' });
       } catch (error) {
+        recordSharedCounter('dynamic_provider.load_total', { outcome: 'failed' });
         handleDynamicProviderError(error, {
           criticality,
           failFast: options.failFast,

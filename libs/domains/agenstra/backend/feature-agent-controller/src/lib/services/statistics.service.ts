@@ -1,4 +1,5 @@
 import { ClientUserRole, UserRole } from '@forepath/identity/backend';
+import { incrementCounter } from '@forepath/shared/backend/util-otel/metrics';
 import { Injectable, Logger } from '@nestjs/common';
 
 import { FilterDropDirection } from '../entities/statistics-chat-filter-drop.entity';
@@ -16,6 +17,7 @@ import { sanitizeProviderMetadata } from '../utils/statistics-metadata-sanitizer
 @Injectable()
 export class StatisticsService {
   private readonly logger = new Logger(StatisticsService.name);
+  private readonly otelMeterName = 'forepath.agenstra';
 
   constructor(
     private readonly statisticsRepository: StatisticsRepository,
@@ -50,6 +52,7 @@ export class StatisticsService {
         charCount,
         occurredAt: new Date(),
       });
+      this.recordChatMessageOtel(clientId, agentId, ChatDirection.INPUT, interactionKind);
     } catch (error) {
       this.logger.warn(`Failed to record chat input: ${(error as Error).message}`);
     }
@@ -83,6 +86,7 @@ export class StatisticsService {
         charCount,
         occurredAt: new Date(),
       });
+      this.recordChatMessageOtel(clientId, agentId, ChatDirection.OUTPUT, interactionKind);
     } catch (error) {
       this.logger.warn(`Failed to record chat output: ${(error as Error).message}`);
     }
@@ -142,6 +146,12 @@ export class StatisticsService {
         charCount,
         occurredAt: new Date(),
       });
+      incrementCounter(this.otelMeterName, 'agenstra.chat.filter_drops', {
+        client_id: clientId,
+        agent_id: agentId,
+        direction,
+        filter_type: filterType,
+      });
     } catch (error) {
       this.logger.warn(`Failed to record chat filter drop: ${(error as Error).message}`);
     }
@@ -180,6 +190,12 @@ export class StatisticsService {
         wordCount,
         charCount,
         occurredAt: new Date(),
+      });
+      incrementCounter(this.otelMeterName, 'agenstra.chat.filter_flags', {
+        client_id: clientId,
+        agent_id: agentId,
+        direction,
+        filter_type: filterType,
       });
     } catch (error) {
       this.logger.warn(`Failed to record chat filter flag: ${(error as Error).message}`);
@@ -557,5 +573,19 @@ export class StatisticsService {
       statisticsAgentId: statisticsAgent.id,
       statisticsUserId,
     };
+  }
+
+  private recordChatMessageOtel(
+    clientId: string,
+    agentId: string,
+    direction: ChatDirection,
+    interactionKind: StatisticsInteractionKind,
+  ): void {
+    incrementCounter(this.otelMeterName, 'agenstra.chat.messages', {
+      client_id: clientId,
+      agent_id: agentId,
+      direction,
+      interaction_kind: interactionKind,
+    });
   }
 }

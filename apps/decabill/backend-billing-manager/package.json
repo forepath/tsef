@@ -17,6 +17,7 @@
     "@bull-board/nestjs": "7.1.5",
     "@bull-board/ui": "7.1.5",
     "@nestjs/bullmq": "11.0.4",
+    "@opentelemetry/sdk-node": "0.220.0",
     "archiver": "8.0.0",
     "axios": "1.12.2",
     "bullmq": "5.76.10",
@@ -31,6 +32,7 @@
     "iconv-lite": "0.7.2",
     "keycloak-connect": "24.0.1",
     "nest-keycloak-connect": "2.0.0-alpha.2",
+    "nestjs-otel": "8.1.0",
     "nodemailer": "7.0.13",
     "pdf-lib": "1.17.1",
     "stripe": "22.1.1",
@@ -41,7 +43,16 @@
     "socket.io-client": "4.8.3",
     "ssh2": "1.17.0",
     "sshpk": "1.18.0",
-    "uuid": "11.1.1"
+    "uuid": "11.1.1",
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/auto-instrumentations-node": "0.79.0",
+    "@opentelemetry/exporter-logs-otlp-http": "0.221.0",
+    "@opentelemetry/exporter-prometheus": "0.221.0",
+    "@opentelemetry/exporter-trace-otlp-http": "0.221.0",
+    "@opentelemetry/resources": "2.10.0",
+    "@opentelemetry/sdk-logs": "0.221.0",
+    "@opentelemetry/sdk-metrics": "2.10.0",
+    "@opentelemetry/semantic-conventions": "1.43.0"
   },
   "devDependencies": {
     "ts-node": "10.9.1",

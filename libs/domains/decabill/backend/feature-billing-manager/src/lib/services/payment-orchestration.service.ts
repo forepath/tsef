@@ -1,7 +1,8 @@
 import { createHash } from 'crypto';
 
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { getTenantIdOrDefault, runWithTenantId } from '@forepath/shared/backend';
+import { getTenantIdOrDefault, runWithTenantId } from '@forepath/shared/backend/util-http-context';
+import { incrementCounter } from '@forepath/shared/backend/util-otel/metrics';
 
 import { AutoPaymentStatus, isAutoPaymentBlocking } from '../constants/auto-payment-status.constants';
 import { InvoiceStatus } from '../constants/invoice-status.constants';
@@ -287,6 +288,10 @@ export class PaymentOrchestrationService {
         processor: processorType,
         externalId: update.externalId,
         mode,
+      });
+      incrementCounter('forepath.decabill', 'decabill.invoices.paid', {
+        tenant_id: getTenantIdOrDefault(),
+        payment_source: mode,
       });
       await this.billingEmailPublisher.publishPaymentSucceeded(paid, {
         processor: processorType,

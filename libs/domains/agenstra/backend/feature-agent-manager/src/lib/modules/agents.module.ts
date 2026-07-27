@@ -38,6 +38,7 @@ import { IncomingChatFilter } from '../providers/filters/incoming-chat-filter';
 import { NoopChatFilter } from '../providers/filters/noop-chat-filter';
 import { OutgoingChatFilter } from '../providers/filters/outgoing-chat-filter';
 import { PipelineProviderFactory } from '../providers/pipeline-provider.factory';
+import { AgenstraManagerMetricsCollectorService } from '../services/agenstra-manager-metrics-collector.service';
 import type { PipelineProvider } from '../providers/pipeline-provider.interface';
 import type { ChatFilter } from '../providers/chat-filter.interface';
 import { GitHubProvider } from '../providers/pipelines/github.provider';
@@ -98,6 +99,7 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
     WorkspaceConfigurationOverridesController,
   ],
   providers: [
+    AgenstraManagerMetricsCollectorService,
     AgentsGateway,
     AgentsService,
     AgentMessagesService,

@@ -6,6 +6,7 @@ import {
   isPrivateOrLoopbackHost,
   isPrivateOrLoopbackIp,
 } from '@forepath/shared/shared/util-network-address';
+import { recordSharedCounter } from '@forepath/shared/backend/util-otel';
 
 export interface WebhookProductionSafetyLogger {
   error(message: string): void;
@@ -23,6 +24,11 @@ function allowInsecureWebhookHttp(): boolean {
   );
 }
 
+function rejectUnsafeWebhookUrl(reason: string, message: string): never {
+  recordSharedCounter('ssrf.guard.blocked_total', { guard: 'webhook', reason });
+  throw new Error(message);
+}
+
 /**
  * SSRF guardrails for admin-configured outbound webhook URLs.
  *
@@ -36,34 +42,34 @@ export function assertSafeWebhookUrlOrThrow(urlString: string): URL {
   try {
     parsed = new URL(trimmed);
   } catch {
-    throw new Error('Webhook URL must be a valid URL');
+    rejectUnsafeWebhookUrl('invalid_url', 'Webhook URL must be a valid URL');
   }
 
   if (parsed.username || parsed.password) {
-    throw new Error('Webhook URL must not contain username/password');
+    rejectUnsafeWebhookUrl('embedded_credentials', 'Webhook URL must not contain username/password');
   }
 
   if (parsed.protocol === 'http:') {
     if (!allowInsecureWebhookHttp()) {
-      throw new Error('Webhook URL must use HTTPS');
+      rejectUnsafeWebhookUrl('insecure_http', 'Webhook URL must use HTTPS');
     }
   } else if (parsed.protocol !== 'https:') {
-    throw new Error('Webhook URL must use HTTPS');
+    rejectUnsafeWebhookUrl('invalid_protocol', 'Webhook URL must use HTTPS');
   }
 
   const host = parsed.hostname.trim().toLowerCase();
 
   if (!host) {
-    throw new Error('Webhook URL hostname is required');
+    rejectUnsafeWebhookUrl('missing_hostname', 'Webhook URL hostname is required');
   }
 
   if (!allowInternalWebhookHost()) {
     if (!net.isIP(host) && isPrivateOrLoopbackHost(host)) {
-      throw new Error('Webhook URL must not target private or loopback addresses');
+      rejectUnsafeWebhookUrl('private_host', 'Webhook URL must not target private or loopback addresses');
     }
 
     if (net.isIP(host) && isPrivateOrLoopbackIp(host)) {
-      throw new Error('Webhook URL must not target private or loopback addresses');
+      rejectUnsafeWebhookUrl('private_ip', 'Webhook URL must not target private or loopback addresses');
     }
   }
 
@@ -103,7 +109,7 @@ export async function assertWebhookHostnameResolvesToPublicIps(hostname: string)
 
     for (const entry of results) {
       if (isPrivateOrLoopbackIp(entry.address)) {
-        throw new Error('Webhook URL hostname resolves to a private or loopback address');
+        rejectUnsafeWebhookUrl('dns_private', 'Webhook URL hostname resolves to a private or loopback address');
       }
     }
   } catch (error) {
@@ -113,7 +119,7 @@ export async function assertWebhookHostnameResolvesToPublicIps(hostname: string)
 
     const message = error instanceof Error ? error.message : String(error);
 
-    throw new Error(`Webhook URL hostname could not be resolved: ${message}`);
+    rejectUnsafeWebhookUrl('dns_resolution_failed', `Webhook URL hostname could not be resolved: ${message}`);
   }
 }
 

@@ -1,6 +1,7 @@
 // Existing exports
 export * from './lib/bull-board-keycloak.guards';
 export * from './lib/bull-board-request-path';
+export * from './lib/otel-metrics-request-path';
 export * from './lib/bull-board-throttler.guard';
 export * from './lib/http-request-path.util';
 export * from './lib/hybrid-auth.guard';

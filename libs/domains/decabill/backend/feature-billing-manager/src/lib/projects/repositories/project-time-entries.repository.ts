@@ -172,6 +172,19 @@ export class ProjectTimeEntriesRepository {
     return parseInt(row?.total ?? '0', 10);
   }
 
+  /** Tenant-scoped sum of unbilled project time across all projects. */
+  async sumUnbilledDurationMinutes(): Promise<number> {
+    const qb = this.baseQuery('entry')
+      .select('COALESCE(SUM(entry.duration_minutes), 0)', 'total')
+      .where('entry.billed_at IS NULL');
+
+    applyProjectTenantFilter(qb, 'project');
+
+    const row = await qb.getRawOne<{ total: string }>();
+
+    return parseInt(row?.total ?? '0', 10);
+  }
+
   async create(dto: Partial<ProjectTimeEntryEntity>): Promise<ProjectTimeEntryEntity> {
     const entity = this.repository.create(dto);
 

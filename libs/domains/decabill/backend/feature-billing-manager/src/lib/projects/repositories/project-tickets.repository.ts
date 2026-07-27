@@ -99,6 +99,14 @@ export class ProjectTicketsRepository {
     return { open, done };
   }
 
+  async countByStatus(status: ProjectTicketStatus): Promise<number> {
+    const qb = this.baseQuery('ticket').where('ticket.status = :status', { status });
+
+    applyProjectTenantFilter(qb, 'project');
+
+    return await qb.getCount();
+  }
+
   async create(dto: Partial<ProjectTicketEntity>): Promise<ProjectTicketEntity> {
     const entity = this.repository.create(dto);
 

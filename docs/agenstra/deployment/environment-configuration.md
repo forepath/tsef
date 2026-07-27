@@ -284,6 +284,18 @@ Used by **backend agent controller**. See [Background jobs](./background-jobs.md
 
 Scheduler interval variables (for example `AUTONOMOUS_TICKET_SCHEDULER_INTERVAL_MS`) configure **coordinator** repeat intervals in BullMQ.
 
+## OpenTelemetry
+
+Applies to **Backend Agent Controller** and **Backend Agent Manager**. See [OpenTelemetry](../features/opentelemetry.md).
+
+| Variable                          | Description                                                                                 |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `OTEL_ENABLED`                    | Must be exactly `true` to enable (default: disabled)                                        |
+| `OTEL_USERNAME` / `OTEL_PASSWORD` | HTTP Basic credentials for the metrics scrape endpoint (both required when enabled)         |
+| `OTEL_METRICS_PATH`               | Prometheus path on the HTTP root, outside `/api` (default `/otel/metrics`)                  |
+| `OTEL_SERVICE_NAME`               | Service resource name (defaults to `agenstra-agent-controller` or `agenstra-agent-manager`) |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`     | Optional OTLP HTTP endpoint for traces and logs                                             |
+
 ## Environment-Specific Defaults
 
 ### Development

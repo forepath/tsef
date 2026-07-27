@@ -378,6 +378,17 @@ export class InvoicesRepository {
     return { count, totalBalance };
   }
 
+  async countByStatus(status: InvoiceStatus): Promise<number> {
+    const qb = this.repository
+      .createQueryBuilder('inv')
+      .innerJoin('users', 'user', 'user.id = inv.user_id')
+      .where('inv.status = :status', { status });
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getCount();
+  }
+
   async findGlobalOpenOverdueSummary(): Promise<OpenOverdueSummary> {
     const qb = this.repository
       .createQueryBuilder('inv')

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-25T19:46:00.262Z",
+  "generatedAt": "2026-07-26T15:55:33.175Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -1124,6 +1124,29 @@
       }
     },
     {
+      "id": "project:shared-backend-util-otel",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-backend-util-otel",
+        "root": "libs/domains/shared/backend/util-otel",
+        "tags": [
+          "npm:private",
+          "domain:shared",
+          "scope:backend",
+          "type:util"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "build",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "backend",
+        "featureGroup": "util"
+      }
+    },
+    {
       "id": "project:agenstra-frontend-agent-console",
       "type": "app",
       "attrs": {
@@ -1731,6 +1754,86 @@
       }
     },
     {
+      "id": "package:@opentelemetry/api",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/api",
+        "version": "1.9.1"
+      }
+    },
+    {
+      "id": "package:@opentelemetry/auto-instrumentations-node",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/auto-instrumentations-node",
+        "version": "0.79.0"
+      }
+    },
+    {
+      "id": "package:@opentelemetry/exporter-logs-otlp-http",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/exporter-logs-otlp-http",
+        "version": "0.221.0"
+      }
+    },
+    {
+      "id": "package:@opentelemetry/exporter-prometheus",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/exporter-prometheus",
+        "version": "0.221.0"
+      }
+    },
+    {
+      "id": "package:@opentelemetry/exporter-trace-otlp-http",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/exporter-trace-otlp-http",
+        "version": "0.221.0"
+      }
+    },
+    {
+      "id": "package:@opentelemetry/resources",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/resources",
+        "version": "2.10.0"
+      }
+    },
+    {
+      "id": "package:@opentelemetry/sdk-logs",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/sdk-logs",
+        "version": "0.221.0"
+      }
+    },
+    {
+      "id": "package:@opentelemetry/sdk-metrics",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/sdk-metrics",
+        "version": "2.10.0"
+      }
+    },
+    {
+      "id": "package:@opentelemetry/sdk-node",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/sdk-node",
+        "version": "0.220.0"
+      }
+    },
+    {
+      "id": "package:@opentelemetry/semantic-conventions",
+      "type": "package",
+      "attrs": {
+        "name": "@opentelemetry/semantic-conventions",
+        "version": "1.43.0"
+      }
+    },
+    {
       "id": "package:axios",
       "type": "package",
       "attrs": {
@@ -1816,6 +1919,14 @@
       "attrs": {
         "name": "nest-keycloak-connect",
         "version": "2.0.0-alpha.2"
+      }
+    },
+    {
+      "id": "package:nestjs-otel",
+      "type": "package",
+      "attrs": {
+        "name": "nestjs-otel",
+        "version": "8.1.0"
       }
     },
     {
@@ -2340,6 +2451,15 @@
       "type": "dto",
       "attrs": {
         "path": "libs/domains/forepath/backend/feature-communication-manager/src/lib/dto/create-contact-request.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "forepath-backend-feature-communication-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/forepath/backend/feature-communication-manager/src/lib/modules/forepath-otel.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/forepath/backend/feature-communication-manager/src/lib/modules/forepath-otel.module.ts",
         "languageOrKind": "ts",
         "projectName": "forepath-backend-feature-communication-manager"
       }
@@ -4627,6 +4747,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/agenstra-otel.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/agenstra-otel.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-controller"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
       "type": "module",
       "attrs": {
@@ -4757,6 +4886,15 @@
       "type": "repository",
       "attrs": {
         "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/user-environment-read-state.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-controller"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
         "languageOrKind": "ts",
         "projectName": "agenstra-backend-feature-agent-controller"
       }
@@ -6425,6 +6563,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/decabill-otel.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/decabill-otel.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/payment-processors/processors/stripe-payment.processor.ts",
       "type": "provider",
       "attrs": {
@@ -7113,6 +7260,15 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-issuer-config.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -8549,6 +8705,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agenstra-otel.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agenstra-otel.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
       "type": "module",
       "attrs": {
@@ -8670,6 +8835,15 @@
       "type": "repository",
       "attrs": {
         "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/workspace-configuration-overrides.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agenstra-manager-metrics-collector.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agenstra-manager-metrics-collector.service.ts",
         "languageOrKind": "ts",
         "projectName": "agenstra-backend-feature-agent-manager"
       }
@@ -10049,6 +10223,24 @@
       }
     },
     {
+      "id": "file:libs/domains/shared/backend/util-otel/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-otel/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-backend-util-otel"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/util-otel/src/lib/otel.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-otel/src/lib/otel.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-util-otel"
+      }
+    },
+    {
       "id": "file:apps/agenstra/backend-agent-manager/README.md",
       "type": "readme",
       "attrs": {
@@ -10797,6 +10989,14 @@
       }
     },
     {
+      "id": "file:docs/agenstra/features/opentelemetry.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/agenstra/features/opentelemetry.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
       "id": "file:docs/agenstra/features/server-provisioning.md",
       "type": "doc",
       "attrs": {
@@ -11285,6 +11485,14 @@
       }
     },
     {
+      "id": "file:docs/decabill/features/opentelemetry.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/opentelemetry.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
       "id": "file:docs/decabill/features/payment-processing.md",
       "type": "doc",
       "attrs": {
@@ -11469,6 +11677,22 @@
       }
     },
     {
+      "id": "file:docs/forepath/features/README.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/forepath/features/README.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/forepath/features/opentelemetry.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/forepath/features/opentelemetry.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
       "id": "file:AGENTS.md",
       "type": "readme",
       "attrs": {
@@ -11527,6 +11751,17 @@
         "pathOrChannel": "/public/contact-requests",
         "operationId": "submitPublicContactRequest",
         "summary": "Submit a public contact request",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/otel/metrics",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/otel/metrics",
+        "operationId": "getOtelMetrics",
+        "summary": "Prometheus metrics scrape",
         "specKind": "openapi"
       }
     },
@@ -18158,6 +18393,16 @@
       }
     },
     {
+      "id": "concept:agenstra-opentelemetry",
+      "type": "concept",
+      "attrs": {
+        "title": "OpenTelemetry",
+        "docPath": "docs/agenstra/deployment/environment-configuration.md",
+        "sectionAnchor": "opentelemetry",
+        "domain": "agenstra"
+      }
+    },
+    {
       "id": "concept:agenstra-environment-specific-defaults",
       "type": "concept",
       "attrs": {
@@ -19344,6 +19589,56 @@
         "title": "Why two tiers?",
         "docPath": "docs/agenstra/features/message-filter-rules.md",
         "sectionAnchor": "why-two-tiers",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-kill-switch",
+      "type": "concept",
+      "attrs": {
+        "title": "Kill switch",
+        "docPath": "docs/agenstra/features/opentelemetry.md",
+        "sectionAnchor": "kill-switch",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-metrics-endpoint",
+      "type": "concept",
+      "attrs": {
+        "title": "Metrics endpoint",
+        "docPath": "docs/agenstra/features/opentelemetry.md",
+        "sectionAnchor": "metrics-endpoint",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-startup-logs",
+      "type": "concept",
+      "attrs": {
+        "title": "Startup logs",
+        "docPath": "docs/agenstra/features/opentelemetry.md",
+        "sectionAnchor": "startup-logs",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-metrics-overview",
+      "type": "concept",
+      "attrs": {
+        "title": "Metrics overview",
+        "docPath": "docs/agenstra/features/opentelemetry.md",
+        "sectionAnchor": "metrics-overview",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-optional-otlp-export",
+      "type": "concept",
+      "attrs": {
+        "title": "Optional OTLP export",
+        "docPath": "docs/agenstra/features/opentelemetry.md",
+        "sectionAnchor": "optional-otlp-export",
         "domain": "agenstra"
       }
     },
@@ -22258,6 +22553,16 @@
       }
     },
     {
+      "id": "concept:decabill-opentelemetry",
+      "type": "concept",
+      "attrs": {
+        "title": "OpenTelemetry",
+        "docPath": "docs/decabill/deployment/environment-configuration.md",
+        "sectionAnchor": "opentelemetry",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-environment-specific-defaults",
       "type": "concept",
       "attrs": {
@@ -23954,6 +24259,66 @@
         "title": "Configuration Summary",
         "docPath": "docs/decabill/features/multi-tenancy.md",
         "sectionAnchor": "configuration-summary",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-application",
+      "type": "concept",
+      "attrs": {
+        "title": "Application",
+        "docPath": "docs/decabill/features/opentelemetry.md",
+        "sectionAnchor": "application",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-kill-switch",
+      "type": "concept",
+      "attrs": {
+        "title": "Kill switch",
+        "docPath": "docs/decabill/features/opentelemetry.md",
+        "sectionAnchor": "kill-switch",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-metrics-endpoint",
+      "type": "concept",
+      "attrs": {
+        "title": "Metrics endpoint",
+        "docPath": "docs/decabill/features/opentelemetry.md",
+        "sectionAnchor": "metrics-endpoint",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-startup-logs",
+      "type": "concept",
+      "attrs": {
+        "title": "Startup logs",
+        "docPath": "docs/decabill/features/opentelemetry.md",
+        "sectionAnchor": "startup-logs",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-metrics-overview",
+      "type": "concept",
+      "attrs": {
+        "title": "Metrics overview",
+        "docPath": "docs/decabill/features/opentelemetry.md",
+        "sectionAnchor": "metrics-overview",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-optional-otlp-export",
+      "type": "concept",
+      "attrs": {
+        "title": "Optional OTLP export",
+        "docPath": "docs/decabill/features/opentelemetry.md",
+        "sectionAnchor": "optional-otlp-export",
         "domain": "decabill"
       }
     },
@@ -25788,6 +26153,116 @@
       }
     },
     {
+      "id": "concept:forepath-features-documentation",
+      "type": "concept",
+      "attrs": {
+        "title": "Features Documentation",
+        "docPath": "docs/forepath/features/README.md",
+        "sectionAnchor": "features-documentation",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-features",
+      "type": "concept",
+      "attrs": {
+        "title": "Features",
+        "docPath": "docs/forepath/features/README.md",
+        "sectionAnchor": "features",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-related-documentation",
+      "type": "concept",
+      "attrs": {
+        "title": "Related documentation",
+        "docPath": "docs/forepath/features/README.md",
+        "sectionAnchor": "related-documentation",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-opentelemetry",
+      "type": "concept",
+      "attrs": {
+        "title": "OpenTelemetry",
+        "docPath": "docs/forepath/features/opentelemetry.md",
+        "sectionAnchor": "opentelemetry",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-application",
+      "type": "concept",
+      "attrs": {
+        "title": "Application",
+        "docPath": "docs/forepath/features/opentelemetry.md",
+        "sectionAnchor": "application",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-kill-switch",
+      "type": "concept",
+      "attrs": {
+        "title": "Kill switch",
+        "docPath": "docs/forepath/features/opentelemetry.md",
+        "sectionAnchor": "kill-switch",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-metrics-endpoint",
+      "type": "concept",
+      "attrs": {
+        "title": "Metrics endpoint",
+        "docPath": "docs/forepath/features/opentelemetry.md",
+        "sectionAnchor": "metrics-endpoint",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-startup-logs",
+      "type": "concept",
+      "attrs": {
+        "title": "Startup logs",
+        "docPath": "docs/forepath/features/opentelemetry.md",
+        "sectionAnchor": "startup-logs",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-metrics-overview",
+      "type": "concept",
+      "attrs": {
+        "title": "Metrics overview",
+        "docPath": "docs/forepath/features/opentelemetry.md",
+        "sectionAnchor": "metrics-overview",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-optional-otlp-export",
+      "type": "concept",
+      "attrs": {
+        "title": "Optional OTLP export",
+        "docPath": "docs/forepath/features/opentelemetry.md",
+        "sectionAnchor": "optional-otlp-export",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-api-reference",
+      "type": "concept",
+      "attrs": {
+        "title": "API reference",
+        "docPath": "docs/forepath/features/opentelemetry.md",
+        "sectionAnchor": "api-reference",
+        "domain": "forepath"
+      }
+    },
+    {
       "id": "domain:shared",
       "type": "domain",
       "attrs": {
@@ -25920,6 +26395,11 @@
   ],
   "edges": [
     {
+      "from": "project:forepath-backend-feature-communication-manager",
+      "to": "project:shared-backend-util-otel",
+      "type": "depends_on"
+    },
+    {
       "from": "project:decabill-frontend-data-access-billing-console",
       "to": "project:shared-frontend-util-configuration",
       "type": "depends_on"
@@ -25930,8 +26410,18 @@
       "type": "depends_on"
     },
     {
+      "from": "project:shared-backend-util-dynamic-provider-registry",
+      "to": "project:shared-backend-util-otel",
+      "type": "depends_on"
+    },
+    {
       "from": "project:agenstra-frontend-data-access-agent-console",
       "to": "project:shared-frontend-util-configuration",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-provisioning-geography",
+      "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
     {
@@ -25962,6 +26452,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-controller",
       "to": "project:shared-backend-util-http-context",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
     {
@@ -26041,6 +26536,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "project:shared-backend-util-otel",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "project:shared-backend-util-http-context",
       "type": "depends_on"
     },
@@ -26077,6 +26577,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "project:shared-backend-util-dynamic-provider-registry",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
     {
@@ -26176,6 +26681,11 @@
     },
     {
       "from": "project:shared-backend-feature-notifications",
+      "to": "project:shared-backend-util-otel",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-feature-notifications",
       "to": "project:shared-backend-util-queue",
       "type": "depends_on"
     },
@@ -26207,6 +26717,16 @@
     {
       "from": "project:shared-backend-feature-monitoring",
       "to": "project:identity-backend-util-auth",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-http-context",
+      "to": "project:shared-backend-util-otel",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-redis-cache",
+      "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
     {
@@ -26246,7 +26766,17 @@
     },
     {
       "from": "project:shared-backend-util-webhook",
+      "to": "project:shared-backend-util-otel",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-webhook",
       "to": "project:shared-shared-util-network-address",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:identity-backend-util-auth",
+      "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
     {
@@ -26272,6 +26802,11 @@
     {
       "from": "project:agenstra-backend-agent-controller",
       "to": "project:shared-backend-util-webhook",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
     {
@@ -26360,6 +26895,11 @@
       "type": "depends_on"
     },
     {
+      "from": "project:shared-backend-util-email",
+      "to": "project:shared-backend-util-otel",
+      "type": "depends_on"
+    },
+    {
       "from": "project:decabill-backend-billing-manager",
       "to": "project:shared-platform-authentication",
       "type": "depends_on"
@@ -26377,6 +26917,11 @@
     {
       "from": "project:decabill-backend-billing-manager",
       "to": "project:shared-backend-util-webhook",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
     {
@@ -26436,6 +26981,11 @@
     },
     {
       "from": "project:agenstra-backend-agent-manager",
+      "to": "project:shared-backend-util-otel",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
       "to": "project:shared-backend-util-dynamic-provider-registry",
       "type": "depends_on"
     },
@@ -26457,6 +27007,11 @@
     {
       "from": "project:forepath-backend-communication",
       "to": "project:shared-backend-util-http-context",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
     {
@@ -26651,6 +27206,56 @@
     },
     {
       "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/api",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/auto-instrumentations-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/exporter-logs-otlp-http",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/exporter-prometheus",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/exporter-trace-otlp-http",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/resources",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/sdk-logs",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/sdk-metrics",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/sdk-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opentelemetry/semantic-conventions",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
       "to": "package:axios",
       "type": "depends_on"
     },
@@ -26702,6 +27307,11 @@
     {
       "from": "project:agenstra-backend-agent-controller",
       "to": "package:nest-keycloak-connect",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:nestjs-otel",
       "type": "depends_on"
     },
     {
@@ -27221,6 +27831,56 @@
     },
     {
       "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/api",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/auto-instrumentations-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/exporter-logs-otlp-http",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/exporter-prometheus",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/exporter-trace-otlp-http",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/resources",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/sdk-logs",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/sdk-metrics",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/sdk-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opentelemetry/semantic-conventions",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
       "to": "package:archiver",
       "type": "depends_on"
     },
@@ -27287,6 +27947,11 @@
     {
       "from": "project:decabill-backend-billing-manager",
       "to": "package:nest-keycloak-connect",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:nestjs-otel",
       "type": "depends_on"
     },
     {
@@ -27551,6 +28216,56 @@
     },
     {
       "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/api",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/auto-instrumentations-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/exporter-logs-otlp-http",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/exporter-prometheus",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/exporter-trace-otlp-http",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/resources",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/sdk-logs",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/sdk-metrics",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/sdk-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opentelemetry/semantic-conventions",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
       "to": "package:axios",
       "type": "depends_on"
     },
@@ -27597,6 +28312,11 @@
     {
       "from": "project:agenstra-backend-agent-manager",
       "to": "package:nest-keycloak-connect",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "package:nestjs-otel",
       "type": "depends_on"
     },
     {
@@ -27681,12 +28401,67 @@
     },
     {
       "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/api",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/auto-instrumentations-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/exporter-logs-otlp-http",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/exporter-prometheus",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/exporter-trace-otlp-http",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/resources",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/sdk-logs",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/sdk-metrics",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/sdk-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@opentelemetry/semantic-conventions",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
       "to": "package:axios",
       "type": "depends_on"
     },
     {
       "from": "project:forepath-backend-communication",
       "to": "package:bcrypt",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:bullmq",
       "type": "depends_on"
     },
     {
@@ -27712,6 +28487,11 @@
     {
       "from": "project:forepath-backend-communication",
       "to": "package:nest-keycloak-connect",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:nestjs-otel",
       "type": "depends_on"
     },
     {
@@ -28472,6 +29252,11 @@
     {
       "from": "project:forepath-backend-feature-communication-manager",
       "to": "file:libs/domains/forepath/backend/feature-communication-manager/src/lib/dto/create-contact-request.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:forepath-backend-feature-communication-manager",
+      "to": "file:libs/domains/forepath/backend/feature-communication-manager/src/lib/modules/forepath-otel.module.ts",
       "type": "contains"
     },
     {
@@ -29526,6 +30311,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/agenstra-otel.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
       "type": "contains"
     },
@@ -29597,6 +30387,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-controller",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/user-environment-read-state.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
       "type": "contains"
     },
     {
@@ -30516,6 +31311,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/decabill-otel.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/payment-processors/processors/stripe-payment.processor.ts",
       "type": "contains"
     },
@@ -30897,6 +31697,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-issuer-config.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
       "type": "contains"
     },
     {
@@ -31696,6 +32501,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agenstra-otel.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
       "type": "contains"
     },
@@ -31762,6 +32572,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/workspace-configuration-overrides.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agenstra-manager-metrics-collector.service.ts",
       "type": "contains"
     },
     {
@@ -32510,6 +33325,16 @@
       "type": "contains"
     },
     {
+      "from": "project:shared-backend-util-otel",
+      "to": "file:libs/domains/shared/backend/util-otel/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-otel",
+      "to": "file:libs/domains/shared/backend/util-otel/src/lib/otel.module.ts",
+      "type": "contains"
+    },
+    {
       "from": "project:agenstra-backend-agent-manager",
       "to": "file:apps/agenstra/backend-agent-manager/README.md",
       "type": "contains"
@@ -32707,6 +33532,11 @@
     {
       "from": "file:libs/domains/forepath/backend/feature-communication-manager/spec/openapi.yaml",
       "to": "api:HTTP:POST:/public/contact-requests",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/forepath/backend/feature-communication-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/otel/metrics",
       "type": "contains"
     },
     {
@@ -33602,6 +34432,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
       "to": "api:HTTP:GET:/admin/webhooks/{id}/deliveries",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/otel/metrics",
       "type": "contains"
     },
     {
@@ -34610,6 +35445,11 @@
       "type": "contains"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "contains"
+    },
+    {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:addon.activated",
       "type": "contains"
@@ -35272,6 +36112,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
       "to": "api:HTTP:POST:/agents/{agentId}/deployments/runs/{runId}/cancel",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/otel/metrics",
       "type": "contains"
     },
     {
@@ -36376,6 +37221,11 @@
     },
     {
       "from": "file:docs/agenstra/deployment/environment-configuration.md",
+      "to": "concept:agenstra-opentelemetry",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/deployment/environment-configuration.md",
       "to": "concept:agenstra-environment-specific-defaults",
       "type": "contains"
     },
@@ -37207,6 +38057,51 @@
     {
       "from": "file:docs/agenstra/features/message-filter-rules.md",
       "to": "concept:agenstra-api-references",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "concept:agenstra-opentelemetry",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "concept:agenstra-applications",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "concept:agenstra-kill-switch",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "concept:agenstra-metrics-endpoint",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "concept:agenstra-startup-logs",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "concept:agenstra-metrics-overview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "concept:agenstra-optional-otlp-export",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "concept:agenstra-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "concept:agenstra-api-reference",
       "type": "contains"
     },
     {
@@ -39261,6 +40156,11 @@
     },
     {
       "from": "file:docs/decabill/deployment/environment-configuration.md",
+      "to": "concept:decabill-opentelemetry",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/deployment/environment-configuration.md",
       "to": "concept:decabill-environment-specific-defaults",
       "type": "contains"
     },
@@ -40352,6 +41252,51 @@
     {
       "from": "file:docs/decabill/features/multi-tenancy.md",
       "to": "concept:decabill-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "concept:decabill-opentelemetry",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "concept:decabill-application",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "concept:decabill-kill-switch",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "concept:decabill-metrics-endpoint",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "concept:decabill-startup-logs",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "concept:decabill-metrics-overview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "concept:decabill-optional-otlp-export",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "concept:decabill-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "concept:decabill-api-reference",
       "type": "contains"
     },
     {
@@ -41562,6 +42507,66 @@
     {
       "from": "file:docs/decabill/troubleshooting/debugging-guide.md",
       "to": "concept:decabill-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/README.md",
+      "to": "concept:forepath-features-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/README.md",
+      "to": "concept:forepath-features",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/README.md",
+      "to": "concept:forepath-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "concept:forepath-opentelemetry",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "concept:forepath-application",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "concept:forepath-kill-switch",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "concept:forepath-metrics-endpoint",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "concept:forepath-startup-logs",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "concept:forepath-metrics-overview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "concept:forepath-optional-otlp-export",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "concept:forepath-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "concept:forepath-api-reference",
       "type": "contains"
     },
     {
@@ -46565,6 +47570,21 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/clients.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/statistics.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/filter-rules.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-console-status.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/clients.service.ts",
       "type": "injects"
@@ -47872,6 +48892,41 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-audit-log.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/billing-audit-logs.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/invoices.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/open-positions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-creation.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/repositories/projects.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/repositories/project-tickets.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/repositories/project-time-entries.repository.ts",
       "type": "injects"
     },
     {
@@ -49946,6 +51001,11 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/clients.service.ts",
       "type": "provides"
     },
@@ -50552,6 +51612,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-admin.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-metrics-collector.service.ts",
       "type": "provides"
     },
     {
@@ -51202,6 +52267,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/workspace-configuration-overrides.controller.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agenstra-manager-metrics-collector.service.ts",
       "type": "provides"
     },
     {
@@ -53955,6 +55025,26 @@
       "type": "documents"
     },
     {
+      "from": "concept:agenstra-kill-switch",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-metrics-endpoint",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-startup-logs",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-metrics-overview",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
       "from": "concept:agenstra-provisioning-request",
       "to": "api:HTTP:GET:/clients",
       "type": "documents"
@@ -54560,6 +55650,11 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-api-reference",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-billing-manager-http-api",
       "to": "api:HTTP:POST:/auth/login",
       "type": "documents"
@@ -54657,6 +55752,11 @@
     {
       "from": "concept:decabill-backend-billing-manager",
       "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-features",
+      "to": "api:HTTP:GET:/otel/metrics",
       "type": "documents"
     },
     {
@@ -56555,6 +57655,26 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-kill-switch",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-metrics-endpoint",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-startup-logs",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-metrics-overview",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-customer-payment-flow",
       "to": "api:HTTP:GET:/customer-profile",
       "type": "documents"
@@ -57690,6 +58810,36 @@
       "type": "documents"
     },
     {
+      "from": "concept:forepath-features",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:forepath-kill-switch",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:forepath-metrics-endpoint",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:forepath-startup-logs",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:forepath-metrics-overview",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:forepath-api-reference",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
       "from": "project:@forepath/test/mounted-plugin-fixture",
       "to": "domain:shared",
       "type": "belongs_to"
@@ -58435,6 +59585,21 @@
       "type": "belongs_to"
     },
     {
+      "from": "project:shared-backend-util-otel",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-util-otel",
+      "to": "context:backend",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-util-otel",
+      "to": "feature-group:util",
+      "type": "belongs_to"
+    },
+    {
       "from": "project:agenstra-frontend-agent-console",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -58815,6 +59980,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "file:docs/agenstra/features/opentelemetry.md",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
       "from": "file:docs/agenstra/features/server-provisioning.md",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -59120,6 +60290,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "file:docs/decabill/features/opentelemetry.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "file:docs/decabill/features/payment-processing.md",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -59232,6 +60407,16 @@
     {
       "from": "file:docs/decabill/troubleshooting/debugging-guide.md",
       "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/forepath/features/README.md",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/forepath/features/opentelemetry.md",
+      "to": "domain:forepath",
       "type": "belongs_to"
     },
     {
@@ -59965,6 +61150,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:agenstra-opentelemetry",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:agenstra-environment-specific-defaults",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -60556,6 +61746,31 @@
     },
     {
       "from": "concept:agenstra-why-two-tiers",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-kill-switch",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-metrics-endpoint",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-startup-logs",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-metrics-overview",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-optional-otlp-export",
       "to": "domain:agenstra",
       "type": "belongs_to"
     },
@@ -62015,6 +63230,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:decabill-opentelemetry",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:decabill-environment-specific-defaults",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -62861,6 +64081,36 @@
     },
     {
       "from": "concept:decabill-configuration-summary",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-application",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-kill-switch",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-metrics-endpoint",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-startup-logs",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-metrics-overview",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-optional-otlp-export",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -63777,6 +65027,61 @@
     {
       "from": "concept:decabill-performance-debugging",
       "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-features-documentation",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-features",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-related-documentation",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-opentelemetry",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-application",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-kill-switch",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-metrics-endpoint",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-startup-logs",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-metrics-overview",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-optional-otlp-export",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-api-reference",
+      "to": "domain:forepath",
       "type": "belongs_to"
     }
   ]

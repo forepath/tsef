@@ -1,4 +1,4 @@
-import { CommunicationModule } from '@forepath/forepath/backend';
+import { CommunicationModule, ForepathOtelModule } from '@forepath/forepath/backend';
 import { getRateLimitConfig } from '@forepath/identity/backend/util-auth/core';
 import { MonitoringModule } from '@forepath/shared/backend/feature-monitoring';
 import { Module, UnauthorizedException } from '@nestjs/common';
@@ -22,6 +22,7 @@ import { TurnstileModule } from 'nest-cloudflare-turnstile';
       },
     }),
     MonitoringModule,
+    ForepathOtelModule,
     CommunicationModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
