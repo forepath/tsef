@@ -74,7 +74,7 @@ Regex rules scoped to this manager instance (distinct from controller global rul
 
 ### Deployments (CI/CD)
 
-- `GET/PUT/DELETE /api/agents/:agentId/deployments/configuration` - Provider token and defaults (encrypted at rest)
+- `GET/POST /api/agents/:agentId/deployments/configuration` and `DELETE` - Provider token and defaults (encrypted at rest; upsert via POST)
 - `GET /api/agents/:agentId/deployments/repositories` - Repositories
 - `GET .../repositories/:repositoryId/branches` - Branches
 - `GET .../repositories/:repositoryId/workflows` - Workflows
@@ -85,6 +85,14 @@ Regex rules scoped to this manager instance (distinct from controller global rul
 - `GET .../deployments/runs/:runId/jobs` - Jobs
 - `GET .../deployments/runs/:runId/jobs/:jobId/logs` - Job logs
 - `POST .../deployments/runs/:runId/cancel` - Cancel run
+
+### Messages metadata
+
+- `GET /api/agents/:id/messages/latest-agent` - Latest agent chat message metadata for unread tracking
+
+### Workspace configuration overrides
+
+- `GET/PUT/DELETE /api/configuration-overrides...` - Workspace configuration overrides (see OpenAPI)
 
 ### Configuration
 
@@ -130,7 +138,15 @@ The Socket.IO WebSocket gateway is available at `http://localhost:8080/agents` (
 
 - `login` - Authenticate with agent ID (UUID or name) and password
 - `chat` - Send chat message (requires authentication)
+- `enhanceChat` / `generateTicketBody` - Isolated prompt helpers (unicast results)
 - Additional events for files, terminals, and tooling as described in the agent-manager AsyncAPI (for example `fileUpdate`, `createTerminal`, `terminalInput`, `closeTerminal`)
+
+#### Server → Client
+
+- `loginSuccess` / `loginError` / `chatMessage` / `chatEvent` / `messageFilterResult`
+- `chatEnhanceResult` / `ticketBodyResult`
+- `gitStateChanged` - Workspace git may have changed; refresh dirty indicators
+- `fileUpdateNotification` / `containerStats` / terminal events / `error`
 
 #### Server → Client
 

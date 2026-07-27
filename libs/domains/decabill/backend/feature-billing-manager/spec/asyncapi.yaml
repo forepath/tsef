@@ -74,6 +74,21 @@ channels:
     messages:
       milestoneUpsertEvent:
         $ref: '#/components/messages/ProjectMilestoneUpsert'
+  projects/milestoneRemoved:
+    address: projects/milestoneRemoved
+    messages:
+      milestoneRemovedEvent:
+        $ref: '#/components/messages/ProjectMilestoneRemoved'
+  projects/timeEntryUpsert:
+    address: projects/timeEntryUpsert
+    messages:
+      timeEntryUpsertEvent:
+        $ref: '#/components/messages/ProjectTimeEntryUpsert'
+  projects/timeEntryRemoved:
+    address: projects/timeEntryRemoved
+    messages:
+      timeEntryRemovedEvent:
+        $ref: '#/components/messages/ProjectTimeEntryRemoved'
   projects/projectSummaryChanged:
     address: projects/projectSummaryChanged
     messages:
@@ -89,10 +104,18 @@ operations:
     action: send
     channel:
       $ref: '#/channels/billing~1subscribeDashboardStatus'
+  clientUnsubscribesDashboard:
+    action: send
+    channel:
+      $ref: '#/channels/billing~1unsubscribeDashboardStatus'
   serverEmitsDashboardStatus:
     action: receive
     channel:
       $ref: '#/channels/billing~1dashboardStatusUpdate'
+  serverBillingError:
+    action: receive
+    channel:
+      $ref: '#/channels/billing~1error'
   clientSetsProject:
     action: send
     channel:
@@ -105,6 +128,38 @@ operations:
     action: receive
     channel:
       $ref: '#/channels/projects~1ticketUpsert'
+  serverProjectTicketRemoved:
+    action: receive
+    channel:
+      $ref: '#/channels/projects~1ticketRemoved'
+  serverProjectTicketCommentCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/projects~1ticketCommentCreated'
+  serverProjectTicketActivityCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/projects~1ticketActivityCreated'
+  serverProjectMilestoneUpsert:
+    action: receive
+    channel:
+      $ref: '#/channels/projects~1milestoneUpsert'
+  serverProjectMilestoneRemoved:
+    action: receive
+    channel:
+      $ref: '#/channels/projects~1milestoneRemoved'
+  serverProjectTimeEntryUpsert:
+    action: receive
+    channel:
+      $ref: '#/channels/projects~1timeEntryUpsert'
+  serverProjectTimeEntryRemoved:
+    action: receive
+    channel:
+      $ref: '#/channels/projects~1timeEntryRemoved'
+  serverProjectSummaryChanged:
+    action: receive
+    channel:
+      $ref: '#/channels/projects~1projectSummaryChanged'
   serverProjectsError:
     action: receive
     channel:
@@ -161,7 +216,52 @@ components:
       contentType: application/json
       payload:
         type: object
-        description: Full ProjectTicketResponse DTO
+        required:
+          [
+            id,
+            projectId,
+            title,
+            status,
+            priority,
+            shas,
+            tasks,
+            locked,
+            createdAt,
+            updatedAt,
+          ]
+        properties:
+          id: { type: string, format: uuid }
+          projectId: { type: string, format: uuid }
+          parentId: { type: string, format: uuid, nullable: true }
+          milestoneId: { type: string, format: uuid, nullable: true }
+          title: { type: string }
+          content: { type: string, nullable: true }
+          status: { type: string }
+          priority: { type: string }
+          shas:
+            type: object
+            properties:
+              short: { type: string }
+              long: { type: string }
+          tasks:
+            type: object
+            properties:
+              open: { type: integer }
+              done: { type: integer }
+              children:
+                type: object
+                properties:
+                  open: { type: integer }
+                  done: { type: integer }
+          createdByUserId: { type: string, format: uuid, nullable: true }
+          createdByEmail: { type: string }
+          locked: { type: boolean }
+          createdAt: { type: string, format: date-time }
+          updatedAt: { type: string, format: date-time }
+          children:
+            type: array
+            items:
+              type: object
     ProjectTicketRemoved:
       name: ProjectTicketRemoved
       contentType: application/json
@@ -176,21 +276,137 @@ components:
       contentType: application/json
       payload:
         type: object
+        required: [id, ticketId, userId, body, createdAt]
+        properties:
+          id: { type: string, format: uuid }
+          ticketId: { type: string, format: uuid }
+          userId: { type: string, format: uuid }
+          userEmail: { type: string }
+          body: { type: string }
+          createdAt: { type: string, format: date-time }
     ProjectTicketActivityCreated:
       name: ProjectTicketActivityCreated
       contentType: application/json
       payload:
         type: object
+        required: [id, ticketId, occurredAt, actorType, actionType, payload]
+        properties:
+          id: { type: string, format: uuid }
+          ticketId: { type: string, format: uuid }
+          occurredAt: { type: string, format: date-time }
+          actorType: { type: string }
+          actorUserId: { type: string, format: uuid, nullable: true }
+          actionType: { type: string }
+          payload:
+            type: object
+            additionalProperties: true
     ProjectMilestoneUpsert:
       name: ProjectMilestoneUpsert
       contentType: application/json
       payload:
         type: object
+        required:
+          [
+            id,
+            projectId,
+            name,
+            sortOrder,
+            progressPercent,
+            openTicketCount,
+            doneTicketCount,
+            createdAt,
+            updatedAt,
+          ]
+        properties:
+          id: { type: string, format: uuid }
+          projectId: { type: string, format: uuid }
+          name: { type: string }
+          description: { type: string, nullable: true }
+          targetDate: { type: string, format: date, nullable: true }
+          sortOrder: { type: integer }
+          lockedAt: { type: string, format: date-time, nullable: true }
+          progressPercent: { type: integer }
+          openTicketCount: { type: integer }
+          doneTicketCount: { type: integer }
+          createdAt: { type: string, format: date-time }
+          updatedAt: { type: string, format: date-time }
+    ProjectMilestoneRemoved:
+      name: ProjectMilestoneRemoved
+      contentType: application/json
+      payload:
+        type: object
+        required: [id, projectId]
+        properties:
+          id: { type: string, format: uuid }
+          projectId: { type: string, format: uuid }
+    ProjectTimeEntryUpsert:
+      name: ProjectTimeEntryUpsert
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          [
+            id,
+            projectId,
+            recordedByUserId,
+            durationMinutes,
+            startedAt,
+            endedAt,
+            recordedAt,
+            createdAt,
+          ]
+        properties:
+          id: { type: string, format: uuid }
+          projectId: { type: string, format: uuid }
+          ticketId: { type: string, format: uuid, nullable: true }
+          recordedByUserId: { type: string, format: uuid }
+          durationMinutes: { type: integer }
+          description: { type: string, nullable: true }
+          startedAt: { type: string, format: date-time }
+          endedAt: { type: string, format: date-time }
+          recordedAt:
+            type: string
+            format: date-time
+            deprecated: true
+          invoiceId: { type: string, format: uuid, nullable: true }
+          billedAt: { type: string, format: date-time, nullable: true }
+          createdAt: { type: string, format: date-time }
+    ProjectTimeEntryRemoved:
+      name: ProjectTimeEntryRemoved
+      contentType: application/json
+      payload:
+        type: object
+        required: [id, projectId]
+        properties:
+          id: { type: string, format: uuid }
+          projectId: { type: string, format: uuid }
     ProjectSummaryChanged:
       name: ProjectSummaryChanged
       contentType: application/json
       payload:
         type: object
+        required:
+          [
+            projectId,
+            totalTrackedMinutes,
+            unbilledMinutes,
+            openBillableAmountNet,
+            billedAmountNet,
+            openTicketCount,
+            doneTicketCount,
+            milestoneCount,
+            openMilestoneCount,
+          ]
+        properties:
+          projectId: { type: string, format: uuid }
+          totalTrackedMinutes: { type: integer }
+          unbilledMinutes: { type: integer }
+          openBillableAmountNet: { type: number }
+          billedAmountNet: { type: number }
+          openTicketCount: { type: integer }
+          doneTicketCount: { type: integer }
+          milestoneCount: { type: integer }
+          openMilestoneCount: { type: integer }
     Error:
       name: Error
       contentType: application/json

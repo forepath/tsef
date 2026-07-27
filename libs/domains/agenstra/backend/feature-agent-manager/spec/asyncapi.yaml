@@ -171,6 +171,14 @@ channels:
       containerStatsEvent:
         $ref: '#/components/messages/ContainerStats'
     description: Server broadcasts container status (running/stopped) and, when running, container statistics (CPU, memory, network, etc.) periodically to all clients authenticated to the agent. First broadcast is sent immediately after successful login, then every 15 seconds by default (CONTAINER_STATS_SCHEDULER_INTERVAL in milliseconds on the agent-manager) while clients remain authenticated. When the container is stopped, stats is null but status is always present.
+  agents/gitStateChanged:
+    address: agents/gitStateChanged
+    messages:
+      gitStateChangedEvent:
+        $ref: '#/components/messages/GitStateChanged'
+    description: |
+      Broadcast after workspace tools that may mutate git state succeed (debounced).
+      Clients should refresh git status / dirty indicators. Envelope matches other success broadcasts.
 operations:
   clientSendsLogin:
     action: send
@@ -310,6 +318,12 @@ operations:
       $ref: '#/channels/agents~1containerStats'
     messages:
       - $ref: '#/channels/agents~1containerStats/messages/containerStatsEvent'
+  serverBroadcastsGitStateChanged:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1gitStateChanged'
+    messages:
+      - $ref: '#/channels/agents~1gitStateChanged/messages/gitStateChangedEvent'
 components:
   securitySchemes:
     jwt:
@@ -1106,3 +1120,30 @@ components:
           timestamp:
             type: string
             description: ISO timestamp
+    GitStateChanged:
+      name: GitStateChanged
+      title: Git workspace state may have changed
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [agentId, timestamp]
+            properties:
+              agentId:
+                type: string
+                format: uuid
+                description: Agent UUID whose workspace may have changed
+              timestamp:
+                type: string
+                format: date-time
+                description: When the change signal was produced
+          timestamp:
+            type: string
+            format: date-time
+            description: Envelope timestamp

@@ -219,6 +219,14 @@ channels:
       ticketAutomationRunStepAppendedEvent:
         $ref: '#/components/messages/TicketBoardRunStepPayload'
     description: New run step row (e.g. agent_turn iteration)
+  tickets/knowledgeRelationChanged:
+    address: tickets/knowledgeRelationChanged
+    messages:
+      ticketsKnowledgeRelationChangedEvent:
+        $ref: '#/components/messages/KnowledgeBoardRelationChangedPayload'
+    description: |
+      Same payload as `pages/knowledgeRelationChanged`. Emitted on the tickets namespace so ticket detail UIs
+      can refresh linked knowledge without joining the pages board.
   pages/setClient:
     address: pages/setClient
     messages:
@@ -272,6 +280,13 @@ channels:
   status/setActiveEnvironment:
     address: status/setActiveEnvironment
     description: Client reports the environment currently in view (suppresses unread for active user).
+  status/error:
+    address: status/error
+    messages:
+      statusErrorEvent:
+        $ref: '#/components/messages/TicketsBoardError'
+    description: |
+      Errors for status namespace (e.g. unauthenticated socket, missing clientId/agentId, or unauthorized).
 operations:
   clientSendsSetClient:
     action: send
@@ -375,6 +390,80 @@ operations:
       $ref: '#/channels/pages~1knowledgePageActivityCreated'
     messages:
       - $ref: '#/channels/pages~1knowledgePageActivityCreated/messages/pagesKnowledgePageActivityCreatedEvent'
+  pagesServerEmitsError:
+    action: receive
+    channel:
+      $ref: '#/channels/pages~1error'
+    messages:
+      - $ref: '#/channels/pages~1error/messages/pagesErrorEvent'
+  ticketsClientSendsSetClient:
+    action: send
+    channel:
+      $ref: '#/channels/tickets~1setClient'
+  ticketsServerEmitsSetClientSuccess:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1setClientSuccess'
+  ticketsServerEmitsError:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1error'
+  ticketsServerEmitsTicketUpsert:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1ticketUpsert'
+  ticketsServerEmitsTicketRemoved:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1ticketRemoved'
+  ticketsServerEmitsTicketCommentCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1ticketCommentCreated'
+  ticketsServerEmitsTicketActivityCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1ticketActivityCreated'
+  ticketsServerEmitsTicketAutomationUpsert:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1ticketAutomationUpsert'
+  ticketsServerEmitsTicketAutomationRunUpsert:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1ticketAutomationRunUpsert'
+  ticketsServerEmitsTicketAutomationRunStepAppended:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1ticketAutomationRunStepAppended'
+  ticketsServerEmitsKnowledgeRelationChanged:
+    action: receive
+    channel:
+      $ref: '#/channels/tickets~1knowledgeRelationChanged'
+    messages:
+      - $ref: '#/channels/tickets~1knowledgeRelationChanged/messages/ticketsKnowledgeRelationChangedEvent'
+  statusServerEmitsStatusSnapshot:
+    action: receive
+    channel:
+      $ref: '#/channels/status~1statusSnapshot'
+  statusServerEmitsStatusPatch:
+    action: receive
+    channel:
+      $ref: '#/channels/status~1statusPatch'
+  statusClientSendsMarkEnvironmentRead:
+    action: send
+    channel:
+      $ref: '#/channels/status~1markEnvironmentRead'
+  statusClientSendsSetActiveEnvironment:
+    action: send
+    channel:
+      $ref: '#/channels/status~1setActiveEnvironment'
+  statusServerEmitsError:
+    action: receive
+    channel:
+      $ref: '#/channels/status~1error'
+    messages:
+      - $ref: '#/channels/status~1error/messages/statusErrorEvent'
 components:
   messages:
     SetClient:

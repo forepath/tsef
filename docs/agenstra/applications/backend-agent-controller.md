@@ -84,7 +84,7 @@ In api-key mode, users do not play a role; these endpoints are not applicable.
 
 The console calls the controller; the controller proxies to each client’s agent-manager. Typical paths:
 
-- `GET/PUT/DELETE .../deployments/configuration` - Deployment configuration
+- `GET/POST .../deployments/configuration` and `DELETE` - Deployment configuration (upsert via POST, not PUT)
 - `GET .../deployments/repositories` - List repositories
 - `GET .../deployments/repositories/:repositoryId/branches` - List branches
 - `GET .../deployments/repositories/:repositoryId/workflows` - List workflows
@@ -110,6 +110,18 @@ Tickets live on the controller database (not on the remote manager). See [Ticket
 - `GET/PATCH /api/tickets/:ticketId/automation` - Automation configuration
 - `POST .../automation/approve` and `POST .../automation/unapprove` - Approve or revoke approval
 - `GET .../automation/runs`, `GET .../automation/runs/:runId`, `POST .../automation/runs/:runId/cancel` - Runs and cancel
+
+### Knowledge tree (controller-native)
+
+Workspace knowledge folders/pages and relations. See OpenAPI `/knowledge/*` and Socket.IO namespace **pages**.
+
+- `GET/POST /api/knowledge` - List and create nodes (`clientId` query on list)
+- `GET /api/knowledge/tree` - Nested tree
+- `GET/PATCH/DELETE /api/knowledge/:id` - Read, update, delete
+- `GET /api/knowledge/:id/activity` - Page activity
+- `POST /api/knowledge/:id/reorder` / `POST /api/knowledge/:id/duplicate`
+- `GET/POST /api/knowledge/relations`, `DELETE /api/knowledge/relations/:id`
+- `GET /api/knowledge/relations/prompt-context` / `GET /api/knowledge/by-sha`
 
 ### Usage statistics
 
@@ -191,10 +203,12 @@ For complete API endpoint documentation, request/response schemas, and authentic
 
 ## WebSocket Gateway
 
-Socket.IO listens on **`WEBSOCKET_PORT`** (default `8081`). Two namespaces share the same port and CORS settings (`WEBSOCKET_CORS_ORIGIN`):
+Socket.IO listens on **`WEBSOCKET_PORT`** (default `8081`). Namespaces share the same port and CORS settings (`WEBSOCKET_CORS_ORIGIN`):
 
 - **`clients`** (default `WEBSOCKET_NAMESPACE` = `clients`) – proxy to the selected workspace’s agent-manager; chat, terminals, stats, and controller-originated ticket hints for the chat UI
 - **`tickets`** (default `TICKETS_WEBSOCKET_NAMESPACE` = `tickets`) – ticket board and automation realtime (see [Tickets and Workspaces](../features/tickets-and-workspaces.md))
+- **`pages`** – knowledge board realtime (`knowledgeTreeChanged`, `knowledgeRelationChanged`, `knowledgePageActivityCreated`)
+- **`status`** – per-user notification snapshots/patches (see [WebSocket Communication](../features/websocket-communication.md))
 
 Connect to each namespace explicitly in the client library (e.g. `io(url + '/clients', options)` and `io(url + '/tickets', options)`).
 
@@ -237,7 +251,22 @@ Same handshake auth as `clients`. After `setClient` with a workspace id, the soc
 - `setClientSuccess` - Workspace context set
 - `ticketUpsert`, `ticketRemoved`, `ticketCommentCreated`, `ticketActivityCreated`
 - `ticketAutomationUpsert`, `ticketAutomationRunUpsert`, `ticketAutomationRunStepAppended`
+- `knowledgeRelationChanged` - Linked knowledge relations changed (same payload as pages namespace)
 - `error` - Tickets namespace errors
+
+### Namespace `pages` – events
+
+Same handshake auth as `clients`. After `setClient`, the socket joins room `client:{clientId}`.
+
+#### Client → Server
+
+- `setClient` - Select workspace for knowledge board realtime
+
+#### Server → Client
+
+- `setClientSuccess` - Workspace context set
+- `knowledgeTreeChanged`, `knowledgeRelationChanged`, `knowledgePageActivityCreated`
+- `error` - Pages namespace errors
 
 For complete WebSocket event specifications and usage examples, see the application and API reference docs linked below.
 

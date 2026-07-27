@@ -865,6 +865,290 @@ paths:
           description: Cleared
         '403':
           description: Forbidden
+  /knowledge:
+    get:
+      summary: List knowledge nodes for a workspace
+      description: |
+        Requires `knowledge:read`. Returns flat node list for the given `clientId`.
+        For realtime tree coherence, subscribe to Socket.IO namespace **pages** (AsyncAPI `pages/*`).
+      operationId: listKnowledgeNodes
+      parameters:
+        - in: query
+          name: clientId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Knowledge nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KnowledgeNodeResponseDto'
+    post:
+      summary: Create knowledge node
+      description: Requires `knowledge:write`.
+      operationId: createKnowledgeNode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeNodeDto'
+      responses:
+        '201':
+          description: Created node
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeNodeResponseDto'
+  /knowledge/tree:
+    get:
+      summary: Get knowledge tree for a workspace
+      description: Requires `knowledge:read`. Returns nested folder/page tree.
+      operationId: getKnowledgeTree
+      parameters:
+        - in: query
+          name: clientId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Nested knowledge tree
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KnowledgeNodeResponseDto'
+  /knowledge/by-sha:
+    get:
+      summary: Get knowledge node by content SHA
+      description: Requires `knowledge:read`.
+      operationId: getKnowledgeNodeBySha
+      parameters:
+        - in: query
+          name: clientId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: sha
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Matching node
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeNodeResponseDto'
+        '404':
+          description: Not found
+  /knowledge/relations:
+    get:
+      summary: List knowledge relations for a source
+      description: Requires `knowledge:read`.
+      operationId: listKnowledgeRelations
+      parameters:
+        - in: query
+          name: clientId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: sourceType
+          required: true
+          schema: { type: string, enum: [ticket, page] }
+        - in: query
+          name: sourceId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Relations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KnowledgeRelationResponseDto'
+    post:
+      summary: Create knowledge relation
+      description: Requires `knowledge:write`. Emits `knowledgeRelationChanged` on pages and tickets namespaces.
+      operationId: createKnowledgeRelation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeRelationDto'
+      responses:
+        '201':
+          description: Created relation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeRelationResponseDto'
+  /knowledge/relations/prompt-context:
+    get:
+      summary: Collect prompt context sections for a source
+      description: Requires `knowledge:read`.
+      operationId: getKnowledgePromptContext
+      parameters:
+        - in: query
+          name: clientId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: sourceType
+          required: true
+          schema: { type: string, enum: [ticket, page] }
+        - in: query
+          name: sourceId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Prompt sections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgePromptContextResponseDto'
+  /knowledge/relations/{id}:
+    delete:
+      summary: Delete knowledge relation
+      description: Requires `knowledge:write`.
+      operationId: deleteKnowledgeRelation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Deleted
+  /knowledge/{id}:
+    get:
+      summary: Get knowledge node by id
+      description: Requires `knowledge:read`.
+      operationId: getKnowledgeNode
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Node
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeNodeResponseDto'
+        '404':
+          description: Not found
+    patch:
+      summary: Update knowledge node
+      description: Requires `knowledge:write`.
+      operationId: updateKnowledgeNode
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKnowledgeNodeDto'
+      responses:
+        '200':
+          description: Updated node
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeNodeResponseDto'
+    delete:
+      summary: Delete knowledge node
+      description: |
+        Requires `knowledge:write`. Optional `releaseExternalSyncMarker=true` clears external sync markers.
+      operationId: deleteKnowledgeNode
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: releaseExternalSyncMarker
+          schema: { type: string, enum: ['true', '1', 'false', '0'] }
+      responses:
+        '204':
+          description: Deleted
+  /knowledge/{id}/activity:
+    get:
+      summary: List knowledge page activity
+      description: Requires `knowledge:read`.
+      operationId: listKnowledgePageActivity
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50 }
+        - in: query
+          name: offset
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Activity rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KnowledgePageActivityResponseDto'
+  /knowledge/{id}/reorder:
+    post:
+      summary: Reorder knowledge node
+      description: Requires `knowledge:write`.
+      operationId: reorderKnowledgeNode
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderKnowledgeNodeDto'
+      responses:
+        '200':
+          description: Reordered node
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeNodeResponseDto'
+  /knowledge/{id}/duplicate:
+    post:
+      summary: Duplicate knowledge node
+      description: Requires `knowledge:write`.
+      operationId: duplicateKnowledgeNode
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Duplicated node
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeNodeResponseDto'
   /tickets:
     get:
       summary: List project tickets
@@ -6629,3 +6913,100 @@ components:
           items:
             $ref: '#/components/schemas/WebhookDeliveryResponseDto'
         total: { type: integer }
+    KnowledgeNodeResponseDto:
+      type: object
+      required:
+        [id, shas, clientId, nodeType, title, sortOrder, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        shas:
+          type: object
+          required: [short, long]
+          properties:
+            short: { type: string }
+            long: { type: string }
+        clientId: { type: string, format: uuid }
+        nodeType: { type: string, enum: [folder, page] }
+        parentId: { type: string, format: uuid, nullable: true }
+        title: { type: string }
+        content: { type: string, nullable: true }
+        sortOrder: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeNodeResponseDto' }
+    CreateKnowledgeNodeDto:
+      type: object
+      required: [nodeType, title]
+      properties:
+        clientId: { type: string, format: uuid }
+        parentId: { type: string, format: uuid, nullable: true }
+        nodeType: { type: string, enum: [folder, page] }
+        title: { type: string, maxLength: 500 }
+        content: { type: string }
+    UpdateKnowledgeNodeDto:
+      type: object
+      properties:
+        parentId: { type: string, format: uuid, nullable: true }
+        title: { type: string, maxLength: 500 }
+        content: { type: string, nullable: true }
+    ReorderKnowledgeNodeDto:
+      type: object
+      required: [sortOrder]
+      properties:
+        sortOrder: { type: integer, minimum: 0, maximum: 100000 }
+    KnowledgeRelationResponseDto:
+      type: object
+      required: [id, clientId, sourceType, sourceId, targetType, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        clientId: { type: string, format: uuid }
+        sourceType: { type: string, enum: [ticket, page] }
+        sourceId: { type: string, format: uuid }
+        targetType: { type: string, enum: [ticket, folder, page] }
+        targetNodeId: { type: string, format: uuid, nullable: true }
+        targetTicketLongSha: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+    CreateKnowledgeRelationDto:
+      type: object
+      required: [clientId, sourceType, sourceId, targetType]
+      properties:
+        clientId: { type: string, format: uuid }
+        sourceType: { type: string, enum: [ticket, page] }
+        sourceId: { type: string, format: uuid }
+        targetType: { type: string, enum: [ticket, folder, page] }
+        targetNodeId: { type: string, format: uuid }
+        targetTicketSha: { type: string, maxLength: 40 }
+    KnowledgePromptContextResponseDto:
+      type: object
+      required: [promptSections]
+      properties:
+        promptSections:
+          type: array
+          items: { type: string }
+    KnowledgePageActivityResponseDto:
+      type: object
+      required: [id, pageId, occurredAt, actorType, actionType, payload]
+      properties:
+        id: { type: string, format: uuid }
+        pageId: { type: string, format: uuid }
+        occurredAt: { type: string, format: date-time }
+        actorType: { type: string, enum: [human, ai, system] }
+        actorUserId: { type: string, format: uuid, nullable: true }
+        actorEmail: { type: string, nullable: true }
+        actionType:
+          type: string
+          enum:
+            [
+              CREATED,
+              FIELD_UPDATED,
+              CONTENT_UPDATED,
+              PARENT_CHANGED,
+              SORT_ORDER_CHANGED,
+              DELETED,
+              DUPLICATED,
+              RELATION_ADDED,
+              RELATION_REMOVED,
+            ]
+        payload: { type: object, additionalProperties: true }

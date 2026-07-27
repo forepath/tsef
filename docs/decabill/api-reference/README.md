@@ -56,6 +56,29 @@ Project endpoints are tagged **`Projects`**, **`Project Board`**, and **`Admin B
 | Board    | `GET/POST /projects/{projectId}/tickets`, `/milestones`, `/time-entries` | Admin write; customer comments    |
 | Admin    | `GET/POST/DELETE /admin/billing/projects`, `POST .../bill-time`          | CRUD and time billing             |
 
+#### Time entries
+
+| Method | Path                                               | `operationId`            | Auth                                                   |
+| ------ | -------------------------------------------------- | ------------------------ | ------------------------------------------------------ |
+| GET    | `/projects/{projectId}/time-entries`               | `listProjectTimeEntries` | `projects:read` (assigned customers and admins)        |
+| POST   | `/projects/{projectId}/time-entries`               | `createProjectTimeEntry` | `time_entries:write` (admin)                           |
+| POST   | `/projects/{projectId}/time-entries/{timeEntryId}` | `updateProjectTimeEntry` | `time_entries:write` (admin); billed entries immutable |
+| DELETE | `/projects/{projectId}/time-entries/{timeEntryId}` | `deleteProjectTimeEntry` | `time_entries:write` (admin); billed entries immutable |
+
+List supports query params `limit`, `offset`, and optional `ticketId`.
+
+#### Contract hygiene — deferred gaps (P0.1)
+
+Implemented in Nest but intentionally **not** expanded in OpenAPI yet (internal or non-partner):
+
+| Method | Path                                                          | Reason                   |
+| ------ | ------------------------------------------------------------- | ------------------------ |
+| GET    | `/service-plans/{id}/order-provisioning-options`              | Internal provisioning UX |
+| POST   | `/admin/billing/customer-profiles/{id}/vat-id/revalidate`     | Admin ops tooling        |
+| POST   | `/admin/billing/customer-profiles/{id}/vat-id/mark-validated` | Admin ops tooling        |
+
+OpenAPI also documents composite surfaces without controllers in `feature-billing-manager` (auth/users from identity when bundled; admin webhook CRUD; otel metrics). Those ops are left published; do not delete without a deprecation note. Cosmetic Nest `:id` vs OpenAPI `{projectId}`/`{ticketId}` param names are deferred.
+
 Product guides: **[Projects](../features/projects.md)** and **[Project Board](../features/project-board.md)**
 
 ## Billing Manager WebSocket Gateways
@@ -90,12 +113,12 @@ See **[Real-time Status](../features/real-time-status.md)**.
 
 ### Project board namespace (`projects`)
 
-| Direction        | Event                                                                                             | Description                                        |
-| ---------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Client to server | `setProject`                                                                                      | Join `project:{projectId}` room after access check |
-| Server to client | `setProjectSuccess`                                                                               | Confirmation for initiating socket                 |
-| Server to client | `ticketUpsert`, `ticketRemoved`, `milestoneUpsert`, `timeEntryUpsert`, `projectSummaryChanged`, … | Room broadcasts after REST mutations               |
-| Server to client | `error`                                                                                           | Application errors scoped to the initiating socket |
+| Direction        | Event                                                                                                                                                                                   | Description                                        |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Client to server | `setProject`                                                                                                                                                                            | Join `project:{projectId}` room after access check |
+| Server to client | `setProjectSuccess`                                                                                                                                                                     | Confirmation for initiating socket                 |
+| Server to client | `ticketUpsert`, `ticketRemoved`, `ticketCommentCreated`, `ticketActivityCreated`, `milestoneUpsert`, `milestoneRemoved`, `timeEntryUpsert`, `timeEntryRemoved`, `projectSummaryChanged` | Room broadcasts after REST mutations               |
+| Server to client | `error`                                                                                                                                                                                 | Application errors scoped to the initiating socket |
 
 Namespace: **`projects`** (env: `PROJECTS_WEBSOCKET_NAMESPACE`).
 
@@ -126,12 +149,12 @@ Load the spec via the docs.decabill.com URL above or the local `/spec/billing-ma
 The repository generates a TypeScript Axios client from the OpenAPI spec:
 
 ```bash
-nx run decabill-backend-billing-manager:generate-client
+nx run decabill-backend-billing-manager:openapi-client-js
 ```
 
 Published npm package (GitHub Packages): **`@forepath/decabill-billing-manager-client`**
 
-Configure `@forepath` scope in `.npmrc` to install from GitHub Packages. Clients are regenerated on release to stay aligned with the spec.
+Configure `@forepath` scope in `.npmrc` to install from GitHub Packages. Clients are regenerated on release to stay aligned with the spec. Output lands under `dist/clients/billing-manager/js` (gitignored).
 
 ## Related Documentation
 

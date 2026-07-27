@@ -181,9 +181,15 @@ sequenceDiagram
 
 ### Server → Client
 
-Typical events include `ticketUpsert`, `ticketRemoved`, `ticketCommentCreated`, `ticketActivityCreated`, `ticketAutomationUpsert`, `ticketAutomationRunUpsert`, and `ticketAutomationRunStepAppended`. Errors use the `error` event on this namespace.
+Typical events include `ticketUpsert`, `ticketRemoved`, `ticketCommentCreated`, `ticketActivityCreated`, `ticketAutomationUpsert`, `ticketAutomationRunUpsert`, `ticketAutomationRunStepAppended`, and `knowledgeRelationChanged` (same relation payload as the pages namespace). Errors use the `error` event on this namespace.
 
 See **[Tickets and Workspaces](./tickets-and-workspaces.md)** for product context and **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** for configuration.
+
+## Knowledge board realtime (`pages` namespace)
+
+Use namespace **`pages`** on the same controller WebSocket origin. After `setClient`, room broadcasts include `knowledgeTreeChanged`, `knowledgeRelationChanged`, and `knowledgePageActivityCreated`. Errors use `error`.
+
+REST source of truth: OpenAPI `/knowledge/*` on the agent-controller.
 
 ## Reconnection Handling
 
