@@ -184,7 +184,7 @@ nx build decabill-backend-billing-manager
 nx test decabill-backend-billing-manager
 
 # Generate TypeScript client from OpenAPI
-nx run decabill-backend-billing-manager:generate-client
+nx run decabill-backend-billing-manager:openapi-client-js
 ```
 
 Published client package: `@forepath/decabill-billing-manager-client` (generated from the same OpenAPI spec).

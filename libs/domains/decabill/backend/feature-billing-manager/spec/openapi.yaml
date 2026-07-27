@@ -3917,6 +3917,20 @@ paths:
       responses:
         '204':
           description: Deleted
+  /admin/billing/projects/{projectId}/summary:
+    get:
+      tags: [Admin Billing]
+      summary: Get project KPI summary (admin)
+      operationId: getAdminProjectSummary
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Project summary KPIs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSummaryResponse'
   /admin/billing/projects/{projectId}/unbilled-time-bounds:
     get:
       tags: [Admin Billing]
@@ -4014,6 +4028,77 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProjectTicketResponse'
+  /projects/{projectId}/tickets/{ticketId}:
+    get:
+      tags: [Project Board]
+      summary: Get project ticket
+      description: Requires `tickets:read`. Set `includeDescendants=true` to embed child tickets.
+      operationId: getProjectTicket
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TicketId'
+        - name: includeDescendants
+          in: query
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Ticket detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectTicketResponse'
+    post:
+      tags: [Project Board]
+      summary: Update project ticket (admin write)
+      description: Requires `tickets:write`. Locked tickets reject content mutations.
+      operationId: updateProjectTicket
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TicketId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectTicketDto'
+      responses:
+        '200':
+          description: Updated ticket
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectTicketResponse'
+    delete:
+      tags: [Project Board]
+      summary: Delete project ticket (admin write)
+      description: Requires `tickets:write`.
+      operationId: deleteProjectTicket
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TicketId'
+      responses:
+        '204':
+          description: Ticket deleted
+  /projects/{projectId}/tickets/{ticketId}/activity:
+    get:
+      tags: [Project Board]
+      summary: List ticket activity
+      description: Requires `tickets:read`.
+      operationId: listProjectTicketActivity
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TicketId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Activity events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectTicketActivityResponse'
   /projects/{projectId}/tickets/{ticketId}/comments:
     get:
       tags: [Project Board]
@@ -4067,6 +4152,156 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ProjectMilestoneResponse'
+    post:
+      tags: [Projects]
+      summary: Create project milestone (admin write)
+      description: Requires `milestones:write`.
+      operationId: createProjectMilestone
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectMilestoneDto'
+      responses:
+        '201':
+          description: Created milestone
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectMilestoneResponse'
+  /projects/{projectId}/milestones/{milestoneId}:
+    post:
+      tags: [Projects]
+      summary: Update project milestone (admin write)
+      description: Requires `milestones:write`. Locked milestones reject mutations.
+      operationId: updateProjectMilestone
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/MilestoneId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectMilestoneDto'
+      responses:
+        '200':
+          description: Updated milestone
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectMilestoneResponse'
+    delete:
+      tags: [Projects]
+      summary: Delete project milestone (admin write)
+      description: Requires `milestones:write`.
+      operationId: deleteProjectMilestone
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/MilestoneId'
+      responses:
+        '204':
+          description: Milestone deleted
+  /projects/{projectId}/milestones/{milestoneId}/lock:
+    post:
+      tags: [Projects]
+      summary: Lock project milestone (admin write)
+      description: Requires `milestones:write`. Prevents further milestone edits and related ticket moves.
+      operationId: lockProjectMilestone
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/MilestoneId'
+      responses:
+        '200':
+          description: Locked milestone
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectMilestoneResponse'
+  /projects/{projectId}/time-entries:
+    get:
+      tags: [Project Board]
+      summary: List project time entries
+      description: |
+        Requires `projects:read`. Assigned customers and admins can list entries for readable projects.
+        Optional `ticketId` filters entries linked to a ticket.
+      operationId: listProjectTimeEntries
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: ticketId
+          in: query
+          schema: { type: string, format: uuid }
+          description: Optional ticket filter
+      responses:
+        '200':
+          description: Paginated time entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectTimeEntriesResponse'
+    post:
+      tags: [Project Board]
+      summary: Create project time entry (admin write)
+      description: |
+        Requires `time_entries:write`. Admin-only mutation. Entries with `billedAt` set are immutable after billing.
+      operationId: createProjectTimeEntry
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectTimeEntryDto'
+      responses:
+        '201':
+          description: Created time entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectTimeEntryResponse'
+  /projects/{projectId}/time-entries/{timeEntryId}:
+    post:
+      tags: [Project Board]
+      summary: Update project time entry (admin write)
+      description: |
+        Requires `time_entries:write`. Admin-only mutation.
+        Entries with `billedAt` set cannot be updated.
+      operationId: updateProjectTimeEntry
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TimeEntryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectTimeEntryDto'
+      responses:
+        '200':
+          description: Updated time entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectTimeEntryResponse'
+    delete:
+      tags: [Project Board]
+      summary: Delete project time entry (admin write)
+      description: |
+        Requires `time_entries:write`. Admin-only mutation.
+        Entries with `billedAt` set cannot be deleted.
+      operationId: deleteProjectTimeEntry
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TimeEntryId'
+      responses:
+        '204':
+          description: Time entry deleted
   /admin/billing/webhooks/event-types:
     get:
       tags: [Admin Billing]
@@ -4294,6 +4529,22 @@ components:
         type: string
         format: uuid
       description: Project ticket ID
+    MilestoneId:
+      in: path
+      name: milestoneId
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Project milestone ID
+    TimeEntryId:
+      in: path
+      name: timeEntryId
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Project time entry ID
     BackorderId:
       in: path
       name: id
@@ -6533,6 +6784,16 @@ components:
         content: { type: string }
         priority: { $ref: '#/components/schemas/ProjectTicketPriority' }
         status: { $ref: '#/components/schemas/ProjectTicketStatus' }
+    UpdateProjectTicketDto:
+      type: object
+      properties:
+        parentId: { type: string, format: uuid, nullable: true }
+        milestoneId: { type: string, format: uuid, nullable: true }
+        title: { type: string }
+        content: { type: string, nullable: true }
+        priority: { $ref: '#/components/schemas/ProjectTicketPriority' }
+        status: { $ref: '#/components/schemas/ProjectTicketStatus' }
+        locked: { type: boolean }
     ProjectTicketCommentResponse:
       type: object
       required: [id, ticketId, userId, body, createdAt]
@@ -6548,6 +6809,19 @@ components:
       required: [body]
       properties:
         body: { type: string }
+    ProjectTicketActivityResponse:
+      type: object
+      required: [id, ticketId, occurredAt, actorType, actionType, payload]
+      properties:
+        id: { type: string, format: uuid }
+        ticketId: { type: string, format: uuid }
+        occurredAt: { type: string, format: date-time }
+        actorType: { type: string }
+        actorUserId: { type: string, format: uuid, nullable: true }
+        actionType: { type: string }
+        payload:
+          type: object
+          additionalProperties: true
     ProjectMilestoneResponse:
       type: object
       required:
@@ -6575,6 +6849,76 @@ components:
         doneTicketCount: { type: integer }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+    CreateProjectMilestoneDto:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        targetDate: { type: string, format: date }
+        sortOrder: { type: integer, minimum: 0 }
+    UpdateProjectMilestoneDto:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        targetDate: { type: string, format: date, nullable: true }
+        sortOrder: { type: integer, minimum: 0 }
+    ProjectTimeEntryResponse:
+      type: object
+      required:
+        [
+          id,
+          projectId,
+          recordedByUserId,
+          durationMinutes,
+          startedAt,
+          endedAt,
+          recordedAt,
+          createdAt,
+        ]
+      properties:
+        id: { type: string, format: uuid }
+        projectId: { type: string, format: uuid }
+        ticketId: { type: string, format: uuid, nullable: true }
+        recordedByUserId: { type: string, format: uuid }
+        durationMinutes: { type: integer }
+        description: { type: string, nullable: true }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time }
+        recordedAt:
+          type: string
+          format: date-time
+          deprecated: true
+          description: Deprecated; use startedAt
+        invoiceId: { type: string, format: uuid, nullable: true }
+        billedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+    CreateProjectTimeEntryDto:
+      type: object
+      required: [startedAt, endedAt]
+      properties:
+        ticketId: { type: string, format: uuid }
+        description: { type: string, maxLength: 500 }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time }
+    UpdateProjectTimeEntryDto:
+      type: object
+      properties:
+        ticketId: { type: string, format: uuid, nullable: true }
+        description: { type: string, maxLength: 500, nullable: true }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time }
+    PaginatedProjectTimeEntriesResponse:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ProjectTimeEntryResponse' }
+        total: { type: integer }
+        limit: { type: integer }
+        offset: { type: integer }
     UpdateCloudInitConfigDto:
       type: object
       properties:

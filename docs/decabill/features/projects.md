@@ -70,9 +70,9 @@ All admin routes require admin role (`@KeycloakRoles(ADMIN)` + `@UsersRoles(ADMI
 | `targetHours`   | Optional project time budget in hours; shown on detail pages with progress vs tracked time |
 | `currency`      | ISO currency (default `EUR`)                                                               |
 
-## Time Entries (Admin)
+## Time Entries
 
-Time is recorded under `/projects/{projectId}/time-entries`. Only admins can list, create, update, or delete entries.
+Time is recorded under `/projects/{projectId}/time-entries`. Assigned customers and admins with `projects:read` can list entries. Create, update, and delete require `time_entries:write` (admin write).
 
 | Method | Path                                           | Purpose               |
 | ------ | ---------------------------------------------- | --------------------- |

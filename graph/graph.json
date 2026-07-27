@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-26T15:55:33.175Z",
+  "generatedAt": "2026-07-27T17:08:29.046Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -11964,6 +11964,15 @@
       }
     },
     {
+      "id": "api:channel:tickets/knowledgeRelationChanged",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "tickets/knowledgeRelationChanged",
+        "summary": "Same payload as `pages/knowledgeRelationChanged`. Emitted on the tickets namespace so ticket detail UIs\ncan refresh linked knowledge without joining the pages board.\n",
+        "specKind": "asyncapi"
+      }
+    },
+    {
       "id": "api:channel:pages/setClient",
       "type": "channel",
       "attrs": {
@@ -12050,6 +12059,15 @@
       "attrs": {
         "pathOrChannel": "status/setActiveEnvironment",
         "summary": "Client reports the environment currently in view (suppresses unread for active user).",
+        "specKind": "asyncapi"
+      }
+    },
+    {
+      "id": "api:channel:status/error",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "status/error",
+        "summary": "Errors for status namespace (e.g. unauthenticated socket, missing clientId/agentId, or unauthorized).\n",
         "specKind": "asyncapi"
       }
     },
@@ -12490,6 +12508,160 @@
         "pathOrChannel": "/imports/atlassian/configs/{id}/markers",
         "operationId": "clearExternalImportMarkers",
         "summary": "Clear sync markers for config (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/knowledge",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/knowledge",
+        "operationId": "listKnowledgeNodes",
+        "summary": "List knowledge nodes for a workspace",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/knowledge",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/knowledge",
+        "operationId": "createKnowledgeNode",
+        "summary": "Create knowledge node",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/knowledge/tree",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/knowledge/tree",
+        "operationId": "getKnowledgeTree",
+        "summary": "Get knowledge tree for a workspace",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/knowledge/by-sha",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/knowledge/by-sha",
+        "operationId": "getKnowledgeNodeBySha",
+        "summary": "Get knowledge node by content SHA",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/knowledge/relations",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/knowledge/relations",
+        "operationId": "listKnowledgeRelations",
+        "summary": "List knowledge relations for a source",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/knowledge/relations",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/knowledge/relations",
+        "operationId": "createKnowledgeRelation",
+        "summary": "Create knowledge relation",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/knowledge/relations/prompt-context",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/knowledge/relations/prompt-context",
+        "operationId": "getKnowledgePromptContext",
+        "summary": "Collect prompt context sections for a source",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/knowledge/relations/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/knowledge/relations/{id}",
+        "operationId": "deleteKnowledgeRelation",
+        "summary": "Delete knowledge relation",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/knowledge/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/knowledge/{id}",
+        "operationId": "getKnowledgeNode",
+        "summary": "Get knowledge node by id",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:PATCH:/knowledge/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "PATCH",
+        "pathOrChannel": "/knowledge/{id}",
+        "operationId": "updateKnowledgeNode",
+        "summary": "Update knowledge node",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/knowledge/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/knowledge/{id}",
+        "operationId": "deleteKnowledgeNode",
+        "summary": "Delete knowledge node",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/knowledge/{id}/activity",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/knowledge/{id}/activity",
+        "operationId": "listKnowledgePageActivity",
+        "summary": "List knowledge page activity",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/knowledge/{id}/reorder",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/knowledge/{id}/reorder",
+        "operationId": "reorderKnowledgeNode",
+        "summary": "Reorder knowledge node",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/knowledge/{id}/duplicate",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/knowledge/{id}/duplicate",
+        "operationId": "duplicateKnowledgeNode",
+        "summary": "Duplicate knowledge node",
         "specKind": "openapi"
       }
     },
@@ -13908,6 +14080,30 @@
       "type": "channel",
       "attrs": {
         "pathOrChannel": "projects/milestoneUpsert",
+        "specKind": "asyncapi"
+      }
+    },
+    {
+      "id": "api:channel:projects/milestoneRemoved",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "projects/milestoneRemoved",
+        "specKind": "asyncapi"
+      }
+    },
+    {
+      "id": "api:channel:projects/timeEntryUpsert",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "projects/timeEntryUpsert",
+        "specKind": "asyncapi"
+      }
+    },
+    {
+      "id": "api:channel:projects/timeEntryRemoved",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "projects/timeEntryRemoved",
         "specKind": "asyncapi"
       }
     },
@@ -15413,6 +15609,17 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/admin/billing/projects/{projectId}/summary",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/projects/{projectId}/summary",
+        "operationId": "getAdminProjectSummary",
+        "summary": "Get project KPI summary (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "api:HTTP:GET:/admin/billing/projects/{projectId}/unbilled-time-bounds",
       "type": "endpoint",
       "attrs": {
@@ -15468,6 +15675,50 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/projects/{projectId}/tickets/{ticketId}",
+        "operationId": "getProjectTicket",
+        "summary": "Get project ticket",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/projects/{projectId}/tickets/{ticketId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/projects/{projectId}/tickets/{ticketId}",
+        "operationId": "updateProjectTicket",
+        "summary": "Update project ticket (admin write)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/projects/{projectId}/tickets/{ticketId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/projects/{projectId}/tickets/{ticketId}",
+        "operationId": "deleteProjectTicket",
+        "summary": "Delete project ticket (admin write)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}/activity",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/projects/{projectId}/tickets/{ticketId}/activity",
+        "operationId": "listProjectTicketActivity",
+        "summary": "List ticket activity",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}/comments",
       "type": "endpoint",
       "attrs": {
@@ -15497,6 +15748,94 @@
         "pathOrChannel": "/projects/{projectId}/milestones",
         "operationId": "listProjectMilestones",
         "summary": "List project milestones",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/projects/{projectId}/milestones",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/projects/{projectId}/milestones",
+        "operationId": "createProjectMilestone",
+        "summary": "Create project milestone (admin write)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/projects/{projectId}/milestones/{milestoneId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/projects/{projectId}/milestones/{milestoneId}",
+        "operationId": "updateProjectMilestone",
+        "summary": "Update project milestone (admin write)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/projects/{projectId}/milestones/{milestoneId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/projects/{projectId}/milestones/{milestoneId}",
+        "operationId": "deleteProjectMilestone",
+        "summary": "Delete project milestone (admin write)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/projects/{projectId}/milestones/{milestoneId}/lock",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/projects/{projectId}/milestones/{milestoneId}/lock",
+        "operationId": "lockProjectMilestone",
+        "summary": "Lock project milestone (admin write)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/projects/{projectId}/time-entries",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/projects/{projectId}/time-entries",
+        "operationId": "listProjectTimeEntries",
+        "summary": "List project time entries",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/projects/{projectId}/time-entries",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/projects/{projectId}/time-entries",
+        "operationId": "createProjectTimeEntry",
+        "summary": "Create project time entry (admin write)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/projects/{projectId}/time-entries/{timeEntryId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/projects/{projectId}/time-entries/{timeEntryId}",
+        "operationId": "updateProjectTimeEntry",
+        "summary": "Update project time entry (admin write)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/projects/{projectId}/time-entries/{timeEntryId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/projects/{projectId}/time-entries/{timeEntryId}",
+        "operationId": "deleteProjectTimeEntry",
+        "summary": "Delete project time entry (admin write)",
         "specKind": "openapi"
       }
     },
@@ -16246,6 +16585,15 @@
       }
     },
     {
+      "id": "api:channel:agents/gitStateChanged",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "agents/gitStateChanged",
+        "summary": "Broadcast after workspace tools that may mutate git state succeed (debounced).\nClients should refresh git status / dirty indicators. Envelope matches other success broadcasts.\n",
+        "specKind": "asyncapi"
+      }
+    },
+    {
       "id": "api:HTTP:GET:/agents",
       "type": "endpoint",
       "attrs": {
@@ -16297,6 +16645,17 @@
         "pathOrChannel": "/agents/{id}",
         "operationId": "deleteAgent",
         "summary": "Delete agent",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/agents/{id}/messages/latest-agent",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/agents/{id}/messages/latest-agent",
+        "operationId": "getLatestAgentMessage",
+        "summary": "Get latest agent chat message metadata",
         "specKind": "openapi"
       }
     },
@@ -19989,6 +20348,16 @@
         "title": "Tickets board realtime (`tickets` namespace)",
         "docPath": "docs/agenstra/features/websocket-communication.md",
         "sectionAnchor": "tickets-board-realtime-tickets-namespace",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-knowledge-board-realtime-pages-namespace",
+      "type": "concept",
+      "attrs": {
+        "title": "Knowledge board realtime (`pages` namespace)",
+        "docPath": "docs/agenstra/features/websocket-communication.md",
+        "sectionAnchor": "knowledge-board-realtime-pages-namespace",
         "domain": "agenstra"
       }
     },
@@ -24513,12 +24882,12 @@
       }
     },
     {
-      "id": "concept:decabill-time-entries-admin",
+      "id": "concept:decabill-time-entries",
       "type": "concept",
       "attrs": {
-        "title": "Time Entries (Admin)",
+        "title": "Time Entries",
         "docPath": "docs/decabill/features/projects.md",
-        "sectionAnchor": "time-entries-admin",
+        "sectionAnchor": "time-entries",
         "domain": "decabill"
       }
     },
@@ -33651,6 +34020,11 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/asyncapi.yaml",
+      "to": "api:channel:tickets/knowledgeRelationChanged",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/asyncapi.yaml",
       "to": "api:channel:pages/setClient",
       "type": "contains"
     },
@@ -33697,6 +34071,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/asyncapi.yaml",
       "to": "api:channel:status/setActiveEnvironment",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/asyncapi.yaml",
+      "to": "api:channel:status/error",
       "type": "contains"
     },
     {
@@ -33897,6 +34276,76 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
       "to": "api:HTTP:DELETE:/imports/atlassian/configs/{id}/markers",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/knowledge/tree",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/knowledge/by-sha",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/knowledge/relations",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/knowledge/relations",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/knowledge/relations/prompt-context",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/knowledge/relations/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/knowledge/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:PATCH:/knowledge/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/knowledge/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/knowledge/{id}/activity",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/knowledge/{id}/reorder",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/knowledge/{id}/duplicate",
       "type": "contains"
     },
     {
@@ -34577,6 +35026,21 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/asyncapi.yaml",
       "to": "api:channel:projects/milestoneUpsert",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/asyncapi.yaml",
+      "to": "api:channel:projects/milestoneRemoved",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/asyncapi.yaml",
+      "to": "api:channel:projects/timeEntryUpsert",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/asyncapi.yaml",
+      "to": "api:channel:projects/timeEntryRemoved",
       "type": "contains"
     },
     {
@@ -35366,6 +35830,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/summary",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/unbilled-time-bounds",
       "type": "contains"
     },
@@ -35391,6 +35860,26 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/projects/{projectId}/tickets/{ticketId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/tickets/{ticketId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}/activity",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}/comments",
       "type": "contains"
     },
@@ -35402,6 +35891,46 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/projects/{projectId}/milestones",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/projects/{projectId}/milestones",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/projects/{projectId}/milestones/{milestoneId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/milestones/{milestoneId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/projects/{projectId}/milestones/{milestoneId}/lock",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/projects/{projectId}/time-entries",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/projects/{projectId}/time-entries",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/projects/{projectId}/time-entries/{timeEntryId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/time-entries/{timeEntryId}",
       "type": "contains"
     },
     {
@@ -35815,6 +36344,11 @@
       "type": "contains"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/asyncapi.yaml",
+      "to": "api:channel:agents/gitStateChanged",
+      "type": "contains"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/agents",
       "type": "contains"
@@ -35837,6 +36371,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
       "to": "api:HTTP:DELETE:/agents/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/agents/{id}/messages/latest-agent",
       "type": "contains"
     },
     {
@@ -38437,6 +38976,11 @@
     {
       "from": "file:docs/agenstra/features/websocket-communication.md",
       "to": "concept:agenstra-tickets-board-realtime-tickets-namespace",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/websocket-communication.md",
+      "to": "concept:agenstra-knowledge-board-realtime-pages-namespace",
       "type": "contains"
     },
     {
@@ -41426,7 +41970,7 @@
     },
     {
       "from": "file:docs/decabill/features/projects.md",
-      "to": "concept:decabill-time-entries-admin",
+      "to": "concept:decabill-time-entries",
       "type": "contains"
     },
     {
@@ -43510,6 +44054,146 @@
       "type": "implements"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:GET:/knowledge/tree",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/knowledge/tree",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:GET:/knowledge/by-sha",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/knowledge/by-sha",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:GET:/knowledge/relations",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/knowledge/relations",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:POST:/knowledge/relations",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:POST:/knowledge/relations",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:GET:/knowledge/relations/prompt-context",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/knowledge/relations/prompt-context",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:DELETE:/knowledge/relations/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:DELETE:/knowledge/relations/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:GET:/knowledge/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/knowledge/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:PATCH:/knowledge/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:PATCH:/knowledge/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:DELETE:/knowledge/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:DELETE:/knowledge/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:GET:/knowledge/{id}/activity",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/knowledge/{id}/activity",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:POST:/knowledge/{id}/reorder",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:POST:/knowledge/{id}/reorder",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/knowledge-tree.controller.ts",
+      "to": "api:HTTP:POST:/knowledge/{id}/duplicate",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:POST:/knowledge/{id}/duplicate",
+      "type": "implements"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/statistics.controller.ts",
       "to": "api:HTTP:GET:/statistics/summary",
       "type": "implements"
@@ -44307,6 +44991,16 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "api:HTTP:DELETE:/admin/billing/projects/{projectId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/summary",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/summary",
       "type": "implements"
     },
     {
@@ -45321,6 +46015,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/admin-projects.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/summary",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/admin-projects.controller.ts",
       "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/unbilled-time-bounds",
       "type": "implements"
     },
@@ -45386,6 +46085,46 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:POST:/projects/{projectId}/tickets/{ticketId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/projects/{projectId}/tickets/{ticketId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/tickets/{ticketId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/tickets/{ticketId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}/activity",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}/activity",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
       "to": "api:HTTP:GET:/projects/{projectId}/tickets/{ticketId}/comments",
       "type": "implements"
     },
@@ -45412,6 +46151,86 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "api:HTTP:GET:/projects/{projectId}/milestones",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:POST:/projects/{projectId}/milestones",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/projects/{projectId}/milestones",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:POST:/projects/{projectId}/milestones/{milestoneId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/projects/{projectId}/milestones/{milestoneId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/milestones/{milestoneId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/milestones/{milestoneId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:POST:/projects/{projectId}/milestones/{milestoneId}/lock",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/projects/{projectId}/milestones/{milestoneId}/lock",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:GET:/projects/{projectId}/time-entries",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/projects/{projectId}/time-entries",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:POST:/projects/{projectId}/time-entries",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/projects/{projectId}/time-entries",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:POST:/projects/{projectId}/time-entries/{timeEntryId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/projects/{projectId}/time-entries/{timeEntryId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/time-entries/{timeEntryId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/time-entries/{timeEntryId}",
       "type": "implements"
     },
     {
@@ -45522,6 +46341,16 @@
     {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "api:HTTP:DELETE:/agents/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-messages.controller.ts",
+      "to": "api:HTTP:GET:/agents/{id}/messages/latest-agent",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:HTTP:GET:/agents/{id}/messages/latest-agent",
       "type": "implements"
     },
     {
@@ -45997,6 +46826,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
       "to": "api:HTTP:DELETE:/agents/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
+      "to": "api:HTTP:GET:/agents/{id}/messages/latest-agent",
       "type": "implements"
     },
     {
@@ -46780,6 +47614,16 @@
       "type": "implements"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/gateways/status.gateway.ts",
+      "to": "api:channel:status/error",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:channel:status/error",
+      "type": "implements"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/gateways/tickets-board.gateway.ts",
       "to": "api:channel:tickets/setClient",
       "type": "implements"
@@ -46877,6 +47721,16 @@
     {
       "from": "project:agenstra-backend-feature-agent-controller",
       "to": "api:channel:tickets/ticketAutomationRunStepAppended",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/gateways/tickets-board.gateway.ts",
+      "to": "api:channel:tickets/knowledgeRelationChanged",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:channel:tickets/knowledgeRelationChanged",
       "type": "implements"
     },
     {
@@ -46987,6 +47841,36 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "api:channel:projects/milestoneUpsert",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/gateways/project-board.gateway.ts",
+      "to": "api:channel:projects/milestoneRemoved",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:channel:projects/milestoneRemoved",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/gateways/project-board.gateway.ts",
+      "to": "api:channel:projects/timeEntryUpsert",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:channel:projects/timeEntryUpsert",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/gateways/project-board.gateway.ts",
+      "to": "api:channel:projects/timeEntryRemoved",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:channel:projects/timeEntryRemoved",
       "type": "implements"
     },
     {
@@ -47237,6 +48121,16 @@
     {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "api:channel:agents/containerStats",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/gateways/agents.gateway.ts",
+      "to": "api:channel:agents/gitStateChanged",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:channel:agents/gitStateChanged",
       "type": "implements"
     },
     {
@@ -53380,6 +54274,56 @@
       "type": "calls"
     },
     {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:GET:/knowledge/tree",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:PATCH:/knowledge/{id}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:POST:/knowledge/{id}/duplicate",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:DELETE:/knowledge/{id}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:GET:/knowledge/relations",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:POST:/knowledge/relations",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:DELETE:/knowledge/relations/{id}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/knowledge.service.ts",
+      "to": "api:HTTP:GET:/knowledge/{id}/activity",
+      "type": "calls"
+    },
+    {
       "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/statistics.service.ts",
       "to": "api:HTTP:GET:/clients/{id}/statistics/summary",
       "type": "calls"
@@ -53891,6 +54835,16 @@
     },
     {
       "from": "concept:agenstra-related",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-related",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-related",
       "to": "api:HTTP:GET:/agents",
       "type": "documents"
     },
@@ -53960,6 +54914,86 @@
       "type": "documents"
     },
     {
+      "from": "concept:agenstra-knowledge-graph",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-knowledge-graph",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-why-it-exists",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-why-it-exists",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-how-to-generate",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-how-to-generate",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-schema-overview",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-schema-overview",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-using-the-graph-with-ai-tools",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-using-the-graph-with-ai-tools",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-or-node-tools-graph-mcp-run-cjs-builds-dist-if-missing-then-starts-mcp",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-or-node-tools-graph-mcp-run-cjs-builds-dist-if-missing-then-starts-mcp",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-security",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-security",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-implementation",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-implementation",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
       "from": "concept:agenstra-api-reference",
       "to": "api:HTTP:GET:/clients",
       "type": "documents"
@@ -54006,6 +55040,76 @@
     },
     {
       "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:GET:/knowledge/tree",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:GET:/knowledge/by-sha",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:GET:/knowledge/relations",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:POST:/knowledge/relations",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:GET:/knowledge/relations/prompt-context",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:DELETE:/knowledge/relations/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:GET:/knowledge/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:PATCH:/knowledge/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:DELETE:/knowledge/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:GET:/knowledge/{id}/activity",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:POST:/knowledge/{id}/reorder",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
+      "to": "api:HTTP:POST:/knowledge/{id}/duplicate",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-controller-api",
       "to": "api:HTTP:GET:/tickets",
       "type": "documents"
     },
@@ -54026,6 +55130,11 @@
     },
     {
       "from": "concept:agenstra-agent-manager-api",
+      "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-manager-api",
       "to": "api:HTTP:POST:/auth/login",
       "type": "documents"
     },
@@ -54041,6 +55150,26 @@
     },
     {
       "from": "concept:agenstra-agent-manager-api",
+      "to": "api:HTTP:GET:/agents/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-manager-api",
+      "to": "api:HTTP:POST:/agents/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-manager-api",
+      "to": "api:HTTP:DELETE:/agents/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-manager-api",
+      "to": "api:HTTP:GET:/agents/{id}/messages/latest-agent",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-manager-api",
       "to": "api:HTTP:GET:/agents-filters",
       "type": "documents"
     },
@@ -54052,6 +55181,31 @@
     {
       "from": "concept:agenstra-agent-manager-api",
       "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-agent-manager-api",
+      "to": "api:HTTP:GET:/configuration-overrides",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-generated-client-packages",
+      "to": "project:agenstra-backend-agent-controller",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-generated-client-packages",
+      "to": "project:agenstra-backend-agent-manager",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-generated-client-packages",
+      "to": "api:HTTP:GET:/clients",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-generated-client-packages",
+      "to": "api:HTTP:POST:/clients",
       "type": "documents"
     },
     {
@@ -54801,6 +55955,16 @@
     },
     {
       "from": "concept:agenstra-authentication-methods",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-authentication-methods",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-authentication-methods",
       "to": "api:HTTP:GET:/tickets",
       "type": "documents"
     },
@@ -55290,6 +56454,16 @@
       "type": "documents"
     },
     {
+      "from": "concept:agenstra-knowledge-board-realtime-pages-namespace",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-knowledge-board-realtime-pages-namespace",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
       "from": "concept:agenstra-in-another-terminal-start-agent-manager",
       "to": "project:agenstra-backend-agent-manager",
       "type": "documents"
@@ -55530,6 +56704,16 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-how-agents-should-work-on-decabill",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-how-agents-should-work-on-decabill",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-usage",
       "to": "api:HTTP:GET:/agents",
       "type": "documents"
@@ -55610,6 +56794,116 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-knowledge-graph",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-knowledge-graph",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-why-it-exists",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-why-it-exists",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-how-to-generate",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-how-to-generate",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-schema-overview",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-schema-overview",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-using-the-graph-with-ai-tools",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-using-the-graph-with-ai-tools",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-or-node-tools-graph-mcp-run-cjs-builds-dist-if-missing-then-starts-mcp",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-or-node-tools-graph-mcp-run-cjs-builds-dist-if-missing-then-starts-mcp",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-security",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-security",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-implementation",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-implementation",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-decabill-specific-recipes",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-decabill-specific-recipes",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-why-decabill-specific-notes",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-why-decabill-specific-notes",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-prefer-mcp-tools",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-prefer-mcp-tools",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-recipes-for-decabill",
       "to": "project:decabill-frontend-data-access-billing-console",
       "type": "documents"
@@ -55635,6 +56929,16 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-recipes-for-decabill",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-recipes-for-decabill",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-or",
       "to": "project:decabill-backend-feature-billing-manager",
       "type": "documents"
@@ -55645,8 +56949,48 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-or",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-or",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-approximate-surface-size-orientation",
       "to": "project:decabill-backend-feature-billing-manager",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-approximate-surface-size-orientation",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-approximate-surface-size-orientation",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-after-graph-tool-changes",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-after-graph-tool-changes",
+      "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-or-node-tools-graph-mcp-run-cjs",
+      "to": "api:HTTP:GET:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-or-node-tools-graph-mcp-run-cjs",
+      "to": "api:HTTP:POST:/knowledge",
       "type": "documents"
     },
     {
@@ -55666,12 +57010,82 @@
     },
     {
       "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:GET:/users",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:POST:/users",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
       "to": "api:HTTP:GET:/tickets",
       "type": "documents"
     },
     {
       "from": "concept:decabill-billing-manager-http-api",
       "to": "api:HTTP:POST:/tickets",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:GET:/service-plans",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:POST:/service-plans",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:GET:/service-plans/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:POST:/service-plans/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:DELETE:/service-plans/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:GET:/customer-profile",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:POST:/customer-profile",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:GET:/admin/billing/customer-profiles",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}",
       "type": "documents"
     },
     {
@@ -55711,12 +57125,42 @@
     },
     {
       "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:GET:/projects/{projectId}/time-entries",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:POST:/projects/{projectId}/time-entries",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:POST:/projects/{projectId}/time-entries/{timeEntryId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
+      "to": "api:HTTP:DELETE:/projects/{projectId}/time-entries/{timeEntryId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-billing-manager-http-api",
       "to": "api:HTTP:GET:/config",
       "type": "documents"
     },
     {
       "from": "concept:decabill-generated-client-package",
       "to": "project:decabill-backend-billing-manager",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-generated-client-package",
+      "to": "api:HTTP:GET:/clients",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-generated-client-package",
+      "to": "api:HTTP:POST:/clients",
       "type": "documents"
     },
     {
@@ -57886,6 +59330,11 @@
     },
     {
       "from": "concept:decabill-admin-crud",
+      "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/summary",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-crud",
       "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/unbilled-time-bounds",
       "type": "documents"
     },
@@ -57895,13 +59344,23 @@
       "type": "documents"
     },
     {
-      "from": "concept:decabill-time-entries-admin",
+      "from": "concept:decabill-time-entries",
       "to": "api:HTTP:GET:/projects",
       "type": "documents"
     },
     {
-      "from": "concept:decabill-time-entries-admin",
+      "from": "concept:decabill-time-entries",
       "to": "api:HTTP:GET:/projects/{projectId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-time-entries",
+      "to": "api:HTTP:GET:/projects/{projectId}/time-entries",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-time-entries",
+      "to": "api:HTTP:POST:/projects/{projectId}/time-entries",
       "type": "documents"
     },
     {
@@ -61950,6 +63409,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:agenstra-knowledge-board-realtime-pages-namespace",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:agenstra-chat-history-restoration",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -64210,7 +65674,7 @@
       "type": "belongs_to"
     },
     {
-      "from": "concept:decabill-time-entries-admin",
+      "from": "concept:decabill-time-entries",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

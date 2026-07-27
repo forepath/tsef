@@ -113,6 +113,29 @@ paths:
       responses:
         '204':
           description: Deleted
+  /agents/{id}/messages/latest-agent:
+    get:
+      summary: Get latest agent chat message metadata
+      description: |
+        Returns id and createdAt of the latest persisted agent-role chat message for unread tracking.
+        Returns 404 when the agent has no agent messages yet.
+      operationId: getLatestAgentMessage
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Latest agent message metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestAgentMessageDto'
+        '404':
+          description: No agent messages found for this environment
   /agents/{id}/start:
     post:
       summary: Start agent environment
@@ -1602,6 +1625,16 @@ components:
           type: string
           format: date-time
         updatedAt:
+          type: string
+          format: date-time
+    LatestAgentMessageDto:
+      type: object
+      required: [id, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        createdAt:
           type: string
           format: date-time
     CreateAgentResponseDto:
