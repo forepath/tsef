@@ -6,7 +6,7 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.18.2",
+    "@modelcontextprotocol/sdk": "1.26.0",
     "@nx/devkit": "22.6.4",
     "tslib": "2.8.1",
     "@nx/nest": "22.6.4",
