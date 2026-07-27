@@ -2365,7 +2365,9 @@
 
               <!-- GIT Repository Configuration -->
               <div class="mb-3">
-                <label for="clientGitRepositorySetupMode" class="form-label">Repository setup</label>
+                <label for="clientGitRepositorySetupMode" class="form-label" i18n="@@featureChat-repositorySetupLabel"
+                  >Repository setup</label
+                >
                 <select
                   class="form-select"
                   id="clientGitRepositorySetupMode"
@@ -2374,17 +2376,19 @@
                   (ngModelChange)="onClientGitSetupModeChange($event)"
                   [disabled]="(clientsCreating$ | async) === true || (provisioning$ | async) === true"
                 >
-                  <option value="clone">Clone from remote</option>
-                  <option value="empty">Empty repository (git init)</option>
+                  <option value="clone" i18n="@@featureChat-gitSetupModeClone">Clone from remote</option>
+                  <option value="empty" i18n="@@featureChat-gitSetupModeEmpty">Empty repository (git init)</option>
                 </select>
-                <small class="form-text text-muted"
+                <small class="form-text text-muted" i18n="@@featureChat-workspaceGitSetupModeHint"
                   >Choose whether to clone an existing repository or start with a new local Git repository.</small
                 >
               </div>
 
               @if (isClientGitCloneMode()) {
                 <div class="mb-3">
-                  <label for="clientGitRepositoryUrl" class="form-label">Git Repository URL</label>
+                  <label for="clientGitRepositoryUrl" class="form-label" i18n="@@featureChat-gitRepositoryUrlLabel"
+                    >Git Repository URL</label
+                  >
                   <input
                     type="url"
                     class="form-control"
@@ -2396,11 +2400,15 @@
                     placeholder="https://github.com/user/repo.git"
                     [disabled]="(clientsCreating$ | async) === true || (provisioning$ | async) === true"
                   />
-                  <small class="form-text text-muted">Git repository URL for agent workspace</small>
+                  <small class="form-text text-muted" i18n="@@featureChat-workspaceGitRepoUrlHint"
+                    >Git repository URL for agent workspace</small
+                  >
                 </div>
 
                 <div class="mb-3">
-                  <label for="clientGitUsername" class="form-label">Git Username</label>
+                  <label for="clientGitUsername" class="form-label" i18n="@@featureChat-gitUsernameLabel"
+                    >Git Username</label
+                  >
                   <input
                     type="text"
                     class="form-control"
@@ -2412,11 +2420,13 @@
                     placeholder="Optional"
                     [disabled]="(clientsCreating$ | async) === true || (provisioning$ | async) === true"
                   />
-                  <small class="form-text text-muted">Git username for repository access</small>
+                  <small class="form-text text-muted" i18n="@@featureChat-gitUsernameHint"
+                    >Git username for repository access</small
+                  >
                 </div>
 
                 <div class="mb-3">
-                  <label for="clientGitToken" class="form-label">Git Token</label>
+                  <label for="clientGitToken" class="form-label" i18n="@@featureChat-gitTokenLabel">Git Token</label>
                   <input
                     type="password"
                     class="form-control"
@@ -2428,11 +2438,15 @@
                     placeholder="Optional"
                     [disabled]="(clientsCreating$ | async) === true || (provisioning$ | async) === true"
                   />
-                  <small class="form-text text-muted">Git token/personal access token for repository access</small>
+                  <small class="form-text text-muted" i18n="@@featureChat-gitTokenHint"
+                    >Git token/personal access token for repository access</small
+                  >
                 </div>
 
                 <div class="mb-3">
-                  <label for="clientGitPassword" class="form-label">Git Password</label>
+                  <label for="clientGitPassword" class="form-label" i18n="@@featureChat-gitPasswordLabel"
+                    >Git Password</label
+                  >
                   <input
                     type="password"
                     class="form-control"
@@ -2444,10 +2458,14 @@
                     placeholder="Optional"
                     [disabled]="(clientsCreating$ | async) === true || (provisioning$ | async) === true"
                   />
-                  <small class="form-text text-muted">Git password for repository access (alternative to token)</small>
+                  <small class="form-text text-muted" i18n="@@featureChat-gitPasswordHint"
+                    >Git password for repository access (alternative to token)</small
+                  >
                 </div>
                 <div class="mb-3">
-                  <label for="clientGitPrivateKey" class="form-label">Git Private Key (SSH)</label>
+                  <label for="clientGitPrivateKey" class="form-label" i18n="@@featureChat-gitPrivateKeyLabel"
+                    >Git Private Key (SSH)</label
+                  >
                   <textarea
                     class="form-control"
                     id="clientGitPrivateKey"
@@ -2459,7 +2477,7 @@
                     placeholder="-----BEGIN OPENSSH PRIVATE KEY-----&#10;...&#10;-----END OPENSSH PRIVATE KEY-----"
                     [disabled]="(clientsCreating$ | async) === true || (provisioning$ | async) === true"
                   ></textarea>
-                  <small class="form-text text-muted"
+                  <small class="form-text text-muted" i18n="@@featureChat-gitPrivateKeyHint"
                     >SSH private key for cloning repositories via SSH (alternative to username/token)</small
                   >
                 </div>
@@ -2513,7 +2531,9 @@
       <form #addAgentForm="ngForm" (ngSubmit)="onSubmitAddAgent()">
         <div class="modal-body">
           <div class="mb-3">
-            <label for="agentName" class="form-label">Name <span class="text-danger">*</span></label>
+            <label for="agentName" class="form-label" i18n="@@featureChat-nameLabel"
+              >Name <span class="text-danger">*</span></label
+            >
             <input
               type="text"
               class="form-control"
@@ -2526,7 +2546,7 @@
             />
           </div>
           <div class="mb-3">
-            <label for="agentDescription" class="form-label">Description</label>
+            <label for="agentDescription" class="form-label" i18n="@@featureChat-descriptionLabel">Description</label>
             <textarea
               class="form-control"
               id="agentDescription"
@@ -2541,7 +2561,7 @@
             @if (activeClient.config?.agentTypes; as agentTypes) {
               @if (agentTypes.length > 0) {
                 <div class="mb-3">
-                  <label for="agentType" class="form-label">Agent Type</label>
+                  <label for="agentType" class="form-label" i18n="@@featureChat-agentTypeLabel">Agent Type</label>
                   <select
                     class="form-select"
                     id="agentType"
@@ -2550,7 +2570,7 @@
                     (ngModelChange)="updateAgentField('agentType', $event)"
                     [disabled]="(agentsCreating$ | async) === true"
                   >
-                    <option [value]="undefined">Default (Cursor)</option>
+                    <option [value]="undefined" i18n="@@featureChat-agentTypeDefaultCursor">Default (Cursor)</option>
                     @for (agentType of agentTypes; track agentType.type) {
                       <option [value]="agentType.type">{{ agentType.displayName }}</option>
                     }
@@ -2560,7 +2580,9 @@
             }
           }
           <div class="mb-3">
-            <label for="agentContainerType" class="form-label">Container Type</label>
+            <label for="agentContainerType" class="form-label" i18n="@@featureChat-containerTypeLabel"
+              >Container Type</label
+            >
             <select
               class="form-select"
               id="agentContainerType"
@@ -2569,18 +2591,20 @@
               (ngModelChange)="updateAgentField('containerType', $event === '' ? undefined : $event)"
               [disabled]="(agentsCreating$ | async) === true"
             >
-              <option value="">Default (Generic)</option>
-              <option [value]="ContainerType.GENERIC">Generic</option>
+              <option value="" i18n="@@featureChat-containerTypeDefaultGeneric">Default (Generic)</option>
+              <option [value]="ContainerType.GENERIC" i18n="@@featureChat-containerTypeGeneric">Generic</option>
               <option [value]="ContainerType.DOCKER">Docker</option>
               <option [value]="ContainerType.TERRAFORM">Terraform</option>
               <option [value]="ContainerType.KUBERNETES">Kubernetes</option>
             </select>
-            <small class="form-text text-muted"
+            <small class="form-text text-muted" i18n="@@featureChat-containerTypeHint"
               >The type of content this agent holds. Defaults to Generic if not specified.</small
             >
           </div>
           <div class="mb-3">
-            <label for="agentGitRepositorySetupMode" class="form-label">Repository setup</label>
+            <label for="agentGitRepositorySetupMode" class="form-label" i18n="@@featureChat-repositorySetupLabel"
+              >Repository setup</label
+            >
             <select
               class="form-select"
               id="agentGitRepositorySetupMode"
@@ -2589,15 +2613,15 @@
               (ngModelChange)="onAgentGitSetupModeChange($event)"
               [disabled]="(agentsCreating$ | async) === true"
             >
-              <option value="clone">Clone from remote</option>
-              <option value="empty">Empty repository (git init)</option>
+              <option value="clone" i18n="@@featureChat-gitSetupModeClone">Clone from remote</option>
+              <option value="empty" i18n="@@featureChat-gitSetupModeEmpty">Empty repository (git init)</option>
             </select>
-            <small class="form-text text-muted"
+            <small class="form-text text-muted" i18n="@@featureChat-agentGitSetupModeHint"
               >Choose whether to clone a repository or initialize an empty local Git repository.</small
             >
             @if (activeClient$ | async; as activeClient) {
               @if (activeClient.config?.gitRepositorySetupMode; as workspaceGitMode) {
-                <small class="form-text text-muted d-block"
+                <small class="form-text text-muted d-block" i18n="@@featureChat-workspaceGitDefault"
                   >Workspace default: {{ getWorkspaceGitSetupModeDefaultLabel(workspaceGitMode) }}</small
                 >
               }
@@ -2605,7 +2629,9 @@
           </div>
           @if (isAgentGitCloneMode()) {
             <div class="mb-3">
-              <label for="agentGitRepositoryUrl" class="form-label">Git Repository URL</label>
+              <label for="agentGitRepositoryUrl" class="form-label" i18n="@@featureChat-gitRepositoryUrlLabel"
+                >Git Repository URL</label
+              >
               <input
                 type="url"
                 class="form-control"
@@ -2617,13 +2643,13 @@
                 placeholder="https://github.com/user/repo.git"
                 [disabled]="(agentsCreating$ | async) === true"
               />
-              <small class="form-text text-muted"
+              <small class="form-text text-muted" i18n="@@featureChat-agentGitRepoUrlHint"
                 >Optional. Defaults to workspace Git repository URL if not specified.</small
               >
             </div>
           }
           <div class="p-3 border border-warning rounded">
-            <label class="form-label mb-2 text-warning">Danger Zone</label>
+            <label class="form-label mb-2 text-warning" i18n="@@featureChat-dangerZoneLabel">Danger Zone</label>
             <p class="small text-warning mb-3" i18n="@@featureChat-dangerZoneDescription">
               These features partially ignore the internal permissions and may allow users to modify the agent container
               files without any restrictions.
@@ -2639,7 +2665,13 @@
                   (ngModelChange)="updateAgentField('createVirtualWorkspace', $event)"
                   [disabled]="(agentsCreating$ | async) === true"
                 />
-                <label class="form-check-label" for="createVirtualWorkspace"> Create Virtual Workspace (VNC) </label>
+                <label
+                  class="form-check-label"
+                  for="createVirtualWorkspace"
+                  i18n="@@featureChat-createVirtualWorkspaceLabel"
+                >
+                  Create Virtual Workspace (VNC)
+                </label>
               </div>
               <small class="form-text text-muted d-block mt-1" i18n="@@featureChat-createVirtualWorkspaceHint"
                 >Enable VNC access to the environment's virtual workspace. Defaults to disabled.</small
@@ -2656,7 +2688,9 @@
                   (ngModelChange)="updateAgentField('createSshConnection', $event)"
                   [disabled]="(agentsCreating$ | async) === true"
                 />
-                <label class="form-check-label" for="createSshConnection"> Create SSH Connection </label>
+                <label class="form-check-label" for="createSshConnection" i18n="@@featureChat-createSshConnectionLabel">
+                  Create SSH Connection
+                </label>
               </div>
               <small class="form-text text-muted d-block mt-1" i18n="@@featureChat-createSshConnectionHint"
                 >Enable SSH access to the environment container. Defaults to disabled.</small
@@ -2903,7 +2937,9 @@
             />
           </div>
           <div class="mb-3">
-            <label for="updateAgentDescription" class="form-label">Description</label>
+            <label for="updateAgentDescription" class="form-label" i18n="@@featureChat-descriptionLabel"
+              >Description</label
+            >
             <textarea
               class="form-control"
               id="updateAgentDescription"
@@ -2915,7 +2951,9 @@
             ></textarea>
           </div>
           <div class="mb-3">
-            <label for="updateAgentContainerType" class="form-label">Container Type</label>
+            <label for="updateAgentContainerType" class="form-label" i18n="@@featureChat-containerTypeLabel"
+              >Container Type</label
+            >
             <select
               class="form-select"
               id="updateAgentContainerType"
@@ -2924,13 +2962,15 @@
               (ngModelChange)="updateEditingAgentField('containerType', $event === '' ? undefined : $event)"
               [disabled]="(agentsUpdating$ | async) === true"
             >
-              <option value="">Default (Generic)</option>
-              <option [value]="ContainerType.GENERIC">Generic</option>
+              <option value="" i18n="@@featureChat-containerTypeDefaultGeneric">Default (Generic)</option>
+              <option [value]="ContainerType.GENERIC" i18n="@@featureChat-containerTypeGeneric">Generic</option>
               <option [value]="ContainerType.DOCKER">Docker</option>
               <option [value]="ContainerType.TERRAFORM">Terraform</option>
               <option [value]="ContainerType.KUBERNETES">Kubernetes</option>
             </select>
-            <small class="form-text text-muted">The type of content this agent holds.</small>
+            <small class="form-text text-muted" i18n="@@featureChat-containerTypeHintShort"
+              >The type of content this agent holds.</small
+            >
           </div>
         </div>
         <div class="modal-footer">
@@ -3043,8 +3083,12 @@
                                   (ngModelChange)="onWorkspaceConfigurationValueChange(setting.settingKey, $event)"
                                   [attr.aria-label]="getWorkspaceConfigurationSettingTitle(setting.settingKey)"
                                 >
-                                  <option value="clone">Clone from remote</option>
-                                  <option value="empty">Empty repository (git init)</option>
+                                  <option value="clone" i18n="@@featureChat-gitSetupModeClone">
+                                    Clone from remote
+                                  </option>
+                                  <option value="empty" i18n="@@featureChat-gitSetupModeEmpty">
+                                    Empty repository (git init)
+                                  </option>
                                 </select>
                               } @else if (setting.settingKey === 'autoEnrichVectorMaxCosineDistance') {
                                 <input
@@ -3190,7 +3234,9 @@
             <form #addEnvVarForm="ngForm" (ngSubmit)="onSubmitCreateEnvironmentVariable()">
               <div class="row g-3">
                 <div class="col-md-5">
-                  <label for="envVarName" class="form-label">Variable Name <span class="text-danger">*</span></label>
+                  <label for="envVarName" class="form-label" i18n="@@featureChat-envVarNameLabel"
+                    >Variable Name <span class="text-danger">*</span></label
+                  >
                   <input
                     type="text"
                     class="form-control"
@@ -3205,7 +3251,9 @@
                   />
                 </div>
                 <div class="col-md-6">
-                  <label for="envVarContent" class="form-label">Value <span class="text-danger">*</span></label>
+                  <label for="envVarContent" class="form-label" i18n="@@featureChat-envVarValueLabel"
+                    >Value <span class="text-danger">*</span></label
+                  >
                   <input
                     type="text"
                     class="form-control"

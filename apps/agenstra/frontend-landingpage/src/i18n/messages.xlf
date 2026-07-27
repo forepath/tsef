@@ -1350,7 +1350,7 @@
         <source> Context that survives handoffs </source>
         </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageKnowledgeLead" datatype="html">
-        <source> Operators and agents reason from the same curated knowledge instead of stale wikis, private notes, or whatever was last pasted into chat. </source>
+        <source> Ops teams and agents reason from the same curated knowledge instead of stale wikis, private notes, or whatever was last pasted into chat. </source>
         </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageKnowledgeBenefit1Title" datatype="html">
         <source> Fewer repeated questions </source>
@@ -1452,10 +1452,10 @@
         <source> Fewer context breaks </source>
         </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageDeployBenefit1Desc" datatype="html">
-        <source> Operators do not hand off to another portal just to promote what agents already built. </source>
+        <source> Your ops team does not hand off to another portal just to promote what agents already built. </source>
         </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageDeployBenefit2Title" datatype="html">
-        <source> Operators stay in the loop </source>
+        <source> Ops teams stay in the loop </source>
         </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageDeployBenefit2Desc" datatype="html">
         <source> Run logs and status are visible to the same team that kicked off the work. </source>
@@ -2319,7 +2319,7 @@
         <source> BUSL-1.1 with Additional Use Grant </source>
         </trans-unit>
       <trans-unit id="featurePortalPricing-startupFeature1" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Everything in Open Source<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Open Source<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
         </trans-unit>
       <trans-unit id="featurePortalPricing-startupFeature2" datatype="html">
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Multi-workspace operations<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> provide centralized management and server provisioning</source>
@@ -2346,7 +2346,7 @@
         <source> BUSL-1.1 with Additional Use Grant </source>
         </trans-unit>
       <trans-unit id="featurePortalPricing-businessFeature1" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Everything in Startup<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Startup<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
         </trans-unit>
       <trans-unit id="featurePortalPricing-businessFeature2" datatype="html">
         <source>Personal onboarding</source>
@@ -2370,7 +2370,7 @@
         <source> Commercial License </source>
         </trans-unit>
       <trans-unit id="featurePortalPricing-enterpriseFeature1" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Everything in Business<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Business<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
         </trans-unit>
       <trans-unit id="featurePortalPricing-enterpriseFeature2" datatype="html">
         <source>Priority support (Microsoft Teams) &amp; SLA</source>
@@ -2409,7 +2409,7 @@
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Automatic scaling.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Capacity grows with your teams</source>
         </trans-unit>
       <trans-unit id="featurePortalPricing-cloudFeature4" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>99.9% uptime SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for enterprise-grade reliability</source>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>99.9% uptime SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for reliable operation at scale</source>
         </trans-unit>
       <trans-unit id="featurePortalPricing-cloudPriceUnit" datatype="html">
         <source>/month</source>

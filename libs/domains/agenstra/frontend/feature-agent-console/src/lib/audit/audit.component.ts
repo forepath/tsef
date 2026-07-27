@@ -159,7 +159,7 @@ export class AuditComponent implements OnInit {
         borderColor: 'var(--bs-border-color)',
       },
       title: {
-        text: 'Messages over time',
+        text: $localize`:@@featureAudit-chartMessagesOverTimeTitle:Messages over time`,
         style: { color: 'var(--bs-body-color)', fontFamily: 'var(--bs-body-font-family)' },
       },
     };

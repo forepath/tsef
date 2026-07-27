@@ -3872,7 +3872,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   }
 
   getWorkspaceGitSetupModeDefaultLabel(mode: 'clone' | 'empty'): string {
-    return mode === 'empty' ? 'Empty repository (git init)' : 'Clone from remote';
+    return mode === 'empty'
+      ? $localize`:@@featureChat-gitSetupModeEmpty:Empty repository (git init)`
+      : $localize`:@@featureChat-gitSetupModeClone:Clone from remote`;
   }
 
   /**

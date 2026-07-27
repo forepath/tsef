@@ -156,11 +156,7 @@
       </trans-unit>
       <trans-unit id="featureAdminBilling-billNowResult" datatype="html">
         <source>Billing queued for <x id="INTERPOLATION" equiv-text="{{ result.userCount }}"/> user(s). Request ID: <x id="INTERPOLATION_1" equiv-text="{{ result.requestId }}"/>.</source>
-        <target>Billing queued for <x id="INTERPOLATION" equiv-text="{{ result.userCount }}"/> user(s). Request ID: <x id="INTERPOLATION_1" equiv-text="{{ result.requestId }}"/>.</target>
-      </trans-unit>
-      <trans-unit id="featureAdminBilling-cancel" datatype="html">
-        <source> Cancel </source>
-        <target> Abbrechen </target>
+        <target>Abrechnung für <x id="INTERPOLATION" equiv-text="{{ result.userCount }}"/> Benutzer eingereiht. Anfrage-ID: <x id="INTERPOLATION_1" equiv-text="{{ result.requestId }}"/>.</target>
       </trans-unit>
       <trans-unit id="featureAdminBilling-confirmBillNow" datatype="html">
         <source>Bill now</source>
@@ -265,14 +261,6 @@
       <trans-unit id="featureAdminInvoices-draftTotal" datatype="html">
         <source>Draft total</source>
         <target>Entwurfssumme</target>
-      </trans-unit>
-      <trans-unit id="featureAdminInvoices-taxStandard" datatype="html">
-        <source>Standard</source>
-        <target>Standard</target>
-      </trans-unit>
-      <trans-unit id="featureAdminInvoices-taxReduced" datatype="html">
-        <source>Reduced</source>
-        <target>Ermäßigt</target>
       </trans-unit>
       <trans-unit id="featureAdminInvoices-removeLine" datatype="html">
         <source>Remove line</source>
@@ -526,17 +514,9 @@
         <source>Unified</source>
         <target>Vereinheitlicht</target>
       </trans-unit>
-      <trans-unit id="featureAdminDatevExports-cancel" datatype="html">
-        <source> Cancel </source>
-        <target> Abbrechen </target>
-      </trans-unit>
-      <trans-unit id="featureAdminDatevExports-confirmExport" datatype="html">
-        <source>Start export</source>
-        <target>Export starten</target>
-      </trans-unit>
       <trans-unit id="featureAdminDatevExports-queuedMessage" datatype="html">
         <source>Queued — waiting for export to start…</source>
-        <target>In Warteschlange — Export wird gestartet…</target>
+        <target>In Warteschlange: Export wird gestartet…</target>
       </trans-unit>
       <trans-unit id="featureBillingAdminSubscriptionSelect-clearSelectionAria" datatype="html">
         <source>Clear selected subscription</source>
@@ -660,7 +640,7 @@
       </trans-unit>
       <trans-unit id="featureBilling-subscriptionStatusUnknown" datatype="html">
         <source>Unknown (<x id="PH" equiv-text="status"/>)</source>
-        <target>Unknown (<x id="PH" equiv-text="status"/>)</target>
+        <target>Unbekannt (<x id="PH" equiv-text="status"/>)</target>
       </trans-unit>
       <trans-unit id="featureBilling-backorderStatusEmpty" datatype="html">
         <source>Unknown</source>
@@ -688,7 +668,7 @@
       </trans-unit>
       <trans-unit id="featureBilling-backorderStatusUnknown" datatype="html">
         <source>Unknown (<x id="PH" equiv-text="status"/>)</source>
-        <target>Unknown (<x id="PH" equiv-text="status"/>)</target>
+        <target>Unbekannt (<x id="PH" equiv-text="status"/>)</target>
       </trans-unit>
       <trans-unit id="featureBilling-invoiceStatusEmpty" datatype="html">
         <source>Unknown</source>
@@ -720,7 +700,7 @@
       </trans-unit>
       <trans-unit id="featureBilling-invoiceStatusUnknown" datatype="html">
         <source>Unknown (<x id="PH" equiv-text="status"/>)</source>
-        <target>Unknown (<x id="PH" equiv-text="status"/>)</target>
+        <target>Unbekannt (<x id="PH" equiv-text="status"/>)</target>
       </trans-unit>
       <trans-unit id="featureBilling-activeStatusActive" datatype="html">
         <source>Active</source>
@@ -812,11 +792,11 @@
       </trans-unit>
       <trans-unit id="featureBilling-intervalEveryHours" datatype="html">
         <source>Every <x id="PH" equiv-text="value"/> hours</source>
-        <target>Every <x id="PH" equiv-text="value"/> hours</target>
+        <target>Alle <x id="PH" equiv-text="value"/> Stunden</target>
       </trans-unit>
       <trans-unit id="featureBilling-intervalEveryDays" datatype="html">
         <source>Every <x id="PH" equiv-text="value"/> days</source>
-        <target>Every <x id="PH" equiv-text="value"/> days</target>
+        <target>Alle <x id="PH" equiv-text="value"/> Tage</target>
       </trans-unit>
       <trans-unit id="featureBilling-intervalEveryYears" datatype="html">
         <source>Every <x id="PH" equiv-text="value"/> years</source>
@@ -824,7 +804,7 @@
       </trans-unit>
       <trans-unit id="featureBilling-intervalEveryMonths" datatype="html">
         <source>Every <x id="PH" equiv-text="value"/> months</source>
-        <target>Every <x id="PH" equiv-text="value"/> months</target>
+        <target>Alle <x id="PH" equiv-text="value"/> Monate</target>
       </trans-unit>
       <trans-unit id="featureBilling-triggeredByScheduler" datatype="html">
         <source>Scheduler</source>
@@ -971,10 +951,6 @@
       <trans-unit id="featureCloudInitConfigs-loadExample" datatype="html">
         <source>Load example</source>
         <target>Beispiel laden</target>
-      </trans-unit>
-      <trans-unit id="featureCloudInitConfigs-cancel" datatype="html">
-        <source> Cancel </source>
-        <target> Abbrechen </target>
       </trans-unit>
       <trans-unit id="featureCloudInitConfigs-save" datatype="html">
         <source> Save </source>
@@ -1300,10 +1276,6 @@
         <source>Balance due</source>
         <target>Offener Betrag</target>
       </trans-unit>
-      <trans-unit id="featureInvoices-close" datatype="html">
-        <source> Close </source>
-        <target> Schließen </target>
-      </trans-unit>
       <trans-unit id="featureInvoices-createTitle" datatype="html">
         <source>Create invoice</source>
         <target>Rechnung erstellen</target>
@@ -1311,10 +1283,6 @@
       <trans-unit id="featureInvoices-description" datatype="html">
         <source>Description</source>
         <target>Beschreibung</target>
-      </trans-unit>
-      <trans-unit id="featureInvoices-cancel" datatype="html">
-        <source> Cancel </source>
-        <target> Abbrechen </target>
       </trans-unit>
       <trans-unit id="featureInvoices-create" datatype="html">
         <source>Create</source>
@@ -1424,17 +1392,9 @@
         <source>Open console</source>
         <target>Konsole öffnen</target>
       </trans-unit>
-      <trans-unit id="featureOverview-managerService" datatype="html">
-        <source>Agenstra Manager</source>
-        <target>Agenstra Manager</target>
-      </trans-unit>
       <trans-unit id="featureOverview-customService" datatype="html">
         <source>Custom application</source>
         <target>Benutzerdefinierte Anwendung</target>
-      </trans-unit>
-      <trans-unit id="featureOverview-controllerService" datatype="html">
-        <source>Agenstra Controller</source>
-        <target>Agenstra Controller</target>
       </trans-unit>
       <trans-unit id="featureOverview-serverStatusOnline" datatype="html">
         <source>Online</source>
@@ -1550,7 +1510,7 @@
       </trans-unit>
       <trans-unit id="featureServicePlans-billingDayOfMonth" datatype="html">
         <source>Billing day of month (1–31)</source>
-        <target>Abrechnungstag im Monat (1–31)</target>
+        <target>Abrechnungstag im Monat (1 bis 31)</target>
       </trans-unit>
       <trans-unit id="featureServicePlans-minCommitmentDays" datatype="html">
         <source>Min commitment days</source>
@@ -1628,10 +1588,6 @@
         <source>Active</source>
         <target>Aktiv</target>
       </trans-unit>
-      <trans-unit id="featureServicePlans-close" datatype="html">
-        <source> Close </source>
-        <target>Schließen</target>
-      </trans-unit>
       <trans-unit id="featureServicePlans-create" datatype="html">
         <source> Create </source>
         <target>Erstellen</target>
@@ -1654,7 +1610,7 @@
       </trans-unit>
       <trans-unit id="featureServicePlans-deleteConfirm" datatype="html">
         <source> Are you sure you want to delete the service plan &quot;<x id="INTERPOLATION" equiv-text="{{ plan.name }}"/>&quot;? </source>
-        <target> Are you sure you want to delete the service plan &quot;<x id="INTERPOLATION" equiv-text="{{ plan.name }}"/>&quot;? </target>
+        <target>Möchten Sie den Serviceplan „<x id="INTERPOLATION" equiv-text="{{ plan.name }}"/>“ wirklich löschen?</target>
       </trans-unit>
       <trans-unit id="featureServicePlans-cannotUndo" datatype="html">
         <source>This action cannot be undone.</source>
@@ -1674,11 +1630,11 @@
       </trans-unit>
       <trans-unit id="featureServiceTypes-title" datatype="html">
         <source>Service Providers</source>
-        <target>Service Providers</target>
+        <target>Serviceanbieter</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-add" datatype="html">
         <source>Add service provider</source>
-        <target>Add service provider</target>
+        <target>Serviceanbieter hinzufügen</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-searchPlaceholder" datatype="html">
         <source>Search providers</source>
@@ -1694,19 +1650,19 @@
       </trans-unit>
       <trans-unit id="featureServiceTypes-serviceTypeActionsAria" datatype="html">
         <source>Service provider actions</source>
-        <target>Service provider actions</target>
+        <target>Aktionen für Serviceanbieter</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-editButtonTitle" datatype="html">
         <source>Edit service provider</source>
-        <target>Edit service provider</target>
+        <target>Serviceanbieter bearbeiten</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-deleteButtonTitle" datatype="html">
         <source>Delete service provider</source>
-        <target>Delete service provider</target>
+        <target>Serviceanbieter löschen</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-createTitle" datatype="html">
         <source> Add service provider </source>
-        <target> Add service provider </target>
+        <target>Serviceanbieter hinzufügen</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-key" datatype="html">
         <source>Key</source>
@@ -1764,17 +1720,13 @@
         <source>Using environment default</source>
         <target>Umgebungs-Standardwert verwenden</target>
       </trans-unit>
-      <trans-unit id="featureServiceTypes-close" datatype="html">
-        <source> Close </source>
-        <target>Schließen</target>
-      </trans-unit>
       <trans-unit id="featureServiceTypes-create" datatype="html">
         <source> Create </source>
         <target>Erstellen</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-editTitle" datatype="html">
         <source> Edit service provider </source>
-        <target> Edit service provider </target>
+        <target>Serviceanbieter bearbeiten</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-save" datatype="html">
         <source> Save </source>
@@ -1782,11 +1734,11 @@
       </trans-unit>
       <trans-unit id="featureServiceTypes-deleteTitle" datatype="html">
         <source> Delete service provider? </source>
-        <target> Delete service provider? </target>
+        <target>Serviceanbieter löschen?</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-deleteConfirm" datatype="html">
         <source> Are you sure you want to delete the service type &quot;<x id="INTERPOLATION" equiv-text="{{ st.name }}"/>&quot; (<x id="INTERPOLATION_1" equiv-text="{{ st.key }}"/>)? </source>
-        <target> Are you sure you want to delete the service type &quot;<x id="INTERPOLATION" equiv-text="{{ st.name }}"/>&quot; (<x id="INTERPOLATION_1" equiv-text="{{ st.key }}"/>)? </target>
+        <target>Möchten Sie den Servicetyp „<x id="INTERPOLATION" equiv-text="{{ st.name }}"/>“ (<x id="INTERPOLATION_1" equiv-text="{{ st.key }}"/>) wirklich löschen?</target>
       </trans-unit>
       <trans-unit id="featureServiceTypes-cannotUndo" datatype="html">
         <source>This action cannot be undone.</source>
@@ -1884,10 +1836,6 @@
         <source>Retry backorder</source>
         <target>Rückstand wiederholen</target>
       </trans-unit>
-      <trans-unit id="featureSubscriptions-cancelBackorderButtonTitle" datatype="html">
-        <source>Cancel backorder</source>
-        <target>Rückstand stornieren</target>
-      </trans-unit>
       <trans-unit id="featureSubscriptions-orderPlanTitle" datatype="html">
         <source>Order plan</source>
         <target>Plan bestellen</target>
@@ -1899,10 +1847,6 @@
       <trans-unit id="featureSubscriptions-choosePlan" datatype="html">
         <source>Choose a plan</source>
         <target>Plan wählen</target>
-      </trans-unit>
-      <trans-unit id="featureSubscriptions-price" datatype="html">
-        <source>Price</source>
-        <target>Preis</target>
       </trans-unit>
       <trans-unit id="featureSubscriptions-loadingPrice" datatype="html">
         <source>Loading price…</source>
@@ -2088,10 +2032,6 @@
         <source> Are you sure you want to cancel this subscription? It will remain active until the end of the current period. </source>
         <target>Dieses Abonnement wirklich kündigen? Es bleibt bis zum Ende der aktuellen Periode aktiv.</target>
       </trans-unit>
-      <trans-unit id="featureSubscriptions-confirmCancel" datatype="html">
-        <source> Confirm cancel </source>
-        <target>Kündigung bestätigen</target>
-      </trans-unit>
       <trans-unit id="featureSubscriptions-resumeSubscriptionTitle" datatype="html">
         <source> Resume subscription? </source>
         <target>Abonnement fortsetzen?</target>
@@ -2103,14 +2043,6 @@
       <trans-unit id="featureSubscriptions-resume" datatype="html">
         <source>Resume</source>
         <target>Fortsetzen</target>
-      </trans-unit>
-      <trans-unit id="featureSubscriptions-cancelBackorderTitle" datatype="html">
-        <source> Cancel backorder? </source>
-        <target>Rückstand stornieren?</target>
-      </trans-unit>
-      <trans-unit id="featureSubscriptions-cancelBackorderConfirm" datatype="html">
-        <source>Are you sure you want to cancel this backorder?</source>
-        <target>Diesen Rückstand wirklich stornieren?</target>
       </trans-unit>
       <trans-unit id="featureSubscriptions-editProfileTitle" datatype="html">
         <source> Edit customer profile </source>
@@ -2250,7 +2182,7 @@
       </trans-unit>
       <trans-unit id="featureUserManager-roleUnknownValue" datatype="html">
         <source>Unknown (<x id="PH" equiv-text="role"/>)</source>
-        <target>Unknown (<x id="PH" equiv-text="role"/>)</target>
+        <target>Unbekannt (<x id="PH" equiv-text="role"/>)</target>
       </trans-unit>
       <trans-unit id="featureConfirmEmail-title" datatype="html">
         <source>Confirm Your Email</source>
@@ -2562,7 +2494,7 @@
       </trans-unit>
       <trans-unit id="featureOtpInput-ariaLabelCharacter" datatype="html">
         <source>Character <x id="position" equiv-text="index + 1"/> of 6</source>
-        <target>Character <x id="position" equiv-text="index + 1"/> of 6</target>
+        <target>Zeichen <x id="position" equiv-text="index + 1"/> von 6</target>
       </trans-unit>
       <trans-unit id="featureRegister-title" datatype="html">
         <source>Create an Account</source>
@@ -2896,10 +2828,6 @@
         <source>Add user</source>
         <target>Benutzer hinzufügen</target>
       </trans-unit>
-      <trans-unit id="featureUserManager-addUser" datatype="html">
-        <source>Add</source>
-        <target>Hinzufügen</target>
-      </trans-unit>
       <trans-unit id="featureUserManager-searchUsersPlaceholder" datatype="html">
         <source>Search users</source>
         <target>Benutzer suchen</target>
@@ -2954,7 +2882,7 @@
       </trans-unit>
       <trans-unit id="featureUserManager-emailLabel" datatype="html">
         <source>Email <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
-        <target>Email <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+        <target>E-Mail <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
       </trans-unit>
       <trans-unit id="featureUserManager-emailPlaceholder" datatype="html">
         <source>user@example.com</source>
@@ -2962,7 +2890,7 @@
       </trans-unit>
       <trans-unit id="featureUserManager-passwordLabel" datatype="html">
         <source>Password <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
-        <target>Password <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+        <target>Passwort <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
       </trans-unit>
       <trans-unit id="featureUserManager-passwordPlaceholder" datatype="html">
         <source>Min. 8 characters</source>
@@ -2971,10 +2899,6 @@
       <trans-unit id="featureUserManager-roleLabel" datatype="html">
         <source>Role</source>
         <target>Rolle</target>
-      </trans-unit>
-      <trans-unit id="featureUserManager-cancel" datatype="html">
-        <source> Cancel </source>
-        <target> Abbrechen </target>
       </trans-unit>
       <trans-unit id="featureUserManager-create" datatype="html">
         <source>Create</source>
@@ -3007,8 +2931,8 @@
       <trans-unit id="featureUserManager-deleteUserConfirm" datatype="html">
         <source> Are you sure you want to delete the user <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ userToDelete.email }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong
             &gt;"/>? </source>
-        <target> Are you sure you want to delete the user <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ userToDelete.email }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong
-            &gt;"/>? </target>
+        <target>Möchten Sie den Benutzer <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ userToDelete.email }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong
+            &gt;"/> wirklich löschen?</target>
       </trans-unit>
       <trans-unit id="featureUserManager-cannotUndo" datatype="html">
         <source>This action cannot be undone.</source>
@@ -3429,6 +3353,1704 @@
       <trans-unit id="featureSubscriptions-configChangeErrorGeneric" datatype="html">
         <source>The configuration change could not be processed. Please try again.</source>
         <target>Die Konfigurationsänderung konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut.</target>
+      </trans-unit>
+      <trans-unit id="featureAdminInvoices-downloadTimeReportButtonTitle" datatype="html">
+        <source>Download time report</source>
+        <target>Zeitbericht herunterladen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-create" datatype="html">
+        <source> Create </source>
+        <target>Erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-save" datatype="html">
+        <source> Save </source>
+        <target>Speichern</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-delete" datatype="html">
+        <source> Delete </source>
+        <target>Löschen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminDatevExports-export" datatype="html">
+        <source>Export</source>
+        <target>Exportieren</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-title" datatype="html">
+        <source>Projects</source>
+        <target>Projekte</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-add" datatype="html">
+        <source>Add</source>
+        <target>Hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-searchPlaceholder" datatype="html">
+        <source>Search projects</source>
+        <target>Projekte suchen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-empty" datatype="html">
+        <source>No projects found</source>
+        <target>Keine Projekte gefunden</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-edit" datatype="html">
+        <source>Edit</source>
+        <target>Bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-delete" datatype="html">
+        <source>Delete</source>
+        <target>Löschen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-createTitle" datatype="html">
+        <source>Create project</source>
+        <target>Projekt erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-nameLabel" datatype="html">
+        <source>Name</source>
+        <target>Name</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-rateLabel" datatype="html">
+        <source>Hourly rate (net)</source>
+        <target>Stundensatz (netto)</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-targetHoursLabel" datatype="html">
+        <source>Target hours</source>
+        <target>Zielstunden</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-targetHoursHint" datatype="html">
+        <source> Optional. Leave empty for no target. </source>
+        <target>Optional. Leer lassen, wenn kein Ziel gesetzt werden soll.</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-create" datatype="html">
+        <source> Create </source>
+        <target>Erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-editTitle" datatype="html">
+        <source>Edit project</source>
+        <target>Projekt bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-statusLabel" datatype="html">
+        <source>Status</source>
+        <target>Status</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-statusActive" datatype="html">
+        <source>Active</source>
+        <target>Aktiv</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-statusArchived" datatype="html">
+        <source>Archived</source>
+        <target>Archiviert</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-save" datatype="html">
+        <source> Save </source>
+        <target>Speichern</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-deleteTitle" datatype="html">
+        <source>Delete project</source>
+        <target>Projekt löschen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProjects-deleteConfirm" datatype="html">
+        <source>Delete this project? Unbilled time must be cleared first.</source>
+        <target>Dieses Projekt löschen? Nicht abgerechnete Zeiten müssen zuvor bereinigt werden.</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-pageTitle" datatype="html">
+        <source>Promotions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-create" datatype="html">
+        <source>Create promotion</source>
+        <target>Aktion erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-searchPlaceholder" datatype="html">
+        <source>Search promotions</source>
+        <target>Aktionen suchen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-loading" datatype="html">
+        <source>Loading…</source>
+        <target>Wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-empty" datatype="html">
+        <source>No promotions yet.</source>
+        <target>Noch keine Aktionen.</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-noSearchResults" datatype="html">
+        <source>No promotions match your search.</source>
+        <target>Keine Aktionen passen zu Ihrer Suche.</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-redemptionCount" datatype="html">
+        <source><x id="INTERPOLATION" equiv-text="{{ promotion.redemptionCount }}"/> redemptions</source>
+        <target><x id="INTERPOLATION" equiv-text="{{ promotion.redemptionCount }}"/> Einlösungen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-edit" datatype="html">
+        <source>Edit</source>
+        <target>Bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-redemptions" datatype="html">
+        <source>Redemptions</source>
+        <target>Einlösungen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-deactivate" datatype="html">
+        <source>Deactivate</source>
+        <target>Deaktivieren</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-createTitle" datatype="html">
+        <source>Create promotion</source>
+        <target>Aktion erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-save" datatype="html">
+        <source> Save </source>
+        <target>Speichern</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-editTitle" datatype="html">
+        <source>Edit promotion</source>
+        <target>Aktion bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-colCode" datatype="html">
+        <source>Code</source>
+        <target>Code</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-colName" datatype="html">
+        <source>Name</source>
+        <target>Name</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-description" datatype="html">
+        <source>Description</source>
+        <target>Beschreibung</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-redeemableFrom" datatype="html">
+        <source>Redeemable from</source>
+        <target>Einlösbar ab</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-redeemableTo" datatype="html">
+        <source>Redeemable to</source>
+        <target>Einlösbar bis</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-maxTotal" datatype="html">
+        <source>Max total redemptions</source>
+        <target>Max. Einlösungen insgesamt</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-maxPerUser" datatype="html">
+        <source>Max per user</source>
+        <target>Max. pro Nutzer</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-colEligibility" datatype="html">
+        <source>Subscription eligibility</source>
+        <target>Abonnement-Berechtigung</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-advantageType" datatype="html">
+        <source>Advantage type</source>
+        <target>Vorteilstyp</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-amountNet" datatype="html">
+        <source>Amount (net)</source>
+        <target>Betrag (netto)</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-freeDays" datatype="html">
+        <source>Free days</source>
+        <target>Kostenlose Tage</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-freePeriods" datatype="html">
+        <source>Free billing periods</source>
+        <target>Kostenlose Abrechnungszeiträume</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-applicablePlans" datatype="html">
+        <source>Applicable plans</source>
+        <target>Anwendbare Pläne</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-applicablePlansHint" datatype="html">
+        <source> Leave empty to allow all products. </source>
+        <target>Leer lassen, um alle Produkte zu erlauben.</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-colActive" datatype="html">
+        <source>Active</source>
+        <target>Aktiv</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-redemptionsTitle" datatype="html">
+        <source>Redemptions</source>
+        <target>Einlösungen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-noRedemptions" datatype="html">
+        <source>No redemptions yet.</source>
+        <target>Noch keine Einlösungen.</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-eligibilityNew" datatype="html">
+        <source>New subscriptions</source>
+        <target>Neue Abonnements</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-eligibilityExisting" datatype="html">
+        <source>Existing subscriptions</source>
+        <target>Bestehende Abonnements</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-eligibilityBoth" datatype="html">
+        <source>New and existing</source>
+        <target>Neue und bestehende</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-advantageTypeFixedAmountNet" datatype="html">
+        <source>Fixed amount (net)</source>
+        <target>Fester Betrag (netto)</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-advantageTypeFreeDays" datatype="html">
+        <source>Free days</source>
+        <target>Kostenlose Tage</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-advantageTypeFreeBillingPeriods" datatype="html">
+        <source>Free billing periods</source>
+        <target>Kostenlose Abrechnungszeiträume</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-advantageAmountNet" datatype="html">
+        <source><x id="PH" equiv-text="Number(config[&apos;amountNet&apos;] ?? 0)"/> net credit</source>
+        <target><x id="PH" equiv-text="Number(config[&apos;amountNet&apos;] ?? 0)"/> Netto-Gutschrift</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-advantageFreeDays" datatype="html">
+        <source><x id="PH" equiv-text="Number(config[&apos;days&apos;] ?? 0)"/> free days</source>
+        <target><x id="PH" equiv-text="Number(config[&apos;days&apos;] ?? 0)"/> kostenlose Tage</target>
+      </trans-unit>
+      <trans-unit id="featureAdminPromotions-advantageFreePeriods" datatype="html">
+        <source><x id="PH" equiv-text="Number(config[&apos;periods&apos;] ?? 0)"/> free billing periods</source>
+        <target><x id="PH" equiv-text="Number(config[&apos;periods&apos;] ?? 0)"/> kostenlose Abrechnungszeiträume</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawButtonTitle" datatype="html">
+        <source>Withdraw subscription</source>
+        <target>Abonnement widerrufen</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-cancel" datatype="html">
+        <source> Cancel </source>
+        <target>Abbrechen</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawSubscriptionTitle" datatype="html">
+        <source>Withdraw subscription?</source>
+        <target>Abonnement widerrufen?</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawSubscriptionConfirm" datatype="html">
+        <source> Are you sure you want to exercise your statutory right of withdrawal? The subscription will end immediately and provisioned services will be removed. </source>
+        <target>Möchten Sie Ihr gesetzliches Widerrufsrecht wirklich ausüben? Das Abonnement endet sofort und bereitgestellte Dienste werden entfernt.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawalDeadline" datatype="html">
+        <source>Withdrawal deadline</source>
+        <target>Widerrufsfrist</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-estimatedRefund" datatype="html">
+        <source>Estimated refund</source>
+        <target>Geschätzte Erstattung</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdraw" datatype="html">
+        <source> Withdraw </source>
+        <target>Widerrufen</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-promotionsPage" datatype="html">
+        <source>Promotions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-projectsPage" datatype="html">
+        <source>Projects</source>
+        <target>Projekte</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-projectDetailPage" datatype="html">
+        <source>Project</source>
+        <target>Projekt</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-adminPromotionsPage" datatype="html">
+        <source>Promotions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-adminProjectsPage" datatype="html">
+        <source>Projects</source>
+        <target>Projekte</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-adminProjectDetailPage" datatype="html">
+        <source>Project</source>
+        <target>Projekt</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-timeEntryStatusBilled" datatype="html">
+        <source>Billed</source>
+        <target>Abgerechnet</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-timeEntryStatusUnbilled" datatype="html">
+        <source>Unbilled</source>
+        <target>Nicht abgerechnet</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-projectStatusActive" datatype="html">
+        <source>Active</source>
+        <target>Aktiv</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-projectStatusArchived" datatype="html">
+        <source>Archived</source>
+        <target>Archiviert</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-promotionRedemptionContextNew" datatype="html">
+        <source>New subscription</source>
+        <target>Neues Abonnement</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-promotionRedemptionContextExisting" datatype="html">
+        <source>Existing subscription</source>
+        <target>Bestehendes Abonnement</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-promotionRedemptionContextUnknown" datatype="html">
+        <source>Unknown (<x id="PH" equiv-text="context"/>)</source>
+        <target>Unbekannt (<x id="PH" equiv-text="context"/>)</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-promotionRedemptionStatusActive" datatype="html">
+        <source>Active</source>
+        <target>Aktiv</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-promotionRedemptionStatusExhausted" datatype="html">
+        <source>Fully used</source>
+        <target>Vollständig genutzt</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-promotionRedemptionStatusExpired" datatype="html">
+        <source>Expired</source>
+        <target>Abgelaufen</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-promotionRedemptionStatusCancelled" datatype="html">
+        <source>Cancelled</source>
+        <target>Storniert</target>
+      </trans-unit>
+      <trans-unit id="featureBilling-promotionRedemptionStatusUnknown" datatype="html">
+        <source>Unknown (<x id="PH" equiv-text="status"/>)</source>
+        <target>Unbekannt (<x id="PH" equiv-text="status"/>)</target>
+      </trans-unit>
+      <trans-unit id="featureAddons-deprovisionScriptTemplate" datatype="html">
+        <source>Cloud-init deprovision script template</source>
+        <target>Cloud-init-Vorlage für Entfernungsskript</target>
+      </trans-unit>
+      <trans-unit id="featureAddons-deprovisionScriptHint" datatype="html">
+        <source>Leave empty for status-only mid-life removal (no SSH reverse script).</source>
+        <target>Leer lassen für rein statusbezogene Entfernung ohne SSH-Gegenskript.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-productBase" datatype="html">
+        <source>Product total (net)</source>
+        <target>Produktgesamtbetrag (netto)</target>
+      </trans-unit>
+      <trans-unit id="featureCloudInitConfigs-create" datatype="html">
+        <source> Create </source>
+        <target>Erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-promotionsTitle" datatype="html">
+        <source>Promotions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-promotions" datatype="html">
+        <source>Promotions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-projectsTitle" datatype="html">
+        <source>Projects</source>
+        <target>Projekte</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-projects" datatype="html">
+        <source>Projects</source>
+        <target>Projekte</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-adminPromotionsTitle" datatype="html">
+        <source>Promotions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-adminPromotions" datatype="html">
+        <source>Promotions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-webhooksTitle" datatype="html">
+        <source>Webhooks</source>
+        <target>Webhooks</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-webhooks" datatype="html">
+        <source>Webhooks</source>
+        <target>Webhooks</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-adminProjectsTitle" datatype="html">
+        <source>Projects</source>
+        <target>Projekte</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-adminProjects" datatype="html">
+        <source>Projects</source>
+        <target>Projekte</target>
+      </trans-unit>
+      <trans-unit id="featureInvoices-historyList" datatype="html">
+        <source>Invoice history</source>
+        <target>Rechnungsverlauf</target>
+      </trans-unit>
+      <trans-unit id="featureInvoices-searchHistory" datatype="html">
+        <source> Search invoice history </source>
+        <target>Rechnungsverlauf suchen</target>
+      </trans-unit>
+      <trans-unit id="featureInvoices-loadingHistory" datatype="html">
+        <source>Loading invoice history...</source>
+        <target>Rechnungsverlauf wird geladen...</target>
+      </trans-unit>
+      <trans-unit id="featureInvoices-noHistory" datatype="html">
+        <source>No invoice history.</source>
+        <target>Kein Rechnungsverlauf.</target>
+      </trans-unit>
+      <trans-unit id="featureInvoices-downloadTimeReportButtonTitle" datatype="html">
+        <source>Download time report</source>
+        <target>Zeitbericht herunterladen</target>
+      </trans-unit>
+      <trans-unit id="featureInvoices-mobileHistory" datatype="html">
+        <source>History</source>
+        <target>Verlauf</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-projects" datatype="html">
+        <source>Active projects</source>
+        <target>Aktive Projekte</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-viewProjectsButtonTitle" datatype="html">
+        <source>View projects</source>
+        <target>Projekte anzeigen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-title" datatype="html">
+        <source>Board</source>
+        <target>Board</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-globalSearchOpenTitle" datatype="html">
+        <source>Search tickets (Ctrl+F)</source>
+        <target>Tickets suchen (Strg+F)</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-globalSearchOpenAria" datatype="html">
+        <source>Search tickets</source>
+        <target>Tickets suchen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-add" datatype="html">
+        <source>Add</source>
+        <target>Hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-searchLaneLabel" datatype="html">
+        <source>Search tickets</source>
+        <target>Tickets suchen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-searchLanePlaceholder" datatype="html">
+        <source>Search tickets</source>
+        <target>Tickets suchen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-subtaskCountTitle" datatype="html">
+        <source>Direct subtasks (done / total)</source>
+        <target>Direkte Teilaufgaben (erledigt / gesamt)</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-dropHere" datatype="html">
+        <source> Drop tickets here </source>
+        <target>Tickets hier ablegen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-noMatchingTickets" datatype="html">
+        <source> No matching tickets </source>
+        <target>Keine passenden Tickets</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-modalLoadingTitle" datatype="html">
+        <source>Ticket</source>
+        <target>Ticket</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-modalCloseAria" datatype="html">
+        <source>Close</source>
+        <target>Schließen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-breadcrumbNavAria" datatype="html">
+        <source>Ticket hierarchy</source>
+        <target>Ticket-Hierarchie</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-lockTicketTitle" datatype="html">
+        <source>Lock ticket</source>
+        <target>Ticket sperren</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-detailLoading" datatype="html">
+        <source>Loading ticket…</source>
+        <target>Ticket wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-fieldShas" datatype="html">
+        <source>SHAs</source>
+        <target>SHAs</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-statusLabel" datatype="html">
+        <source>Status</source>
+        <target>Status</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-priorityLabel" datatype="html">
+        <source>Priority</source>
+        <target>Priorität</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-milestoneLabel" datatype="html">
+        <source>Milestone</source>
+        <target>Meilenstein</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-acceptanceLabel" datatype="html">
+        <source> Acceptance <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-muted small d-block fw-normal&quot; [attr.aria-label]=&quot;acceptancePct + &apos;%&apos;&quot;
+                      &gt;"/><x id="INTERPOLATION" equiv-text="{{ acceptancePct | number: &apos;1.0-0&apos; }}"/>%<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span
+                    &gt;"/></source>
+        <target> Abnahme <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-muted small d-block fw-normal&quot; [attr.aria-label]=&quot;acceptancePct + &apos;%&apos;&quot;
+                      &gt;"/><x id="INTERPOLATION" equiv-text="{{ acceptancePct | number: &apos;1.0-0&apos; }}"/>%<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span
+                    &gt;"/></target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-subtaskProgressLabel" datatype="html">
+        <source> Subtasks <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-muted small d-block fw-normal&quot; [attr.aria-label]=&quot;stPct + &apos;%&apos;&quot;
+                        &gt;"/><x id="INTERPOLATION" equiv-text="{{ stPct | number: &apos;1.0-0&apos; }}"/>%<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span
+                      &gt;"/></source>
+        <target> Teilaufgaben <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-muted small d-block fw-normal&quot; [attr.aria-label]=&quot;stPct + &apos;%&apos;&quot;
+                        &gt;"/><x id="INTERPOLATION" equiv-text="{{ stPct | number: &apos;1.0-0&apos; }}"/>%<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span
+                      &gt;"/></target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-contentLabel" datatype="html">
+        <source>Description</source>
+        <target>Beschreibung</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-subtasksHeading" datatype="html">
+        <source>Subtasks</source>
+        <target>Teilaufgaben</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-addSubtask" datatype="html">
+        <source>Add subtask</source>
+        <target>Teilaufgabe hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-subtasksEmpty" datatype="html">
+        <source>No subtasks yet.</source>
+        <target>Noch keine Teilaufgaben.</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-openSubtaskTitle" datatype="html">
+        <source>Open subtask</source>
+        <target>Teilaufgabe öffnen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-timeEntriesHeading" datatype="html">
+        <source>Time entries</source>
+        <target>Zeiteinträge</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-addTimeEntry" datatype="html">
+        <source>Add time</source>
+        <target>Zeit hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-timeEntriesLoading" datatype="html">
+        <source>Loading time…</source>
+        <target>Zeit wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-timeEntriesEmpty" datatype="html">
+        <source> No time logged on this ticket yet. </source>
+        <target>Für dieses Ticket wurde noch keine Zeit erfasst.</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-commentsHeading" datatype="html">
+        <source>Comments</source>
+        <target>Kommentare</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-commentPlaceholder" datatype="html">
+        <source>Add a comment…</source>
+        <target>Kommentar hinzufügen…</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-addComment" datatype="html">
+        <source> Add </source>
+        <target>Hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-commentAuthorDash" datatype="html">
+        <source>—</source>
+        <target>-</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityHeading" datatype="html">
+        <source>Activity</source>
+        <target>Aktivität</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-deleteTitle" datatype="html">
+        <source>Permanently delete this ticket</source>
+        <target>Dieses Ticket dauerhaft löschen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-delete" datatype="html">
+        <source> Delete </source>
+        <target>Löschen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-deleteConfirmModalTitle" datatype="html">
+        <source>Delete ticket</source>
+        <target>Ticket löschen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-deleteConfirmModalLead" datatype="html">
+        <source>Are you sure you want to delete this ticket?</source>
+        <target>Möchten Sie dieses Ticket wirklich löschen?</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-deleteConfirmCannotUndo" datatype="html">
+        <source>This action cannot be undone.</source>
+        <target>Diese Aktion kann nicht rückgängig gemacht werden.</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-createSubtaskTitle" datatype="html">
+        <source>New subtask</source>
+        <target>Neue Teilaufgabe</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-createTitle" datatype="html">
+        <source>New ticket</source>
+        <target>Neues Ticket</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-titleLabel" datatype="html">
+        <source>Title</source>
+        <target>Titel</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-createTitlePlaceholder" datatype="html">
+        <source>Short summary</source>
+        <target>Kurze Zusammenfassung</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-create" datatype="html">
+        <source> Create </source>
+        <target>Erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-globalSearchTitle" datatype="html">
+        <source> Search tickets </source>
+        <target>Tickets suchen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-globalSearchInputLabel" datatype="html">
+        <source>Search tickets</source>
+        <target>Tickets suchen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-globalSearchPlaceholder" datatype="html">
+        <source>Search by title, description, or id</source>
+        <target>Nach Titel, Beschreibung oder ID suchen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-globalSearchHint" datatype="html">
+        <source> Type to search all tickets in this project, including done and closed. </source>
+        <target>Durchsucht alle Tickets in diesem Projekt, auch erledigte und geschlossene.</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-globalSearchNoResults" datatype="html">
+        <source>No matching tickets</source>
+        <target>Keine passenden Tickets</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-createTimeEntryTitle" datatype="html">
+        <source>New time entry</source>
+        <target>Neuer Zeiteintrag</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-timeStartLabel" datatype="html">
+        <source>Start</source>
+        <target>Start</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-timeEndLabel" datatype="html">
+        <source>End</source>
+        <target>Ende</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-timeDescriptionLabel" datatype="html">
+        <source>Description</source>
+        <target>Beschreibung</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-milestoneNone" datatype="html">
+        <source>None</source>
+        <target>Kein Meilenstein</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-priorityLow" datatype="html">
+        <source>Low</source>
+        <target>Niedrig</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-priorityMedium" datatype="html">
+        <source>Medium</source>
+        <target>Mittel</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-priorityHigh" datatype="html">
+        <source>High</source>
+        <target>Hoch</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-priorityCritical" datatype="html">
+        <source>Critical</source>
+        <target>Kritisch</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-lockedTicket" datatype="html">
+        <source>Locked</source>
+        <target>Gesperrt</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-backToAdminProjects" datatype="html">
+        <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-left me-1&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Back to projects </source>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-left me-1&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Zurück zu Projekten </target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-assignee" datatype="html">
+        <source>Assignee: <x id="INTERPOLATION" equiv-text="{{ email }}"/></source>
+        <target>Zugewiesen an: <x id="INTERPOLATION" equiv-text="{{ email }}"/></target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-trackedTime" datatype="html">
+        <source>Tracked time</source>
+        <target>Erfasste Zeit</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-unbilledTime" datatype="html">
+        <source> Unbilled time </source>
+        <target>Nicht abgerechnete Zeit</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-openBillable" datatype="html">
+        <source> Open billable </source>
+        <target>Offen abrechenbar</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-openMilestones" datatype="html">
+        <source> Open milestones </source>
+        <target>Offene Meilensteine</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-completedMilestones" datatype="html">
+        <source> Completed milestones </source>
+        <target>Abgeschlossene Meilensteine</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-milestonesProgressAria" datatype="html">
+        <source>Milestone completion</source>
+        <target>Meilenstein-Fortschritt</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-openTickets" datatype="html">
+        <source> Open tickets </source>
+        <target>Offene Tickets</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-completedTickets" datatype="html">
+        <source> Completed tickets </source>
+        <target>Abgeschlossene Tickets</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-ticketsProgressAria" datatype="html">
+        <source>Tickets done</source>
+        <target>Erledigte Tickets</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-timeEntries" datatype="html">
+        <source>Time entries</source>
+        <target>Zeiteinträge</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-addTime" datatype="html">
+        <source>Add</source>
+        <target>Hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTime" datatype="html">
+        <source>Bill unbilled time</source>
+        <target>Nicht abgerechnete Zeit abrechnen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-timeReport" datatype="html">
+        <source>Time report</source>
+        <target>Zeitbericht</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-timeEntriesEmpty" datatype="html">
+        <source>No time entries yet</source>
+        <target>Noch keine Zeiteinträge</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-editTime" datatype="html">
+        <source>Edit</source>
+        <target>Bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-deleteTime" datatype="html">
+        <source>Delete</source>
+        <target>Löschen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-createTimeTitle" datatype="html">
+        <source>New time entry</source>
+        <target>Neuer Zeiteintrag</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-startLabel" datatype="html">
+        <source>Start</source>
+        <target>Start</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-endLabel" datatype="html">
+        <source>End</source>
+        <target>Ende</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-descriptionLabel" datatype="html">
+        <source>Description</source>
+        <target>Beschreibung</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-editTimeTitle" datatype="html">
+        <source>Edit time entry</source>
+        <target>Zeiteintrag bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-deleteTimeTitle" datatype="html">
+        <source>Delete time entry</source>
+        <target>Zeiteintrag löschen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-deleteTimeConfirm" datatype="html">
+        <source> Delete this time entry (<x id="INTERPOLATION" equiv-text="{{ formatMinutes(entry.durationMinutes) }}"/>)? This cannot be undone. </source>
+        <target>Diesen Zeiteintrag (<x id="INTERPOLATION" equiv-text="{{ formatMinutes(entry.durationMinutes) }}"/>) löschen? Diese Aktion kann nicht rückgängig gemacht werden.</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTimeTitle" datatype="html">
+        <source>Bill unbilled time</source>
+        <target>Nicht abgerechnete Zeit abrechnen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTimeLoading" datatype="html">
+        <source>Loading range…</source>
+        <target>Zeitraum wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTimeFromLabel" datatype="html">
+        <source>From</source>
+        <target>Von</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTimeToLabel" datatype="html">
+        <source>To</source>
+        <target>Bis</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTimeRangeHint" datatype="html">
+        <source> Only time entries fully within the selected range are included (start on or after From, end on or before To). </source>
+        <target>Nur Zeiteinträge, die vollständig im ausgewählten Zeitraum liegen, werden einbezogen (Start am oder nach Von, Ende am oder vor Bis).</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTimeNoUnbilled" datatype="html">
+        <source> No unbilled time entries to bill. </source>
+        <target>Keine nicht abgerechneten Zeiteinträge zum Abrechnen.</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTimeSubscription" datatype="html">
+        <source>Subscription (optional)</source>
+        <target>Abonnement (optional)</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTimeAdditionalLines" datatype="html">
+        <source>Additional line items (optional)</source>
+        <target>Zusätzliche Rechnungspositionen (optional)</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-billTimeAdditionalLinesHint" datatype="html">
+        <source> Unbilled time is billed as the first invoice line. Add extra lines here if needed. </source>
+        <target>Nicht abgerechnete Zeit wird als erste Rechnungsposition abgerechnet. Fügen Sie hier bei Bedarf weitere Positionen hinzu.</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-timeReportTitle" datatype="html">
+        <source>Time report</source>
+        <target>Zeitbericht</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-timeReportLoading" datatype="html">
+        <source>Loading range…</source>
+        <target>Zeitraum wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-timeReportFromLabel" datatype="html">
+        <source>From</source>
+        <target>Von</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-timeReportToLabel" datatype="html">
+        <source>To</source>
+        <target>Bis</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-timeReportRangeHint" datatype="html">
+        <source> Only time entries fully within the selected range are included (start on or after From, end on or before To). </source>
+        <target>Nur Zeiteinträge, die vollständig im ausgewählten Zeitraum liegen, werden einbezogen (Start am oder nach Von, Ende am oder vor Bis).</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-timeReportUnbilledOnly" datatype="html">
+        <source> Only include unbilled positions </source>
+        <target>Nur nicht abgerechnete Positionen einbeziehen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-trackedTimeProgressAria" datatype="html">
+        <source>Tracked time progress</source>
+        <target>Fortschritt der erfassten Zeit</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-tabBoard" datatype="html">
+        <source>Board</source>
+        <target>Board</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-tabMilestones" datatype="html">
+        <source>Milestones</source>
+        <target>Meilensteine</target>
+      </trans-unit>
+      <trans-unit id="featureProjectDetail-tabTime" datatype="html">
+        <source>Time</source>
+        <target>Zeit</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestoneSelect-clearSelectionAria" datatype="html">
+        <source>Clear selected milestone</source>
+        <target>Ausgewählten Meilenstein entfernen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestoneSelect-noMilestones" datatype="html">
+        <source>No milestones found.</source>
+        <target>Keine Meilensteine gefunden.</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestoneSelect-placeholder" datatype="html">
+        <source>Search milestones by name</source>
+        <target>Meilensteine nach Name suchen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-title" datatype="html">
+        <source>Milestones</source>
+        <target>Meilensteine</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-add" datatype="html">
+        <source>Add</source>
+        <target>Hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-empty" datatype="html">
+        <source>No milestones yet</source>
+        <target>Noch keine Meilensteine</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-edit" datatype="html">
+        <source>Edit</source>
+        <target>Bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-lock" datatype="html">
+        <source>Lock</source>
+        <target>Sperren</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-delete" datatype="html">
+        <source>Delete</source>
+        <target>Löschen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-createTitle" datatype="html">
+        <source>New milestone</source>
+        <target>Neuer Meilenstein</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-nameLabel" datatype="html">
+        <source>Name</source>
+        <target>Name</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-namePlaceholder" datatype="html">
+        <source>Name</source>
+        <target>Name</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-create" datatype="html">
+        <source> Create </source>
+        <target>Erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-editTitle" datatype="html">
+        <source>Edit milestone</source>
+        <target>Meilenstein bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-descriptionLabel" datatype="html">
+        <source>Description</source>
+        <target>Beschreibung</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-targetDateLabel" datatype="html">
+        <source>Target date</source>
+        <target>Zieldatum</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-save" datatype="html">
+        <source> Save </source>
+        <target>Speichern</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-deleteTitle" datatype="html">
+        <source>Delete milestone</source>
+        <target>Meilenstein löschen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-deleteConfirm" datatype="html">
+        <source> Delete milestone &quot;<x id="INTERPOLATION" equiv-text="{{ milestone.name }}"/>&quot;? This cannot be undone. </source>
+        <target>Meilenstein "<x id="INTERPOLATION" equiv-text="{{ milestone.name }}"/>" löschen? Diese Aktion kann nicht rückgängig gemacht werden.</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-openTicketCount" datatype="html">
+        <source><x id="PH" equiv-text="milestone.openTicketCount"/> open</source>
+        <target><x id="PH" equiv-text="milestone.openTicketCount"/> offen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-doneTicketCount" datatype="html">
+        <source><x id="PH" equiv-text="milestone.doneTicketCount"/> done</source>
+        <target><x id="PH" equiv-text="milestone.doneTicketCount"/> erledigt</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-progress" datatype="html">
+        <source><x id="PH" equiv-text="milestone.progressPercent"/>%</source>
+        <target><x id="PH" equiv-text="milestone.progressPercent"/>%</target>
+      </trans-unit>
+      <trans-unit id="featureProjectMilestones-locked" datatype="html">
+        <source>Locked</source>
+        <target>Gesperrt</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionCreated" datatype="html">
+        <source>Created</source>
+        <target>Erstellt</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionDeleted" datatype="html">
+        <source>Deleted</source>
+        <target>Gelöscht</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionCommentAdded" datatype="html">
+        <source>Comment added</source>
+        <target>Kommentar hinzugefügt</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionStatusChanged" datatype="html">
+        <source>Status changed</source>
+        <target>Status geändert</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionPriorityChanged" datatype="html">
+        <source>Priority changed</source>
+        <target>Priorität geändert</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionParentChanged" datatype="html">
+        <source>Parent changed</source>
+        <target>Übergeordnetes Ticket geändert</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionMilestoneChanged" datatype="html">
+        <source>Milestone changed</source>
+        <target>Meilenstein geändert</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionLocked" datatype="html">
+        <source>Locked</source>
+        <target>Gesperrt</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionFieldUpdated" datatype="html">
+        <source>Details updated</source>
+        <target>Details aktualisiert</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-activityActionUnknown" datatype="html">
+        <source>Unknown activity</source>
+        <target>Unbekannte Aktivität</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-laneDraft" datatype="html">
+        <source>Draft</source>
+        <target>Entwurf</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-laneTodo" datatype="html">
+        <source>To do</source>
+        <target>Offen</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-laneInProgress" datatype="html">
+        <source>In progress</source>
+        <target>In Bearbeitung</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-lanePrototype" datatype="html">
+        <source>Prototype</source>
+        <target>Prototyp</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-laneDone" datatype="html">
+        <source>Done</source>
+        <target>Erledigt</target>
+      </trans-unit>
+      <trans-unit id="featureProjectBoard-laneClosed" datatype="html">
+        <source>Closed</source>
+        <target>Geschlossen</target>
+      </trans-unit>
+      <trans-unit id="featureProjects-title" datatype="html">
+        <source>Projects</source>
+        <target>Projekte</target>
+      </trans-unit>
+      <trans-unit id="featureProjects-searchPlaceholder" datatype="html">
+        <source>Search projects</source>
+        <target>Projekte suchen</target>
+      </trans-unit>
+      <trans-unit id="featureProjects-empty" datatype="html">
+        <source>No projects assigned to you</source>
+        <target>Ihnen sind keine Projekte zugewiesen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-duringFreeDaysUntil" datatype="html">
+        <source>Until <x id="date" equiv-text="benefitEndsLabel"/></source>
+        <target>Bis <x id="date" equiv-text="benefitEndsLabel"/></target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-duringNextPeriod" datatype="html">
+        <source>Next billing period</source>
+        <target>Nächster Abrechnungszeitraum</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-afterFreeDaysEnds" datatype="html">
+        <source>After <x id="date" equiv-text="benefitEndsLabel"/></source>
+        <target>Nach <x id="date" equiv-text="benefitEndsLabel"/></target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-afterFreeDays" datatype="html">
+        <source>After free period ends</source>
+        <target>Nach Ende des kostenlosen Zeitraums</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-duringNextPeriods" datatype="html">
+        <source>Next <x id="PH" equiv-text="periods"/> billing periods</source>
+        <target>Nächste <x id="PH" equiv-text="periods"/> Abrechnungszeiträume</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-afterFreePeriod" datatype="html">
+        <source>Following periods</source>
+        <target>Folgende Zeiträume</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-afterFreePeriods" datatype="html">
+        <source>After <x id="PH" equiv-text="periods"/> free periods</source>
+        <target>Nach <x id="PH" equiv-text="periods"/> kostenlosen Zeiträumen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-duringCreditRemaining" datatype="html">
+        <source>While credit remains</source>
+        <target>Solange Guthaben vorhanden ist</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-afterCreditUsed" datatype="html">
+        <source>After credit is used</source>
+        <target>Nachdem das Guthaben aufgebraucht ist</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-pageTitle" datatype="html">
+        <source>Promotions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-checkSectionTitle" datatype="html">
+        <source>Apply a promotion code</source>
+        <target>Aktionscode anwenden</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-selectSubscription" datatype="html">
+        <source>Subscription</source>
+        <target>Abonnement</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-selectSubscriptionPlaceholder" datatype="html">
+        <source>Select subscription</source>
+        <target>Abonnement auswählen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-codePlaceholder" datatype="html">
+        <source>Promotion code</source>
+        <target>Aktionscode</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-checkCode" datatype="html">
+        <source> Check code </source>
+        <target>Code prüfen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-clearCheck" datatype="html">
+        <source>Clear check</source>
+        <target>Prüfung löschen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-redeemNow" datatype="html">
+        <source> Redeem now </source>
+        <target>Jetzt einlösen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-validMessage" datatype="html">
+        <source>This code can be applied.</source>
+        <target>Dieser Code kann angewendet werden.</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-regularPeriodPrice" datatype="html">
+        <source> Regular period price </source>
+        <target>Regulärer Preis pro Zeitraum</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-periodPrice" datatype="html">
+        <source>Period price</source>
+        <target>Preis pro Zeitraum</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-pricingUnavailable" datatype="html">
+        <source> Period pricing is not available for this subscription. </source>
+        <target>Für dieses Abonnement ist kein Zeitraumpreis verfügbar.</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-activeTitle" datatype="html">
+        <source>Active promotions</source>
+        <target>Aktive Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-searchActive" datatype="html">
+        <source> Search active promotions </source>
+        <target>Aktive Aktionen suchen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-loading" datatype="html">
+        <source>Loading…</source>
+        <target>Wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-noActive" datatype="html">
+        <source>No active promotions.</source>
+        <target>Keine aktiven Aktionen.</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-noActiveSearchResults" datatype="html">
+        <source> No active promotions match your search. </source>
+        <target>Keine aktiven Aktionen passen zu Ihrer Suche.</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-historyTitle" datatype="html">
+        <source>Redemption history</source>
+        <target>Einlösungsverlauf</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-searchHistory" datatype="html">
+        <source> Search redemption history </source>
+        <target>Einlösungsverlauf suchen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-noHistory" datatype="html">
+        <source>No redemptions yet.</source>
+        <target>Noch keine Einlösungen.</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-noHistorySearchResults" datatype="html">
+        <source>No redemptions match your search.</source>
+        <target>Keine Einlösungen passen zu Ihrer Suche.</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-mobileActive" datatype="html">
+        <source>Active promotions</source>
+        <target>Aktive Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-mobileHistory" datatype="html">
+        <source>History</source>
+        <target>Verlauf</target>
+      </trans-unit>
+      <trans-unit id="featureServicePlans-taxCategory" datatype="html">
+        <source>VAT rate</source>
+        <target>MwSt.-Satz</target>
+      </trans-unit>
+      <trans-unit id="featureServicePlans-estimatedPrices" datatype="html">
+        <source>Estimated prices</source>
+        <target>Geschätzte Preise</target>
+      </trans-unit>
+      <trans-unit id="featureServicePlans-cancelAtPeriodEndHelp" datatype="html">
+        <source>Cancellation will be scheduled for the end of the current billing period. Unchecking this allows immediate cancellation mid-period.</source>
+        <target>Die Kündigung wird zum Ende des aktuellen Abrechnungszeitraums geplant. Wenn Sie dies abwählen, ist eine sofortige Kündigung mitten im Zeitraum möglich.</target>
+      </trans-unit>
+      <trans-unit id="featureServicePlans-autoRecalculatePriceDaily" datatype="html">
+        <source>Automatic daily price recalculation</source>
+        <target>Automatische tägliche Preisneuberechnung</target>
+      </trans-unit>
+      <trans-unit id="featureServicePlans-autoRecalculatePriceDailyHelp" datatype="html">
+        <source>Opt in only when required for EU compliance. When enabled, the package price is recalculated nightly at midnight from the provider catalog. Checkout must disclose this and the statutory withdrawal restart when the price changes.</source>
+        <target>Nur aktivieren, wenn es für EU-Konformität erforderlich ist. Wenn aktiviert, wird der Paketpreis jede Nacht um Mitternacht aus dem Anbieterkatalog neu berechnet. Der Checkout muss dies und den Neustart des gesetzlichen Widerrufsrechts bei Preisänderungen anzeigen.</target>
+      </trans-unit>
+      <trans-unit id="featureServicePlans-migrateExistingSubscriptions" datatype="html">
+        <source>Apply base price, margin, and VAT changes to existing subscriptions</source>
+        <target>Basispreis-, Margen- und MwSt.-Änderungen auf bestehende Abonnements anwenden</target>
+      </trans-unit>
+      <trans-unit id="featureServicePlans-migrateExistingSubscriptionsHelp" datatype="html">
+        <source>When checked, changing base price, margins, or VAT rate queues a job that migrates eligible subscriptions (differential billing, statutory withdrawal restart, and customer email). Leave unchecked to update the catalog only for new orders.</source>
+        <target>Wenn aktiviert, reiht eine Änderung von Basispreis, Margen oder MwSt.-Satz einen Job ein, der berechtigte Abonnements migriert (Differenzabrechnung, Neustart des gesetzlichen Widerrufsrechts und Kunden-E-Mail). Deaktiviert lassen, um nur den Katalog für neue Bestellungen zu aktualisieren.</target>
+      </trans-unit>
+      <trans-unit id="featureServiceTypes-disallowStatutoryWithdrawal" datatype="html">
+        <source>Disallow statutory withdrawal after provisioning</source>
+        <target>Gesetzlichen Widerruf nach Bereitstellung ausschließen</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawOrderButtonTitle" datatype="html">
+        <source>Withdraw order</source>
+        <target>Bestellung widerrufen</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-orderConfirmationTitle" datatype="html">
+        <source>Order placed successfully</source>
+        <target>Bestellung erfolgreich aufgegeben</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-orderConfirmationMessage" datatype="html">
+        <source> Your subscription is being provisioned. You can close this dialog and track progress in your subscriptions list. </source>
+        <target>Ihr Abonnement wird bereitgestellt. Sie können diesen Dialog schließen und den Fortschritt in Ihrer Abonnementliste verfolgen.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-orderSummaryTitle" datatype="html">
+        <source>Order summary</source>
+        <target>Bestellübersicht</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-orderCodeLabel" datatype="html">
+        <source>Promotion code (optional)</source>
+        <target>Aktionscode (optional)</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-orderPricingPendingSidebar" datatype="html">
+        <source> Check the price summary for updated totals. </source>
+        <target>Prüfen Sie die Preisübersicht für aktualisierte Gesamtbeträge.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawalPolicyTitle" datatype="html">
+        <source> Statutory withdrawal </source>
+        <target>Gesetzliches Widerrufsrecht</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawalPeriodDays" datatype="html">
+        <source>Withdrawal period</source>
+        <target>Widerrufsfrist</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawalAfterProvisioning" datatype="html">
+        <source> You may withdraw within the statutory period, even after the service is provisioned. Refunds for unused time are calculated on a pro-rata basis. </source>
+        <target>Sie können innerhalb der gesetzlichen Frist widerrufen, auch nachdem der Dienst bereitgestellt wurde. Erstattungen für ungenutzte Zeit werden anteilig berechnet.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawalBeforeProvisioningOnly" datatype="html">
+        <source> Statutory withdrawal is only available before the service is provisioned. </source>
+        <target>Der gesetzliche Widerruf ist nur vor Bereitstellung des Dienstes möglich.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyTitle" datatype="html">
+        <source>Automatic price adjustment</source>
+        <target>Automatische Preisanpassung</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyIntro" datatype="html">
+        <source>This plan may have its price adjusted automatically each day based on the provider catalog.</source>
+        <target>Der Preis dieses Plans kann täglich automatisch anhand des Anbieterkatalogs angepasst werden.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyEmail" datatype="html">
+        <source>You will receive an email if the price changes.</source>
+        <target>Sie erhalten eine E-Mail, wenn sich der Preis ändert.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyWithdrawalPrefix" datatype="html">
+        <source>From then on, you have</source>
+        <target>Ab dann haben Sie</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-autoRecalculatePriceDailyWithdrawalSuffix" datatype="html">
+        <source>days to withdraw without negative impact.</source>
+        <target>Tage Zeit, um ohne Nachteile zu widerrufen.</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-orderPriceTitle" datatype="html">
+        <source>Price</source>
+        <target>Preis</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-orderPlanTotal" datatype="html">
+        <source> Plan total (net) </source>
+        <target>Plan-Gesamtbetrag (netto)</target>
+      </trans-unit>
+      <trans-unit id="featurePromotions-orderDiscountLabel" datatype="html">
+        <source>Promotion</source>
+        <target>Aktion</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-orderTermsTitle" datatype="html">
+        <source>Runtime &amp; terms</source>
+        <target>Laufzeit und Bedingungen</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-orderStepBack" datatype="html">
+        <source> Back </source>
+        <target>Zurück</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-orderStepNext" datatype="html">
+        <source> Next </source>
+        <target>Weiter</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawOrderTitle" datatype="html">
+        <source> Withdraw order? </source>
+        <target>Bestellung widerrufen?</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-withdrawOrderConfirm" datatype="html">
+        <source>Are you sure you want to withdraw this order?</source>
+        <target>Möchten Sie diese Bestellung wirklich widerrufen?</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-closeAria" datatype="html">
+        <source>Close</source>
+        <target>Schließen</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-cancel" datatype="html">
+        <source> Cancel </source>
+        <target>Abbrechen</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-confirm" datatype="html">
+        <source> Log out </source>
+        <target>Abmelden</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-usersTitle" datatype="html">
+        <source>Log out?</source>
+        <target>Abmelden?</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-keycloakTitle" datatype="html">
+        <source>Log out?</source>
+        <target>Abmelden?</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-defaultTitle" datatype="html">
+        <source>Log out?</source>
+        <target>Abmelden?</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-usersMessage" datatype="html">
+        <source>You will be signed out of this browser only. Other devices and browsers will stay signed in unless you choose to sign out everywhere below.</source>
+        <target>Sie werden nur in diesem Browser abgemeldet. Andere Geräte und Browser bleiben angemeldet, außer Sie wählen unten die Abmeldung überall aus.</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-keycloakMessage" datatype="html">
+        <source>You will be signed out of this browser. If you use single sign-on, other applications may also require you to sign in again.</source>
+        <target>Sie werden in diesem Browser abgemeldet. Wenn Sie Single Sign-On verwenden, müssen Sie sich möglicherweise auch in anderen Anwendungen erneut anmelden.</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-defaultMessage" datatype="html">
+        <source>Are you sure you want to log out?</source>
+        <target>Möchten Sie sich wirklich abmelden?</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-logoutAllSessionsLabel" datatype="html">
+        <source>Also sign out all other devices and browsers</source>
+        <target>Auch von allen anderen Geräten und Browsern abmelden</target>
+      </trans-unit>
+      <trans-unit id="identityLogoutConfirm-logoutAllSessionsHint" datatype="html">
+        <source>For security, this ends every active session for your account.</source>
+        <target>Aus Sicherheitsgründen beendet dies jede aktive Sitzung Ihres Kontos.</target>
+      </trans-unit>
+      <trans-unit id="featureTokenManager-editButtonTitle" datatype="html">
+        <source>Edit token</source>
+        <target>Token bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureTokenManager-editModalTitle" datatype="html">
+        <source>Edit personal access token</source>
+        <target>Persönlichen Zugriffstoken bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureTokenManager-update" datatype="html">
+        <source>Update</source>
+        <target>Aktualisieren</target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-heroTitle" datatype="html">
+        <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Contact<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> us </source>
+        <target> <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Kontakt<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> aufnehmen </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-heroLead" datatype="html">
+        <source> Tell us about your project or question. We typically reply within one business day. </source>
+        <target> Erzählen Sie uns von Ihrem Projekt oder Ihrer Frage. Wir antworten in der Regel innerhalb eines Werktags. </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-successTitle" datatype="html">
+        <source>Message sent</source>
+        <target> Nachricht gesendet </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-successLead" datatype="html">
+        <source> Thank you for reaching out. We received your message and will get back to you soon. </source>
+        <target> Vielen Dank für Ihre Nachricht. Wir haben sie erhalten und melden uns in Kürze bei Ihnen. </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-nameLabel" datatype="html">
+        <source>Name</source>
+        <target> Name </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-nameRequired" datatype="html">
+        <source> Name is required. </source>
+        <target> Name ist erforderlich. </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-emailLabel" datatype="html">
+        <source>Email</source>
+        <target> E-Mail </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-emailRequired" datatype="html">
+        <source> Email is required. </source>
+        <target> E-Mail ist erforderlich. </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-emailInvalid" datatype="html">
+        <source> Enter a valid email address. </source>
+        <target> Bitte geben Sie eine gültige E-Mail-Adresse ein. </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-phoneLabel" datatype="html">
+        <source>Phone <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-muted fw-normal&quot;&gt;"/>(optional)<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target> Telefon <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-muted fw-normal&quot;&gt;"/>(optional)<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-companyLabel" datatype="html">
+        <source>Company <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-muted fw-normal&quot;&gt;"/>(optional)<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target> Unternehmen <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-muted fw-normal&quot;&gt;"/>(optional)<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-messageLabel" datatype="html">
+        <source>Message</source>
+        <target> Nachricht </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-messageRequired" datatype="html">
+        <source> Message is required. </source>
+        <target> Nachricht ist erforderlich. </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-privacyAcceptPrefix" datatype="html">
+        <source>I accept the</source>
+        <target> Ich akzeptiere die </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-privacyPolicyLink" datatype="html">
+        <source>Privacy Policy</source>
+        <target> Datenschutzerklärung </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-privacyRequired" datatype="html">
+        <source> You must accept the Privacy Policy to send your message. </source>
+        <target> Sie müssen die Datenschutzerklärung akzeptieren, um Ihre Nachricht zu senden. </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-submitting" datatype="html">
+        <source>Sending…</source>
+        <target> Wird gesendet… </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-submit" datatype="html">
+        <source>Send message</source>
+        <target> Nachricht senden </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-detailsAriaLabel" datatype="html">
+        <source>Contact information</source>
+        <target> Kontaktinformationen </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-detailsTitle" datatype="html">
+        <source> Contact information </source>
+        <target> Kontaktinformationen </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-detailsLead" datatype="html">
+        <source> Prefer to reach us directly? Use the details below. </source>
+        <target> Lieber direkt? Nutzen Sie die Angaben unten. </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-detailsEmailLabel" datatype="html">
+        <source>Email</source>
+        <target> E-Mail </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-detailsPhoneLabel" datatype="html">
+        <source>Phone</source>
+        <target> Telefon </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-detailsFaxLabel" datatype="html">
+        <source>Fax</source>
+        <target> Fax </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-detailsWebLabel" datatype="html">
+        <source>Web</source>
+        <target> Web </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-metaTitle" datatype="html">
+        <source>Contact :: <x id="productName" equiv-text="productName"/></source>
+        <target> Kontakt :: <x id="productName" equiv-text="productName"/> </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-metaDescription" datatype="html">
+        <source>Send us a message. We typically reply within one business day.</source>
+        <target> Senden Sie uns eine Nachricht. Wir antworten in der Regel innerhalb eines Werktags. </target>
+      </trans-unit>
+      <trans-unit id="sharedFeatureLandingpageContact-metaKeywords" datatype="html">
+        <source>contact, support, <x id="productName" equiv-text="productName"/></source>
+        <target> Kontakt, Support, <x id="productName" equiv-text="productName"/> </target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-webhooksPage" datatype="html">
+        <source>Webhooks</source>
+        <target>Webhooks</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-title" datatype="html">
+        <source>Webhooks</source>
+        <target>Webhooks</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-addWebhookTitle" datatype="html">
+        <source>Add webhook</source>
+        <target>Webhook hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-testSuccess" datatype="html">
+        <source>Test delivery succeeded.</source>
+        <target>Testzustellung erfolgreich.</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-testFailed" datatype="html">
+        <source>Test delivery failed.</source>
+        <target>Testzustellung fehlgeschlagen.</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-dismissTestResult" datatype="html">
+        <source>Dismiss</source>
+        <target>Ausblenden</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-searchPlaceholder" datatype="html">
+        <source>Search webhooks</source>
+        <target>Webhooks suchen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-loading" datatype="html">
+        <source>Loading webhooks...</source>
+        <target>Webhooks werden geladen...</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-empty" datatype="html">
+        <source>No webhooks configured</source>
+        <target>Keine Webhooks konfiguriert</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-events" datatype="html">
+        <source>events</source>
+        <target>Ereignisse</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-failures" datatype="html">
+        <source>failures</source>
+        <target>Fehler</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-viewDeliveriesTitle" datatype="html">
+        <source>View deliveries</source>
+        <target>Zustellungen anzeigen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-testWebhookTitle" datatype="html">
+        <source>Send test delivery</source>
+        <target>Testzustellung senden</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-editWebhookTitle" datatype="html">
+        <source>Edit webhook</source>
+        <target>Webhook bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deleteWebhookTitle" datatype="html">
+        <source>Delete webhook</source>
+        <target>Webhook löschen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-createWebhookTitle" datatype="html">
+        <source> Create webhook </source>
+        <target>Webhook erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-closeAriaLabel" datatype="html">
+        <source>Close</source>
+        <target>Schließen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-signingSecretTitle" datatype="html">
+        <source>Signing secret</source>
+        <target>Signaturgeheimnis</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-signingSecretHint" datatype="html">
+        <source> Copy this signing secret now. It will not be shown again. </source>
+        <target>Kopieren Sie diesen Signaturgeheimnis-Schlüssel jetzt. Er wird nicht erneut angezeigt.</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-done" datatype="html">
+        <source> Done </source>
+        <target>Erledigt</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-create" datatype="html">
+        <source>Create</source>
+        <target>Erstellen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-editWebhookModalTitle" datatype="html">
+        <source> Edit webhook </source>
+        <target>Webhook bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-update" datatype="html">
+        <source>Update</source>
+        <target>Aktualisieren</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-nameLabel" datatype="html">
+        <source>Name <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target>Name <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-httpMethodLabel" datatype="html">
+        <source>HTTP method</source>
+        <target>HTTP-Methode</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-urlLabel" datatype="html">
+        <source>URL <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target>URL <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-clientLabel" datatype="html">
+        <source>Client</source>
+        <target>Client</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-allClientsOption" datatype="html">
+        <source>All clients</source>
+        <target>Alle Clients</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-authTypeLabel" datatype="html">
+        <source>Authentication</source>
+        <target>Authentifizierung</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-authNone" datatype="html">
+        <source>None</source>
+        <target>Keine</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-authAuthorization" datatype="html">
+        <source> Authorization header </source>
+        <target>Authorization-Header</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-authCustomHeader" datatype="html">
+        <source> Custom header </source>
+        <target>Eigener Header</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-authQueryParam" datatype="html">
+        <source> Query parameter </source>
+        <target>Query-Parameter</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-enabledLabel" datatype="html">
+        <source>Enabled</source>
+        <target>Aktiviert</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-authHeaderNameLabel" datatype="html">
+        <source>Header name <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target>Header-Name <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-authValueLabel" datatype="html">
+        <source> Auth value <x id="START_BLOCK_IF" equiv-text="@if (!hasExistingAuthValue) {"/><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/><x id="CLOSE_BLOCK_IF" equiv-text="}"/></source>
+        <target> Authentifizierungswert <x id="START_BLOCK_IF" equiv-text="@if (!hasExistingAuthValue) {"/><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/><x id="CLOSE_BLOCK_IF" equiv-text="}"/></target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-authValueKeepHint" datatype="html">
+        <source>Leave empty to keep the current value</source>
+        <target>Leer lassen, um den aktuellen Wert beizubehalten</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-subscribedEventsLabel" datatype="html">
+        <source>Subscribed events <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target>Abonnierte Ereignisse <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-loadingEventTypes" datatype="html">
+        <source>Loading event types...</source>
+        <target>Ereignistypen werden geladen...</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-noEventTypes" datatype="html">
+        <source>No event types available</source>
+        <target>Keine Ereignistypen verfügbar</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deleteWebhookModalTitle" datatype="html">
+        <source> Delete webhook </source>
+        <target>Webhook löschen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deleteConfirm" datatype="html">
+        <source> Are you sure you want to delete the webhook <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ endpointToDelete.name }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong
+            &gt;"/>? </source>
+        <target> Möchten Sie den Webhook <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ endpointToDelete.name }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong
+            &gt;"/> wirklich löschen? </target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-cannotUndo" datatype="html">
+        <source>This action cannot be undone.</source>
+        <target>Diese Aktion kann nicht rückgängig gemacht werden.</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-delete" datatype="html">
+        <source>Delete</source>
+        <target>Löschen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveriesTitle" datatype="html">
+        <source> Recent deliveries </source>
+        <target>Letzte Zustellungen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-loadingDeliveries" datatype="html">
+        <source>Loading deliveries...</source>
+        <target>Zustellungen werden geladen...</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-noDeliveries" datatype="html">
+        <source>No deliveries yet</source>
+        <target>Noch keine Zustellungen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveryTime" datatype="html">
+        <source>Time</source>
+        <target>Zeit</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveryEvent" datatype="html">
+        <source>Event</source>
+        <target>Ereignis</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveryStatus" datatype="html">
+        <source>Status</source>
+        <target>Status</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveryAttempt" datatype="html">
+        <source>Attempt</source>
+        <target>Versuch</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveryDetails" datatype="html">
+        <source>Details</source>
+        <target>Details</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliverySuccess" datatype="html">
+        <source>Success</source>
+        <target>Erfolgreich</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveryFailed" datatype="html">
+        <source>Failed</source>
+        <target>Fehlgeschlagen</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveryError" datatype="html">
+        <source>Error</source>
+        <target>Fehler</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveryPayload" datatype="html">
+        <source>Payload</source>
+        <target>Payload</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-deliveryResponse" datatype="html">
+        <source>Response</source>
+        <target>Antwort</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-moreDeliveries" datatype="html">
+        <source> More deliveries exist than shown. </source>
+        <target>Es gibt mehr Zustellungen als angezeigt.</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-totalDeliveries" datatype="html">
+        <source>total deliveries</source>
+        <target>Zustellungen insgesamt</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-allClients" datatype="html">
+        <source>All clients</source>
+        <target>Alle Clients</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-disabled" datatype="html">
+        <source>Disabled</source>
+        <target>Deaktiviert</target>
+      </trans-unit>
+      <trans-unit id="featureNotifications-enabled" datatype="html">
+        <source>Enabled</source>
+        <target>Aktiviert</target>
       </trans-unit>
     </body>
   </file>

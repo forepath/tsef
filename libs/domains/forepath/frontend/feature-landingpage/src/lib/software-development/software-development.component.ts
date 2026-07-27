@@ -147,7 +147,7 @@ export class ForepathSoftwareDevelopmentComponent implements OnInit {
     },
     {
       icon: 'bi-clipboard-check',
-      title: $localize`:@@featureForepathSoftwareDevelopment-cap6Title:Quality engineering`,
+      title: $localize`:@@featureForepathSoftwareDevelopment-cap6Title:Quality assurance`,
       description: $localize`:@@featureForepathSoftwareDevelopment-cap6Desc:Test automation, contract tests, and CI pipelines that catch regressions before production.`,
     },
   ] as const;
