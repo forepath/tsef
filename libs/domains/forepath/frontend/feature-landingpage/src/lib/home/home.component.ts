@@ -79,7 +79,7 @@ export class ForepathHomeComponent implements OnInit {
 
   ngOnInit(): void {
     const metaTitle = $localize`:@@featureForepathHome-metaTitle:Consulting and engineering for modern IT :: ForePath`;
-    const metaDescription = $localize`:@@featureForepathHome-metaDescription:ForePath helps organizations design infrastructure, deliver software, and adopt AI with pragmatic engineering, open standards, and systems you can operate long term.`;
+    const metaDescription = $localize`:@@featureForepathHome-metaDescription:ForePath helps organizations design infrastructure, deliver software, and adopt AI with practical engineering, open standards, and systems you can operate long term.`;
 
     this.titleService.setTitle(metaTitle);
     this.destroyRef.onDestroy(

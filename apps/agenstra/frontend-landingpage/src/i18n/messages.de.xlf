@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="featurePortalAgentctx-heroTitle" datatype="html">
         <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>One Context<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> For All Your AI Coding Tools</source>
-        <target> Ein Kontext für alle Ihre KI-Coding-Tools </target>
+        <target><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Ein Kontext<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> für all Ihre KI-Coding-Tools</target>
       </trans-unit>
       <trans-unit id="featurePortalAgentctx-heroDescription" datatype="html">
         <source>Every AI coding tool wants its own configuration and instructions. Over time they drift apart and assistants start contradicting each other. AgentCTX lets you maintain project context once and generate aligned configs for every editor your team uses.</source>
@@ -12,11 +12,11 @@
       </trans-unit>
       <trans-unit id="featurePortalAgentctx-installCta" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-download me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Install AgentCTX</source>
-        <target> AgentCTX installieren </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-download me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> AgentCTX installieren</target>
       </trans-unit>
       <trans-unit id="featurePortalAgentctx-quickstartCta" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-file-text me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> View quickstart</source>
-        <target> Schnellstart anzeigen </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-file-text me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Schnellstart anzeigen</target>
       </trans-unit>
       <trans-unit id="featurePortalAgentctx-partnersTagline" datatype="html">
         <source>Generates configs for the assistants your team already uses</source>
@@ -212,7 +212,7 @@
       </trans-unit>
       <trans-unit id="featurePortalAgentctx-audienceItem4" datatype="html">
         <source>Wants AI to feel like part of the engineering system, not a personal side tool</source>
-        <target> Möchten, dass sich KI wie ein Teil des Engineering-Systems anfühlt, nicht wie ein persönliches Nebenwerkzeug </target>
+        <target>Möchten, dass sich KI wie ein Teil des technischen Gesamtsystems anfühlt, nicht wie ein persönliches Nebenwerkzeug</target>
       </trans-unit>
       <trans-unit id="featurePortalAgentctx-persona1" datatype="html">
         <source>Platform engineers</source>
@@ -300,11 +300,11 @@
       </trans-unit>
       <trans-unit id="featurePortalCloud-heroCtaPrimary" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-chat-dots me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Talk to us</source>
-        <target> Kontakt aufnehmen </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-chat-dots me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Kontakt aufnehmen</target>
       </trans-unit>
       <trans-unit id="featurePortalCloud-heroCtaSecondary" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-trophy me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> See how it works</source>
-        <target> So funktioniert es </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-trophy me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> So funktioniert es</target>
       </trans-unit>
       <trans-unit id="featurePortalCloud-providersTagline" datatype="html">
         <source>Hosted on cloud providers your platform team already trusts</source>
@@ -492,7 +492,7 @@
       </trans-unit>
       <trans-unit id="featurePortalCloud-metaKeywords" datatype="html">
         <source>Agenstra Cloud, Agenstra, AI agent platform, AI control plane, AI governance, AI observability, managed SaaS, agentic systems</source>
-        <target> Agenstra Cloud, Agenstra, KI-Agentenplattform, KI-Control-Plane, KI-Governance, KI-Observability, verwaltetes SaaS, agentische Systeme </target>
+        <target>Agenstra Cloud, Agenstra, KI-Agentenplattform, KI-Control-Plane, KI-Governance, KI-Beobachtbarkeit, verwaltetes SaaS, agentenbasierte Systeme</target>
       </trans-unit>
       <trans-unit id="featurePortalCloud-planPriceMonth" datatype="html">
         <source>/month</source>
@@ -1328,7 +1328,7 @@
       </trans-unit>
       <trans-unit id="featurePortal-footerListings" datatype="html">
         <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;fw-bold&quot;&gt;"/>Want to learn even more?<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> Check out the Agenstra listings on these platforms:</source>
-        <target> Möchten Sie noch mehr erfahren? Schauen Sie sich die Agenstra-Listings auf diesen Plattformen an: </target>
+        <target><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;fw-bold&quot;&gt;"/>Möchten Sie noch mehr erfahren?<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> Schauen Sie sich die Agenstra-Listings auf diesen Plattformen an:</target>
       </trans-unit>
       <trans-unit id="featurePortal-languageSwitcherAriaLabel" datatype="html">
         <source>Select language</source>
@@ -1400,11 +1400,11 @@
       </trans-unit>
       <trans-unit id="featurePortalDesktop-downloadCtaHero" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-download me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Download Agenstra Desktop</source>
-        <target> Agenstra Desktop herunterladen </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-download me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Agenstra Desktop herunterladen</target>
       </trans-unit>
       <trans-unit id="featurePortalDesktop-setupGuide" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-file-text me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Read setup guide</source>
-        <target> Installationsanleitung lesen </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-file-text me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Installationsanleitung lesen</target>
       </trans-unit>
       <trans-unit id="featurePortalDesktop-platforms" datatype="html">
         <source>Available for: Windows, Linux</source>
@@ -1460,11 +1460,11 @@
       </trans-unit>
       <trans-unit id="featurePortalDesktop-tabObserve" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-eye me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Observe</source>
-        <target> Beobachten </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-eye me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Beobachten</target>
       </trans-unit>
       <trans-unit id="featurePortalDesktop-tabAct" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-lightning-charge me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Act</source>
-        <target> Handeln </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-lightning-charge me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Handeln</target>
       </trans-unit>
       <trans-unit id="featurePortalDesktop-pillarObserveTitle" datatype="html">
         <source>Observe from your desktop</source>
@@ -1624,7 +1624,7 @@
       </trans-unit>
       <trans-unit id="featurePortalDesktop-ctaLead" datatype="html">
         <source>Start by connecting Agenstra Desktop to a non production environment. Let your developers and operators use it to explore existing agents, run tests, and see how your platform behaves.</source>
-        <target> Verbinden Sie Agenstra Desktop zunächst mit einer Nicht-Produktionsumgebung. Lassen Sie Entwickler und Operatoren vorhandene Agenten erkunden, Tests ausführen und nachvollziehen, wie sich die Plattform verhält. </target>
+        <target>Verbinden Sie Agenstra Desktop zunächst mit einer Nicht-Produktionsumgebung. Lassen Sie Entwickler und Betriebsteams vorhandene Agenten erkunden, Tests ausführen und nachvollziehen, wie sich die Plattform verhält.</target>
       </trans-unit>
       <trans-unit id="featurePortalDesktop-ctaSub" datatype="html">
         <source>Once the team is comfortable, you can add access to staging and production according to your organization&apos;s access policies.</source>
@@ -1648,7 +1648,7 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-heroTitle" datatype="html">
         <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>One place<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> to run, govern, and ship with coding agents</source>
-        <target> Ein Ort, um Coding-Agenten zu betreiben, zu steuern und auszuliefern </target>
+        <target><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Ein Ort<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/>, um Coding-Agenten zu betreiben, zu steuern und zuverlässig bereitzustellen</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-heroLead" datatype="html">
         <source>Agenstra brings workspaces, tickets, knowledge, coding, and releases together on infrastructure you own. Your team can trust agents from the first experiment through production.</source>
@@ -1656,7 +1656,7 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-heroCtaLine" datatype="html">
         <source>Keep agent-assisted work on the same bar as the rest of your practice: approvals, audit trails, and controls that match how you review changes and release software.</source>
-        <target> Halten Sie agentisch unterstützte Arbeit auf dem gleichen Qualitätsniveau wie der Rest Ihrer Praxis: Freigaben, Audit-Trails und Kontrollen, die zu Ihrer Art passen, Änderungen zu prüfen und Software auszuliefern. </target>
+        <target>Halten Sie agentisch unterstützte Arbeit auf dem gleichen Qualitätsniveau wie der Rest Ihrer Praxis: Freigaben, Audit-Trails und Kontrollen, die zu Ihrer Art passen, Änderungen zu prüfen und Software bereitzustellen.</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-heroFeatureBadge1" datatype="html">
         <source>Multi-workspace control</source>
@@ -1692,11 +1692,11 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-getStartedHero" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-rocket-takeoff me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Get started</source>
-        <target> Loslegen </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-rocket-takeoff me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Loslegen</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-productTour" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-trophy me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> View product tour</source>
-        <target> Produkttour ansehen </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-trophy me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Produkttour ansehen</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-heroSlideSpaces" datatype="html">
         <source>Agenstra workspaces</source>
@@ -1768,7 +1768,7 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageWorkspacesLead" datatype="html">
         <source>Platform and engineering leaders see where agents run and who owns what, without micromanaging how each team works day to day.</source>
-        <target> Platform- und Engineering-Leads sehen, wo Agenten laufen und wer was verantwortet, ohne den Alltag jedes Teams zu mikromanagen. </target>
+        <target>Platform- und Tech-Leads sehen, wo Agenten laufen und wer was verantwortet, ohne den Alltag jedes Teams zu mikromanagen.</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageWorkspacesBenefit1Title" datatype="html">
         <source>Leadership clarity</source>
@@ -1799,8 +1799,8 @@
         <target> Kontext, der Übergaben übersteht </target>
       </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageKnowledgeLead" datatype="html">
-        <source>Operators and agents reason from the same curated knowledge instead of stale wikis, private notes, or whatever was last pasted into chat.</source>
-        <target> Operatoren und Agenten arbeiten mit demselben kuratierten Wissen statt mit veralteten Wikis, privaten Notizen oder dem, was zuletzt in den Chat eingefügt wurde. </target>
+        <source> Ops teams and agents reason from the same curated knowledge instead of stale wikis, private notes, or whatever was last pasted into chat. </source>
+        <target>Betriebsteam und Agenten arbeiten mit demselben kuratierten Wissen statt mit veralteten Wikis, privaten Notizen oder dem, was zuletzt in den Chat eingefügt wurde.</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageKnowledgeBenefit1Title" datatype="html">
         <source>Fewer repeated questions</source>
@@ -1935,12 +1935,12 @@
         <target> Weniger Kontextbrüche </target>
       </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageDeployBenefit1Desc" datatype="html">
-        <source>Operators do not hand off to another portal just to promote what agents already built.</source>
-        <target> Operatoren müssen nicht zu einem anderen Portal wechseln, nur um auszuliefern, was Agenten bereits gebaut haben. </target>
+        <source> Your ops team does not hand off to another portal just to promote what agents already built. </source>
+        <target>Das Betriebsteam muss nicht zu einem anderen Portal wechseln, nur um bereitzustellen, was Agenten bereits gebaut haben.</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageDeployBenefit2Title" datatype="html">
-        <source>Operators stay in the loop</source>
-        <target> Operatoren bleiben im Bild </target>
+        <source> Ops teams stay in the loop </source>
+        <target>Das Betriebsteam bleibt im Bild</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-solutionAdvantageDeployBenefit2Desc" datatype="html">
         <source>Run logs and status are visible to the same team that kicked off the work.</source>
@@ -1956,7 +1956,7 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-engineeringTitle" datatype="html">
         <source>Built for how platform and engineering teams ship software</source>
-        <target> Entwickelt für Platform- und Engineering-Teams, die Software ausliefern </target>
+        <target>Für Platform- und Entwicklungsteams, die Software bereitstellen</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-engineeringLead" datatype="html">
         <source>Agenstra is where your team operates agents. It is not a replacement for your IDE. It sits beside the editors, Git, and pipelines you already use so agent work follows familiar review and release habits.</source>
@@ -2000,7 +2000,7 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-engineeringItem4" datatype="html">
         <source>Let operators adjust knowledge, tickets, and policies without opening the repository</source>
-        <target> Lassen Sie Operatoren Wissen, Tickets und Richtlinien anpassen, ohne das Repository zu öffnen </target>
+        <target>Lassen Sie das Betriebsteam Wissen, Tickets und Richtlinien anpassen, ohne das Repository zu öffnen</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-engineeringTile5Title" datatype="html">
         <source>Tickets first</source>
@@ -2016,27 +2016,27 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-capabilitiesLead" datatype="html">
         <source>Pick a theme to see what Agenstra does: workspaces, policy, tickets, knowledge, IDE, integrations, and releases. This is the feature-level detail engineering and platform teams evaluate.</source>
-        <target> Wählen Sie ein Thema, um zu sehen, was Agenstra leistet: Workspaces, Richtlinien, Tickets, Wissen, IDE, Integrationen und Releases. Das ist die Feature-Ebene, die Engineering- und Platform-Teams bewerten. </target>
+        <target>Wählen Sie ein Thema, um zu sehen, was Agenstra leistet: Workspaces, Richtlinien, Tickets, Wissen, IDE, Integrationen und Releases. Das ist die Feature-Ebene, die Entwicklungs- und Platform-Teams bewerten.</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-pillarTabRun" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-diagram-3 me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Run together</source>
-        <target> Gemeinsam betreiben </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-diagram-3 me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Gemeinsam betreiben</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-pillarTabGovern" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-shield-lock me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Stay in control</source>
-        <target> Kontrolle behalten </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-shield-lock me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Kontrolle behalten</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-pillarTabShip" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-rocket-takeoff me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Ship faster</source>
-        <target> Schneller ausliefern </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-rocket-takeoff me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Schneller bereitstellen</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-pillarTabKnow" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-journal-text me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Share context</source>
-        <target> Kontext teilen </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-journal-text me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Kontext teilen</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-pillarTabConnect" datatype="html">
         <source><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-plug me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Fit your tools</source>
-        <target> Tools einbinden </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-plug me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Tools einbinden</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-capability1Title" datatype="html">
         <source>One home for every workspace</source>
@@ -2128,7 +2128,7 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-pillarShipPoint3Title" datatype="html">
         <source>Ship with confidence</source>
-        <target> Mit Vertrauen ausliefern </target>
+        <target>Mit Vertrauen bereitstellen</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-capability3Item3" datatype="html">
         <source>Trigger releases, follow run logs, and use Git from the same place you chat with agents</source>
@@ -2252,7 +2252,7 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-ecosystemDesktopDesc" datatype="html">
         <source>A desktop app for daily operators with the same sign-in and permissions as the web console.</source>
-        <target> Eine Desktop-App für tägliche Operatoren mit derselben Anmeldung und denselben Berechtigungen wie die Web-Konsole. </target>
+        <target>Eine Desktop-App für den täglichen Betrieb mit derselben Anmeldung und denselben Berechtigungen wie die Web-Konsole.</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-ecosystemDesktopCta" datatype="html">
         <source>Explore Desktop</source>
@@ -2304,7 +2304,7 @@
       </trans-unit>
       <trans-unit id="featurePortalHome-metaTitle" datatype="html">
         <source>One place to run, govern, and ship with agents :: Agenstra</source>
-        <target> Ein Ort, um Agenten zu betreiben, zu steuern und auszuliefern :: Agenstra </target>
+        <target>Ein Ort, um Agenten zu betreiben, zu steuern und bereitzustellen :: Agenstra</target>
       </trans-unit>
       <trans-unit id="featurePortalHome-metaDescription" datatype="html">
         <source>Run and govern coding agents at enterprise scale: workspaces, ticket automation, in-browser coding, releases, policy, and audit trails. Self-host Agenstra or run on Agenstra Cloud.</source>
@@ -2598,7 +2598,9 @@
         <source>We use Google Tag Manager, a service of Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland. Google Tag Manager is used to manage website tags via an interface. The tool itself (which implements the tags) does not process any personal data of users. Google Tag Manager only triggers other tags, which in turn may collect data. Google only receives information about the use of the Tag Manager itself. Further information can be found in Google&apos;s privacy policy at: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
                 &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>. The processing is based on our legitimate interest in accordance with Art. 6 para. 1 lit. f GDPR in an efficient and technically flawless integration of analysis and marketing services.</source>
-        <target> Wir verwenden den Google Tag Manager, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Der Google Tag Manager dient zur Verwaltung von Website-Tags über eine Oberfläche. Das Tool selbst (welches die Tags implementiert) verarbeitet keine personenbezogenen Daten der Nutzer. Der Google Tag Manager löst lediglich andere Tags aus, die ihrerseits unter Umständen Daten erfassen. Google erhält lediglich Informationen zur Nutzung des Tag Managers selbst. Weitere Informationen finden Sie in den Datenschutzbestimmungen von Google unter: https://policies.google.com/privacy. Die Verarbeitung erfolgt auf Basis unseres berechtigten Interesses gemäß Art. 6 Abs. 1 lit. f DSGVO an einer effizienten und technisch einwandfreien Einbindung von Analyse- und Marketing-Diensten. </target>
+        <target>Wir verwenden den Google Tag Manager, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Der Google Tag Manager dient zur Verwaltung von Website-Tags über eine Oberfläche. Das Tool selbst (welches die Tags implementiert) verarbeitet keine personenbezogenen Daten der Nutzer. Der Google Tag Manager löst lediglich andere Tags aus, die ihrerseits unter Umständen Daten erfassen. Google erhält lediglich Informationen zur Nutzung des Tag Managers selbst. Weitere Informationen finden Sie in den Datenschutzbestimmungen von Google unter: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
+                &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>. Die Verarbeitung erfolgt auf Basis unseres berechtigten Interesses gemäß Art. 6 Abs. 1 lit. f DSGVO an einer effizienten und technisch einwandfreien Einbindung von Analyse- und Marketing-Diensten.</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-cloudflareCdnTitle" datatype="html">
         <source>Cloudflare CDN</source>
@@ -2612,7 +2614,13 @@
                 class=&quot;text-decoration-none&quot;
                 &gt;"/>Cloudflare DPA<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>.</source>
-        <target> Wir nutzen das Content Delivery Network (CDN) der Cloudflare Germany GmbH, Rosental 7, c/o Mindspace, 80331 München, Deutschland (Cloudflare), um die Sicherheit und die Auslieferungsgeschwindigkeit unserer Website zu erhöhen. Dies entspricht unserem berechtigten Interesse (Art. 6 Abs. 1 lit. f DSGVO). Ein CDN ist ein Netzwerk aus weltweit verteilten Servern, das in der Lage ist, optimierte Inhalte an Webseitennutzer auszuliefern. Für diesen Zweck können personenbezogene Daten in Server-Logfiles von Cloudflare verarbeitet werden. Cloudflare ist Empfänger Ihrer personenbezogenen Daten und als Auftragsverarbeiter für uns tätig. Weitere Informationen zu Widerspruchs- und Beseitigungsmöglichkeiten gegenüber Cloudflare finden Sie unter: Cloudflare DPA. </target>
+        <target>Wir nutzen das Content Delivery Network (CDN) der Cloudflare Germany GmbH, Rosental 7, c/o Mindspace, 80331 München, Deutschland (Cloudflare), um die Sicherheit und die Auslieferungsgeschwindigkeit unserer Website zu erhöhen. Dies entspricht unserem berechtigten Interesse (Art. 6 Abs. 1 lit. f DSGVO). Ein CDN ist ein Netzwerk aus weltweit verteilten Servern, das in der Lage ist, optimierte Inhalte an Webseitennutzer auszuliefern. Für diesen Zweck können personenbezogene Daten in Server-Logfiles von Cloudflare verarbeitet werden. Cloudflare ist Empfänger Ihrer personenbezogenen Daten und als Auftragsverarbeiter für uns tätig. Weitere Informationen zu Widerspruchs- und Beseitigungsmöglichkeiten gegenüber Cloudflare finden Sie unter: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a
+                href=&quot;https://www.cloudflare.com/resources/assets/slt3lc6tev37/1M1j5uuFDuLTYiZJJDPBag/770322411bcac7f8bcc350e31b1e8319/Customer_DPA_v.3_1_-_de-de_19_Oct_2020.pdf&quot;
+                target=&quot;_blank&quot;
+                rel=&quot;noopener&quot;
+                class=&quot;text-decoration-none&quot;
+                &gt;"/>Cloudflare DPA<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>.</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-plausibleTitle" datatype="html">
         <source>Plausible Analytics</source>
@@ -2634,7 +2642,13 @@
                 class=&quot;text-decoration-none&quot;
                 &gt;"/>https://www.cloudflare.com/privacypolicy/<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>. The processing is based on user consent in accordance with Art. 6 para. 1 lit. a GDPR and § 25 para. 1 TTDSG.</source>
-        <target> Wir verwenden Cloudflare Analytics, einen Dienst der Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (EU-Vertreter: Cloudflare Ireland Limited, 5th Floor, One Albert Quay, Cork, Irland). Cloudflare Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden aggregierte Website-Traffic-Daten wie Seitenaufrufe, eindeutige Besucher, Referrer und Performance-Metriken erfasst. Die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Cloudflare unter https://www.cloudflare.com/privacypolicy/. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG. </target>
+        <target>Wir verwenden Cloudflare Analytics, einen Dienst der Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (EU-Vertreter: Cloudflare Ireland Limited, 5th Floor, One Albert Quay, Cork, Irland). Cloudflare Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden aggregierte Website-Traffic-Daten wie Seitenaufrufe, eindeutige Besucher, Referrer und Performance-Metriken erfasst. Die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Cloudflare unter <x id="START_LINK" ctype="x-a" equiv-text="&lt;a
+                href=&quot;https://www.cloudflare.com/privacypolicy/&quot;
+                target=&quot;_blank&quot;
+                rel=&quot;noopener&quot;
+                class=&quot;text-decoration-none&quot;
+                &gt;"/>https://www.cloudflare.com/privacypolicy/<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-gaTitle" datatype="html">
         <source>Google Analytics</source>
@@ -2644,7 +2658,9 @@
         <source>We use Google Analytics, a service of Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland (US parent: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA). Google Analytics is only activated after explicit user consent. It collects data on website usage including page views, sessions, user behavior, and demographics for optimization purposes. IP addresses are anonymized, and data is processed in accordance with Google&apos;s privacy policy at <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
                 &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>. The processing is based on user consent in accordance with Art. 6 para. 1 lit. a GDPR and § 25 para. 1 TTDSG.</source>
-        <target> Wir verwenden Google Analytics, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (US-Muttergesellschaft: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA). Google Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden Daten zur Website-Nutzung erfasst, einschließlich Seitenaufrufe, Sitzungen, Nutzerverhalten und demografische Daten zu Optimierungszwecken. IP-Adressen werden anonymisiert, und die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Google unter https://policies.google.com/privacy. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG. </target>
+        <target>Wir verwenden Google Analytics, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (US-Muttergesellschaft: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA). Google Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden Daten zur Website-Nutzung erfasst, einschließlich Seitenaufrufe, Sitzungen, Nutzerverhalten und demografische Daten zu Optimierungszwecken. IP-Adressen werden anonymisiert, und die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Google unter <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
+                &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-mailgunTitle" datatype="html">
         <source>Mailgun</source>
@@ -2658,7 +2674,13 @@
                 class=&quot;text-decoration-none&quot;
                 &gt;"/>https://www.mailgun.com/de/legal/privacy-policy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>.</source>
-        <target> Für den Versand systembezogener E-Mails (z. B. Bestätigungs-, Benachrichtigungs- oder Transaktions-E-Mails) nutzen wir den Dienst „Mailgun“ des Anbieters Mailgun Technologies, Inc., 112 E Pecan St. #1135, San Antonio, TX 78205, USA. Der Versand erfolgt über Serverstandorte innerhalb der Europäischen Union. Mailgun agiert als Auftragsverarbeiter gemäß Art. 28 DSGVO. Mit Mailgun wurde ein entsprechender Auftragsverarbeitungsvertrag geschlossen, der die Einhaltung europäischer Datenschutzstandards gewährleistet. Die Verarbeitung umfasst insbesondere E-Mail-Adressen sowie die Inhalte der versendeten E-Mails. Weitere Informationen zur Datenverarbeitung durch Mailgun finden Sie unter: https://www.mailgun.com/de/legal/privacy-policy. </target>
+        <target>Für den Versand systembezogener E-Mails (z. B. Bestätigungs-, Benachrichtigungs- oder Transaktions-E-Mails) nutzen wir den Dienst „Mailgun“ des Anbieters Mailgun Technologies, Inc., 112 E Pecan St. #1135, San Antonio, TX 78205, USA. Der Versand erfolgt über Serverstandorte innerhalb der Europäischen Union. Mailgun agiert als Auftragsverarbeiter gemäß Art. 28 DSGVO. Mit Mailgun wurde ein entsprechender Auftragsverarbeitungsvertrag geschlossen, der die Einhaltung europäischer Datenschutzstandards gewährleistet. Die Verarbeitung umfasst insbesondere E-Mail-Adressen sowie die Inhalte der versendeten E-Mails. Weitere Informationen zur Datenverarbeitung durch Mailgun finden Sie unter: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a
+                href=&quot;https://www.mailgun.com/de/legal/privacy-policy&quot;
+                target=&quot;_blank&quot;
+                rel=&quot;noopener&quot;
+                class=&quot;text-decoration-none&quot;
+                &gt;"/>https://www.mailgun.com/de/legal/privacy-policy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>.</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-changesTitle" datatype="html">
         <source>Changes</source>
@@ -2974,7 +2996,7 @@
       </trans-unit>
       <trans-unit id="featurePortalPricing-heroTitle" datatype="html">
         <source>Choose Your <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>License<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
-        <target> Wählen Sie Ihre Lizenz </target>
+        <target>Wählen Sie Ihre <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Lizenz<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-heroDescription" datatype="html">
         <source>Run Agenstra on your own infrastructure or let us host it with predictable pricing as you grow from experiments to enterprise governance.</source>
@@ -2999,7 +3021,8 @@
       <trans-unit id="featurePortalPricing-pathSelfHostedCta" datatype="html">
         <source>See license tiers <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-down ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
             &gt;"/></source>
-        <target> Lizenzstufen ansehen </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-down ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+            &gt;"/> Lizenzstufen ansehen</target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-pathManagedTitle" datatype="html">
         <source>Agenstra Cloud</source>
@@ -3012,7 +3035,8 @@
       <trans-unit id="featurePortalPricing-pathManagedCta" datatype="html">
         <source>See cloud pricing <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-down ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
             &gt;"/></source>
-        <target> Cloud-Preise ansehen </target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-down ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+            &gt;"/> Cloud-Preise ansehen</target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-tiersTitle" datatype="html">
         <source>License tiers</source>
@@ -3048,7 +3072,7 @@
       </trans-unit>
       <trans-unit id="featurePortalPricing-openSourceFeature1" datatype="html">
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Agenstra Studio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> includes workspaces, tickets, and agent oversight</source>
-        <target> Agenstra Studio mit Workspaces, Tickets und Agenten-Übersicht </target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Agenstra Studio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> umfasst Workspaces, Tickets und Agenten-Übersicht</target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-openSourceFeature2" datatype="html">
         <source>Single-machine agent runtime</source>
@@ -3083,12 +3107,12 @@
         <target> BUSL-1.1 mit zusätzlicher Nutzungsgenehmigung </target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-startupFeature1" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Everything in Open Source<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
-        <target> Alles aus Open Source </target>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Open Source<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Open Source inklusive<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-startupFeature2" datatype="html">
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Multi-workspace operations<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> provide centralized management and server provisioning</source>
-        <target> Multi-Workspace-Betrieb mit zentraler Verwaltung und Server-Bereitstellung </target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Multi-Workspace-Betrieb<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> mit zentraler Verwaltung und Server-Bereitstellung</target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-startupFeature3" datatype="html">
         <source>Multi-machine agent runtime orchestration</source>
@@ -3119,8 +3143,8 @@
         <target> BUSL-1.1 mit zusätzlicher Nutzungsgenehmigung </target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-businessFeature1" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Everything in Startup<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
-        <target> Alles aus Startup </target>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Startup<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Startup inklusive<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-businessFeature2" datatype="html">
         <source>Personal onboarding</source>
@@ -3151,8 +3175,8 @@
         <target> Kommerzielle Lizenz </target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-enterpriseFeature1" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Everything in Business<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
-        <target> Alles aus Business </target>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Business<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Business inklusive<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-enterpriseFeature2" datatype="html">
         <source>Priority support (Microsoft Teams) &amp; SLA</source>
@@ -3192,19 +3216,19 @@
       </trans-unit>
       <trans-unit id="featurePortalPricing-cloudFeature1" datatype="html">
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Fully managed.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> We handle infrastructure, updates, and maintenance</source>
-        <target> Vollständig verwaltet. Wir kümmern uns um Infrastruktur, Updates und Wartung. </target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Vollständig verwaltet.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Wir kümmern uns um Infrastruktur, Updates und Wartung.</target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-cloudFeature2" datatype="html">
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Full platform.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Studio, web IDE, automation, and governance</source>
-        <target> Volle Plattform. Studio, Web-IDE, Automatisierung und Governance. </target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Volle Plattform.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Studio, Web-IDE, Automatisierung und Governance.</target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-cloudFeature3" datatype="html">
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Automatic scaling.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Capacity grows with your teams</source>
-        <target> Automatische Skalierung. Kapazität wächst mit Ihren Teams. </target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Automatische Skalierung.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Kapazität wächst mit Ihren Teams.</target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-cloudFeature4" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>99.9% uptime SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for enterprise-grade reliability</source>
-        <target> 99,9 % Uptime-SLA für Enterprise-Zuverlässigkeit </target>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>99.9% uptime SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for reliable operation at scale</source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>99,9 % Verfügbarkeits-SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> für zuverlässigen Betrieb im großen Maßstab</target>
       </trans-unit>
       <trans-unit id="featurePortalPricing-cloudPriceUnit" datatype="html">
         <source>/month</source>

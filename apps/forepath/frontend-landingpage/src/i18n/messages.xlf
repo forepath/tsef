@@ -6,10 +6,10 @@
         <source> Consulting that turns <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>strategy into systems<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
         </trans-unit>
       <trans-unit id="featureForepathConsulting-heroLead" datatype="html">
-        <source> We help engineering leaders design platforms, improve delivery, and adopt AI with architecture your teams can implement and operate. </source>
+        <source> We help tech leads design platforms, improve delivery, and adopt AI with architecture your teams can implement and operate. </source>
         </trans-unit>
       <trans-unit id="featureForepathConsulting-valueTitle" datatype="html">
-        <source> Professional advice pays off </source>
+        <source>Good consulting pays off</source>
         </trans-unit>
       <trans-unit id="featureForepathConsulting-valueLead" datatype="html">
         <source> Good consulting turns uncertainty into decisions your teams can act on. We help you choose direction before budget and momentum lock in the wrong path. </source>
@@ -282,7 +282,7 @@
         <source>ForePath</source>
         </trans-unit>
       <trans-unit id="featureForepath-footerTagline" datatype="html">
-        <source> Pragmatic consulting and engineering for teams that need reliable infrastructure, modern software delivery, and products they can operate with confidence. </source>
+        <source> Practical consulting and engineering for teams that need reliable infrastructure, modern software delivery, and products they can operate with confidence. </source>
         </trans-unit>
       <trans-unit id="featureForepath-languageSwitcherAriaLabel" datatype="html">
         <source>Select language</source>
@@ -355,7 +355,7 @@
         <source>Community</source>
         </trans-unit>
       <trans-unit id="featureForepathHome-heroTitle" datatype="html">
-        <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Pragmatic engineering<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> for teams that ship and operate with confidence </source>
+        <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Practical engineering<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> for teams that ship and operate with confidence </source>
         </trans-unit>
       <trans-unit id="featureForepathHome-heroLead" datatype="html">
         <source> ForePath partners with organizations to modernize infrastructure, deliver software, and adopt AI without trading away control, clarity, or long-term maintainability. </source>
@@ -466,7 +466,7 @@
         <source>Consulting and engineering for modern IT :: ForePath</source>
         </trans-unit>
       <trans-unit id="featureForepathHome-metaDescription" datatype="html">
-        <source>ForePath helps organizations design infrastructure, deliver software, and adopt AI with pragmatic engineering, open standards, and systems you can operate long term.</source>
+        <source>ForePath helps organizations design infrastructure, deliver software, and adopt AI with practical engineering, open standards, and systems you can operate long term.</source>
         </trans-unit>
       <trans-unit id="featureForepathHome-metaKeywords" datatype="html">
         <source>ForePath, IT consulting, cloud infrastructure, DevOps, software development, digital sovereignty, Germany</source>
@@ -1551,7 +1551,7 @@
         <source>Agent-assisted workflows embedded in your products with guardrails and observability.</source>
         </trans-unit>
       <trans-unit id="featureForepathSoftwareDevelopment-cap6Title" datatype="html">
-        <source>Quality engineering</source>
+        <source>Quality assurance</source>
         </trans-unit>
       <trans-unit id="featureForepathSoftwareDevelopment-cap6Desc" datatype="html">
         <source>Test automation, contract tests, and CI pipelines that catch regressions before production.</source>

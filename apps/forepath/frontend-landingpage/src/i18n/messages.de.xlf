@@ -7,12 +7,12 @@
         <target> Beratung, die <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Strategie in Systeme<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> überführt </target>
       </trans-unit>
       <trans-unit id="featureForepathConsulting-heroLead" datatype="html">
-        <source> We help engineering leaders design platforms, improve delivery, and adopt AI with architecture your teams can implement and operate. </source>
-        <target> Wir unterstützen Führungskräfte im Engineering beim Plattformdesign, bei schnellerer Auslieferung und bei der KI-Einführung mit Architektur, die Ihre Teams umsetzen und betreiben können. </target>
+        <source> We help tech leads design platforms, improve delivery, and adopt AI with architecture your teams can implement and operate. </source>
+        <target>Wir unterstützen Tech-Leads beim Plattformdesign, bei schnellerer Auslieferung und bei der KI-Einführung mit Architektur, die Ihre Teams umsetzen und betreiben können.</target>
       </trans-unit>
       <trans-unit id="featureForepathConsulting-valueTitle" datatype="html">
-        <source>Professional advice pays off</source>
-        <target>Professionelle Beratung zahlt sich aus</target>
+        <source>Good consulting pays off</source>
+        <target>Gute Beratung zahlt sich aus</target>
       </trans-unit>
       <trans-unit id="featureForepathConsulting-valueLead" datatype="html">
         <source> Good consulting turns uncertainty into decisions your teams can act on. We help you choose direction before budget and momentum lock in the wrong path. </source>
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="featureForepathConsulting-advantage3Desc" datatype="html">
         <source>We facilitate tradeoffs across engineering, security, and leadership so priorities stay coherent.</source>
-        <target> Wir moderieren Abwägungen zwischen Engineering, Sicherheit und Führung, damit Prioritäten stimmig bleiben. </target>
+        <target>Wir moderieren Abwägungen zwischen Technik, Sicherheit und Führung, damit Prioritäten stimmig bleiben.</target>
       </trans-unit>
       <trans-unit id="featureForepathConsulting-advantage4Title" datatype="html">
         <source>Confidence before commitment</source>
@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="featureForepathConsulting-cloudItem1Desc" datatype="html">
         <source>Clear guardrails for finance, security, and engineering across accounts and subscriptions.</source>
-        <target> Klare Leitplanken für Finanzen, Sicherheit und Engineering über Accounts und Subscriptions hinweg. </target>
+        <target>Klare Leitplanken für Finanzen, Sicherheit und Technik über Accounts und Abonnements hinweg.</target>
       </trans-unit>
       <trans-unit id="featureForepathConsulting-cloudItem2Title" datatype="html">
         <source>Container platforms</source>
@@ -180,7 +180,7 @@
       </trans-unit>
       <trans-unit id="featureForepathConsulting-aiDesc" datatype="html">
         <source> Use-case discovery, agent workflow design, model routing, and governance for coding and operational agents. We help you pilot quickly while building the controls security and legal teams expect. </source>
-        <target> Use-Case-Discovery, Agent-Workflow-Design, Model-Routing und Governance für Coding- und Operations-Agenten. Wir helfen Ihnen, schnell Pilotprojekte zu starten und gleichzeitig die Kontrollen aufzubauen, die Sicherheits- und Legal-Teams erwarten. </target>
+        <target>Anwendungsfälle klären, Agent-Workflows gestalten, Modelle sinnvoll routen und klare Regeln für Coding- und Betriebs-Agenten. Wir helfen Ihnen, schnell zu pilotieren und gleichzeitig die Kontrollen aufzubauen, die Sicherheits- und Legal-Teams brauchen.</target>
       </trans-unit>
       <trans-unit id="featureForepathConsulting-aiItem1Title" datatype="html">
         <source>Agent rollout</source>
@@ -292,7 +292,7 @@
       </trans-unit>
       <trans-unit id="featureForepathConsulting-metaDescription" datatype="html">
         <source>ForePath consulting for cloud platforms, DevOps, AI adoption, security, and compliance. Practical architecture and delivery guidance for engineering teams.</source>
-        <target> ForePath berät zu Cloud-Plattformen, DevOps, KI-Einführung, Sicherheit und Compliance. Praktische Architektur- und Auslieferungsbegleitung für Engineering-Teams. </target>
+        <target>ForePath berät zu Cloud-Plattformen, DevOps, KI-Einführung, Sicherheit und Compliance. Praktische Architektur- und Auslieferungsbegleitung für Entwicklungsteams.</target>
       </trans-unit>
       <trans-unit id="featureForepathConsulting-metaKeywords" datatype="html">
         <source>ForePath consulting, cloud architecture, DevOps, AI consulting, security compliance, platform engineering</source>
@@ -324,7 +324,7 @@
       </trans-unit>
       <trans-unit id="featureForepath-navAgenstraCaption" datatype="html">
         <source>Run and ship with coding agents</source>
-        <target>Coding-Agenten betreiben und ausliefern</target>
+        <target>Coding-Agenten betreiben und bereitstellen</target>
       </trans-unit>
       <trans-unit id="featureForepath-navDecabill" datatype="html">
         <source>Decabill</source>
@@ -348,7 +348,7 @@
       </trans-unit>
       <trans-unit id="featureForepath-navItSystemsCaption" datatype="html">
         <source>Run and support platforms with operators</source>
-        <target>Plattformen betreiben und mit Operatoren unterstützen</target>
+        <target>Plattformen betreiben und Betriebsteams unterstützen</target>
       </trans-unit>
       <trans-unit id="featureForepath-navSoftwareDevelopment" datatype="html">
         <source>Software Development</source>
@@ -356,7 +356,7 @@
       </trans-unit>
       <trans-unit id="featureForepath-navSoftwareDevelopmentCaption" datatype="html">
         <source>Ship and own software in production</source>
-        <target>Software in Produktion ausliefern und betreiben</target>
+        <target>Software in Produktion bereitstellen und betreiben</target>
       </trans-unit>
       <trans-unit id="featureForepath-navOne" datatype="html">
         <source>One</source>
@@ -379,8 +379,8 @@
         <target state="translated">ForePath</target>
       </trans-unit>
       <trans-unit id="featureForepath-footerTagline" datatype="html">
-        <source> Pragmatic consulting and engineering for teams that need reliable infrastructure, modern software delivery, and products they can operate with confidence. </source>
-        <target state="translated">Pragmatische Beratung und Engineering für Teams, die zuverlässige Infrastruktur, moderne Softwareauslieferung und Produkte brauchen, die sie selbstbewusst betreiben können.</target>
+        <source> Practical consulting and engineering for teams that need reliable infrastructure, modern software delivery, and products they can operate with confidence. </source>
+        <target>Praxisnahe Beratung und Technik für Teams, die zuverlässige Infrastruktur, moderne Softwarebereitstellung und Produkte brauchen, die sie selbstbewusst betreiben können.</target>
       </trans-unit>
       <trans-unit id="featureForepath-languageSwitcherAriaLabel" datatype="html">
         <source>Select language</source>
@@ -431,8 +431,8 @@
         <target>© 2025 IPvX UG (haftungsbeschränkt). Alle Rechte vorbehalten.</target>
       </trans-unit>
       <trans-unit id="featureForepathHome-heroTitle" datatype="html">
-        <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Pragmatic engineering<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> for teams that ship and operate with confidence </source>
-        <target> Pragmatisches Engineering für Teams, die zuverlässig liefern und betreiben </target>
+        <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Practical engineering<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> for teams that ship and operate with confidence </source>
+        <target><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Praxisnahe Technik<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> für Teams, die zuverlässig liefern und betreiben</target>
       </trans-unit>
       <trans-unit id="featureForepathHome-heroLead" datatype="html">
         <source> ForePath partners with organizations to modernize infrastructure, deliver software, and adopt AI without trading away control, clarity, or long-term maintainability. </source>
@@ -532,15 +532,18 @@
       </trans-unit>
       <trans-unit id="featureForepathHome-humanMeetsLinkConsulting" datatype="html">
         <source>Consulting</source>
-        <target>Beratung</target>
+        <target>Beratung <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+          &gt;"/></target>
       </trans-unit>
       <trans-unit id="featureForepathHome-humanMeetsLinkItSystems" datatype="html">
         <source>IT systems</source>
-        <target>IT-Systeme</target>
+        <target>IT-Systeme <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+          &gt;"/></target>
       </trans-unit>
       <trans-unit id="featureForepathHome-humanMeetsLinkSoftwareDevelopment" datatype="html">
         <source>Software development</source>
-        <target>Softwareentwicklung</target>
+        <target>Softwareentwicklung <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+          &gt;"/></target>
       </trans-unit>
       <trans-unit id="featureForepathHome-rootsSymbolAlt" datatype="html">
         <source>Nordrhein-Westfalen-Zeichen, the citizen emblem of North Rhine-Westphalia</source>
@@ -572,11 +575,11 @@
       </trans-unit>
       <trans-unit id="featureForepathHome-metaTitle" datatype="html">
         <source>Consulting and engineering for modern IT :: ForePath</source>
-        <target> Beratung und Engineering für moderne IT :: ForePath </target>
+        <target>Beratung und Technik für moderne IT :: ForePath</target>
       </trans-unit>
       <trans-unit id="featureForepathHome-metaDescription" datatype="html">
-        <source>ForePath helps organizations design infrastructure, deliver software, and adopt AI with pragmatic engineering, open standards, and systems you can operate long term.</source>
-        <target> ForePath hilft Organisationen, Infrastruktur zu gestalten, Software auszuliefern und KI einzuführen. Pragmatisches Engineering, offene Standards und Systeme, die Sie langfristig betreiben können. </target>
+        <source>ForePath helps organizations design infrastructure, deliver software, and adopt AI with practical engineering, open standards, and systems you can operate long term.</source>
+        <target>ForePath hilft Organisationen, Infrastruktur zu gestalten, Software bereitzustellen und KI einzuführen. Praxisnahe Technik, offene Standards und Systeme, die Sie langfristig betreiben können.</target>
       </trans-unit>
       <trans-unit id="featureForepathHome-metaKeywords" datatype="html">
         <source>ForePath, IT consulting, cloud infrastructure, DevOps, software development, digital sovereignty, Germany</source>
@@ -600,7 +603,7 @@
       </trans-unit>
       <trans-unit id="featureForepathItSystems-offeringsLead" datatype="html">
         <source> Reliable infrastructure comes from open technologies, clear processes, and partners who treat operations and security as one discipline. We run the systems your business depends on, from the office floor to the data centre, so your teams stay productive without constant firefighting. </source>
-        <target> Zuverlässige Infrastrukturen entstehen durch offene Technologien, klare Prozesse und Partner, die Betrieb und Sicherheit ganzheitlich denken. Wir betreiben die Systeme, von denen Ihr Unternehmen abhängt, vom Arbeitsplatz bis ins Rechenzentrum, damit Ihre Teams produktiv bleiben, statt ständig Brände zu löschen. </target>
+        <target>Zuverlässige Infrastrukturen entstehen durch offene Technologien, klare Prozesse und Partner, die Betrieb und Sicherheit zusammen denken. Wir betreiben die Systeme, von denen Ihr Unternehmen abhängt, vom Arbeitsplatz bis zur Cloud.</target>
       </trans-unit>
       <trans-unit id="featureForepathItSystems-catNetworkTitle" datatype="html">
         <source>Network</source>
@@ -1154,7 +1157,9 @@
         <source> We use Google Tag Manager, a service of Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland. Google Tag Manager is used to manage website tags via an interface. The tool itself (which implements the tags) does not process any personal data of users. Google Tag Manager only triggers other tags, which in turn may collect data. Google only receives information about the use of the Tag Manager itself. Further information can be found in Google&apos;s privacy policy at: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
                 &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>. The processing is based on our legitimate interest in accordance with Art. 6 para. 1 lit. f GDPR in an efficient and technically flawless integration of analysis and marketing services. </source>
-        <target state="translated">Wir verwenden den Google Tag Manager, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Der Google Tag Manager dient zur Verwaltung von Website-Tags über eine Oberfläche. Das Tool selbst (welches die Tags implementiert) verarbeitet keine personenbezogenen Daten der Nutzer. Der Google Tag Manager löst lediglich andere Tags aus, die ihrerseits unter Umständen Daten erfassen. Google erhält lediglich Informationen zur Nutzung des Tag Managers selbst. Weitere Informationen finden Sie in den Datenschutzbestimmungen von Google unter: https://policies.google.com/privacy. Die Verarbeitung erfolgt auf Basis unseres berechtigten Interesses gemäß Art. 6 Abs. 1 lit. f DSGVO an einer effizienten und technisch einwandfreien Einbindung von Analyse- und Marketing-Diensten.</target>
+        <target>Wir verwenden den Google Tag Manager, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Der Google Tag Manager dient zur Verwaltung von Website-Tags über eine Oberfläche. Das Tool selbst (welches die Tags implementiert) verarbeitet keine personenbezogenen Daten der Nutzer. Der Google Tag Manager löst lediglich andere Tags aus, die ihrerseits unter Umständen Daten erfassen. Google erhält lediglich Informationen zur Nutzung des Tag Managers selbst. Weitere Informationen finden Sie in den Datenschutzbestimmungen von Google unter: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
+                &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>. Die Verarbeitung erfolgt auf Basis unseres berechtigten Interesses gemäß Art. 6 Abs. 1 lit. f DSGVO an einer effizienten und technisch einwandfreien Einbindung von Analyse- und Marketing-Diensten.</target>
       </trans-unit>
       <trans-unit id="featureForepathLegal-cloudflareCdnTitle" datatype="html">
         <source>Cloudflare CDN</source>
@@ -1168,7 +1173,13 @@
                 class=&quot;text-decoration-none&quot;
                 &gt;"/>Cloudflare DPA<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>. </source>
-        <target state="translated">Wir nutzen das Content Delivery Network (CDN) der Cloudflare Germany GmbH, Rosental 7, c/o Mindspace, 80331 München, Deutschland (Cloudflare), um die Sicherheit und die Auslieferungsgeschwindigkeit unserer Website zu erhöhen. Dies entspricht unserem berechtigten Interesse (Art. 6 Abs. 1 lit. f DSGVO). Ein CDN ist ein Netzwerk aus weltweit verteilten Servern, das in der Lage ist, optimierte Inhalte an Webseitennutzer auszuliefern. Für diesen Zweck können personenbezogene Daten in Server-Logfiles von Cloudflare verarbeitet werden. Cloudflare ist Empfänger Ihrer personenbezogenen Daten und als Auftragsverarbeiter für uns tätig. Weitere Informationen zu Widerspruchs- und Beseitigungsmöglichkeiten gegenüber Cloudflare finden Sie unter: Cloudflare DPA.</target>
+        <target>Wir nutzen das Content Delivery Network (CDN) der Cloudflare Germany GmbH, Rosental 7, c/o Mindspace, 80331 München, Deutschland (Cloudflare), um die Sicherheit und die Auslieferungsgeschwindigkeit unserer Website zu erhöhen. Dies entspricht unserem berechtigten Interesse (Art. 6 Abs. 1 lit. f DSGVO). Ein CDN ist ein Netzwerk aus weltweit verteilten Servern, das in der Lage ist, optimierte Inhalte an Webseitennutzer auszuliefern. Für diesen Zweck können personenbezogene Daten in Server-Logfiles von Cloudflare verarbeitet werden. Cloudflare ist Empfänger Ihrer personenbezogenen Daten und als Auftragsverarbeiter für uns tätig. Weitere Informationen zu Widerspruchs- und Beseitigungsmöglichkeiten gegenüber Cloudflare finden Sie unter: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a
+                href=&quot;https://www.cloudflare.com/resources/assets/slt3lc6tev37/1M1j5uuFDuLTYiZJJDPBag/770322411bcac7f8bcc350e31b1e8319/Customer_DPA_v.3_1_-_de-de_19_Oct_2020.pdf&quot;
+                target=&quot;_blank&quot;
+                rel=&quot;noopener&quot;
+                class=&quot;text-decoration-none&quot;
+                &gt;"/>Cloudflare DPA<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>.</target>
       </trans-unit>
       <trans-unit id="featureForepathLegal-plausibleTitle" datatype="html">
         <source>Plausible Analytics</source>
@@ -1190,7 +1201,13 @@
                 class=&quot;text-decoration-none&quot;
                 &gt;"/>https://www.cloudflare.com/privacypolicy/<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>. The processing is based on user consent in accordance with Art. 6 para. 1 lit. a GDPR and § 25 para. 1 TTDSG. </source>
-        <target state="translated">Wir verwenden Cloudflare Analytics, einen Dienst der Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (EU-Vertreter: Cloudflare Ireland Limited, 5th Floor, One Albert Quay, Cork, Irland). Cloudflare Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden aggregierte Website-Traffic-Daten wie Seitenaufrufe, eindeutige Besucher, Referrer und Performance-Metriken erfasst. Die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Cloudflare unter https://www.cloudflare.com/privacypolicy/. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
+        <target>Wir verwenden Cloudflare Analytics, einen Dienst der Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (EU-Vertreter: Cloudflare Ireland Limited, 5th Floor, One Albert Quay, Cork, Irland). Cloudflare Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden aggregierte Website-Traffic-Daten wie Seitenaufrufe, eindeutige Besucher, Referrer und Performance-Metriken erfasst. Die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Cloudflare unter <x id="START_LINK" ctype="x-a" equiv-text="&lt;a
+                href=&quot;https://www.cloudflare.com/privacypolicy/&quot;
+                target=&quot;_blank&quot;
+                rel=&quot;noopener&quot;
+                class=&quot;text-decoration-none&quot;
+                &gt;"/>https://www.cloudflare.com/privacypolicy/<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
       </trans-unit>
       <trans-unit id="featureForepathLegal-gaTitle" datatype="html">
         <source>Google Analytics</source>
@@ -1200,7 +1217,9 @@
         <source> We use Google Analytics, a service of Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland (US parent: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA). Google Analytics is only activated after explicit user consent. It collects data on website usage including page views, sessions, user behavior, and demographics for optimization purposes. IP addresses are anonymized, and data is processed in accordance with Google&apos;s privacy policy at <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
                 &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>. The processing is based on user consent in accordance with Art. 6 para. 1 lit. a GDPR and § 25 para. 1 TTDSG. </source>
-        <target state="translated">Wir verwenden Google Analytics, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (US-Muttergesellschaft: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA). Google Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden Daten zur Website-Nutzung erfasst, einschließlich Seitenaufrufe, Sitzungen, Nutzerverhalten und demografische Daten zu Optimierungszwecken. IP-Adressen werden anonymisiert, und die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Google unter https://policies.google.com/privacy. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
+        <target>Wir verwenden Google Analytics, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (US-Muttergesellschaft: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA). Google Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden Daten zur Website-Nutzung erfasst, einschließlich Seitenaufrufe, Sitzungen, Nutzerverhalten und demografische Daten zu Optimierungszwecken. IP-Adressen werden anonymisiert, und die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Google unter <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
+                &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
       </trans-unit>
       <trans-unit id="featureForepathLegal-mailgunTitle" datatype="html">
         <source>Mailgun</source>
@@ -1214,7 +1233,13 @@
                 class=&quot;text-decoration-none&quot;
                 &gt;"/>https://www.mailgun.com/de/legal/privacy-policy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
               &gt;"/>. </source>
-        <target state="translated">Für den Versand systembezogener E-Mails (z. B. Bestätigungs-, Benachrichtigungs- oder Transaktions-E-Mails) nutzen wir den Dienst „Mailgun“ des Anbieters Mailgun Technologies, Inc., 112 E Pecan St. #1135, San Antonio, TX 78205, USA. Der Versand erfolgt über Serverstandorte innerhalb der Europäischen Union. Mailgun agiert als Auftragsverarbeiter gemäß Art. 28 DSGVO. Mit Mailgun wurde ein entsprechender Auftragsverarbeitungsvertrag geschlossen, der die Einhaltung europäischer Datenschutzstandards gewährleistet. Die Verarbeitung umfasst insbesondere E-Mail-Adressen sowie die Inhalte der versendeten E-Mails. Weitere Informationen zur Datenverarbeitung durch Mailgun finden Sie unter: https://www.mailgun.com/de/legal/privacy-policy.</target>
+        <target>Für den Versand systembezogener E-Mails (z. B. Bestätigungs-, Benachrichtigungs- oder Transaktions-E-Mails) nutzen wir den Dienst „Mailgun“ des Anbieters Mailgun Technologies, Inc., 112 E Pecan St. #1135, San Antonio, TX 78205, USA. Der Versand erfolgt über Serverstandorte innerhalb der Europäischen Union. Mailgun agiert als Auftragsverarbeiter gemäß Art. 28 DSGVO. Mit Mailgun wurde ein entsprechender Auftragsverarbeitungsvertrag geschlossen, der die Einhaltung europäischer Datenschutzstandards gewährleistet. Die Verarbeitung umfasst insbesondere E-Mail-Adressen sowie die Inhalte der versendeten E-Mails. Weitere Informationen zur Datenverarbeitung durch Mailgun finden Sie unter: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a
+                href=&quot;https://www.mailgun.com/de/legal/privacy-policy&quot;
+                target=&quot;_blank&quot;
+                rel=&quot;noopener&quot;
+                class=&quot;text-decoration-none&quot;
+                &gt;"/>https://www.mailgun.com/de/legal/privacy-policy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>.</target>
       </trans-unit>
       <trans-unit id="featureForepathLegal-changesTitle" datatype="html">
         <source>Changes</source>
@@ -1560,7 +1585,7 @@
       </trans-unit>
       <trans-unit id="featureForepathOne-heroTitle" datatype="html">
         <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>ForePath One<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> is where we ship products we operate </source>
-        <target> ForePath One ist der Ort, an dem wir Produkte ausliefern, die wir selbst betreiben </target>
+        <target><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>ForePath One<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> ist der Ort, an dem wir Produkte bereitstellen, die wir selbst betreiben</target>
       </trans-unit>
       <trans-unit id="featureForepathOne-heroLead" datatype="html">
         <source> The same engineers who advise your platform teams build this software. It is designed for production, not demos. </source>
@@ -1625,7 +1650,8 @@
       <trans-unit id="featureForepathOne-bentoDevLink" datatype="html">
         <source>View development <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
             &gt;"/></source>
-        <target> Entwicklung ansehen </target>
+        <target>Entwicklung ansehen <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+            &gt;"/></target>
       </trans-unit>
       <trans-unit id="featureForepathOne-bentoDevDesc" datatype="html">
         <source> Platforms, integrations, and applications built to last. </source>
@@ -1638,7 +1664,8 @@
       <trans-unit id="featureForepathOne-bentoItLink" datatype="html">
         <source>View IT systems <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
             &gt;"/></source>
-        <target> IT-Systeme ansehen </target>
+        <target>IT-Systeme ansehen <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+            &gt;"/></target>
       </trans-unit>
       <trans-unit id="featureForepathOne-bentoItDesc" datatype="html">
         <source> Monitoring, patching, incidents, and steady-state operations. </source>
@@ -1651,7 +1678,8 @@
       <trans-unit id="featureForepathOne-bentoConsultingLink" datatype="html">
         <source>View consulting <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
             &gt;"/></source>
-        <target> Beratung ansehen </target>
+        <target>Beratung ansehen <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+            &gt;"/></target>
       </trans-unit>
       <trans-unit id="featureForepathOne-bentoConsultingDesc" datatype="html">
         <source> Strategy, architecture, and roadmaps your team can execute. </source>
@@ -1919,7 +1947,7 @@
       </trans-unit>
       <trans-unit id="featureForepathPricing-vatDisclaimer" datatype="html">
         <source> All prices are <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>plus statutory VAT<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/>. This offer is directed <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>exclusively at businesses, freelancers, and public institutions<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> within the meaning of Section 14 German Civil Code (BGB). </source>
-        <target> Alle Preise verstehen sich <strong>zuzüglich der gesetzlichen Mehrwertsteuer</strong>. Das Angebot richtet sich <strong>ausschließlich an Gewerbetreibende, Freiberufler und öffentliche Einrichtungen</strong> im Sinne des § 14 BGB. </target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>zuzüglich der gesetzlichen Mehrwertsteuer<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/>. Dieses Angebot richtet sich <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>ausschließlich an Gewerbetreibende, Freiberufler und öffentliche Einrichtungen<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> im Sinne des § 14 BGB.</target>
       </trans-unit>
       <trans-unit id="featureForepathPricing-startupTitle" datatype="html">
         <source>Special conditions for startups and SMEs</source>
@@ -1959,7 +1987,7 @@
       </trans-unit>
       <trans-unit id="featureForepathSoftwareDevelopment-heroTitle" datatype="html">
         <source><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Software development<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> built to last </source>
-        <target> Softwareentwicklung, die Bestand hat </target>
+        <target><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Softwareentwicklung<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/>, die Bestand hat</target>
       </trans-unit>
       <trans-unit id="featureForepathSoftwareDevelopment-heroLead" datatype="html">
         <source> We ship features your teams can own: readable code, automated tests, and documentation that matches how you operate in production. </source>
@@ -2014,8 +2042,8 @@
         <target> Agent-gestützte Workflows in Ihren Produkten, mit Leitplanken und Observability. </target>
       </trans-unit>
       <trans-unit id="featureForepathSoftwareDevelopment-cap6Title" datatype="html">
-        <source>Quality engineering</source>
-        <target> Qualitätsengineering </target>
+        <source>Quality assurance</source>
+        <target>Qualitätssicherung</target>
       </trans-unit>
       <trans-unit id="featureForepathSoftwareDevelopment-cap6Desc" datatype="html">
         <source>Test automation, contract tests, and CI pipelines that catch regressions before production.</source>

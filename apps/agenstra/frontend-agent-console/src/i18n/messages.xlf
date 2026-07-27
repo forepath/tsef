@@ -449,6 +449,9 @@
       <trans-unit id="featureAudit-chartFilterBreakdownTitle" datatype="html">
         <source>Filter drops and flags by type</source>
         </trans-unit>
+      <trans-unit id="featureAudit-chartMessagesOverTimeTitle" datatype="html">
+        <source>Messages over time</source>
+      </trans-unit>
       <trans-unit id="featureAudit-chatIoDirectionInput" datatype="html">
         <source>User message</source>
         </trans-unit>
@@ -915,12 +918,93 @@
       <trans-unit id="featureChat-createWorkspace" datatype="html">
         <source>Create</source>
         </trans-unit>
+      <trans-unit id="featureChat-agentTypeLabel" datatype="html">
+        <source>Agent Type</source>
+      </trans-unit>
+      <trans-unit id="featureChat-agentTypeDefaultCursor" datatype="html">
+        <source>Default (Cursor)</source>
+      </trans-unit>
+      <trans-unit id="featureChat-containerTypeLabel" datatype="html">
+        <source>Container Type</source>
+      </trans-unit>
+      <trans-unit id="featureChat-containerTypeDefaultGeneric" datatype="html">
+        <source>Default (Generic)</source>
+      </trans-unit>
+      <trans-unit id="featureChat-containerTypeGeneric" datatype="html">
+        <source>Generic</source>
+      </trans-unit>
+      <trans-unit id="featureChat-containerTypeHint" datatype="html">
+        <source>The type of content this agent holds. Defaults to Generic if not specified.</source>
+      </trans-unit>
+      <trans-unit id="featureChat-containerTypeHintShort" datatype="html">
+        <source>The type of content this agent holds.</source>
+      </trans-unit>
+      <trans-unit id="featureChat-repositorySetupLabel" datatype="html">
+        <source>Repository setup</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitSetupModeClone" datatype="html">
+        <source>Clone from remote</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitSetupModeEmpty" datatype="html">
+        <source>Empty repository (git init)</source>
+      </trans-unit>
+      <trans-unit id="featureChat-agentGitSetupModeHint" datatype="html">
+        <source>Choose whether to clone a repository or initialize an empty local Git repository.</source>
+      </trans-unit>
+      <trans-unit id="featureChat-workspaceGitSetupModeHint" datatype="html">
+        <source>Choose whether to clone an existing repository or start with a new local Git repository.</source>
+      </trans-unit>
+      <trans-unit id="featureChat-workspaceGitDefault" datatype="html">
+        <source>Workspace default: <x id="INTERPOLATION" equiv-text="{{ getWorkspaceGitSetupModeDefaultLabel(workspaceGitMode) }}"/></source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitRepositoryUrlLabel" datatype="html">
+        <source>Git Repository URL</source>
+      </trans-unit>
+      <trans-unit id="featureChat-agentGitRepoUrlHint" datatype="html">
+        <source>Optional. Defaults to workspace Git repository URL if not specified.</source>
+      </trans-unit>
+      <trans-unit id="featureChat-workspaceGitRepoUrlHint" datatype="html">
+        <source>Git repository URL for agent workspace</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitUsernameLabel" datatype="html">
+        <source>Git Username</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitUsernameHint" datatype="html">
+        <source>Git username for repository access</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitTokenLabel" datatype="html">
+        <source>Git Token</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitTokenHint" datatype="html">
+        <source>Git token/personal access token for repository access</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitPasswordLabel" datatype="html">
+        <source>Git Password</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitPasswordHint" datatype="html">
+        <source>Git password for repository access (alternative to token)</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitPrivateKeyLabel" datatype="html">
+        <source>Git Private Key (SSH)</source>
+      </trans-unit>
+      <trans-unit id="featureChat-gitPrivateKeyHint" datatype="html">
+        <source>SSH private key for cloning repositories via SSH (alternative to username/token)</source>
+      </trans-unit>
+      <trans-unit id="featureChat-dangerZoneLabel" datatype="html">
+        <source>Danger Zone</source>
+      </trans-unit>
       <trans-unit id="featureChat-dangerZoneDescription" datatype="html">
         <source> These features partially ignore the internal permissions and may allow users to modify the agent container files without any restrictions. </source>
         </trans-unit>
+      <trans-unit id="featureChat-createVirtualWorkspaceLabel" datatype="html">
+        <source>Create Virtual Workspace (VNC)</source>
+      </trans-unit>
       <trans-unit id="featureChat-createVirtualWorkspaceHint" datatype="html">
         <source>Enable VNC access to the environment&apos;s virtual workspace. Defaults to disabled.</source>
         </trans-unit>
+      <trans-unit id="featureChat-createSshConnectionLabel" datatype="html">
+        <source>Create SSH Connection</source>
+      </trans-unit>
       <trans-unit id="featureChat-createSshConnectionHint" datatype="html">
         <source>Enable SSH access to the environment container. Defaults to disabled.</source>
         </trans-unit>
@@ -978,6 +1062,12 @@
       <trans-unit id="featureChat-addEnvVar" datatype="html">
         <source>Add New Environment Variable</source>
         </trans-unit>
+      <trans-unit id="featureChat-envVarNameLabel" datatype="html">
+        <source>Variable Name <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+      </trans-unit>
+      <trans-unit id="featureChat-envVarValueLabel" datatype="html">
+        <source>Value <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-danger&quot;&gt;"/>*<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+      </trans-unit>
       <trans-unit id="featureChat-envVarNamePlaceholder" datatype="html">
         <source>VARIABLE_NAME</source>
         </trans-unit>

@@ -572,7 +572,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillComparison-technologyFitBody" datatype="html">
         <source>Your revenue stack depends on choices you make before the next close, not on feature checklists alone. Choosing billing technology that matches how you sell services, SaaS, and hosting is a crucial step toward sustainable operations for agencies and digital product teams. Do you think Decabill could be a good fit for your workflow?</source>
-        <target state="translated">Ihr Umsatzstack hängt von Entscheidungen ab, die Sie vor dem nächsten Abschluss treffen, nicht allein von Funktionschecklisten. Die Wahl einer Abrechnungstechnologie, die zu Ihrem Verkauf von Services, SaaS und Hosting passt, ist ein entscheidender Schritt zu nachhaltigen Abläufen für Agenturen und Digitalprodukt-Teams. Könnte Decabill gut zu Ihrem Workflow passen?</target>
+        <target>Ihr Umsatzstack hängt von Entscheidungen ab, die Sie vor dem nächsten Abschluss treffen, nicht allein von Funktionschecklisten. Die Wahl einer Abrechnungstechnologie, die zu Ihrem Verkauf von Services, SaaS und Hosting passt, ist ein entscheidender Schritt zu nachhaltigen Abläufen für Agenturen und Teams für digitale Produkte. Könnte Decabill gut zu Ihrem Workflow passen?</target>
       </trans-unit>
       <trans-unit id="featureDecabillComparison-stripe-metaTitle" datatype="html">
         <source>Stripe Billing vs Decabill</source>
@@ -612,7 +612,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillComparison-whmcs-overviewDecabill" datatype="html">
         <source>Decabill is built for agencies and digital product teams that bill more than hosting alone. It unifies SaaS subscriptions, service work, and managed cloud hosting in one multi-tenant platform with ZUGFeRD invoicing, Stripe payments, and operator consoles you can self-host or run on Decabill Cloud.</source>
-        <target state="translated">Decabill ist für Agenturen und Digitalprodukt-Teams gebaut, die mehr als nur Hosting abrechnen. Es vereint SaaS-Abonnements, Serviceleistungen und verwaltetes Cloud-Hosting in einer Multi-Tenant-Plattform mit ZUGFeRD-Rechnungsstellung, Stripe-Zahlungen und Betreiberkonsolen, die Sie selbst hosten oder auf Decabill Cloud betreiben können.</target>
+        <target>Decabill ist für Agenturen und Teams für digitale Produkte gebaut, die mehr als nur Hosting abrechnen. Es vereint SaaS-Abonnements, Serviceleistungen und verwaltetes Cloud-Hosting in einer Multi-Tenant-Plattform mit ZUGFeRD-Rechnungsstellung, Stripe-Zahlungen und Betriebskonsolen, die Sie selbst hosten oder auf Decabill Cloud betreiben können.</target>
       </trans-unit>
       <trans-unit id="featureDecabillPortal-navComparison" datatype="html">
         <source>Comparison</source>
@@ -628,7 +628,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillPortal-madeIn" datatype="html">
         <source>Made in</source>
-        <target state="translated">Made in</target>
+        <target>Entwickelt in</target>
       </trans-unit>
       <trans-unit id="featureDecabillPortal-madeInCountry" datatype="html">
         <source>Germany</source>
@@ -656,7 +656,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillPortal-footerTagline" datatype="html">
         <source> Billing for agencies and digital product teams. Bill services, projects, SaaS subscriptions, and managed hosting from one multi-tenant platform. </source>
-        <target state="translated">Abrechnung für Agenturen und Digitalprodukt-Teams. Rechnen Sie Services, Projekte, SaaS-Abonnements und verwaltetes Hosting von einer mandantenfähigen Plattform aus.</target>
+        <target>Abrechnung für Agenturen und Teams für digitale Produkte. Rechnen Sie Services, Projekte, SaaS-Abonnements und verwaltetes Hosting von einer Multi-Tenant-Plattform aus.</target>
       </trans-unit>
       <trans-unit id="featureDecabillPortal-languageSwitcherAriaLabel" datatype="html">
         <source>Select language</source>
@@ -705,12 +705,11 @@
       <trans-unit id="featureDecabillHome-heroTitle" datatype="html">
         <source>
           <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;" />Billing for agencies<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;" /> and digital products </source>
-        <target state="translated">
-          <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;" />Abrechnung für Agenturen<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;" /> und Digitalprodukte</target>
+        <target><x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Abrechnung für Agenturen<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/> und digitale Produkte</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-heroLead" datatype="html">
         <source> Decabill is one platform for agencies and digital product teams. Bill client services and projects, SaaS subscriptions, and managed hosting without stitching together separate tools. </source>
-        <target state="translated">Decabill ist eine Plattform für Agenturen und Digitalprodukt-Teams. Rechnen Sie Kundenservices und Projekte, SaaS-Abonnements und verwaltetes Hosting ab, ohne separate Tools zusammenzuführen.</target>
+        <target>Decabill ist eine Plattform für Agenturen und Teams für digitale Produkte. Rechnen Sie Kundenservices und Projekte, SaaS-Abonnements und verwaltetes Hosting ab, ohne separate Tools zusammenzuführen.</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-heroBadge1" datatype="html">
         <source>Services &amp; projects</source>
@@ -721,8 +720,8 @@
         <target state="translated">SaaS-Abonnements</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-heroBadge3" datatype="html">
-        <source>Managed hosting</source>
-        <target state="translated">Multi-Tenant</target>
+        <source>Automatic provisioning</source>
+        <target state="translated">Automatische Provisionierung</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-heroBadge4" datatype="html">
         <source>ZUGFeRD invoicing</source>
@@ -740,13 +739,13 @@
         <source>
           <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-rocket-takeoff me-2&quot; aria-hidden=&quot;true&quot;&gt;" />
           <x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;" /> Get started </source>
-        <target state="translated">Loslegen</target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-rocket-takeoff me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Loslegen</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-productTour" datatype="html">
         <source>
           <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-trophy me-2&quot; aria-hidden=&quot;true&quot;&gt;" />
           <x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;" /> View product tour </source>
-        <target state="translated">Produkttour ansehen</target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-trophy me-2&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> Produkttour ansehen</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-heroSlideOverview" datatype="html">
         <source>Decabill overview dashboard with cloud instances</source>
@@ -906,7 +905,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillHome-solutionAdvantageOperationsLead" datatype="html">
         <source> Operations should feel calm even when catalogs, tenants, and provisioning queues get busier. Decabill gives operators one cockpit instead of context switching across tools. </source>
-        <target state="translated">Der Betrieb soll ruhig bleiben, auch wenn Kataloge, Mandanten und Provisioning-Warteschlangen voller werden. Decabill gibt Operatoren ein Cockpit statt Tool-Wechsel.</target>
+        <target>Der Betrieb soll ruhig bleiben, auch wenn Kataloge, Mandanten und Provisioning-Warteschlangen voller werden. Decabill gibt dem Betriebsteam ein Cockpit statt Tool-Wechsel.</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-solutionAdvantageOperationsBenefit1Title" datatype="html">
         <source> One operations view </source>
@@ -929,8 +928,8 @@
         <target state="translated">Entscheidungen ohne Feuerwehrübungen</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-solutionAdvantageOperationsBenefit3Desc" datatype="html">
-        <source> Bill-now, backorder retry, and KPI views help operators act on billing exceptions before they become month-end crises. </source>
-        <target state="translated">Bill-now, Backorder-Retry und KPI-Ansichten helfen Operatoren, Billing-Ausnahmen zu beheben, bevor sie zu Monatsend-Krisen werden.</target>
+        <source> Bill now, backorder retries, and KPI views help your ops team clear billing exceptions before month-end turns messy. </source>
+        <target>Sofortabrechnung, erneute Backorder-Versuche und KPI-Ansichten helfen dem Betriebsteam, Abrechnungsausnahmen zu klären, bevor sie zum Monatsende eskalieren.</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-solutionAdvantageScaleHeadline" datatype="html">
         <source> Room to add brands without rebuilding billing </source>
@@ -1066,7 +1065,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillHome-useCasesLead" datatype="html">
         <source> Decabill is where your team runs revenue operations. It sits beside the products and services you already sell so billing follows how agencies and product teams actually go to market. </source>
-        <target state="translated">Decabill ist der Ort, an dem Ihr Team Umsatzprozesse steuert. Es ergänzt die Produkte und Services, die Sie bereits verkaufen – damit Abrechnung dem entspricht, wie Agenturen und Produktteams wirklich am Markt auftreten.</target>
+        <target>Decabill ist der Ort, an dem Ihr Team Umsatzprozesse steuert. Es ergänzt die Produkte und Services, die Sie bereits verkaufen, damit Abrechnung dem entspricht, wie Agenturen und Produktteams wirklich am Markt auftreten.</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-sellVisualBadge" datatype="html">
         <source>Configure plans and pricing</source>
@@ -1090,7 +1089,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillHome-sellItem2" datatype="html">
         <source> Publish offerings and checkout flows that match how you price without custom glue code </source>
-        <target state="translated">Angebote und Checkout-Flows veröffentlichen, die zu Ihrer Preislogik passen – ohne individuelle Klebelösungen</target>
+        <target>Angebote und Checkout-Flows veröffentlichen, die zu Ihrer Preislogik passen, ohne individuelle Klebelösungen</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-sellTile3Title" datatype="html">
         <source>Self-service by default</source>
@@ -1106,7 +1105,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillHome-sellItem4" datatype="html">
         <source> Reconciliation and exports sit beside sales so numbers match what customers see </source>
-        <target state="translated">Abgleich und Exporte direkt neben dem Vertrieb – damit die Zahlen dem entsprechen, was Kunden sehen</target>
+        <target>Abgleich und Exporte direkt neben dem Vertrieb, damit die Zahlen dem entsprechen, was Kunden sehen</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-sellTile5Title" datatype="html">
         <source>Room to diversify</source>
@@ -1114,7 +1113,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillHome-sellItem5" datatype="html">
         <source> Add brands, products, and integrations as your mix changes without starting over </source>
-        <target state="translated">Marken, Produkte und Integrationen hinzufügen, wenn sich Ihr Mix ändert – ohne von vorn anzufangen</target>
+        <target>Marken, Produkte und Integrationen hinzufügen, wenn sich Ihr Mix ändert, ohne von vorn anzufangen</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-ecosystemTitle" datatype="html">
         <source> One platform, flexible surfaces </source>
@@ -1166,7 +1165,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillHome-ecosystemAdvantage2Desc" datatype="html">
         <source> API-first design, provider plugins, and Docker-based deployment you can inspect, customize, and integrate without platform lock-in. </source>
-        <target state="translated">API-first-Design, Provider-Plugins und Docker-basierte Bereitstellung, die Sie prüfen, anpassen und integrieren können – ohne Vendor Lock-in.</target>
+        <target>API-first-Design, Provider-Plugins und Docker-basierte Bereitstellung, die Sie prüfen, anpassen und integrieren können, ohne Vendor Lock-in.</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-ecosystemAdvantage2Cta" datatype="html">
         <source>Explore the docs</source>
@@ -1210,15 +1209,15 @@
       </trans-unit>
       <trans-unit id="featureDecabillHome-ctaDocs" datatype="html">
         <source>Read the docs</source>
-        <target state="translated">Read the docs</target>
+        <target>Dokumentation lesen</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-metaTitlePage" datatype="html">
         <source>Billing for agencies and digital products</source>
-        <target state="translated">Abrechnung für Agenturen und Digitalprodukte</target>
+        <target>Abrechnung für Agenturen und digitale Produkte</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-metaDescription" datatype="html">
         <source>Decabill helps agencies and digital product teams bill services, projects, SaaS subscriptions, and hosting. Invoicing, payments, and customer self-service in one multi-tenant platform.</source>
-        <target state="translated">Decabill hilft Agenturen und Digitalprodukt-Teams, Services, Projekte, SaaS-Abonnements und Hosting abzurechnen. Rechnungsstellung, Zahlungen und Kunden-Self-Service auf einer mandantenfähigen Plattform.</target>
+        <target>Decabill hilft Agenturen und Teams für digitale Produkte, Services, Projekte, SaaS-Abonnements und Hosting abzurechnen. Rechnungsstellung, Zahlungen und Kunden-Self-Service auf einer Multi-Tenant-Plattform.</target>
       </trans-unit>
       <trans-unit id="featureDecabillHome-metaKeywords" datatype="html">
         <source>Decabill, agency billing, digital products, SaaS billing, hosting billing, invoicing, Stripe, ZUGFeRD, multi-tenant</source>
@@ -1522,7 +1521,9 @@
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-gtmDesc" datatype="html">
         <source> We use Google Tag Manager, a service of Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland. Google Tag Manager is used to manage website tags via an interface. The tool itself (which implements the tags) does not process any personal data of users. Google Tag Manager only triggers other tags, which in turn may collect data. Google only receives information about the use of the Tag Manager itself. Further information can be found in Google's privacy policy at: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;                 &gt;" />https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a               &gt;" />. The processing is based on our legitimate interest in accordance with Art. 6 para. 1 lit. f GDPR in an efficient and technically flawless integration of analysis and marketing services. </source>
-        <target state="translated">Wir verwenden den Google Tag Manager, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Der Google Tag Manager dient zur Verwaltung von Website-Tags über eine Oberfläche. Das Tool selbst (welches die Tags implementiert) verarbeitet keine personenbezogenen Daten der Nutzer. Der Google Tag Manager löst lediglich andere Tags aus, die ihrerseits unter Umständen Daten erfassen. Google erhält lediglich Informationen zur Nutzung des Tag Managers selbst. Weitere Informationen finden Sie in den Datenschutzbestimmungen von Google unter: https://policies.google.com/privacy. Die Verarbeitung erfolgt auf Basis unseres berechtigten Interesses gemäß Art. 6 Abs. 1 lit. f DSGVO an einer effizienten und technisch einwandfreien Einbindung von Analyse- und Marketing-Diensten.</target>
+        <target>Wir verwenden den Google Tag Manager, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Der Google Tag Manager dient zur Verwaltung von Website-Tags über eine Oberfläche. Das Tool selbst (welches die Tags implementiert) verarbeitet keine personenbezogenen Daten der Nutzer. Der Google Tag Manager löst lediglich andere Tags aus, die ihrerseits unter Umständen Daten erfassen. Google erhält lediglich Informationen zur Nutzung des Tag Managers selbst. Weitere Informationen finden Sie in den Datenschutzbestimmungen von Google unter: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
+                &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>. Die Verarbeitung erfolgt auf Basis unseres berechtigten Interesses gemäß Art. 6 Abs. 1 lit. f DSGVO an einer effizienten und technisch einwandfreien Einbindung von Analyse- und Marketing-Diensten.</target>
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-cloudflareCdnTitle" datatype="html">
         <source>Cloudflare CDN</source>
@@ -1530,7 +1531,13 @@
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-cloudflareCdnDesc" datatype="html">
         <source> We use the Content Delivery Network (CDN) of Cloudflare Germany GmbH, Rosental 7, c/o Mindspace, 80331 Munich, Germany (Cloudflare), to increase the security and delivery speed of our website. This corresponds to our legitimate interest (Art. 6 para. 1 lit. f GDPR). A CDN is a network of servers distributed worldwide that is able to deliver optimized content to website users. For this purpose, personal data may be processed in server log files by Cloudflare. Cloudflare is a recipient of your personal data and acts as a processor for us. Further information on objection and removal options against Cloudflare can be found at: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a                 href=&quot;https://www.cloudflare.com/resources/assets/slt3lc6tev37/1M1j5uuFDuLTYiZJJDPBag/770322411bcac7f8bcc350e31b1e8319/Customer_DPA_v.3_1_-_de-de_19_Oct_2020.pdf&quot;                 target=&quot;_blank&quot;                 rel=&quot;noopener&quot;                 class=&quot;text-decoration-none&quot;                 &gt;" />Cloudflare DPA<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a               &gt;" />. </source>
-        <target state="translated">Wir nutzen das Content Delivery Network (CDN) der Cloudflare Germany GmbH, Rosental 7, c/o Mindspace, 80331 München, Deutschland (Cloudflare), um die Sicherheit und die Auslieferungsgeschwindigkeit unserer Website zu erhöhen. Dies entspricht unserem berechtigten Interesse (Art. 6 Abs. 1 lit. f DSGVO). Ein CDN ist ein Netzwerk aus weltweit verteilten Servern, das in der Lage ist, optimierte Inhalte an Webseitennutzer auszuliefern. Für diesen Zweck können personenbezogene Daten in Server-Logfiles von Cloudflare verarbeitet werden. Cloudflare ist Empfänger Ihrer personenbezogenen Daten und als Auftragsverarbeiter für uns tätig. Weitere Informationen zu Widerspruchs- und Beseitigungsmöglichkeiten gegenüber Cloudflare finden Sie unter: Cloudflare DPA.</target>
+        <target>Wir nutzen das Content Delivery Network (CDN) der Cloudflare Germany GmbH, Rosental 7, c/o Mindspace, 80331 München, Deutschland (Cloudflare), um die Sicherheit und die Auslieferungsgeschwindigkeit unserer Website zu erhöhen. Dies entspricht unserem berechtigten Interesse (Art. 6 Abs. 1 lit. f DSGVO). Ein CDN ist ein Netzwerk aus weltweit verteilten Servern, das in der Lage ist, optimierte Inhalte an Webseitennutzer auszuliefern. Für diesen Zweck können personenbezogene Daten in Server-Logfiles von Cloudflare verarbeitet werden. Cloudflare ist Empfänger Ihrer personenbezogenen Daten und als Auftragsverarbeiter für uns tätig. Weitere Informationen zu Widerspruchs- und Beseitigungsmöglichkeiten gegenüber Cloudflare finden Sie unter: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a
+                href=&quot;https://www.cloudflare.com/resources/assets/slt3lc6tev37/1M1j5uuFDuLTYiZJJDPBag/770322411bcac7f8bcc350e31b1e8319/Customer_DPA_v.3_1_-_de-de_19_Oct_2020.pdf&quot;
+                target=&quot;_blank&quot;
+                rel=&quot;noopener&quot;
+                class=&quot;text-decoration-none&quot;
+                &gt;"/>Cloudflare DPA<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>.</target>
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-plausibleTitle" datatype="html">
         <source>Plausible Analytics</source>
@@ -1546,7 +1553,13 @@
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-cloudflareAnalyticsDesc" datatype="html">
         <source> We use Cloudflare Analytics, a service of Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (EU representative: Cloudflare Ireland Limited, 5th Floor, One Albert Quay, Cork, Ireland). Cloudflare Analytics is only activated after explicit user consent. It collects aggregated website traffic data such as page views, unique visitors, referrers, and performance metrics. Data is processed in accordance with Cloudflare's privacy policy at <x id="START_LINK" ctype="x-a" equiv-text="&lt;a                 href=&quot;https://www.cloudflare.com/privacypolicy/&quot;                 target=&quot;_blank&quot;                 rel=&quot;noopener&quot;                 class=&quot;text-decoration-none&quot;                 &gt;" />https://www.cloudflare.com/privacypolicy/<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a               &gt;" />. The processing is based on user consent in accordance with Art. 6 para. 1 lit. a GDPR and § 25 para. 1 TTDSG. </source>
-        <target state="translated">Wir verwenden Cloudflare Analytics, einen Dienst der Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (EU-Vertreter: Cloudflare Ireland Limited, 5th Floor, One Albert Quay, Cork, Irland). Cloudflare Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden aggregierte Website-Traffic-Daten wie Seitenaufrufe, eindeutige Besucher, Referrer und Performance-Metriken erfasst. Die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Cloudflare unter https://www.cloudflare.com/privacypolicy/. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
+        <target>Wir verwenden Cloudflare Analytics, einen Dienst der Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (EU-Vertreter: Cloudflare Ireland Limited, 5th Floor, One Albert Quay, Cork, Irland). Cloudflare Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden aggregierte Website-Traffic-Daten wie Seitenaufrufe, eindeutige Besucher, Referrer und Performance-Metriken erfasst. Die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Cloudflare unter <x id="START_LINK" ctype="x-a" equiv-text="&lt;a
+                href=&quot;https://www.cloudflare.com/privacypolicy/&quot;
+                target=&quot;_blank&quot;
+                rel=&quot;noopener&quot;
+                class=&quot;text-decoration-none&quot;
+                &gt;"/>https://www.cloudflare.com/privacypolicy/<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-gaTitle" datatype="html">
         <source>Google Analytics</source>
@@ -1554,7 +1567,9 @@
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-gaDesc" datatype="html">
         <source> We use Google Analytics, a service of Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland (US parent: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA). Google Analytics is only activated after explicit user consent. It collects data on website usage including page views, sessions, user behavior, and demographics for optimization purposes. IP addresses are anonymized, and data is processed in accordance with Google's privacy policy at <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;                 &gt;" />https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a               &gt;" />. The processing is based on user consent in accordance with Art. 6 para. 1 lit. a GDPR and § 25 para. 1 TTDSG. </source>
-        <target state="translated">Wir verwenden Google Analytics, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (US-Muttergesellschaft: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA). Google Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden Daten zur Website-Nutzung erfasst, einschließlich Seitenaufrufe, Sitzungen, Nutzerverhalten und demografische Daten zu Optimierungszwecken. IP-Adressen werden anonymisiert, und die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Google unter https://policies.google.com/privacy. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
+        <target>Wir verwenden Google Analytics, einen Dienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (US-Muttergesellschaft: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA). Google Analytics wird nur nach ausdrücklicher Nutzereinwilligung aktiviert. Es werden Daten zur Website-Nutzung erfasst, einschließlich Seitenaufrufe, Sitzungen, Nutzerverhalten und demografische Daten zu Optimierungszwecken. IP-Adressen werden anonymisiert, und die Datenverarbeitung erfolgt gemäß der Datenschutzerklärung von Google unter <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://policies.google.com/privacy&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;text-decoration-none&quot;
+                &gt;"/>https://policies.google.com/privacy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>. Die Verarbeitung erfolgt auf Basis der Nutzereinwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG.</target>
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-mailgunTitle" datatype="html">
         <source>Mailgun</source>
@@ -1562,7 +1577,13 @@
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-mailgunDesc" datatype="html">
         <source> For sending system-related emails (e.g., confirmation, notification, or transaction emails), we use the "Mailgun" service of the provider Mailgun Technologies, Inc., 112 E Pecan St. #1135, San Antonio, TX 78205, USA. The sending takes place via server locations within the European Union. Mailgun acts as a processor in accordance with Art. 28 GDPR. A corresponding data processing agreement has been concluded with Mailgun, which ensures compliance with European data protection standards. The processing includes in particular email addresses as well as the content of the sent emails. Further information on data processing by Mailgun can be found at: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a                 href=&quot;https://www.mailgun.com/de/legal/privacy-policy&quot;                 target=&quot;_blank&quot;                 rel=&quot;noopener&quot;                 class=&quot;text-decoration-none&quot;                 &gt;" />https://www.mailgun.com/de/legal/privacy-policy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a               &gt;" />. </source>
-        <target state="translated">Für den Versand systembezogener E-Mails (z. B. Bestätigungs-, Benachrichtigungs- oder Transaktions-E-Mails) nutzen wir den Dienst „Mailgun“ des Anbieters Mailgun Technologies, Inc., 112 E Pecan St. #1135, San Antonio, TX 78205, USA. Der Versand erfolgt über Serverstandorte innerhalb der Europäischen Union. Mailgun agiert als Auftragsverarbeiter gemäß Art. 28 DSGVO. Mit Mailgun wurde ein entsprechender Auftragsverarbeitungsvertrag geschlossen, der die Einhaltung europäischer Datenschutzstandards gewährleistet. Die Verarbeitung umfasst insbesondere E-Mail-Adressen sowie die Inhalte der versendeten E-Mails. Weitere Informationen zur Datenverarbeitung durch Mailgun finden Sie unter: https://www.mailgun.com/de/legal/privacy-policy.</target>
+        <target>Für den Versand systembezogener E-Mails (z. B. Bestätigungs-, Benachrichtigungs- oder Transaktions-E-Mails) nutzen wir den Dienst „Mailgun“ des Anbieters Mailgun Technologies, Inc., 112 E Pecan St. #1135, San Antonio, TX 78205, USA. Der Versand erfolgt über Serverstandorte innerhalb der Europäischen Union. Mailgun agiert als Auftragsverarbeiter gemäß Art. 28 DSGVO. Mit Mailgun wurde ein entsprechender Auftragsverarbeitungsvertrag geschlossen, der die Einhaltung europäischer Datenschutzstandards gewährleistet. Die Verarbeitung umfasst insbesondere E-Mail-Adressen sowie die Inhalte der versendeten E-Mails. Weitere Informationen zur Datenverarbeitung durch Mailgun finden Sie unter: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a
+                href=&quot;https://www.mailgun.com/de/legal/privacy-policy&quot;
+                target=&quot;_blank&quot;
+                rel=&quot;noopener&quot;
+                class=&quot;text-decoration-none&quot;
+                &gt;"/>https://www.mailgun.com/de/legal/privacy-policy<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a
+              &gt;"/>.</target>
       </trans-unit>
       <trans-unit id="featureDecabillLegalPrivacy-changesTitle" datatype="html">
         <source>Changes</source>
@@ -1610,7 +1631,7 @@
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-generalInfo" datatype="html">
         <source>General Information</source>
-        <target state="translated">General Information</target>
+        <target>Allgemeine Informationen</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-companyName" datatype="html">
         <source>IPvX UG (haftungsbeschränkt)</source>
@@ -1626,27 +1647,27 @@
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-addressRegion" datatype="html">
         <source>Nordrhein-Westfalen, Germany</source>
-        <target state="translated">Nordrhein-Westfalen, Germany</target>
+        <target>Nordrhein-Westfalen, Deutschland</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-commercialRegisterLabel" datatype="html">
         <source>Commercial Register Number:</source>
-        <target state="translated">Commercial Register Number:</target>
+        <target>Handelsregisternummer:</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-registerCourtLabel" datatype="html">
         <source>Register Court:</source>
-        <target state="translated">Register Court:</target>
+        <target>Registergericht:</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-representedByLabel" datatype="html">
         <source>Represented by:</source>
-        <target state="translated">Represented by:</target>
+        <target>Vertreten durch:</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-contact" datatype="html">
         <source>Contact</source>
-        <target state="translated">Contact</target>
+        <target>Kontakt</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-phoneLabel" datatype="html">
         <source>Phone:</source>
-        <target state="translated">Phone:</target>
+        <target>Telefon:</target>
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-faxLabel" datatype="html">
         <source>Fax:</source>
@@ -1654,7 +1675,7 @@
       </trans-unit>
       <trans-unit id="featurePortalPrivacy-emailLabel" datatype="html">
         <source>Email:</source>
-        <target state="translated">Email:</target>
+        <target>E-Mail:</target>
       </trans-unit>
       <trans-unit id="featureDecabillLegalTerms-scopeTitle" datatype="html">
         <source>Scope and Definitions</source>
@@ -1927,7 +1948,7 @@
       <trans-unit id="featureDecabillPricing-heroTitle" datatype="html">
         <source> Choose Your <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;" />License<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;" />
         </source>
-        <target state="translated">Wählen Sie Ihre Lizenz</target>
+        <target>Wählen Sie Ihre <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;text-primary&quot;&gt;"/>Lizenz<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-heroDescription" datatype="html">
         <source> Run Decabill on your own infrastructure or let us host it with predictable pricing as you grow from early deployments to enterprise revenue operations. </source>
@@ -1953,7 +1974,8 @@
         <source>See license tiers <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-down ms-1&quot; aria-hidden=&quot;true&quot;&gt;" />
           <x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i             &gt;" />
         </source>
-        <target state="translated">Lizenzstufen ansehen</target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-down ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+            &gt;"/> Lizenzstufen ansehen</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-pathManagedTitle" datatype="html">
         <source>Decabill Cloud</source>
@@ -1967,7 +1989,8 @@
         <source>See cloud pricing <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-down ms-1&quot; aria-hidden=&quot;true&quot;&gt;" />
           <x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i             &gt;" />
         </source>
-        <target state="translated">Cloud-Preise ansehen</target>
+        <target><x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-down ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i
+            &gt;"/> Cloud-Preise ansehen</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-tiersTitle" datatype="html">
         <source>License tiers</source>
@@ -2004,7 +2027,7 @@
       <trans-unit id="featureDecabillPricing-openSourceFeature1" datatype="html">
         <source>
           <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;" />Billing manager API<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" /> includes subscriptions, invoices, and webhooks</source>
-        <target state="translated">Billing-Manager-API mit Abonnements, Rechnungen und Webhooks</target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Billing-Manager-API<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> mit Abonnements, Rechnungen und Webhooks</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-openSourceFeature2" datatype="html">
         <source>Single-tenant deployment with Docker</source>
@@ -2039,20 +2062,18 @@
         <target state="translated">BUSL-1.1 mit zusätzlicher Nutzungsgenehmigung</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-startupFeature1" datatype="html">
-        <source>
-          <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;" />Everything in Open Source<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" />
-        </source>
-        <target state="translated">Alles aus Open Source</target>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Open Source<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Open Source inklusive<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-startupFeature2" datatype="html">
         <source>
           <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;" />Billing console<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" /> for customer and admin self-service</source>
-        <target state="translated">Billing-Konsole für Kunden- und Admin-Self-Service</target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Billing-Konsole<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> für Kunden- und Admin-Self-Service</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-startupFeature3" datatype="html">
         <source>
           <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;" />Multi-tenant operations<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" /> with tenant isolation and per-tenant URLs</source>
-        <target state="translated">Multi-Tenant-Betrieb mit Mandantenisolation und URLs pro Mandant</target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Multi-Tenant-Betrieb<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> mit Mandantenisolation und URLs pro Mandant</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-startupFeature4" datatype="html">
         <source>Automatic product provisioning from subscriptions</source>
@@ -2079,10 +2100,8 @@
         <target state="translated">BUSL-1.1 mit zusätzlicher Nutzungsgenehmigung</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-businessFeature1" datatype="html">
-        <source>
-          <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;" />Everything in Startup<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" />
-        </source>
-        <target state="translated">Alles aus Startup</target>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Startup<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Startup inklusive<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-businessFeature2" datatype="html">
         <source>Personal onboarding</source>
@@ -2113,10 +2132,8 @@
         <target state="translated">Kommerzielle Lizenz</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-enterpriseFeature1" datatype="html">
-        <source>
-          <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;" />Everything in Business<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" />
-        </source>
-        <target state="translated">Alles aus Business</target>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Business<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Business inklusive<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-enterpriseFeature2" datatype="html">
         <source>Priority support (Microsoft Teams) &amp; SLA</source>
@@ -2157,22 +2174,21 @@
       <trans-unit id="featureDecabillPricing-cloudFeature1" datatype="html">
         <source>
           <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;" />Fully managed.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" /> We handle infrastructure, updates, and maintenance</source>
-        <target state="translated">Vollständig verwaltet. Wir kümmern uns um Infrastruktur, Updates und Wartung.</target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Vollständig verwaltet.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Wir kümmern uns um Infrastruktur, Updates und Wartung.</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-cloudFeature2" datatype="html">
         <source>
           <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;" />Full platform.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" /> Customer console, admin billing, ZUGFeRD invoicing, and provisioning</source>
-        <target state="translated">Volle Plattform. Kundenkonsole, Admin-Abrechnung, ZUGFeRD-Rechnungen und Bereitstellung.</target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Volle Plattform.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Kundenkonsole, Admin-Abrechnung, ZUGFeRD-Rechnungen und Bereitstellung.</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-cloudFeature3" datatype="html">
         <source>
           <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;" />Automatic scaling.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" /> Capacity grows with your catalog and tenants</source>
-        <target state="translated">Automatische Skalierung. Kapazität wächst mit Katalog und Mandanten.</target>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Automatische Skalierung.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Kapazität wächst mit Katalog und Mandanten.</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-cloudFeature4" datatype="html">
-        <source>
-          <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;" />99.9% uptime SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;" /> for enterprise-grade reliability</source>
-        <target state="translated">99,9 % Uptime-SLA für Enterprise-Zuverlässigkeit.</target>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>99.9% uptime SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for reliable operation at scale</source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>99,9 % Verfügbarkeits-SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> für zuverlässigen Betrieb im großen Maßstab</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-cloudStartingAt" datatype="html">
         <source>Starting at</source>
@@ -2200,7 +2216,7 @@
       </trans-unit>
       <trans-unit id="featureDecabillPricing-ctaLead" datatype="html">
         <source> Whether you are starting with our open source version or need enterprise features, we are here to help you run reliable billing for agencies and digital products. </source>
-        <target state="translated">Ob Sie mit unserer Open-Source-Version beginnen oder Enterprise-Funktionen benötigen: Wir helfen Ihnen, zuverlässige Abrechnung für Agenturen und Digitalprodukte zu betreiben.</target>
+        <target>Ob Sie mit unserer Open-Source-Version beginnen oder Enterprise-Funktionen benötigen: Wir helfen Ihnen, zuverlässige Abrechnung für Agenturen und digitale Produkte zu betreiben.</target>
       </trans-unit>
       <trans-unit id="featureDecabillPricing-ctaGetStarted" datatype="html">
         <source>Get Started Free</source>

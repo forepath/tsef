@@ -540,7 +540,7 @@
         <source>SaaS subscriptions</source>
         </trans-unit>
       <trans-unit id="featureDecabillHome-heroBadge3" datatype="html">
-        <source>Managed hosting</source>
+        <source>Automatic provisioning</source>
         </trans-unit>
       <trans-unit id="featureDecabillHome-heroBadge4" datatype="html">
         <source>ZUGFeRD invoicing</source>
@@ -693,7 +693,7 @@
         <source> Decisions without fire drills </source>
         </trans-unit>
       <trans-unit id="featureDecabillHome-solutionAdvantageOperationsBenefit3Desc" datatype="html">
-        <source> Bill-now, backorder retry, and KPI views help operators act on billing exceptions before they become month-end crises. </source>
+        <source> Bill now, backorder retries, and KPI views help your ops team clear billing exceptions before month-end turns messy. </source>
         </trans-unit>
       <trans-unit id="featureDecabillHome-solutionAdvantageScaleHeadline" datatype="html">
         <source> Room to add brands without rebuilding billing </source>
@@ -1545,7 +1545,7 @@
         <source> BUSL-1.1 with Additional Use Grant </source>
         </trans-unit>
       <trans-unit id="featureDecabillPricing-startupFeature1" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Everything in Open Source<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Open Source<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
         </trans-unit>
       <trans-unit id="featureDecabillPricing-startupFeature2" datatype="html">
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Billing console<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for customer and admin self-service</source>
@@ -1572,7 +1572,7 @@
         <source> BUSL-1.1 with Additional Use Grant </source>
         </trans-unit>
       <trans-unit id="featureDecabillPricing-businessFeature1" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Everything in Startup<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Startup<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
         </trans-unit>
       <trans-unit id="featureDecabillPricing-businessFeature2" datatype="html">
         <source>Personal onboarding</source>
@@ -1596,7 +1596,7 @@
         <source> Commercial License </source>
         </trans-unit>
       <trans-unit id="featureDecabillPricing-enterpriseFeature1" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Everything in Business<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Includes Business<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/></source>
         </trans-unit>
       <trans-unit id="featureDecabillPricing-enterpriseFeature2" datatype="html">
         <source>Priority support (Microsoft Teams) &amp; SLA</source>
@@ -1635,7 +1635,7 @@
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>Automatic scaling.<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> Capacity grows with your catalog and tenants</source>
         </trans-unit>
       <trans-unit id="featureDecabillPricing-cloudFeature4" datatype="html">
-        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>99.9% uptime SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for enterprise-grade reliability</source>
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong class=&quot;text-body&quot;&gt;"/>99.9% uptime SLA<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> for reliable operation at scale</source>
         </trans-unit>
       <trans-unit id="featureDecabillPricing-cloudStartingAt" datatype="html">
         <source>Starting at</source>
