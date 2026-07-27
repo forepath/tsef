@@ -31,9 +31,9 @@ Decabill marketing promotions let tenants define discount codes that customers r
 
 ## Customer flow
 
-1. **Validate** — `POST /promotions/validate` simulates redemption (no writes).
-2. **Redeem** — `POST /promotions/redeem` persists an active redemption linked to a subscription.
-3. **Checkout** — optional `promotionCode` on `POST /subscriptions` redeems with context `new` after the subscription is created.
+1. **Validate** `POST /promotions/validate` simulates redemption (no writes).
+2. **Redeem** `POST /promotions/redeem` persists an active redemption linked to a subscription.
+3. **Checkout** optional `promotionCode` on `POST /subscriptions` redeems with context `new` after the subscription is created.
 
 ## Billing integration
 
@@ -41,8 +41,8 @@ Decabill marketing promotions let tenants define discount codes that customers r
 - Invoices are issued when raw charges ≥ €0.01 even if promotions reduce the balance to zero.
 - Zero-balance promotional invoices are marked **paid** immediately and use e-invoice type code **325** (instead of **380**).
 
-## Related docs
+## Related documentation
 
-- [Invoices](./invoices.md) — zero-balance promotional invoices
-- [Subscriptions](./subscriptions.md) — promo code at order time
-- [Multi-tenancy](./multi-tenancy.md) — tenant-scoped catalogs
+- [Invoices](./invoices.md) zero-balance promotional invoices
+- [Subscriptions](./subscriptions.md) promo code at order time
+- [Multi-tenancy](./multi-tenancy.md) tenant-scoped catalogs

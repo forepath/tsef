@@ -92,11 +92,11 @@ sequenceDiagram
     U->>U: View Response
 ```
 
-## Related Documentation
+## Related documentation
 
-- **[WebSocket Communication](./websocket-communication.md)** - Real-time communication details
-- **[Message Filter Rules](./message-filter-rules.md)** - Regex policies affecting chat
-- **[Agent Management](./agent-management.md)** - Agent authentication
+- **[WebSocket Communication](./websocket-communication.md)** Real-time communication details
+- **[Message Filter Rules](./message-filter-rules.md)** Regex policies affecting chat
+- **[Agent Management](./agent-management.md)** Agent authentication
 
 ---
 

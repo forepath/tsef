@@ -42,9 +42,9 @@ Events are published from the **agent-controller** service after proxied operati
 
 ### Chat and filter rules
 
-- `chat_message.created` — user or agent chat message in a workspace session
+- `chat_message.created`, user or agent chat message in a workspace session
 - `filter_rule.created`, `filter_rule.updated`, `filter_rule.deleted`
-- `filter_rule.triggered` — a filter rule dropped or flagged a message
+- `filter_rule.triggered`, a filter rule dropped or flagged a message
 
 ### Agent environment variables
 

@@ -15,7 +15,7 @@ Comprehensive checklist for deploying Decabill to production.
 - [ ] Database credentials are not defaults
 - [ ] `TENANTS` lists only intended tenant ids
 - [ ] `TENANTS_ALLOW_DEFAULT=false` when the `default` tenant must not be reachable (multi-tenant-only deployments)
-- [ ] `STATIC_API_KEY_TENANT_ID` set if API key must not span tenants (see **[DR-002](../security/accepted-risks.md#dr-002--billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**)
+- [ ] `STATIC_API_KEY_TENANT_ID` set if API key must not span tenants (see **[DR-002](../security/accepted-risks.md#dr-002-billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**)
 - [ ] `BILLING_FRONTEND_URL` and `TENANT_FRONTEND_URLS` match live console URLs
 - [ ] Stripe keys and webhook secret configured for production mode
 - [ ] `STRIPE_CHECKOUT_SUCCESS_URL` and `STRIPE_CHECKOUT_CANCEL_URL` use HTTPS console URLs
@@ -49,7 +49,7 @@ Comprehensive checklist for deploying Decabill to production.
 - [ ] `BILLING_DATEV_EXPORT_ENABLED=false` verified if DATEV export is not required (UI hidden via capabilities)
 - [ ] Unified DATEV export allowlist reviewed (`BILLING_DATEV_UNIFIED_EXPORT_ALLOWED_TENANTS`)
 - [ ] Sample DATEV export validated with DatevFormatPruefProgramm before accountant handoff
-- [ ] Provisioning SSH and cloud API tokens restricted (see **[DR-001](../security/accepted-risks.md#dr-001--provisioning-ssh-cloud-init-templates)**)
+- [ ] Provisioning SSH and cloud API tokens restricted (see **[DR-001](../security/accepted-risks.md#dr-001-provisioning-ssh-cloud-init-templates)**)
 
 ### Database
 
@@ -71,7 +71,7 @@ Comprehensive checklist for deploying Decabill to production.
 ### Authentication
 
 - Use Keycloak or users mode for interactive multi-tenant console access in production
-- Set **`AUTHENTICATION_METHOD`** explicitly if policy requires unambiguous mode selection (see **[DR-004](../security/accepted-risks.md#dr-004--backend-authentication-method-resolution)**)
+- Set **`AUTHENTICATION_METHOD`** explicitly if policy requires unambiguous mode selection (see **[DR-004](../security/accepted-risks.md#dr-004-backend-authentication-method-resolution)**)
 - Rotate `STATIC_API_KEY` on a defined schedule if used for automation
 - Never expose API keys in frontend bundles or public `CONFIG` JSON
 
@@ -80,7 +80,7 @@ Comprehensive checklist for deploying Decabill to production.
 - Review **`TENANTS`** and **`X-Tenant`** handling before go-live
 - Set **`TENANTS_ALLOW_DEFAULT=false`** when the implicit `default` tenant must not be reachable
 - Prefer per-tenant console URLs via `TENANT_FRONTEND_URLS` for branded tenants
-- Understand shared API key scope documented in **[DR-002](../security/accepted-risks.md#dr-002--billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**
+- Understand shared API key scope documented in **[DR-002](../security/accepted-risks.md#dr-002-billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**
 
 ### Network Security
 
@@ -163,20 +163,17 @@ Comprehensive checklist for deploying Decabill to production.
 
 ## Deployment Process
 
-1. **Pre-deployment**
-   - Run full test suite and security scans
+1. **Pre-deployment** Run full test suite and security scans
    - Review **[Accepted risks](../security/accepted-risks.md)** for operator obligations
    - Validate environment on staging with production-like `TENANTS` and Stripe test mode
 
-2. **Deployment**
-   - Deploy Postgres and Redis
+2. **Deployment** Deploy Postgres and Redis
    - Deploy API; wait for healthy `/api/health`
    - Deploy scheduler and worker
    - Deploy frontends
    - Register Stripe webhook endpoint for production URL
 
-3. **Post-deployment**
-   - Verify health endpoints
+3. **Post-deployment** Verify health endpoints
    - Create test subscription and invoice in staging tenant
    - Confirm coordinator jobs appear in Bull Board
    - Monitor logs for migration or Redis connection errors
@@ -187,14 +184,14 @@ Comprehensive checklist for deploying Decabill to production.
 - Document database migration rollback constraints (billing migrations may be forward-only)
 - Practice rollback on staging with volume snapshots
 
-## Related Documentation
+## Related documentation
 
-- **[Operator Runbook](./operator-runbook.md)** - Capacity, install verification, day-2, and disclosure checklists
-- **[System Requirements](./system-requirements.md)** - CPU, memory, and disk baselines
-- **[Docker Deployment](./docker-deployment.md)** - Containerized deployment
-- **[Environment Configuration](./environment-configuration.md)** - Environment variables
-- **[Background Jobs](./background-jobs.md)** - Queue startup order
-- **[Troubleshooting](../troubleshooting/README.md)** - Problem-solving guides
+- **[Operator Runbook](./operator-runbook.md)** Capacity, install verification, day-2, and disclosure checklists
+- **[System Requirements](./system-requirements.md)** CPU, memory, and disk baselines
+- **[Docker Deployment](./docker-deployment.md)** Containerized deployment
+- **[Environment Configuration](./environment-configuration.md)** Environment variables
+- **[Background Jobs](./background-jobs.md)** Queue startup order
+- **[Troubleshooting](../troubleshooting/README.md)** Problem-solving guides
 
 ---
 

@@ -82,12 +82,12 @@ sequenceDiagram
 - Missing or failed server info displays a loading or error placeholder
 - Provisioning failures link to subscription detail and [Backorders](./backorders.md) when applicable
 
-## Related Documentation
+## Related documentation
 
-- **[Real-time Status](./real-time-status.md)** - WebSocket dashboard stream
-- **[Subscriptions](./subscriptions.md)** - Subscription items and server-info endpoint
-- **[Server Provisioning](./server-provisioning.md)** - What gets provisioned
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Action endpoint schemas
+- **[Real-time Status](./real-time-status.md)** WebSocket dashboard stream
+- **[Subscriptions](./subscriptions.md)** Subscription items and server-info endpoint
+- **[Server Provisioning](./server-provisioning.md)** What gets provisioned
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** Action endpoint schemas
 
 ---
 

@@ -152,7 +152,7 @@ We publish CycloneDX SBOM files for each release (Nx service SBOMs and Trivy con
 - [Decabill documentation](./docs/decabill/README.md) - Billing product guides
 - [Decabill security documentation](./docs/decabill/security/README.md) - Decabill accepted risks, SBOM, and hardening
 
-### External Resources
+### External resources
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/) - Common security risks
 - [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework) - Cybersecurity best practices

@@ -63,10 +63,10 @@ No new mapper. Partial credit documents are included by `findWithdrawnInPeriod` 
 
 ## Notifications
 
-| Event                             | Webhook                | Email                                                                                  |
-| --------------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
-| `service_plan.price_recalculated` | Yes                    | No                                                                                     |
-| `subscription.price_changed`      | Yes (per subscription) | Yes — **one consolidated email per `userId`** per tenant run (`price-change` template) |
+| Event                             | Webhook                | Email                                                                                 |
+| --------------------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
+| `service_plan.price_recalculated` | Yes                    | No                                                                                    |
+| `subscription.price_changed`      | Yes (per subscription) | Yes (**one consolidated email per `userId`** per tenant run, `price-change` template) |
 
 Email `correlationId` / event dedupe key: `price-recalc:{tenantId}:{userId}:{runDate}` (hashed to a UUID for `email_deliveries.event_id`).
 
@@ -86,8 +86,8 @@ Manual edits to `basePrice`, `marginPercent`, `marginFixed`, or `taxCategory` do
 
 Public and authenticated plan responses expose `autoRecalculatePriceDaily`. The billing console order modal and config-change modal show a disclaimer when the flag is true (email on change; then `withdrawalPolicy.periodDays` to withdraw without negative impact).
 
-## Related code
+## Related documentation
 
-- `ServicePlanPriceRecalcService`, `PriceRecalcJobHandler`
-- `SubscriptionConfigChangeBillingService.applySettlement`
-- Job names: `price-recalc.coordinator` / `price-recalc.unit`
+- **[Subscription config change](./subscription-config-change.md)** Settlement rules reused by daily price migration
+- **[Service types and plans](./service-types-and-plans.md)** `autoRecalculatePriceDaily` and commercial plan fields
+- **[Background jobs](../deployment/background-jobs.md)** BullMQ coordinator and unit jobs (`price-recalc.coordinator` / `price-recalc.unit`)

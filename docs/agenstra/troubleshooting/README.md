@@ -67,11 +67,11 @@ If you encounter issues:
 4. Review error messages
 5. Consult the [documentation](../README.md)
 
-## Related Documentation
+## Related documentation
 
-- **[Getting Started](../getting-started.md)** - Setup guide
-- **[Deployment](../deployment/README.md)** - Deployment guides
-- **[Applications](../applications/README.md)** - Application documentation
+- **[Getting Started](../getting-started.md)** Setup guide
+- **[Deployment](../deployment/README.md)** Deployment guides
+- **[Applications](../applications/README.md)** Application documentation
 
 ---
 

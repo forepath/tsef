@@ -69,12 +69,19 @@ DB_DATABASE=agent_controller
 
 # Authentication (choose one)
 STATIC_API_KEY=dev-api-key-123
+
 # OR Keycloak
+
 # KEYCLOAK_AUTH_SERVER_URL=http://localhost:8380
+
 # KEYCLOAK_REALM=agenstra
+
 # KEYCLOAK_CLIENT_ID=agent-controller
+
 # KEYCLOAK_CLIENT_SECRET=your-client-secret
+
 # Optional: KEYCLOAK_SERVER_URL if different from auth server URL
+
 # Optional: KEYCLOAK_TOKEN_VALIDATION=ONLINE (default) or OFFLINE
 
 # Ports
@@ -201,7 +208,9 @@ The agent-manager requires Docker for managing agent containers. Ensure Docker i
 docker ps
 
 # Start Docker (if not running)
+
 # macOS: Open Docker Desktop
+
 # Linux: sudo systemctl start docker
 ```
 
@@ -224,11 +233,11 @@ docker ps
 - Check Docker socket permissions: `ls -l /var/run/docker.sock`
 - Verify Docker-in-Docker setup for agent-manager
 
-## Related Documentation
+## Related documentation
 
-- **[Docker Deployment](./docker-deployment.md)** - Containerized deployment
-- **[Production Checklist](./production-checklist.md)** - Production deployment
-- **[Environment Configuration](./environment-configuration.md)** - Environment variables
+- **[Docker Deployment](./docker-deployment.md)** Containerized deployment
+- **[Production Checklist](./production-checklist.md)** Production deployment
+- **[Environment Configuration](./environment-configuration.md)** Environment variables
 
 ---
 

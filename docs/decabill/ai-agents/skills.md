@@ -9,7 +9,7 @@ Skills document reusable expertise (e.g. TypeScript patterns, testing strategies
 ## Structure
 
 - **Location**: `.agenstra/skills/`
-- **Format**: MDC (`.skill.mdc`) – YAML frontmatter + body
+- **Format**: MDC (`.skill.mdc`) with YAML frontmatter + body
 - **Naming**: Descriptive name (e.g. `design-patterns.skill.mdc`, `testing-patterns.skill.mdc`)
 
 The **filename stem** (without `.skill.mdc`) is the skill key. The **body** is the skill content emitted by the transformers.
@@ -26,9 +26,9 @@ Optional metadata between `---` is read by the reader and available in the conte
 
 ## Content guidelines
 
-- **Self-contained** – Each file should be understandable without requiring other skills.
-- **Structured** – Use headings, lists, and code blocks so agents can parse and apply the content.
-- **Referential** – You may reference rules or other docs; avoid duplicating long passages.
+- **Self-contained** Each file should be understandable without requiring other skills.
+- **Structured** Use headings, lists, and code blocks so agents can parse and apply the content.
+- **Referential** You may reference rules or other docs; avoid duplicating long passages.
 
 ## Example
 
@@ -38,6 +38,7 @@ id: design-patterns
 name: Design Patterns
 description: Reusable patterns and trade-offs
 ---
+
 # Design Patterns
 
 ## Factory Pattern
@@ -51,9 +52,9 @@ description: Reusable patterns and trade-offs
 
 ## Output by tool
 
-- **Cursor** – One folder per skill under `.cursor/skills/<name>/` with a `SKILL.md` file (frontmatter: `name`, `description`), **except** MCP package skills (`ai`, `code`, `graph`). Those live in `tools/<pkg>/src/lib/mcp/SKILL.md` and are exposed by the matching MCP server as an MCP **prompt** (and `skill://<name>` **resource**); Cursor also dual-publishes thin stubs under `.cursor/skills/`.
-- **OpenCode** – Same folder layout under `.opencode/skills/<name>/SKILL.md`, including thin MCP stubs.
-- **GitHub Copilot** – Same folder layout under [`.github/skills/<name>/SKILL.md`](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills), including thin MCP stubs. MCP package skill stems in `.agenstra/skills/` are not copied as full bodies.
+- **Cursor** One folder per skill under `.cursor/skills/<name>/` with a `SKILL.md` file (frontmatter: `name`, `description`), **except** MCP package skills (`ai`, `code`, `graph`). Those live in `tools/<pkg>/src/lib/mcp/SKILL.md` and are exposed by the matching MCP server as an MCP **prompt** (and `skill://<name>` **resource**); Cursor also dual-publishes thin stubs under `.cursor/skills/`.
+- **OpenCode** Same folder layout under `.opencode/skills/<name>/SKILL.md`, including thin MCP stubs.
+- **GitHub Copilot** Same folder layout under [`.github/skills/<name>/SKILL.md`](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills), including thin MCP stubs. MCP package skill stems in `.agenstra/skills/` are not copied as full bodies.
 
 ## MCP package skills
 
@@ -63,9 +64,9 @@ description: Reusable patterns and trade-offs
 | `code`     | `tools/code/src/lib/mcp/SKILL.md`  | `code`            | prompt `code`, `skill://code`   |
 | `graph`    | `tools/graph/src/lib/mcp/SKILL.md` | `knowledge-graph` | prompt `graph`, `skill://graph` |
 
-## Related
+## Related documentation
 
-- [Knowledge graph](./knowledge-graph.md) – `graph/graph.json` and the **Knowledge Graph Skill** for structural navigation
-- [Agents](./agents.md) – Agents reference skills
-- [Rules](./rules.md) – Rules vs. skills: rules are project instructions; skills are reusable knowledge
-- [README](./README.md) – Overview of `.agenstra/` and transformation
+- [Knowledge graph](./knowledge-graph.md) `graph/graph.json` and the **Knowledge Graph Skill** for structural navigation
+- [Agents](./agents.md) Agents reference skills
+- [Rules](./rules.md) Rules vs. skills: rules are project instructions; skills are reusable knowledge
+- [README](./README.md) Overview of `.agenstra/` and transformation

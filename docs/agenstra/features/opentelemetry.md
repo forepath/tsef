@@ -22,7 +22,7 @@ When disabled, no metrics route is registered, the SDK does not start, and start
 
 ## Metrics endpoint
 
-When enabled, Prometheus exposition is served at **`OTEL_METRICS_PATH`** (default **`/otel/metrics`**) on the HTTP root — **outside** the `/api` global prefix.
+When enabled, Prometheus exposition is served at **`OTEL_METRICS_PATH`** (default **`/otel/metrics`**) on the HTTP root. **outside** the `/api` global prefix.
 
 - **Authentication:** HTTP Basic with `OTEL_USERNAME` / `OTEL_PASSWORD`.
 - **Content-Type:** `text/plain` (Prometheus exposition format).
@@ -73,7 +73,7 @@ Domain gauges (meter `forepath.agenstra`, polled every 60 seconds when OTEL is e
 
 | Gauge                               | Labels                                       | Description                                         |
 | ----------------------------------- | -------------------------------------------- | --------------------------------------------------- |
-| `agenstra.workspaces`               | —                                            | Workspace (client) count                            |
+| `agenstra.workspaces`               | -                                            | Workspace (client) count                            |
 | `agenstra.tickets`                  | `client_id`, `status`                        | Ticket counts per workspace and status              |
 | `agenstra.chat_messages`            | `client_id`, `direction`, `interaction_kind` | Cumulative chat I/O message counts from statistics  |
 | `agenstra.chat_words`               | `client_id`, `direction`, `interaction_kind` | Cumulative word counts                              |
@@ -90,8 +90,8 @@ The agent manager enables shared host and runtime metrics. When OTEL is enabled 
 | Gauge                                 | Labels                         | Description                                               |
 | ------------------------------------- | ------------------------------ | --------------------------------------------------------- |
 | `agenstra.manager.agents`             | `agent_type`, `container_type` | Agents by type and container kind                         |
-| `agenstra.manager.agents.total`       | —                              | Total agent count                                         |
-| `agenstra.manager.agents.provisioned` | —                              | Agents with a non-null `container_id`                     |
+| `agenstra.manager.agents.total`       | -                              | Total agent count                                         |
+| `agenstra.manager.agents.provisioned` | -                              | Agents with a non-null `container_id`                     |
 | `agenstra.manager.chat_messages`      | `actor`, `filtered`            | Persisted chat messages (`user` / `agent`)                |
 | `agenstra.manager.chat_words`         | `actor`, `filtered`            | Approximate word counts from message text                 |
 | `agenstra.manager.chat_chars`         | `actor`, `filtered`            | Character counts from message text                        |
@@ -104,11 +104,10 @@ Set `OTEL_EXPORTER_OTLP_ENDPOINT` to send traces and logs to an OTLP HTTP receiv
 
 ## Related documentation
 
-- **[Environment configuration](../deployment/environment-configuration.md#opentelemetry)** — Variable reference
-- **[Background jobs](../deployment/background-jobs.md)** — BullMQ queues scraped on the controller
-- **Library:** `libs/domains/shared/backend/util-otel/README.md`
+- **[Environment configuration](../deployment/environment-configuration.md#opentelemetry)** Variable reference
+- **[Background jobs](../deployment/background-jobs.md)** BullMQ queues scraped on the controller
 
 ## API reference
 
-- [Agent Controller OpenAPI](/spec/agent-controller/openapi.yaml) — `GET /otel/metrics` (root server)
-- [Agent Manager OpenAPI](/spec/agent-manager/openapi.yaml) — `GET /otel/metrics` (root server)
+- [Agent Controller OpenAPI](/spec/agent-controller/openapi.yaml) `GET /otel/metrics` (root server)
+- [Agent Manager OpenAPI](/spec/agent-manager/openapi.yaml) `GET /otel/metrics` (root server)

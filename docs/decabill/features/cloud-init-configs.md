@@ -156,9 +156,9 @@ The admin UI provides a **Load example** starter script that installs Docker, co
 
 Custom stacks do not include Nginx or Let's Encrypt in v1. TLS termination is out of scope for this service kind.
 
-## Related Documentation
+## Related documentation
 
-- **[Server Provisioning](./server-provisioning.md)** - Provider provisioning and cloud-init overview
-- **[Service Types and Plans](./service-types-and-plans.md)** - Plan defaults and admin catalog
-- **[Subscriptions](./subscriptions.md)** - Order flow and `requestedConfig`
-- **[API Reference](../api-reference/README.md)** - OpenAPI schemas
+- **[Server Provisioning](./server-provisioning.md)** Provider provisioning and cloud-init overview
+- **[Service Types and Plans](./service-types-and-plans.md)** Plan defaults and admin catalog
+- **[Subscriptions](./subscriptions.md)** Order flow and `requestedConfig`
+- **[API Reference](../api-reference/README.md)** OpenAPI schemas

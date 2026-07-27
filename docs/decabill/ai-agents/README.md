@@ -1,4 +1,4 @@
-# AI Agents (Decabill)
+# AI Agents Context (.agenstra)
 
 Guides for AI coding assistants working on **Decabill** in this monorepo. Includes the workspace `.agenstra/` agent context (duplicated here for convenience) plus Decabill-specific orientation.
 
@@ -8,10 +8,10 @@ The `.agenstra/` context is a **single source of truth** for agent rules, comman
 
 **Key characteristics**:
 
-- **Tool-agnostic** – No vendor-specific syntax in the source files
-- **Composable** – Rules, commands, skills, and agents are separate and reusable
-- **Versionable** – Commit `.agenstra/` to git and share across the team
-- **Transform on demand** – Generate tool configs with `nx` or the transformer API
+- **Tool-agnostic** No vendor-specific syntax in the source files
+- **Composable** Rules, commands, skills, and agents are separate and reusable
+- **Versionable** Commit `.agenstra/` to git and share across the team
+- **Transform on demand** Generate tool configs with `nx` or the transformer API
 
 ## Directory Structure
 
@@ -78,7 +78,7 @@ Manual overrides in `overrides/` are copied to the output directory **after** tr
 
 After editing `.agenstra/`, generate output for one or more tools:
 
-**Via agentctx** – Use the **agentctx** CLI binary built from `tools/ai`; see [agentctx](./agentctx.md) for install and usage.
+**Via agentctx** Use the **agentctx** CLI binary built from `tools/ai`; see [agentctx](./agentctx.md) for install and usage.
 
 **Via Nx** (if the project has an `agenstra-transform` target):
 
@@ -141,14 +141,14 @@ API contracts (canonical):
 5. **Respect multi-tenancy**: tenant context (`X-Tenant`, guards, tenant-scoped queries). See [Multi-tenancy](../features/multi-tenancy.md) and [Authentication](../features/authentication.md).
 6. **Use Nx from the monorepo root** and capture output under `tmp/nx-agent/` (nx-cli skill). Typical targets: `decabill-backend-billing-manager`, `decabill-frontend-billing-console`.
 
-## Related product docs
+## Related documentation
 
-- [Architecture](../architecture/README.md)
-- [Applications](../applications/README.md)
-- [Features](../features/README.md)
-- [Deployment](../deployment/README.md)
-- [Security](../security/README.md)
-- [Troubleshooting](../troubleshooting/README.md)
+- [Architecture](../architecture/README.md) System architecture overview
+- [Applications](../applications/README.md) Billing console and billing manager apps
+- [Features](../features/README.md) Product capability index
+- [Deployment](../deployment/README.md) Local, Docker, and production guides
+- [Security](../security/README.md) Compliance, hardening, and disclosure
+- [Troubleshooting](../troubleshooting/README.md) Common issues and debugging
 
 ---
 

@@ -9,9 +9,9 @@ Agents are AI-powered entities that run in Docker containers. Each agent has:
 - **Unique ID** (UUID)
 - **Name** and optional description
 - **Agent Type** (e.g., `cursor` for cursor-agent)
-- **Container** - Docker container for agent execution
-- **Credentials** - Password for WebSocket authentication
-- **Workspace** - Git repository cloned into the container (bind-mounted from host `/opt/agents/{uuid}`; path depends on agent type — see [Container image security](../security/container-images.md))
+- **Container** Docker container for agent execution
+- **Credentials** Password for WebSocket authentication
+- **Workspace** Git repository cloned into the container (bind-mounted from host `/opt/agents/{uuid}`; path depends on agent type, see [Container image security](../security/container-images.md))
 - **VNC Container** (optional) - Virtual workspace with XFCE4 desktop and Chromium browser
 
 ## Creating an Agent
@@ -195,17 +195,17 @@ Per-agent regex filters live on the manager (`/api/agents-filters`). Global poli
 
 For detailed API documentation, see the application and API reference docs linked below.
 
-## Related Documentation
+## Related documentation
 
-- **[Chat Interface](./chat-interface.md)** - Chat with agents
-- **[File Management](./file-management.md)** - File operations in containers
-- **[Version Control](./version-control.md)** - Git operations in containers
-- **[WebSocket Communication](./websocket-communication.md)** - Real-time communication
-- **[VNC Browser Access](./vnc-browser-access.md)** - Graphical browser access via VNC
-- **[Usage Statistics](./usage-statistics.md)** - Controller-side usage metrics
-- **[Message Filter Rules](./message-filter-rules.md)** - Regex filters
-- **[Dynamic provider plugins](./dynamic-provider-plugins.md)** - Custom agent, pipeline, and filter providers
-- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** - Application details
+- **[Chat Interface](./chat-interface.md)** Chat with agents
+- **[File Management](./file-management.md)** File operations in containers
+- **[Version Control](./version-control.md)** Git operations in containers
+- **[WebSocket Communication](./websocket-communication.md)** Real-time communication
+- **[VNC Browser Access](./vnc-browser-access.md)** Graphical browser access via VNC
+- **[Usage Statistics](./usage-statistics.md)** Controller-side usage metrics
+- **[Message Filter Rules](./message-filter-rules.md)** Regex filters
+- **[Dynamic provider plugins](./dynamic-provider-plugins.md)** Custom agent, pipeline, and filter providers
+- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** Application details
 
 ---
 

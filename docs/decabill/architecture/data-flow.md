@@ -246,12 +246,12 @@ graph TB
 
 Dashboard socket effects (`connectBillingDashboardSocket$`, `billingDashboardSocketApplicationErrorFallback$`) bridge Socket.IO events into the `billingDashboardSocket` slice used by the overview page.
 
-## Related Documentation
+## Related documentation
 
-- **[System Overview](./system-overview.md)** - Tier architecture
-- **[Components](./components.md)** - Runtime components
-- **[Real-time Status](../features/real-time-status.md)** - WebSocket contract details
-- **[API Reference](../api-reference/README.md)** - OpenAPI and AsyncAPI specs
+- **[System Overview](./system-overview.md)** Tier architecture
+- **[Components](./components.md)** Runtime components
+- **[Real-time Status](../features/real-time-status.md)** WebSocket contract details
+- **[API Reference](../api-reference/README.md)** OpenAPI and AsyncAPI specs
 
 ---
 

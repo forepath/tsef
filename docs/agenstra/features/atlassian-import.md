@@ -4,10 +4,10 @@ The agent controller can **import work from Atlassian Cloud** into Agenstra usin
 
 ## Overview
 
-- **Site connections** – Per-controller records for an Atlassian site: base URL, account email, and API token used for REST calls. Tokens are stored for server-side use only; list and detail APIs do not return secrets (see OpenAPI).
-- **Import configurations** – Each config binds a connection to a **workspace** (`clientId`), an import **kind** (`jira` or `confluence`), optional query scope (JQL, board id, CQL, space key, etc.), and optional **parent** targets in Agenstra (parent ticket for Jira swimlanes, parent folder for Confluence pages). Configs can be enabled or disabled; each run records `lastRunAt` and `lastError` when applicable.
-- **Provider model** – Today the registered provider is **Atlassian** (`atlassian`). The controller uses a small factory so additional providers could be added later without changing the HTTP surface. Register extra import backends with `DYNAMIC_CONTEXT_IMPORT_PROVIDERS` (see [Dynamic provider plugins](./dynamic-provider-plugins.md)).
-- **Execution** – A periodic **scheduler** loads enabled configs in batches and invokes the provider with an **item budget** per tick. Admins can also **run** a single config on demand from the console or `POST` the run endpoint.
+- **Site connections** Per-controller records for an Atlassian site: base URL, account email, and API token used for REST calls. Tokens are stored for server-side use only; list and detail APIs do not return secrets (see OpenAPI).
+- **Import configurations** Each config binds a connection to a **workspace** (`clientId`), an import **kind** (`jira` or `confluence`), optional query scope (JQL, board id, CQL, space key, etc.), and optional **parent** targets in Agenstra (parent ticket for Jira swimlanes, parent folder for Confluence pages). Configs can be enabled or disabled; each run records `lastRunAt` and `lastError` when applicable.
+- **Provider model** Today the registered provider is **Atlassian** (`atlassian`). The controller uses a small factory so additional providers could be added later without changing the HTTP surface. Register extra import backends with `DYNAMIC_CONTEXT_IMPORT_PROVIDERS` (see [Dynamic provider plugins](./dynamic-provider-plugins.md)).
+- **Execution** A periodic **scheduler** loads enabled configs in batches and invokes the provider with an **item budget** per tick. Admins can also **run** a single config on demand from the console or `POST` the run endpoint.
 
 ## Why controller-native?
 
@@ -15,15 +15,15 @@ Tickets and knowledge trees already live on the controller ([Tickets and Workspa
 
 ## Access control
 
-- **HTTP** – All routes under `/api/imports/atlassian` require the same **admin check** as global [Message Filter Rules](./message-filter-rules.md): the user must be a **global admin** (`UserRole.ADMIN`) unless the request is authenticated as an **API key** (`isApiKeyAuth`), in which case the role check is bypassed for trusted automation (consistent with `/api/filter-rules`).
-- **Console** – Route **`/imports/atlassian`** uses `authGuard` and `adminGuard` (same predicate as `/filters` and user management). The sidebar **Import** entry is shown only when that admin predicate is true.
+- **HTTP** All routes under `/api/imports/atlassian` require the same **admin check** as global [Message Filter Rules](./message-filter-rules.md): the user must be a **global admin** (`UserRole.ADMIN`) unless the request is authenticated as an **API key** (`isApiKeyAuth`), in which case the role check is bypassed for trusted automation (consistent with `/api/filter-rules`).
+- **Console** Route **`/imports/atlassian`** uses `authGuard` and `adminGuard` (same predicate as `/filters` and user management). The sidebar **Import** entry is shown only when that admin predicate is true.
 
 Non-admin interactive users receive **403** from the API and cannot open the admin UI for import settings.
 
 ## Jira vs Confluence
 
-- **Jira** – Imports issues matched by the configured scope (for example JQL and optional board hints) into the ticket model, including description conversion where supported (ADF and wiki-style markup are normalized toward markdown for storage).
-- **Confluence** – Imports pages matched by CQL / structure rules into the knowledge tree under the chosen parent folder when configured. Confluence **storage HTML** and wiki markup are converted toward markdown for imported page bodies.
+- **Jira** Imports issues matched by the configured scope (for example JQL and optional board hints) into the ticket model, including description conversion where supported (ADF and wiki-style markup are normalized toward markdown for storage).
+- **Confluence** Imports pages matched by CQL / structure rules into the knowledge tree under the chosen parent folder when configured. Confluence **storage HTML** and wiki markup are converted toward markdown for imported page bodies.
 
 Exact field matrices and validation rules are defined in the OpenAPI DTOs (`CreateExternalImportConfigDto`, `UpdateExternalImportConfigDto`, etc.).
 
@@ -49,24 +49,24 @@ Admins can **clear all markers** for a config via **`DELETE /api/imports/atlassi
 
 ## Console entry points
 
-- Route **`/imports/atlassian`** – **Atlassian import** admin: connections, configs, test connection, run, clear markers, modals for create/edit/delete (see [Frontend Agent Console](../applications/frontend-agent-console.md)).
+- Route **`/imports/atlassian`** **Atlassian import** admin: connections, configs, test connection, run, clear markers, modals for create/edit/delete (see [Frontend Agent Console](../applications/frontend-agent-console.md)).
 
 Boards do not embed full import administration; operators manage imports from this route.
 
 ## Related documentation
 
-- **[Tickets and Workspaces](./tickets-and-workspaces.md)** – Target model for Jira imports
-- **[Message Filter Rules](./message-filter-rules.md)** – Same admin / API-key authorization pattern on the controller
-- **[Authentication](./authentication.md)** – Roles and authentication modes
-- **[Dynamic provider plugins](./dynamic-provider-plugins.md)** – `DYNAMIC_CONTEXT_IMPORT_PROVIDERS` and shared loader behavior
-- **[Backend Agent Controller](../applications/backend-agent-controller.md)** – Nest application and `/api` prefix
-- **[Frontend Agent Console](../applications/frontend-agent-console.md)** – Routes and NgRx feature wiring
-- **[API Reference](../api-reference/README.md)** – Where the bundled OpenAPI lives
-- **[Environment configuration](./environment-configuration.md)** – Full controller and frontend environment variable reference (includes import scheduler variables)
+- **[Tickets and Workspaces](./tickets-and-workspaces.md)** Target model for Jira imports
+- **[Message Filter Rules](./message-filter-rules.md)** Same admin / API-key authorization pattern on the controller
+- **[Authentication](./authentication.md)** Roles and authentication modes
+- **[Dynamic provider plugins](./dynamic-provider-plugins.md)** `DYNAMIC_CONTEXT_IMPORT_PROVIDERS` and shared loader behavior
+- **[Backend Agent Controller](../applications/backend-agent-controller.md)** Nest application and `/api` prefix
+- **[Frontend Agent Console](../applications/frontend-agent-console.md)** Routes and NgRx feature wiring
+- **[API Reference](../api-reference/README.md)** Where the bundled OpenAPI lives
+- **[Environment configuration](../deployment/environment-configuration.md)** Full controller and frontend environment variable reference (includes import scheduler variables)
 
 ## API references
 
-- [Agent Controller OpenAPI](/spec/agent-controller/openapi.yaml) – `/imports/atlassian/connections`, `/imports/atlassian/configs`, run, markers, and connection test paths
+- [Agent Controller OpenAPI](/spec/agent-controller/openapi.yaml) `/imports/atlassian/connections`, `/imports/atlassian/configs`, run, markers, and connection test paths
 
 ---
 

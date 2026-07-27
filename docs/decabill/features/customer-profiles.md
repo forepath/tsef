@@ -79,15 +79,15 @@ Sensitive fields follow standard application encryption and access controls. Str
 
 The user's registration date (day of month, capped at 28) defaults as their **billing day** for open position accumulation. This is stored on the user record and is independent of the service plan's `billing_day_of_month`. See [Invoices](./invoices.md).
 
-## Related Documentation
+## Related documentation
 
-- **[Subscriptions](./subscriptions.md)** - Profile required at order time
-- **[Invoices](./invoices.md)** - Issuer and customer data on PDFs
-- **[Projects](./projects.md)** - Profile required for project bill-time
-- **[Billing Administration](./billing-administration.md)** - Admin profile CRUD
-- **[Customer Trust Score](./customer-trust-score.md)** - Admin-only trust ranking and factor breakdown
-- **[Payment Processing](./payment-processing.md)** - Stripe customer linkage
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Profile DTO schemas
+- **[Subscriptions](./subscriptions.md)** Profile required at order time
+- **[Invoices](./invoices.md)** Issuer and customer data on PDFs
+- **[Projects](./projects.md)** Profile required for project bill-time
+- **[Billing Administration](./billing-administration.md)** Admin profile CRUD
+- **[Customer Trust Score](./customer-trust-score.md)** Admin-only trust ranking and factor breakdown
+- **[Payment Processing](./payment-processing.md)** Stripe customer linkage
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** Profile DTO schemas
 
 ---
 

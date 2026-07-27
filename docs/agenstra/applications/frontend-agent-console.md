@@ -10,34 +10,34 @@ This application provides a comprehensive user interface for managing clients, a
 
 This application provides:
 
-- **Chat Interface** - Real-time bidirectional communication with AI agents via WebSocket
-- **Monaco Editor** - Integrated code editor with syntax highlighting and code completion
-- **File Management** - Browse, read, write, create, and delete files in agent containers
-- **Version Control** - Full Git operations (status, branches, commit, push, pull, rebase)
-- **Container Statistics** - Real-time container resource monitoring (CPU, memory, network)
-- **Client Management** - Create, update, and delete clients (remote agent-manager instances)
-- **Agent Management** - Create, update, delete, start, stop, and restart agents; environment variables; models list
-- **Tickets** - Workspace ticket board with comments, activity, migration, and automation runs ([Tickets and Workspaces](../features/tickets-and-workspaces.md))
-- **Deployments** - CI/CD configuration and runs per agent ([Deployment](../features/deployment.md))
-- **Usage statistics** - Controller-backed analytics slices for operators ([Usage Statistics](../features/usage-statistics.md))
-- **Message filter rules** - Global admin rule manager ([Message Filter Rules](../features/message-filter-rules.md))
-- **Atlassian import** - Admin UI for Atlassian site connections and Jira/Confluence import configs ([Atlassian import](../features/atlassian-import.md))
-- **Agent autonomy** - Configure which agents may run autonomously per workspace
-- **Server Provisioning** - Provision cloud servers (Hetzner, DigitalOcean) with automated deployment
-- **Audit** - Audit views for administrators (`/audit`)
-- **State Management** - NgRx for predictable state management
-- **Authentication** - Keycloak or built-in users (JWT) via `@forepath/identity/frontend`, depending on deployment configuration
+- **Chat Interface** Real-time bidirectional communication with AI agents via WebSocket
+- **Monaco Editor** Integrated code editor with syntax highlighting and code completion
+- **File Management** Browse, read, write, create, and delete files in agent containers
+- **Version Control** Full Git operations (status, branches, commit, push, pull, rebase)
+- **Container Statistics** Real-time container resource monitoring (CPU, memory, network)
+- **Client Management** Create, update, and delete clients (remote agent-manager instances)
+- **Agent Management** Create, update, delete, start, stop, and restart agents; environment variables; models list
+- **Tickets** Workspace ticket board with comments, activity, migration, and automation runs ([Tickets and Workspaces](../features/tickets-and-workspaces.md))
+- **Deployments** CI/CD configuration and runs per agent ([Deployment](../features/deployment.md))
+- **Usage statistics** Controller-backed analytics slices for operators ([Usage Statistics](../features/usage-statistics.md))
+- **Message filter rules** Global admin rule manager ([Message Filter Rules](../features/message-filter-rules.md))
+- **Atlassian import** Admin UI for Atlassian site connections and Jira/Confluence import configs ([Atlassian import](../features/atlassian-import.md))
+- **Agent autonomy** Configure which agents may run autonomously per workspace
+- **Server Provisioning** Provision cloud servers (Hetzner, DigitalOcean) with automated deployment
+- **Audit** Audit views for administrators (`/audit`)
+- **State Management** NgRx for predictable state management
+- **Authentication** Keycloak or built-in users (JWT) via `@forepath/identity/frontend`, depending on deployment configuration
 
 ## Architecture
 
 This application is built using:
 
-- **Angular** - Frontend framework
-- **NgRx** - State management (Actions, Reducers, Effects, Selectors, Facades)
-- **Monaco Editor** - Code editor (VS Code editor in the browser)
-- **Socket.IO Client** - WebSocket communication
-- **Bootstrap** - UI framework
-- **RxJS** - Reactive programming
+- **Angular** Frontend framework
+- **NgRx** State management (Actions, Reducers, Effects, Selectors, Facades)
+- **Monaco Editor** Code editor (VS Code editor in the browser)
+- **Socket.IO Client** WebSocket communication
+- **Bootstrap** UI framework
+- **RxJS** Reactive programming
 
 The application integrates:
 
@@ -130,18 +130,18 @@ The application uses NgRx for state management with the following state slices:
 Routes are defined in the framework library `libs/domains/agenstra/frontend/feature-agent-console/src/lib/agent-console.routes.ts`. Highlights:
 
 - ``(empty) → redirect to`clients`
-- **Identity** – `identityAuthRoutes` (login, register, password reset, email confirmation, user management) merged under the shell component
-- `/audit` – Audit (authenticated)
-- `/filters` – Global message filter rules (**admin** guard)
-- `/imports/atlassian` – Atlassian site connections and import configurations (**admin** guard; sidebar with Users/Filters)
-- `/tickets`, `/tickets/:clientId` – Ticket board (**authenticated**; requires active client context)
-- `/clients` – Default **Manager** view: client and agent chat shell
-  - `/clients` – Landing list
-  - `/clients/:clientId` – Workspace selected
-  - `/clients/:clientId/agents/:agentId` – Agent chat
-  - `/clients/:clientId/agents/:agentId/editor` – Editor layout for the same shell
-  - `/clients/:clientId/agents/:agentId/config` – Agent configuration editor (guarded)
-  - `/clients/:clientId/agents/:agentId/deployments` – Deployments UI for the agent
+- **Identity** `identityAuthRoutes` (login, register, password reset, email confirmation, user management) merged under the shell component
+- `/audit`. Audit (authenticated)
+- `/filters`. Global message filter rules (**admin** guard)
+- `/imports/atlassian`. Atlassian site connections and import configurations (**admin** guard; sidebar with Users/Filters)
+- `/tickets`, `/tickets/:clientId`. Ticket board (**authenticated**; requires active client context)
+- `/clients`. Default **Manager** view: client and agent chat shell
+  - `/clients`. Landing list
+  - `/clients/:clientId`. Workspace selected
+  - `/clients/:clientId/agents/:agentId`. Agent chat
+  - `/clients/:clientId/agents/:agentId/editor`. Editor layout for the same shell
+  - `/clients/:clientId/agents/:agentId/config`. Agent configuration editor (guarded)
+  - `/clients/:clientId/agents/:agentId/deployments`. Deployments UI for the agent
 - `**` → redirect to `clients`
 
 ## Components
@@ -192,8 +192,8 @@ Monaco Editor integration for code editing with:
 
 The application opens **two** Socket.IO connections to the controller **`WEBSOCKET_URL`** when needed:
 
-1. **`clients` namespace** – Same port as today’s `WEBSOCKET_URL`; `setClient` selects the workspace, then `forward` sends agent-manager events (chat, login, terminals, etc.). Manager responses arrive as their native event names on this socket.
-2. **`tickets` namespace** – Optional second connection for ticket board realtime (`setClient` per workspace, then ticket and automation events). Chat-centric UIs may rely on controller events on `clients` instead; see [WebSocket Communication](../features/websocket-communication.md).
+1. **`clients` namespace** Same port as today’s `WEBSOCKET_URL`; `setClient` selects the workspace, then `forward` sends agent-manager events (chat, login, terminals, etc.). Manager responses arrive as their native event names on this socket.
+2. **`tickets` namespace** Optional second connection for ticket board realtime (`setClient` per workspace, then ticket and automation events). Chat-centric UIs may rely on controller events on `clients` instead; see [WebSocket Communication](../features/websocket-communication.md).
 
 Reconnection flows restore client context, agent login when applicable, and tickets board context.
 
@@ -211,8 +211,8 @@ On reconnection:
 
 Behavior depends on controller configuration:
 
-- **Keycloak** – Authorization code flow, tokens attached to HTTP and WebSocket handshakes, refresh handled by the identity frontend layer.
-- **Users (JWT)** – Email/password login and registration routes from `identityAuthRoutes`; tokens are stored and sent as `Bearer` on HTTP and on WebSocket handshakes.
+- **Keycloak** Authorization code flow, tokens attached to HTTP and WebSocket handshakes, refresh handled by the identity frontend layer.
+- **Users (JWT)** Email/password login and registration routes from `identityAuthRoutes`; tokens are stored and sent as `Bearer` on HTTP and on WebSocket handshakes.
 
 See [Authentication](../features/authentication.md) for environment variables and operational notes.
 
@@ -249,9 +249,9 @@ When `CONFIG` is set, the frontend server fetches and validates the remote JSON 
 - `CSP_ENFORCE` - When `true`, sends enforcing `Content-Security-Policy`. Otherwise sends `Content-Security-Policy-Report-Only` (default).
 - `CSP_DEFAULT_SRC_EXTRA` - Optional extra origins for `default-src` (after `'self'`). Same comma- or space-separated URL list as `CSP_CONNECT_SRC_EXTRA`.
 - `CSP_BASE_URI_EXTRA` - Optional extra origins for `base-uri` (after `'self'`). Same URL list format.
-- **`connect-src`** - Includes `'self'`, `https:`, and `wss:`; non-production also includes `http:` and `ws:` scheme keywords. In **production**, plain HTTP backends need explicit origins via `CSP_CONNECT_SRC_EXTRA`.
+- **`connect-src`** Includes `'self'`, `https:`, and `wss:`; non-production also includes `http:` and `ws:` scheme keywords. In **production**, plain HTTP backends need explicit origins via `CSP_CONNECT_SRC_EXTRA`.
 - `CSP_CONNECT_SRC_EXTRA` - Comma- or space-separated URLs (normalized to origins). Example: `CSP_CONNECT_SRC_EXTRA=http://host.docker.internal:3100`
-- **`script-src`** - Default `'self' 'unsafe-inline' 'unsafe-eval'`. For third-party scripts (for example Google Tag Manager’s `gtm.js`), set `CSP_SCRIPT_SRC_EXTRA` with the script host origin(s). `connect-src` already allows `https:`, so this variable is for **script** loads, not network beacons alone.
+- **`script-src`** Default `'self' 'unsafe-inline' 'unsafe-eval'`. For third-party scripts (for example Google Tag Manager’s `gtm.js`), set `CSP_SCRIPT_SRC_EXTRA` with the script host origin(s). `connect-src` already allows `https:`, so this variable is for **script** loads, not network beacons alone.
 - `CSP_SCRIPT_SRC_EXTRA` - Extra `script-src` origins. Example: `CSP_SCRIPT_SRC_EXTRA=https://www.googletagmanager.com`
 - `CSP_WORKER_SRC_EXTRA`, `CSP_STYLE_SRC_EXTRA`, `CSP_IMG_SRC_EXTRA`, `CSP_FONT_SRC_EXTRA` - Optional extra origins for `worker-src` (after `'self'` and `blob:`), `style-src` (after `'self'` and `'unsafe-inline'`), `img-src` (after `'self'` and `data:`), and `font-src` (after `'self'` and `data:`). Same comma- or space-separated URL list as `CSP_CONNECT_SRC_EXTRA`.
 - `CSP_FRAME_ANCESTORS` - Optional **full override** of the CSP `frame-ancestors` directive (default `'none'` if unset). See [Environment configuration](../deployment/environment-configuration.md) (Content Security Policy section) for `X-Frame-Options` alignment.
@@ -305,19 +305,19 @@ Before deploying to production:
 6. Build the application: `nx build agenstra-frontend-agent-console --configuration=production`
 7. Serve the built files using a web server (nginx, Apache, etc.)
 
-## Related Documentation
+## Related documentation
 
-- **[Chat Interface Feature](../features/chat-interface.md)** - Chat functionality guide
-- **[Web IDE Feature](../features/web-ide.md)** - Code editor guide
-- **[File Management Feature](../features/file-management.md)** - File operations guide
-- **[Version Control Feature](../features/version-control.md)** - Git operations guide
-- **[Tickets and Workspaces](../features/tickets-and-workspaces.md)** - Ticket board and automation
-- **[Deployment](../features/deployment.md)** - CI/CD from the console
-- **[Usage Statistics](../features/usage-statistics.md)** - Controller analytics
-- **[Message Filter Rules](../features/message-filter-rules.md)** - Global and per-agent filters
-- **[Atlassian import](../features/atlassian-import.md)** - Atlassian site connections and import configurations (admin UI)
-- **[WebSocket Communication](../features/websocket-communication.md)** - Dual-namespace behavior
-- **[Backend Agent Controller](./backend-agent-controller.md)** - API and WebSocket surface
+- **[Chat Interface Feature](../features/chat-interface.md)** Chat functionality guide
+- **[Web IDE Feature](../features/web-ide.md)** Code editor guide
+- **[File Management Feature](../features/file-management.md)** File operations guide
+- **[Version Control Feature](../features/version-control.md)** Git operations guide
+- **[Tickets and Workspaces](../features/tickets-and-workspaces.md)** Ticket board and automation
+- **[Deployment](../features/deployment.md)** CI/CD from the console
+- **[Usage Statistics](../features/usage-statistics.md)** Controller analytics
+- **[Message Filter Rules](../features/message-filter-rules.md)** Global and per-agent filters
+- **[Atlassian import](../features/atlassian-import.md)** Atlassian site connections and import configurations (admin UI)
+- **[WebSocket Communication](../features/websocket-communication.md)** Dual-namespace behavior
+- **[Backend Agent Controller](./backend-agent-controller.md)** API and WebSocket surface
 
 ---
 

@@ -16,7 +16,7 @@ This page covers **Decabill billing manager** registries only.
 | `DYNAMIC_BILLING_PROVIDER_METADATA` | optional    | Admin UI provider metadata (`providerMetadata` export)                      |
 | `DYNAMIC_ADDON_MODULES`             | optional    | Addon lifecycle modules (`provision` / `teardown`, optional `configFields`) |
 
-Provider metadata capability flags (all **fail closed** when omitted — treated as `false`):
+Provider metadata capability flags (all **fail closed** when omitted, treated as `false`):
 
 | Flag                          | When to set `true`                                    |
 | ----------------------------- | ----------------------------------------------------- |
@@ -42,9 +42,9 @@ Shared tuning:
 
 For each `DYNAMIC_*` entry the loader:
 
-1. **Baked-in** - resolves the package from `/app/package.json` (image build graph)
-2. **Plugin path** - looks up the package by `package.json` name under `DYNAMIC_PROVIDER_PLUGIN_PATH`
-3. **Fail** - logs and skips, or aborts startup when critical and fail-fast is enabled
+1. **Baked-in** resolves the package from `/app/package.json` (image build graph)
+2. **Plugin path** looks up the package by `package.json` name under `DYNAMIC_PROVIDER_PLUGIN_PATH`
+3. **Fail** logs and skips, or aborts startup when critical and fail-fast is enabled
 
 Baked-in wins when the same package exists in both places.
 
@@ -85,7 +85,7 @@ Allowed package name prefixes: `@forepath/`, `@decabill/`. Do not combine `file:
 External packages must export one of:
 
 1. **`createProvider`** (preferred) - `(moduleRef: ModuleRef) => T | Promise<T>`
-2. **Named PascalCase class** - via entry alias or `package.json`:
+2. **Named PascalCase class** via entry alias or `package.json`:
 
 ```json
 {
@@ -162,12 +162,12 @@ volumes:
 
 See [Docker Deployment](../deployment/docker-deployment.md).
 
-## Related Documentation
+## Related documentation
 
-- **[Payment Processing](./payment-processing.md)** - Stripe built-in processor
-- **[Service Types and Plans](./service-types-and-plans.md)** - Provider registry consumption
-- **[Environment Configuration](../deployment/environment-configuration.md)** - `DYNAMIC_*` reference
-- **[Backend Billing Manager](../applications/backend-billing-manager.md)** - Compose and env
+- **[Payment Processing](./payment-processing.md)** Stripe built-in processor
+- **[Service Types and Plans](./service-types-and-plans.md)** Provider registry consumption
+- **[Environment Configuration](../deployment/environment-configuration.md)** `DYNAMIC_*` reference
+- **[Backend Billing Manager](../applications/backend-billing-manager.md)** Compose and env
 
 ---
 

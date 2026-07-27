@@ -6,8 +6,8 @@ Client management enables you to connect to and manage multiple remote agent-man
 
 A client represents a connection to a remote agent-manager service. You can either:
 
-1. **Connect to an existing agent-manager** - If you already have an agent-manager running
-2. **Provision a new server** - Automatically provision a cloud server with agent-manager deployment
+1. **Connect to an existing agent-manager** If you already have an agent-manager running
+2. **Provision a new server** Automatically provision a cloud server with agent-manager deployment
 
 When using keycloak or users authentication, Agenstra supports **per-client permissions** to enable multi-tenant scenarios. Each client has a creator and can have multiple associated users with different roles.
 
@@ -41,8 +41,8 @@ See the [Server Provisioning](./server-provisioning.md) documentation for detail
 
 Each client includes a `config` field that is automatically fetched from the remote agent-manager:
 
-- **`gitRepositoryUrl`** - The Git repository URL configured on the agent-manager instance
-- **`agentTypes`** - Array of available agent provider types (e.g., `['cursor', 'opencode', 'openclaw']`)
+- **`gitRepositoryUrl`** The Git repository URL configured on the agent-manager instance
+- **`agentTypes`** Array of available agent provider types (e.g., `['cursor', 'opencode', 'openclaw']`)
 
 This configuration allows you to discover which agent types are available on each remote agent-manager instance.
 
@@ -85,8 +85,8 @@ Access to a client is granted if:
 
 Each user-client relationship has a role:
 
-- **`admin`** - Can manage users (add/remove) and has full access to the client
-- **`user`** - Can access the client but cannot manage users
+- **`admin`** Can manage users (add/remove) and has full access to the client
+- **`user`** Can access the client but cannot manage users
 
 ### Managing Client Users
 
@@ -135,12 +135,12 @@ In api-key mode, users do not play a role; these endpoints are not applicable.
 
 For detailed API documentation, see the application and API reference docs linked below.
 
-## Related Documentation
+## Related documentation
 
-- **[Server Provisioning](./server-provisioning.md)** - Automated server provisioning
-- **[Agent Management](./agent-management.md)** - Managing agents for a client
-- **[WebSocket Communication](./websocket-communication.md)** - Real-time communication with clients
-- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** - Application details
+- **[Server Provisioning](./server-provisioning.md)** Automated server provisioning
+- **[Agent Management](./agent-management.md)** Managing agents for a client
+- **[WebSocket Communication](./websocket-communication.md)** Real-time communication with clients
+- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** Application details
 
 ---
 

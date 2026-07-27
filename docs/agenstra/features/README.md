@@ -6,23 +6,23 @@ This section provides comprehensive documentation for all features in the Agenst
 
 Agenstra provides a complete set of features for managing distributed AI agent infrastructure:
 
-- **Client Management** - Manage multiple remote agent-manager instances
-- **Agent Management** - Create, manage, and interact with AI agents
-- **Server Provisioning** - Automated cloud server provisioning
-- **WebSocket Communication** - Real-time bidirectional communication
-- **File Management** - File system operations in agent containers
-- **Version Control** - Git operations directly from the web interface
-- **Web IDE** - Monaco Editor integration for code editing
-- **Chat Interface** - AI chat functionality with real-time responses
-- **VNC Browser Access** - Graphical browser access via VNC and noVNC
-- **Deployment** - CI/CD pipeline management and deployment functionality
-- **Authentication** - Multiple authentication methods with configurable user registration
-- **Tickets and Workspaces** - Ticket boards, migration, and automation on the controller
-- **Usage Statistics** - Controller-backed usage and filter metrics (distinct from container stats)
-- **Message Filter Rules** - Global and per-agent regex policies for chat traffic
-- **Atlassian import** - Admin-managed site connections and import configs (Jira and Confluence) into tickets and knowledge
-- **Dynamic provider plugins** - Extend provisioning, agents, pipelines, context import, and chat filters via env-configured packages
-- **OpenTelemetry** - Optional Prometheus metrics and OTLP export (disabled by default)
+- **Client Management** Manage multiple remote agent-manager instances
+- **Agent Management** Create, manage, and interact with AI agents
+- **Server Provisioning** Automated cloud server provisioning
+- **WebSocket Communication** Real-time bidirectional communication
+- **File Management** File system operations in agent containers
+- **Version Control** Git operations directly from the web interface
+- **Web IDE** Monaco Editor integration for code editing
+- **Chat Interface** AI chat functionality with real-time responses
+- **VNC Browser Access** Graphical browser access via VNC and noVNC
+- **Deployment** CI/CD pipeline management and deployment functionality
+- **Authentication** Multiple authentication methods with configurable user registration
+- **Tickets and Workspaces** Ticket boards, migration, and automation on the controller
+- **Usage Statistics** Controller-backed usage and filter metrics (distinct from container stats)
+- **Message Filter Rules** Global and per-agent regex policies for chat traffic
+- **Atlassian import** Admin-managed site connections and import configs (Jira and Confluence) into tickets and knowledge
+- **Dynamic provider plugins** Extend provisioning, agents, pipelines, context import, and chat filters via env-configured packages
+- **OpenTelemetry** Optional Prometheus metrics and OTLP export (disabled by default)
 
 ## Features
 
@@ -278,12 +278,12 @@ graph TB
     DP --> DEP
 ```
 
-## Related Documentation
+## Related documentation
 
-- **[Getting Started](../getting-started.md)** - Quick start guide
-- **[Architecture](../architecture/README.md)** - System architecture
-- **[Applications](../applications/README.md)** - Application documentation
-- **[Deployment](../deployment/README.md)** - Deployment guides
+- **[Getting Started](../getting-started.md)** Quick start guide
+- **[Architecture](../architecture/README.md)** System architecture
+- **[Applications](../applications/README.md)** Application documentation
+- **[Deployment](../deployment/README.md)** Deployment guides
 
 ---
 

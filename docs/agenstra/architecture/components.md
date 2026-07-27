@@ -250,14 +250,14 @@ graph TB
 
 ### Infrastructure
 
-- **PostgreSQL** - Database for both controller and manager
-- **Docker** - Container runtime for agent execution
-- **Keycloak** - Identity and access management (optional)
+- **PostgreSQL** Database for both controller and manager
+- **Docker** Container runtime for agent execution
+- **Keycloak** Identity and access management (optional)
 
 ### Cloud Providers
 
-- **Hetzner Cloud** - Server provisioning provider
-- **DigitalOcean** - Server provisioning provider
+- **Hetzner Cloud** Server provisioning provider
+- **DigitalOcean** Server provisioning provider
 
 ## Component Communication
 
@@ -277,13 +277,13 @@ graph TB
 - **Agent Controller**: Clients, credentials, provisioning references, client users, tickets (`tickets`, `ticket_comments`, `ticket_activity`, `ticket_body_generation_sessions`), ticket automation (`client_agent_autonomy`, `ticket_automation`, `ticket_automation_run`, `ticket_automation_lease`, `ticket_automation_run_step`), statistics shadow and event tables (`statistics_users`, `statistics_clients`, `statistics_agents`, `statistics_provisioning_references`, `statistics_client_users`, `statistics_chat_io`, `statistics_chat_filter_drops`, `statistics_chat_filter_flags`, `statistics_entity_events`), global console filter tables (`agent_console_regex_filter_rules`, `agent_console_regex_filter_rule_clients`, `agent_console_regex_filter_rule_sync_targets`)
 - **Agent Manager**: Agents, chat messages (`agent_chat_messages`), agent message events (`agent_message_events`), environment variables (`agent_environment_variables`), `deployment_configurations`, `deployment_runs`, per-agent regex rules (`regex_filter_rules`)
 
-## Related Documentation
+## Related documentation
 
-- **[System Overview](./system-overview.md)** - High-level architecture
-- **[Data Flow](./data-flow.md)** - Communication patterns
-- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** - Application details
-- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** - Application details
-- **[Frontend Agent Console Application](../applications/frontend-agent-console.md)** - Application details
+- **[System Overview](./system-overview.md)** High-level architecture
+- **[Data Flow](./data-flow.md)** Communication patterns
+- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** Application details
+- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** Application details
+- **[Frontend Agent Console Application](../applications/frontend-agent-console.md)** Application details
 
 ---
 

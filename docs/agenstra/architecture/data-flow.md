@@ -323,13 +323,13 @@ sequenceDiagram
     U->>U: Server Provisioned
 ```
 
-## Related Documentation
+## Related documentation
 
-- **[System Overview](./system-overview.md)** - High-level architecture
-- **[Components](./components.md)** - Component breakdown
-- **[WebSocket Communication](../features/websocket-communication.md)** - Real-time communication details
-- **[Client Management](../features/client-management.md)** - Client operations
-- **[Agent Management](../features/agent-management.md)** - Agent operations
+- **[System Overview](./system-overview.md)** High-level architecture
+- **[Components](./components.md)** Component breakdown
+- **[WebSocket Communication](../features/websocket-communication.md)** Real-time communication details
+- **[Client Management](../features/client-management.md)** Client operations
+- **[Agent Management](../features/agent-management.md)** Agent operations
 
 ---
 

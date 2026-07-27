@@ -36,7 +36,7 @@ Common problems and their solutions in Decabill.
 
 - Verify `Authorization` header or Keycloak token is valid
 - Check `STATIC_API_KEY` matches server configuration
-- Review `AUTHENTICATION_METHOD` and implicit resolution (see **[DR-004](../security/accepted-risks.md#dr-004--backend-authentication-method-resolution)**)
+- Review `AUTHENTICATION_METHOD` and implicit resolution (see **[DR-004](../security/accepted-risks.md#dr-004-backend-authentication-method-resolution)**)
 
 ### "Forbidden" or Tenant Errors (400/403)
 
@@ -44,10 +44,8 @@ Common problems and their solutions in Decabill.
 
 **Solutions**:
 
-- Send **`X-Tenant`** header matching an id in **`TENANTS`**
-- When **`TENANTS_ALLOW_DEFAULT=false`**, `default` is not allowed; missing, blank, or `default` **`X-Tenant`** values return 400
-- For user auth, ensure user's `tenant_id` matches **`X-Tenant`**
-- With API key auth, set **`STATIC_API_KEY_TENANT_ID`** if the key is bound to one tenant (see **[DR-002](../security/accepted-risks.md#dr-002--billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**)
+- Send **`X-Tenant`** header matching an id in **`TENANTS`** When **`TENANTS_ALLOW_DEFAULT=false`**, `default` is not allowed; missing, blank, or `default` **`X-Tenant`** values return 400
+- For user auth, ensure user's `tenant_id` matches **`X-Tenant`**. With API key auth, set **`STATIC_API_KEY_TENANT_ID`** if the key is bound to one tenant (see **[DR-002](../security/accepted-risks.md#dr-002-billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**)
 
 ### Keycloak Authentication Fails
 
@@ -180,7 +178,7 @@ Common problems and their solutions in Decabill.
 - Verify `HETZNER_API_TOKEN` or `DIGITALOCEAN_API_TOKEN` is valid
 - Check worker logs for cloud API errors
 - Inspect `backorder-retry` jobs in Bull Board
-- Review **[DR-001](../security/accepted-risks.md#dr-001--provisioning-ssh-cloud-init-templates)** for SSH posture on new instances
+- Review **[DR-001](../security/accepted-risks.md#dr-001-provisioning-ssh-cloud-init-templates)** for SSH posture on new instances
 
 ## Rate Limiting Issues
 
@@ -193,11 +191,11 @@ Common problems and their solutions in Decabill.
 - Increase `RATE_LIMIT_LIMIT` or `RATE_LIMIT_TTL`
 - Disable in development: `RATE_LIMIT_ENABLED=false`
 
-## Related Documentation
+## Related documentation
 
-- **[Debugging Guide](./debugging-guide.md)** - Debugging strategies
-- **[Background jobs](../deployment/background-jobs.md)** - Queue architecture
-- **[Environment configuration](../deployment/environment-configuration.md)** - Variable reference
+- **[Debugging Guide](./debugging-guide.md)** Debugging strategies
+- **[Background jobs](../deployment/background-jobs.md)** Queue architecture
+- **[Environment configuration](../deployment/environment-configuration.md)** Variable reference
 
 ---
 

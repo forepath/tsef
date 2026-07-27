@@ -32,7 +32,7 @@ Responsible disclosure (contact and process, **no bug bounty**), CycloneDX **SBO
 
 ### [CI security scanning (Trivy)](./ci-security-scanning.md)
 
-Automated **Trivy** scans on pull requests (filesystem, IaC/config, container images); SARIF upload to GitHub Security; CRITICAL fail gate (fixable issues only; see **[AR-005](./accepted-risks.md#ar-005---ci--local-trivy-unfixed-vulnerabilities-not-gated)**). Pre-commit runs filesystem/config scans locally.
+Automated **Trivy** scans on pull requests (filesystem, IaC/config, container images); SARIF upload to GitHub Security; CRITICAL fail gate (fixable issues only; see **[AR-005](./accepted-risks.md#ar-005-ci-local-trivy-unfixed-vulnerabilities-not-gated)**). Pre-commit runs filesystem/config scans locally.
 
 ## Configuration reference
 
@@ -40,10 +40,10 @@ For variable-by-variable deployment settings, including **`CLIENT_ENDPOINT_*`**,
 
 ## Related documentation
 
-- **[Architecture](../architecture/README.md)** — Trust boundaries and component roles
-- **[Authentication feature](../features/authentication.md)** — User-facing authentication flows
-- **[Deployment](../deployment/README.md)** — Docker and production guides
-- **[Operator runbook](../deployment/operator-runbook.md)** — Install/ops and disclosure checklists
+- **[Architecture](../architecture/README.md)** Trust boundaries and component roles
+- **[Authentication feature](../features/authentication.md)** User-facing authentication flows
+- **[Deployment](../deployment/README.md)** Docker and production guides
+- **[Operator runbook](../deployment/operator-runbook.md)** Install/ops and disclosure checklists
 
 ---
 

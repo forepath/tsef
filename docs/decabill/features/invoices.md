@@ -143,14 +143,14 @@ See **[Projects](./projects.md)** for KPIs, reassignment rules, and minimum bill
 
 Full schemas: [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml).
 
-## Related Documentation
+## Related documentation
 
-- **[Payment Processing](./payment-processing.md)** - Stripe checkout and webhooks
-- **[Billing Administration](./billing-administration.md)** - Manual invoices and KPIs
-- **[Customer Profiles](./customer-profiles.md)** - Required for issuance
-- **[Projects](./projects.md)** - Bill-time from tracked hours
-- **[Subscriptions](./subscriptions.md)** - Source of open positions
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant-scoped invoice data
+- **[Payment Processing](./payment-processing.md)** Stripe checkout and webhooks
+- **[Billing Administration](./billing-administration.md)** Manual invoices and KPIs
+- **[Customer Profiles](./customer-profiles.md)** Required for issuance
+- **[Projects](./projects.md)** Bill-time from tracked hours
+- **[Subscriptions](./subscriptions.md)** Source of open positions
+- **[Multi-tenancy](./multi-tenancy.md)** Tenant-scoped invoice data
 
 ---
 

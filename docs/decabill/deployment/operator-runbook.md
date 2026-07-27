@@ -18,27 +18,26 @@ Map your intended profile to **[System Requirements](./system-requirements.md)**
 ### Platform
 
 - [ ] Host OS is Linux **amd64** or **arm64** with a current kernel (LTS preferred for production)
-- [ ] Docker **20.10+** (recommended **24+**) and Compose **2.0+**
-- [ ] Node.js **24.14.1** only if running local Nx (containers already pin this version)
+- [ ] Docker **20.10+** (recommended **24+**) and Compose **2.0+** [ ] Node.js **24.14.1** only if running local Nx (containers already pin this version)
 - [ ] Images planned as non-root `agenstra` (UID **10001**) for API/worker and `node` (UID **1000**) for frontends
 
 ### Data services
 
-- [ ] PostgreSQL 16 sized for profile (production small ≥2–4 GiB RAM / 50 GiB disk; medium per system requirements)
-- [ ] Redis 7 sized for BullMQ history (production ≥1–2 GiB); AOF or RDB recovery plan agreed
+- [ ] PostgreSQL 16 sized for profile (production small ≥2-4 GiB RAM / 50 GiB disk; medium per system requirements)
+- [ ] Redis 7 sized for BullMQ history (production ≥1-2 GiB); AOF or RDB recovery plan agreed
 - [ ] Disk growth planned for invoice metadata, audit tables, PDF volume, and DATEV exports when enabled
 
 ### Billing manager roles
 
 - [ ] Production uses split **`QUEUE_ROLE`**: `api`, `worker`, and **one** `scheduler` per Redis key prefix
-- [ ] API memory limit ≥2–4 GiB (PDF path can briefly need **4 GiB**)
+- [ ] API memory limit ≥2-4 GiB (PDF path can briefly need **4 GiB**)
 - [ ] Worker memory limit ≥4 GiB for heavy PDF/provisioning batches; concurrency tuned to CPU and Stripe/cloud rate limits
 - [ ] Scheduler kept lightweight (≤1 GiB); never run multiple schedulers against the same Redis prefix
 - [ ] Invoice PDF and DATEV export volumes mounted on **api, worker, and scheduler** when those features are enabled
 
 ### Frontend and network
 
-- [ ] Billing console sized (≥0.5 vCPU, 512 MiB–1 GiB)
+- [ ] Billing console sized (≥0.5 vCPU, 512 MiB, 1 GiB)
 - [ ] Ingress plan covers console (**4500**), API (**3200**), and WebSocket (**8082**)
 - [ ] Bull Board (`/admin/queues`) restricted to operations networks
 - [ ] Production SMTP replaces Mailhog; outbound HTTPS available for Stripe and cloud providers
@@ -90,10 +89,8 @@ Run after Compose or orchestrated bring-up. Prefer staging with production-like 
 
 ### Subscription config change
 
-- [ ] Confirm `CONFIG_CHANGE_SCHEDULER_INTERVAL`, `CONFIG_CHANGE_SCHEDULER_BATCH_SIZE`, and `CONFIG_CHANGE_PROCESSING_TIMEOUT_MS` match expected load (defaults: 30s / 100 / 15m) — see [Environment configuration](./environment-configuration.md)
-- [ ] For cloud-init addons offered for mid-life remove: either set `deprovisionScriptTemplate` for real remote undo, or accept that empty/unset means **status-only** removal (row inactive, snapshot cleared, no SSH undo)
-- [ ] Dynamic billing provider plugins that support in-place resize must set `supportsServerTypeUpgrade` / `supportsServerTypeDowngrade` on metadata (fail-closed when omitted) — see [Subscription config change](../features/subscription-config-change.md) and [Dynamic provider plugins](../features/dynamic-provider-plugins.md)
-- [ ] After a failed config change: treat committed snapshots as billing authority; expect customers to resubmit; do not assume infra rollback
+- [ ] Confirm `CONFIG_CHANGE_SCHEDULER_INTERVAL`, `CONFIG_CHANGE_SCHEDULER_BATCH_SIZE`, and `CONFIG_CHANGE_PROCESSING_TIMEOUT_MS` match expected load (defaults: 30s / 100 / 15m), see [Environment configuration](./environment-configuration.md) [ ] For cloud-init addons offered for mid-life remove: either set `deprovisionScriptTemplate` for real remote undo, or accept that empty/unset means **status-only** removal (row inactive, snapshot cleared, no SSH undo)
+- [ ] Dynamic billing provider plugins that support in-place resize must set `supportsServerTypeUpgrade` / `supportsServerTypeDowngrade` on metadata (fail-closed when omitted), see [Subscription config change](../features/subscription-config-change.md) and [Dynamic provider plugins](../features/dynamic-provider-plugins.md) [ ] After a failed config change: treat committed snapshots as billing authority; expect customers to resubmit; do not assume infra rollback
 
 ### Logging and access
 
@@ -108,7 +105,7 @@ Operators who redistribute or operate Decabill should keep disclosure and supply
 ### Supported versions
 
 - [ ] Deploy only **supported 2.x.x** lines for security updates
-- [ ] If you market a product with digital elements in the EU, define **your** support-period end date (month/year) using upstream 2.x practice as input — do not invent unsupported lines as “supported”
+- [ ] If you market a product with digital elements in the EU, define **your** support-period end date (month/year) using upstream 2.x practice as input, do not invent unsupported lines as “supported”
 
 ### Receiving reports (if you are the operator of record)
 
@@ -127,13 +124,13 @@ Operators who redistribute or operate Decabill should keep disclosure and supply
 
 ## Related documentation
 
-- **[System Requirements](./system-requirements.md)** — Capacity baselines by role
-- **[Production Checklist](./production-checklist.md)** — Full production hardening
-- **[Docker Deployment](./docker-deployment.md)** — Compose layout and volumes
-- **[Background Jobs](./background-jobs.md)** — Queue roles and startup order
-- **[Environment Configuration](./environment-configuration.md)** — Variables that affect load and security
-- **[Vulnerability reporting and artifacts](../security/vulnerability-reporting-and-artifacts.md)** — Disclosure and SBOM
-- **[Operational hardening](../security/operational-hardening.md)** — Implemented controls
+- **[System Requirements](./system-requirements.md)** Capacity baselines by role
+- **[Production Checklist](./production-checklist.md)** Full production hardening
+- **[Docker Deployment](./docker-deployment.md)** Compose layout and volumes
+- **[Background Jobs](./background-jobs.md)** Queue roles and startup order
+- **[Environment Configuration](./environment-configuration.md)** Variables that affect load and security
+- **[Vulnerability reporting and artifacts](../security/vulnerability-reporting-and-artifacts.md)** Disclosure and SBOM
+- **[Operational hardening](../security/operational-hardening.md)** Implemented controls
 
 ---
 

@@ -8,7 +8,7 @@ See also: [API Reference](../api-reference/README.md) for the published OpenAPI 
 
 All endpoints under `/admin/billing/*` require admin role (`@KeycloakRoles(ADMIN)` + `@UsersRoles(ADMIN)`). Frontend routes use `authGuard` + `billingAdminGuard`.
 
-**Multi-tenancy:** Admin and user routes are scoped by **`X-Tenant`** and the user's **`tenant_id`**. API key auth with **`STATIC_API_KEY`** and without **`STATIC_API_KEY_TENANT_ID`** can administer **all** configured tenants (accepted risk **[DR-002](../security/accepted-risks.md#dr-002--billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**).
+**Multi-tenancy:** Admin and user routes are scoped by **`X-Tenant`** and the user's **`tenant_id`**. API key auth with **`STATIC_API_KEY`** and without **`STATIC_API_KEY_TENANT_ID`** can administer **all** configured tenants (accepted risk **[DR-002](../security/accepted-risks.md#dr-002-billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**).
 
 ## Billing Dashboard
 
@@ -108,16 +108,6 @@ Projects are managed under `/admin/billing/projects`. Admins assign each project
 
 See **[Projects](./projects.md)** for assignment rules, KPIs, and bill-time preconditions.
 
-## Related Admin Pages
-
-- **Billing dashboard** (`/administration/billing`) - KPIs, charts, bill-now
-- **Customer profiles** (`/administration/customer-profiles`) - Admin CRUD
-- **Customer trust score** - Admin-only traffic-light ranking inside customer profiles
-- **Projects** (`/administration/projects`) - Project CRUD and bill-time
-- **Webhooks** (`/webhooks`) - Tenant-scoped outbound notification endpoints; see [Webhooks](./webhooks.md)
-- **Service types and plans** - Catalog administration in the billing console
-- **Users** (`/users`) - Shared identity user manager
-
 ## Webhook Notifications
 
 Admin and API-key clients manage tenant-scoped webhook endpoints under `/admin/billing/webhooks`.
@@ -137,15 +127,18 @@ Admin and API-key clients manage tenant-scoped webhook endpoints under `/admin/b
 
 See **[Webhooks](./webhooks.md)** for payload envelope, signing, and event types.
 
-## Related Documentation
+## Related documentation
 
-- **[Invoices](./invoices.md)** - Status model and open positions
-- **[Customer Profiles](./customer-profiles.md)** - Profile fields and validation
-- **[Customer Trust Score](./customer-trust-score.md)** - Trust ranking thresholds, factors, and webhooks
-- **[Projects](./projects.md)** - Admin project CRUD and bill-time
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant scope and DR-002
-- **[Authentication](./authentication.md)** - Admin role requirements
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Full admin path schemas
+- **[Dashboard and server control](./dashboard-and-server-control.md)** Billing dashboard KPIs, charts, and bill-now (`/administration/billing`)
+- **[Customer profiles](./customer-profiles.md)** Admin customer profile CRUD (`/administration/customer-profiles`)
+- **[Customer trust score](./customer-trust-score.md)** Admin-only traffic-light ranking inside customer profiles
+- **[Projects](./projects.md)** Admin project CRUD and bill-time (`/administration/projects`)
+- **[Webhooks](./webhooks.md)** Tenant-scoped outbound notification endpoints (`/webhooks`)
+- **[Service types and plans](./service-types-and-plans.md)** Catalog administration in the billing console
+- **[Authentication](./authentication.md)** Shared identity user manager (`/users`)
+- **[Invoices](./invoices.md)** Status model and open positions
+- **[Multi-tenancy](./multi-tenancy.md)** Tenant scope and DR-002
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** Full admin path schemas
 
 ---
 

@@ -84,12 +84,12 @@ When the original plan allowed customer location selection, the encrypted snapsh
 
 The billing console lists backorders on the customer subscriptions flow with status, plan name, and retry or cancel actions where permitted.
 
-## Related Documentation
+## Related documentation
 
-- **[Subscriptions](./subscriptions.md)** - Order flow and `autoBackorder`
-- **[Service Types and Plans](./service-types-and-plans.md)** - Availability endpoints
-- **[Server Provisioning](./server-provisioning.md)** - Provisioning on fulfillment
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Backorder schemas
+- **[Subscriptions](./subscriptions.md)** Order flow and `autoBackorder`
+- **[Service Types and Plans](./service-types-and-plans.md)** Availability endpoints
+- **[Server Provisioning](./server-provisioning.md)** Provisioning on fulfillment
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** Backorder schemas
 
 ---
 

@@ -36,14 +36,13 @@ Resolution is implemented in **`getAuthenticationMethod`** (`libs/domains/identi
 | **`TenantUserGuard`**          | Ensures authenticated users' **`tenant_id`** matches the request tenant.                                                                                                                                                                      |
 | **`STATIC_API_KEY_TENANT_ID`** | Optional bind of API key auth to one tenant.                                                                                                                                                                                                  |
 
-**Accepted risk [DR-002](./accepted-risks.md#dr-002--billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset):** With **`STATIC_API_KEY`** and **without** **`STATIC_API_KEY_TENANT_ID`**, one deployment API key grants **admin access to every tenant** in **`TENANTS`** (tenant chosen per request via **`X-Tenant`**). Interactive **keycloak** / **users** sessions remain limited to the user's tenant.
+**Accepted risk [DR-002](./accepted-risks.md#dr-002-billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset):** With **`STATIC_API_KEY`** and **without** **`STATIC_API_KEY_TENANT_ID`**, one deployment API key grants **admin access to every tenant** in **`TENANTS`** (tenant chosen per request via **`X-Tenant`**). Interactive **keycloak** / **users** sessions remain limited to the user's tenant.
 
 Code: `libs/domains/decabill/backend/feature-billing-manager/src/lib/guards/tenant-user.guard.ts`, `libs/domains/shared/backend/util-http-context/src/lib/tenant-id.middleware.ts`.
 
 ## Stripe webhooks
 
-- Webhook signatures verified with **`STRIPE_WEBHOOK_SECRET`**
-- Invalid signatures are rejected; do not disable verification in production
+- Webhook signatures verified with **`STRIPE_WEBHOOK_SECRET`** Invalid signatures are rejected; do not disable verification in production
 - Route webhook URL only to the billing API ingress; restrict by network policy where possible
 
 ## Logging and correlation
@@ -97,10 +96,10 @@ Cloud-init templates may configure root SSH for first-boot automation. See **DR-
 
 ## Related documentation
 
-- **[Accepted risks](./accepted-risks.md)** - DR-001 through DR-005
-- **[Environment configuration](../deployment/environment-configuration.md)**
-- **[Production checklist](../deployment/production-checklist.md)**
-- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)** - Disclosure and response commitments
+- **[Accepted risks](./accepted-risks.md)** DR-001 through DR-005
+- **[Environment configuration](../deployment/environment-configuration.md)** Security-related environment variables
+- **[Production checklist](../deployment/production-checklist.md)** Pre-flight production checks
+- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)** Disclosure and response commitments
 
 ---
 

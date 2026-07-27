@@ -78,12 +78,13 @@ The editor can be configured with:
 - Word wrap
 - Line endings
 
-## Related Documentation
+## Related documentation
 
-- **[File Management](./file-management.md)** - File operations
-- **[Chat Interface](./chat-interface.md)** - Chat with agents
-- **[Monaco Editor Documentation](https://microsoft.github.io/monaco-editor/)** - Editor documentation
+- **[File Management](./file-management.md)** File operations
+- **[Chat Interface](./chat-interface.md)** Chat with agents
 
----
+## External resources
+
+- **[Monaco Editor Documentation](https://microsoft.github.io/monaco-editor/)** Editor documentation
 
 _For detailed editor integration, see the feature and deployment docs linked below._

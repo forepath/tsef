@@ -111,12 +111,12 @@ NgRx effects in `data-access-billing-console`:
 
 When WebSocket is unavailable, [Dashboard and Server Control](./dashboard-and-server-control.md) falls back to REST.
 
-## Related Documentation
+## Related documentation
 
-- **[Dashboard and Server Control](./dashboard-and-server-control.md)** - Overview UI and server actions
-- **[Authentication](./authentication.md)** - JWT and Keycloak handshake
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant in handshake
-- **[Billing Manager AsyncAPI](/spec/billing-manager/asyncapi.yaml)** - Full message schemas
+- **[Dashboard and Server Control](./dashboard-and-server-control.md)** Overview UI and server actions
+- **[Authentication](./authentication.md)** JWT and Keycloak handshake
+- **[Multi-tenancy](./multi-tenancy.md)** Tenant in handshake
+- **[Billing Manager AsyncAPI](/spec/billing-manager/asyncapi.yaml)** Full message schemas
 
 ---
 

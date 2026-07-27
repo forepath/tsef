@@ -10,8 +10,7 @@ Multi-tenancy is enforced on:
 
 - HTTP REST API via the `X-Tenant` header
 - Socket.IO dashboard status via handshake `extraHeaders` or `auth.tenantId`
-- Socket.IO project board via the same handshake rules on namespace **`projects`**
-- Background jobs that iterate all configured tenants
+- Socket.IO project board via the same handshake rules on namespace **`projects`** Background jobs that iterate all configured tenants
 - Stripe webhook handling that resolves tenant from checkout session metadata
 
 ## Tenant Selection
@@ -24,7 +23,7 @@ Clients send optional header:
 X-Tenant: one
 ```
 
-When omitted, the server uses `default` unless `TENANTS_ALLOW_DEFAULT=false` — then missing, blank, or `default` values are rejected with 400.
+When omitted, the server uses `default` unless `TENANTS_ALLOW_DEFAULT=false`, then missing, blank, or `default` values are rejected with 400.
 
 The billing console reads `billing.tenantId` from runtime config and attaches `X-Tenant` on every API call.
 
@@ -98,11 +97,10 @@ STATIC_API_KEY_TENANT_ID=one
 
 A valid `STATIC_API_KEY` grants admin access to **every** tenant listed in `TENANTS`, selected per request via `X-Tenant`. This is intentional for a single shared automation credential.
 
-**Accepted risk [DR-002](../security/accepted-risks.md#dr-002--billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset):** Anyone with the deployment API key can read and mutate all configured tenants by changing `X-Tenant`.
+**Accepted risk [DR-002](../security/accepted-risks.md#dr-002-billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset):** Anyone with the deployment API key can read and mutate all configured tenants by changing `X-Tenant`.
 
-**Mitigations:**
+**Mitigations:** Set `STATIC_API_KEY_TENANT_ID` when automation must target one tenant only
 
-- Set `STATIC_API_KEY_TENANT_ID` when automation must target one tenant only
 - Prefer Keycloak or users auth for the billing console in multi-tenant production
 - Rotate and protect `STATIC_API_KEY` as a high-value secret
 - WebSocket dashboard status does not stream to API key clients
@@ -159,13 +157,13 @@ sequenceDiagram
 | `BILLING_FRONTEND_URL`     | No       | Default tenant frontend base URL for Stripe redirects                                       |
 | `TENANT_FRONTEND_URLS`     | No       | Per-tenant frontend URLs for Stripe redirects                                               |
 
-## Related Documentation
+## Related documentation
 
-- **[Authentication](./authentication.md)** - Auth methods and API key behavior
-- **[Billing Administration](./billing-administration.md)** - Admin routes and tenant scope
-- **[Security - Accepted risks](../security/accepted-risks.md)** - **DR-002** multi-tenant API key scope
-- **[Environment Configuration](../deployment/environment-configuration.md)** - Full variable reference
-- **[Payment Processing](./payment-processing.md)** - Tenant-aware Stripe redirects
+- **[Authentication](./authentication.md)** Auth methods and API key behavior
+- **[Billing Administration](./billing-administration.md)** Admin routes and tenant scope
+- **[Security (Accepted risks)](../security/accepted-risks.md)** **DR-002** multi-tenant API key scope
+- **[Environment Configuration](../deployment/environment-configuration.md)** Full variable reference
+- **[Payment Processing](./payment-processing.md)** Tenant-aware Stripe redirects
 
 ---
 

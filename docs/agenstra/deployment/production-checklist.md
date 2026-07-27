@@ -136,20 +136,17 @@ Comprehensive checklist for deploying Agenstra to production.
 
 ## Deployment Process
 
-1. **Pre-deployment**
-   - Review and test all changes
+1. **Pre-deployment** Review and test all changes
    - Run full test suite
    - Check security vulnerabilities
    - Review configuration
 
-2. **Deployment**
-   - Deploy to staging first
+2. **Deployment** Deploy to staging first
    - Test staging deployment
    - Deploy to production
    - Monitor deployment
 
-3. **Post-deployment**
-   - Verify all services are running
+3. **Post-deployment** Verify all services are running
    - Check health endpoints
    - Monitor logs for errors
    - Test critical functionality
@@ -161,13 +158,13 @@ Comprehensive checklist for deploying Agenstra to production.
 - Keep previous versions available
 - Have rollback scripts ready
 
-## Related Documentation
+## Related documentation
 
-- **[Operator Runbook](./operator-runbook.md)** - Capacity, install verification, day-2, and disclosure checklists
-- **[System Requirements](./system-requirements.md)** - CPU, memory, and disk baselines
-- **[Docker Deployment](./docker-deployment.md)** - Containerized deployment
-- **[Environment Configuration](./environment-configuration.md)** - Environment variables
-- **[Troubleshooting](../troubleshooting/README.md)** - Problem-solving guides
+- **[Operator Runbook](./operator-runbook.md)** Capacity, install verification, day-2, and disclosure checklists
+- **[System Requirements](./system-requirements.md)** CPU, memory, and disk baselines
+- **[Docker Deployment](./docker-deployment.md)** Containerized deployment
+- **[Environment Configuration](./environment-configuration.md)** Environment variables
+- **[Troubleshooting](../troubleshooting/README.md)** Problem-solving guides
 
 ---
 
