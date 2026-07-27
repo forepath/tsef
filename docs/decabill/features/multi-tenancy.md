@@ -10,8 +10,7 @@ Multi-tenancy is enforced on:
 
 - HTTP REST API via the `X-Tenant` header
 - Socket.IO dashboard status via handshake `extraHeaders` or `auth.tenantId`
-- Socket.IO project board via the same handshake rules on namespace **`projects`**
-- Background jobs that iterate all configured tenants
+- Socket.IO project board via the same handshake rules on namespace **`projects`**: Background jobs that iterate all configured tenants
 - Stripe webhook handling that resolves tenant from checkout session metadata
 
 ## Tenant Selection
@@ -24,7 +23,7 @@ Clients send optional header:
 X-Tenant: one
 ```
 
-When omitted, the server uses `default` unless `TENANTS_ALLOW_DEFAULT=false` — then missing, blank, or `default` values are rejected with 400.
+When omitted, the server uses `default` unless `TENANTS_ALLOW_DEFAULT=false`: then missing, blank, or `default` values are rejected with 400.
 
 The billing console reads `billing.tenantId` from runtime config and attaches `X-Tenant` on every API call.
 
@@ -161,11 +160,11 @@ sequenceDiagram
 
 ## Related Documentation
 
-- **[Authentication](./authentication.md)** - Auth methods and API key behavior
-- **[Billing Administration](./billing-administration.md)** - Admin routes and tenant scope
-- **[Security - Accepted risks](../security/accepted-risks.md)** - **DR-002** multi-tenant API key scope
-- **[Environment Configuration](../deployment/environment-configuration.md)** - Full variable reference
-- **[Payment Processing](./payment-processing.md)** - Tenant-aware Stripe redirects
+- **[Authentication](./authentication.md)**: Auth methods and API key behavior
+- **[Billing Administration](./billing-administration.md)**: Admin routes and tenant scope
+- **[Security: Accepted risks](../security/accepted-risks.md)**: **DR-002** multi-tenant API key scope
+- **[Environment Configuration](../deployment/environment-configuration.md)**: Full variable reference
+- **[Payment Processing](./payment-processing.md)**: Tenant-aware Stripe redirects
 
 ---
 

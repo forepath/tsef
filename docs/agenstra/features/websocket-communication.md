@@ -177,7 +177,7 @@ sequenceDiagram
 
 ### Client → Server
 
-- `setClient` with `{ clientId }` – joins Socket.IO room `client:{clientId}` when authorized
+- `setClient` with `{ clientId }` to joins Socket.IO room `client:{clientId}` when authorized
 
 ### Server → Client
 
@@ -267,11 +267,11 @@ sequenceDiagram
 
 ## Related Documentation
 
-- **[Chat Interface](./chat-interface.md)** - Chat functionality details
-- **[Tickets and Workspaces](./tickets-and-workspaces.md)** - Ticket board and automation
-- **[Agent Management](./agent-management.md)** - Agent authentication
-- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** - Controller WebSocket details
-- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** - Manager WebSocket details
+- **[Chat Interface](./chat-interface.md)**: Chat functionality details
+- **[Tickets and Workspaces](./tickets-and-workspaces.md)**: Ticket board and automation
+- **[Agent Management](./agent-management.md)**: Agent authentication
+- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)**: Controller WebSocket details
+- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)**: Manager WebSocket details
 
 ---
 

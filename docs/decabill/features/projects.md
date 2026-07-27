@@ -32,8 +32,8 @@ Customers can list and view tickets, milestones, and ticket comments. Ticket cre
 
 **Frontend routes:**
 
-- `/projects` — project list
-- `/projects/:projectId` — project detail with read-only board
+- `/projects`: project list
+- `/projects/:projectId`: project detail with read-only board
 
 ## Admin CRUD
 
@@ -108,7 +108,7 @@ Entries may optionally reference a ticket (`ticketId`). Billed entries (`billedA
 | `subscriptionId` | Optional subscription link (must belong to project customer) |
 | `lineItems`      | Optional extra invoice lines (same shape as manual invoices) |
 
-Only unbilled entries where `startedAt >= from` and `endedAt <= to` are included. `from` must be strictly before `to`. The issued invoice always includes one generated line for the billed time range — **description** = project name plus billed period (`from – to`), **quantity** = billed hours, **unit price (net)** = project hourly rate — followed by any optional `lineItems`. Per-entry detail remains on the attached time report.
+Only unbilled entries where `startedAt >= from` and `endedAt <= to` are included. `from` must be strictly before `to`. The issued invoice always includes one generated line for the billed time range: **description** = project name plus billed period (`from`/`to`), **quantity** = billed hours, **unit price (net)** = project hourly rate: followed by any optional `lineItems`. Per-entry detail remains on the attached time report.
 
 ### Preconditions
 
@@ -138,7 +138,7 @@ Admins can generate a **live** time report PDF without persisting it:
 
 The modal reuses the same default **From** / **To** values as bill-time (`GET .../unbilled-time-bounds`). The PDF lists time entries (when, duration, description, ticket, billing status) for the selected range.
 
-Bill-time does **not** require ticket or milestone lock and does **not** lock tickets automatically. Board scope lock (ticket/milestone) and billing lock (billed time entries) are separate concerns. See [Project Board — Locking](./project-board.md#locking).
+Bill-time does **not** require ticket or milestone lock and does **not** lock tickets automatically. Board scope lock (ticket/milestone) and billing lock (billed time entries) are separate concerns. See [Project Board: Locking](./project-board.md#locking).
 
 ```mermaid
 sequenceDiagram
@@ -225,12 +225,12 @@ See [Authentication](./authentication.md) and [Multi-tenancy](./multi-tenancy.md
 
 ## Related Documentation
 
-- **[Project Board](./project-board.md)** - Live board, swimlanes, and WebSocket events
-- **[Billing Administration](./billing-administration.md)** - Admin projects UI and cross-links
-- **[Customer Profiles](./customer-profiles.md)** - Profile required for bill-time
-- **[Invoices](./invoices.md)** - Issued invoice from project time
-- **[Real-time Status](./real-time-status.md)** - Separate `billing` namespace for server status
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Project and board REST schemas
+- **[Project Board](./project-board.md)**: Live board, swimlanes, and WebSocket events
+- **[Billing Administration](./billing-administration.md)**: Admin projects UI and cross-links
+- **[Customer Profiles](./customer-profiles.md)**: Profile required for bill-time
+- **[Invoices](./invoices.md)**: Issued invoice from project time
+- **[Real-time Status](./real-time-status.md)**: Separate `billing` namespace for server status
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)**: Project and board REST schemas
 
 ---
 

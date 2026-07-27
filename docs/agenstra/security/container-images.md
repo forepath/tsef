@@ -1,6 +1,6 @@
 # Container image security
 
-This page documents **first-party Docker images**: runtime users, bind mounts, entrypoints, and **restricted `sudo`**. It complements **[Operational hardening](./operational-hardening.md)** and **[Docker deployment](../deployment/docker-deployment.md)**.
+This page documents **first-party Docker images**, including runtime users, bind mounts, entrypoints, and **restricted `sudo`**. It complements **[Operational hardening](./operational-hardening.md)** and **[Docker deployment](../deployment/docker-deployment.md)**.
 
 For image build targets and registry names, see **[Backend Agent Manager](../applications/backend-agent-manager.md)** (`project.json` / `Dockerfile.*`).
 
@@ -92,8 +92,8 @@ Deploy **manager API, worker, VNC, SSH, and agi** images from the **same release
 
 ## Related documentation
 
-- **[Operational hardening](./operational-hardening.md)** — Summary table and cross-links
-- **[Docker deployment](../deployment/docker-deployment.md#container-security-images)** — Compose and `DOCKER_GID`
-- **[Production checklist](../deployment/production-checklist.md)** — Pre-flight checks
-- **[VNC browser access](../features/vnc-browser-access.md)** — Feature architecture
-- **[Environment configuration](../deployment/environment-configuration.md)** — Per-provider image env vars
+- **[Operational hardening](./operational-hardening.md)**: Summary table and cross-links
+- **[Docker deployment](../deployment/docker-deployment.md#container-security-images)**: Compose and `DOCKER_GID`
+- **[Production checklist](../deployment/production-checklist.md)**: Pre-flight checks
+- **[VNC browser access](../features/vnc-browser-access.md)**: Feature architecture
+- **[Environment configuration](../deployment/environment-configuration.md)**: Per-provider image env vars

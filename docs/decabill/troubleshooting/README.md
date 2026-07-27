@@ -1,15 +1,15 @@
 # Troubleshooting Documentation
 
-This section provides guides for troubleshooting common issues and debugging problems in Decabill.
+This section covers common issues and debugging for Decabill.
 
 ## Overview
 
-Troubleshooting guides help you:
+Use these guides to:
 
 - Identify and resolve common billing and deployment problems
-- Debug API, WebSocket, queue, and payment issues effectively
+- Debug API, WebSocket, queue, and payment issues
 - Understand error messages and log patterns
-- Find solutions quickly
+- Find practical fixes
 
 ## Troubleshooting Guides
 
@@ -36,8 +36,7 @@ Debugging strategies and tools:
 
 ### Connection Issues
 
-- Check billing API is running on port **3200**
-- Verify billing console `API_URL` and `CSP_CONNECT_SRC_EXTRA`
+- Check billing API is running on port **3200**: Verify billing console `API_URL` and `CSP_CONNECT_SRC_EXTRA`
 - Confirm `CORS_ORIGIN` includes the console origin
 
 ### Authentication Problems
@@ -63,8 +62,8 @@ If you encounter issues:
 
 ## Related Documentation
 
-- **[Security accepted risks](../security/accepted-risks.md)** - Known documented behaviors (DR-001 through DR-005)
-- **[Background jobs](../deployment/background-jobs.md)** - Queue roles and Bull Board
+- **[Security accepted risks](../security/accepted-risks.md)**: Known documented behaviors (DR-001 through DR-005)
+- **[Background jobs](../deployment/background-jobs.md)**: Queue roles and Bull Board
 
 ---
 

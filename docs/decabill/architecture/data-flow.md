@@ -248,10 +248,10 @@ Dashboard socket effects (`connectBillingDashboardSocket$`, `billingDashboardSoc
 
 ## Related Documentation
 
-- **[System Overview](./system-overview.md)** - Tier architecture
-- **[Components](./components.md)** - Runtime components
-- **[Real-time Status](../features/real-time-status.md)** - WebSocket contract details
-- **[API Reference](../api-reference/README.md)** - OpenAPI and AsyncAPI specs
+- **[System Overview](./system-overview.md)**: Tier architecture
+- **[Components](./components.md)**: Runtime components
+- **[Real-time Status](../features/real-time-status.md)**: WebSocket contract details
+- **[API Reference](../api-reference/README.md)**: OpenAPI and AsyncAPI specs
 
 ---
 

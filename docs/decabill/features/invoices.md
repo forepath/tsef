@@ -53,9 +53,9 @@ Configure scheduler interval with `OPEN_POSITION_INVOICE_SCHEDULER_INTERVAL` (de
 
 ### Summary and Lists
 
-- `GET /invoices/summary` - Aggregated counts and amounts for the authenticated user
-- `GET /invoices/open-overdue` - Open and overdue invoices for the user (`issued`, `partially_paid`, `overdue`)
-- `GET /invoices/history` - Paid and void invoices for the user (drafts are never shown to customers)
+- `GET /invoices/summary`: Aggregated counts and amounts for the authenticated user
+- `GET /invoices/open-overdue`: Open and overdue invoices for the user (`issued`, `partially_paid`, `overdue`)
+- `GET /invoices/history`: Paid and void invoices for the user (drafts are never shown to customers)
 
 The customer invoices page shows these as two columns: **Open and overdue invoices** and **Invoice history**. Both lists are user-scoped (not filtered by subscription). Subscription-scoped `GET /invoices/{subscriptionId}` remains available for other flows and also excludes drafts.
 
@@ -65,10 +65,10 @@ Customer invoice list and detail endpoints (including by-ref and subscription-sc
 
 Invoices are addressed by stable `invoiceRefId`:
 
-- `GET /invoices/ref/{invoiceRefId}` - Invoice detail
-- `GET /invoices/ref/{invoiceRefId}/pdf` - Download ZUGFeRD PDF
-- `GET /invoices/ref/{invoiceRefId}/void-document/pdf` - Void document PDF when voided
-- `POST /invoices/ref/{invoiceRefId}/pay` - Initiate Stripe Checkout
+- `GET /invoices/ref/{invoiceRefId}`: Invoice detail
+- `GET /invoices/ref/{invoiceRefId}/pdf`: Download ZUGFeRD PDF
+- `GET /invoices/ref/{invoiceRefId}/void-document/pdf`: Void document PDF when voided
+- `POST /invoices/ref/{invoiceRefId}/pay`: Initiate Stripe Checkout
 
 Subscription-scoped paths mirror the same operations under `/invoices/{subscriptionId}/ref/{invoiceRefId}`.
 
@@ -129,10 +129,10 @@ See **[Projects](./projects.md)** for KPIs, reassignment rules, and minimum bill
 
 ## Manual Invoice Workflow (Admin)
 
-1. `POST /admin/billing/invoices/manual` - Create draft with user, optional subscription, custom line items
-2. `POST /admin/billing/invoices/{invoiceRefId}` - Update draft line items
-3. `POST /admin/billing/invoices/{invoiceRefId}/issue` - Issue draft (requires complete customer profile)
-4. `DELETE /admin/billing/invoices/{invoiceRefId}` - Delete draft only
+1. `POST /admin/billing/invoices/manual`: Create draft with user, optional subscription, custom line items
+2. `POST /admin/billing/invoices/{invoiceRefId}`: Update draft line items
+3. `POST /admin/billing/invoices/{invoiceRefId}/issue`: Issue draft (requires complete customer profile)
+4. `DELETE /admin/billing/invoices/{invoiceRefId}`: Delete draft only
 
 ## API Endpoints Summary
 
@@ -145,12 +145,12 @@ Full schemas: [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml).
 
 ## Related Documentation
 
-- **[Payment Processing](./payment-processing.md)** - Stripe checkout and webhooks
-- **[Billing Administration](./billing-administration.md)** - Manual invoices and KPIs
-- **[Customer Profiles](./customer-profiles.md)** - Required for issuance
-- **[Projects](./projects.md)** - Bill-time from tracked hours
-- **[Subscriptions](./subscriptions.md)** - Source of open positions
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant-scoped invoice data
+- **[Payment Processing](./payment-processing.md)**: Stripe checkout and webhooks
+- **[Billing Administration](./billing-administration.md)**: Manual invoices and KPIs
+- **[Customer Profiles](./customer-profiles.md)**: Required for issuance
+- **[Projects](./projects.md)**: Bill-time from tracked hours
+- **[Subscriptions](./subscriptions.md)**: Source of open positions
+- **[Multi-tenancy](./multi-tenancy.md)**: Tenant-scoped invoice data
 
 ---
 

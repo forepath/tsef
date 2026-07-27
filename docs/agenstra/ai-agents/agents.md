@@ -8,8 +8,8 @@ Agents are specialized AI roles (e.g. architect, code reviewer). Subagents are f
 
 ## Structure
 
-- **Primary agents**: `.agenstra/agents/` – files named `<name>.agent.mdc`
-- **Subagents**: `.agenstra/subagents/` – files named `<name>.subagent.mdc`
+- **Primary agents**: `.agenstra/agents/` to files named `<name>.agent.mdc`
+- **Subagents**: `.agenstra/subagents/` to files named `<name>.subagent.mdc`
 
 Each file is **MDC** (Markdown with frontmatter): a YAML block between `---` delimiters for metadata, then a Markdown body for the prompt/instructions. The **filename stem** (e.g. `architect` from `architect.agent.mdc`) is the agent id used in output filenames and references. The frontmatter may also include an `id` field for display or compatibility.
 
@@ -73,13 +73,13 @@ General instructions here.
 
 ## Output by tool
 
-- **Cursor** – Primary agents and subagents → `.cursor/agents/<id>.md` (Markdown with frontmatter `name`, `description` and body from MDC body or description).
-- **OpenCode** – All agents and subagents → `.opencode/agents/<id>.md` with frontmatter (`description`, `mode`, `model`, `temperature`, `tools`) and body from MDC body or description. The `tools` object is written as YAML (e.g. `write: false`, `edit: false`, `bash: false`) per [OpenCode agents docs](https://opencode.ai/docs/agents/#markdown).
-- **GitHub Copilot** – Primary agents and subagents → [`.github/agents/<id>.agent.md`](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli) with frontmatter `name`, `description`, optional `model` / `tools` (enabled tool names as a list), and prompt body. See [custom agents configuration](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
+- **Cursor**: Primary agents and subagents → `.cursor/agents/<id>.md` (Markdown with frontmatter `name`, `description` and body from MDC body or description).
+- **OpenCode**: All agents and subagents → `.opencode/agents/<id>.md` with frontmatter (`description`, `mode`, `model`, `temperature`, `tools`) and body from MDC body or description. The `tools` object is written as YAML (e.g. `write: false`, `edit: false`, `bash: false`) per [OpenCode agents docs](https://opencode.ai/docs/agents/#markdown).
+- **GitHub Copilot**: Primary agents and subagents → [`.github/agents/<id>.agent.md`](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli) with frontmatter `name`, `description`, optional `model` / `tools` (enabled tool names as a list), and prompt body. See [custom agents configuration](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
 
 ## Related
 
-- [Rules](./rules.md) – Project instructions
-- [Skills](./skills.md) – Reusable knowledge
-- [MCP definitions](./mcp-definitions.md) – MCP server config
-- [README](./README.md) – Overview of `.agenstra/` and transformation
+- [Rules](./rules.md): Project instructions
+- [Skills](./skills.md): Reusable knowledge
+- [MCP definitions](./mcp-definitions.md): MCP server config
+- [README](./README.md): Overview of `.agenstra/` and transformation

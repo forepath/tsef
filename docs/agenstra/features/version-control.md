@@ -4,7 +4,7 @@ Full Git operations directly from the web interface. View status, manage branche
 
 ## Overview
 
-Version control enables you to perform Git operations directly in agent containers. All operations are performed in the container's workspace, which contains a cloned Git repository.
+Version control lets you perform Git operations directly in agent containers. All operations are performed in the container's workspace, which contains a cloned Git repository.
 
 ## Git Operations
 
@@ -58,8 +58,8 @@ View the current Git status:
 
 The HTTP API also exposes operator-focused endpoints (on the manager and proxied through the controller):
 
-- **`POST .../vcs/workspace/prepare-clean`** – Prepare a clean Git workspace for automated or manual workflows (see OpenAPI for semantics).
-- **`POST .../automation/verify-commands`** – Validate command configuration used by ticket automation and related flows.
+- **`POST .../vcs/workspace/prepare-clean`**: Prepare a clean Git workspace for automated or manual workflows (see OpenAPI for semantics).
+- **`POST .../automation/verify-commands`**: Validate command configuration used by ticket automation and related flows.
 
 These complement everyday commit/push operations documented above.
 
@@ -98,29 +98,29 @@ sequenceDiagram
 
 ### Version Control Operations
 
-- `GET /api/clients/:id/agents/:agentId/vcs/status` - Get git status
-- `GET /api/clients/:id/agents/:agentId/vcs/branches` - List all branches
-- `GET /api/clients/:id/agents/:agentId/vcs/diff?path={filePath}` - Get file diff
-- `POST /api/clients/:id/agents/:agentId/vcs/stage` - Stage files
-- `POST /api/clients/:id/agents/:agentId/vcs/unstage` - Unstage files
-- `POST /api/clients/:id/agents/:agentId/vcs/commit` - Commit staged changes
-- `POST /api/clients/:id/agents/:agentId/vcs/push` - Push changes to remote
-- `POST /api/clients/:id/agents/:agentId/vcs/pull` - Pull changes from remote
-- `POST /api/clients/:id/agents/:agentId/vcs/fetch` - Fetch changes from remote
-- `POST /api/clients/:id/agents/:agentId/vcs/rebase` - Rebase current branch
-- `POST /api/clients/:id/agents/:agentId/vcs/branches/:branch/switch` - Switch to a branch
-- `POST /api/clients/:id/agents/:agentId/vcs/branches` - Create a new branch
-- `DELETE /api/clients/:id/agents/:agentId/vcs/branches/:branch` - Delete a branch
-- `POST /api/clients/:id/agents/:agentId/vcs/conflicts/resolve` - Resolve merge conflicts
-- `POST /api/clients/:id/agents/:agentId/vcs/workspace/prepare-clean` - Prepare clean workspace (proxied)
-- `POST /api/clients/:id/agents/:agentId/automation/verify-commands` - Verify automation commands (proxied)
+- `GET /api/clients/:id/agents/:agentId/vcs/status`: Get git status
+- `GET /api/clients/:id/agents/:agentId/vcs/branches`: List all branches
+- `GET /api/clients/:id/agents/:agentId/vcs/diff?path={filePath}`: Get file diff
+- `POST /api/clients/:id/agents/:agentId/vcs/stage`: Stage files
+- `POST /api/clients/:id/agents/:agentId/vcs/unstage`: Unstage files
+- `POST /api/clients/:id/agents/:agentId/vcs/commit`: Commit staged changes
+- `POST /api/clients/:id/agents/:agentId/vcs/push`: Push changes to remote
+- `POST /api/clients/:id/agents/:agentId/vcs/pull`: Pull changes from remote
+- `POST /api/clients/:id/agents/:agentId/vcs/fetch`: Fetch changes from remote
+- `POST /api/clients/:id/agents/:agentId/vcs/rebase`: Rebase current branch
+- `POST /api/clients/:id/agents/:agentId/vcs/branches/:branch/switch`: Switch to a branch
+- `POST /api/clients/:id/agents/:agentId/vcs/branches`: Create a new branch
+- `DELETE /api/clients/:id/agents/:agentId/vcs/branches/:branch`: Delete a branch
+- `POST /api/clients/:id/agents/:agentId/vcs/conflicts/resolve`: Resolve merge conflicts
+- `POST /api/clients/:id/agents/:agentId/vcs/workspace/prepare-clean`: Prepare clean workspace (proxied)
+- `POST /api/clients/:id/agents/:agentId/automation/verify-commands`: Verify automation commands (proxied)
 
 For detailed API documentation, see the application and API reference docs linked below.
 
 ## Related Documentation
 
-- **[File Management](./file-management.md)** - File operations
-- **[Agent Management](./agent-management.md)** - Agent containers
+- **[File Management](./file-management.md)**: File operations
+- **[Agent Management](./agent-management.md)**: Agent containers
 
 ---
 

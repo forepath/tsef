@@ -82,8 +82,7 @@ Common problems and their solutions in the Agenstra system.
 **Solutions**:
 
 - Ensure host `/opt/agents` exists and is writable by UID **10001**, or allow the image entrypoint to `chown` the bind mount (rebuild worker/VNC/SSH/agi images from a current release)
-- Confirm manager API, worker, VNC, SSH, and agi images are on the **same release tag**
-- Inspect ownership on the host: `ls -la /opt/agents/<volume-uuid>`
+- Confirm manager API, worker, VNC, SSH, and agi images are on the **same release tag**: Inspect ownership on the host: `ls -la /opt/agents/<volume-uuid>`
 - See **[Container image security](../security/container-images.md#host-directory-ownership)**
 
 ## Database Issues
@@ -189,8 +188,8 @@ Common problems and their solutions in the Agenstra system.
 
 ## Related Documentation
 
-- **[Debugging Guide](./debugging-guide.md)** - Debugging strategies
-- **[Deployment Guide](../deployment/README.md)** - Deployment troubleshooting
+- **[Debugging Guide](./debugging-guide.md)**: Debugging strategies
+- **[Deployment Guide](../deployment/README.md)**: Deployment troubleshooting
 
 ---
 

@@ -54,10 +54,10 @@ sequenceDiagram
 
 Cloud-init installs Docker CE and deploys a docker-compose stack on the instance. The default controller bundle includes:
 
-- **PostgreSQL** - Application database with health checks
-- **Backend API** - NestJS billing or agent controller API container (depending on service plan configuration)
-- **Frontend console** - Angular SSR web application served behind reverse proxy
-- **Nginx** - Terminates HTTP and HTTPS, proxies to backend and frontend containers, serves ACME HTTP-01 challenges at `/.well-known/acme-challenge/`
+- **PostgreSQL**: Application database with health checks
+- **Backend API**: NestJS billing or agent controller API container (depending on service plan configuration)
+- **Frontend console**: Angular SSR web application served behind reverse proxy
+- **Nginx**: Terminates HTTP and HTTPS, proxies to backend and frontend containers, serves ACME HTTP-01 challenges at `/.well-known/acme-challenge/`
 
 Containers share a defined application directory on the host (typically under `/opt/`). Environment variables for authentication, database connection, and product-specific settings are interpolated into the generated compose file from the subscription's requested configuration.
 
@@ -95,14 +95,14 @@ Cloud-init waits for the DNS A record (`proxied: false`) to resolve to the host 
 
 Provisioning templates configure SSH for operational access. Key-based authentication is enabled; password authentication is disabled in generated `sshd` configuration.
 
-**Accepted risk [DR-001](../security/accepted-risks.md#dr-001--provisioning-ssh-cloud-init-templates):** Cloud-init may configure root SSH access and install root `authorized_keys` for first-boot automation. Compensating controls include network restrictions, key rotation, and bastion access. See [Security - Accepted risks](../security/accepted-risks.md).
+**Accepted risk [DR-001](../security/accepted-risks.md#dr-001--provisioning-ssh-cloud-init-templates):** Cloud-init may configure root SSH access and install root `authorized_keys` for first-boot automation. Compensating controls include network restrictions, key rotation, and bastion access. See [Security: Accepted risks](../security/accepted-risks.md).
 
 ## Nested Provisioning Tokens
 
 Optional `requestedConfig` keys on subscription order allow the provisioned instance to provision additional servers:
 
-- `hetznerApiToken` - Hetzner API token injected into instance environment
-- `digitaloceanApiToken` - DigitalOcean API token injected into instance environment
+- `hetznerApiToken`: Hetzner API token injected into instance environment
+- `digitaloceanApiToken`: DigitalOcean API token injected into instance environment
 
 Use only when the product stack requires nested cloud automation.
 
@@ -110,7 +110,7 @@ Use only when the product stack requires nested cloud automation.
 
 After provisioning:
 
-- `GET /subscriptions/{subscriptionId}/items/{itemId}/server-info` - Live status from provider API
+- `GET /subscriptions/{subscriptionId}/items/{itemId}/server-info`: Live status from provider API
 - Start, stop, restart via action endpoints (see [Dashboard and Server Control](./dashboard-and-server-control.md))
 
 ## Subscription Item Update Scheduler
@@ -140,12 +140,12 @@ Provisioning itself is triggered internally by subscription and backorder servic
 
 ## Related Documentation
 
-- **[Subscriptions](./subscriptions.md)** - Order flow
-- **[Backorders](./backorders.md)** - Retry when capacity unavailable
-- **[Service Types and Plans](./service-types-and-plans.md)** - Provider schemas
-- **[Dashboard and Server Control](./dashboard-and-server-control.md)** - Power actions
-- **[Security - Accepted risks](../security/accepted-risks.md)** - **DR-001** provisioning SSH
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Server info schemas
+- **[Subscriptions](./subscriptions.md)**: Order flow
+- **[Backorders](./backorders.md)**: Retry when capacity unavailable
+- **[Service Types and Plans](./service-types-and-plans.md)**: Provider schemas
+- **[Dashboard and Server Control](./dashboard-and-server-control.md)**: Power actions
+- **[Security: Accepted risks](../security/accepted-risks.md)**: **DR-001** provisioning SSH
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)**: Server info schemas
 
 ---
 

@@ -30,9 +30,9 @@ Implementation lives in `@forepath/shared/backend/util-dynamic-provider-registry
 
 For each `DYNAMIC_*` entry the loader:
 
-1. **Baked-in** — resolves the package from `/app/package.json` (image build / `nx run <app>:prune` graph).
-2. **Plugin path** — looks up the package by `package.json` `name` under `DYNAMIC_PROVIDER_PLUGIN_PATH` (immediate child directories and `node_modules` after startup install).
-3. **Fail** — logs and skips the entry, or aborts startup when the registry is **critical** and `DYNAMIC_PROVIDERS_FAIL_FAST=true`.
+1. **Baked-in**: resolves the package from `/app/package.json` (image build / `nx run <app>:prune` graph).
+2. **Plugin path**: looks up the package by `package.json` `name` under `DYNAMIC_PROVIDER_PLUGIN_PATH` (immediate child directories and `node_modules` after startup install).
+3. **Fail**: logs and skips the entry, or aborts startup when the registry is **critical** and `DYNAMIC_PROVIDERS_FAIL_FAST=true`.
 
 Baked-in wins when the same package exists in both places.
 
@@ -62,7 +62,7 @@ DYNAMIC_AGENT_PROVIDERS=AcmeAgent=@forepath/agenstra/backend/agent-acme
 # bare specifier
 DYNAMIC_PIPELINE_PROVIDERS=@forepath/agenstra/backend/pipeline-acme
 
-# file: entry — directory relative to DYNAMIC_PROVIDER_PLUGIN_PATH
+# file: entry - directory relative to DYNAMIC_PROVIDER_PLUGIN_PATH
 DYNAMIC_PROVISIONING_PROVIDERS=acme=file:provisioning-acme
 ```
 
@@ -72,8 +72,8 @@ Allowed package name prefixes: `@forepath/`, `@agenstra/`. Do not combine `file:
 
 External packages must export one of:
 
-1. **`createProvider`** (preferred) — `(moduleRef: ModuleRef) => T | Promise<T>`
-2. **Named PascalCase class** — via entry alias or `package.json`:
+1. **`createProvider`** (preferred): `(moduleRef: ModuleRef) => T | Promise<T>`
+2. **Named PascalCase class**: via entry alias or `package.json`:
 
 ```json
 {
@@ -101,8 +101,8 @@ Use this when operators add providers **after** the image exists.
 
 1. Build the plugin (`nx build <plugin-lib>`) to produce compiled JS and `package.json`.
 2. Deliver the plugin:
-   - **Mount** — copy the folder into host `./provider-plugins/` (compose mounts it at `/var/lib/forepath/provider-plugins` when you enable plugins), and/or
-   - **Install** — set `DYNAMIC_PROVIDER_PLUGIN_INSTALL` (see below).
+   - **Mount**: copy the folder into host `./provider-plugins/` (compose mounts it at `/var/lib/forepath/provider-plugins` when you enable plugins), and/or
+   - **Install**: set `DYNAMIC_PROVIDER_PLUGIN_INSTALL` (see below).
 3. Set `DYNAMIC_PROVIDER_PLUGIN_PATH` to `/var/lib/forepath/provider-plugins` (or your chosen absolute path inside the container).
 4. Set `DYNAMIC_*` to reference the package **name** or a `file:` directory.
 5. Restart the container.
@@ -152,14 +152,14 @@ Or inspect startup logs for `DynamicProviderRegistry` / loader errors.
 
 ### Agent controller
 
-- **Provisioning** — [Server Provisioning](./server-provisioning.md) lists built-in Hetzner and DigitalOcean providers; `DYNAMIC_PROVISIONING_PROVIDERS` adds more for `GET /api/clients/provisioning/providers` and provision flows.
-- **Context import** — [Atlassian import](./atlassian-import.md) registers Atlassian statically; `DYNAMIC_CONTEXT_IMPORT_PROVIDERS` can add other import backends to the same factory.
+- **Provisioning**: [Server Provisioning](./server-provisioning.md) lists built-in Hetzner and DigitalOcean providers; `DYNAMIC_PROVISIONING_PROVIDERS` adds more for `GET /api/clients/provisioning/providers` and provision flows.
+- **Context import**: [Atlassian import](./atlassian-import.md) registers Atlassian statically; `DYNAMIC_CONTEXT_IMPORT_PROVIDERS` can add other import backends to the same factory.
 
 ### Agent manager
 
-- **Agents** — [Agent Management](./agent-management.md); `DYNAMIC_AGENT_PROVIDERS` extends agent types beyond built-in cursor/openclaw/opencode providers.
-- **Pipelines** — [Deployment](./deployment.md); `DYNAMIC_PIPELINE_PROVIDERS` adds CI/CD backends.
-- **Chat filters** — [Message Filter Rules](./message-filter-rules.md); `DYNAMIC_CHAT_FILTERS` adds filter implementations on the manager.
+- **Agents**: [Agent Management](./agent-management.md); `DYNAMIC_AGENT_PROVIDERS` extends agent types beyond built-in cursor/openclaw/opencode providers.
+- **Pipelines**: [Deployment](./deployment.md); `DYNAMIC_PIPELINE_PROVIDERS` adds CI/CD backends.
+- **Chat filters**: [Message Filter Rules](./message-filter-rules.md); `DYNAMIC_CHAT_FILTERS` adds filter implementations on the manager.
 
 ## Docker Compose (optional plugins)
 
@@ -179,10 +179,10 @@ See [Docker Deployment](../deployment/docker-deployment.md) and [Applications](.
 
 ## Related documentation
 
-- **[Environment configuration](../deployment/environment-configuration.md)** — `DYNAMIC_*` variable reference
-- **[Server Provisioning](./server-provisioning.md)** — Built-in provisioning providers
-- **[Agent Management](./agent-management.md)** — Agent types and lifecycle
-- **[Atlassian import](./atlassian-import.md)** — Built-in context import provider
-- **[Deployment](./deployment.md)** — CI/CD providers on the manager
-- **[Backend Agent Controller](../applications/backend-agent-controller.md)** — Controller env and compose
-- **[Backend Agent Manager](../applications/backend-agent-manager.md)** — Manager env and compose
+- **[Environment configuration](../deployment/environment-configuration.md)**: `DYNAMIC_*` variable reference
+- **[Server Provisioning](./server-provisioning.md)**: Built-in provisioning providers
+- **[Agent Management](./agent-management.md)**: Agent types and lifecycle
+- **[Atlassian import](./atlassian-import.md)**: Built-in context import provider
+- **[Deployment](./deployment.md)**: CI/CD providers on the manager
+- **[Backend Agent Controller](../applications/backend-agent-controller.md)**: Controller env and compose
+- **[Backend Agent Manager](../applications/backend-agent-manager.md)**: Manager env and compose

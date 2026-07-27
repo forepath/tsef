@@ -6,10 +6,10 @@ Prepaid (advance) billing and the `year` billing interval for Decabill service p
 
 Service plans support:
 
-| Field                 | Meaning                                                                                                                     |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `billingIntervalType` | `hour`, `day`, `month`, or **`year`**                                                                                       |
-| `billInAdvance`       | `false` (default): arrear — debt at period **end**. `true`: advance — debt at period **start** covering the upcoming period |
+| Field                 | Meaning                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `billingIntervalType` | `hour`, `day`, `month`, or **`year`**                                                                                     |
+| `billInAdvance`       | `false` (default): arrear: debt at period **end**. `true`: advance: debt at period **start** covering the upcoming period |
 
 Existing plans migrate to `billInAdvance = false` and keep prior behaviour.
 
@@ -17,7 +17,7 @@ Liability still flows **subscription → open position → billing-day accumulat
 
 ## Yearly interval
 
-`BillingScheduleService` advances by `billingIntervalValue` calendar years. Optional `billingDayOfMonth` clamps the anniversary day (same clamp as monthly). Do not model yearly as `month` + `12` — the month branch ignores `billingIntervalValue`.
+`BillingScheduleService` advances by `billingIntervalValue` calendar years. Optional `billingDayOfMonth` clamps the anniversary day (same clamp as monthly). Do not model yearly as `month` + `12`: the month branch ignores `billingIntervalValue`.
 
 ## Advance vs arrear
 
@@ -36,22 +36,22 @@ Liability still flows **subscription → open position → billing-day accumulat
 
 Same eligibility as arrear. Accounting:
 
-1. **Billable invoice for the current prepaid period** (no unbilled open position) — existing partial credit note + eInvoice for unused `withdrawnAt → currentPeriodEnd`; no extra open position.
-2. **Unbilled open position for the current prepaid period** (including unprovisioned withdraw after an immediate advance charge) — set `billUntil = withdrawnAt` on unbilled rows; no credit note (even if older invoices exist); no extra open position.
-3. **Neither** — fall back to arrear teardown OP with `billUntil = withdrawnAt`.
+1. **Billable invoice for the current prepaid period** (no unbilled open position): existing partial credit note + eInvoice for unused `withdrawnAt → currentPeriodEnd`; no extra open position.
+2. **Unbilled open position for the current prepaid period** (including unprovisioned withdraw after an immediate advance charge): set `billUntil = withdrawnAt` on unbilled rows; no credit note (even if older invoices exist); no extra open position.
+3. **Neither**: fall back to arrear teardown OP with `billUntil = withdrawnAt`.
 
 Mid-life [config change](./subscription-config-change.md) and [automatic price recalculation](./automatic-price-recalculation.md) use the same prepaid notion of an **unbilled recurring period charge** (`adjustment_net IS NULL`) when choosing between an open-position correction and a partial credit document. Unrelated adjustment open positions do not flip that branch.
 
 ## Notifications
 
-| Event                           | When                                                                                         |
-| ------------------------------- | -------------------------------------------------------------------------------------------- |
-| `subscription.created`          | Order confirmation on subscribe — webhook + email                                            |
-| `subscription.cancel_scheduled` | Cancel request (`pending_cancel`) — webhook + email                                          |
-| `subscription.canceled`         | Final cancel teardown — webhook + email (not used for withdrawal emails)                     |
-| `subscription.resumed`          | Resume from pending cancel — webhook + email                                                 |
-| `subscription.withdrawn`        | Statutory withdrawal teardown complete — email (webhook still emits `subscription.canceled`) |
-| `subscription.period_charged`   | Open position created (initial advance or due tick) — webhook only                           |
+| Event                           | When                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------- |
+| `subscription.created`          | Order confirmation on subscribe: webhook + email                                            |
+| `subscription.cancel_scheduled` | Cancel request (`pending_cancel`): webhook + email                                          |
+| `subscription.canceled`         | Final cancel teardown: webhook + email (not used for withdrawal emails)                     |
+| `subscription.resumed`          | Resume from pending cancel: webhook + email                                                 |
+| `subscription.withdrawn`        | Statutory withdrawal teardown complete: email (webhook still emits `subscription.canceled`) |
+| `subscription.period_charged`   | Open position created (initial advance or due tick): webhook only                           |
 
 All subscription webhook payloads include `billInAdvance` and `billingIntervalType`. For advance plans, `nextBillingAt` is the next charge / period boundary.
 

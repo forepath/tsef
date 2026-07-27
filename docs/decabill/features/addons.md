@@ -38,9 +38,9 @@ Addon config mirrors [CloudInit environment variables](./cloud-init-configs.md) 
 Each field may define:
 
 - `key` / `label` / optional `description`
-- `showInOrderForm` — customer-visible on Order Plan Configuration step (selection happens in Step 1)
-- `useRandomDefault` (+ length ≥ 21, optional special chars) — server generates when still empty after merge
-- `hasDefault` — computed from static default or random flag (never expose values to customers)
+- `showInOrderForm`: customer-visible on Order Plan Configuration step (selection happens in Step 1)
+- `useRandomDefault` (+ length ≥ 21, optional special chars): server generates when still empty after merge
+- `hasDefault`: computed from static default or random flag (never expose values to customers)
 
 | Type                | Who owns the field list                                                                                                                                        |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |

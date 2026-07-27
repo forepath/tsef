@@ -6,7 +6,7 @@ This register records **explicit risk acceptance** for product and deployment co
 
 ---
 
-## AR-001 - Desktop app: no OS-trusted code signing / no in-app auto-update
+## AR-001: Desktop app: no OS-trusted code signing / no in-app auto-update
 
 | Field                                  | Recorded value                                                                                                                                                                                                                               |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -28,7 +28,7 @@ This register records **explicit risk acceptance** for product and deployment co
 
 ---
 
-## AR-002 - Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)
+## AR-002: Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -46,11 +46,11 @@ This register records **explicit risk acceptance** for product and deployment co
 
 #### Operator summary (AR-002)
 
-By default, CSP is **report-only**. Use **`CSP_ENFORCE=true`** only after verification. See **[Operational hardening - Content Security Policy](./operational-hardening.md#content-security-policy-frontend-express)** and **[Environment configuration](../deployment/environment-configuration.md)**.
+By default, CSP is **report-only**. Use **`CSP_ENFORCE=true`** only after verification. See **[Operational hardening: Content Security Policy](./operational-hardening.md#content-security-policy-frontend-express)** and **[Environment configuration](../deployment/environment-configuration.md)**.
 
 ---
 
-## AR-003 - Backend authentication method resolution
+## AR-003: Backend authentication method resolution
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                                                                                                       |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -68,11 +68,11 @@ By default, CSP is **report-only**. Use **`CSP_ENFORCE=true`** only after verifi
 
 #### Operator summary (AR-003)
 
-Set **`AUTHENTICATION_METHOD`** explicitly if your policy requires **fully explicit** configuration. Never expose **`STATIC_API_KEY`**. See **[Authentication](../features/authentication.md)** and **[Operational hardening - Authentication mode](./operational-hardening.md#authentication-mode-backends)**.
+Set **`AUTHENTICATION_METHOD`** explicitly if your policy requires **fully explicit** configuration. Never expose **`STATIC_API_KEY`**. See **[Authentication](../features/authentication.md)** and **[Operational hardening: Authentication mode](./operational-hardening.md#authentication-mode-backends)**.
 
 ---
 
-## AR-004 - Desktop window open policy (`native-agent-console`)
+## AR-004: Desktop window open policy (`native-agent-console`)
 
 | Field                                 | Recorded value                                                                                                                                                                                     |
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -94,7 +94,7 @@ New windows are **allowed** by design. Risk is **lower** than in a general-purpo
 
 ---
 
-## AR-005 - CI / local Trivy: unfixed vulnerabilities not gated
+## AR-005: CI / local Trivy: unfixed vulnerabilities not gated
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                                                                         |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -122,16 +122,16 @@ New windows are **allowed** by design. Risk is **lower** than in a general-purpo
 - **AR-002:** Tighten CSP after automated and manual verification so core UI (including Monaco) still functions.
 - **AR-003:** Require **`AUTHENTICATION_METHOD`** in all environments if auditors demand explicit configuration, or add startup validation that fails when **`STATIC_API_KEY`** is set without an explicit mode.
 - **AR-004:** Tighten **`setWindowOpenHandler`** (for example URL allowlist or **`action: 'deny'`**) if the product loads untrusted origins or adds browser-like navigation.
-- **AR-005:** Set **`vulnerability.ignore-unfixed: false`** (and optionally add **HIGH** to `severity`) if policy requires failing on all CRITICAL findings regardless of fix availability. Expect more `.trivyignore` churn until dependencies catch up.
+- **AR-005:** Set **`vulnerability.ignore-unfixed: false`** (and optionally add **HIGH**: `severity`) if policy requires failing on all CRITICAL findings regardless of fix availability. Expect more `.trivyignore` churn until dependencies catch up.
 
 ---
 
 ## Related documentation
 
-- **[Compliance and standards](./compliance-and-standards.md)**
-- **[Operational hardening](./operational-hardening.md)**
-- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)**
-- **[CI security scanning (Trivy)](./ci-security-scanning.md)**
+- [Compliance and standards](./compliance-and-standards.md)
+- [Operational hardening](./operational-hardening.md)
+- [Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)
+- [CI security scanning (Trivy)](./ci-security-scanning.md)
 
 ---
 

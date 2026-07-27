@@ -1,15 +1,15 @@
 # Troubleshooting Documentation
 
-This section provides guides for troubleshooting common issues and debugging problems in the Agenstra system.
+This section covers common issues and debugging for Agenstra.
 
 ## Overview
 
-Troubleshooting guides help you:
+Use these guides to:
 
 - Identify and resolve common problems
-- Debug issues effectively
+- Debug API, WebSocket, and container issues
 - Understand error messages
-- Find solutions quickly
+- Find practical fixes
 
 ## Troubleshooting Guides
 
@@ -69,9 +69,9 @@ If you encounter issues:
 
 ## Related Documentation
 
-- **[Getting Started](../getting-started.md)** - Setup guide
-- **[Deployment](../deployment/README.md)** - Deployment guides
-- **[Applications](../applications/README.md)** - Application documentation
+- **[Getting Started](../getting-started.md)**: Setup guide
+- **[Deployment](../deployment/README.md)**: Deployment guides
+- **[Applications](../applications/README.md)**: Application documentation
 
 ---
 

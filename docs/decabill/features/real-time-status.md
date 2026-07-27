@@ -113,10 +113,10 @@ When WebSocket is unavailable, [Dashboard and Server Control](./dashboard-and-se
 
 ## Related Documentation
 
-- **[Dashboard and Server Control](./dashboard-and-server-control.md)** - Overview UI and server actions
-- **[Authentication](./authentication.md)** - JWT and Keycloak handshake
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant in handshake
-- **[Billing Manager AsyncAPI](/spec/billing-manager/asyncapi.yaml)** - Full message schemas
+- **[Dashboard and Server Control](./dashboard-and-server-control.md)**: Overview UI and server actions
+- **[Authentication](./authentication.md)**: JWT and Keycloak handshake
+- **[Multi-tenancy](./multi-tenancy.md)**: Tenant in handshake
+- **[Billing Manager AsyncAPI](/spec/billing-manager/asyncapi.yaml)**: Full message schemas
 
 ---
 

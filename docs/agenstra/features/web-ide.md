@@ -4,7 +4,7 @@ Monaco Editor integration for code editing in agent containers. Syntax highlight
 
 ## Overview
 
-The Web IDE provides a full-featured code editor in the browser using Monaco Editor (the same editor that powers VS Code). It enables you to edit files directly in agent containers with syntax highlighting, code completion, and IntelliSense.
+The Web IDE provides a full-featured code editor in the browser using Monaco Editor (the same editor that powers VS Code). You can edit files directly in agent containers with syntax highlighting, code completion, and IntelliSense.
 
 ## Features
 
@@ -80,9 +80,9 @@ The editor can be configured with:
 
 ## Related Documentation
 
-- **[File Management](./file-management.md)** - File operations
-- **[Chat Interface](./chat-interface.md)** - Chat with agents
-- **[Monaco Editor Documentation](https://microsoft.github.io/monaco-editor/)** - Editor documentation
+- **[File Management](./file-management.md)**: File operations
+- **[Chat Interface](./chat-interface.md)**: Chat with agents
+- **[Monaco Editor Documentation](https://microsoft.github.io/monaco-editor/)**: Editor documentation
 
 ---
 

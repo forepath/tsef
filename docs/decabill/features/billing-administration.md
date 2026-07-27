@@ -44,19 +44,19 @@ The invoice list supports batch loading with client-side search in list-group st
 
 **Workflow:**
 
-1. `POST /admin/billing/invoices/manual` - Create draft with user, optional subscription, custom line items
-2. `POST /admin/billing/invoices/{invoiceRefId}` - Update draft line items
-3. `POST /admin/billing/invoices/{invoiceRefId}/issue` - Issue draft (requires complete customer profile)
-4. `DELETE /admin/billing/invoices/{invoiceRefId}` - Delete draft only
+1. `POST /admin/billing/invoices/manual`: Create draft with user, optional subscription, custom line items
+2. `POST /admin/billing/invoices/{invoiceRefId}`: Update draft line items
+3. `POST /admin/billing/invoices/{invoiceRefId}/issue`: Issue draft (requires complete customer profile)
+4. `DELETE /admin/billing/invoices/{invoiceRefId}`: Delete draft only
 
 Additional admin actions on issued invoices:
 
-- `POST /admin/billing/invoices/{invoiceRefId}/void` - Void invoice
-- `POST /admin/billing/invoices/{invoiceRefId}/mark-paid` - Mark paid manually
-- `POST /admin/billing/invoices/{invoiceRefId}/mark-unpaid` - Revert paid status
-- `GET /admin/billing/invoices/{invoiceRefId}/audit-logs` - Audit trail
-- `GET /admin/billing/invoices/{invoiceRefId}/pdf` - Download PDF
-- `GET /admin/billing/invoices/{invoiceRefId}/void-document/pdf` - Void document PDF
+- `POST /admin/billing/invoices/{invoiceRefId}/void`: Void invoice
+- `POST /admin/billing/invoices/{invoiceRefId}/mark-paid`: Mark paid manually
+- `POST /admin/billing/invoices/{invoiceRefId}/mark-unpaid`: Revert paid status
+- `GET /admin/billing/invoices/{invoiceRefId}/audit-logs`: Audit trail
+- `GET /admin/billing/invoices/{invoiceRefId}/pdf`: Download PDF
+- `GET /admin/billing/invoices/{invoiceRefId}/void-document/pdf`: Void document PDF
 
 ```mermaid
 sequenceDiagram
@@ -110,13 +110,12 @@ See **[Projects](./projects.md)** for assignment rules, KPIs, and bill-time prec
 
 ## Related Admin Pages
 
-- **Billing dashboard** (`/administration/billing`) - KPIs, charts, bill-now
-- **Customer profiles** (`/administration/customer-profiles`) - Admin CRUD
-- **Customer trust score** - Admin-only traffic-light ranking inside customer profiles
-- **Projects** (`/administration/projects`) - Project CRUD and bill-time
-- **Webhooks** (`/webhooks`) - Tenant-scoped outbound notification endpoints; see [Webhooks](./webhooks.md)
-- **Service types and plans** - Catalog administration in the billing console
-- **Users** (`/users`) - Shared identity user manager
+- **Billing dashboard** (`/administration/billing`): KPIs, charts, bill-now
+- **Customer profiles** (`/administration/customer-profiles`): Admin CRUD
+- **Customer trust score**: Admin-only traffic-light ranking inside customer profiles
+- **Projects** (`/administration/projects`): Project CRUD and bill-time
+- **Webhooks** (`/webhooks`): Tenant-scoped outbound notification endpoints; see [Webhooks](./webhooks.md): **Service types and plans**: Catalog administration in the billing console
+- **Users** (`/users`): Shared identity user manager
 
 ## Webhook Notifications
 
@@ -139,13 +138,13 @@ See **[Webhooks](./webhooks.md)** for payload envelope, signing, and event types
 
 ## Related Documentation
 
-- **[Invoices](./invoices.md)** - Status model and open positions
-- **[Customer Profiles](./customer-profiles.md)** - Profile fields and validation
-- **[Customer Trust Score](./customer-trust-score.md)** - Trust ranking thresholds, factors, and webhooks
-- **[Projects](./projects.md)** - Admin project CRUD and bill-time
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant scope and DR-002
-- **[Authentication](./authentication.md)** - Admin role requirements
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Full admin path schemas
+- **[Invoices](./invoices.md)**: Status model and open positions
+- **[Customer Profiles](./customer-profiles.md)**: Profile fields and validation
+- **[Customer Trust Score](./customer-trust-score.md)**: Trust ranking thresholds, factors, and webhooks
+- **[Projects](./projects.md)**: Admin project CRUD and bill-time
+- **[Multi-tenancy](./multi-tenancy.md)**: Tenant scope and DR-002
+- **[Authentication](./authentication.md)**: Admin role requirements
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)**: Full admin path schemas
 
 ---
 

@@ -12,28 +12,28 @@ Customers use it to manage subscriptions, pay invoices, and view provisioned ser
 
 This application provides:
 
-- **Overview dashboard** - Subscription cards, server status, start/stop/restart actions
-- **Plans** - Browse and order service plans, manage subscription lifecycle
-- **Invoices** - Two-column customer view (open/overdue and invoice history), detail, download, and Stripe checkout redirect
-- **Customer profile** - Billing metadata required before ordering
-- **Administration** - Service types, CloudInit configs, service plans, billing KPIs, manual invoices, billing profiles (admin only)
-- **Identity UI** - Login, registration, password reset, email confirmation, user management
-- **Real-time status** - Socket.IO subscription on the overview page
-- **Projects** - Assigned project list, read-only board, and ticket comments
-- **Project board WebSocket** - Live ticket updates on the `projects` namespace
-- **Localization** - English and German builds with locale-prefixed SSR paths
-- **Runtime configuration** - Express `/config` endpoint for deployed environments
+- **Overview dashboard**: Subscription cards, server status, start/stop/restart actions
+- **Plans**: Browse and order service plans, manage subscription lifecycle
+- **Invoices**: Two-column customer view (open/overdue and invoice history), detail, download, and Stripe checkout redirect
+- **Customer profile**: Billing metadata required before ordering
+- **Administration**: Service types, CloudInit configs, service plans, billing KPIs, manual invoices, billing profiles (admin only)
+- **Identity UI**: Login, registration, password reset, email confirmation, user management
+- **Real-time status**: Socket.IO subscription on the overview page
+- **Projects**: Assigned project list, read-only board, and ticket comments
+- **Project board WebSocket**: Live ticket updates on the `projects` namespace
+- **Localization**: English and German builds with locale-prefixed SSR paths
+- **Runtime configuration**: Express `/config` endpoint for deployed environments
 
 ## Architecture
 
 Built with:
 
-- **Angular** - Components, routing, and i18n
-- **NgRx** - State, effects, and facades from `@forepath/decabill/frontend/data-access-billing-console`
-- **Express** - SSR static file server (`src/server.ts`)
-- **Bootstrap 5** - Layout and components
-- **Socket.IO client** - Dashboard status namespace
-- **Identity bundle** - `@forepath/identity/frontend` for auth routes and guards
+- **Angular**: Components, routing, and i18n
+- **NgRx**: State, effects, and facades from `@forepath/decabill/frontend/data-access-billing-console`
+- **Express**: SSR static file server (`src/server.ts`)
+- **Bootstrap 5**: Layout and components
+- **Socket.IO client**: Dashboard status namespace
+- **Identity bundle**: `@forepath/identity/frontend` for auth routes and guards
 
 Feature components live in `@forepath/decabill/frontend/feature-billing-console` and are wired through `billingConsoleRoutes`.
 
@@ -78,7 +78,7 @@ Stripe return URLs typically land on `/invoices?payment=success` or `?payment=ca
 | `/administration/customer-profiles`  | AdminCustomerProfilesPage | Customer billing profile CRUD        |
 | `/administration/projects`           | AdminProjectsPage         | Project CRUD, time billing, board    |
 
-Unknown paths redirect to the shell root (`**` to ``).
+Unknown paths redirect to the shell root (`**` to `''`).
 
 ## Express SSR Server
 
@@ -181,14 +181,14 @@ Ensure `CSP_CONNECT_SRC_EXTRA` includes the browser-reachable billing manager or
 
 ## Related Documentation
 
-- **[Backend Billing Manager](./backend-billing-manager.md)** - API and WebSocket endpoints
-- **[Authentication](../features/authentication.md)** - Login methods
-- **[Dashboard and Server Control](../features/dashboard-and-server-control.md)** - Overview behavior
-- **[Real-time Status](../features/real-time-status.md)** - WebSocket events
-- **[Projects](../features/projects.md)** - Assignment, CRUD, and bill-time
-- **[Project Board](../features/project-board.md)** - Live board and `projects` WebSocket
-- **[Getting Started](../getting-started.md)** - Local setup
-- **[Docker Deployment](../deployment/docker-deployment.md)** - Container deployment
+- **[Backend Billing Manager](./backend-billing-manager.md)**: API and WebSocket endpoints
+- **[Authentication](../features/authentication.md)**: Login methods
+- **[Dashboard and Server Control](../features/dashboard-and-server-control.md)**: Overview behavior
+- **[Real-time Status](../features/real-time-status.md)**: WebSocket events
+- **[Projects](../features/projects.md)**: Assignment, CRUD, and bill-time
+- **[Project Board](../features/project-board.md)**: Live board and `projects` WebSocket
+- **[Getting Started](../getting-started.md)**: Local setup
+- **[Docker Deployment](../deployment/docker-deployment.md)**: Container deployment
 
 ---
 
@@ -202,4 +202,4 @@ Copyright (c) 2025 IPvX UG (haftungsbeschränkt)
 
 BUSL permits non-production use and limited production use subject to the Additional Use Grant (typically for organizations below the Total Finances threshold on the [Decabill pricing page](https://decabill.com/pricing)). The license converts to **AGPL-3.0** after the Change Date (three years from release date).
 
-See [LICENSE](../../../apps/decabill/frontend-billing-console/LICENSE) for the full text and alternative commercial licensing at [decabill.com](https://decabill.com).
+See the LICENSE file under `apps/decabill/frontend-billing-console` for the full text and alternative commercial licensing at [decabill.com](https://decabill.com).

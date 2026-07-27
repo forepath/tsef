@@ -34,8 +34,8 @@ Built-in providers include Hetzner Cloud and DigitalOcean when API tokens are co
 
 The optional `configSchema` is a JSON-schema-like object:
 
-- **`properties`** - Field definitions with `type`, `description`, and optional `enum`
-- **`basePriceFromField`** - When set (for example `serverType`), the console loads options from `GET /service-types/providers/{providerId}/server-types` and uses selected `priceMonthly` as plan base price
+- **`properties`**: Field definitions with `type`, `description`, and optional `enum`
+- **`basePriceFromField`**: When set (for example `serverType`), the console loads options from `GET /service-types/providers/{providerId}/server-types` and uses selected `priceMonthly` as plan base price
 
 Enum fields render as select inputs in the billing console.
 
@@ -94,9 +94,9 @@ Service plans belong to a service type and define customer-facing pricing and bi
 
 - Title, description, and active flag
 - Billing interval (hourly, daily, monthly, **yearly**)
-- **`billInAdvance`** — when true, charge at period start (prepaid); default false (arrear). Incompatible with usage-based metering. See [Advance billing and yearly interval](./advance-billing-and-yearly-interval.md).
-- **`autoRecalculatePriceDaily`** — when true, nightly job refreshes catalog base price from the provider and migrates eligible subscriptions (default false, opt-in). See [Automatic daily price recalculation](./automatic-price-recalculation.md).
-- **Admin commercial migrate** — on plan update, optional request field `migrateExistingSubscriptions` (not stored). When true **and** `basePrice`, `marginPercent`, `marginFixed`, or `taxCategory` actually change, a `plan-price-migrate.unit` job migrates eligible subscriptions with the same settlement, withdrawal restart, and consolidated price-change email as nightly recalc. Unchecked updates affect new orders only.
+- **`billInAdvance`**: when true, charge at period start (prepaid); default false (arrear). Incompatible with usage-based metering. See [Advance billing and yearly interval](./advance-billing-and-yearly-interval.md).
+- **`autoRecalculatePriceDaily`**: when true, nightly job refreshes catalog base price from the provider and migrates eligible subscriptions (default false, opt-in). See [Automatic daily price recalculation](./automatic-price-recalculation.md).
+- **Admin commercial migrate**: on plan update, optional request field `migrateExistingSubscriptions` (not stored). When true **and** `basePrice`, `marginPercent`, `marginFixed`, or `taxCategory` actually change, a `plan-price-migrate.unit` job migrates eligible subscriptions with the same settlement, withdrawal restart, and consolidated price-change email as nightly recalc. Unchecked updates affect new orders only.
 - Base price, margin, and computed customer total
 - `providerConfigDefaults` merged with customer `requestedConfig` on order
 - For provisioning plans, customers choose from `provisioningOptions` (integrated `controller`/`manager` and/or custom CloudInit configs). Admins configure these exclusively via **Customer-selectable options** checkboxes in the plan editor; **Product defaults** fields are scoped to the checked options only. New plans default to both Agenstra Controller and Agenstra Manager selected. Existing legacy plans are reconciled by migration `1772000000000_CloudInitAndPlanProvisioningConsolidated`.
@@ -138,9 +138,9 @@ When a plan has `allowCustomerServerTypeSelection` and multiple `allowedServerTy
 
 Before order:
 
-- `POST /availability/check` - Validate config against provider capacity
-- `POST /availability/alternatives` - Suggest alternatives when unavailable
-- `POST /pricing/preview` - Estimated customer total for plan and config
+- `POST /availability/check`: Validate config against provider capacity
+- `POST /availability/alternatives`: Suggest alternatives when unavailable
+- `POST /pricing/preview`: Estimated customer total for plan and config
 
 ## Admin UI
 
@@ -163,11 +163,11 @@ flowchart LR
 
 ## Related Documentation
 
-- **[Subscriptions](./subscriptions.md)** - Ordering against plans
-- **[Server Provisioning](./server-provisioning.md)** - Provider provisioning behavior
-- **[Dynamic Provider Plugins](./dynamic-provider-plugins.md)** - Extra providers and UI metadata
-- **[CloudInit Configs](./cloud-init-configs.md)** - Custom service templates
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant-scoped catalog
+- **[Subscriptions](./subscriptions.md)**: Ordering against plans
+- **[Server Provisioning](./server-provisioning.md)**: Provider provisioning behavior
+- **[Dynamic Provider Plugins](./dynamic-provider-plugins.md)**: Extra providers and UI metadata
+- **[CloudInit Configs](./cloud-init-configs.md)**: Custom service templates
+- **[Multi-tenancy](./multi-tenancy.md)**: Tenant-scoped catalog
 
 ---
 

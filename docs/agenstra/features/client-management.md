@@ -1,15 +1,15 @@
 # Client Management
 
-Client management enables you to connect to and manage multiple remote agent-manager instances from a single console.
+Client management lets you connect to and manage multiple remote agent-manager instances from a single console.
 
 ## Overview
 
 A client represents a connection to a remote agent-manager service. You can either:
 
-1. **Connect to an existing agent-manager** - If you already have an agent-manager running
-2. **Provision a new server** - Automatically provision a cloud server with agent-manager deployment
+1. **Connect to an existing agent-manager**: If you already have an agent-manager running
+2. **Provision a new server**: Automatically provision a cloud server with agent-manager deployment
 
-When using keycloak or users authentication, Agenstra supports **per-client permissions** to enable multi-tenant scenarios. Each client has a creator and can have multiple associated users with different roles.
+When using Keycloak or users authentication, Agenstra supports **per-client permissions** that enable multi-tenant scenarios. Each client has a creator and can have multiple associated users with different roles.
 
 ## Creating a Client
 
@@ -41,10 +41,10 @@ See the [Server Provisioning](./server-provisioning.md) documentation for detail
 
 Each client includes a `config` field that is automatically fetched from the remote agent-manager:
 
-- **`gitRepositoryUrl`** - The Git repository URL configured on the agent-manager instance
-- **`agentTypes`** - Array of available agent provider types (e.g., `['cursor', 'opencode', 'openclaw']`)
+- **`gitRepositoryUrl`**: The Git repository URL configured on the agent-manager instance
+- **`agentTypes`**: Array of available agent provider types (e.g., `['cursor', 'opencode', 'openclaw']`)
 
-This configuration allows you to discover which agent types are available on each remote agent-manager instance.
+This configuration lets you discover which agent types are available on each remote agent-manager instance.
 
 ## Managing Clients
 
@@ -85,8 +85,8 @@ Access to a client is granted if:
 
 Each user-client relationship has a role:
 
-- **`admin`** - Can manage users (add/remove) and has full access to the client
-- **`user`** - Can access the client but cannot manage users
+- **`admin`**: Can manage users (add/remove) and has full access to the client
+- **`user`**: Can access the client but cannot manage users
 
 ### Managing Client Users
 
@@ -119,17 +119,17 @@ Users are added to clients by their email address. This applies to keycloak and 
 
 ### Client Management
 
-- `GET /api/clients` - List all clients (filtered by user access in keycloak/users mode)
-- `GET /api/clients/:id` - Get a single client by UUID
-- `POST /api/clients` - Create a new client
-- `POST /api/clients/:id` - Update an existing client
-- `DELETE /api/clients/:id` - Delete a client
+- `GET /api/clients`: List all clients (filtered by user access in keycloak/users mode)
+- `GET /api/clients/:id`: Get a single client by UUID
+- `POST /api/clients`: Create a new client
+- `POST /api/clients/:id`: Update an existing client
+- `DELETE /api/clients/:id`: Delete a client
 
 ### Client User Management (keycloak/users authentication only)
 
-- `GET /api/clients/:id/users` - List users associated with a client
-- `POST /api/clients/:id/users` - Add a user to a client by email
-- `DELETE /api/clients/:id/users/:relationshipId` - Remove a user from a client
+- `GET /api/clients/:id/users`: List users associated with a client
+- `POST /api/clients/:id/users`: Add a user to a client by email
+- `DELETE /api/clients/:id/users/:relationshipId`: Remove a user from a client
 
 In api-key mode, users do not play a role; these endpoints are not applicable.
 
@@ -137,10 +137,10 @@ For detailed API documentation, see the application and API reference docs linke
 
 ## Related Documentation
 
-- **[Server Provisioning](./server-provisioning.md)** - Automated server provisioning
-- **[Agent Management](./agent-management.md)** - Managing agents for a client
-- **[WebSocket Communication](./websocket-communication.md)** - Real-time communication with clients
-- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** - Application details
+- **[Server Provisioning](./server-provisioning.md)**: Automated server provisioning
+- **[Agent Management](./agent-management.md)**: Managing agents for a client
+- **[WebSocket Communication](./websocket-communication.md)**: Real-time communication with clients
+- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)**: Application details
 
 ---
 

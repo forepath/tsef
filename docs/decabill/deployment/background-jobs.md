@@ -74,8 +74,8 @@ Coordinators fan out unit jobs such as:
 - `plan-price-migrate.unit` (enqueued from admin plan update when `migrateExistingSubscriptions` is true and commercial pricing fields change)
 - Admin bill-now coordinator and unit jobs (`AdminBillNowJobName`)
 - `datev-export.coordinator` and `datev-export.unit` (when `BILLING_DATEV_EXPORT_ENABLED=true`)
-- `webhook-deliver` — outbound webhook notification delivery
-- `email-deliver` — transactional email delivery (Handlebars + nodemailer)
+- `webhook-deliver`: outbound webhook notification delivery
+- `email-deliver`: transactional email delivery (Handlebars + nodemailer)
 
 BullMQ `jobId` values prevent duplicate active work for the same entity. Custom job IDs use `.` separators and only allowed characters (alphanumeric, `.`, `-`, `_`, `~`).
 
@@ -103,7 +103,7 @@ DATEV unit job IDs:
 | `QUEUE_BULL_BOARD_USERNAME` | HTTP Basic username                     | `admin`                   |
 | `QUEUE_BULL_BOARD_PASSWORD` | HTTP Basic password (required)          | `bullmq` in local compose |
 
-Scheduler interval variables (`BILLING_SCHEDULER_INTERVAL`, `EXPIRATION_SCHEDULER_INTERVAL`, `CONFIG_CHANGE_SCHEDULER_INTERVAL`, etc.) control **coordinator repeat** intervals in BullMQ. Config-change reclaim uses `CONFIG_CHANGE_PROCESSING_TIMEOUT_MS` (not an interval) — see [Subscription Config Change](../features/subscription-config-change.md#operations).
+Scheduler interval variables (`BILLING_SCHEDULER_INTERVAL`, `EXPIRATION_SCHEDULER_INTERVAL`, `CONFIG_CHANGE_SCHEDULER_INTERVAL`, etc.) control **coordinator repeat** intervals in BullMQ. Config-change reclaim uses `CONFIG_CHANGE_PROCESSING_TIMEOUT_MS` (not an interval): see [Subscription Config Change](../features/subscription-config-change.md#operations).
 
 ## Docker Compose
 
@@ -139,10 +139,10 @@ Unit jobs resolve `tenant_id` from job payload data so multi-tenant billing runs
 
 ## Related Documentation
 
-- **[Environment Configuration](./environment-configuration.md)** - Redis and scheduler variables
-- **[Local Development](./local-development.md)** - `QUEUE_ROLE=all` locally
-- **[Docker Deployment](./docker-deployment.md)** - Compose services
-- **[Multi-tenancy](../features/multi-tenancy.md)** - `X-Tenant` and `TENANTS`
+- **[Environment Configuration](./environment-configuration.md)**: Redis and scheduler variables
+- **[Local Development](./local-development.md)**: `QUEUE_ROLE=all` locally
+- **[Docker Deployment](./docker-deployment.md)**: Compose services
+- **[Multi-tenancy](../features/multi-tenancy.md)**: `X-Tenant` and `TENANTS`
 
 ---
 

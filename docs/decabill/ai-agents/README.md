@@ -8,10 +8,10 @@ The `.agenstra/` context is a **single source of truth** for agent rules, comman
 
 **Key characteristics**:
 
-- **Tool-agnostic** – No vendor-specific syntax in the source files
-- **Composable** – Rules, commands, skills, and agents are separate and reusable
-- **Versionable** – Commit `.agenstra/` to git and share across the team
-- **Transform on demand** – Generate tool configs with `nx` or the transformer API
+- **Tool-agnostic**: No vendor-specific syntax in the source files
+- **Composable**: Rules, commands, skills, and agents are separate and reusable
+- **Versionable**: Commit `.agenstra/` to git and share across the team
+- **Transform on demand**: Generate tool configs with `nx` or the transformer API
 
 ## Directory Structure
 
@@ -78,7 +78,7 @@ Manual overrides in `overrides/` are copied to the output directory **after** tr
 
 After editing `.agenstra/`, generate output for one or more tools:
 
-**Via agentctx** – Use the **agentctx** CLI binary built from `tools/ai`; see [agentctx](./agentctx.md) for install and usage.
+**Via agentctx**: Use the **agentctx** CLI binary built from `tools/ai`; see [agentctx](./agentctx.md) for install and usage.
 
 **Via Nx** (if the project has an `agenstra-transform` target):
 

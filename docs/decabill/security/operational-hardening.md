@@ -42,8 +42,7 @@ Code: `libs/domains/decabill/backend/feature-billing-manager/src/lib/guards/tena
 
 ## Stripe webhooks
 
-- Webhook signatures verified with **`STRIPE_WEBHOOK_SECRET`**
-- Invalid signatures are rejected; do not disable verification in production
+- Webhook signatures verified with **`STRIPE_WEBHOOK_SECRET`**: Invalid signatures are rejected; do not disable verification in production
 - Route webhook URL only to the billing API ingress; restrict by network policy where possible
 
 ## Logging and correlation
@@ -97,10 +96,10 @@ Cloud-init templates may configure root SSH for first-boot automation. See **DR-
 
 ## Related documentation
 
-- **[Accepted risks](./accepted-risks.md)** - DR-001 through DR-005
-- **[Environment configuration](../deployment/environment-configuration.md)**
-- **[Production checklist](../deployment/production-checklist.md)**
-- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)** - Disclosure and response commitments
+- **[Accepted risks](./accepted-risks.md)**: DR-001 through DR-005
+- [Environment configuration](../deployment/environment-configuration.md)
+- [Production checklist](../deployment/production-checklist.md)
+- [Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)
 
 ---
 

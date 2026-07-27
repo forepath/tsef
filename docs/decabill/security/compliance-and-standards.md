@@ -52,11 +52,11 @@ Detail: **[Container image security](./container-images.md)**, **[Operational ha
 
 ## Related documentation
 
-- **[Accepted risks](./accepted-risks.md)**
-- **[Operational hardening](./operational-hardening.md)**
-- **[Container image security](./container-images.md)**
-- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)**
-- **[Environment configuration](../deployment/environment-configuration.md)**
+- [Accepted risks](./accepted-risks.md)
+- [Operational hardening](./operational-hardening.md)
+- [Container image security](./container-images.md)
+- [Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)
+- [Environment configuration](../deployment/environment-configuration.md)
 
 ---
 

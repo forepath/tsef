@@ -25,10 +25,10 @@ docker compose logs -f api
 
 Configure log levels via environment variables:
 
-- `LOG_LEVEL=debug` - Detailed debugging information
-- `LOG_LEVEL=info` - General information
-- `LOG_LEVEL=warn` - Warnings
-- `LOG_LEVEL=error` - Errors only
+- `LOG_LEVEL=debug`: Detailed debugging information
+- `LOG_LEVEL=info`: General information
+- `LOG_LEVEL=warn`: Warnings
+- `LOG_LEVEL=error`: Errors only
 
 ### Log Analysis
 
@@ -152,8 +152,8 @@ wscat -c ws://localhost:8081/clients
 
 ## Related Documentation
 
-- **[Common Issues](./common-issues.md)** - Common problems and solutions
-- **[Deployment Guide](../deployment/README.md)** - Deployment troubleshooting
+- **[Common Issues](./common-issues.md)**: Common problems and solutions
+- **[Deployment Guide](../deployment/README.md)**: Deployment troubleshooting
 
 ---
 

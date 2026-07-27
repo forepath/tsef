@@ -29,8 +29,8 @@ Coordinators fan out **unit jobs** (one ticket, one import config, etc.). BullMQ
 
 Notification delivery jobs on the same queue:
 
-- `webhook-deliver` — outbound webhook HTTPS delivery
-- `email-deliver` — transactional identity email (Handlebars + nodemailer)
+- `webhook-deliver`: outbound webhook HTTPS delivery
+- `email-deliver`: transactional identity email (Handlebars + nodemailer)
 
 See [Email notifications](../features/email-notifications.md).
 

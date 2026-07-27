@@ -158,7 +158,7 @@ Custom stacks do not include Nginx or Let's Encrypt in v1. TLS termination is ou
 
 ## Related Documentation
 
-- **[Server Provisioning](./server-provisioning.md)** - Provider provisioning and cloud-init overview
-- **[Service Types and Plans](./service-types-and-plans.md)** - Plan defaults and admin catalog
-- **[Subscriptions](./subscriptions.md)** - Order flow and `requestedConfig`
-- **[API Reference](../api-reference/README.md)** - OpenAPI schemas
+- **[Server Provisioning](./server-provisioning.md)**: Provider provisioning and cloud-init overview
+- **[Service Types and Plans](./service-types-and-plans.md)**: Plan defaults and admin catalog
+- **[Subscriptions](./subscriptions.md)**: Order flow and `requestedConfig`
+- **[API Reference](../api-reference/README.md)**: OpenAPI schemas

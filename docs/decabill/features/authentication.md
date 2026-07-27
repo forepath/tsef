@@ -6,9 +6,9 @@ Authentication system supporting multiple methods with configurable user registr
 
 Decabill supports three authentication methods:
 
-- **API Key Authentication** - Static API key for automation and operator scripts
-- **Keycloak Authentication** - OAuth2/OIDC via Keycloak
-- **Users Authentication** - Built-in user registration with JWT
+- **API Key Authentication**: Static API key for automation and operator scripts
+- **Keycloak Authentication**: OAuth2/OIDC via Keycloak
+- **Users Authentication**: Built-in user registration with JWT
 
 Each method is configured via environment variables on the billing manager. The billing console runtime config must match the backend method.
 
@@ -25,7 +25,7 @@ AUTHENTICATION_METHOD=api-key
 STATIC_API_KEY=your-secure-api-key-here
 ```
 
-When `STATIC_API_KEY` is set and `AUTHENTICATION_METHOD` is unset, the backend may infer api-key mode. See [Security - Operational hardening](../security/operational-hardening.md) for resolution behavior.
+When `STATIC_API_KEY` is set and `AUTHENTICATION_METHOD` is unset, the backend may infer api-key mode. See [Security: Operational hardening](../security/operational-hardening.md) for resolution behavior.
 
 **Features**:
 
@@ -83,13 +83,13 @@ DISABLE_SIGNUP=false
 
 User-bound tokens for scripts and CI (for example usage recording). They are **not** a billing-console login password. **Not available** when `AUTHENTICATION_METHOD=api-key`.
 
-| Concern                  | Behavior                                                                                                                                              |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Create / update / revoke | Console **Personal Access Tokens** page (`/settings/tokens`); interactive console session only (password JWT or Keycloak OIDC)                        |
-| Exchange                 | `POST /auth/token` with `{ "token": "fp_pat_…" }` only (no email) → JWT with `amr: ["pat"]` and `scopes`                                              |
-| Console                  | Login rejects `fp_pat_` secrets; SPA rejects JWTs whose `amr` includes `pat`; dashboard WebSockets reject PAT JWTs                                    |
-| Keycloak                 | Local `users` row is synced on first authenticated request (`keycloakSub`); PAT CRUD and exchange require `JWT_SECRET`                                |
-| Scopes                   | `BILLING_PAT_SCOPES` — catalog/subscriptions/invoices/usage/projects/tickets/… + `users:admin` / `webhooks:admin`; each enforced via `@RequireScopes` |
+| Concern                  | Behavior                                                                                                                                             |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Create / update / revoke | Console **Personal Access Tokens** page (`/settings/tokens`); interactive console session only (password JWT or Keycloak OIDC)                       |
+| Exchange                 | `POST /auth/token` with `{ "token": "fp_pat_…" }` only (no email) → JWT with `amr: ["pat"]` and `scopes`                                             |
+| Console                  | Login rejects `fp_pat_` secrets; SPA rejects JWTs whose `amr` includes `pat`; dashboard WebSockets reject PAT JWTs                                   |
+| Keycloak                 | Local `users` row is synced on first authenticated request (`keycloakSub`); PAT CRUD and exchange require `JWT_SECRET`                               |
+| Scopes                   | `BILLING_PAT_SCOPES`: catalog/subscriptions/invoices/usage/projects/tickets/… + `users:admin` / `webhooks:admin`; each enforced via `@RequireScopes` |
 
 Prefer PATs over a shared `STATIC_API_KEY` for multi-tenant automation (see accepted risk DR-002).
 
@@ -186,34 +186,34 @@ Frontend runtime config should set `authentication.disableSignup` to match the b
 
 ### Authentication Endpoints (Public)
 
-- `POST /auth/login` - Login with email and password (console; PATs rejected)
-- `POST /auth/token` - Exchange personal access token for machine JWT (`amr: pat`)
-- `POST /auth/register` - Register new user (503 when signup disabled)
-- `POST /auth/confirm-email` - Confirm email with code
-- `POST /auth/request-password-reset` - Request password reset
-- `POST /auth/reset-password` - Reset password with code
-- `POST /auth/change-password` - Change password (authenticated; returns new JWT)
-- `POST /auth/logout` - Log out and invalidate all JWT sessions (users auth only)
+- `POST /auth/login`: Login with email and password (console; PATs rejected)
+- `POST /auth/token`: Exchange personal access token for machine JWT (`amr: pat`)
+- `POST /auth/register`: Register new user (503 when signup disabled)
+- `POST /auth/confirm-email`: Confirm email with code
+- `POST /auth/request-password-reset`: Request password reset
+- `POST /auth/reset-password`: Reset password with code
+- `POST /auth/change-password`: Change password (authenticated; returns new JWT)
+- `POST /auth/logout`: Log out and invalidate all JWT sessions (users auth only)
 
 ### Personal Access Token Endpoints (Password session)
 
-- `GET /auth/token-scopes` - Grantable scopes for the current user
-- `GET /auth/tokens` - List own tokens
-- `POST /auth/tokens` - Create token (plaintext returned once)
-- `PATCH /auth/tokens/{id}` - Update own token name and scopes (secret unchanged)
-- `DELETE /auth/tokens/{id}` - Revoke own token
-- `GET /users/{userId}/tokens` - List tokens for a user (admin)
-- `DELETE /users/{userId}/tokens/{tokenId}` - Revoke a user's token (admin)
+- `GET /auth/token-scopes`: Grantable scopes for the current user
+- `GET /auth/tokens`: List own tokens
+- `POST /auth/tokens`: Create token (plaintext returned once)
+- `PATCH /auth/tokens/{id}`: Update own token name and scopes (secret unchanged)
+- `DELETE /auth/tokens/{id}`: Revoke own token
+- `GET /users/{userId}/tokens`: List tokens for a user (admin)
+- `DELETE /users/{userId}/tokens/{tokenId}`: Revoke a user's token (admin)
 
 ### User Management Endpoints (Admin Only)
 
-- `GET /users` - List users
-- `POST /users` - Create user
-- `GET /users/{id}` - Get user
-- `POST /users/{id}` - Update user
-- `DELETE /users/{id}` - Delete user
-- `POST /users/{id}/lock` - Lock user account
-- `POST /users/{id}/unlock` - Unlock user account
+- `GET /users`: List users
+- `POST /users`: Create user
+- `GET /users/{id}`: Get user
+- `POST /users/{id}`: Update user
+- `DELETE /users/{id}`: Delete user
+- `POST /users/{id}/lock`: Lock user account
+- `POST /users/{id}/unlock`: Unlock user account
 
 See [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) for request and response schemas.
 
@@ -254,11 +254,11 @@ flowchart TB
 
 ## Related Documentation
 
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant header and API key scope
-- **[Environment Configuration](../deployment/environment-configuration.md)** - Environment variable reference
-- **[Security - Accepted risks](../security/accepted-risks.md)** - Authentication and tenant scope entries
-- **[Backend Billing Manager](../applications/backend-billing-manager.md)** - Backend authentication implementation
-- **[Frontend Billing Console](../applications/frontend-billing-console.md)** - Frontend authentication UI
+- **[Multi-tenancy](./multi-tenancy.md)**: Tenant header and API key scope
+- **[Environment Configuration](../deployment/environment-configuration.md)**: Environment variable reference
+- **[Security: Accepted risks](../security/accepted-risks.md)**: Authentication and tenant scope entries
+- **[Backend Billing Manager](../applications/backend-billing-manager.md)**: Backend authentication implementation
+- **[Frontend Billing Console](../applications/frontend-billing-console.md)**: Frontend authentication UI
 
 ---
 

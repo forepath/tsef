@@ -1,6 +1,6 @@
 # Container image security
 
-This page documents **first-party Decabill Docker images**: runtime users, secrets handling, and build conventions. It complements **[Operational hardening](./operational-hardening.md)** and **[Docker deployment](../deployment/docker-deployment.md)**.
+This page documents **first-party Decabill Docker images**, including runtime users, secrets handling, and build conventions. It complements **[Operational hardening](./operational-hardening.md)** and **[Docker deployment](../deployment/docker-deployment.md)**.
 
 ## Published images
 
@@ -59,8 +59,7 @@ Source: `apps/decabill/frontend-billing-console/Dockerfile.server`
 
 - Default `PORT=4500`
 - Runs as **`node`** (UID **1000**)
-- Runtime `CONFIG` URL and CSP variables documented in **[Environment configuration](../deployment/environment-configuration.md)**
-- Compose often sets `CSP_CONNECT_SRC_EXTRA` to reach the billing API from the browser
+- Runtime `CONFIG` URL and CSP variables documented in **[Environment configuration](../deployment/environment-configuration.md)**: Compose often sets `CSP_CONNECT_SRC_EXTRA` to reach the billing API from the browser
 
 ## Docs server image (`decabill-docs-server`)
 
@@ -88,10 +87,10 @@ Deploy **billing API, worker, and scheduler** containers from the **same release
 
 ## Related documentation
 
-- **[Operational hardening](./operational-hardening.md)** - Summary table and cross-links
-- **[Docker deployment](../deployment/docker-deployment.md)** - Compose services
-- **[Production checklist](../deployment/production-checklist.md)** - Pre-flight checks
-- **[Background jobs](../deployment/background-jobs.md)** - Worker and scheduler images use the same billing API image with different `QUEUE_ROLE`
+- **[Operational hardening](./operational-hardening.md)**: Summary table and cross-links
+- **[Docker deployment](../deployment/docker-deployment.md)**: Compose services
+- **[Production checklist](../deployment/production-checklist.md)**: Pre-flight checks
+- **[Background jobs](../deployment/background-jobs.md)**: Worker and scheduler images use the same billing API image with different `QUEUE_ROLE`
 
 ---
 

@@ -21,10 +21,10 @@ docker compose logs -f backend-billing-manager-scheduler
 
 Configure log levels via environment variables where supported:
 
-- `LOG_LEVEL=debug` - Detailed debugging information
-- `LOG_LEVEL=info` - General information
-- `LOG_LEVEL=warn` - Warnings
-- `LOG_LEVEL=error` - Errors only
+- `LOG_LEVEL=debug`: Detailed debugging information
+- `LOG_LEVEL=info`: General information
+- `LOG_LEVEL=warn`: Warnings
+- `LOG_LEVEL=error`: Errors only
 
 ### Correlation IDs
 
@@ -173,9 +173,9 @@ Use browser DevTools Network tab or a Socket.IO client with:
 
 ## Related Documentation
 
-- **[Common Issues](./common-issues.md)** - Common problems and solutions
-- **[Background jobs](../deployment/background-jobs.md)** - Queue roles and job registry
-- **[Environment configuration](../deployment/environment-configuration.md)** - Scheduler intervals
+- **[Common Issues](./common-issues.md)**: Common problems and solutions
+- **[Background jobs](../deployment/background-jobs.md)**: Queue roles and job registry
+- **[Environment configuration](../deployment/environment-configuration.md)**: Scheduler intervals
 
 ---
 

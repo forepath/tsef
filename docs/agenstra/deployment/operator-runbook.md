@@ -26,22 +26,22 @@ Map your intended profile to **[System Requirements](./system-requirements.md)**
 ### Controller stack
 
 - [ ] PostgreSQL (pgvector) sized for profile (local ≥2 GiB / production small ≥4 GiB RAM; disk per [System Requirements](./system-requirements.md#postgresql-pgvector))
-- [ ] Redis 7 sized for BullMQ history (production ≥1–2 GiB)
+- [ ] Redis 7 sized for BullMQ history (production ≥1 to 2 GiB)
 - [ ] API, worker, and scheduler roles split for production (`QUEUE_ROLE`); **one** scheduler per Redis key prefix
 - [ ] Worker concurrency (`QUEUE_WORKER_CONCURRENCY`) aligned with CPU and embedding provider rate limits
-- [ ] Container memory limits set on API (2–4 GiB), worker (4–8 GiB production), scheduler (≤1 GiB)
+- [ ] Container memory limits set on API (2 to 4 GiB), worker (4 to 8 GiB production), scheduler (≤1 GiB)
 
 ### Manager host and agents
 
 - [ ] Manager API + Postgres capacity reserved separately from agent workloads
-- [ ] Per concurrent agent (worker + VNC): plan ~4 vCPU and 4–8 GiB plus disk under `/opt/agents/{uuid}`
+- [ ] Per concurrent agent (worker + VNC): plan ~4 vCPU and 4 to 8 GiB plus disk under `/opt/agents/{uuid}`
 - [ ] Host totals match expected concurrent agents (see manager host totals table in system requirements)
 - [ ] Image **`DOCKER_GID`** matches host `docker` group GID at build time
 - [ ] Manager **API, worker, VNC, SSH, and AGI** images planned on the **same release tag**
 
 ### Frontend and network
 
-- [ ] Console host sized (≥0.5 vCPU, 512 MiB–1 GiB)
+- [ ] Console host sized (≥0.5 vCPU, 512 MiB to 1 GiB)
 - [ ] Ingress plan covers console (**4200**), controller API (**3100**) / WS (**8081**), manager API (**3000**) / WS (**8080**)
 - [ ] Bull Board (`/admin/queues` on controller **3100**) restricted to operations networks
 - [ ] Outbound HTTPS available for provider and proxied agent traffic
@@ -104,7 +104,7 @@ Operators who redistribute or operate Agenstra should keep disclosure and supply
 ### Supported versions
 
 - [ ] Deploy only **supported 2.x.x** lines for security updates
-- [ ] If you market a product with digital elements in the EU, define **your** support-period end date (month/year) using upstream 2.x practice as input — do not invent unsupported lines as “supported”
+- [ ] If you market a product with digital elements in the EU, define **your** support-period end date (month/year) using upstream 2.x practice as input: do not invent unsupported lines as “supported”
 
 ### Receiving reports (if you are the operator of record)
 
@@ -123,12 +123,12 @@ Operators who redistribute or operate Agenstra should keep disclosure and supply
 
 ## Related documentation
 
-- **[System Requirements](./system-requirements.md)** — Capacity baselines by role
-- **[Production Checklist](./production-checklist.md)** — Full production hardening
-- **[Docker Deployment](./docker-deployment.md)** — Compose layout and socket mounts
-- **[Environment Configuration](./environment-configuration.md)** — Variables that affect load and security
-- **[Vulnerability reporting and artifacts](../security/vulnerability-reporting-and-artifacts.md)** — Disclosure, SBOM, desktop integrity
-- **[Operational hardening](../security/operational-hardening.md)** — Implemented controls
+- **[System Requirements](./system-requirements.md)**: Capacity baselines by role
+- **[Production Checklist](./production-checklist.md)**: Full production hardening
+- **[Docker Deployment](./docker-deployment.md)**: Compose layout and socket mounts
+- **[Environment Configuration](./environment-configuration.md)**: Variables that affect load and security
+- **[Vulnerability reporting and artifacts](../security/vulnerability-reporting-and-artifacts.md)**: Disclosure, SBOM, desktop integrity
+- **[Operational hardening](../security/operational-hardening.md)**: Implemented controls
 
 ---
 

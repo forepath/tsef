@@ -21,7 +21,7 @@ When disabled, no metrics route is registered, the SDK does not start, and start
 
 ## Metrics endpoint
 
-When enabled, Prometheus exposition is served at **`OTEL_METRICS_PATH`** (default **`/otel/metrics`**) on the HTTP root — **outside** the `/api` global prefix.
+When enabled, Prometheus exposition is served at **`OTEL_METRICS_PATH`** (default **`/otel/metrics`**) on the HTTP root: **outside** the `/api` global prefix.
 
 - **Authentication:** HTTP Basic with `OTEL_USERNAME` / `OTEL_PASSWORD`.
 - **Content-Type:** `text/plain` (Prometheus exposition format).
@@ -62,14 +62,14 @@ Domain gauges (meter `forepath.decabill`, labels include `tenant_id`, polled eve
 | Gauge                                    | Labels   | Description                                        |
 | ---------------------------------------- | -------- | -------------------------------------------------- |
 | `decabill.invoices.open`                 | `status` | Open/overdue invoice counts by status              |
-| `decabill.invoices.overdue`              | —        | Overdue invoice count                              |
-| `decabill.invoices.open_total`           | —        | Sum of `balance_due` on open/overdue invoices      |
-| `decabill.open_positions.unbilled_total` | —        | Open-position totals not yet on invoices           |
-| `decabill.open_positions.unbilled_users` | —        | Users with unbilled open positions                 |
-| `decabill.subscriptions.active`          | —        | Active subscription count                          |
+| `decabill.invoices.overdue`              | -        | Overdue invoice count                              |
+| `decabill.invoices.open_total`           | -        | Sum of `balance_due` on open/overdue invoices      |
+| `decabill.open_positions.unbilled_total` | -        | Open-position totals not yet on invoices           |
+| `decabill.open_positions.unbilled_users` | -        | Users with unbilled open positions                 |
+| `decabill.subscriptions.active`          | -        | Active subscription count                          |
 | `decabill.projects`                      | `status` | Billing projects by status (`active` / `archived`) |
 | `decabill.project_tickets`               | `status` | Project tickets (tasks) by status                  |
-| `decabill.project_time.unbilled_minutes` | —        | Unbilled project time across projects              |
+| `decabill.project_time.unbilled_minutes` | -        | Unbilled project time across projects              |
 
 ## Optional OTLP export
 
@@ -77,10 +77,10 @@ Set `OTEL_EXPORTER_OTLP_ENDPOINT` to send traces and logs to an OTLP HTTP receiv
 
 ## Related documentation
 
-- **[Environment configuration](../deployment/environment-configuration.md#opentelemetry)** — Variable reference
-- **[Background jobs](../deployment/background-jobs.md)** — BullMQ roles and queues
+- **[Environment configuration](../deployment/environment-configuration.md#opentelemetry)**: Variable reference
+- **[Background jobs](../deployment/background-jobs.md)**: BullMQ roles and queues
 - **Library:** `libs/domains/shared/backend/util-otel/README.md`
 
 ## API reference
 
-- [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) — `GET /otel/metrics` (root server)
+- [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml): `GET /otel/metrics` (root server)

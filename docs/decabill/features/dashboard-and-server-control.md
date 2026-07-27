@@ -84,10 +84,10 @@ sequenceDiagram
 
 ## Related Documentation
 
-- **[Real-time Status](./real-time-status.md)** - WebSocket dashboard stream
-- **[Subscriptions](./subscriptions.md)** - Subscription items and server-info endpoint
-- **[Server Provisioning](./server-provisioning.md)** - What gets provisioned
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Action endpoint schemas
+- **[Real-time Status](./real-time-status.md)**: WebSocket dashboard stream
+- **[Subscriptions](./subscriptions.md)**: Subscription items and server-info endpoint
+- **[Server Provisioning](./server-provisioning.md)**: What gets provisioned
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)**: Action endpoint schemas
 
 ---
 

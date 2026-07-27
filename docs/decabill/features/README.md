@@ -1,32 +1,32 @@
 # Features Documentation
 
-This section provides comprehensive documentation for all features in the Decabill billing product.
+This section covers features in the Decabill billing product.
 
 ## Overview
 
-Decabill provides a complete set of capabilities for subscription billing, invoicing, payments, and optional infrastructure provisioning:
+Decabill covers subscription billing, invoicing, payments, and optional infrastructure provisioning:
 
-- **Authentication** - Keycloak OAuth2/OIDC, built-in users with JWT, or static API key
-- **Multi-tenancy** - Tenant-scoped data with `X-Tenant` header and configurable tenant frontends
-- **Subscriptions** - Order, cancel, and resume service plans with optional cloud provisioning
-- **Advance billing and yearly interval** - Prepaid period charges and `year` billing interval
-- **Invoices** - ZUGFeRD PDFs, open positions, billing-day accumulation, and Stripe checkout
-- **Service Types and Plans** - Admin-managed catalog with provider schemas and pricing
-- **Billing Administration** - Manual invoices, customer profiles, KPIs, and bill-now
-- **Customer Profiles** - Self-service and admin billing metadata required for ordering
-- **VAT and tax treatment** - EU place-of-supply modes, VIES VAT ID validation, OSS threshold, reverse charge
-- **Customer Trust Score** - Admin-only traffic-light trust ranking on billing profiles
-- **Dashboard and Server Control** - Overview of subscriptions with start, stop, and restart actions
-- **Real-time Status** - WebSocket dashboard stream for provisioned server status
-- **Backorders** - Queue and retry when provider capacity is unavailable
-- **Public Withdrawal** - Statutory withdrawal without login at `/withdrawal`
-- **Payment Processing** - Stripe checkout and webhook-driven payment state
-- **Dynamic Provider Plugins** - Extend payment processors and billing UI metadata at runtime
-- **Server Provisioning** - Cloud-init deployment of bundled product stacks for eligible plans
-- **CloudInit Configs** - Admin-managed Docker templates for the custom service kind
-- **Projects** - Customer-assigned work tracking with admin CRUD and billable time
-- **Project Board** - Live ticket board with swimlanes and WebSocket updates
-- **OpenTelemetry** - Optional Prometheus metrics and OTLP export (disabled by default)
+- **Authentication**: Keycloak OAuth2/OIDC, built-in users with JWT, or static API key
+- **Multi-tenancy**: Tenant-scoped data with `X-Tenant` header and configurable tenant frontends
+- **Subscriptions**: Order, cancel, and resume service plans with optional cloud provisioning
+- **Advance billing and yearly interval**: Prepaid period charges and `year` billing interval
+- **Invoices**: ZUGFeRD PDFs, open positions, billing-day accumulation, and Stripe checkout
+- **Service Types and Plans**: Admin-managed catalog with provider schemas and pricing
+- **Billing Administration**: Manual invoices, customer profiles, KPIs, and bill-now
+- **Customer Profiles**: Self-service and admin billing metadata required for ordering
+- **VAT and tax treatment**: EU place-of-supply modes, VIES VAT ID validation, OSS threshold, reverse charge
+- **Customer Trust Score**: Admin-only traffic-light trust ranking on billing profiles
+- **Dashboard and Server Control**: Overview of subscriptions with start, stop, and restart actions
+- **Real-time Status**: WebSocket dashboard stream for provisioned server status
+- **Backorders**: Queue and retry when provider capacity is unavailable
+- **Public Withdrawal**: Statutory withdrawal without login at `/withdrawal`
+- **Payment Processing**: Stripe checkout and webhook-driven payment state
+- **Dynamic Provider Plugins**: Extend payment processors and billing UI metadata at runtime
+- **Server Provisioning**: Cloud-init deployment of bundled product stacks for eligible plans
+- **CloudInit Configs**: Admin-managed Docker templates for the custom service kind
+- **Projects**: Customer-assigned work tracking with admin CRUD and billable time
+- **Project Board**: Live ticket board with swimlanes and WebSocket updates
+- **OpenTelemetry**: Optional Prometheus metrics and OTLP export (disabled by default)
 
 ## Features
 
@@ -320,11 +320,11 @@ graph TB
 
 ## Related Documentation
 
-- **[Getting Started](../getting-started.md)** - Quick start guide
-- **[Architecture](../architecture/README.md)** - System architecture
-- **[Applications](../applications/README.md)** - Application documentation
-- **[Deployment](../deployment/README.md)** - Deployment guides
-- **[API Reference](../api-reference/README.md)** - OpenAPI and AsyncAPI specifications
+- **[Getting Started](../getting-started.md)**: Quick start guide
+- **[Architecture](../architecture/README.md)**: System architecture
+- **[Applications](../applications/README.md)**: Application documentation
+- **[Deployment](../deployment/README.md)**: Deployment guides
+- **[API Reference](../api-reference/README.md)**: OpenAPI and AsyncAPI specifications
 
 ---
 

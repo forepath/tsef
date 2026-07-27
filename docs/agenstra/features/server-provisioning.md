@@ -4,7 +4,7 @@ Automated cloud server provisioning with Docker and agent-manager deployment. Su
 
 ## Overview
 
-Server provisioning enables you to automatically:
+Server provisioning lets you automatically:
 
 1. Create a cloud server instance
 2. Install Docker CE
@@ -60,27 +60,27 @@ The provisioning endpoint accepts a `ProvisionServerDto` with the following fiel
 
 ### Required Fields
 
-- **`providerType`** - Provider identifier (`"hetzner"` or `"digital-ocean"`)
-- **`serverType`** - Server type identifier (e.g., `"cx11"` for Hetzner, `"s-1vcpu-1gb"` for DigitalOcean)
-- **`name`** - Server name (auto-generated if not provided)
-- **`authenticationType`** - Authentication type (`"api_key"` or `"keycloak"`)
+- **`providerType`**: Provider identifier (`"hetzner"` or `"digital-ocean"`)
+- **`serverType`**: Server type identifier (e.g., `"cx11"` for Hetzner, `"s-1vcpu-1gb"` for DigitalOcean)
+- **`name`**: Server name (auto-generated if not provided)
+- **`authenticationType`**: Authentication type (`"api_key"` or `"keycloak"`)
 
 ### Optional Fields
 
-- **`description`** - Server description
-- **`location`** - Datacenter location slug (e.g., `"fsn1"`, `"nbg1"` for Hetzner; `"fra1"`, `"nyc3"` for DigitalOcean). UIs load human-readable labels from `GET /api/clients/provisioning/providers/:providerType/locations`.
-- **`apiKey`** - API key for API_KEY authentication (auto-generated if not provided)
-- **`keycloakClientId`** - Keycloak client ID (required for KEYCLOAK authentication)
-- **`keycloakClientSecret`** - Keycloak client secret (required for KEYCLOAK authentication)
-- **`keycloakRealm`** - Keycloak realm (optional, defaults to environment variable)
-- **`keycloakAuthServerUrl`** - Keycloak auth server URL (optional, defaults to environment variable)
-- **`agentWsPort`** - Agent WebSocket port (defaults to 8080)
-- **`gitRepositoryUrl`** - Git repository URL for agent workspace
-- **`gitUsername`** - Git username for repository access
-- **`gitToken`** - Git token/personal access token for repository access
-- **`gitPassword`** - Git password for repository access (alternative to token)
-- **`cursorApiKey`** - Cursor API key for agent configuration
-- **`agentDefaultImage`** - Default Docker image for cursor agents (defaults to `ghcr.io/forepath/agenstra-manager-worker:latest`)
+- **`description`**: Server description
+- **`location`**: Datacenter location slug (e.g., `"fsn1"`, `"nbg1"` for Hetzner; `"fra1"`, `"nyc3"` for DigitalOcean). UIs load human-readable labels from `GET /api/clients/provisioning/providers/:providerType/locations`.
+- **`apiKey`**: API key for API_KEY authentication (auto-generated if not provided)
+- **`keycloakClientId`**: Keycloak client ID (required for KEYCLOAK authentication)
+- **`keycloakClientSecret`**: Keycloak client secret (required for KEYCLOAK authentication)
+- **`keycloakRealm`**: Keycloak realm (optional, defaults to environment variable)
+- **`keycloakAuthServerUrl`**: Keycloak auth server URL (optional, defaults to environment variable)
+- **`agentWsPort`**: Agent WebSocket port (defaults to 8080)
+- **`gitRepositoryUrl`**: Git repository URL for agent workspace
+- **`gitUsername`**: Git username for repository access
+- **`gitToken`**: Git token/personal access token for repository access
+- **`gitPassword`**: Git password for repository access (alternative to token)
+- **`cursorApiKey`**: Cursor API key for agent configuration
+- **`agentDefaultImage`**: Default Docker image for cursor agents (defaults to `ghcr.io/forepath/agenstra-manager-worker:latest`)
 
 ## Provisioning Steps
 
@@ -137,20 +137,20 @@ The system will:
 
 ### Server Provisioning
 
-- `GET /api/clients/provisioning/providers` - List available provisioning providers
-- `GET /api/clients/provisioning/providers/:providerType/server-types` - Get available server types for a provider
-- `GET /api/clients/provisioning/providers/:providerType/locations` - Get geography options with human-readable labels
-- `POST /api/clients/provisioning/provision` - Provision a new server and create a client
-- `GET /api/clients/:id/provisioning/info` - Get server information for a provisioned client
-- `DELETE /api/clients/:id/provisioning` - Delete a provisioned server and its associated client
+- `GET /api/clients/provisioning/providers`: List available provisioning providers
+- `GET /api/clients/provisioning/providers/:providerType/server-types`: Get available server types for a provider
+- `GET /api/clients/provisioning/providers/:providerType/locations`: Get geography options with human-readable labels
+- `POST /api/clients/provisioning/provision`: Provision a new server and create a client
+- `GET /api/clients/:id/provisioning/info`: Get server information for a provisioned client
+- `DELETE /api/clients/:id/provisioning`: Delete a provisioned server and its associated client
 
 For detailed API documentation, see the application and API reference docs linked below.
 
 ## Related Documentation
 
-- **[Client Management](./client-management.md)** - Managing clients
-- **[Dynamic provider plugins](./dynamic-provider-plugins.md)** - Adding custom provisioning providers
-- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** - Application details
+- **[Client Management](./client-management.md)**: Managing clients
+- **[Dynamic provider plugins](./dynamic-provider-plugins.md)**: Adding custom provisioning providers
+- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)**: Application details
 
 ---
 

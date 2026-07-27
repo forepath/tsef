@@ -59,12 +59,12 @@ The `args` field (for local commands when `command` is a string) is also read.
 
 ## Output by tool
 
-- **Cursor** – Single `.cursor/mcp.json` with `mcpServers: { "<id>": { "command", "args", "env", "url", "headers", "enabled" } }` for local, or `{ "url", "headers", "enabled" }` for remote. Command array becomes `command` (first element) + `args` (rest); `environment`/`env` → `env`; `enabled` is forwarded when set in the definition.
-- **OpenCode** – Top-level `mcp` in `opencode.json`: `mcp: { "<id>": { "type", "command" (array), "environment", "url", "headers", "enabled" } }` per [OpenCode MCP docs](https://opencode.ai/docs/mcp-servers/).
-- **GitHub Copilot** – `.vscode/mcp.json` with `servers: { "<id>": { "command", "args", "env", "url", "headers" } }` for [Copilot Chat MCP in VS Code](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/extend-copilot-chat-with-mcp). Same command/args/env/url/headers mapping as Cursor; servers with `enabled: false` are omitted (VS Code has no `enabled` field in this file).
+- **Cursor**: Single `.cursor/mcp.json` with `mcpServers: { "<id>": { "command", "args", "env", "url", "headers", "enabled" } }` for local, or `{ "url", "headers", "enabled" }` for remote. Command array becomes `command` (first element) + `args` (rest); `environment`/`env` → `env`; `enabled` is forwarded when set in the definition.
+- **OpenCode**: Top-level `mcp` in `opencode.json`: `mcp: { "<id>": { "type", "command" (array), "environment", "url", "headers", "enabled" } }` per [OpenCode MCP docs](https://opencode.ai/docs/mcp-servers/).
+- **GitHub Copilot**: `.vscode/mcp.json` with `servers: { "<id>": { "command", "args", "env", "url", "headers" } }` for [Copilot Chat MCP in VS Code](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/extend-copilot-chat-with-mcp). Same command/args/env/url/headers mapping as Cursor; servers with `enabled: false` are omitted (VS Code has no `enabled` field in this file).
 
 ## Related
 
-- [Agents](./agents.md) – Agents can reference MCP servers via `mcp` or `tools`
-- [README](./README.md) – Overview of `.agenstra/` and transformation
+- [Agents](./agents.md): Agents can reference MCP servers via `mcp` or `tools`
+- [README](./README.md): Overview of `.agenstra/` and transformation
 - Package skills: `tools/ai|code|graph/src/lib/mcp/SKILL.md`

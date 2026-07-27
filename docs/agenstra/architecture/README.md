@@ -1,12 +1,12 @@
 # Architecture Documentation
 
-This section covers the architectural principles, patterns, and structural decisions that guide the Agenstra system. Understanding these concepts is essential for effectively using and deploying the platform.
+This section covers the architectural principles, patterns, and structural decisions that guide Agenstra. Understanding these concepts helps you deploy, integrate, and operate the control plane and agent-manager hosts.
 
 ## Overview
 
-Agenstra follows a **three-tier distributed architecture** that enables centralized management of multiple remote agent-manager instances. The architecture is built on:
+Agenstra follows a **three-tier distributed architecture** for centralized management of multiple remote agent-manager instances. The stack is built on:
 
-- **Domain-Driven Design (DDD)** principles with clear separation of concerns
+- **Domain-driven modules** with clear separation of concerns
 - **RESTful HTTP APIs** for synchronous operations
 - **WebSocket (Socket.IO)** for real-time bidirectional communication
 - **Container-based agent execution** using Docker
@@ -47,74 +47,74 @@ Communication patterns and data flow:
 
 Agenstra uses a three-tier architecture:
 
-1. **Frontend Tier** - Angular application with NgRx state management
-2. **Controller Tier** - Centralized control plane for managing multiple agent-manager instances
-3. **Manager Tier** - Agent lifecycle management and container execution
+1. **Frontend Tier**: Angular application with NgRx state management
+2. **Controller Tier**: Centralized control plane for managing multiple agent-manager instances
+3. **Manager Tier**: Agent lifecycle management and container execution
 
 ### Communication Patterns
 
-- **HTTP REST API** - Synchronous operations (CRUD, file operations, Git operations)
-- **WebSocket (Socket.IO)** - Real-time bidirectional communication (chat, events, logs)
-- **Event Forwarding** - Controller forwards events between frontend and manager
+- **HTTP REST API**: Synchronous operations (CRUD, file operations, Git operations)
+- **WebSocket (Socket.IO)**: Real-time bidirectional communication (chat, events, logs)
+- **Event Forwarding**: Controller forwards events between frontend and manager
 
 ### Authentication & Authorization
 
-- **HTTP Endpoints** - Keycloak OAuth2 or API key authentication
-- **WebSocket** - Database-backed authentication (agents) or client context (controller)
-- **Token Caching** - OAuth2 tokens are cached for efficiency
+- **HTTP Endpoints**: Keycloak OAuth2 or API key authentication
+- **WebSocket**: Database-backed authentication (agents) or client context (controller)
+- **Token Caching**: OAuth2 tokens are cached for efficiency
 
 ### State Management
 
-- **Frontend** - NgRx (Actions, Reducers, Effects, Selectors, Facades)
-- **Backend** - In-memory state for WebSocket sessions and token caching
-- **Database** - PostgreSQL for persistent data (clients, agents, credentials)
+- **Frontend**: NgRx (Actions, Reducers, Effects, Selectors, Facades)
+- **Backend**: In-memory state for WebSocket sessions and token caching
+- **Database**: PostgreSQL for persistent data (clients, agents, credentials)
 
 ## Related Documentation
 
 ### Getting Started
 
-- **[Getting Started](../getting-started.md)** - Set up your environment
+- **[Getting Started](../getting-started.md)**: Set up your environment
 
 ### Features
 
-- **[Client Management](../features/client-management.md)** - Client architecture and operations
-- **[Agent Management](../features/agent-management.md)** - Agent lifecycle and architecture
-- **[WebSocket Communication](../features/websocket-communication.md)** - Real-time communication patterns
+- **[Client Management](../features/client-management.md)**: Client architecture and operations
+- **[Agent Management](../features/agent-management.md)**: Agent lifecycle and architecture
+- **[WebSocket Communication](../features/websocket-communication.md)**: Real-time communication patterns
 
 ### Deployment
 
-- **[Local Development](../deployment/local-development.md)** - Local architecture setup
-- **[Docker Deployment](../deployment/docker-deployment.md)** - Containerized architecture
-- **[Production Checklist](../deployment/production-checklist.md)** - Production architecture considerations
+- **[Local Development](../deployment/local-development.md)**: Local architecture setup
+- **[Docker Deployment](../deployment/docker-deployment.md)**: Containerized architecture
+- **[Production Checklist](../deployment/production-checklist.md)**: Production architecture considerations
 
 ## Architecture Principles
 
 ### Scalability
 
-- **Distributed Architecture** - Multiple agent-manager instances can be managed from a single controller
-- **Horizontal Scaling** - Agent-managers can be scaled independently
-- **Stateless Design** - Frontend and controller are stateless (state in database)
+- **Distributed Architecture**: Multiple agent-manager instances can be managed from a single controller
+- **Horizontal Scaling**: Agent-managers can be scaled independently
+- **Stateless Design**: Frontend and controller are stateless (state in database)
 
 ### Maintainability
 
-- **Clear Separation** - Each tier has distinct responsibilities
-- **Modular Design** - Libraries can be used independently
-- **Consistent Patterns** - Same patterns across all components
+- **Clear Separation**: Each tier has distinct responsibilities
+- **Modular Design**: Libraries can be used independently
+- **Consistent Patterns**: Same patterns across all components
 
 ### Security
 
-- **Authentication** - Multiple authentication methods (Keycloak, API key)
-- **Authorization** - Role-based access control
-- **Secure Communication** - HTTPS and WSS in production
-- **Credential Management** - Secure storage and encryption
+- **Authentication**: Multiple authentication methods (Keycloak, API key)
+- **Authorization**: Role-based access control
+- **Secure Communication**: HTTPS and WSS in production
+- **Credential Management**: Secure storage and encryption
 
 See **[Security documentation](../security/README.md)** for the accepted-risk register, CRA- and BSI-oriented transparency notes, and operational controls.
 
 ### Reliability
 
-- **Reconnection Handling** - Automatic reconnection with state restoration
-- **Error Handling** - Comprehensive error handling and recovery
-- **Health Monitoring** - Container health checks and monitoring
+- **Reconnection Handling**: Automatic reconnection with state restoration
+- **Error Handling**: Error handling and recovery
+- **Health Monitoring**: Container health checks and monitoring
 
 ---
 

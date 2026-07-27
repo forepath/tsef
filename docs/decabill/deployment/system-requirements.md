@@ -59,11 +59,11 @@ Container images target **Node.js 24.14.1** on **debian:trixie-slim**. Billing A
 
 Primary datastore for tenants, subscriptions, invoices, identity, and project data.
 
-| Profile             | vCPU | Memory  | Disk     | Notes                                      |
-| ------------------- | ---- | ------- | -------- | ------------------------------------------ |
-| Local / staging     | 1    | 1–2 GiB | 10 GiB   | Single tenant, low invoice volume          |
-| Production (small)  | 2    | 2–4 GiB | 50 GiB   | Several tenants, routine billing cycles    |
-| Production (medium) | 4    | 8 GiB   | 100+ GiB | Higher invoice PDF and DATEV export volume |
+| Profile             | vCPU | Memory     | Disk     | Notes                                      |
+| ------------------- | ---- | ---------- | -------- | ------------------------------------------ |
+| Local / staging     | 1    | 1 to 2 GiB | 10 GiB   | Single tenant, low invoice volume          |
+| Production (small)  | 2    | 2 to 4 GiB | 50 GiB   | Several tenants, routine billing cycles    |
+| Production (medium) | 4    | 8 GiB      | 100+ GiB | Higher invoice PDF and DATEV export volume |
 
 Plan disk growth for invoice metadata, audit tables, and migration history. Enable automated backups before production cutover.
 
@@ -71,10 +71,10 @@ Plan disk growth for invoice metadata, audit tables, and migration history. Enab
 
 BullMQ backing store for the **`billing`** queue. AOF persistence is enabled in the default Compose file.
 
-| Profile         | vCPU | Memory  | Disk  | Notes                                                    |
-| --------------- | ---- | ------- | ----- | -------------------------------------------------------- |
-| Local / staging | 0.5  | 512 MiB | 1 GiB | Default compose stack                                    |
-| Production      | 1    | 1–2 GiB | 5 GiB | Jobs are **not** auto-removed; memory grows with history |
+| Profile         | vCPU | Memory     | Disk  | Notes                                                    |
+| --------------- | ---- | ---------- | ----- | -------------------------------------------------------- |
+| Local / staging | 0.5  | 512 MiB    | 1 GiB | Default compose stack                                    |
+| Production      | 1    | 1 to 2 GiB | 5 GiB | Jobs are **not** auto-removed; memory grows with history |
 
 Monitor Redis memory when Bull Board retention is long or worker failure rates are high.
 
@@ -86,10 +86,10 @@ All roles use image `ghcr.io/forepath/decabill-billing-api`. Set container limit
 
 Serves HTTP **3200**, WebSocket **8082**, runs migrations, and may expose Bull Board. Holds Playwright Chromium in memory even when PDF work runs on workers.
 
-| Profile         | vCPU | Memory limit | Notes                                                   |
-| --------------- | ---- | ------------ | ------------------------------------------------------- |
-| Local / staging | 1    | 2 GiB        | Single replica behind Compose                           |
-| Production      | 1–2  | 2–4 GiB      | Scale replicas horizontally for HTTP and WebSocket load |
+| Profile         | vCPU   | Memory limit | Notes                                                   |
+| --------------- | ------ | ------------ | ------------------------------------------------------- |
+| Local / staging | 1      | 2 GiB        | Single replica behind Compose                           |
+| Production      | 1 to 2 | 2 to 4 GiB   | Scale replicas horizontally for HTTP and WebSocket load |
 
 Reserve headroom for concurrent REST traffic and dashboard WebSocket connections. PDF generation on the API path can briefly need **4 GiB** per replica.
 
@@ -97,11 +97,11 @@ Reserve headroom for concurrent REST traffic and dashboard WebSocket connections
 
 Processes BullMQ unit jobs: billing cycles, expiration, reminders, provisioning, invoice PDFs, SSH stack updates, and DATEV export units. Default **`QUEUE_WORKER_CONCURRENCY=5`**.
 
-| Profile            | vCPU | Memory limit | Notes                                              |
-| ------------------ | ---- | ------------ | -------------------------------------------------- |
-| Local / staging    | 1    | 2 GiB        | `QUEUE_WORKER_CONCURRENCY=2` acceptable on laptops |
-| Production (light) | 1–2  | 2–4 GiB      | Mostly email and status polling                    |
-| Production (heavy) | 2–4  | 4–8 GiB      | Provisioning, PDF batches, or high concurrency     |
+| Profile            | vCPU   | Memory limit | Notes                                              |
+| ------------------ | ------ | ------------ | -------------------------------------------------- |
+| Local / staging    | 1      | 2 GiB        | `QUEUE_WORKER_CONCURRENCY=2` acceptable on laptops |
+| Production (light) | 1 to 2 | 2 to 4 GiB   | Mostly email and status polling                    |
+| Production (heavy) | 2 to 4 | 4 to 8 GiB   | Provisioning, PDF batches, or high concurrency     |
 
 Scale **worker replicas** horizontally. Tune `QUEUE_WORKER_CONCURRENCY` to CPU count and external API rate limits (Stripe, Hetzner, DigitalOcean).
 
@@ -109,17 +109,17 @@ Scale **worker replicas** horizontally. Tune `QUEUE_WORKER_CONCURRENCY` to CPU c
 
 Registers repeatable coordinator jobs only. Lightweight and **singleton** per Redis key prefix.
 
-| Profile          | vCPU     | Memory limit  | Notes                                          |
-| ---------------- | -------- | ------------- | ---------------------------------------------- |
-| All environments | 0.25–0.5 | 512 MiB–1 GiB | Run **one** scheduler container per deployment |
+| Profile          | vCPU        | Memory limit     | Notes                                          |
+| ---------------- | ----------- | ---------------- | ---------------------------------------------- |
+| All environments | 0.25 to 0.5 | 512 MiB to 1 GiB | Run **one** scheduler container per deployment |
 
 ## Frontend Billing Console
 
 Angular SSR Express server. No database or Redis on this host.
 
-| Application     | Image                             | vCPU | Memory limit  | Disk  | Default port |
-| --------------- | --------------------------------- | ---- | ------------- | ----- | ------------ |
-| Billing console | `decabill-billing-console-server` | 0.5  | 512 MiB–1 GiB | 2 GiB | **4500**     |
+| Application     | Image                             | vCPU | Memory limit     | Disk  | Default port |
+| --------------- | --------------------------------- | ---- | ---------------- | ----- | ------------ |
+| Billing console | `decabill-billing-console-server` | 0.5  | 512 MiB to 1 GiB | 2 GiB | **4500**     |
 
 Browser clients need a modern evergreen browser. The billing console initial bundle budget warns at **1 MB** (errors at **5 MB**).
 
@@ -139,7 +139,7 @@ When running the full Compose stack (Postgres, Redis, API, worker, scheduler, Ma
 
 | Resource | Minimum     | Comfortable |
 | -------- | ----------- | ----------- |
-| vCPU     | 4           | 6–8         |
+| vCPU     | 4           | 6 to 8      |
 | Memory   | 8 GiB       | 16 GiB      |
 | Disk     | 30 GiB free | 50 GiB free |
 
@@ -158,14 +158,14 @@ Acceptable for staging or a single-tenant pilot. Split worker from API before pr
 
 ### Recommended production split
 
-| Host / service                | vCPU     | Memory       |
-| ----------------------------- | -------- | ------------ |
-| API (1–2 replicas)            | 2 each   | 2–4 GiB each |
-| Worker (1+ replicas)          | 2 each   | 4 GiB each   |
-| Scheduler (1 replica)         | 0.5      | 1 GiB        |
-| PostgreSQL                    | 2        | 4 GiB        |
-| Redis                         | 1        | 1 GiB        |
-| Billing console (1+ replicas) | 0.5 each | 1 GiB each   |
+| Host / service                | vCPU     | Memory          |
+| ----------------------------- | -------- | --------------- |
+| API (1 to 2 replicas)         | 2 each   | 2 to 4 GiB each |
+| Worker (1+ replicas)          | 2 each   | 4 GiB each      |
+| Scheduler (1 replica)         | 0.5      | 1 GiB           |
+| PostgreSQL                    | 2        | 4 GiB           |
+| Redis                         | 1        | 1 GiB           |
+| Billing console (1+ replicas) | 0.5 each | 1 GiB each      |
 
 ## Network and External Dependencies
 
@@ -182,11 +182,11 @@ Ingress: expose console (**4500** or behind TLS terminator), API (**3200**), and
 
 ## Related Documentation
 
-- **[Operator Runbook](./operator-runbook.md)** - Install capacity, verification, and day-2 checklists
-- **[Docker Deployment](./docker-deployment.md)** - Compose services and startup order
-- **[Background Jobs](./background-jobs.md)** - Queue roles and concurrency
-- **[Production Checklist](./production-checklist.md)** - Set container limits before go-live
-- **[Components](../architecture/components.md)** - Ports and dependencies
+- **[Operator Runbook](./operator-runbook.md)**: Install capacity, verification, and day-2 checklists
+- **[Docker Deployment](./docker-deployment.md)**: Compose services and startup order
+- **[Background Jobs](./background-jobs.md)**: Queue roles and concurrency
+- **[Production Checklist](./production-checklist.md)**: Set container limits before go-live
+- **[Components](../architecture/components.md)**: Ports and dependencies
 
 ---
 

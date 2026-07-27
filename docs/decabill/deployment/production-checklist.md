@@ -1,6 +1,6 @@
 # Production Deployment Checklist
 
-Comprehensive checklist for deploying Decabill to production.
+Checklist for deploying Decabill to production.
 
 ## Pre-Deployment Checklist
 
@@ -163,20 +163,15 @@ Comprehensive checklist for deploying Decabill to production.
 
 ## Deployment Process
 
-1. **Pre-deployment**
-   - Run full test suite and security scans
+1. **Pre-deployment**: Run full test suite and security scans
    - Review **[Accepted risks](../security/accepted-risks.md)** for operator obligations
    - Validate environment on staging with production-like `TENANTS` and Stripe test mode
-
-2. **Deployment**
-   - Deploy Postgres and Redis
+2. **Deployment**: Deploy Postgres and Redis
    - Deploy API; wait for healthy `/api/health`
    - Deploy scheduler and worker
    - Deploy frontends
    - Register Stripe webhook endpoint for production URL
-
-3. **Post-deployment**
-   - Verify health endpoints
+3. **Post-deployment**: Verify health endpoints
    - Create test subscription and invoice in staging tenant
    - Confirm coordinator jobs appear in Bull Board
    - Monitor logs for migration or Redis connection errors
@@ -189,12 +184,12 @@ Comprehensive checklist for deploying Decabill to production.
 
 ## Related Documentation
 
-- **[Operator Runbook](./operator-runbook.md)** - Capacity, install verification, day-2, and disclosure checklists
-- **[System Requirements](./system-requirements.md)** - CPU, memory, and disk baselines
-- **[Docker Deployment](./docker-deployment.md)** - Containerized deployment
-- **[Environment Configuration](./environment-configuration.md)** - Environment variables
-- **[Background Jobs](./background-jobs.md)** - Queue startup order
-- **[Troubleshooting](../troubleshooting/README.md)** - Problem-solving guides
+- **[Operator Runbook](./operator-runbook.md)**: Capacity, install verification, day-2, and disclosure checklists
+- **[System Requirements](./system-requirements.md)**: CPU, memory, and disk baselines
+- **[Docker Deployment](./docker-deployment.md)**: Containerized deployment
+- **[Environment Configuration](./environment-configuration.md)**: Environment variables
+- **[Background Jobs](./background-jobs.md)**: Queue startup order
+- **[Troubleshooting](../troubleshooting/README.md)**: Problem-solving guides
 
 ---
 

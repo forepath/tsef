@@ -8,10 +8,10 @@ The Agent Controller provides a centralized control plane for managing multiple 
 
 ### HTTP REST API
 
-**OpenAPI Specification**: [openapi.yaml](/spec/agent-controller/openapi.yaml)
+**OpenAPI Specification**: [openapi.yaml](/spec/agent-controller/openapi.yaml):
 
-- **View in Swagger Editor**: [Open in Swagger Editor](https://editor.swagger.io/?url=https://docs.agenstra.com/spec/agent-controller/openapi.yaml)
-- **Download**: [openapi.yaml](/spec/agent-controller/openapi.yaml)
+- View in Swagger Editor: [Open in Swagger Editor](https://editor.swagger.io/?url=https://docs.agenstra.com/spec/agent-controller/openapi.yaml):
+- Download: [openapi.yaml](/spec/agent-controller/openapi.yaml)
 
 The Agent Controller HTTP API provides:
 
@@ -44,7 +44,7 @@ The Agent Controller HTTP API provides:
 | DELETE           | `/knowledge/relations/{id}`           | `deleteKnowledgeRelation`                                          |
 | GET              | `/knowledge/relations/prompt-context` | `getKnowledgePromptContext`                                        |
 
-#### Contract hygiene — deferred gaps
+#### Contract hygiene: deferred gaps
 
 OpenAPI also documents composite surfaces without controllers in `feature-agent-controller` (auth/users from identity when bundled; admin webhooks; otel metrics). Those ops stay published. Cosmetic Nest `{clientId}` vs OpenAPI `{id}` param names are deferred.
 
@@ -52,15 +52,15 @@ OpenAPI also documents composite surfaces without controllers in `feature-agent-
 
 **AsyncAPI Specification**: [asyncapi.yaml](/spec/agent-controller/asyncapi.yaml)
 
-- **View in AsyncAPI Studio**: [Open in AsyncAPI Studio](https://studio.asyncapi.com/?url=https://docs.agenstra.com/spec/agent-controller/asyncapi.yaml)
-- **Download**: [asyncapi.yaml](/spec/agent-controller/asyncapi.yaml)
+- View in AsyncAPI Studio: [Open in AsyncAPI Studio](https://studio.asyncapi.com/?url=https://docs.agenstra.com/spec/agent-controller/asyncapi.yaml)
+- Download: [asyncapi.yaml](/spec/agent-controller/asyncapi.yaml)
 
 The Agent Controller WebSocket gateway provides:
 
-- **`clients` namespace** – Client context (`setClient`), `forward` to remote agent-managers, proxied events by name, reconnection notifications, controller-originated ticket hints for chat
-- **`tickets` namespace** – Ticket board and automation realtime (`setClient`, upserts, comments, activity, run events, `knowledgeRelationChanged`)
-- **`pages` namespace** – Knowledge board realtime (`setClient`, `knowledgeTreeChanged`, `knowledgeRelationChanged`, `knowledgePageActivityCreated`)
-- **`status` namespace** – Per-user notification snapshots/patches (`statusSnapshot`, `statusPatch`, `markEnvironmentRead`, `setActiveEnvironment`, `error`)
+- **`clients` namespace**: Client context (`setClient`), `forward` to remote agent-managers, proxied events by name, reconnection notifications, controller-originated ticket hints for chat
+- **`tickets` namespace**: Ticket board and automation realtime (`setClient`, upserts, comments, activity, run events, `knowledgeRelationChanged`)
+- **`pages` namespace**: Knowledge board realtime (`setClient`, `knowledgeTreeChanged`, `knowledgeRelationChanged`, `knowledgePageActivityCreated`)
+- **`status` namespace**: Per-user notification snapshots/patches (`statusSnapshot`, `statusPatch`, `markEnvironmentRead`, `setActiveEnvironment`, `error`)
 
 ## Agent Manager API
 
@@ -68,10 +68,10 @@ The Agent Manager provides agent lifecycle management and container execution.
 
 ### HTTP REST API
 
-**OpenAPI Specification**: [openapi.yaml](/spec/agent-manager/openapi.yaml)
+**OpenAPI Specification**: [openapi.yaml](/spec/agent-manager/openapi.yaml):
 
-- **View in Swagger Editor**: [Open in Swagger Editor](https://editor.swagger.io/?url=https://docs.agenstra.com/spec/agent-manager/openapi.yaml)
-- **Download**: [openapi.yaml](/spec/agent-manager/openapi.yaml)
+- View in Swagger Editor: [Open in Swagger Editor](https://editor.swagger.io/?url=https://docs.agenstra.com/spec/agent-manager/openapi.yaml)
+- Download: [openapi.yaml](/spec/agent-manager/openapi.yaml)
 
 The Agent Manager HTTP API provides:
 
@@ -85,16 +85,16 @@ The Agent Manager HTTP API provides:
 - Deployment configuration and CI/CD run APIs (`/agents/:agentId/deployments/...`)
 - Configuration endpoint (`/config`)
 
-#### Contract hygiene — deferred gaps
+#### Contract hygiene: deferred gaps
 
 `GET /otel/metrics` is documented for shared monitoring (outside Nest controllers in this feature). Nested Docker stats object fields in AsyncAPI remain underspecified placeholders.
 
 ### WebSocket Gateway
 
-**AsyncAPI Specification**: [asyncapi.yaml](/spec/agent-manager/asyncapi.yaml)
+**AsyncAPI Specification**: [asyncapi.yaml](/spec/agent-manager/asyncapi.yaml):
 
-- **View in AsyncAPI Studio**: [Open in AsyncAPI Studio](https://studio.asyncapi.com/?url=https://docs.agenstra.com/spec/agent-manager/asyncapi.yaml)
-- **Download**: [asyncapi.yaml](/spec/agent-manager/asyncapi.yaml)
+- View in AsyncAPI Studio: [Open in AsyncAPI Studio](https://studio.asyncapi.com/?url=https://docs.agenstra.com/spec/agent-manager/asyncapi.yaml)
+- Download: [asyncapi.yaml](/spec/agent-manager/asyncapi.yaml)
 
 The Agent Manager WebSocket gateway provides:
 
@@ -156,7 +156,7 @@ All clients are automatically generated and published with each release, ensurin
 
 ## Related Documentation
 
-- **[Architecture Overview](../architecture/system-overview.md)** - System architecture and component relationships
-- **[WebSocket Communication](../features/websocket-communication.md)** - Real-time communication patterns
-- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** - Application details
-- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** - Application details
+- **[Architecture Overview](../architecture/system-overview.md)**: System architecture and component relationships
+- **[WebSocket Communication](../features/websocket-communication.md)**: Real-time communication patterns
+- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)**: Application details
+- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)**: Application details

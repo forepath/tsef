@@ -6,9 +6,9 @@ This section provides deployment guides and configuration information for Decabi
 
 Decabill can be deployed in several ways:
 
-- **Local Development** - For development and testing on your machine
-- **Docker Deployment** - Containerized deployment using Docker Compose
-- **Production Deployment** - Production-ready deployment with security and performance considerations
+- **Local Development**: For development and testing on your machine
+- **Docker Deployment**: Containerized deployment using Docker Compose
+- **Production Deployment**: Production-ready deployment with security and performance considerations
 
 ## Deployment Guides
 
@@ -143,8 +143,8 @@ nx serve decabill-frontend-billing-console
 
 ## Related Documentation
 
-- **[Security](../security/README.md)** - Accepted risks, hardening, SBOM, and disclosure
-- **[Troubleshooting](../troubleshooting/README.md)** - Common issues and debugging
+- **[Security](../security/README.md)**: Accepted risks, hardening, SBOM, and disclosure
+- **[Troubleshooting](../troubleshooting/README.md)**: Common issues and debugging
 
 ---
 

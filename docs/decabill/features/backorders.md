@@ -86,10 +86,10 @@ The billing console lists backorders on the customer subscriptions flow with sta
 
 ## Related Documentation
 
-- **[Subscriptions](./subscriptions.md)** - Order flow and `autoBackorder`
-- **[Service Types and Plans](./service-types-and-plans.md)** - Availability endpoints
-- **[Server Provisioning](./server-provisioning.md)** - Provisioning on fulfillment
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Backorder schemas
+- **[Subscriptions](./subscriptions.md)**: Order flow and `autoBackorder`
+- **[Service Types and Plans](./service-types-and-plans.md)**: Availability endpoints
+- **[Server Provisioning](./server-provisioning.md)**: Provisioning on fulfillment
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)**: Backorder schemas
 
 ---
 

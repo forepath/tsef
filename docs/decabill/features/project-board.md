@@ -26,21 +26,21 @@ Customers never see create-ticket or drag-drop controls (`isAdmin=false` on the 
 
 ## Locking
 
-Locking freezes **delivery scope** on the board — what was agreed and documented — separately from **billing**, which freezes **hours and money**.
+Locking freezes **delivery scope** on the board: what was agreed and documented: separately from **billing**, which freezes **hours and money**.
 
 ### Why lock
 
 Typical reasons to lock work:
 
-- **Sign-off** — Ticket is done and you do not want title, description, or acceptance criteria changed after the customer saw it.
-- **Audit trail** — Each ticket has a stable content SHA; lock marks that version as final and records a `LOCKED` activity entry.
-- **Accident prevention** — Stop later edits to closed work while the project stays active.
+- **Sign-off**: Ticket is done and you do not want title, description, or acceptance criteria changed after the customer saw it.
+- **Audit trail**: Each ticket has a stable content SHA; lock marks that version as final and records a `LOCKED` activity entry.
+- **Accident prevention**: Stop later edits to closed work while the project stays active.
 
 Locking is **not** a prerequisite for bill-time and does **not** run automatically when you invoice hours.
 
 ### Ticket lock
 
-Admins lock a ticket from the ticket detail modal (lock icon) or via `POST /tickets/{ticketId}` with `{ "locked": true }`. Lock is **one-way** — there is no unlock in the API or UI.
+Admins lock a ticket from the ticket detail modal (lock icon) or via `POST /tickets/{ticketId}` with `{ "locked": true }`. Lock is **one-way**; there is no unlock in the API or UI.
 
 When `locked` is true:
 
@@ -77,9 +77,9 @@ These mechanisms are related in workflow but **not connected in code** today:
 | Milestone lock | Milestone metadata                                               |
 | Bill time      | Unbilled time entries → issued invoice (`billedAt`, `invoiceId`) |
 
-`POST /admin/billing/projects/{projectId}/bill-time` bills unbilled time entries **within the requested datetime range** regardless of ticket or milestone lock. The billing console loads default **From**/**To** values from `GET .../unbilled-time-bounds` before submit. After bill-time, billed time entries are immutable — that is the **billing freeze**, not ticket lock.
+`POST /admin/billing/projects/{projectId}/bill-time` bills unbilled time entries **within the requested datetime range** regardless of ticket or milestone lock. The billing console loads default **From**/**To** values from `GET .../unbilled-time-bounds` before submit. After bill-time, billed time entries are immutable: that is the **billing freeze**, not ticket lock.
 
-See [Projects — Bill Time](./projects.md#bill-time) for invoicing preconditions and results.
+See [Projects: Bill Time](./projects.md#bill-time) for invoicing preconditions and results.
 
 ### Enforcement status
 
@@ -107,13 +107,13 @@ Tickets support parent-child hierarchy and optional milestone assignment. Each t
 
 ### Milestones
 
-| Method | Path                    | Access                                                                                         |
-| ------ | ----------------------- | ---------------------------------------------------------------------------------------------- |
-| GET    | `/milestones`           | Customer read, admin read                                                                      |
-| POST   | `/milestones`           | Admin only                                                                                     |
-| POST   | `/milestones/{id}`      | Admin only                                                                                     |
-| POST   | `/milestones/{id}/lock` | Admin only (one-way milestone lock; see [Project Board — Locking](./project-board.md#locking)) |
-| DELETE | `/milestones/{id}`      | Admin only                                                                                     |
+| Method | Path                    | Access                                                                                        |
+| ------ | ----------------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/milestones`           | Customer read, admin read                                                                     |
+| POST   | `/milestones`           | Admin only                                                                                    |
+| POST   | `/milestones/{id}`      | Admin only                                                                                    |
+| POST   | `/milestones/{id}/lock` | Admin only (one-way milestone lock; see [Project Board: Locking](./project-board.md#locking)) |
+| DELETE | `/milestones/{id}`      | Admin only                                                                                    |
 
 ## WebSocket Connection
 
@@ -212,26 +212,26 @@ sequenceDiagram
     GW-->>UI: ticketUpsert (room broadcast)
 ```
 
-Sequence source: [`project-board-realtime.mmd`](../../../libs/domains/decabill/backend/feature-billing-manager/docs/project-board-realtime.mmd)
+The sequence diagram above summarizes project board WebSocket join and ticket broadcast behavior.
 
 ## Frontend Integration
 
 NgRx effects in `data-access-billing-console`:
 
-- `connectProjectBoardSocket$` — connect when entering a project board
-- `setProjectBoardSocketProjectEmit$` — emit `setProject` after connect
-- `restoreProjectBoardSocketProject$` — re-emit `setProject` after reconnect
+- `connectProjectBoardSocket$`: connect when entering a project board
+- `setProjectBoardSocketProjectEmit$`: emit `setProject` after connect
+- `restoreProjectBoardSocketProject$`: re-emit `setProject` after reconnect
 - Socket events dispatch board slice updates (tickets, milestones, time entries, summary)
 
 The `ProjectBoardComponent` loads tickets over REST on init, connects the socket, and calls `setProject(projectId)`.
 
 ## Related Documentation
 
-- **[Projects](./projects.md)** - Assignment, admin CRUD, bill-time, KPIs
-- **[Real-time Status](./real-time-status.md)** - Separate `billing` namespace for server status
-- **[Authentication](./authentication.md)** - JWT and Keycloak handshake
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant in handshake
-- **[Billing Manager AsyncAPI](/spec/billing-manager/asyncapi.yaml)** - Full message schemas
+- **[Projects](./projects.md)**: Assignment, admin CRUD, bill-time, KPIs
+- **[Real-time Status](./real-time-status.md)**: Separate `billing` namespace for server status
+- **[Authentication](./authentication.md)**: JWT and Keycloak handshake
+- **[Multi-tenancy](./multi-tenancy.md)**: Tenant in handshake
+- **[Billing Manager AsyncAPI](/spec/billing-manager/asyncapi.yaml)**: Full message schemas
 
 ---
 

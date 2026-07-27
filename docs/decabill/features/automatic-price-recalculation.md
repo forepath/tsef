@@ -63,10 +63,10 @@ No new mapper. Partial credit documents are included by `findWithdrawnInPeriod` 
 
 ## Notifications
 
-| Event                             | Webhook                | Email                                                                                  |
-| --------------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
-| `service_plan.price_recalculated` | Yes                    | No                                                                                     |
-| `subscription.price_changed`      | Yes (per subscription) | Yes — **one consolidated email per `userId`** per tenant run (`price-change` template) |
+| Event                             | Webhook                | Email                                                                                 |
+| --------------------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
+| `service_plan.price_recalculated` | Yes                    | No                                                                                    |
+| `subscription.price_changed`      | Yes (per subscription) | Yes: **one consolidated email per `userId`** per tenant run (`price-change` template) |
 
 Email `correlationId` / event dedupe key: `price-recalc:{tenantId}:{userId}:{runDate}` (hashed to a UUID for `email_deliveries.event_id`).
 

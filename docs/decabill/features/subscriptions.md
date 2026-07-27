@@ -77,9 +77,9 @@ sequenceDiagram
 
 ### Request Body
 
-- **`planId`** (required) - UUID of the service plan
-- **`requestedConfig`** (optional) - Provider-specific configuration validated against the service type schema
-- **`autoBackorder`** (optional) - When true, queue a backorder if capacity is unavailable
+- **`planId`** (required): UUID of the service plan
+- **`requestedConfig`** (optional): Provider-specific configuration validated against the service type schema
+- **`autoBackorder`** (optional): When true, queue a backorder if capacity is unavailable
 
 Provider config keys include `serverType`, `location` or `region`, and optional nested provisioning tokens. See [Service Types and Plans](./service-types-and-plans.md) and [Server Provisioning](./server-provisioning.md).
 
@@ -101,8 +101,8 @@ See **[CloudInit Configs](./cloud-init-configs.md)**.
 
 ## Cancel and Resume
 
-- `POST /subscriptions/{subscriptionId}/cancel` - Schedule cancellation at period end or immediately per plan rules. Advance-billed plans (`billInAdvance`) always defer to period end. Emits `subscription.cancel_scheduled` (not final `subscription.canceled`).
-- `POST /subscriptions/{subscriptionId}/resume` - Reverse a pending cancel before `effective_at`
+- `POST /subscriptions/{subscriptionId}/cancel`: Schedule cancellation at period end or immediately per plan rules. Advance-billed plans (`billInAdvance`) always defer to period end. Emits `subscription.cancel_scheduled` (not final `subscription.canceled`).
+- `POST /subscriptions/{subscriptionId}/resume`: Reverse a pending cancel before `effective_at`
 
 ## Statutory Withdrawal (Widerruf)
 
@@ -125,8 +125,8 @@ After an [automatic price recalculation](./automatic-price-recalculation.md) mig
 
 ### Withdraw vs Cancel
 
-- **Withdraw** (`POST /subscriptions/{subscriptionId}/withdraw`) — immediate teardown, bypasses `CancellationPolicyService` (e.g. works during `minCommitmentDays`).
-- **Cancel** — commercial cancellation subject to notice and commitment rules.
+- **Withdraw** (`POST /subscriptions/{subscriptionId}/withdraw`): immediate teardown, bypasses `CancellationPolicyService` (e.g. works during `minCommitmentDays`).
+- **Cancel**: commercial cancellation subject to notice and commitment rules.
 
 ### Refunds on provisioned withdrawal
 
@@ -178,8 +178,8 @@ Active subscriptions can change server type and addons without switching plans. 
 
 ## Availability
 
-- `POST /availability/check` - Check whether requested config is available at the provider
-- `POST /availability/alternatives` - Suggest alternative regions or server types
+- `POST /availability/check`: Check whether requested config is available at the provider
+- `POST /availability/alternatives`: Suggest alternative regions or server types
 
 ## API Endpoints
 
@@ -204,13 +204,13 @@ See [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) for schemas.
 
 ## Related Documentation
 
-- **[Customer Profiles](./customer-profiles.md)** - Required before ordering
-- **[Service Types and Plans](./service-types-and-plans.md)** - Catalog and provider schemas
-- **[Subscription Config Change](./subscription-config-change.md)** - Mid-life server type and addon changes
-- **[Invoices](./invoices.md)** - Open positions and billing-day accumulation
-- **[Backorders](./backorders.md)** - Capacity retry queue
-- **[Server Provisioning](./server-provisioning.md)** - Cloud-init and bundled stacks
-- **[Dashboard and Server Control](./dashboard-and-server-control.md)** - Overview and power actions
+- **[Customer Profiles](./customer-profiles.md)**: Required before ordering
+- **[Service Types and Plans](./service-types-and-plans.md)**: Catalog and provider schemas
+- **[Subscription Config Change](./subscription-config-change.md)**: Mid-life server type and addon changes
+- **[Invoices](./invoices.md)**: Open positions and billing-day accumulation
+- **[Backorders](./backorders.md)**: Capacity retry queue
+- **[Server Provisioning](./server-provisioning.md)**: Cloud-init and bundled stacks
+- **[Dashboard and Server Control](./dashboard-and-server-control.md)**: Overview and power actions
 
 ---
 

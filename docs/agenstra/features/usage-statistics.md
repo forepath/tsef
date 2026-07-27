@@ -22,8 +22,8 @@ Global equivalents exist under `/api/statistics/...` for cross-workspace views w
 
 ## Who can access what
 
-- **Client-scoped routes** – Same client access rules as other controller APIs (plus admin visibility where documented).
-- **Global routes** – Intended for administrators or roles that may see aggregates across accessible clients; exact behavior is defined in the OpenAPI descriptions for each operation.
+- **Client-scoped routes**: Same client access rules as other controller APIs (plus admin visibility where documented).
+- **Global routes**: Intended for administrators or roles that may see aggregates across accessible clients; exact behavior is defined in the OpenAPI descriptions for each operation.
 
 ## Relationship to container stats
 
@@ -34,13 +34,13 @@ Global equivalents exist under `/api/statistics/...` for cross-workspace views w
 
 ## Related documentation
 
-- **[Backend Agent Controller](../applications/backend-agent-controller.md)** – Endpoint group listing
-- **[Agent Management](./agent-management.md)** – Container stats and agent lifecycle
-- **[Authentication](./authentication.md)** – Roles and access modes
+- **[Backend Agent Controller](../applications/backend-agent-controller.md)**: Endpoint group listing
+- **[Agent Management](./agent-management.md)**: Container stats and agent lifecycle
+- **[Authentication](./authentication.md)**: Roles and access modes
 
 ## API reference
 
-- [Agent Controller OpenAPI](/spec/agent-controller/openapi.yaml) – `/clients/{id}/statistics/*` and `/statistics/*`
+- [Agent Controller OpenAPI](/spec/agent-controller/openapi.yaml): `/clients/{id}/statistics/*` and `/statistics/*`
 
 ---
 

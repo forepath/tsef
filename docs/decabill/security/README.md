@@ -40,10 +40,10 @@ For variable-by-variable deployment settings, including **`CONFIG_*`**, **`CSP_E
 
 ## Related documentation
 
-- **[Deployment](../deployment/README.md)** - Docker and production guides
-- **[Operator runbook](../deployment/operator-runbook.md)** - Install/ops and disclosure checklists
-- **[Architecture](../architecture/README.md)** - Trust boundaries and components
-- **[Features](../features/README.md)** - Product capabilities including multi-tenancy and payments
+- **[Deployment](../deployment/README.md)**: Docker and production guides
+- **[Operator runbook](../deployment/operator-runbook.md)**: Install/ops and disclosure checklists
+- **[Architecture](../architecture/README.md)**: Trust boundaries and components
+- **[Features](../features/README.md)**: Product capabilities including multi-tenancy and payments
 
 ---
 

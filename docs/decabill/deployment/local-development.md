@@ -222,15 +222,14 @@ See **[Background Jobs](./background-jobs.md)**.
 
 ### Port Conflicts
 
-- Billing API: **3200**, WebSocket: **8082**, console: **4500**, docs: **4200**, Redis host port: **6380**
-- Change ports in `.env` if needed: `lsof -i :3200`
+- Billing API: **3200**, WebSocket: **8082**, console: **4500**, docs: **4200**, Redis host port: **6380**: Change ports in `.env` if needed: `lsof -i :3200`
 
 ## Related Documentation
 
-- **[Docker Deployment](./docker-deployment.md)** - Containerized deployment
-- **[Production Checklist](./production-checklist.md)** - Production deployment
-- **[Environment Configuration](./environment-configuration.md)** - Environment variables
-- **[Common Issues](../troubleshooting/common-issues.md)** - Problem solving
+- **[Docker Deployment](./docker-deployment.md)**: Containerized deployment
+- **[Production Checklist](./production-checklist.md)**: Production deployment
+- **[Environment Configuration](./environment-configuration.md)**: Environment variables
+- **[Common Issues](../troubleshooting/common-issues.md)**: Problem solving
 
 ---
 

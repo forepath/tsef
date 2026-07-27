@@ -43,10 +43,10 @@ This document describes the major runtime components in Decabill, their responsi
 
 ### Queue roles (same image, different `QUEUE_ROLE`)
 
-- **`api`** - Serves HTTP and WebSocket; runs migrations; may expose Bull Board
-- **`worker`** - Consumes BullMQ unit jobs (billing, expiration, reminders, backorder retry, SSH updates, bill-now units)
-- **`scheduler`** - Registers repeatable coordinator jobs on startup
-- **`all`** - Combines all roles for local development
+- **`api`**: Serves HTTP and WebSocket; runs migrations; may expose Bull Board
+- **`worker`**: Consumes BullMQ unit jobs (billing, expiration, reminders, backorder retry, SSH updates, bill-now units)
+- **`scheduler`**: Registers repeatable coordinator jobs on startup
+- **`all`**: Combines all roles for local development
 
 **Documentation**: [Backend Billing Manager Application](../applications/backend-billing-manager.md)
 
@@ -95,7 +95,7 @@ This document describes the major runtime components in Decabill, their responsi
 
 **Feature library**: `libs/domains/decabill/frontend/feature-landingpage`
 
-**License**: **Source-available** (viewing only; see [LICENSE](../../../apps/decabill/frontend-landingpage/LICENSE))
+**License**: **Source-available** (viewing only; see the LICENSE file under `apps/decabill/frontend-landingpage`)
 
 ### Key responsibilities
 
@@ -208,10 +208,10 @@ graph TB
 
 ## Related Documentation
 
-- **[System Overview](./system-overview.md)** - Architecture summary
-- **[Data Flow](./data-flow.md)** - Request and event flows
-- **[Background Jobs](../deployment/background-jobs.md)** - Queue job catalog
-- **[API Reference](../api-reference/README.md)** - HTTP and WebSocket contracts
+- **[System Overview](./system-overview.md)**: Architecture summary
+- **[Data Flow](./data-flow.md)**: Request and event flows
+- **[Background Jobs](../deployment/background-jobs.md)**: Queue job catalog
+- **[API Reference](../api-reference/README.md)**: HTTP and WebSocket contracts
 
 ---
 

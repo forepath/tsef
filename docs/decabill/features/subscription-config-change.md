@@ -25,7 +25,7 @@ Provisioning providers declare two fail-closed flags:
 | `supportsServerTypeUpgrade`   | In-place resize to a more expensive type |
 | `supportsServerTypeDowngrade` | In-place resize to a cheaper type        |
 
-Built-in Hetzner and DigitalOcean register both `true`. Dynamic plugins must opt in. Equal-price (“lateral”) server-type changes are **rejected** — there is no lateral-change rule.
+Built-in Hetzner and DigitalOcean register both `true`. Dynamic plugins must opt in. Equal-price (“lateral”) server-type changes are **rejected**; there is no lateral-change rule.
 
 Server type changes use the provider resize APIs (never recreate/destroy the VM). Location is never accepted on this path.
 
@@ -59,9 +59,9 @@ Request body may include `serverType`, `addAddonIds`, `removeAddonIds`, and `add
 3. Worker: claim CAS → resize → remove addons → add addons → one-shot billing → complete
 4. Each successful step commits operational snapshots immediately and records `appliedSteps`
 5. One-shot billing runs **only** if every requested step succeeded
-6. Failures mark the change `failed`, return subscription to `active`, emit `subscription.config_change_failed` — no infra rollback; no one-shot billing
+6. Failures mark the change `failed`, return subscription to `active`, emit `subscription.config_change_failed`: no infra rollback; no one-shot billing
 
-Stuck `processing` rows are reclaimed once after `CONFIG_CHANGE_PROCESSING_TIMEOUT_MS` (default 15m); a second timeout fails the change. Failed rows are terminal — customers must **submit a new** request against current committed state.
+Stuck `processing` rows are reclaimed once after `CONFIG_CHANGE_PROCESSING_TIMEOUT_MS` (default 15m); a second timeout fails the change. Failed rows are terminal: customers must **submit a new** request against current committed state.
 
 ## Billing
 
@@ -108,7 +108,7 @@ Tune on **scheduler** and **worker** (same env as the API). Full table: [Environ
 
 Related addon SSH timeout (mid-life cloud-init provision/deprovision): `BILLING_ADDON_SSH_COMMAND_TIMEOUT_MS` (default `120000`). See [Addons](./addons.md).
 
-Job names: `subscription-config-change.coordinator` / `subscription-config-change.unit` — see [Background jobs](../deployment/background-jobs.md).
+Job names: `subscription-config-change.coordinator` / `subscription-config-change.unit`: see [Background jobs](../deployment/background-jobs.md).
 
 ### Empty deprovision script = status-only
 
@@ -124,7 +124,7 @@ Built-in Hetzner / DigitalOcean set both resize flags. **Dynamic** billing provi
 
 - Partial infra may already be committed (resize and/or some addons); one-shot billing did not run
 - Recurring billing follows committed snapshots
-- Failed change rows are terminal — customer must submit a **new** request
+- Failed change rows are terminal: customer must submit a **new** request
 - Do not expect automatic infra rollback
 
 ## Related

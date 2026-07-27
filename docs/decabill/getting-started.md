@@ -221,7 +221,7 @@ Confirm WebSocket dashboard updates on the overview page when logged in as an en
 
 1. **[System Overview](./architecture/system-overview.md)** for the two-tier architecture
 2. **[Multi-tenancy](./features/multi-tenancy.md)** if you run more than one tenant
-3. **[Subscriptions](./features/subscriptions.md)** to order a service plan
+3. **[Subscriptions](./features/subscriptions.md)**: order a service plan
 4. **[Billing Administration](./features/billing-administration.md)** for manual invoices and operator dashboards
 5. **[API Reference](./api-reference/README.md)** for OpenAPI and AsyncAPI specifications
 

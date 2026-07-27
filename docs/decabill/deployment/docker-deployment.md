@@ -26,19 +26,18 @@ docker compose up -d
 
 The `docker-compose.yaml` includes:
 
-- **postgres** - PostgreSQL 16
-- **redis** - Redis 7 with persistence; host port **6380** maps to container **6379**
-- **backend-billing-manager** - API (`QUEUE_ROLE=api`, port **3200**, WebSocket **8082**)
-- **backend-billing-manager-scheduler** - Coordinator registration (`QUEUE_ROLE=scheduler`)
-- **backend-billing-manager-worker** - Job processing (`QUEUE_ROLE=worker`)
-- **mailhog** - Local SMTP capture for invoice and reminder emails
+- **postgres**: PostgreSQL 16
+- **redis**: Redis 7 with persistence; host port **6380** maps to container **6379**: **backend-billing-manager**: API (`QUEUE_ROLE=api`, port **3200**, WebSocket **8082**)
+- **backend-billing-manager-scheduler**: Coordinator registration (`QUEUE_ROLE=scheduler`)
+- **backend-billing-manager-worker**: Job processing (`QUEUE_ROLE=worker`)
+- **mailhog**: Local SMTP capture for invoice and reminder emails
 
 Volumes:
 
-- `postgres_data` - Database files
-- `redis_data` - Redis AOF data
-- `invoice_pdf_data` - Invoice PDF storage at `/data/invoices`
-- `./provider-plugins` - Optional dynamic provider plugins mount
+- `postgres_data`: Database files
+- `redis_data`: Redis AOF data
+- `invoice_pdf_data`: Invoice PDF storage at `/data/invoices`
+- `./provider-plugins`: Optional dynamic provider plugins mount
 
 Image: `ghcr.io/forepath/decabill-billing-api:latest`
 
@@ -104,10 +103,10 @@ When `CONFIG` is set, the frontend server also supports hardening variables docu
 
 Billing console and docs Express servers support CSP variables:
 
-- `CSP_ENFORCE` - Enforce CSP when `true`; otherwise report-only
-- `CSP_CONNECT_SRC_EXTRA` - Extra `connect-src` origins (required in production for plain HTTP APIs)
+- `CSP_ENFORCE`: Enforce CSP when `true`; otherwise report-only
+- `CSP_CONNECT_SRC_EXTRA`: Extra `connect-src` origins (required in production for plain HTTP APIs)
 - `CSP_SCRIPT_SRC_EXTRA`, `CSP_STYLE_SRC_EXTRA`, `CSP_IMG_SRC_EXTRA`, `CSP_FONT_SRC_EXTRA`, `CSP_WORKER_SRC_EXTRA`
-- `CSP_FRAME_ANCESTORS` - Optional full override for `frame-ancestors`
+- `CSP_FRAME_ANCESTORS`: Optional full override for `frame-ancestors`
 
 ## Building Containers
 
@@ -173,11 +172,11 @@ docker compose logs --tail=100 backend-billing-manager-worker
 
 ## Related Documentation
 
-- **[System Requirements](./system-requirements.md)** - CPU, memory, and disk by role
-- **[Local Development](./local-development.md)** - Local setup
-- **[Production Checklist](./production-checklist.md)** - Production deployment
-- **[Environment Configuration](./environment-configuration.md)** - Environment variables
-- **[Background Jobs](./background-jobs.md)** - Queue roles and Redis
+- **[System Requirements](./system-requirements.md)**: CPU, memory, and disk by role
+- **[Local Development](./local-development.md)**: Local setup
+- **[Production Checklist](./production-checklist.md)**: Production deployment
+- **[Environment Configuration](./environment-configuration.md)**: Environment variables
+- **[Background Jobs](./background-jobs.md)**: Queue roles and Redis
 
 ---
 

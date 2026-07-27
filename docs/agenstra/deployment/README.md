@@ -1,14 +1,14 @@
 # Deployment Documentation
 
-This section provides comprehensive deployment guides and configuration information for the Agenstra system.
+This section provides deployment guides and configuration information for Agenstra.
 
 ## Overview
 
 Agenstra can be deployed in various ways:
 
-- **Local Development** - For development and testing
-- **Docker Deployment** - Containerized deployment using Docker Compose
-- **Production Deployment** - Production-ready deployment with security and performance considerations
+- **Local Development**: For development and testing
+- **Docker Deployment**: Containerized deployment using Docker Compose
+- **Production Deployment**: Production-ready deployment with security and performance considerations
 
 ## Deployment Guides
 
@@ -41,6 +41,17 @@ CPU, memory, and disk guidance by deployment role:
 - PostgreSQL (pgvector) and Redis baselines
 - Frontend hosts and mixed local-development hosts
 
+### [Environment Configuration](./environment-configuration.md)
+
+Complete environment variables reference:
+
+- Application-specific variables
+- Database configuration
+- Authentication configuration
+- CORS and rate limiting
+- Server provisioning
+- [Dynamic provider plugins](../features/dynamic-provider-plugins.md): optional runtime extensions for Agenstra backends
+
 ### [Production Checklist](./production-checklist.md)
 
 Production deployment guide:
@@ -60,16 +71,13 @@ Install and day-2 ops checklists:
 - Ongoing operations (queues, backups, logging)
 - Disclosure, SBOM, and supported-version obligations
 
-### [Environment Configuration](./environment-configuration.md)
+### [Background Jobs](./background-jobs.md)
 
-Complete environment variables reference:
+BullMQ background processing for the agent controller:
 
-- Application-specific variables
-- Database configuration
-- Authentication configuration
-- CORS and rate limiting
-- Server provisioning
-- [Dynamic provider plugins](../features/dynamic-provider-plugins.md) — optional runtime extensions for Agenstra backends
+- Queue roles (API, scheduler, worker)
+- Job registry and coordinator schedules
+- Redis and worker concurrency notes
 
 ## Deployment Architecture
 
@@ -132,10 +140,10 @@ nx serve agenstra-frontend-agent-console
 
 ## Related Documentation
 
-- **[Getting Started](../getting-started.md)** - Quick start guide
-- **[Architecture](../architecture/README.md)** - System architecture
-- **[Applications](../applications/README.md)** - Application details
-- **[Security](../security/README.md)** - Accepted risks, hardening, SBOM, and disclosure
+- **[Getting Started](../getting-started.md)**: Quick start guide
+- **[Architecture](../architecture/README.md)**: System architecture
+- **[Applications](../applications/README.md)**: Application details
+- **[Security](../security/README.md)**: Accepted risks, hardening, SBOM, and disclosure
 
 ---
 

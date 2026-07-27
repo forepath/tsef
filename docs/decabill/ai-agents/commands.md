@@ -9,7 +9,7 @@ Commands define repeatable workflows (e.g. refactor, test generation, code revie
 ## Structure
 
 - **Location**: `.agenstra/commands/`
-- **Format**: MDC (`.command.mdc`) – YAML frontmatter + body
+- **Format**: MDC (`.command.mdc`) to YAML frontmatter + body
 - **Naming**: Descriptive name; the filename stem is the command key (e.g. `refactor.command.mdc` → key `refactor`)
 
 The **body** (content below the frontmatter) is the **prompt** text. It can use placeholders like `{{pattern}}`.
@@ -41,11 +41,11 @@ Refactor this code to use the {{pattern}} pattern. Follow the rules in #rules/ar
 
 ## Output by tool
 
-- **Cursor** – One `.md` file per command under `.cursor/commands/` (plain Markdown: title, description, prompt).
-- **OpenCode** – One `.md` file per command under `.opencode/commands/` with YAML frontmatter (`description`, `agent`, `model`).
-- **GitHub Copilot** – The transformer does not emit commands for Copilot. Configure Copilot prompts or instructions separately if needed.
+- **Cursor**: One `.md` file per command under `.cursor/commands/` (plain Markdown: title, description, prompt).
+- **OpenCode**: One `.md` file per command under `.opencode/commands/` with YAML frontmatter (`description`, `agent`, `model`).
+- **GitHub Copilot**: The transformer does not emit commands for Copilot. Configure Copilot prompts or instructions separately if needed.
 
 ## Related
 
-- [Agents](./agents.md) – Reference an agent via `agent` for OpenCode (and Cursor where supported)
-- [README](./README.md) – Overview of `.agenstra/` and transformation
+- [Agents](./agents.md): Reference an agent via `agent` for OpenCode (and Cursor where supported)
+- [README](./README.md): Overview of `.agenstra/` and transformation

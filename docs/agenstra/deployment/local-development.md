@@ -226,9 +226,9 @@ docker ps
 
 ## Related Documentation
 
-- **[Docker Deployment](./docker-deployment.md)** - Containerized deployment
-- **[Production Checklist](./production-checklist.md)** - Production deployment
-- **[Environment Configuration](./environment-configuration.md)** - Environment variables
+- **[Docker Deployment](./docker-deployment.md)**: Containerized deployment
+- **[Production Checklist](./production-checklist.md)**: Production deployment
+- **[Environment Configuration](./environment-configuration.md)**: Environment variables
 
 ---
 

@@ -4,7 +4,7 @@ File system operations in agent containers. Read, write, create, delete, and mov
 
 ## Overview
 
-File management enables you to interact with the file system in agent containers. All operations are performed directly in the container's workspace, which typically contains a cloned Git repository.
+File management lets you interact with the file system in agent containers. All operations are performed directly in the container's workspace, which typically contains a cloned Git repository.
 
 ## File Operations
 
@@ -108,20 +108,20 @@ This enables real-time collaboration and ensures all clients see the latest file
 
 ### File Operations
 
-- `GET /api/clients/:id/agents/:agentId/files` - List directory contents
-- `GET /api/clients/:id/agents/:agentId/files/:path` - Read file content
-- `POST /api/clients/:id/agents/:agentId/files/:path` - Create file or directory
-- `PUT /api/clients/:id/agents/:agentId/files/:path` - Write file content
-- `DELETE /api/clients/:id/agents/:agentId/files/:path` - Delete file or directory
-- `PATCH /api/clients/:id/agents/:agentId/files/:path` - Move file or directory
+- `GET /api/clients/:id/agents/:agentId/files`: List directory contents
+- `GET /api/clients/:id/agents/:agentId/files/:path`: Read file content
+- `POST /api/clients/:id/agents/:agentId/files/:path`: Create file or directory
+- `PUT /api/clients/:id/agents/:agentId/files/:path`: Write file content
+- `DELETE /api/clients/:id/agents/:agentId/files/:path`: Delete file or directory
+- `PATCH /api/clients/:id/agents/:agentId/files/:path`: Move file or directory
 
 For detailed API documentation, see the application and API reference docs linked below.
 
 ## Related Documentation
 
-- **[Web IDE](./web-ide.md)** - Monaco Editor integration
-- **[Version Control](./version-control.md)** - Git operations
-- **[Agent Management](./agent-management.md)** - Agent containers
+- **[Web IDE](./web-ide.md)**: Monaco Editor integration
+- **[Version Control](./version-control.md)**: Git operations
+- **[Agent Management](./agent-management.md)**: Agent containers
 
 ---
 

@@ -1,6 +1,6 @@
 # Agent Management
 
-Agent management enables you to create, manage, and interact with AI agents running in Docker containers.
+Agent management lets you create, manage, and interact with AI agents running in Docker containers.
 
 ## Overview
 
@@ -9,10 +9,10 @@ Agents are AI-powered entities that run in Docker containers. Each agent has:
 - **Unique ID** (UUID)
 - **Name** and optional description
 - **Agent Type** (e.g., `cursor` for cursor-agent)
-- **Container** - Docker container for agent execution
-- **Credentials** - Password for WebSocket authentication
-- **Workspace** - Git repository cloned into the container (bind-mounted from host `/opt/agents/{uuid}`; path depends on agent type — see [Container image security](../security/container-images.md))
-- **VNC Container** (optional) - Virtual workspace with XFCE4 desktop and Chromium browser
+- **Container**: Docker container for agent execution
+- **Credentials**: Password for WebSocket authentication
+- **Workspace**: Git repository cloned into the container (bind-mounted from host `/opt/agents/{uuid}`; path depends on agent type: see [Container image security](../security/container-images.md))
+- **VNC Container** (optional): Virtual workspace with XFCE4 desktop and Chromium browser
 
 ## Creating an Agent
 
@@ -97,7 +97,7 @@ Agenstra uses a plugin-based agent provider system. Each agent has an `agentType
 
 ### Available Types
 
-- **`cursor`** (default) - Cursor-agent binary running in Docker containers
+- **`cursor`** (default): Cursor-agent binary running in Docker containers
 
 ### Adding New Agent Types
 
@@ -184,28 +184,28 @@ Per-agent regex filters live on the manager (`/api/agents-filters`). Global poli
 
 ### Agent Management
 
-- `GET /api/clients/:id/agents` - List all agents for a client
-- `GET /api/clients/:id/agents/:agentId` - Get a single agent by UUID
-- `POST /api/clients/:id/agents` - Create a new agent
-- `POST /api/clients/:id/agents/:agentId` - Update an existing agent
-- `DELETE /api/clients/:id/agents/:agentId` - Delete an agent
-- `POST /api/clients/:id/agents/:agentId/start` - Start agent container (proxied)
-- `POST /api/clients/:id/agents/:agentId/stop` - Stop agent container (proxied)
-- `POST /api/clients/:id/agents/:agentId/restart` - Restart agent container (proxied)
+- `GET /api/clients/:id/agents`: List all agents for a client
+- `GET /api/clients/:id/agents/:agentId`: Get a single agent by UUID
+- `POST /api/clients/:id/agents`: Create a new agent
+- `POST /api/clients/:id/agents/:agentId`: Update an existing agent
+- `DELETE /api/clients/:id/agents/:agentId`: Delete an agent
+- `POST /api/clients/:id/agents/:agentId/start`: Start agent container (proxied)
+- `POST /api/clients/:id/agents/:agentId/stop`: Stop agent container (proxied)
+- `POST /api/clients/:id/agents/:agentId/restart`: Restart agent container (proxied)
 
 For detailed API documentation, see the application and API reference docs linked below.
 
 ## Related Documentation
 
-- **[Chat Interface](./chat-interface.md)** - Chat with agents
-- **[File Management](./file-management.md)** - File operations in containers
-- **[Version Control](./version-control.md)** - Git operations in containers
-- **[WebSocket Communication](./websocket-communication.md)** - Real-time communication
-- **[VNC Browser Access](./vnc-browser-access.md)** - Graphical browser access via VNC
-- **[Usage Statistics](./usage-statistics.md)** - Controller-side usage metrics
-- **[Message Filter Rules](./message-filter-rules.md)** - Regex filters
-- **[Dynamic provider plugins](./dynamic-provider-plugins.md)** - Custom agent, pipeline, and filter providers
-- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** - Application details
+- **[Chat Interface](./chat-interface.md)**: Chat with agents
+- **[File Management](./file-management.md)**: File operations in containers
+- **[Version Control](./version-control.md)**: Git operations in containers
+- **[WebSocket Communication](./websocket-communication.md)**: Real-time communication
+- **[VNC Browser Access](./vnc-browser-access.md)**: Graphical browser access via VNC
+- **[Usage Statistics](./usage-statistics.md)**: Controller-side usage metrics
+- **[Message Filter Rules](./message-filter-rules.md)**: Regex filters
+- **[Dynamic provider plugins](./dynamic-provider-plugins.md)**: Custom agent, pipeline, and filter providers
+- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)**: Application details
 
 ---
 

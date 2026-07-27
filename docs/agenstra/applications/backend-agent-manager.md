@@ -10,27 +10,27 @@ This application provides a complete agent management system by importing **`Age
 
 This application provides:
 
-- **HTTP REST API** - Full CRUD operations for agent management
-- **WebSocket Gateway** - Real-time bidirectional communication with agents
-- **Container Integration** - Docker container management for agent execution
-- **VNC Browser Access** - Virtual workspace containers with XFCE4 desktop and Chromium browser
-- **Secure Authentication** - Keycloak integration for HTTP endpoints and database-backed authentication for WebSocket
-- **Database Support** - PostgreSQL with TypeORM for data persistence
-- **Auto Migrations** - Automatic database schema migrations on startup
-- **Rate Limiting** - Configurable rate limiting on all API endpoints
-- **CORS Configuration** - Production-safe CORS defaults
-- **Plugin-based Agent Providers** - Support for multiple agent implementations (cursor-agent, etc.)
+- **HTTP REST API**: Full CRUD operations for agent management
+- **WebSocket Gateway**: Real-time bidirectional communication with agents
+- **Container Integration**: Docker container management for agent execution
+- **VNC Browser Access**: Virtual workspace containers with XFCE4 desktop and Chromium browser
+- **Secure Authentication**: Keycloak integration for HTTP endpoints and database-backed authentication for WebSocket
+- **Database Support**: PostgreSQL with TypeORM for data persistence
+- **Auto Migrations**: Automatic database schema migrations on startup
+- **Rate Limiting**: Configurable rate limiting on all API endpoints
+- **CORS Configuration**: Production-safe CORS defaults
+- **Plugin-based Agent Providers**: Support for multiple agent implementations (cursor-agent, etc.)
 
 ## Architecture
 
 This application is built using:
 
-- **NestJS** - Progressive Node.js framework
-- **TypeORM** - Object-Relational Mapping for database operations
-- **Keycloak** - Identity and access management (optional, can use API key)
-- **Socket.IO** - WebSocket communication
-- **Docker** - Container management for agent execution
-- **PostgreSQL** - Database for agent storage
+- **NestJS**: Progressive Node.js framework
+- **TypeORM**: Object-Relational Mapping for database operations
+- **Keycloak**: Identity and access management (optional, can use API key)
+- **Socket.IO**: WebSocket communication
+- **Docker**: Container management for agent execution
+- **PostgreSQL**: Database for agent storage
 
 The Nest `AppModule` wires TypeORM, hybrid HTTP auth (Keycloak connect plus optional static API key), throttling, and the framework **`AgentsModule`** implementation.
 
@@ -40,91 +40,91 @@ All HTTP endpoints are prefixed with `/api` and protected by Keycloak authentica
 
 ### Agent Management
 
-- `GET /api/agents` - List all agents (supports `limit` and `offset` query parameters)
-- `GET /api/agents/:id` - Get a single agent by UUID
-- `POST /api/agents` - Create a new agent (returns auto-generated password)
-- `POST /api/agents/:id` - Update an existing agent
-- `DELETE /api/agents/:id` - Delete an agent
-- `GET /api/agents/:id/models` - List models available for the agent (provider-specific)
+- `GET /api/agents`: List all agents (supports `limit` and `offset` query parameters)
+- `GET /api/agents/:id`: Get a single agent by UUID
+- `POST /api/agents`: Create a new agent (returns auto-generated password)
+- `POST /api/agents/:id`: Update an existing agent
+- `DELETE /api/agents/:id`: Delete an agent
+- `GET /api/agents/:id/models`: List models available for the agent (provider-specific)
 
 ### Agent lifecycle
 
-- `POST /api/agents/:id/start` - Start the agent container
-- `POST /api/agents/:id/stop` - Stop the agent container
-- `POST /api/agents/:id/restart` - Restart the agent container
+- `POST /api/agents/:id/start`: Start the agent container
+- `POST /api/agents/:id/stop`: Stop the agent container
+- `POST /api/agents/:id/restart`: Restart the agent container
 
 ### Environment variables
 
 Changes are persisted and synchronized to the agent’s Docker container (the container is restarted so new variables take effect).
 
-- `GET /api/agents/:agentId/environment` - List variables (`limit`, `offset`)
-- `GET /api/agents/:agentId/environment/count` - Count variables
-- `POST /api/agents/:agentId/environment` - Create variable (`201 Created`)
-- `PUT /api/agents/:agentId/environment/:id` - Update variable
-- `DELETE /api/agents/:agentId/environment/:id` - Delete one variable
-- `DELETE /api/agents/:agentId/environment` - Delete all variables
+- `GET /api/agents/:agentId/environment`: List variables (`limit`, `offset`)
+- `GET /api/agents/:agentId/environment/count`: Count variables
+- `POST /api/agents/:agentId/environment`: Create variable (`201 Created`)
+- `PUT /api/agents/:agentId/environment/:id`: Update variable
+- `DELETE /api/agents/:agentId/environment/:id`: Delete one variable
+- `DELETE /api/agents/:agentId/environment`: Delete all variables
 
 ### Per-agent message filter rules
 
 Regex rules scoped to this manager instance (distinct from controller global rules). See [Message Filter Rules](../features/message-filter-rules.md).
 
-- `GET/POST /api/agents-filters` - List (ordered by priority) and create
-- `GET /api/agents-filters/count` - Rule count
-- `GET/PUT/DELETE /api/agents-filters/:id` - Read, update, delete
+- `GET/POST /api/agents-filters`: List (ordered by priority) and create
+- `GET /api/agents-filters/count`: Rule count
+- `GET/PUT/DELETE /api/agents-filters/:id`: Read, update, delete
 
 ### Deployments (CI/CD)
 
-- `GET/POST /api/agents/:agentId/deployments/configuration` and `DELETE` - Provider token and defaults (encrypted at rest; upsert via POST)
-- `GET /api/agents/:agentId/deployments/repositories` - Repositories
-- `GET .../repositories/:repositoryId/branches` - Branches
-- `GET .../repositories/:repositoryId/workflows` - Workflows
-- `POST /api/agents/:agentId/deployments/workflows/trigger` - Trigger a run
-- `GET /api/agents/:agentId/deployments/runs` - List runs
-- `GET .../deployments/runs/:runId` - Run detail
-- `GET .../deployments/runs/:runId/logs` - Run logs
-- `GET .../deployments/runs/:runId/jobs` - Jobs
-- `GET .../deployments/runs/:runId/jobs/:jobId/logs` - Job logs
-- `POST .../deployments/runs/:runId/cancel` - Cancel run
+- `GET/POST /api/agents/:agentId/deployments/configuration` and `DELETE`: Provider token and defaults (encrypted at rest; upsert via POST)
+- `GET /api/agents/:agentId/deployments/repositories`: Repositories
+- `GET .../repositories/:repositoryId/branches`: Branches
+- `GET .../repositories/:repositoryId/workflows`: Workflows
+- `POST /api/agents/:agentId/deployments/workflows/trigger`: Trigger a run
+- `GET /api/agents/:agentId/deployments/runs`: List runs
+- `GET .../deployments/runs/:runId`: Run detail
+- `GET .../deployments/runs/:runId/logs`: Run logs
+- `GET .../deployments/runs/:runId/jobs`: Jobs
+- `GET .../deployments/runs/:runId/jobs/:jobId/logs`: Job logs
+- `POST .../deployments/runs/:runId/cancel`: Cancel run
 
 ### Messages metadata
 
-- `GET /api/agents/:id/messages/latest-agent` - Latest agent chat message metadata for unread tracking
+- `GET /api/agents/:id/messages/latest-agent`: Latest agent chat message metadata for unread tracking
 
 ### Workspace configuration overrides
 
-- `GET/PUT/DELETE /api/configuration-overrides...` - Workspace configuration overrides (see OpenAPI)
+- `GET/PUT/DELETE /api/configuration-overrides...`: Workspace configuration overrides (see OpenAPI)
 
 ### Configuration
 
-- `GET /api/config` - Get configuration parameters including Git repository URL and available agent types
+- `GET /api/config`: Get configuration parameters including Git repository URL and available agent types
 
 ### File Operations
 
-- `GET /api/agents/:agentId/files` - List directory contents
-- `GET /api/agents/:agentId/files/:path` - Read file content
-- `POST /api/agents/:agentId/files/:path` - Create file or directory
-- `PUT /api/agents/:agentId/files/:path` - Write file content
-- `DELETE /api/agents/:agentId/files/:path` - Delete file or directory
-- `PATCH /api/agents/:agentId/files/:path` - Move file or directory
+- `GET /api/agents/:agentId/files`: List directory contents
+- `GET /api/agents/:agentId/files/:path`: Read file content
+- `POST /api/agents/:agentId/files/:path`: Create file or directory
+- `PUT /api/agents/:agentId/files/:path`: Write file content
+- `DELETE /api/agents/:agentId/files/:path`: Delete file or directory
+- `PATCH /api/agents/:agentId/files/:path`: Move file or directory
 
 ### Version Control Operations
 
-- `GET /api/agents/:agentId/vcs/status` - Get git status
-- `GET /api/agents/:agentId/vcs/branches` - List all branches
-- `GET /api/agents/:agentId/vcs/diff?path={filePath}` - Get file diff
-- `POST /api/agents/:agentId/vcs/stage` - Stage files
-- `POST /api/agents/:agentId/vcs/unstage` - Unstage files
-- `POST /api/agents/:agentId/vcs/commit` - Commit staged changes
-- `POST /api/agents/:agentId/vcs/push` - Push changes to remote
-- `POST /api/agents/:agentId/vcs/pull` - Pull changes from remote
-- `POST /api/agents/:agentId/vcs/fetch` - Fetch changes from remote
-- `POST /api/agents/:agentId/vcs/rebase` - Rebase current branch
-- `POST /api/agents/:agentId/vcs/branches/:branch/switch` - Switch to a branch
-- `POST /api/agents/:agentId/vcs/branches` - Create a new branch
-- `DELETE /api/agents/:agentId/vcs/branches/:branch` - Delete a branch
-- `POST /api/agents/:agentId/vcs/conflicts/resolve` - Resolve merge conflicts
-- `POST /api/agents/:agentId/vcs/workspace/prepare-clean` - Prepare a clean Git workspace (automation / operator aid)
-- `POST /api/agents/:agentId/automation/verify-commands` - Validate automation-related command configuration
+- `GET /api/agents/:agentId/vcs/status`: Get git status
+- `GET /api/agents/:agentId/vcs/branches`: List all branches
+- `GET /api/agents/:agentId/vcs/diff?path={filePath}`: Get file diff
+- `POST /api/agents/:agentId/vcs/stage`: Stage files
+- `POST /api/agents/:agentId/vcs/unstage`: Unstage files
+- `POST /api/agents/:agentId/vcs/commit`: Commit staged changes
+- `POST /api/agents/:agentId/vcs/push`: Push changes to remote
+- `POST /api/agents/:agentId/vcs/pull`: Pull changes from remote
+- `POST /api/agents/:agentId/vcs/fetch`: Fetch changes from remote
+- `POST /api/agents/:agentId/vcs/rebase`: Rebase current branch
+- `POST /api/agents/:agentId/vcs/branches/:branch/switch`: Switch to a branch
+- `POST /api/agents/:agentId/vcs/branches`: Create a new branch
+- `DELETE /api/agents/:agentId/vcs/branches/:branch`: Delete a branch
+- `POST /api/agents/:agentId/vcs/conflicts/resolve`: Resolve merge conflicts
+- `POST /api/agents/:agentId/vcs/workspace/prepare-clean`: Prepare a clean Git workspace (automation / operator aid)
+- `POST /api/agents/:agentId/automation/verify-commands`: Validate automation-related command configuration
 
 For complete API endpoint documentation, request/response schemas, and authentication requirements, see the application and API reference docs linked below.
 
@@ -136,32 +136,32 @@ The Socket.IO WebSocket gateway is available at `http://localhost:8080/agents` (
 
 #### Client → Server
 
-- `login` - Authenticate with agent ID (UUID or name) and password
-- `chat` - Send chat message (requires authentication)
-- `enhanceChat` / `generateTicketBody` - Isolated prompt helpers (unicast results)
+- `login`: Authenticate with agent ID (UUID or name) and password
+- `chat`: Send chat message (requires authentication)
+- `enhanceChat` / `generateTicketBody`: Isolated prompt helpers (unicast results)
 - Additional events for files, terminals, and tooling as described in the agent-manager AsyncAPI (for example `fileUpdate`, `createTerminal`, `terminalInput`, `closeTerminal`)
 
 #### Server → Client
 
 - `loginSuccess` / `loginError` / `chatMessage` / `chatEvent` / `messageFilterResult`
 - `chatEnhanceResult` / `ticketBodyResult`
-- `gitStateChanged` - Workspace git may have changed; refresh dirty indicators
+- `gitStateChanged`: Workspace git may have changed; refresh dirty indicators
 - `fileUpdateNotification` / `containerStats` / terminal events / `error`
 
 #### Server → Client
 
-- `loginSuccess` - Emitted on successful authentication
-- `loginError` - Emitted on authentication failure
-- `chatMessage` - Chat traffic (broadcast or unicast depending on message options)
-- `containerStats` — container status and resource usage; first event after login, then every 15 seconds by default (`CONTAINER_STATS_SCHEDULER_INTERVAL` in ms)
+- `loginSuccess`: Emitted on successful authentication
+- `loginError`: Emitted on authentication failure
+- `chatMessage`: Chat traffic (broadcast or unicast depending on message options)
+- `containerStats`: container status and resource usage; first event after login, then every 15 seconds by default (`CONTAINER_STATS_SCHEDULER_INTERVAL` in ms)
 - File and terminal notifications, and other provider-specific events per AsyncAPI
-- `error` - Emitted on authorization or processing errors
+- `error`: Emitted on authorization or processing errors
 
 For complete WebSocket event specifications, authentication flow, and usage examples, see the application and API reference docs linked below.
 
 ## Authentication
 
-Built-in **users** registration and JWT login live on the **agent controller** only. The agent manager application always uses **Keycloak** (JWT with `agent_management` role) or **static API key** as configured—there are no `/auth/*` endpoints on this service. Operators typically never call the manager HTTP API directly from a browser; the console uses the controller, which proxies requests with stored client credentials.
+Built-in **users** registration and JWT login live on the **agent controller** only. The agent manager application always uses **Keycloak** (JWT with `agent_management` role) or **static API key** as configured: there are no `/auth/*` endpoints on this service. Operators typically never call the manager HTTP API directly from a browser; the console uses the controller, which proxies requests with stored client credentials.
 
 ### HTTP Endpoints
 
@@ -190,10 +190,10 @@ The application implements configurable rate limiting on all API endpoints to pr
 
 Rate limiting is configured via environment variables:
 
-- **`RATE_LIMIT_ENABLED`** - Enable/disable rate limiting
+- **`RATE_LIMIT_ENABLED`**: Enable/disable rate limiting
   - Default: `true` in production, `false` in development
-- **`RATE_LIMIT_TTL`** - Time window in seconds (default: `60`)
-- **`RATE_LIMIT_LIMIT`** - Maximum number of requests per window (default: `100`)
+- **`RATE_LIMIT_TTL`**: Time window in seconds (default: `60`)
+- **`RATE_LIMIT_LIMIT`**: Maximum number of requests per window (default: `100`)
 
 ### Behavior
 
@@ -208,7 +208,7 @@ The application implements production-safe CORS defaults to prevent unauthorized
 
 CORS is configured via the `CORS_ORIGIN` environment variable:
 
-- **`CORS_ORIGIN`** - Comma-separated list of allowed origins
+- **`CORS_ORIGIN`**: Comma-separated list of allowed origins
   - If not set:
     - **Production**: CORS is **disabled** (no origins allowed)
     - **Development**: CORS allows **all origins** (`*`)
@@ -219,34 +219,34 @@ See the application docs and environment configuration for complete environment 
 
 **Application-specific:**
 
-- `PORT` - HTTP API port (default: `3000`)
-- `WEBSOCKET_PORT` - WebSocket gateway port (default: `8080`)
-- `NODE_ENV` - Environment mode (`development` or `production`)
+- `PORT`: HTTP API port (default: `3000`)
+- `WEBSOCKET_PORT`: WebSocket gateway port (default: `8080`)
+- `NODE_ENV`: Environment mode (`development` or `production`)
 
 **Git Repository:**
 
-- `GIT_REPOSITORY_URL` - Git repository URL for agent workspace
-- `GIT_USERNAME` - Git username for authentication
-- `GIT_TOKEN` - Git personal access token
-- `GIT_PASSWORD` - Git password (alternative to token)
-- `GIT_PRIVATE_KEY` - SSH private key for SSH repositories
+- `GIT_REPOSITORY_URL`: Git repository URL for agent workspace
+- `GIT_USERNAME`: Git username for authentication
+- `GIT_TOKEN`: Git personal access token
+- `GIT_PASSWORD`: Git password (alternative to token)
+- `GIT_PRIVATE_KEY`: SSH private key for SSH repositories
 
 **Cursor Agent:**
 
-- `CURSOR_API_KEY` - Cursor API key for agent communication
-- `CURSOR_AGENT_DOCKER_IMAGE` - Docker image for cursor-agent containers
+- `CURSOR_API_KEY`: Cursor API key for agent communication
+- `CURSOR_AGENT_DOCKER_IMAGE`: Docker image for cursor-agent containers
 
 **VNC Browser Access:**
 
-- `VNC_SERVER_DOCKER_IMAGE` - Docker image for VNC containers (default: `ghcr.io/forepath/agenstra-manager-vnc:latest`)
-- `VNC_SERVER_PUBLIC_PORTS` - Port range for VNC host port allocation (e.g., `"6080-6180"`)
+- `VNC_SERVER_DOCKER_IMAGE`: Docker image for VNC containers (default: `ghcr.io/forepath/agenstra-manager-vnc:latest`)
+- `VNC_SERVER_PUBLIC_PORTS`: Port range for VNC host port allocation (e.g., `"6080-6180"`)
 
 **Dynamic provider plugins (optional):**
 
-- `DYNAMIC_AGENT_PROVIDERS` - Extra agent backend packages
-- `DYNAMIC_PIPELINE_PROVIDERS` - Extra CI/CD provider packages
-- `DYNAMIC_CHAT_FILTERS` - Extra chat filter packages
-- `DYNAMIC_PROVIDER_PLUGIN_PATH` / `DYNAMIC_PROVIDER_PLUGIN_INSTALL` - Post-build plugin mount and startup install
+- `DYNAMIC_AGENT_PROVIDERS`: Extra agent backend packages
+- `DYNAMIC_PIPELINE_PROVIDERS`: Extra CI/CD provider packages
+- `DYNAMIC_CHAT_FILTERS`: Extra chat filter packages
+- `DYNAMIC_PROVIDER_PLUGIN_PATH` / `DYNAMIC_PROVIDER_PLUGIN_INSTALL`: Post-build plugin mount and startup install
 
 See [Dynamic provider plugins](../features/dynamic-provider-plugins.md).
 
@@ -323,14 +323,14 @@ Before deploying to production, ensure:
 
 ## Related Documentation
 
-- **[Agent Management Feature](../features/agent-management.md)** - Agent management guide
-- **[VNC Browser Access Feature](../features/vnc-browser-access.md)** - VNC browser access guide
-- **[WebSocket Communication Feature](../features/websocket-communication.md)** - WebSocket communication guide
-- **[Deployment Feature](../features/deployment.md)** - CI/CD configuration and operations
-- **[Message Filter Rules](../features/message-filter-rules.md)** - Per-agent regex filters
-- **[Dynamic provider plugins](../features/dynamic-provider-plugins.md)** - Custom agent, pipeline, and filter providers
-- **[Backend Agent Controller](./backend-agent-controller.md)** - Control plane and proxy paths used by the console
-- **[Deployment Guide](../deployment/production-checklist.md)** - Production deployment guide
+- **[Agent Management Feature](../features/agent-management.md)**: Agent management guide
+- **[VNC Browser Access Feature](../features/vnc-browser-access.md)**: VNC browser access guide
+- **[WebSocket Communication Feature](../features/websocket-communication.md)**: WebSocket communication guide
+- **[Deployment Feature](../features/deployment.md)**: CI/CD configuration and operations
+- **[Message Filter Rules](../features/message-filter-rules.md)**: Per-agent regex filters
+- **[Dynamic provider plugins](../features/dynamic-provider-plugins.md)**: Custom agent, pipeline, and filter providers
+- **[Backend Agent Controller](./backend-agent-controller.md)**: Control plane and proxy paths used by the console
+- **[Deployment Guide](../deployment/production-checklist.md)**: Production deployment guide
 
 ## License
 

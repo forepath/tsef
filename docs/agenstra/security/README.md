@@ -40,10 +40,10 @@ For variable-by-variable deployment settings, including **`CLIENT_ENDPOINT_*`**,
 
 ## Related documentation
 
-- **[Architecture](../architecture/README.md)** — Trust boundaries and component roles
-- **[Authentication feature](../features/authentication.md)** — User-facing authentication flows
-- **[Deployment](../deployment/README.md)** — Docker and production guides
-- **[Operator runbook](../deployment/operator-runbook.md)** — Install/ops and disclosure checklists
+- **[Architecture](../architecture/README.md)**: Trust boundaries and component roles
+- **[Authentication feature](../features/authentication.md)**: User-facing authentication flows
+- **[Deployment](../deployment/README.md)**: Docker and production guides
+- **[Operator runbook](../deployment/operator-runbook.md)**: Install/ops and disclosure checklists
 
 ---
 

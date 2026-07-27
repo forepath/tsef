@@ -1,11 +1,11 @@
 # AgentCTX
 
-**AgentCTX (Agent Context)** is the command-line binary that generates tool-specific agent config from a `.agenstra/` context. It is built from the `@forepath/ai` package in `tools/ai` and provides the same transformation logic as the [Nx executor](./README.md#generating-tool-configs) and the programmatic API described in `tools/ai/README.md` in the repository—useful when you want to run the transform without Nx or from a standalone install.
+**AgentCTX (Agent Context)** is the command-line binary that generates tool-specific agent config from a `.agenstra/` context. It is built from the `@forepath/ai` package in `tools/ai` and provides the same transformation logic as the [Nx executor](./README.md#generating-tool-configs) and the programmatic API described in `tools/ai/README.md` in the repository: useful when you want to run the transform without Nx or from a standalone install.
 
 ## Purpose
 
-- **Validate** – Check that a directory contains a valid `.agenstra/` context (e.g. `metadata.json` and expected structure).
-- **Transform** – Read `.agenstra/` and emit config for one or more tools (Cursor, OpenCode, GitHub Copilot) into an output directory.
+- **Validate**: Check that a directory contains a valid `.agenstra/` context (e.g. `metadata.json` and expected structure).
+- **Transform**: Read `.agenstra/` and emit config for one or more tools (Cursor, OpenCode, GitHub Copilot) into an output directory.
 
 agentctx does **not** scaffold or create `.agenstra/`; use the example in this repo’s `.agenstra/` as reference.
 
@@ -114,10 +114,10 @@ agentctx --help
 
 When run without `--dry-run`, agentctx writes tool-specific output under `<outputDir>/` using the standard directory names for each tool:
 
-- `<outputDir>/.cursor/` – Cursor rules, commands, skills, agents, `mcp.json`
-- `<outputDir>/.opencode/` – OpenCode commands, agents; plus `AGENTS.md` and `opencode.json` at the output root
-- `<outputDir>/.github/` – GitHub Copilot instructions, custom agents (`.github/agents/`), and skills (`.github/skills/`)
-- `<outputDir>/.vscode/mcp.json` – Copilot Chat MCP servers (when transforming github-copilot)
+- `<outputDir>/.cursor/` to Cursor rules, commands, skills, agents, `mcp.json`
+- `<outputDir>/.opencode/` to OpenCode commands, agents; plus `AGENTS.md` and `opencode.json` at the output root
+- `<outputDir>/.github/` to GitHub Copilot instructions, custom agents (`.github/agents/`), and skills (`.github/skills/`)
+- `<outputDir>/.vscode/mcp.json` to Copilot Chat MCP servers (when transforming github-copilot)
 
 With the default `--outputDir .`, running `agentctx` in your project root writes `.cursor/`, `.opencode/`, `.github/`, etc. directly into that folder. If you use a different output directory (e.g. `--outputDir generated`), copy or symlink the generated content into your project root as needed. After transformation, files from `.agenstra/overrides/` are copied on top, so overrides can overwrite or extend generated content.
 
@@ -125,7 +125,7 @@ On success, agentctx prints one line per target and exits with code 0. On valida
 
 ## Related
 
-- [README](./README.md) – Overview of `.agenstra/` and generating tool configs
-- [Rules](./rules.md) – Project instructions in `.agenstra/rules/`
-- [Commands](./commands.md) – Slash-style commands in `.agenstra/commands/`
-- [Agents](./agents.md) – Agents and subagents in `.agenstra/agents/` and `subagents/`
+- [README](./README.md): Overview of `.agenstra/` and generating tool configs
+- [Rules](./rules.md): Project instructions in `.agenstra/rules/`
+- [Commands](./commands.md): Slash-style commands in `.agenstra/commands/`
+- [Agents](./agents.md): Agents and subagents in `.agenstra/agents/` and `subagents/`

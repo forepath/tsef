@@ -1,26 +1,26 @@
 # Deployment and CI/CD Integration
 
-This feature enables deployment functionality and CI/CD pipeline management for agents. It allows you to configure CI/CD providers (GitHub Actions and GitLab CI/CD), trigger pipeline runs, monitor their status, and view logs directly from the Agenstra console.
+This feature adds deployment functionality and CI/CD pipeline management for agents. It lets you configure CI/CD providers (GitHub Actions and GitLab CI/CD), trigger pipeline runs, monitor their status, and view logs directly from the Agenstra console.
 
 ## Overview
 
 The deployment feature provides:
 
-- **CI/CD Provider Configuration** - Configure GitHub Actions or GitLab CI/CD (or other providers) for each agent
-- **Pipeline Management** - List, trigger, and monitor CI/CD pipeline runs
-- **Log Viewing** - View pipeline run logs and individual job/step logs
-- **Run History** - Track deployment history and status
+- **CI/CD Provider Configuration**: Configure GitHub Actions or GitLab CI/CD (or other providers) for each agent
+- **Pipeline Management**: List, trigger, and monitor CI/CD pipeline runs
+- **Log Viewing**: View pipeline run logs and individual job/step logs
+- **Run History**: Track deployment history and status
 
 ## Architecture
 
 The deployment feature follows the same provider pattern used throughout Agenstra:
 
-- **PipelineProvider Interface** - Unified interface for CI/CD providers
-- **PipelineProviderFactory** - Factory for managing multiple providers
-- **Provider Implementations** - GitHub Actions and GitLab CI/CD providers (extensible to Jenkins, Azure DevOps, etc.)
-- **Runtime plugins** - Additional pipeline providers via `DYNAMIC_PIPELINE_PROVIDERS` (see [Dynamic provider plugins](./dynamic-provider-plugins.md))
-- **Deployment Service** - Orchestrates pipeline operations
-- **Database Storage** - Stores deployment configurations and run history
+- **PipelineProvider Interface**: Unified interface for CI/CD providers
+- **PipelineProviderFactory**: Factory for managing multiple providers
+- **Provider Implementations**: GitHub Actions and GitLab CI/CD providers (extensible to Jenkins, Azure DevOps, etc.)
+- **Runtime plugins**: Additional pipeline providers via `DYNAMIC_PIPELINE_PROVIDERS` (see [Dynamic provider plugins](./dynamic-provider-plugins.md))
+- **Deployment Service**: Orchestrates pipeline operations
+- **Database Storage**: Stores deployment configurations and run history
 
 See the application and deployment docs for detailed component relationships.
 
@@ -30,15 +30,15 @@ See the application and deployment docs for detailed component relationships.
 
 The GitHub provider supports:
 
-- **Repository Management** - List accessible repositories
-- **Branch Management** - List branches for repositories
-- **Workflow Management** - List workflows/pipelines for repositories
-- **Run Triggering** - Trigger workflow runs manually
-- **Status Tracking** - Get real-time status of pipeline runs
-- **Log Viewing** - View logs for runs and individual jobs
-- **Run Cancellation** - Cancel running pipelines
+- **Repository Management**: List accessible repositories
+- **Branch Management**: List branches for repositories
+- **Workflow Management**: List workflows/pipelines for repositories
+- **Run Triggering**: Trigger workflow runs manually
+- **Status Tracking**: Get real-time status of pipeline runs
+- **Log Viewing**: View logs for runs and individual jobs
+- **Run Cancellation**: Cancel running pipelines
 
-**Authentication**: Uses GitHub Personal Access Tokens (PAT) or GitHub App tokens. The token is stored in the database as part of the deployment configuration and is encrypted at rest.
+**Authentication** uses GitHub Personal Access Tokens (PAT) or GitHub App tokens. The token is stored in the database as part of the deployment configuration and is encrypted at rest.
 
 **Base URL**: The base URL for GitHub Enterprise Server can be configured per agent via the `providerBaseUrl` field in the deployment configuration. If not specified, defaults to `https://api.github.com`.
 
@@ -46,15 +46,15 @@ The GitHub provider supports:
 
 The GitLab provider supports:
 
-- **Repository Management** - List accessible projects (repositories)
-- **Branch Management** - List branches for projects
-- **Pipeline Management** - List and trigger CI/CD pipelines
-- **Run Triggering** - Trigger pipeline runs manually with variables
-- **Status Tracking** - Get real-time status of pipeline runs
-- **Log Viewing** - View logs for runs and individual jobs
-- **Run Cancellation** - Cancel running pipelines
+- **Repository Management**: List accessible projects (repositories)
+- **Branch Management**: List branches for projects
+- **Pipeline Management**: List and trigger CI/CD pipelines
+- **Run Triggering**: Trigger pipeline runs manually with variables
+- **Status Tracking**: Get real-time status of pipeline runs
+- **Log Viewing**: View logs for runs and individual jobs
+- **Run Cancellation**: Cancel running pipelines
 
-**Authentication**: Uses GitLab Personal Access Tokens (PAT). The token is stored in the database as part of the deployment configuration and is encrypted at rest.
+**Authentication** uses GitLab Personal Access Tokens (PAT). The token is stored in the database as part of the deployment configuration and is encrypted at rest.
 
 **Base URL**: The base URL for self-hosted GitLab instances can be configured per agent via the `providerBaseUrl` field in the deployment configuration. If not specified, defaults to `https://gitlab.com/api/v4`.
 
@@ -136,19 +136,19 @@ All endpoints are prefixed with `/api/agents/:agentId/deployments`:
 
 #### Configuration Management
 
-- `GET /configuration` - Get deployment configuration
-- `POST /configuration` - Create or update deployment configuration
-- `DELETE /configuration` - Delete deployment configuration
+- `GET /configuration`: Get deployment configuration
+- `POST /configuration`: Create or update deployment configuration
+- `DELETE /configuration`: Delete deployment configuration
 
 #### Repository Operations
 
-- `GET /repositories` - List accessible repositories
-- `GET /repositories/:repositoryId/branches` - List branches for a repository
-- `GET /repositories/:repositoryId/workflows` - List workflows for a repository (optional `?branch=name` query parameter)
+- `GET /repositories`: List accessible repositories
+- `GET /repositories/:repositoryId/branches`: List branches for a repository
+- `GET /repositories/:repositoryId/workflows`: List workflows for a repository (optional `?branch=name` query parameter)
 
 #### Pipeline Operations
 
-- `POST /workflows/trigger` - Trigger a workflow run
+- `POST /workflows/trigger`: Trigger a workflow run
   ```json
   {
     "workflowId": "12345678",
@@ -161,12 +161,12 @@ All endpoints are prefixed with `/api/agents/:agentId/deployments`:
 
 #### Run Management
 
-- `GET /runs` - List deployment runs (supports `limit` and `offset` query parameters)
-- `GET /runs/:runId` - Get run status
-- `GET /runs/:runId/logs` - Get run logs
-- `GET /runs/:runId/jobs` - List jobs/steps for a run
-- `GET /runs/:runId/jobs/:jobId/logs` - Get logs for a specific job
-- `POST /runs/:runId/cancel` - Cancel a running pipeline
+- `GET /runs`: List deployment runs (supports `limit` and `offset` query parameters)
+- `GET /runs/:runId`: Get run status
+- `GET /runs/:runId/logs`: Get run logs
+- `GET /runs/:runId/jobs`: List jobs/steps for a run
+- `GET /runs/:runId/jobs/:jobId/logs`: Get logs for a specific job
+- `POST /runs/:runId/cancel`: Cancel a running pipeline
 
 ### Agent Controller Proxy Endpoints
 
@@ -276,14 +276,14 @@ curl http://localhost:3000/api/agents/{agentId}/deployments/runs/{runId}/logs \
 
 Stores CI/CD provider configuration per agent:
 
-- `id` (UUID) - Primary key
-- `agent_id` (UUID) - Foreign key to agents table
-- `provider_type` (VARCHAR) - Provider type (e.g., 'github')
-- `repository_id` (VARCHAR) - Repository identifier
-- `default_branch` (VARCHAR) - Default branch name
-- `workflow_id` (VARCHAR) - Workflow/pipeline identifier
-- `provider_token` (VARCHAR, encrypted) - Provider API token
-- `provider_base_url` (VARCHAR) - Optional base URL for self-hosted instances
+- `id` (UUID): Primary key
+- `agent_id` (UUID): Foreign key to agents table
+- `provider_type` (VARCHAR): Provider type (e.g., 'github')
+- `repository_id` (VARCHAR): Repository identifier
+- `default_branch` (VARCHAR): Default branch name
+- `workflow_id` (VARCHAR): Workflow/pipeline identifier
+- `provider_token` (VARCHAR, encrypted): Provider API token
+- `provider_base_url` (VARCHAR): Optional base URL for self-hosted instances
 - `created_at` (TIMESTAMP)
 - `updated_at` (TIMESTAMP)
 
@@ -291,19 +291,19 @@ Stores CI/CD provider configuration per agent:
 
 Stores pipeline run history:
 
-- `id` (UUID) - Primary key
-- `configuration_id` (UUID) - Foreign key to deployment_configurations table
-- `provider_run_id` (VARCHAR) - Provider-specific run identifier
-- `run_name` (VARCHAR) - Run name/title
-- `status` (VARCHAR) - Run status (queued, in_progress, completed, cancelled, failure)
-- `conclusion` (VARCHAR) - Run conclusion (success, failure, cancelled, skipped)
-- `ref` (VARCHAR) - Git reference (branch, tag, or commit SHA)
-- `sha` (VARCHAR) - Commit SHA
-- `workflow_id` (VARCHAR) - Workflow identifier
-- `workflow_name` (VARCHAR) - Workflow name
-- `started_at` (TIMESTAMP) - When the run started
-- `completed_at` (TIMESTAMP) - When the run completed
-- `html_url` (TEXT) - HTML URL for viewing the run
+- `id` (UUID): Primary key
+- `configuration_id` (UUID): Foreign key to deployment_configurations table
+- `provider_run_id` (VARCHAR): Provider-specific run identifier
+- `run_name` (VARCHAR): Run name/title
+- `status` (VARCHAR): Run status (queued, in_progress, completed, cancelled, failure)
+- `conclusion` (VARCHAR): Run conclusion (success, failure, cancelled, skipped)
+- `ref` (VARCHAR): Git reference (branch, tag, or commit SHA)
+- `sha` (VARCHAR): Commit SHA
+- `workflow_id` (VARCHAR): Workflow identifier
+- `workflow_name` (VARCHAR): Workflow name
+- `started_at` (TIMESTAMP): When the run started
+- `completed_at` (TIMESTAMP): When the run completed
+- `html_url` (TEXT): HTML URL for viewing the run
 - `created_at` (TIMESTAMP)
 - `updated_at` (TIMESTAMP)
 
@@ -347,6 +347,6 @@ Deployment configuration can be included when creating or updating agents:
 
 ## Related Documentation
 
-- [Agent Management](./agent-management.md) - Agent lifecycle management
-- [Server Provisioning](./server-provisioning.md) - Automated server provisioning
-- [Dynamic provider plugins](./dynamic-provider-plugins.md) - `DYNAMIC_PIPELINE_PROVIDERS` and shared loader behavior
+- [Agent Management](./agent-management.md): Agent lifecycle management
+- [Server Provisioning](./server-provisioning.md): Automated server provisioning
+- [Dynamic provider plugins](./dynamic-provider-plugins.md): `DYNAMIC_PIPELINE_PROVIDERS` and shared loader behavior

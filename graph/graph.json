@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-27T17:08:29.046Z",
+  "generatedAt": "2026-07-27T20:24:28.840Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -17342,26 +17342,6 @@
       }
     },
     {
-      "id": "concept:agenstra-key-features",
-      "type": "concept",
-      "attrs": {
-        "title": "Key Features",
-        "docPath": "docs/agenstra/README.md",
-        "sectionAnchor": "key-features",
-        "domain": "agenstra"
-      }
-    },
-    {
-      "id": "concept:agenstra-related-documentation",
-      "type": "concept",
-      "attrs": {
-        "title": "Related Documentation",
-        "docPath": "docs/agenstra/README.md",
-        "sectionAnchor": "related-documentation",
-        "domain": "agenstra"
-      }
-    },
-    {
       "id": "concept:agenstra-external-resources",
       "type": "concept",
       "attrs": {
@@ -17418,6 +17398,16 @@
         "title": "Generating tool configs",
         "docPath": "docs/agenstra/ai-agents/README.md",
         "sectionAnchor": "generating-tool-configs",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-related-documentation",
+      "type": "concept",
+      "attrs": {
+        "title": "Related documentation",
+        "docPath": "docs/agenstra/ai-agents/README.md",
+        "sectionAnchor": "related-documentation",
         "domain": "agenstra"
       }
     },
@@ -19745,7 +19735,7 @@
       "id": "concept:agenstra-file-entry-directory-relative-to-dynamic-provider-plugin-path",
       "type": "concept",
       "attrs": {
-        "title": "file: entry — directory relative to DYNAMIC_PROVIDER_PLUGIN_PATH",
+        "title": "file: entry - directory relative to DYNAMIC_PROVIDER_PLUGIN_PATH",
         "docPath": "docs/agenstra/features/dynamic-provider-plugins.md",
         "sectionAnchor": "file-entry-directory-relative-to-dynamic-provider-plugin-path",
         "domain": "agenstra"
@@ -20625,7 +20615,7 @@
       "id": "concept:agenstra-ar-001-desktop-app-no-os-trusted-code-signing-no-in-app-auto-update",
       "type": "concept",
       "attrs": {
-        "title": "AR-001 - Desktop app: no OS-trusted code signing / no in-app auto-update",
+        "title": "AR-001: Desktop app: no OS-trusted code signing / no in-app auto-update",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-001-desktop-app-no-os-trusted-code-signing-no-in-app-auto-update",
         "domain": "agenstra"
@@ -20635,7 +20625,7 @@
       "id": "concept:agenstra-ar-002-web-frontends-csp-unsafe-inline-unsafe-eval-monaco",
       "type": "concept",
       "attrs": {
-        "title": "AR-002 - Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)",
+        "title": "AR-002: Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-002-web-frontends-csp-unsafe-inline-unsafe-eval-monaco",
         "domain": "agenstra"
@@ -20645,7 +20635,7 @@
       "id": "concept:agenstra-ar-003-backend-authentication-method-resolution",
       "type": "concept",
       "attrs": {
-        "title": "AR-003 - Backend authentication method resolution",
+        "title": "AR-003: Backend authentication method resolution",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-003-backend-authentication-method-resolution",
         "domain": "agenstra"
@@ -20655,7 +20645,7 @@
       "id": "concept:agenstra-ar-004-desktop-window-open-policy-native-agent-console",
       "type": "concept",
       "attrs": {
-        "title": "AR-004 - Desktop window open policy (`native-agent-console`)",
+        "title": "AR-004: Desktop window open policy (`native-agent-console`)",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-004-desktop-window-open-policy-native-agent-console",
         "domain": "agenstra"
@@ -20665,7 +20655,7 @@
       "id": "concept:agenstra-ar-005-ci-local-trivy-unfixed-vulnerabilities-not-gated",
       "type": "concept",
       "attrs": {
-        "title": "AR-005 - CI / local Trivy: unfixed vulnerabilities not gated",
+        "title": "AR-005: CI / local Trivy: unfixed vulnerabilities not gated",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-005-ci-local-trivy-unfixed-vulnerabilities-not-gated",
         "domain": "agenstra"
@@ -20925,7 +20915,7 @@
       "id": "concept:agenstra-agent-controller-remote-client-endpoints-ssrf",
       "type": "concept",
       "attrs": {
-        "title": "Agent Controller - remote client endpoints (SSRF)",
+        "title": "Agent Controller: remote client endpoints (SSRF)",
         "docPath": "docs/agenstra/security/operational-hardening.md",
         "sectionAnchor": "agent-controller-remote-client-endpoints-ssrf",
         "domain": "agenstra"
@@ -20935,7 +20925,7 @@
       "id": "concept:agenstra-http-proxy-to-remote-agent-manager-headers",
       "type": "concept",
       "attrs": {
-        "title": "HTTP proxy to remote agent-manager - headers",
+        "title": "HTTP proxy to remote agent-manager: headers",
         "docPath": "docs/agenstra/security/operational-hardening.md",
         "sectionAnchor": "http-proxy-to-remote-agent-manager-headers",
         "domain": "agenstra"
@@ -20995,7 +20985,7 @@
       "id": "concept:agenstra-electron-shell-new-windows",
       "type": "concept",
       "attrs": {
-        "title": "Electron shell - new windows",
+        "title": "Electron shell: new windows",
         "docPath": "docs/agenstra/security/operational-hardening.md",
         "sectionAnchor": "electron-shell-new-windows",
         "domain": "agenstra"
@@ -25845,7 +25835,7 @@
       "id": "concept:decabill-dr-001-provisioning-ssh-cloud-init-templates",
       "type": "concept",
       "attrs": {
-        "title": "DR-001 - Provisioning SSH (cloud-init templates)",
+        "title": "DR-001: Provisioning SSH (cloud-init templates)",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-001-provisioning-ssh-cloud-init-templates",
         "domain": "decabill"
@@ -25855,7 +25845,7 @@
       "id": "concept:decabill-dr-002-billing-multi-tenant-api-key-scope-static-api-key-tenant-id-unset",
       "type": "concept",
       "attrs": {
-        "title": "DR-002 - Billing multi-tenant API key scope (`STATIC_API_KEY_TENANT_ID` unset)",
+        "title": "DR-002: Billing multi-tenant API key scope (`STATIC_API_KEY_TENANT_ID` unset)",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-002-billing-multi-tenant-api-key-scope-static-api-key-tenant-id-unset",
         "domain": "decabill"
@@ -25865,7 +25855,7 @@
       "id": "concept:decabill-dr-003-web-frontends-csp-unsafe-inline-unsafe-eval-monaco",
       "type": "concept",
       "attrs": {
-        "title": "DR-003 - Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)",
+        "title": "DR-003: Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-003-web-frontends-csp-unsafe-inline-unsafe-eval-monaco",
         "domain": "decabill"
@@ -25875,7 +25865,7 @@
       "id": "concept:decabill-dr-004-backend-authentication-method-resolution",
       "type": "concept",
       "attrs": {
-        "title": "DR-004 - Backend authentication method resolution",
+        "title": "DR-004: Backend authentication method resolution",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-004-backend-authentication-method-resolution",
         "domain": "decabill"
@@ -25885,7 +25875,7 @@
       "id": "concept:decabill-dr-005-ci-local-trivy-unfixed-vulnerabilities-not-gated",
       "type": "concept",
       "attrs": {
-        "title": "DR-005 - CI / local Trivy: unfixed vulnerabilities not gated",
+        "title": "DR-005: CI / local Trivy: unfixed vulnerabilities not gated",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-005-ci-local-trivy-unfixed-vulnerabilities-not-gated",
         "domain": "decabill"
@@ -36696,16 +36686,6 @@
     {
       "from": "file:docs/agenstra/README.md",
       "to": "concept:agenstra-system-architecture",
-      "type": "contains"
-    },
-    {
-      "from": "file:docs/agenstra/README.md",
-      "to": "concept:agenstra-key-features",
-      "type": "contains"
-    },
-    {
-      "from": "file:docs/agenstra/README.md",
-      "to": "concept:agenstra-related-documentation",
       "type": "contains"
     },
     {
@@ -61904,16 +61884,6 @@
       "type": "belongs_to"
     },
     {
-      "from": "concept:agenstra-key-features",
-      "to": "domain:agenstra",
-      "type": "belongs_to"
-    },
-    {
-      "from": "concept:agenstra-related-documentation",
-      "to": "domain:agenstra",
-      "type": "belongs_to"
-    },
-    {
       "from": "concept:agenstra-external-resources",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -61940,6 +61910,11 @@
     },
     {
       "from": "concept:agenstra-generating-tool-configs",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-related-documentation",
       "to": "domain:agenstra",
       "type": "belongs_to"
     },

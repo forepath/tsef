@@ -1,6 +1,6 @@
 # Production Deployment Checklist
 
-Comprehensive checklist for deploying Agenstra to production.
+Checklist for deploying Agenstra to production.
 
 ## Pre-Deployment Checklist
 
@@ -53,7 +53,7 @@ Comprehensive checklist for deploying Agenstra to production.
 ### Authentication
 
 - Use strong API keys or Keycloak with proper configuration
-- Consider setting **`AUTHENTICATION_METHOD`** explicitly in production if your policy requires fully unambiguous mode selection (see **[Accepted risks - AR-003](../security/accepted-risks.md)**)
+- Consider setting **`AUTHENTICATION_METHOD`** explicitly in production if your policy requires fully unambiguous mode selection (see **[Accepted risks: AR-003](../security/accepted-risks.md)**)
 - Enable token expiration and refresh
 - Implement proper session management
 - Use HTTPS for all API communications
@@ -136,20 +136,15 @@ Comprehensive checklist for deploying Agenstra to production.
 
 ## Deployment Process
 
-1. **Pre-deployment**
-   - Review and test all changes
+1. **Pre-deployment**: Review and test all changes
    - Run full test suite
    - Check security vulnerabilities
    - Review configuration
-
-2. **Deployment**
-   - Deploy to staging first
+2. **Deployment**: Deploy to staging first
    - Test staging deployment
    - Deploy to production
    - Monitor deployment
-
-3. **Post-deployment**
-   - Verify all services are running
+3. **Post-deployment**: Verify all services are running
    - Check health endpoints
    - Monitor logs for errors
    - Test critical functionality
@@ -163,11 +158,11 @@ Comprehensive checklist for deploying Agenstra to production.
 
 ## Related Documentation
 
-- **[Operator Runbook](./operator-runbook.md)** - Capacity, install verification, day-2, and disclosure checklists
-- **[System Requirements](./system-requirements.md)** - CPU, memory, and disk baselines
-- **[Docker Deployment](./docker-deployment.md)** - Containerized deployment
-- **[Environment Configuration](./environment-configuration.md)** - Environment variables
-- **[Troubleshooting](../troubleshooting/README.md)** - Problem-solving guides
+- **[Operator Runbook](./operator-runbook.md)**: Capacity, install verification, day-2, and disclosure checklists
+- **[System Requirements](./system-requirements.md)**: CPU, memory, and disk baselines
+- **[Docker Deployment](./docker-deployment.md)**: Containerized deployment
+- **[Environment Configuration](./environment-configuration.md)**: Environment variables
+- **[Troubleshooting](../troubleshooting/README.md)**: Problem-solving guides
 
 ---
 

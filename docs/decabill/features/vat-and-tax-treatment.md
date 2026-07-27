@@ -40,7 +40,7 @@ Self-service revalidate: `POST /customer-profile/vat-id/revalidate`.
 
 ## OSS €10,000 threshold
 
-Cross-border EU B2C (non–reverse-charge) net totals are tracked per tenant/year. Below threshold → home-country VAT; at/above → destination rates (`eu_b2c_oss`).
+Cross-border EU B2C (non to reverse-charge) net totals are tracked per tenant/year. Below threshold → home-country VAT; at/above → destination rates (`eu_b2c_oss`).
 
 `BILLING_OSS_REGISTERED=true` forces destination rates without waiting for the ledger.
 

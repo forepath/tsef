@@ -1,20 +1,20 @@
 # Applications Documentation
 
-This section provides detailed documentation for each application in the Agenstra system.
+This section covers each application in the Agenstra product.
 
 ## Overview
 
 Agenstra consists of three main applications:
 
-1. **Backend Agent Controller** - Centralized control plane for managing multiple agent-manager instances
-2. **Backend Agent Manager** - Agent management system with HTTP REST API and WebSocket gateway
-3. **Frontend Agent Console** - Web-based IDE and chat interface for interacting with agents
+1. **Backend Agent Controller**: Centralized control plane for managing multiple agent-manager instances
+2. **Backend Agent Manager**: Agent management system with HTTP REST API and WebSocket gateway
+3. **Frontend Agent Console**: Web-based IDE and chat interface for interacting with agents
 
 ## Applications
 
 ### [Backend Agent Controller](./backend-agent-controller.md)
 
-Centralized control plane that enables you to manage multiple distributed agent-manager instances from a single console.
+Centralized control plane for managing multiple distributed agent-manager instances from a single console.
 
 **Key Features**:
 
@@ -90,10 +90,10 @@ graph TB
 
 ## Related Documentation
 
-- **[Architecture Overview](../architecture/system-overview.md)** - System architecture
-- **[Getting Started](../getting-started.md)** - Setup and configuration
-- **[Deployment Guide](../deployment/README.md)** - Deployment documentation
-- **[Features Documentation](../features/README.md)** - Feature details
+- **[Architecture Overview](../architecture/system-overview.md)**: System architecture
+- **[Getting Started](../getting-started.md)**: Setup and configuration
+- **[Deployment Guide](../deployment/README.md)**: Deployment documentation
+- **[Features Documentation](../features/README.md)**: Feature details
 
 ---
 

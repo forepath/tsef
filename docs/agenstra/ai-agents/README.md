@@ -8,10 +8,10 @@ The `.agenstra/` context is a **single source of truth** for agent rules, comman
 
 **Key characteristics**:
 
-- **Tool-agnostic** – No vendor-specific syntax in the source files
-- **Composable** – Rules, commands, skills, and agents are separate and reusable
-- **Versionable** – Commit `.agenstra/` to git and share across the team
-- **Transform on demand** – Generate tool configs with `nx` or the transformer API
+- **Tool-agnostic**: No vendor-specific syntax in the source files
+- **Composable**: Rules, commands, skills, and agents are separate and reusable
+- **Versionable**: Commit `.agenstra/` to git and share across the team
+- **Transform on demand**: Generate tool configs with `nx` or the transformer API
 
 ## Directory Structure
 
@@ -59,6 +59,10 @@ Primary agents and subagents defined as **MDC** (YAML frontmatter + body) in `ag
 
 MCP server definitions (local command or remote URL) in `mcp-definitions/`. Transformed into Cursor `.cursor/mcp.json`, OpenCode `opencode.json` (`mcp` object), and GitHub Copilot `.vscode/mcp.json` (`servers` object). Workspace servers: `ai`, `code`, `knowledge-graph`.
 
+### [agentctx](./agentctx.md)
+
+CLI for validating `.agenstra/` context and transforming it into tool-specific configs. See [agentctx](./agentctx.md) for install and usage.
+
 ### Overrides
 
 Manual overrides in `overrides/` are copied to the output directory **after** transformation, allowing you to overwrite or extend auto-generated content. Override structure mirrors the output structure:
@@ -80,7 +84,7 @@ Use overrides to:
 
 After editing `.agenstra/`, generate output for one or more tools:
 
-**Via agentctx** – Use the **agentctx** CLI binary built from `tools/ai`; see [agentctx](./agentctx.md) for install and usage.
+**Via agentctx**: Use the **agentctx** CLI binary built from `tools/ai`; see [agentctx](./agentctx.md) for install and usage.
 
 **Via Nx** (if the project has an `agenstra-transform` target):
 
@@ -105,7 +109,7 @@ Output is written under `outputDir/` using standard directory names: `outputDir/
 
 ## Related documentation
 
-- **[Applications](../applications/README.md)** – Backend and frontend applications
+- **[Applications](../applications/README.md)**: Backend and frontend applications
 
 ---
 
