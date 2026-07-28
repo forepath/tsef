@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.21.0](https://github.com/forepath/one/compare/v2.20.0...v2.21.0) (2026-07-28)
+
+
+### Features
+
+* open telemetry logs and metrics export ([#527](https://github.com/forepath/one/issues/527)) ([00e3aab](https://github.com/forepath/one/commit/00e3aab542a6c0a1bf8ae1f217a098966b4a3094))
+
+
+### Bug Fixes
+
+* sync specs and docs ([#530](https://github.com/forepath/one/issues/530)) ([1de0c4b](https://github.com/forepath/one/commit/1de0c4b3ea005f52c171aea01e854ab9b88a5fac))
+
+
+### Chores
+
+* improve documentation v2 ([#533](https://github.com/forepath/one/issues/533)) ([086a81e](https://github.com/forepath/one/commit/086a81e3e0990ebc76d34802820d29c2866183ed))
+* improve marketing copies ([#531](https://github.com/forepath/one/issues/531)) ([4fe9aa4](https://github.com/forepath/one/commit/4fe9aa4781dd4344159a06cad1ba340a58985fb4))
+
 ## [2.20.0](https://github.com/forepath/one/compare/v2.19.0...v2.20.0) (2026-07-26)
 
 
