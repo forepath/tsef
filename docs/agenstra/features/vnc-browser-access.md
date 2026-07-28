@@ -15,11 +15,11 @@ When an agent is created with VNC support, the system automatically:
 
 The VNC container provides:
 
-- **XFCE4 Desktop Environment** - Lightweight, full-featured desktop
-- **Chromium Browser** - Pre-configured and auto-started on session login
-- **Secure VNC Access** - Password-protected VNC authentication
-- **HTTPS noVNC Client** - Web-based VNC client accessible via browser
-- **Network Isolation** - Dedicated Docker network for VNC and agent containers
+- **XFCE4 Desktop Environment** Lightweight, full-featured desktop
+- **Chromium Browser** Pre-configured and auto-started on session login
+- **Secure VNC Access** Password-protected VNC authentication
+- **HTTPS noVNC Client** Web-based VNC client accessible via browser
+- **Network Isolation** Dedicated Docker network for VNC and agent containers
 
 ## Architecture
 
@@ -70,26 +70,21 @@ The VNC feature uses a multi-container architecture:
 
 When an agent is created with VNC support:
 
-1. **VNC Container Creation**
-   - Docker image: `ghcr.io/forepath/agenstra-manager-vnc:latest`
+1. **VNC Container Creation** Docker image: `ghcr.io/forepath/agenstra-manager-vnc:latest`
    - Container name: `{agent-name}-virtual-workspace`
    - Environment variables: VNC password, agent name, Git credentials
    - Port mapping: Random host port → Container port 6080
-   - Volume mount: Shared agent data at **`/home/agenstra/environment`** (same host path as the worker’s `/app` mount); read-only **`/opt/agents` → `/opt/workspace`**
-   - Runtime **`VNC_PASSWORD`** required (no default in the image); container runs as **`agenstra`** (UID **10001**)
+   - Volume mount: Shared agent data at **`/home/agenstra/environment`** (same host path as the worker’s `/app` mount); read-only **`/opt/agents` → `/opt/workspace`** Runtime **`VNC_PASSWORD`** required (no default in the image); container runs as **`agenstra`** (UID **10001**)
 
-2. **Network Setup**
-   - Creates a dedicated Docker network
+2. **Network Setup** Creates a dedicated Docker network
    - Connects both agent container and VNC container
    - Enables communication between containers
 
-3. **Password Generation**
-   - Generates a secure random password
+3. **Password Generation** Generates a secure random password
    - Encrypts password using AES-256-GCM
    - Stores encrypted password in database
 
-4. **Database Storage**
-   - Stores VNC container ID
+4. **Database Storage** Stores VNC container ID
    - Stores VNC host port
    - Stores VNC network ID
    - Stores encrypted VNC password
@@ -98,17 +93,14 @@ When an agent is created with VNC support:
 
 To access the VNC session:
 
-1. **Get Agent Details**
-   - Retrieve agent information including VNC host port
+1. **Get Agent Details** Retrieve agent information including VNC host port
    - Decrypt VNC password (handled automatically by the system)
 
-2. **Connect via noVNC**
-   - Navigate to `https://{agent-manager-host}:{vnc-host-port}/vnc.html`
+2. **Connect via noVNC** Navigate to `https://{agent-manager-host}:{vnc-host-port}/vnc.html`
    - Enter VNC password when prompted
    - Access the XFCE4 desktop with Chromium browser
 
-3. **Browser Interaction**
-   - Chromium browser is automatically started on session login
+3. **Browser Interaction** Chromium browser is automatically started on session login
    - Browser is configured as the default web browser
    - Browser runs with `--no-sandbox` and `--disable-dev-shm-usage` flags
 
@@ -116,16 +108,13 @@ To access the VNC session:
 
 When an agent is deleted:
 
-1. **Network Cleanup**
-   - Disconnects all containers from the VNC network
+1. **Network Cleanup** Disconnects all containers from the VNC network
    - Removes the Docker network
 
-2. **Container Cleanup**
-   - Stops and removes the VNC container
+2. **Container Cleanup** Stops and removes the VNC container
    - Stops and removes the agent container
 
-3. **Database Cleanup**
-   - Removes agent entity (including VNC-related fields)
+3. **Database Cleanup** Removes agent entity (including VNC-related fields)
    - Encrypted VNC password is automatically deleted
 
 ## Configuration
@@ -134,14 +123,12 @@ When an agent is deleted:
 
 The VNC feature is controlled by the following environment variables:
 
-**Agent Manager Configuration:**
+**Agent Manager Configuration:** `VNC_SERVER_PUBLIC_PORTS` - Port range for VNC host port allocation (e.g., `"6080-6180"`)
 
-- `VNC_SERVER_PUBLIC_PORTS` - Port range for VNC host port allocation (e.g., `"6080-6180"`)
 - `VNC_SERVER_DOCKER_IMAGE` - Docker image for VNC containers (default: `ghcr.io/forepath/agenstra-manager-vnc:latest`)
 
-**VNC Container Configuration:**
+**VNC Container Configuration:** `VNC_PASSWORD` - VNC authentication password (auto-generated if not set)
 
-- `VNC_PASSWORD` - VNC authentication password (auto-generated if not set)
 - `VNC_DISPLAY` - VNC display number (default: `:1`)
 - `VNC_RESOLUTION` - Desktop resolution (default: `1920x1080`)
 - `VNC_DEPTH` - Color depth (default: `24`)
@@ -157,21 +144,18 @@ VNC host ports are automatically allocated from the configured port range. The s
 
 ### Security
 
-**VNC Authentication:**
+**VNC Authentication:** VNC passwords are generated using cryptographically secure random number generation
 
-- VNC passwords are generated using cryptographically secure random number generation
 - Passwords are encrypted at rest using AES-256-GCM encryption
 - Passwords are transmitted securely via HTTPS when accessing noVNC
 
-**Network Isolation:**
+**Network Isolation:** VNC and agent containers are isolated in a dedicated Docker network
 
-- VNC and agent containers are isolated in a dedicated Docker network
 - Containers can communicate with each other but are isolated from other containers
 - Network is automatically cleaned up when the agent is deleted
 
-**HTTPS Access:**
+**HTTPS Access:** noVNC client is served over HTTPS using self-signed certificates
 
-- noVNC client is served over HTTPS using self-signed certificates
 - Certificates are generated during container build
 - For production, consider using proper SSL certificates
 
@@ -263,79 +247,67 @@ The Chromium browser in the VNC container:
 
 ### VNC Container Not Starting
 
-**Symptoms:**
+**Symptoms:** Agent is created but VNC container is not accessible
 
-- Agent is created but VNC container is not accessible
 - VNC host port is not assigned
 
 **Solutions:**
 
-1. **Check Docker Image Availability**
-   - Ensure `VNC_SERVER_DOCKER_IMAGE` is set correctly
+1. **Check Docker Image Availability** Ensure `VNC_SERVER_DOCKER_IMAGE` is set correctly
    - Verify the Docker image is available and accessible
    - Check Docker image pull permissions
 
-2. **Check Port Range**
-   - Verify `VNC_SERVER_PUBLIC_PORTS` is set correctly
+2. **Check Port Range** Verify `VNC_SERVER_PUBLIC_PORTS` is set correctly
    - Ensure the port range is available on the host
    - Check for port conflicts
 
-3. **Check Container Logs**
-   - Inspect VNC container logs: `docker logs {vnc-container-id}`
+3. **Check Container Logs** Inspect VNC container logs: `docker logs {vnc-container-id}`
    - Look for startup errors or configuration issues
 
 ### Cannot Connect to VNC
 
-**Symptoms:**
+**Symptoms:** noVNC client loads but cannot connect
 
-- noVNC client loads but cannot connect
 - Connection timeout or authentication failure
 
 **Solutions:**
 
-1. **Verify Host Port**
-   - Check that the VNC host port is correctly mapped
+1. **Verify Host Port** Check that the VNC host port is correctly mapped
    - Verify the port is accessible from your network
    - Check firewall rules
 
-2. **Verify VNC Password**
-   - Ensure you're using the correct VNC password
+2. **Verify VNC Password** Ensure you're using the correct VNC password
    - Check that password decryption is working
    - Verify the password hasn't been changed
 
-3. **Check Container Status**
-   - Verify the VNC container is running: `docker ps | grep vnc`
+3. **Check Container Status** Verify the VNC container is running: `docker ps | grep vnc`
    - Check container health and resource usage
    - Inspect container logs for errors
 
 ### Chromium Not Starting
 
-**Symptoms:**
+**Symptoms:** VNC session connects but Chromium doesn't appear
 
-- VNC session connects but Chromium doesn't appear
 - Desktop is visible but browser is missing
 
 **Solutions:**
 
-1. **Check XFCE4 Session**
-   - Verify XFCE4 desktop environment is running
+1. **Check XFCE4 Session** Verify XFCE4 desktop environment is running
    - Check XFCE4 logs for errors
    - Ensure autostart entries are configured
 
-2. **Check Chromium Configuration**
-   - Verify Chromium desktop entry exists
+2. **Check Chromium Configuration** Verify Chromium desktop entry exists
    - Check autostart configuration
    - Inspect Chromium startup logs
 
-3. **Check Display Configuration**
-   - Verify `CHROMIUM_DISPLAY` matches `VNC_DISPLAY`
+3. **Check Display Configuration** Verify `CHROMIUM_DISPLAY` matches `VNC_DISPLAY`
    - Check X11 display configuration
    - Ensure display server is running
 
-## Related Documentation
+## Related documentation
 
-- **[Agent Management](./agent-management.md)** - Agent lifecycle and management
-- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** - Application details
+- **[Agent Management](./agent-management.md)** Agent lifecycle and management
+- **[Backend Agent Manager Application](../applications/backend-agent-manager.md)** Application details
 
 ---
 

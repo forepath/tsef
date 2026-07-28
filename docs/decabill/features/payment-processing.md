@@ -103,15 +103,16 @@ See [Auto-Billing](./auto-billing.md) for off-session charging, retries, and man
 - Checkout sessions include tenant and invoice references for scoped updates
 - Use HTTPS for production webhook URLs
 
-## Related Documentation
+## Related documentation
 
-- **[Invoices](./invoices.md)** - Invoice statuses and pay endpoints
-- **[Multi-tenancy](./multi-tenancy.md)** - Tenant-aware redirect URLs
-- **[Dynamic Provider Plugins](./dynamic-provider-plugins.md)** - `DYNAMIC_PAYMENT_PROCESSORS`
-- **[Customer Profiles](./customer-profiles.md)** - Stripe customer id storage
-- **[Stripe Documentation](https://stripe.com/docs)** - External Stripe reference
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Pay and webhook paths
+- **[Invoices](./invoices.md)** Invoice statuses and pay endpoints
+- **[Multi-tenancy](./multi-tenancy.md)** Tenant-aware redirect URLs
+- **[Dynamic Provider Plugins](./dynamic-provider-plugins.md)** `DYNAMIC_PAYMENT_PROCESSORS`
+- **[Customer Profiles](./customer-profiles.md)** Stripe customer id storage
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** Pay and webhook paths
 
----
+## External resources
+
+- **[Stripe Documentation](https://stripe.com/docs)** External Stripe reference
 
 _Configure Stripe keys in the billing manager environment before enabling customer checkout._

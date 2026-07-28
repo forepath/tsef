@@ -54,10 +54,10 @@ sequenceDiagram
 
 Cloud-init installs Docker CE and deploys a docker-compose stack on the instance. The default controller bundle includes:
 
-- **PostgreSQL** - Application database with health checks
-- **Backend API** - NestJS billing or agent controller API container (depending on service plan configuration)
-- **Frontend console** - Angular SSR web application served behind reverse proxy
-- **Nginx** - Terminates HTTP and HTTPS, proxies to backend and frontend containers, serves ACME HTTP-01 challenges at `/.well-known/acme-challenge/`
+- **PostgreSQL** Application database with health checks
+- **Backend API** NestJS billing or agent controller API container (depending on service plan configuration)
+- **Frontend console** Angular SSR web application served behind reverse proxy
+- **Nginx** Terminates HTTP and HTTPS, proxies to backend and frontend containers, serves ACME HTTP-01 challenges at `/.well-known/acme-challenge/`
 
 Containers share a defined application directory on the host (typically under `/opt/`). Environment variables for authentication, database connection, and product-specific settings are interpolated into the generated compose file from the subscription's requested configuration.
 
@@ -95,7 +95,7 @@ Cloud-init waits for the DNS A record (`proxied: false`) to resolve to the host 
 
 Provisioning templates configure SSH for operational access. Key-based authentication is enabled; password authentication is disabled in generated `sshd` configuration.
 
-**Accepted risk [DR-001](../security/accepted-risks.md#dr-001--provisioning-ssh-cloud-init-templates):** Cloud-init may configure root SSH access and install root `authorized_keys` for first-boot automation. Compensating controls include network restrictions, key rotation, and bastion access. See [Security - Accepted risks](../security/accepted-risks.md).
+**Accepted risk [DR-001](../security/accepted-risks.md#dr-001-provisioning-ssh-cloud-init-templates):** Cloud-init may configure root SSH access and install root `authorized_keys` for first-boot automation. Compensating controls include network restrictions, key rotation, and bastion access. See [Security (Accepted risks)](../security/accepted-risks.md).
 
 ## Nested Provisioning Tokens
 
@@ -138,14 +138,14 @@ Subscription `requestedConfig` can include authentication mode for the provision
 
 Provisioning itself is triggered internally by subscription and backorder services, not via a standalone public provision endpoint.
 
-## Related Documentation
+## Related documentation
 
-- **[Subscriptions](./subscriptions.md)** - Order flow
-- **[Backorders](./backorders.md)** - Retry when capacity unavailable
-- **[Service Types and Plans](./service-types-and-plans.md)** - Provider schemas
-- **[Dashboard and Server Control](./dashboard-and-server-control.md)** - Power actions
-- **[Security - Accepted risks](../security/accepted-risks.md)** - **DR-001** provisioning SSH
-- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** - Server info schemas
+- **[Subscriptions](./subscriptions.md)** Order flow
+- **[Backorders](./backorders.md)** Retry when capacity unavailable
+- **[Service Types and Plans](./service-types-and-plans.md)** Provider schemas
+- **[Dashboard and Server Control](./dashboard-and-server-control.md)** Power actions
+- **[Security (Accepted risks)](../security/accepted-risks.md)** **DR-001** provisioning SSH
+- **[Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml)** Server info schemas
 
 ---
 

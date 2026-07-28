@@ -32,27 +32,27 @@ graph TB
 
 #### Frontend Tier
 
-- **User Interface** - Web-based IDE with Monaco Editor
-- **State Management** - NgRx for application state
-- **Real-time Communication** - WebSocket client for chat and events
-- **File Management** - File system operations UI
-- **Version Control** - Git operations UI
+- **User Interface** Web-based IDE with Monaco Editor
+- **State Management** NgRx for application state
+- **Real-time Communication** WebSocket client for chat and events
+- **File Management** File system operations UI
+- **Version Control** Git operations UI
 
 #### Controller Tier
 
-- **Client Management** - CRUD operations for clients (remote agent-manager instances)
-- **Event Forwarding** - Forward WebSocket events between frontend and managers
-- **Authentication** - Keycloak or API key authentication
-- **Credential Management** - Store and manage agent credentials
-- **Server Provisioning** - Automated cloud server provisioning
+- **Client Management** CRUD operations for clients (remote agent-manager instances)
+- **Event Forwarding** Forward WebSocket events between frontend and managers
+- **Authentication** Keycloak or API key authentication
+- **Credential Management** Store and manage agent credentials
+- **Server Provisioning** Automated cloud server provisioning
 
 #### Manager Tier
 
-- **Agent Management** - CRUD operations for agents
-- **Container Management** - Docker container lifecycle
-- **WebSocket Gateway** - Real-time communication with agents
-- **File Operations** - File system operations in containers
-- **Version Control** - Git operations in containers
+- **Agent Management** CRUD operations for agents
+- **Container Management** Docker container lifecycle
+- **WebSocket Gateway** Real-time communication with agents
+- **File Operations** File system operations in containers
+- **Version Control** Git operations in containers
 
 ## Component Relationships
 
@@ -297,10 +297,10 @@ sequenceDiagram
     AM-->>AC: Chat History (for each agent)
 ```
 
-## Related Documentation
+## Related documentation
 
-- **[Components](./components.md)** - Detailed component breakdown
-- **[Data Flow](./data-flow.md)** - Detailed data flow patterns
+- **[Components](./components.md)** Detailed component breakdown
+- **[Data Flow](./data-flow.md)** Detailed data flow patterns
 
 ---
 

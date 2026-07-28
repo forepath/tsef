@@ -66,7 +66,7 @@ See the **Knowledge Graph Skill** (`tools/graph/src/lib/mcp/SKILL.md`, also the 
 ## Using the graph with AI tools
 
 1. Load the **Knowledge Graph Skill** via the knowledge-graph MCP prompt `graph` (source: `tools/graph/src/lib/mcp/SKILL.md`).
-2. Prefer the **knowledge-graph MCP** (`.agenstra/mcp-definitions/knowledge-graph.mcp.json` → Cursor `.cursor/mcp.json`) — tools `graph_r1`, `graph_docs`, `graph_endpoint`, `graph_search`, `graph_impact`, `graph_mentions`.
+2. Prefer the **knowledge-graph MCP** (`.agenstra/mcp-definitions/knowledge-graph.mcp.json` → Cursor `.cursor/mcp.json`). Tools: `graph_r1`, `graph_docs`, `graph_endpoint`, `graph_search`, `graph_impact`, `graph_mentions`.
 3. Or use the CLI: `nx run graph:query -- r1 <project>`, `nx run graph:impact -- --base main`, `nx run graph:query -- mentions <project>`.
 4. Do **not** paste all of `graph/graph.json` into context; recipe tools return compact neighborhoods.
 5. Optionally open `graph/graph.html` via `nx run graph:serve` for visual inspection.
@@ -77,6 +77,7 @@ Build the MCP/CLI entrypoints after graph tool changes (or let the launcher buil
 
 ```bash
 nx run graph:build
+
 # or: node tools/graph/mcp-run.cjs  # builds dist if missing, then starts MCP
 ```
 

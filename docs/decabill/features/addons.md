@@ -38,9 +38,9 @@ Addon config mirrors [CloudInit environment variables](./cloud-init-configs.md) 
 Each field may define:
 
 - `key` / `label` / optional `description`
-- `showInOrderForm` — customer-visible on Order Plan Configuration step (selection happens in Step 1)
-- `useRandomDefault` (+ length ≥ 21, optional special chars) — server generates when still empty after merge
-- `hasDefault` — computed from static default or random flag (never expose values to customers)
+- `showInOrderForm`, customer-visible on Order Plan Configuration step (selection happens in Step 1)
+- `useRandomDefault` (+ length ≥ 21, optional special chars), server generates when still empty after merge
+- `hasDefault`, computed from static default or random flag (never expose values to customers)
 
 | Type                | Who owns the field list                                                                                                                                        |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -114,9 +114,9 @@ Ops checklist for mid-life addon remove and related env knobs: [Subscription Con
 
 See [Webhooks](./webhooks.md) and [Email notifications](./email-notifications.md) for `addon.*` events.
 
-## Related
+## Related documentation
 
-- [Dynamic provider plugins](./dynamic-provider-plugins.md) (`DYNAMIC_ADDON_MODULES`, `configFields`)
-- [CloudInit configs](./cloud-init-configs.md) (env var / random default pattern)
-- [Service types and plans](./service-types-and-plans.md)
-- [Subscriptions](./subscriptions.md)
+- [Dynamic provider plugins](./dynamic-provider-plugins.md) `DYNAMIC_ADDON_MODULES` and `configFields`
+- [CloudInit configs](./cloud-init-configs.md) Env var and random default pattern
+- [Service types and plans](./service-types-and-plans.md) Catalog attachment of addons to plans
+- [Subscriptions](./subscriptions.md) Addon lifecycle on subscription orders

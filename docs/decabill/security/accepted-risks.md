@@ -6,7 +6,7 @@ This register records **explicit risk acceptance** for Decabill product and depl
 
 ---
 
-## DR-001 - Provisioning SSH (cloud-init templates)
+## DR-001 (Provisioning SSH, cloud-init templates)
 
 | Field                                             | Recorded value                                                                                                                                                                                                                     |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -28,7 +28,7 @@ Some Decabill provisioning flows generate cloud-init that configures **SSH for `
 
 ---
 
-## DR-002 - Billing multi-tenant API key scope (`STATIC_API_KEY_TENANT_ID` unset)
+## DR-002 (Billing multi-tenant API key scope, `STATIC_API_KEY_TENANT_ID` unset)
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                                                                                                                                                                                |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -50,7 +50,7 @@ With **`STATIC_API_KEY`** and **without** **`STATIC_API_KEY_TENANT_ID`**, the ke
 
 ---
 
-## DR-003 - Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)
+## DR-003 (Web frontends: CSP `unsafe-inline` / `unsafe-eval`, Monaco)
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -72,7 +72,7 @@ By default, CSP may be **report-only** depending on `CSP_ENFORCE`. Use **`CSP_EN
 
 ---
 
-## DR-004 - Backend authentication method resolution
+## DR-004 (Backend authentication method resolution)
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                                            |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -94,7 +94,7 @@ Set **`AUTHENTICATION_METHOD`** explicitly if your policy requires **fully expli
 
 ---
 
-## DR-005 - CI / local Trivy: unfixed vulnerabilities not gated
+## DR-005 (CI / local Trivy: unfixed vulnerabilities not gated)
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                          |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -128,10 +128,10 @@ Set **`AUTHENTICATION_METHOD`** explicitly if your policy requires **fully expli
 
 ## Related documentation
 
-- **[Compliance and standards](./compliance-and-standards.md)**
-- **[Operational hardening](./operational-hardening.md)**
-- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)**
-- **[CI security scanning (Trivy)](./ci-security-scanning.md)**
+- **[Compliance and standards](./compliance-and-standards.md)** CRA and BSI documentation themes
+- **[Operational hardening](./operational-hardening.md)** Implemented controls and operator notes
+- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)** Disclosure process and SBOM paths
+- **[CI security scanning (Trivy)](./ci-security-scanning.md)** PR Trivy gates and ignore policy
 
 ---
 

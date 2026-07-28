@@ -50,8 +50,8 @@ Communication patterns and end-to-end flows:
 
 ### Two-Tier Architecture
 
-1. **Presentation tier** - Angular billing console with NgRx state, localized SSR, and Express static hosting
-2. **Application tier** - NestJS billing manager with TypeORM, BullMQ workers, and provider integrations
+1. **Presentation tier** Angular billing console with NgRx state, localized SSR, and Express static hosting
+2. **Application tier** NestJS billing manager with TypeORM, BullMQ workers, and provider integrations
 
 There is no separate billing controller. The console talks directly to the billing manager API and WebSocket gateway.
 
@@ -78,36 +78,36 @@ See **[Authentication](../features/authentication.md)** and **[Multi-tenancy](..
 
 ### State Management
 
-- **Frontend** - NgRx facades and effects for subscriptions, invoices, admin billing, projects, dashboard socket, and project board socket state
-- **Backend** - PostgreSQL as source of truth; Redis for job queues; in-memory socket subscription timers for dashboard polling; project board room broadcasts
+- **Frontend** NgRx facades and effects for subscriptions, invoices, admin billing, projects, dashboard socket, and project board socket state
+- **Backend** PostgreSQL as source of truth; Redis for job queues; in-memory socket subscription timers for dashboard polling; project board room broadcasts
 
-## Related Documentation
+## Related documentation
 
 ### Getting Started
 
-- **[Getting Started](../getting-started.md)** - Local setup and first login
+- **[Getting Started](../getting-started.md)** Local setup and first login
 
 ### Features
 
-- **[Subscriptions](../features/subscriptions.md)** - Order and lifecycle
-- **[Invoices](../features/invoices.md)** - Open positions, PDFs, and payment
-- **[Payment Processing](../features/payment-processing.md)** - Stripe checkout and webhooks
-- **[Server Provisioning](../features/server-provisioning.md)** - Cloud-init stacks for eligible plans
-- **[Real-time Status](../features/real-time-status.md)** - Dashboard WebSocket behavior
-- **[Projects](../features/projects.md)** - Customer-assigned work and bill-time
-- **[Project Board](../features/project-board.md)** - Live board WebSocket behavior
+- **[Subscriptions](../features/subscriptions.md)** Order and lifecycle
+- **[Invoices](../features/invoices.md)** Open positions, PDFs, and payment
+- **[Payment Processing](../features/payment-processing.md)** Stripe checkout and webhooks
+- **[Server Provisioning](../features/server-provisioning.md)** Cloud-init stacks for eligible plans
+- **[Real-time Status](../features/real-time-status.md)** Dashboard WebSocket behavior
+- **[Projects](../features/projects.md)** Customer-assigned work and bill-time
+- **[Project Board](../features/project-board.md)** Live board WebSocket behavior
 
 ### Deployment
 
-- **[Local Development](../deployment/local-development.md)** - Nx and compose setup
-- **[Docker Deployment](../deployment/docker-deployment.md)** - Container images and services
-- **[Background Jobs](../deployment/background-jobs.md)** - BullMQ coordinators and units
-- **[Environment Configuration](../deployment/environment-configuration.md)** - Full env reference
+- **[Local Development](../deployment/local-development.md)** Nx and compose setup
+- **[Docker Deployment](../deployment/docker-deployment.md)** Container images and services
+- **[Background Jobs](../deployment/background-jobs.md)** BullMQ coordinators and units
+- **[Environment Configuration](../deployment/environment-configuration.md)** Full env reference
 
 ### Applications
 
-- **[Frontend Billing Console](../applications/frontend-billing-console.md)**
-- **[Backend Billing Manager](../applications/backend-billing-manager.md)**
+- **[Frontend Billing Console](../applications/frontend-billing-console.md)** Customer and admin Angular SSR console
+- **[Backend Billing Manager](../applications/backend-billing-manager.md)** NestJS API, jobs, provisioning, and WebSockets
 
 ## Architecture Principles
 

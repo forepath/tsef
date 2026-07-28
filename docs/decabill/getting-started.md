@@ -29,6 +29,7 @@ git clone https://github.com/forepath/one.git
 cd one/apps/decabill/backend-billing-manager
 
 cp .start-containers.env.example .env
+
 # Edit .env: set STATIC_API_KEY, ENCRYPTION_KEY, issuer fields, and TENANTS as needed
 
 docker compose up -d
@@ -79,6 +80,7 @@ Start Postgres and Redis (Docker one-liners or the billing manager compose stack
 # Terminal 1: billing manager (QUEUE_ROLE=all runs API, worker, and scheduler in one process)
 cd apps/decabill/backend-billing-manager
 cp .start-containers.env.example .env
+
 # Set QUEUE_ROLE=all, REDIS_PORT=6380 if Redis is published on the host, and auth variables
 
 nx serve decabill-backend-billing-manager
@@ -124,15 +126,23 @@ AUTHENTICATION_METHOD=api-key
 STATIC_API_KEY=dev-api-key-123
 
 # Or Keycloak:
+
 # AUTHENTICATION_METHOD=keycloak
+
 # KEYCLOAK_AUTH_SERVER_URL=http://localhost:8380
+
 # KEYCLOAK_REALM=decabill
+
 # KEYCLOAK_CLIENT_ID=billing-manager
+
 # KEYCLOAK_CLIENT_SECRET=your-client-secret
 
 # Or built-in users (default in local Angular environment):
+
 # AUTHENTICATION_METHOD=users
+
 # JWT_SECRET=your-jwt-secret
+
 # DISABLE_SIGNUP=false
 
 # Ports

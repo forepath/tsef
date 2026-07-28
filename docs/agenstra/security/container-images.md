@@ -92,8 +92,8 @@ Deploy **manager API, worker, VNC, SSH, and agi** images from the **same release
 
 ## Related documentation
 
-- **[Operational hardening](./operational-hardening.md)** — Summary table and cross-links
-- **[Docker deployment](../deployment/docker-deployment.md#container-security-images)** — Compose and `DOCKER_GID`
-- **[Production checklist](../deployment/production-checklist.md)** — Pre-flight checks
-- **[VNC browser access](../features/vnc-browser-access.md)** — Feature architecture
-- **[Environment configuration](../deployment/environment-configuration.md)** — Per-provider image env vars
+- **[Operational hardening](./operational-hardening.md)** Summary table and cross-links
+- **[Docker deployment](../deployment/docker-deployment.md#container-security-images)** Compose and `DOCKER_GID`
+- **[Production checklist](../deployment/production-checklist.md)** Pre-flight checks
+- **[VNC browser access](../features/vnc-browser-access.md)** Feature architecture
+- **[Environment configuration](../deployment/environment-configuration.md)** Per-provider image env vars

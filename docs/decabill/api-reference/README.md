@@ -17,16 +17,16 @@ Canonical source in the monorepo: `libs/domains/decabill/backend/feature-billing
 
 The HTTP API includes:
 
-- **Public offerings** - Unauthenticated plan listings for marketing pages
-- **Service catalog** - Service types, service plans, and CloudInit configs (admin)
-- **Subscriptions and backorders** - Order, cancel, resume, retry, and availability
-- **Customer profile** - Self-service billing metadata
-- **Invoices and open positions** - Issue, preview, download, void, pay, and billing-day accumulation
-- **Admin billing** - Manual invoices, customer profiles, statistics, audit logs, bill-now
-- **Projects** - Customer project reads, admin CRUD, board tickets/milestones/time entries, bill-time
-- **Authentication and users** - Login, register, and user management when `AUTHENTICATION_METHOD=users`
-- **Stripe webhook** - Signed payment event handling
-- **Configuration** - `GET /config` for operator-visible settings
+- **Public offerings** Unauthenticated plan listings for marketing pages
+- **Service catalog** Service types, service plans, and CloudInit configs (admin)
+- **Subscriptions and backorders** Order, cancel, resume, retry, and availability
+- **Customer profile** Self-service billing metadata
+- **Invoices and open positions** Issue, preview, download, void, pay, and billing-day accumulation
+- **Admin billing** Manual invoices, customer profiles, statistics, audit logs, bill-now
+- **Projects** Customer project reads, admin CRUD, board tickets/milestones/time entries, bill-time
+- **Authentication and users** Login, register, and user management when `AUTHENTICATION_METHOD=users`
+- **Stripe webhook** Signed payment event handling
+- **Configuration** `GET /config` for operator-visible settings
 
 ### Authentication
 
@@ -67,7 +67,7 @@ Project endpoints are tagged **`Projects`**, **`Project Board`**, and **`Admin B
 
 List supports query params `limit`, `offset`, and optional `ticketId`.
 
-#### Contract hygiene — deferred gaps (P0.1)
+#### Contract hygiene (deferred gaps, P0.1)
 
 Implemented in Nest but intentionally **not** expanded in OpenAPI yet (internal or non-partner):
 
@@ -156,12 +156,12 @@ Published npm package (GitHub Packages): **`@forepath/decabill-billing-manager-c
 
 Configure `@forepath` scope in `.npmrc` to install from GitHub Packages. Clients are regenerated on release to stay aligned with the spec. Output lands under `dist/clients/billing-manager/js` (gitignored).
 
-## Related Documentation
+## Related documentation
 
-- **[Backend Billing Manager](../applications/backend-billing-manager.md)** - Ports, queue roles, and deployment
-- **[Frontend Billing Console](../applications/frontend-billing-console.md)** - How the UI calls the API
-- **[Architecture Data Flow](../architecture/data-flow.md)** - HTTP, WebSocket, Stripe, and provisioning sequences
-- **[Features Overview](../features/README.md)** - Product capability index
+- **[Backend Billing Manager](../applications/backend-billing-manager.md)** Ports, queue roles, and deployment
+- **[Frontend Billing Console](../applications/frontend-billing-console.md)** How the UI calls the API
+- **[Architecture Data Flow](../architecture/data-flow.md)** HTTP, WebSocket, Stripe, and provisioning sequences
+- **[Features Overview](../features/README.md)** Product capability index
 
 ---
 

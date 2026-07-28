@@ -59,8 +59,7 @@ Source: `apps/decabill/frontend-billing-console/Dockerfile.server`
 
 - Default `PORT=4500`
 - Runs as **`node`** (UID **1000**)
-- Runtime `CONFIG` URL and CSP variables documented in **[Environment configuration](../deployment/environment-configuration.md)**
-- Compose often sets `CSP_CONNECT_SRC_EXTRA` to reach the billing API from the browser
+- Runtime `CONFIG` URL and CSP variables documented in **[Environment configuration](../deployment/environment-configuration.md)** Compose often sets `CSP_CONNECT_SRC_EXTRA` to reach the billing API from the browser
 
 ## Docs server image (`decabill-docs-server`)
 
@@ -78,7 +77,7 @@ Source: `apps/shared/frontend-docs/Dockerfile.server` (same pattern as billing c
 
 ## Image scanning
 
-Container images built in CI are scanned with Trivy on pull requests. Decabill images are included when built in the PR pipeline. See **[CI security scanning](./ci-security-scanning.md)** and **[DR-005](./accepted-risks.md#dr-005--ci--local-trivy-unfixed-vulnerabilities-not-gated)**.
+Container images built in CI are scanned with Trivy on pull requests. Decabill images are included when built in the PR pipeline. See **[CI security scanning](./ci-security-scanning.md)** and **[DR-005](./accepted-risks.md#dr-005-ci-local-trivy-unfixed-vulnerabilities-not-gated)**.
 
 Release publishes CycloneDX SBOMs for Decabill images as `container-decabill-*.cdx.json`. See **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)**.
 
@@ -88,11 +87,11 @@ Deploy **billing API, worker, and scheduler** containers from the **same release
 
 ## Related documentation
 
-- **[Operational hardening](./operational-hardening.md)** - Summary table and cross-links
-- **[Docker deployment](../deployment/docker-deployment.md)** - Compose services
-- **[Production checklist](../deployment/production-checklist.md)** - Pre-flight checks
-- **[Background jobs](../deployment/background-jobs.md)** - Worker and scheduler images use the same billing API image with different `QUEUE_ROLE`
+- **[Operational hardening](./operational-hardening.md)** Summary table and cross-links
+- **[Docker deployment](../deployment/docker-deployment.md)** Compose services
+- **[Production checklist](../deployment/production-checklist.md)** Pre-flight checks
+- **[Background jobs](../deployment/background-jobs.md)** Worker and scheduler images use the same billing API image with different `QUEUE_ROLE`
 
 ---
 
-_For provisioning SSH accepted risk on provisioned instances, see [DR-001](./accepted-risks.md#dr-001--provisioning-ssh-cloud-init-templates)._
+_For provisioning SSH accepted risk on provisioned instances, see [DR-001](./accepted-risks.md#dr-001-provisioning-ssh-cloud-init-templates)._

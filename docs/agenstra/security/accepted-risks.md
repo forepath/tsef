@@ -6,7 +6,7 @@ This register records **explicit risk acceptance** for product and deployment co
 
 ---
 
-## AR-001 - Desktop app: no OS-trusted code signing / no in-app auto-update
+## AR-001 (Desktop app: no OS-trusted code signing / no in-app auto-update)
 
 | Field                                  | Recorded value                                                                                                                                                                                                                               |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -28,7 +28,7 @@ This register records **explicit risk acceptance** for product and deployment co
 
 ---
 
-## AR-002 - Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)
+## AR-002 (Web frontends: CSP `unsafe-inline` / `unsafe-eval`, Monaco)
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -50,7 +50,7 @@ By default, CSP is **report-only**. Use **`CSP_ENFORCE=true`** only after verifi
 
 ---
 
-## AR-003 - Backend authentication method resolution
+## AR-003 (Backend authentication method resolution)
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                                                                                                       |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -72,7 +72,7 @@ Set **`AUTHENTICATION_METHOD`** explicitly if your policy requires **fully expli
 
 ---
 
-## AR-004 - Desktop window open policy (`native-agent-console`)
+## AR-004 (Desktop window open policy, `native-agent-console`)
 
 | Field                                 | Recorded value                                                                                                                                                                                     |
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -94,7 +94,7 @@ New windows are **allowed** by design. Risk is **lower** than in a general-purpo
 
 ---
 
-## AR-005 - CI / local Trivy: unfixed vulnerabilities not gated
+## AR-005 (CI / local Trivy: unfixed vulnerabilities not gated)
 
 | Field                                 | Recorded value                                                                                                                                                                                                                                                                                         |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -128,10 +128,10 @@ New windows are **allowed** by design. Risk is **lower** than in a general-purpo
 
 ## Related documentation
 
-- **[Compliance and standards](./compliance-and-standards.md)**
-- **[Operational hardening](./operational-hardening.md)**
-- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)**
-- **[CI security scanning (Trivy)](./ci-security-scanning.md)**
+- **[Compliance and standards](./compliance-and-standards.md)** CRA and BSI documentation themes
+- **[Operational hardening](./operational-hardening.md)** Implemented controls and operator notes
+- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)** Disclosure process and SBOM paths
+- **[CI security scanning (Trivy)](./ci-security-scanning.md)** PR Trivy gates and ignore policy
 
 ---
 

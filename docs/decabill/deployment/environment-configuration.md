@@ -49,7 +49,7 @@ Billing data and users are partitioned by **`tenant_id`**. HTTP clients send **`
 | `BILLING_FRONTEND_URL`     | Billing console base URL for the `default` tenant (Stripe return redirects).                                                                                         |
 | `TENANT_FRONTEND_URLS`     | Per-tenant console URLs: `tenantId=https://…` pairs, comma-separated.                                                                                                |
 
-**API key scope (accepted risk [DR-002](../security/accepted-risks.md#dr-002--billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)):** With **`STATIC_API_KEY`** and **without** **`STATIC_API_KEY_TENANT_ID`**, one deployment key grants **admin access to every tenant** in **`TENANTS`**, selected per request via **`X-Tenant`**. Set **`STATIC_API_KEY_TENANT_ID`** to bind the key to one tenant, or use **keycloak** / **users** for interactive multi-tenant console access.
+**API key scope (accepted risk [DR-002](../security/accepted-risks.md#dr-002-billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)):** With **`STATIC_API_KEY`** and **without** **`STATIC_API_KEY_TENANT_ID`**, one deployment key grants **admin access to every tenant** in **`TENANTS`**, selected per request via **`X-Tenant`**. Set **`STATIC_API_KEY_TENANT_ID`** to bind the key to one tenant, or use **keycloak** / **users** for interactive multi-tenant console access.
 
 ### CORS and Rate Limiting
 
@@ -98,8 +98,8 @@ Monthly DATEV Buchungsstapel exports (category 21) with optional PDF document bu
 | `BILLING_DATEV_EXPORT_STORAGE_PATH`            | Export ZIP root (shared volume on api/worker/scheduler)                     | `/data/datev-exports` |
 | `BILLING_DATEV_EXPORT_CRON`                    | BullMQ cron for monthly coordinator (1st of month)                          | `0 0 1 * *`           |
 | `BILLING_DATEV_EXPORT_TIMEZONE`                | Timezone for cron and previous-month period calculation                     | `Europe/Berlin`       |
-| `BILLING_DATEV_CONSULTANT_NUMBER`              | DATEV Beraternummer (required per tenant for export)                        | —                     |
-| `BILLING_DATEV_CLIENT_NUMBER`                  | DATEV Mandantennummer (required per tenant for export)                      | —                     |
+| `BILLING_DATEV_CONSULTANT_NUMBER`              | DATEV Beraternummer (required per tenant for export)                        | -                     |
+| `BILLING_DATEV_CLIENT_NUMBER`                  | DATEV Mandantennummer (required per tenant for export)                      | -                     |
 | `BILLING_DATEV_CHART_OF_ACCOUNTS`              | `SKR03` or `SKR04`                                                          | `SKR03`               |
 | `BILLING_DATEV_ACCOUNT_LENGTH`                 | Sachkontenlänge in EXTF header                                              | `4`                   |
 | `BILLING_DATEV_REVENUE_ACCOUNT_STANDARD`       | Revenue account for 19% (SKR03 default `8400`, SKR04 `4400`)                | env / chart default   |
@@ -110,8 +110,8 @@ Monthly DATEV Buchungsstapel exports (category 21) with optional PDF document bu
 | `BILLING_DATEV_BU_KEY_REDUCED`                 | Override BU-Schlüssel for reduced tax                                       | empty                 |
 | `BILLING_DATEV_EXPORT_INCLUDE_DOCUMENTS`       | Include PDF bundle + Beleglink in Buchungsstapel                            | `true`                |
 | `BILLING_DATEV_EXPORT_DICTATION_ABBR`          | Diktatkürzel in EXTF header                                                 | `DEC`                 |
-| `BILLING_DATEV_FISCAL_YEAR_START_MONTH`        | Wirtschaftsjahresbeginn (1–12)                                              | `1`                   |
-| `BILLING_DATEV_TENANT_CONFIG`                  | JSON map of per-tenant (and optional `unified`) DATEV overrides             | —                     |
+| `BILLING_DATEV_FISCAL_YEAR_START_MONTH`        | Wirtschaftsjahresbeginn (1-12)                                              | `1`                   |
+| `BILLING_DATEV_TENANT_CONFIG`                  | JSON map of per-tenant (and optional `unified`) DATEV overrides             | -                     |
 | `BILLING_DATEV_UNIFIED_EXPORT_ENABLED`         | Enable cross-tenant consolidated monthly export                             | `false`               |
 | `BILLING_DATEV_UNIFIED_EXPORT_ALLOWED_TENANTS` | Comma-separated tenant ids allowed to list/trigger/download unified exports | `default` when unset  |
 
@@ -170,7 +170,7 @@ When `EMAIL_COMPANY_*` is unset, Decabill typically relies on `BILLING_ISSUER_*`
 
 Per-service-type overrides for `HETZNER_API_TOKEN` and `DIGITALOCEAN_API_TOKEN` can be configured in the billing console under **Administration → Service Providers → Provider defaults**. Overrides are stored encrypted in the database using `ENCRYPTION_KEY` (AES-256-GCM). When unset for a service type, the global environment variables above apply.
 
-Provisioning SSH posture is documented under accepted risk **[DR-001](../security/accepted-risks.md#dr-001--provisioning-ssh-cloud-init-templates)**.
+Provisioning SSH posture is documented under accepted risk **[DR-001](../security/accepted-risks.md#dr-001-provisioning-ssh-cloud-init-templates)**.
 
 ### Scheduler Intervals (BullMQ Coordinators)
 
@@ -311,20 +311,19 @@ Applies to **Backend Billing Manager**. See [OpenTelemetry](../features/opentele
 ### Production
 
 - `NODE_ENV=production`
-- `CORS_ORIGIN` **required**
-- `RATE_LIMIT_ENABLED=true`
+- `CORS_ORIGIN` **required** `RATE_LIMIT_ENABLED=true`
 - `ENCRYPTION_KEY` **required** for encrypted fields
 - Strong `STATIC_API_KEY` or Keycloak/users auth
 - `QUEUE_BULL_BOARD_PASSWORD` **required** when Bull Board is enabled
 - `CONFIG_ALLOWED_HOSTS` when `CONFIG` is set on frontends
 
-## Related Documentation
+## Related documentation
 
-- **[Local Development](./local-development.md)** - Local setup
-- **[Docker Deployment](./docker-deployment.md)** - Containerized deployment
-- **[Production Checklist](./production-checklist.md)** - Production deployment
-- **[Background Jobs](./background-jobs.md)** - BullMQ roles and coordinators
-- **[Accepted risks](../security/accepted-risks.md)** - DR-001, DR-002, DR-003, DR-004
+- **[Local Development](./local-development.md)** Local setup
+- **[Docker Deployment](./docker-deployment.md)** Containerized deployment
+- **[Production Checklist](./production-checklist.md)** Production deployment
+- **[Background Jobs](./background-jobs.md)** BullMQ roles and coordinators
+- **[Accepted risks](../security/accepted-risks.md)** DR-001, DR-002, DR-003, DR-004
 
 ---
 

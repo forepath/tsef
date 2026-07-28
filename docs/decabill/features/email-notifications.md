@@ -57,7 +57,7 @@ If no company name is resolved, header and footer are omitted. On Decabill, leav
 | `user.email_confirmation_requested`    | `email-confirmation`                   | Identity registration / email change              |
 | `user.password_reset_requested`        | `password-reset`                       | Password reset                                    |
 
-## Delivery & retries
+## Delivery and retries
 
 - Job: `email-deliver`, max **3** attempts, exponential backoff from 5s
 - Attachments: storage keys only in the job payload; PDFs loaded in the worker via `EMAIL_ATTACHMENT_RESOLVER` (BillingModule; resolved across module boundaries at delivery time)

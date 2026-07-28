@@ -6,9 +6,9 @@ Authentication system supporting multiple authentication methods with configurab
 
 Agenstra supports three authentication methods:
 
-- **API Key Authentication** - Static API key for simple authentication
-- **Keycloak Authentication** - OAuth2/OIDC via Keycloak
-- **Users Authentication** - Built-in user registration with JWT
+- **API Key Authentication** Static API key for simple authentication
+- **Keycloak Authentication** OAuth2/OIDC via Keycloak
+- **Users Authentication** Built-in user registration with JWT
 
 Each method has different use cases and can be configured via environment variables.
 
@@ -81,13 +81,13 @@ DISABLE_SIGNUP=false  # Set to true to disable self-registration
 
 User-bound tokens for scripts and CI. They are **not** a console login password. **Not available** when `AUTHENTICATION_METHOD=api-key`.
 
-| Concern                  | Behavior                                                                                                                                           |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Create / update / revoke | Console **Personal Access Tokens** page (`/settings/tokens`); interactive console session only (password JWT or Keycloak OIDC)                     |
-| Exchange                 | `POST /auth/token` with `{ "token": "fp_pat_…" }` only (no email) → JWT with `amr: ["pat"]` and `scopes`                                           |
-| Console                  | Login rejects `fp_pat_` secrets; SPA rejects JWTs whose `amr` includes `pat`; WebSockets reject PAT JWTs                                           |
-| Keycloak                 | Local `users` row is synced on first authenticated request (`keycloakSub`); PAT CRUD and exchange require `JWT_SECRET`                             |
-| Scopes                   | `AGENSTRA_PAT_SCOPES` — clients/tickets/knowledge/agents/imports/statistics + `users:admin` / `webhooks:admin`; each enforced via `@RequireScopes` |
+| Concern                  | Behavior                                                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Create / update / revoke | Console **Personal Access Tokens** page (`/settings/tokens`); interactive console session only (password JWT or Keycloak OIDC)                          |
+| Exchange                 | `POST /auth/token` with `{ "token": "fp_pat_…" }` only (no email) → JWT with `amr: ["pat"]` and `scopes`                                                |
+| Console                  | Login rejects `fp_pat_` secrets; SPA rejects JWTs whose `amr` includes `pat`; WebSockets reject PAT JWTs                                                |
+| Keycloak                 | Local `users` row is synced on first authenticated request (`keycloakSub`); PAT CRUD and exchange require `JWT_SECRET`                                  |
+| Scopes                   | `AGENSTRA_PAT_SCOPES` covers clients/tickets/knowledge/agents/imports/statistics + `users:admin` / `webhooks:admin`; each enforced via `@RequireScopes` |
 
 Compared to `STATIC_API_KEY`, PATs are per-user, scoped, rotatable, and do not grant cross-tenant admin by default.
 
@@ -356,14 +356,14 @@ When using **keycloak** or **users** authentication, access to clients is contro
 
 See **[Client Management](./client-management.md#per-client-permissions)** for details on access control rules and managing client users.
 
-## Related Documentation
+## Related documentation
 
-- **[Environment Configuration](../deployment/environment-configuration.md)** - Environment variable reference
-- **[Security - Accepted risks](../security/accepted-risks.md)** - **AR-003** (implicit authentication method resolution when `AUTHENTICATION_METHOD` is unset)
-- **[Security — Operational hardening](../security/operational-hardening.md)** - Backend authentication resolution behavior
-- **[Client Management](./client-management.md)** - Per-client permissions and user management
-- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** - Backend authentication implementation
-- **[Frontend Agent Console Application](../applications/frontend-agent-console.md)** - Frontend authentication UI
+- **[Environment Configuration](../deployment/environment-configuration.md)** Environment variable reference
+- **[Security (Accepted risks)](../security/accepted-risks.md)** **AR-003** (implicit authentication method resolution when `AUTHENTICATION_METHOD` is unset)
+- **[Security (Operational hardening)](../security/operational-hardening.md)** Backend authentication resolution behavior
+- **[Client Management](./client-management.md)** Per-client permissions and user management
+- **[Backend Agent Controller Application](../applications/backend-agent-controller.md)** Backend authentication implementation
+- **[Frontend Agent Console Application](../applications/frontend-agent-console.md)** Frontend authentication UI
 
 ---
 

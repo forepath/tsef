@@ -26,12 +26,11 @@ docker compose up -d
 
 The `docker-compose.yaml` includes:
 
-- **postgres** - PostgreSQL 16
-- **redis** - Redis 7 with persistence; host port **6380** maps to container **6379**
-- **backend-billing-manager** - API (`QUEUE_ROLE=api`, port **3200**, WebSocket **8082**)
-- **backend-billing-manager-scheduler** - Coordinator registration (`QUEUE_ROLE=scheduler`)
-- **backend-billing-manager-worker** - Job processing (`QUEUE_ROLE=worker`)
-- **mailhog** - Local SMTP capture for invoice and reminder emails
+- **postgres** PostgreSQL 16
+- **redis** Redis 7 with persistence; host port **6380** maps to container **6379** **backend-billing-manager** API (`QUEUE_ROLE=api`, port **3200**, WebSocket **8082**)
+- **backend-billing-manager-scheduler** Coordinator registration (`QUEUE_ROLE=scheduler`)
+- **backend-billing-manager-worker** Job processing (`QUEUE_ROLE=worker`)
+- **mailhog** Local SMTP capture for invoice and reminder emails
 
 Volumes:
 
@@ -171,13 +170,13 @@ docker compose logs -f backend-billing-manager
 docker compose logs --tail=100 backend-billing-manager-worker
 ```
 
-## Related Documentation
+## Related documentation
 
-- **[System Requirements](./system-requirements.md)** - CPU, memory, and disk by role
-- **[Local Development](./local-development.md)** - Local setup
-- **[Production Checklist](./production-checklist.md)** - Production deployment
-- **[Environment Configuration](./environment-configuration.md)** - Environment variables
-- **[Background Jobs](./background-jobs.md)** - Queue roles and Redis
+- **[System Requirements](./system-requirements.md)** CPU, memory, and disk by role
+- **[Local Development](./local-development.md)** Local setup
+- **[Production Checklist](./production-checklist.md)** Production deployment
+- **[Environment Configuration](./environment-configuration.md)** Environment variables
+- **[Background Jobs](./background-jobs.md)** Queue roles and Redis
 
 ---
 

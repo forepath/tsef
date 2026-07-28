@@ -149,7 +149,7 @@ Use browser DevTools Network tab or a Socket.IO client with:
 ### Multi-Tenant Data in Wrong Tenant
 
 1. Confirm console sends correct **`X-Tenant`**
-2. For API key auth, review **[DR-002](../security/accepted-risks.md#dr-002--billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**
+2. For API key auth, review **[DR-002](../security/accepted-risks.md#dr-002-billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)**
 3. Verify user's `tenant_id` in database matches expected tenant
 
 ## Performance Debugging
@@ -171,11 +171,11 @@ Use browser DevTools Network tab or a Socket.IO client with:
 - Index usage on `tenant_id` filtered queries
 - Connection pool sizing under scheduler batch loads
 
-## Related Documentation
+## Related documentation
 
-- **[Common Issues](./common-issues.md)** - Common problems and solutions
-- **[Background jobs](../deployment/background-jobs.md)** - Queue roles and job registry
-- **[Environment configuration](../deployment/environment-configuration.md)** - Scheduler intervals
+- **[Common Issues](./common-issues.md)** Common problems and solutions
+- **[Background jobs](../deployment/background-jobs.md)** Queue roles and job registry
+- **[Environment configuration](../deployment/environment-configuration.md)** Scheduler intervals
 
 ---
 

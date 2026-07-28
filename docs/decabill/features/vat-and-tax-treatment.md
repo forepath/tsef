@@ -40,7 +40,7 @@ Self-service revalidate: `POST /customer-profile/vat-id/revalidate`.
 
 ## OSS €10,000 threshold
 
-Cross-border EU B2C (non–reverse-charge) net totals are tracked per tenant/year. Below threshold → home-country VAT; at/above → destination rates (`eu_b2c_oss`).
+Cross-border EU B2C (non-reverse-charge) net totals are tracked per tenant/year. Below threshold → home-country VAT; at/above → destination rates (`eu_b2c_oss`).
 
 `BILLING_OSS_REGISTERED=true` forces destination rates without waiting for the ledger.
 
@@ -52,9 +52,9 @@ EU rates live in `eu-vat-rates.constants.ts` (Your Europe snapshot; see file hea
 
 Issued invoices store `taxMode`, `taxCountryCode`, `taxNote`, `einvoiceTaxCategoryCode`, `resolvedTaxRate`, and buyer/issuer tax fields so PDF, eInvoice, and DATEV stay stable if rate tables change later.
 
-## Related
+## Related documentation
 
-- [Customer Profiles](./customer-profiles.md)
-- [Invoices](./invoices.md)
-- [Webhooks](./webhooks.md)
-- [Environment configuration](../deployment/environment-configuration.md)
+- [Customer Profiles](./customer-profiles.md) VAT ID and tax residency fields
+- [Invoices](./invoices.md) Tax lines on issued documents
+- [Webhooks](./webhooks.md) Tax-related billing notifications
+- [Environment configuration](../deployment/environment-configuration.md) Issuer and tax-related variables

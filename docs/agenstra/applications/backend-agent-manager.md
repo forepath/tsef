@@ -10,27 +10,27 @@ This application provides a complete agent management system by importing **`Age
 
 This application provides:
 
-- **HTTP REST API** - Full CRUD operations for agent management
-- **WebSocket Gateway** - Real-time bidirectional communication with agents
-- **Container Integration** - Docker container management for agent execution
-- **VNC Browser Access** - Virtual workspace containers with XFCE4 desktop and Chromium browser
-- **Secure Authentication** - Keycloak integration for HTTP endpoints and database-backed authentication for WebSocket
-- **Database Support** - PostgreSQL with TypeORM for data persistence
-- **Auto Migrations** - Automatic database schema migrations on startup
-- **Rate Limiting** - Configurable rate limiting on all API endpoints
-- **CORS Configuration** - Production-safe CORS defaults
-- **Plugin-based Agent Providers** - Support for multiple agent implementations (cursor-agent, etc.)
+- **HTTP REST API** Full CRUD operations for agent management
+- **WebSocket Gateway** Real-time bidirectional communication with agents
+- **Container Integration** Docker container management for agent execution
+- **VNC Browser Access** Virtual workspace containers with XFCE4 desktop and Chromium browser
+- **Secure Authentication** Keycloak integration for HTTP endpoints and database-backed authentication for WebSocket
+- **Database Support** PostgreSQL with TypeORM for data persistence
+- **Auto Migrations** Automatic database schema migrations on startup
+- **Rate Limiting** Configurable rate limiting on all API endpoints
+- **CORS Configuration** Production-safe CORS defaults
+- **Plugin-based Agent Providers** Support for multiple agent implementations (cursor-agent, etc.)
 
 ## Architecture
 
 This application is built using:
 
-- **NestJS** - Progressive Node.js framework
-- **TypeORM** - Object-Relational Mapping for database operations
-- **Keycloak** - Identity and access management (optional, can use API key)
-- **Socket.IO** - WebSocket communication
-- **Docker** - Container management for agent execution
-- **PostgreSQL** - Database for agent storage
+- **NestJS** Progressive Node.js framework
+- **TypeORM** Object-Relational Mapping for database operations
+- **Keycloak** Identity and access management (optional, can use API key)
+- **Socket.IO** WebSocket communication
+- **Docker** Container management for agent execution
+- **PostgreSQL** Database for agent storage
 
 The Nest `AppModule` wires TypeORM, hybrid HTTP auth (Keycloak connect plus optional static API key), throttling, and the framework **`AgentsModule`** implementation.
 
@@ -153,7 +153,7 @@ The Socket.IO WebSocket gateway is available at `http://localhost:8080/agents` (
 - `loginSuccess` - Emitted on successful authentication
 - `loginError` - Emitted on authentication failure
 - `chatMessage` - Chat traffic (broadcast or unicast depending on message options)
-- `containerStats` — container status and resource usage; first event after login, then every 15 seconds by default (`CONTAINER_STATS_SCHEDULER_INTERVAL` in ms)
+- `containerStats`, container status and resource usage; first event after login, then every 15 seconds by default (`CONTAINER_STATS_SCHEDULER_INTERVAL` in ms)
 - File and terminal notifications, and other provider-specific events per AsyncAPI
 - `error` - Emitted on authorization or processing errors
 
@@ -161,7 +161,7 @@ For complete WebSocket event specifications, authentication flow, and usage exam
 
 ## Authentication
 
-Built-in **users** registration and JWT login live on the **agent controller** only. The agent manager application always uses **Keycloak** (JWT with `agent_management` role) or **static API key** as configured—there are no `/auth/*` endpoints on this service. Operators typically never call the manager HTTP API directly from a browser; the console uses the controller, which proxies requests with stored client credentials.
+Built-in **users** registration and JWT login live on the **agent controller** only. The agent manager application always uses **Keycloak** (JWT with `agent_management` role) or **static API key** as configured, there are no `/auth/*` endpoints on this service. Operators typically never call the manager HTTP API directly from a browser; the console uses the controller, which proxies requests with stored client credentials.
 
 ### HTTP Endpoints
 
@@ -190,10 +190,10 @@ The application implements configurable rate limiting on all API endpoints to pr
 
 Rate limiting is configured via environment variables:
 
-- **`RATE_LIMIT_ENABLED`** - Enable/disable rate limiting
+- **`RATE_LIMIT_ENABLED`** Enable/disable rate limiting
   - Default: `true` in production, `false` in development
-- **`RATE_LIMIT_TTL`** - Time window in seconds (default: `60`)
-- **`RATE_LIMIT_LIMIT`** - Maximum number of requests per window (default: `100`)
+- **`RATE_LIMIT_TTL`** Time window in seconds (default: `60`)
+- **`RATE_LIMIT_LIMIT`** Maximum number of requests per window (default: `100`)
 
 ### Behavior
 
@@ -208,7 +208,7 @@ The application implements production-safe CORS defaults to prevent unauthorized
 
 CORS is configured via the `CORS_ORIGIN` environment variable:
 
-- **`CORS_ORIGIN`** - Comma-separated list of allowed origins
+- **`CORS_ORIGIN`** Comma-separated list of allowed origins
   - If not set:
     - **Production**: CORS is **disabled** (no origins allowed)
     - **Development**: CORS allows **all origins** (`*`)
@@ -217,33 +217,28 @@ CORS is configured via the `CORS_ORIGIN` environment variable:
 
 See the application docs and environment configuration for complete environment variable documentation.
 
-**Application-specific:**
+**Application-specific:** `PORT` - HTTP API port (default: `3000`)
 
-- `PORT` - HTTP API port (default: `3000`)
 - `WEBSOCKET_PORT` - WebSocket gateway port (default: `8080`)
 - `NODE_ENV` - Environment mode (`development` or `production`)
 
-**Git Repository:**
+**Git Repository:** `GIT_REPOSITORY_URL` - Git repository URL for agent workspace
 
-- `GIT_REPOSITORY_URL` - Git repository URL for agent workspace
 - `GIT_USERNAME` - Git username for authentication
 - `GIT_TOKEN` - Git personal access token
 - `GIT_PASSWORD` - Git password (alternative to token)
 - `GIT_PRIVATE_KEY` - SSH private key for SSH repositories
 
-**Cursor Agent:**
+**Cursor Agent:** `CURSOR_API_KEY` - Cursor API key for agent communication
 
-- `CURSOR_API_KEY` - Cursor API key for agent communication
 - `CURSOR_AGENT_DOCKER_IMAGE` - Docker image for cursor-agent containers
 
-**VNC Browser Access:**
+**VNC Browser Access:** `VNC_SERVER_DOCKER_IMAGE` - Docker image for VNC containers (default: `ghcr.io/forepath/agenstra-manager-vnc:latest`)
 
-- `VNC_SERVER_DOCKER_IMAGE` - Docker image for VNC containers (default: `ghcr.io/forepath/agenstra-manager-vnc:latest`)
 - `VNC_SERVER_PUBLIC_PORTS` - Port range for VNC host port allocation (e.g., `"6080-6180"`)
 
-**Dynamic provider plugins (optional):**
+**Dynamic provider plugins (optional):** `DYNAMIC_AGENT_PROVIDERS` - Extra agent backend packages
 
-- `DYNAMIC_AGENT_PROVIDERS` - Extra agent backend packages
 - `DYNAMIC_PIPELINE_PROVIDERS` - Extra CI/CD provider packages
 - `DYNAMIC_CHAT_FILTERS` - Extra chat filter packages
 - `DYNAMIC_PROVIDER_PLUGIN_PATH` / `DYNAMIC_PROVIDER_PLUGIN_INSTALL` - Post-build plugin mount and startup install
@@ -321,16 +316,16 @@ Before deploying to production, ensure:
 - Host `/opt/agents` permissions are suitable for UID **10001** (see [Container image security](../security/container-images.md))
 - Host `docker` group GID matches image `DOCKER_GID` (or image rebuilt with correct `--build-arg`)
 
-## Related Documentation
+## Related documentation
 
-- **[Agent Management Feature](../features/agent-management.md)** - Agent management guide
-- **[VNC Browser Access Feature](../features/vnc-browser-access.md)** - VNC browser access guide
-- **[WebSocket Communication Feature](../features/websocket-communication.md)** - WebSocket communication guide
-- **[Deployment Feature](../features/deployment.md)** - CI/CD configuration and operations
-- **[Message Filter Rules](../features/message-filter-rules.md)** - Per-agent regex filters
-- **[Dynamic provider plugins](../features/dynamic-provider-plugins.md)** - Custom agent, pipeline, and filter providers
-- **[Backend Agent Controller](./backend-agent-controller.md)** - Control plane and proxy paths used by the console
-- **[Deployment Guide](../deployment/production-checklist.md)** - Production deployment guide
+- **[Agent Management Feature](../features/agent-management.md)** Agent management guide
+- **[VNC Browser Access Feature](../features/vnc-browser-access.md)** VNC browser access guide
+- **[WebSocket Communication Feature](../features/websocket-communication.md)** WebSocket communication guide
+- **[Deployment Feature](../features/deployment.md)** CI/CD configuration and operations
+- **[Message Filter Rules](../features/message-filter-rules.md)** Per-agent regex filters
+- **[Dynamic provider plugins](../features/dynamic-provider-plugins.md)** Custom agent, pipeline, and filter providers
+- **[Backend Agent Controller](./backend-agent-controller.md)** Control plane and proxy paths used by the console
+- **[Deployment Guide](../deployment/production-checklist.md)** Production deployment guide
 
 ## License
 

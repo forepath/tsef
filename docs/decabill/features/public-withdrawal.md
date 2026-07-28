@@ -6,7 +6,7 @@ Exercise statutory withdrawal (Widerruf) without logging in. Customers verify id
 
 The public flow is available at **`/withdrawal`** in the billing console (no authentication required). It matches the subscription against the **billing profile** (not the login email), validates order/receipt dates, sends a 6-character confirmation code to the profile email, and executes withdrawal after OTP verification and legal acknowledgment.
 
-Logged-in customers continue to use the subscription **Withdraw** action in the console. See [Subscriptions — Statutory Withdrawal](./subscriptions.md#statutory-withdrawal-widerruf) for eligibility rules and refund behavior.
+Logged-in customers continue to use the subscription **Withdraw** action in the console. See [Subscriptions. Statutory Withdrawal](./subscriptions.md#statutory-withdrawal-widerruf) for eligibility rules and refund behavior.
 
 ## Flow
 
@@ -42,12 +42,12 @@ sequenceDiagram
 
 Re-submitting the **same** subscription number, customer name, email, optional company, ordered on, and received on (when applicable) resumes a non-expired pending request:
 
-| Existing session                        | Behavior                                                |
-| --------------------------------------- | ------------------------------------------------------- |
-| None                                    | Create request, send email, advance to `code`           |
-| Pending, not expired, code not verified | Resume to `code` — no new email                         |
-| Pending, not expired, code verified     | Resume to `acknowledge` — user re-checks legal checkbox |
-| Expired or already confirmed            | Invalidate old row, create new request, send new email  |
+| Existing session                        | Behavior                                               |
+| --------------------------------------- | ------------------------------------------------------ |
+| None                                    | Create request, send email, advance to `code`          |
+| Pending, not expired, code not verified | Resume to `code`, no new email                         |
+| Pending, not expired, code verified     | Resume to `acknowledge`, user re-checks legal checkbox |
+| Expired or already confirmed            | Invalidate old row, create new request, send new email |
 
 Default confirmation TTL: **`PUBLIC_WITHDRAWAL_CONFIRMATION_TTL_HOURS`** (48 hours).
 
@@ -90,10 +90,10 @@ OpenAPI operation IDs: `getPublicWithdrawalAddressee`, `requestPublicWithdrawal`
 | Variable                                   | Description                                                                               | Default  |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------- | -------- |
 | `PUBLIC_WITHDRAWAL_CONFIRMATION_TTL_HOURS` | Hours until a pending request expires                                                     | `48`     |
-| `BILLING_ISSUER_*`                         | Legal entity shown as withdrawal addressee and on invoices                                | —        |
+| `BILLING_ISSUER_*`                         | Legal entity shown as withdrawal addressee and on invoices                                | -        |
 | `ENCRYPTION_KEY`                           | Encrypts confirmation codes at rest                                                       | required |
-| `SMTP_*` / `EMAIL_FROM`                    | Outbound confirmation email (queued; see [Email notifications](./email-notifications.md)) | —        |
-| `EMAIL_COMPANY_*` / `BILLING_ISSUER_*`     | Optional brand header/footer on the confirmation email                                    | —        |
+| `SMTP_*` / `EMAIL_FROM`                    | Outbound confirmation email (queued; see [Email notifications](./email-notifications.md)) | -        |
+| `EMAIL_COMPANY_*` / `BILLING_ISSUER_*`     | Optional brand header/footer on the confirmation email                                    | -        |
 
 See [Environment Configuration](../deployment/environment-configuration.md).
 
@@ -104,8 +104,8 @@ See [Environment Configuration](../deployment/environment-configuration.md).
 - UI mirrors identity auth layout (two-column, Bootstrap alerts, `IdentityOtpInputComponent`)
 - Addressee card: _"Your withdrawal is addressed to"_ from `GET /public/withdrawal/addressee`
 
-## Related
+## Related documentation
 
-- [Subscriptions — Statutory Withdrawal](./subscriptions.md#statutory-withdrawal-widerruf)
-- [Customer Profiles](./customer-profiles.md)
-- [Authentication](./authentication.md)
+- [Subscriptions (Statutory Withdrawal)](./subscriptions.md#statutory-withdrawal-widerruf) Authenticated withdrawal path and policy
+- [Customer Profiles](./customer-profiles.md) Profile data used on withdrawal notices
+- [Authentication](./authentication.md) Public and authenticated access modes

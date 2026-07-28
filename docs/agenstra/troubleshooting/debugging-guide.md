@@ -11,10 +11,12 @@ View application logs:
 ```bash
 # Backend Agent Controller
 nx serve agenstra-backend-agent-controller
+
 # Logs appear in console
 
 # Backend Agent Manager
 nx serve agenstra-backend-agent-manager
+
 # Logs appear in console
 
 # Docker containers
@@ -150,10 +152,10 @@ wscat -c ws://localhost:8081/clients
 {"event":"setClient","data":{"clientId":"client-uuid"}}
 ```
 
-## Related Documentation
+## Related documentation
 
-- **[Common Issues](./common-issues.md)** - Common problems and solutions
-- **[Deployment Guide](../deployment/README.md)** - Deployment troubleshooting
+- **[Common Issues](./common-issues.md)** Common problems and solutions
+- **[Deployment Guide](../deployment/README.md)** Deployment troubleshooting
 
 ---
 

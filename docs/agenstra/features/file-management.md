@@ -117,11 +117,11 @@ This enables real-time collaboration and ensures all clients see the latest file
 
 For detailed API documentation, see the application and API reference docs linked below.
 
-## Related Documentation
+## Related documentation
 
-- **[Web IDE](./web-ide.md)** - Monaco Editor integration
-- **[Version Control](./version-control.md)** - Git operations
-- **[Agent Management](./agent-management.md)** - Agent containers
+- **[Web IDE](./web-ide.md)** Monaco Editor integration
+- **[Version Control](./version-control.md)** Git operations
+- **[Agent Management](./agent-management.md)** Agent containers
 
 ---
 

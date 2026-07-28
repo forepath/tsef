@@ -76,7 +76,7 @@ When using `localhost` or `host.docker.internal` in `KEYCLOAK_AUTH_SERVER_URL`, 
 - If tokens are issued with `localhost` (from frontend), backend should also use `localhost` for issuer validation
 - Docker containers accessing Keycloak via `host.docker.internal` may need issuer normalization
 
-## Related Documentation
+## Related documentation
 
 - **[Environment Configuration](../../../../../docs/agenstra/deployment/environment-configuration.md)** - Complete environment variable reference
 - **[Backend Agent Controller README](../../../../../apps/agenstra/backend-agent-controller/README.md)** - Application-specific usage

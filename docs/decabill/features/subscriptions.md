@@ -125,8 +125,8 @@ After an [automatic price recalculation](./automatic-price-recalculation.md) mig
 
 ### Withdraw vs Cancel
 
-- **Withdraw** (`POST /subscriptions/{subscriptionId}/withdraw`) — immediate teardown, bypasses `CancellationPolicyService` (e.g. works during `minCommitmentDays`).
-- **Cancel** — commercial cancellation subject to notice and commitment rules.
+- **Withdraw** (`POST /subscriptions/{subscriptionId}/withdraw`), immediate teardown, bypasses `CancellationPolicyService` (e.g. works during `minCommitmentDays`).
+- **Cancel** commercial cancellation subject to notice and commitment rules.
 
 ### Refunds on provisioned withdrawal
 
@@ -202,15 +202,15 @@ Active subscriptions can change server type and addons without switching plans. 
 
 See [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) for schemas.
 
-## Related Documentation
+## Related documentation
 
-- **[Customer Profiles](./customer-profiles.md)** - Required before ordering
-- **[Service Types and Plans](./service-types-and-plans.md)** - Catalog and provider schemas
-- **[Subscription Config Change](./subscription-config-change.md)** - Mid-life server type and addon changes
-- **[Invoices](./invoices.md)** - Open positions and billing-day accumulation
-- **[Backorders](./backorders.md)** - Capacity retry queue
-- **[Server Provisioning](./server-provisioning.md)** - Cloud-init and bundled stacks
-- **[Dashboard and Server Control](./dashboard-and-server-control.md)** - Overview and power actions
+- **[Customer Profiles](./customer-profiles.md)** Required before ordering
+- **[Service Types and Plans](./service-types-and-plans.md)** Catalog and provider schemas
+- **[Subscription Config Change](./subscription-config-change.md)** Mid-life server type and addon changes
+- **[Invoices](./invoices.md)** Open positions and billing-day accumulation
+- **[Backorders](./backorders.md)** Capacity retry queue
+- **[Server Provisioning](./server-provisioning.md)** Cloud-init and bundled stacks
+- **[Dashboard and Server Control](./dashboard-and-server-control.md)** Overview and power actions
 
 ---
 

@@ -10,29 +10,29 @@ This application provides a centralized control plane for managing multiple dist
 
 This application provides:
 
-- **HTTP REST API** - Full CRUD operations for client management and proxied agent operations
-- **WebSocket Gateway** - Real-time bidirectional event forwarding to remote agent-manager services
-- **Server Provisioning** - Automated cloud server provisioning (Hetzner Cloud, DigitalOcean) with Docker and agent-manager deployment
-- **Tickets and Automation** - Workspace tickets, migration, and automation APIs with optional ticket board WebSocket namespace
-- **Usage Statistics** - Aggregated chat, filter, and entity metrics for operators and admins
-- **Global Filter Rules** - Admin-managed regex policies synced to workspaces
-- **Atlassian import** - Admin-managed Atlassian site connections and Jira/Confluence import configurations (scheduled and on-demand)
-- **Per-Client Permissions** - Fine-grained access control with user roles per client (keycloak/users mode)
-- **Secure Authentication** - API key, Keycloak OAuth2/OIDC, or built-in users (JWT) for HTTP and WebSocket
-- **Database Support** - PostgreSQL with TypeORM for data persistence
-- **Auto Migrations** - Automatic database schema migrations on startup
-- **Rate Limiting** - Configurable rate limiting on all API endpoints
-- **CORS Configuration** - Production-safe CORS defaults
+- **HTTP REST API** Full CRUD operations for client management and proxied agent operations
+- **WebSocket Gateway** Real-time bidirectional event forwarding to remote agent-manager services
+- **Server Provisioning** Automated cloud server provisioning (Hetzner Cloud, DigitalOcean) with Docker and agent-manager deployment
+- **Tickets and Automation** Workspace tickets, migration, and automation APIs with optional ticket board WebSocket namespace
+- **Usage Statistics** Aggregated chat, filter, and entity metrics for operators and admins
+- **Global Filter Rules** Admin-managed regex policies synced to workspaces
+- **Atlassian import** Admin-managed Atlassian site connections and Jira/Confluence import configurations (scheduled and on-demand)
+- **Per-Client Permissions** Fine-grained access control with user roles per client (keycloak/users mode)
+- **Secure Authentication** API key, Keycloak OAuth2/OIDC, or built-in users (JWT) for HTTP and WebSocket
+- **Database Support** PostgreSQL with TypeORM for data persistence
+- **Auto Migrations** Automatic database schema migrations on startup
+- **Rate Limiting** Configurable rate limiting on all API endpoints
+- **CORS Configuration** Production-safe CORS defaults
 
 ## Architecture
 
 This application is built using:
 
-- **NestJS** - Progressive Node.js framework
-- **TypeORM** - Object-Relational Mapping for database operations
-- **Keycloak** - Identity and access management (optional, can use API key)
-- **Socket.IO** - WebSocket communication
-- **PostgreSQL** - Database for client and credential storage
+- **NestJS** Progressive Node.js framework
+- **TypeORM** Object-Relational Mapping for database operations
+- **Keycloak** Identity and access management (optional, can use API key)
+- **Socket.IO** WebSocket communication
+- **PostgreSQL** Database for client and credential storage
 
 The thin Nest application composes **`ClientsModule`** and **`IdentityStatisticsBridgeModule`** from `@forepath/agenstra/backend` and **`MonitoringModule`** from `@forepath/shared/backend`, which bundle client management, ticket and proxy behavior, usage statistics bridging, and health endpoints from the agent-controller implementation.
 
@@ -205,10 +205,10 @@ For complete API endpoint documentation, request/response schemas, and authentic
 
 Socket.IO listens on **`WEBSOCKET_PORT`** (default `8081`). Namespaces share the same port and CORS settings (`WEBSOCKET_CORS_ORIGIN`):
 
-- **`clients`** (default `WEBSOCKET_NAMESPACE` = `clients`) – proxy to the selected workspace’s agent-manager; chat, terminals, stats, and controller-originated ticket hints for the chat UI
-- **`tickets`** (default `TICKETS_WEBSOCKET_NAMESPACE` = `tickets`) – ticket board and automation realtime (see [Tickets and Workspaces](../features/tickets-and-workspaces.md))
-- **`pages`** – knowledge board realtime (`knowledgeTreeChanged`, `knowledgeRelationChanged`, `knowledgePageActivityCreated`)
-- **`status`** – per-user notification snapshots/patches (see [WebSocket Communication](../features/websocket-communication.md))
+- **`clients`** (default `WEBSOCKET_NAMESPACE` = `clients`), proxy to the selected workspace’s agent-manager; chat, terminals, stats, and controller-originated ticket hints for the chat UI
+- **`tickets`** (default `TICKETS_WEBSOCKET_NAMESPACE` = `tickets`), ticket board and automation realtime (see [Tickets and Workspaces](../features/tickets-and-workspaces.md))
+- **`pages`** knowledge board realtime (`knowledgeTreeChanged`, `knowledgeRelationChanged`, `knowledgePageActivityCreated`)
+- **`status`** per-user notification snapshots/patches (see [WebSocket Communication](../features/websocket-communication.md))
 
 Connect to each namespace explicitly in the client library (e.g. `io(url + '/clients', options)` and `io(url + '/tickets', options)`).
 
@@ -222,7 +222,7 @@ WebSocket connections require authentication via the `Authorization` header (pol
 
 Unauthenticated connections are rejected with `connect_error` "Unauthorized". The `setClient` operation enforces per-client authorization: only users with access to the requested client can set that client context. Unauthorized attempts emit an `error` event with message "You do not have access to this client".
 
-### Namespace `clients` – events
+### Namespace `clients` (events)
 
 #### Client → Server
 
@@ -233,12 +233,12 @@ Unauthenticated connections are rejected with `connect_error` "Unauthorized". Th
 
 - `setClientSuccess` - Confirmation that client context was set (or already set)
 - `forwardAck` - Acknowledgement that a `forward` was accepted
-- **Proxied manager events** - Responses are re-emitted using their original event names (for example `chatMessage`, `containerStats`, `terminalOutput`) to the initiating socket only
+- **Proxied manager events** Responses are re-emitted using their original event names (for example `chatMessage`, `containerStats`, `terminalOutput`) to the initiating socket only
 - `remoteDisconnected`, `remoteReconnecting`, `remoteReconnected`, `remoteReconnectError`, `remoteReconnectFailed` - Remote agent-manager link state
 - `ticketAutomationRunChatUpsert`, `ticketChatTicketUpsert` - Controller-originated ticket timeline and metadata for chat clients (see AsyncAPI)
 - `error` - Error messages
 
-### Namespace `tickets` – events
+### Namespace `tickets` (events)
 
 Same handshake auth as `clients`. After `setClient` with a workspace id, the socket joins room `client:{clientId}`.
 
@@ -254,7 +254,7 @@ Same handshake auth as `clients`. After `setClient` with a workspace id, the soc
 - `knowledgeRelationChanged` - Linked knowledge relations changed (same payload as pages namespace)
 - `error` - Tickets namespace errors
 
-### Namespace `pages` – events
+### Namespace `pages` (events)
 
 Same handshake auth as `clients`. After `setClient`, the socket joins room `client:{clientId}`.
 
@@ -307,10 +307,10 @@ The application implements configurable rate limiting on all API endpoints to pr
 
 Rate limiting is configured via environment variables:
 
-- **`RATE_LIMIT_ENABLED`** - Enable/disable rate limiting
+- **`RATE_LIMIT_ENABLED`** Enable/disable rate limiting
   - Default: `true` in production, `false` in development
-- **`RATE_LIMIT_TTL`** - Time window in seconds (default: `60`)
-- **`RATE_LIMIT_LIMIT`** - Maximum number of requests per window (default: `100`)
+- **`RATE_LIMIT_TTL`** Time window in seconds (default: `60`)
+- **`RATE_LIMIT_LIMIT`** Maximum number of requests per window (default: `100`)
 
 ### Behavior
 
@@ -332,7 +332,7 @@ The application implements production-safe CORS defaults to prevent unauthorized
 
 CORS is configured via the `CORS_ORIGIN` environment variable:
 
-- **`CORS_ORIGIN`** - Comma-separated list of allowed origins
+- **`CORS_ORIGIN`** Comma-separated list of allowed origins
   - Example: `"https://agenstra.com,https://app.agenstra.com"`
   - If not set:
     - **Production**: CORS is **disabled** (no origins allowed) - most secure default
@@ -354,35 +354,28 @@ Requests and WebSocket handshakes to each workspace’s **stored agent-manager b
 
 See the application docs and environment configuration for complete environment variable documentation.
 
-**Application-specific:**
+**Application-specific:** `PORT` - HTTP API port (default: `3100`)
 
-- `PORT` - HTTP API port (default: `3100`)
 - `WEBSOCKET_PORT` - WebSocket gateway port (default: `8081`; shared by `clients` and `tickets` namespaces)
 - `WEBSOCKET_NAMESPACE` - Socket.IO namespace for agent proxying (default: `clients`)
 - `TICKETS_WEBSOCKET_NAMESPACE` - Socket.IO namespace for ticket board realtime (default: `tickets`)
 - `WEBSOCKET_CORS_ORIGIN` - CORS origin(s) for WebSocket (see framework docs)
 - `NODE_ENV` - Environment mode (`development` or `production`)
 
-**CORS Configuration:**
+**CORS Configuration:** `CORS_ORIGIN` - Allowed CORS origins (comma-separated list)
 
-- `CORS_ORIGIN` - Allowed CORS origins (comma-separated list)
+**Rate Limiting:** `RATE_LIMIT_ENABLED` - Enable/disable rate limiting
 
-**Rate Limiting:**
-
-- `RATE_LIMIT_ENABLED` - Enable/disable rate limiting
 - `RATE_LIMIT_TTL` - Time window in seconds (default: `60`)
 - `RATE_LIMIT_LIMIT` - Maximum requests per window (default: `100`)
 
-**Client workspace endpoints (SSRF):**
+**Client workspace endpoints (SSRF):** `CLIENT_ENDPOINT_ALLOWED_HOSTS` - Allowed endpoint hostnames (comma-separated or `*`); **required in production** `CLIENT_ENDPOINT_ALLOW_INSECURE_HTTP` - Allow `http:` endpoints in production when `true`
 
-- `CLIENT_ENDPOINT_ALLOWED_HOSTS` - Allowed endpoint hostnames (comma-separated or `*`); **required in production**
-- `CLIENT_ENDPOINT_ALLOW_INSECURE_HTTP` - Allow `http:` endpoints in production when `true`
 - `CLIENT_ENDPOINT_ALLOW_INTERNAL_HOST` - Allow private/loopback targets and skip DNS rebinding check when `true` (same pattern as `CONFIG_*`: no separate skip-DNS flag)
 - `CLIENT_ENDPOINT_TLS_REJECT_UNAUTHORIZED` - TLS verify outbound HTTPS (set `false` only outside production)
 
-**Authentication:**
+**Authentication:** `AUTHENTICATION_METHOD` - Authentication method: `api-key`, `keycloak`, or `users` (default: inferred from `STATIC_API_KEY`)
 
-- `AUTHENTICATION_METHOD` - Authentication method: `api-key`, `keycloak`, or `users` (default: inferred from `STATIC_API_KEY`)
 - `STATIC_API_KEY` - Static API key (required when `AUTHENTICATION_METHOD=api-key`)
 - `KEYCLOAK_SERVER_URL` - Keycloak server URL (optional, used for server URL if different from auth server URL)
 - `KEYCLOAK_AUTH_SERVER_URL` - Keycloak authentication server URL (required for Keycloak auth)
@@ -391,23 +384,20 @@ See the application docs and environment configuration for complete environment 
 - `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret (required for Keycloak auth)
 - `KEYCLOAK_TOKEN_VALIDATION` - Token validation method: `ONLINE` or `OFFLINE` (optional, default: `ONLINE`)
 
-**Database:**
+**Database:** `DB_HOST` - Database host (default: `localhost`)
 
-- `DB_HOST` - Database host (default: `localhost`)
 - `DB_PORT` - Database port (default: `5432`)
 - `DB_USERNAME` - Database username (default: `postgres`)
 - `DB_PASSWORD` - Database password (default: `postgres`)
 - `DB_DATABASE` - Database name (default: `postgres`)
 
-**Server Provisioning:**
+**Server Provisioning:** `HETZNER_API_TOKEN` - Hetzner Cloud API token
 
-- `HETZNER_API_TOKEN` - Hetzner Cloud API token
 - `DIGITALOCEAN_API_TOKEN` - DigitalOcean API token
 - `ENCRYPTION_KEY` - Encryption key for sensitive data
 
-**Dynamic provider plugins (optional):**
+**Dynamic provider plugins (optional):** `DYNAMIC_PROVISIONING_PROVIDERS` - Extra provisioning packages (critical registry)
 
-- `DYNAMIC_PROVISIONING_PROVIDERS` - Extra provisioning packages (critical registry)
 - `DYNAMIC_CONTEXT_IMPORT_PROVIDERS` - Extra context import provider packages
 - `DYNAMIC_PROVIDERS_FAIL_FAST` - Abort startup on critical provider load errors when `true`
 - `DYNAMIC_PROVIDER_PLUGIN_PATH` / `DYNAMIC_PROVIDER_PLUGIN_INSTALL` - Post-build plugin mount and startup install
@@ -458,18 +448,18 @@ Before deploying to production, ensure:
 - Database credentials are secure
 - `ENCRYPTION_KEY` is set for sensitive data encryption
 
-## Related Documentation
+## Related documentation
 
-- **[Client Management Feature](../features/client-management.md)** - Client management guide
-- **[Server Provisioning Feature](../features/server-provisioning.md)** - Server provisioning guide
-- **[WebSocket Communication Feature](../features/websocket-communication.md)** - WebSocket communication guide
-- **[Tickets and Workspaces](../features/tickets-and-workspaces.md)** - Tickets, migration, automation
-- **[Usage Statistics](../features/usage-statistics.md)** - Controller usage metrics
-- **[Message Filter Rules](../features/message-filter-rules.md)** - Global and per-agent filters
-- **[Atlassian import](../features/atlassian-import.md)** - Atlassian site connections and Jira/Confluence import configurations
-- **[Dynamic provider plugins](../features/dynamic-provider-plugins.md)** - Runtime provisioning and import provider extensions
-- **[Deployment Feature](../features/deployment.md)** - CI/CD configuration (invoked via controller proxy from the console)
-- **[Deployment Guide](../deployment/production-checklist.md)** - Production deployment guide
+- **[Client Management Feature](../features/client-management.md)** Client management guide
+- **[Server Provisioning Feature](../features/server-provisioning.md)** Server provisioning guide
+- **[WebSocket Communication Feature](../features/websocket-communication.md)** WebSocket communication guide
+- **[Tickets and Workspaces](../features/tickets-and-workspaces.md)** Tickets, migration, automation
+- **[Usage Statistics](../features/usage-statistics.md)** Controller usage metrics
+- **[Message Filter Rules](../features/message-filter-rules.md)** Global and per-agent filters
+- **[Atlassian import](../features/atlassian-import.md)** Atlassian site connections and Jira/Confluence import configurations
+- **[Dynamic provider plugins](../features/dynamic-provider-plugins.md)** Runtime provisioning and import provider extensions
+- **[Deployment Feature](../features/deployment.md)** CI/CD configuration (invoked via controller proxy from the console)
+- **[Deployment Guide](../deployment/production-checklist.md)** Production deployment guide
 
 ## License
 

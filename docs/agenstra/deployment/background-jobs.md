@@ -29,8 +29,8 @@ Coordinators fan out **unit jobs** (one ticket, one import config, etc.). BullMQ
 
 Notification delivery jobs on the same queue:
 
-- `webhook-deliver` — outbound webhook HTTPS delivery
-- `email-deliver` — transactional identity email (Handlebars + nodemailer)
+- `webhook-deliver`: outbound webhook HTTPS delivery
+- `email-deliver`: transactional identity email (Handlebars + nodemailer)
 
 See [Email notifications](../features/email-notifications.md).
 
@@ -75,6 +75,6 @@ Worker and scheduler containers set `QUEUE_BULL_BOARD_ENABLED=false` so they do 
 
 ## Related documentation
 
-- [Environment configuration](./environment-configuration.md)
-- [Local development](./local-development.md)
-- [Docker deployment](./docker-deployment.md)
+- [Environment configuration](./environment-configuration.md) Queue and Redis variables
+- [Local development](./local-development.md) Local API, worker, and scheduler setup
+- [Docker deployment](./docker-deployment.md) Compose services for queue roles

@@ -58,8 +58,8 @@ View the current Git status:
 
 The HTTP API also exposes operator-focused endpoints (on the manager and proxied through the controller):
 
-- **`POST .../vcs/workspace/prepare-clean`** – Prepare a clean Git workspace for automated or manual workflows (see OpenAPI for semantics).
-- **`POST .../automation/verify-commands`** – Validate command configuration used by ticket automation and related flows.
+- **`POST .../vcs/workspace/prepare-clean`** Prepare a clean Git workspace for automated or manual workflows (see OpenAPI for semantics).
+- **`POST .../automation/verify-commands`** Validate command configuration used by ticket automation and related flows.
 
 These complement everyday commit/push operations documented above.
 
@@ -117,10 +117,10 @@ sequenceDiagram
 
 For detailed API documentation, see the application and API reference docs linked below.
 
-## Related Documentation
+## Related documentation
 
-- **[File Management](./file-management.md)** - File operations
-- **[Agent Management](./agent-management.md)** - Agent containers
+- **[File Management](./file-management.md)** File operations
+- **[Agent Management](./agent-management.md)** Agent containers
 
 ---
 

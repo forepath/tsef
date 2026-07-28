@@ -10,9 +10,9 @@ Customers can enable auto-billing on their profile after attaching a default pay
 
 Processors implement:
 
-- `supportsAutoPayment()` — marker; Stripe returns `true`
-- `createSetupSession(...)` — hosted setup for collecting a default payment method
-- `chargeOffSession(...)` — off-session charge against the stored method
+- `supportsAutoPayment()`: marker; Stripe returns `true`
+- `createSetupSession(...)`: hosted setup for collecting a default payment method
+- `chargeOffSession(...)`: off-session charge against the stored method
 - Webhook mapping for setup completion and PaymentIntent outcomes
 
 Dynamic processors that do not support auto-pay must return `supportsAutoPayment(): false`. Enable APIs reject with a clear error when the default processor lacks the capability.
@@ -46,7 +46,7 @@ Checkout payments also set `setup_future_usage=off_session` so successful Checko
 | `in_progress` / `retrying`                                    | Blocked                        |
 | `scheduled` / `exhausted` / `canceled` / `idle` / `succeeded` | Allowed when otherwise payable |
 
-**Retries:** max 3 attempts — immediate, then +1 day, then +3 days (`BILLING_AUTO_PAYMENT_RETRY_DELAY_1_MS`, `BILLING_AUTO_PAYMENT_RETRY_DELAY_2_MS`). Pending / SCA off-session results stay `in_progress` with a safety `autoPaymentNextRetryAt` (`BILLING_AUTO_PAYMENT_PENDING_SAFETY_DELAY_MS`, default 15 minutes); after that window the coordinator releases them to `retrying`. After exhaustion, `payment.auto.exhausted` is published and manual pay unlocks.
+**Retries:** max 3 attempts, immediate, then +1 day, then +3 days (`BILLING_AUTO_PAYMENT_RETRY_DELAY_1_MS`, `BILLING_AUTO_PAYMENT_RETRY_DELAY_2_MS`). Pending / SCA off-session results stay `in_progress` with a safety `autoPaymentNextRetryAt` (`BILLING_AUTO_PAYMENT_PENDING_SAFETY_DELAY_MS`, default 15 minutes); after that window the coordinator releases them to `retrying`. After exhaustion, `payment.auto.exhausted` is published and manual pay unlocks.
 
 **Jobs:** `invoice-auto-payment.coordinator` / `.unit` (interval `INVOICE_AUTO_PAYMENT_SCHEDULER_INTERVAL`, default 60s). Claims use an optimistic `UPDATE … WHERE status IN (scheduled, retrying)`.
 
@@ -65,10 +65,10 @@ Admin mark-paid / mark-unpaid remain available as operational overrides.
 
 Duplicate Checkout / sync success paths short-circuit when the invoice is already paid (no second email). Checkout `payment_intent.*` webhooks are ignored; only `mode: auto` PaymentIntents use that path.
 
-## Related
+## Related documentation
 
-- [Payment Processing](./payment-processing.md)
-- [Customer Profiles](./customer-profiles.md)
-- [Invoices](./invoices.md)
-- [Webhooks](./webhooks.md)
-- [Background Jobs](../deployment/background-jobs.md)
+- [Payment Processing](./payment-processing.md) Processor setup and off-session charges
+- [Customer Profiles](./customer-profiles.md) Auto-billing flags and default payment method
+- [Invoices](./invoices.md) Invoice auto-payment lifecycle
+- [Webhooks](./webhooks.md) Payment method and auto-pay events
+- [Background Jobs](../deployment/background-jobs.md) `invoice-auto-payment.*` coordinators and units

@@ -36,8 +36,7 @@ Debugging strategies and tools:
 
 ### Connection Issues
 
-- Check billing API is running on port **3200**
-- Verify billing console `API_URL` and `CSP_CONNECT_SRC_EXTRA`
+- Check billing API is running on port **3200** Verify billing console `API_URL` and `CSP_CONNECT_SRC_EXTRA`
 - Confirm `CORS_ORIGIN` includes the console origin
 
 ### Authentication Problems
@@ -61,10 +60,10 @@ If you encounter issues:
 3. Check application and worker logs
 4. Consult **[Deployment](../deployment/README.md)** and **[Environment configuration](../deployment/environment-configuration.md)**
 
-## Related Documentation
+## Related documentation
 
-- **[Security accepted risks](../security/accepted-risks.md)** - Known documented behaviors (DR-001 through DR-005)
-- **[Background jobs](../deployment/background-jobs.md)** - Queue roles and Bull Board
+- **[Security accepted risks](../security/accepted-risks.md)** Known documented behaviors (DR-001 through DR-005)
+- **[Background jobs](../deployment/background-jobs.md)** Queue roles and Bull Board
 
 ---
 

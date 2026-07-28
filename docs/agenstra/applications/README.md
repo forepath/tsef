@@ -6,9 +6,9 @@ This section provides detailed documentation for each application in the Agenstr
 
 Agenstra consists of three main applications:
 
-1. **Backend Agent Controller** - Centralized control plane for managing multiple agent-manager instances
-2. **Backend Agent Manager** - Agent management system with HTTP REST API and WebSocket gateway
-3. **Frontend Agent Console** - Web-based IDE and chat interface for interacting with agents
+1. **Backend Agent Controller** Centralized control plane for managing multiple agent-manager instances
+2. **Backend Agent Manager** Agent management system with HTTP REST API and WebSocket gateway
+3. **Frontend Agent Console** Web-based IDE and chat interface for interacting with agents
 
 ## Applications
 
@@ -88,12 +88,12 @@ graph TB
 - **Controller ↔ Manager**: HTTP REST API (proxied) and WebSocket (event forwarding)
 - **Manager ↔ Agent Containers**: Docker API and container stdin/stdout
 
-## Related Documentation
+## Related documentation
 
-- **[Architecture Overview](../architecture/system-overview.md)** - System architecture
-- **[Getting Started](../getting-started.md)** - Setup and configuration
-- **[Deployment Guide](../deployment/README.md)** - Deployment documentation
-- **[Features Documentation](../features/README.md)** - Feature details
+- **[Architecture Overview](../architecture/system-overview.md)** System architecture
+- **[Getting Started](../getting-started.md)** Setup and configuration
+- **[Deployment Guide](../deployment/README.md)** Deployment documentation
+- **[Features Documentation](../features/README.md)** Feature details
 
 ---
 

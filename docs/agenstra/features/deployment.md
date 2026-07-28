@@ -6,21 +6,21 @@ This feature enables deployment functionality and CI/CD pipeline management for 
 
 The deployment feature provides:
 
-- **CI/CD Provider Configuration** - Configure GitHub Actions or GitLab CI/CD (or other providers) for each agent
-- **Pipeline Management** - List, trigger, and monitor CI/CD pipeline runs
-- **Log Viewing** - View pipeline run logs and individual job/step logs
-- **Run History** - Track deployment history and status
+- **CI/CD Provider Configuration** Configure GitHub Actions or GitLab CI/CD (or other providers) for each agent
+- **Pipeline Management** List, trigger, and monitor CI/CD pipeline runs
+- **Log Viewing** View pipeline run logs and individual job/step logs
+- **Run History** Track deployment history and status
 
 ## Architecture
 
 The deployment feature follows the same provider pattern used throughout Agenstra:
 
-- **PipelineProvider Interface** - Unified interface for CI/CD providers
-- **PipelineProviderFactory** - Factory for managing multiple providers
-- **Provider Implementations** - GitHub Actions and GitLab CI/CD providers (extensible to Jenkins, Azure DevOps, etc.)
-- **Runtime plugins** - Additional pipeline providers via `DYNAMIC_PIPELINE_PROVIDERS` (see [Dynamic provider plugins](./dynamic-provider-plugins.md))
-- **Deployment Service** - Orchestrates pipeline operations
-- **Database Storage** - Stores deployment configurations and run history
+- **PipelineProvider Interface** Unified interface for CI/CD providers
+- **PipelineProviderFactory** Factory for managing multiple providers
+- **Provider Implementations** GitHub Actions and GitLab CI/CD providers (extensible to Jenkins, Azure DevOps, etc.)
+- **Runtime plugins** Additional pipeline providers via `DYNAMIC_PIPELINE_PROVIDERS` (see [Dynamic provider plugins](./dynamic-provider-plugins.md))
+- **Deployment Service** Orchestrates pipeline operations
+- **Database Storage** Stores deployment configurations and run history
 
 See the application and deployment docs for detailed component relationships.
 
@@ -30,13 +30,13 @@ See the application and deployment docs for detailed component relationships.
 
 The GitHub provider supports:
 
-- **Repository Management** - List accessible repositories
-- **Branch Management** - List branches for repositories
-- **Workflow Management** - List workflows/pipelines for repositories
-- **Run Triggering** - Trigger workflow runs manually
-- **Status Tracking** - Get real-time status of pipeline runs
-- **Log Viewing** - View logs for runs and individual jobs
-- **Run Cancellation** - Cancel running pipelines
+- **Repository Management** List accessible repositories
+- **Branch Management** List branches for repositories
+- **Workflow Management** List workflows/pipelines for repositories
+- **Run Triggering** Trigger workflow runs manually
+- **Status Tracking** Get real-time status of pipeline runs
+- **Log Viewing** View logs for runs and individual jobs
+- **Run Cancellation** Cancel running pipelines
 
 **Authentication**: Uses GitHub Personal Access Tokens (PAT) or GitHub App tokens. The token is stored in the database as part of the deployment configuration and is encrypted at rest.
 
@@ -46,13 +46,13 @@ The GitHub provider supports:
 
 The GitLab provider supports:
 
-- **Repository Management** - List accessible projects (repositories)
-- **Branch Management** - List branches for projects
-- **Pipeline Management** - List and trigger CI/CD pipelines
-- **Run Triggering** - Trigger pipeline runs manually with variables
-- **Status Tracking** - Get real-time status of pipeline runs
-- **Log Viewing** - View logs for runs and individual jobs
-- **Run Cancellation** - Cancel running pipelines
+- **Repository Management** List accessible projects (repositories)
+- **Branch Management** List branches for projects
+- **Pipeline Management** List and trigger CI/CD pipelines
+- **Run Triggering** Trigger pipeline runs manually with variables
+- **Status Tracking** Get real-time status of pipeline runs
+- **Log Viewing** View logs for runs and individual jobs
+- **Run Cancellation** Cancel running pipelines
 
 **Authentication**: Uses GitLab Personal Access Tokens (PAT). The token is stored in the database as part of the deployment configuration and is encrypted at rest.
 
@@ -345,8 +345,8 @@ Deployment configuration can be included when creating or updating agents:
 - **Environment Promotion**: Promote deployments across environments
 - **Multi-Environment Support**: Manage deployments across multiple environments
 
-## Related Documentation
+## Related documentation
 
-- [Agent Management](./agent-management.md) - Agent lifecycle management
-- [Server Provisioning](./server-provisioning.md) - Automated server provisioning
-- [Dynamic provider plugins](./dynamic-provider-plugins.md) - `DYNAMIC_PIPELINE_PROVIDERS` and shared loader behavior
+- [Agent Management](./agent-management.md) Agent lifecycle management
+- [Server Provisioning](./server-provisioning.md) Automated server provisioning
+- [Dynamic provider plugins](./dynamic-provider-plugins.md) `DYNAMIC_PIPELINE_PROVIDERS` and shared loader behavior

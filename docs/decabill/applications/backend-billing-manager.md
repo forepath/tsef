@@ -12,27 +12,27 @@ The app module in `apps/decabill/backend-billing-manager` bootstraps shared queu
 
 This application provides:
 
-- **HTTP REST API** - Subscriptions, invoices, catalog, customer profile, admin billing, public offerings
-- **WebSocket gateway** - Dashboard server status on namespace **`billing`**; project board on namespace **`projects`**
-- **Background jobs** - Billing cycles, expiration, reminders, overdue handling, backorder retry, SSH stack updates
-- **Stripe integration** - Checkout sessions and signed webhooks
-- **Invoice PDFs** - ZUGFeRD-style generation and filesystem storage
-- **Multi-tenancy** - Tenant allowlist and row-level isolation
-- **Authentication** - API key, Keycloak, or built-in users (JWT)
-- **Dynamic plugins** - Optional payment processors and billing UI metadata
-- **Email** - Invoice and reminder delivery via SMTP
-- **Rate limiting and CORS** - Production-safe HTTP defaults
+- **HTTP REST API** Subscriptions, invoices, catalog, customer profile, admin billing, public offerings
+- **WebSocket gateway** Dashboard server status on namespace **`billing`**; project board on namespace **`projects`**
+- **Background jobs** Billing cycles, expiration, reminders, overdue handling, backorder retry, SSH stack updates
+- **Stripe integration** Checkout sessions and signed webhooks
+- **Invoice PDFs** ZUGFeRD-style generation and filesystem storage
+- **Multi-tenancy** Tenant allowlist and row-level isolation
+- **Authentication** API key, Keycloak, or built-in users (JWT)
+- **Dynamic plugins** Optional payment processors and billing UI metadata
+- **Email** Invoice and reminder delivery via SMTP
+- **Rate limiting and CORS** Production-safe HTTP defaults
 
 ## Architecture
 
 Built with:
 
-- **NestJS** - Modules, controllers, guards, and gateways
-- **TypeORM** - Entities and migrations (app migrations plus identity migrations)
-- **BullMQ** - Queue name **`billing`** with coordinator and unit jobs
-- **Socket.IO** - Separate WebSocket listener on `WEBSOCKET_PORT`
-- **PostgreSQL** - Primary datastore
-- **Redis** - BullMQ connection
+- **NestJS** Modules, controllers, guards, and gateways
+- **TypeORM** Entities and migrations (app migrations plus identity migrations)
+- **BullMQ** Queue name **`billing`** with coordinator and unit jobs
+- **Socket.IO** Separate WebSocket listener on `WEBSOCKET_PORT`
+- **PostgreSQL** Primary datastore
+- **Redis** BullMQ connection
 
 Domain logic, OpenAPI source, and AsyncAPI source live in `libs/domains/decabill/backend/feature-billing-manager`.
 
@@ -165,9 +165,9 @@ Spec: `/spec/billing-manager/asyncapi.yaml`
 
 ## Stripe and Provisioning
 
-- **Stripe** - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, checkout return URLs, `BILLING_DEFAULT_PAYMENT_PROCESSOR`
-- **Hetzner / DigitalOcean** - `HETZNER_API_TOKEN`, `DIGITALOCEAN_API_TOKEN`
-- **DNS** - Optional Cloudflare integration (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`, `DNS_BASE_DOMAIN`)
+- **Stripe** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, checkout return URLs, `BILLING_DEFAULT_PAYMENT_PROCESSOR`
+- **Hetzner / DigitalOcean** `HETZNER_API_TOKEN`, `DIGITALOCEAN_API_TOKEN`
+- **DNS** Optional Cloudflare integration (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`, `DNS_BASE_DOMAIN`)
 
 See **[Payment Processing](../features/payment-processing.md)** and **[Server Provisioning](../features/server-provisioning.md)**.
 
@@ -198,14 +198,14 @@ When enabled on an API or `all` process:
 
 Disable in production unless tightly access-controlled.
 
-## Related Documentation
+## Related documentation
 
-- **[Frontend Billing Console](./frontend-billing-console.md)** - UI routes and SSR
-- **[Architecture Components](../architecture/components.md)** - Infrastructure dependencies
-- **[Data Flow](../architecture/data-flow.md)** - Sequence diagrams
-- **[Environment Configuration](../deployment/environment-configuration.md)** - Complete env list
-- **[Billing Administration](../features/billing-administration.md)** - Admin features
-- **[API Reference](../api-reference/README.md)** - OpenAPI and AsyncAPI
+- **[Frontend Billing Console](./frontend-billing-console.md)** UI routes and SSR
+- **[Architecture Components](../architecture/components.md)** Infrastructure dependencies
+- **[Data Flow](../architecture/data-flow.md)** Sequence diagrams
+- **[Environment Configuration](../deployment/environment-configuration.md)** Complete env list
+- **[Billing Administration](../features/billing-administration.md)** Admin features
+- **[API Reference](../api-reference/README.md)** OpenAPI and AsyncAPI
 
 ## License
 

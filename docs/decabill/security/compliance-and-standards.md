@@ -52,11 +52,11 @@ Detail: **[Container image security](./container-images.md)**, **[Operational ha
 
 ## Related documentation
 
-- **[Accepted risks](./accepted-risks.md)**
-- **[Operational hardening](./operational-hardening.md)**
-- **[Container image security](./container-images.md)**
-- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)**
-- **[Environment configuration](../deployment/environment-configuration.md)**
+- **[Accepted risks](./accepted-risks.md)** Documented residual risks and mitigations
+- **[Operational hardening](./operational-hardening.md)** Implemented controls and operator notes
+- **[Container image security](./container-images.md)** Non-root users, bind mounts, and sudo policy
+- **[Vulnerability reporting and artifacts](./vulnerability-reporting-and-artifacts.md)** Disclosure process and SBOM paths
+- **[Environment configuration](../deployment/environment-configuration.md)** Security-related environment variables
 
 ---
 

@@ -41,8 +41,7 @@ graph TB
 #### Application Tier (Backend Billing Manager)
 
 - HTTP REST API under `/api` (OpenAPI documented)
-- WebSocket gateway on port **8082**, namespace **`billing`**
-- PostgreSQL persistence with TypeORM migrations on API startup
+- WebSocket gateway on port **8082**, namespace **`billing`** PostgreSQL persistence with TypeORM migrations on API startup
 - BullMQ schedulers and workers for billing cycles, reminders, backorders, and provisioning updates
 - Stripe checkout session creation and webhook handling
 - Optional cloud server provisioning via provider APIs and cloud-init
@@ -144,16 +143,16 @@ graph TB
 
 ## Data Boundaries
 
-- **Tenant isolation** - Rows carry `tenant_id`; requests with invalid or missing tenant ids are rejected when not allowed
-- **User scope** - Customers see their subscriptions and invoices; admins access `/admin/billing/*` routes and administration UI
-- **Provider secrets** - Cloud API tokens and SSH keys are stored encrypted; Stripe secrets remain server-side only
+- **Tenant isolation** Rows carry `tenant_id`; requests with invalid or missing tenant ids are rejected when not allowed
+- **User scope** Customers see their subscriptions and invoices; admins access `/admin/billing/*` routes and administration UI
+- **Provider secrets** Cloud API tokens and SSH keys are stored encrypted; Stripe secrets remain server-side only
 
-## Related Documentation
+## Related documentation
 
-- **[Components](./components.md)** - Detailed component breakdown
-- **[Data Flow](./data-flow.md)** - Sequence diagrams for major flows
-- **[Applications](../applications/README.md)** - Per-application reference
-- **[Getting Started](../getting-started.md)** - Run the stack locally
+- **[Components](./components.md)** Detailed component breakdown
+- **[Data Flow](./data-flow.md)** Sequence diagrams for major flows
+- **[Applications](../applications/README.md)** Per-application reference
+- **[Getting Started](../getting-started.md)** Run the stack locally
 
 ---
 

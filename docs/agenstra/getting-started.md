@@ -81,7 +81,9 @@ KEYCLOAK_AUTH_SERVER_URL=http://localhost:8380
 KEYCLOAK_REALM=agenstra
 KEYCLOAK_CLIENT_ID=agent-controller
 KEYCLOAK_CLIENT_SECRET=your-client-secret
+
 # Optional: KEYCLOAK_SERVER_URL if different from auth server URL
+
 # Optional: KEYCLOAK_TOKEN_VALIDATION=ONLINE (default) or OFFLINE
 
 # Option 3: Users authentication
@@ -115,6 +117,7 @@ DB_DATABASE=agent_manager
 
 # Authentication
 STATIC_API_KEY=your-secure-api-key-here
+
 # OR Keycloak configuration (same as above)
 
 # Ports
@@ -150,8 +153,8 @@ WEBSOCKET_URL=http://localhost:8081
 
 A client represents a connection to a remote agent-manager service. You can either:
 
-1. **Connect to an existing agent-manager** - If you already have an agent-manager running
-2. **Provision a new server** - Automatically provision a cloud server with agent-manager
+1. **Connect to an existing agent-manager** If you already have an agent-manager running
+2. **Provision a new server** Automatically provision a cloud server with agent-manager
 
 ### Connect to Existing Agent-Manager
 
@@ -224,10 +227,10 @@ To interact with an agent:
 
 You're now ready to:
 
-- **Chat with the agent** - Send messages and receive responses
-- **Edit files** - Use the integrated Monaco Editor to edit files in the agent container
-- **Manage Git** - View status, branches, commit, push, and pull
-- **View logs** - Monitor container logs in real-time
+- **Chat with the agent** Send messages and receive responses
+- **Edit files** Use the integrated Monaco Editor to edit files in the agent container
+- **Manage Git** View status, branches, commit, push, and pull
+- **View logs** Monitor container logs in real-time
 
 ## Quick Tour of Features
 
@@ -271,12 +274,12 @@ You're now ready to:
 
 Now that you have Agenstra set up:
 
-1. **[Architecture Overview](./architecture/system-overview.md)** - Understand how the system works
-2. **[Client Management](./features/client-management.md)** - Learn about managing clients
-3. **[Agent Management](./features/agent-management.md)** - Deep dive into agent lifecycle
-4. **[WebSocket Communication](./features/websocket-communication.md)** - Understand real-time communication
-5. **[Tickets and Workspaces](./features/tickets-and-workspaces.md)** - Ticket board and automation
-6. **[Deployment Guide](./deployment/production-checklist.md)** - Prepare for production
+1. **[Architecture Overview](./architecture/system-overview.md)** Understand how the system works
+2. **[Client Management](./features/client-management.md)** Learn about managing clients
+3. **[Agent Management](./features/agent-management.md)** Deep dive into agent lifecycle
+4. **[WebSocket Communication](./features/websocket-communication.md)** Understand real-time communication
+5. **[Tickets and Workspaces](./features/tickets-and-workspaces.md)** Ticket board and automation
+6. **[Deployment Guide](./deployment/production-checklist.md)** Prepare for production
 
 ## Troubleshooting
 
@@ -288,7 +291,7 @@ If you encounter issues:
 
 ## Additional Resources
 
-- **[API Reference](./api-reference/README.md)** - Complete OpenAPI and AsyncAPI specifications
+- **[API Reference](./api-reference/README.md)** Complete OpenAPI and AsyncAPI specifications
 
 ---
 

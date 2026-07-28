@@ -6,9 +6,9 @@ This section provides detailed documentation for each application in the Decabil
 
 Decabill consists of three primary applications:
 
-1. **Frontend Billing Console** - Angular SSR customer and admin UI
-2. **Backend Billing Manager** - NestJS API, WebSocket gateway, background jobs, and integrations
-3. **Frontend Landing Page** - Angular SSR marketing and pricing site at [decabill.com](https://decabill.com)
+1. **Frontend Billing Console** Angular SSR customer and admin UI
+2. **Backend Billing Manager** NestJS API, WebSocket gateway, background jobs, and integrations
+3. **Frontend Landing Page** Angular SSR marketing and pricing site at [decabill.com](https://decabill.com)
 
 Both applications live under `apps/decabill/` and delegate feature logic to domain libraries in `libs/domains/decabill/`.
 
@@ -18,7 +18,7 @@ Both applications live under `apps/decabill/` and delegate feature logic to doma
 | ------------------------------------------------------------ | -------------------- | ---------------------------------------------------------------------------------------- |
 | [Backend Billing Manager](./backend-billing-manager.md)      | **AGPL-3.0**         | Open Source tier; network use triggers source-sharing obligations                        |
 | [Frontend Billing Console](./frontend-billing-console.md)    | **BUSL-1.1**         | Startup tier and above with Additional Use Grant; converts to AGPL after the Change Date |
-| Frontend Landing Page (`apps/decabill/frontend-landingpage`) | **Source-available** | Viewing only; see [LICENSE](../../../apps/decabill/frontend-landingpage/LICENSE)         |
+| Frontend Landing Page (`apps/decabill/frontend-landingpage`) | **Source-available** | Viewing only; see the LICENSE file in the landing page app directory                     |
 
 ---
 
@@ -105,13 +105,13 @@ Docker Compose entry points:
 - `apps/decabill/backend-billing-manager/docker-compose.yaml`
 - `apps/decabill/frontend-billing-console/docker-compose.yaml`
 
-## Related Documentation
+## Related documentation
 
-- **[Getting Started](../getting-started.md)** - First-time setup
-- **[Architecture Overview](../architecture/system-overview.md)** - System design
-- **[Deployment Guide](../deployment/README.md)** - Local and container deployment
-- **[Features Documentation](../features/README.md)** - Product capabilities
-- **[API Reference](../api-reference/README.md)** - Specifications
+- **[Getting Started](../getting-started.md)** First-time setup
+- **[Architecture Overview](../architecture/system-overview.md)** System design
+- **[Deployment Guide](../deployment/README.md)** Local and container deployment
+- **[Features Documentation](../features/README.md)** Product capabilities
+- **[API Reference](../api-reference/README.md)** Specifications
 
 ---
 

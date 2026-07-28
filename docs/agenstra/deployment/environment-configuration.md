@@ -61,7 +61,7 @@ Transactional identity email via BullMQ (`email-deliver`). See [Email notificati
 ### CORS Configuration
 
 - `CORS_ORIGIN` - Allowed CORS origins (comma-separated list)
-  - Production: **Required** - Set to allow specific origins (CORS disabled if not set)
+  - Production: **Required** Set to allow specific origins (CORS disabled if not set)
   - Development: Optional - Defaults to `*` (all origins allowed)
 
 ### Rate Limiting
@@ -74,7 +74,7 @@ Transactional identity email via BullMQ (`email-deliver`). See [Email notificati
 
 These variables apply to **stored client workspace URLs** (the agent-manager base URL the controller proxies to). They mirror the semantics of frontend **`CONFIG_*`** runtime-config settings where noted.
 
-- `CLIENT_ENDPOINT_ALLOWED_HOSTS` - Comma-separated lowercase hostnames allowed in client endpoint URLs, or `*` for any host (default: unset in non-production; **required in production** — the process exits on startup if unset when `NODE_ENV=production`).
+- `CLIENT_ENDPOINT_ALLOWED_HOSTS` - Comma-separated lowercase hostnames allowed in client endpoint URLs, or `*` for any host (default: unset in non-production; **required in production** the process exits on startup if unset when `NODE_ENV=production`).
 - `CLIENT_ENDPOINT_ALLOW_INSECURE_HTTP` - Set to `true` to allow `http:` client endpoints when `NODE_ENV=production` (default: HTTPS only in production).
 - `CLIENT_ENDPOINT_ALLOW_INTERNAL_HOST` - Set to `true` to allow private/loopback hostnames and literal private IPs in client endpoints, and to **skip DNS rebinding checks** (mirrors `CONFIG_ALLOW_INTERNAL_HOST` for `/config`; neither side uses a dedicated skip-DNS env var). Use only in trusted lab or air-gapped deployments.
 - `CLIENT_ENDPOINT_TLS_REJECT_UNAUTHORIZED` - Defaults to TLS certificate verification **on** for outbound HTTPS to client endpoints. Set to `false` **only in non-production** to allow self-signed certificates (disallowed when `NODE_ENV=production`).
@@ -122,13 +122,10 @@ Optional runtime extensions for provisioning and context import. See [Dynamic pr
 
 ### Authentication
 
-**Option 1: API Key Authentication**
+**Option 1: API Key Authentication** `STATIC_API_KEY` - Static API key for authentication
 
-- `STATIC_API_KEY` - Static API key for authentication
+**Option 2: Keycloak Authentication** `KEYCLOAK_SERVER_URL` - Keycloak server URL (optional, used for server URL if different from auth server URL)
 
-**Option 2: Keycloak Authentication**
-
-- `KEYCLOAK_SERVER_URL` - Keycloak server URL (optional, used for server URL if different from auth server URL)
 - `KEYCLOAK_AUTH_SERVER_URL` - Keycloak authentication server URL (required)
 - `KEYCLOAK_REALM` - Keycloak realm name (required)
 - `KEYCLOAK_CLIENT_ID` - Keycloak client ID (required)
@@ -140,7 +137,7 @@ Optional runtime extensions for provisioning and context import. See [Dynamic pr
 ### CORS Configuration
 
 - `CORS_ORIGIN` - Allowed CORS origins (comma-separated list)
-  - Production: **Required** - Set to allow specific origins (CORS disabled if not set)
+  - Production: **Required** Set to allow specific origins (CORS disabled if not set)
   - Development: Optional - Defaults to `*` (all origins allowed)
 
 ### Rate Limiting
@@ -155,16 +152,14 @@ Optional runtime extensions for provisioning and context import. See [Dynamic pr
 
 ### Git Repository Configuration
 
-**For HTTPS Repositories:**
+**For HTTPS Repositories:** `GIT_REPOSITORY_URL` - Git repository URL (HTTPS)
 
-- `GIT_REPOSITORY_URL` - Git repository URL (HTTPS)
 - `GIT_USERNAME` - Git username
 - `GIT_TOKEN` - Git personal access token (preferred)
 - `GIT_PASSWORD` - Git password (alternative to token)
 
-**For SSH Repositories:**
+**For SSH Repositories:** `GIT_REPOSITORY_URL` - Git repository URL (SSH)
 
-- `GIT_REPOSITORY_URL` - Git repository URL (SSH)
 - `GIT_PRIVATE_KEY` - SSH private key (PEM or OpenSSH format, no passphrase)
 
 ### Cursor Agent Configuration
@@ -245,13 +240,13 @@ When `CONFIG` is set, the frontend server fetches and validates the remote JSON 
 - `CSP_ENFORCE` - When `true`, sends enforcing `Content-Security-Policy`. Otherwise sends `Content-Security-Policy-Report-Only` (default).
 - `CSP_DEFAULT_SRC_EXTRA` - Extra origins appended to `default-src` after `'self'` (same URL list rules as `CSP_CONNECT_SRC_EXTRA`). Use when a resource type has no more specific directive and must load from another origin.
 - `CSP_BASE_URI_EXTRA` - Extra origins appended to `base-uri` after `'self'` (same URL list rules). Restricts which URLs may appear in a document’s `<base href>`.
-- **`connect-src` behavior** - The policy always allows `'self'`, `https:`, and `wss:`. Outside production it also allows the `http:` and `ws:` **scheme keywords** (any host on those schemes). In **production**, unencrypted `http` / `ws` endpoints are **not** allowed unless you add their **origins** via `CSP_CONNECT_SRC_EXTRA`.
+- **`connect-src` behavior** The policy always allows `'self'`, `https:`, and `wss:`. Outside production it also allows the `http:` and `ws:` **scheme keywords** (any host on those schemes). In **production**, unencrypted `http` / `ws` endpoints are **not** allowed unless you add their **origins** via `CSP_CONNECT_SRC_EXTRA`.
 - `CSP_CONNECT_SRC_EXTRA` - Extra `connect-src` entries: comma- or space-separated full URLs; each is normalized to an **origin** (`http`, `https`, `ws`, and `wss` accepted). **Required in production** for APIs on plain HTTP (for example `http://host.docker.internal:3100`). Example: `CSP_CONNECT_SRC_EXTRA=http://host.docker.internal:3100`
-- **`script-src` behavior** - Default is `'self' 'unsafe-inline' 'unsafe-eval'` (Monaco and similar tooling). Third-party scripts are **not** allowed unless you add origins with `CSP_SCRIPT_SRC_EXTRA`. **Note:** `connect-src` already includes the `https:` scheme keyword, so HTTPS `fetch` / XHR to analytics hosts does not require `CSP_CONNECT_SRC_EXTRA`; loading tag-manager **JavaScript** (for example `gtm.js`) does require `CSP_SCRIPT_SRC_EXTRA` when CSP is enforced.
+- **`script-src` behavior** Default is `'self' 'unsafe-inline' 'unsafe-eval'` (Monaco and similar tooling). Third-party scripts are **not** allowed unless you add origins with `CSP_SCRIPT_SRC_EXTRA`. **Note:** `connect-src` already includes the `https:` scheme keyword, so HTTPS `fetch` / XHR to analytics hosts does not require `CSP_CONNECT_SRC_EXTRA`; loading tag-manager **JavaScript** (for example `gtm.js`) does require `CSP_SCRIPT_SRC_EXTRA` when CSP is enforced.
 - `CSP_SCRIPT_SRC_EXTRA` - Same URL list format as `CSP_CONNECT_SRC_EXTRA`; each URL is normalized to an origin and appended to `script-src`. Example (Google Tag Manager): `CSP_SCRIPT_SRC_EXTRA=https://www.googletagmanager.com`
-- **`worker-src` / `style-src` / `img-src` / `font-src`** - Defaults are `worker-src 'self' blob:`, `style-src 'self' 'unsafe-inline'`, `img-src 'self' data:`, `font-src 'self' data:`. Append third-party origins with the matching `CSP_*_SRC_EXTRA` variable (same URL list rules as above).
+- **`worker-src` / `style-src` / `img-src` / `font-src`** Defaults are `worker-src 'self' blob:`, `style-src 'self' 'unsafe-inline'`, `img-src 'self' data:`, `font-src 'self' data:`. Append third-party origins with the matching `CSP_*_SRC_EXTRA` variable (same URL list rules as above).
 - `CSP_WORKER_SRC_EXTRA`, `CSP_STYLE_SRC_EXTRA`, `CSP_IMG_SRC_EXTRA`, `CSP_FONT_SRC_EXTRA` - Extra origins for those directives. Example (Google Fonts CSS + files): `CSP_STYLE_SRC_EXTRA=https://fonts.googleapis.com` and `CSP_FONT_SRC_EXTRA=https://fonts.gstatic.com`
-- **`frame-ancestors`** - Default is `'none'` (not set). **`CSP_FRAME_ANCESTORS` overrides the entire source list** (space-separated CSP sources, for example `'self'` or `https://parent.example`); it is **not** merged with `'none'`. Values containing `;` or newlines are rejected and treated as `'none'`. When the resolved list is exactly `'self'`, the middleware sends `X-Frame-Options: SAMEORIGIN`; when it is `'none'`, it sends `X-Frame-Options: DENY`; for other lists it omits `X-Frame-Options` so `frame-ancestors` alone controls embedding.
+- **`frame-ancestors`** Default is `'none'` (not set). **`CSP_FRAME_ANCESTORS` overrides the entire source list** (space-separated CSP sources, for example `'self'` or `https://parent.example`); it is **not** merged with `'none'`. Values containing `;` or newlines are rejected and treated as `'none'`. When the resolved list is exactly `'self'`, the middleware sends `X-Frame-Options: SAMEORIGIN`; when it is `'none'`, it sends `X-Frame-Options: DENY`; for other lists it omits `X-Frame-Options` so `frame-ancestors` alone controls embedding.
 
 ### API Configuration
 
@@ -312,13 +307,13 @@ Applies to **Backend Agent Controller** and **Backend Agent Manager**. See [Open
 - `RATE_LIMIT_ENABLED=true` (default)
 - `RATE_LIMIT_LIMIT=100` (default)
 
-## Related Documentation
+## Related documentation
 
-- **[Local Development](./local-development.md)** - Local setup
-- **[Docker Deployment](./docker-deployment.md)** - Containerized deployment
-- **[Production Checklist](./production-checklist.md)** - Production deployment
-- **[Background jobs](./background-jobs.md)** - BullMQ roles, Redis, and coordinators
-- **[Atlassian import](../features/atlassian-import.md)** - Import feature, markers, and console entry points
+- **[Local Development](./local-development.md)** Local setup
+- **[Docker Deployment](./docker-deployment.md)** Containerized deployment
+- **[Production Checklist](./production-checklist.md)** Production deployment
+- **[Background jobs](./background-jobs.md)** BullMQ roles, Redis, and coordinators
+- **[Atlassian import](../features/atlassian-import.md)** Import feature, markers, and console entry points
 
 ---
 
