@@ -95,6 +95,14 @@ Cloud-init waits for the DNS A record (`proxied: false`) to resolve to the host 
 
 Provisioning templates configure SSH for operational access. Key-based authentication is enabled; password authentication is disabled in generated `sshd` configuration.
 
+The provisioning private key is stored encrypted on the subscription item and used by platform automation (updates, addons, resize helpers). Customers who need direct machine access can reveal that key **once** via:
+
+`GET /subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key`
+
+Successful reveal sets `sshAccessGranted` on the item (from `ssh_access_granted_at`), returns the OpenSSH private key once, and blocks further reveals (`409`). Viewing the key may limit technical support for that specific service. The Overview dashboard shows a confirmation disclaimer before reveal and a badge after access is granted.
+
+A webhook (`subscription.ssh_access_granted`) and customer email are sent on successful reveal with metadata only (never the key). The email asks the recipient to contact support if they did not perform the action.
+
 **Accepted risk [DR-001](../security/accepted-risks.md#dr-001-provisioning-ssh-cloud-init-templates):** Cloud-init may configure root SSH access and install root `authorized_keys` for first-boot automation. Compensating controls include network restrictions, key rotation, and bastion access. See [Security (Accepted risks)](../security/accepted-risks.md).
 
 ## Nested Provisioning Tokens

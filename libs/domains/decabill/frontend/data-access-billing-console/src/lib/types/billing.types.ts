@@ -488,11 +488,19 @@ export interface SubscriptionItemResponse {
   id: string;
   subscriptionId: string;
   serviceTypeId: string;
+  /** User-facing service type name from the catalog. */
+  serviceTypeName?: string;
   provisioningStatus: ProvisioningStatus;
   provisionedAt?: string | null;
   hostname?: string | null;
   /** Product service: controller, manager, or custom CloudInit template. Defaults to controller. */
   service?: ProvisioningServiceKind;
+  /** True after the customer has revealed the provisioning SSH private key at least once. */
+  sshAccessGranted?: boolean;
+}
+
+export interface SubscriptionSshAccessKeyResponse {
+  privateKey: string;
 }
 
 export interface ServerInfoResponse {
@@ -510,6 +518,8 @@ export interface BillingDashboardStatusItem {
   subscriptionId: string;
   itemId: string;
   service: ProvisioningServiceKind;
+  /** User-facing service type name from the catalog. */
+  serviceTypeName?: string;
   name: string;
   publicIp: string;
   privateIp?: string;
@@ -517,6 +527,7 @@ export interface BillingDashboardStatusItem {
   metadata?: Record<string, unknown>;
   hostname?: string;
   hostnameFqdn?: string;
+  sshAccessGranted?: boolean;
 }
 
 export interface BillingDashboardStatusUpdatePayload {

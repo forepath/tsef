@@ -427,6 +427,38 @@ export class BillingEmailPublisher {
     });
   }
 
+  /**
+   * Notifies the customer that the SSH access key was revealed. Never includes the private key.
+   */
+  async publishSshAccessGranted(
+    subscription: SubscriptionEntity,
+    planName: string,
+    context: { itemId: string; hostname?: string; grantedAt: Date },
+  ): Promise<void> {
+    const profile = await this.customerProfilesRepository.findByUserId(subscription.userId);
+    const to = await this.resolveRecipientEmail(subscription.userId, profile);
+
+    if (!to) {
+      this.logger.warn(`No billing email for user ${subscription.userId}, skipping SSH access granted email`);
+
+      return;
+    }
+
+    await this.emailDispatcher.publish({
+      eventType: 'subscription.ssh_access_granted',
+      scopeKey: getTenantIdOrDefault(),
+      to,
+      templateKey: 'ssh-access-granted',
+      templateContext: {
+        recipientName: this.greeting(profile),
+        planName,
+        subscriptionNumber: subscription.number ?? '',
+        hostname: context.hostname ?? '',
+        grantedAt: context.grantedAt.toLocaleString(),
+      },
+    });
+  }
+
   async publishPriceChangedConsolidated(params: {
     tenantId: string;
     userId: string;

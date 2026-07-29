@@ -17,18 +17,30 @@ Per subscription item with active provisioning:
 - Subscription and plan title
 - Provisioning status
 - Server name, public IP, hostname, and FQDN
+- Catalog service type name (`serviceTypeName` from subscription items / dashboard status)
 - Provider-reported power state (running, off, etc.)
 - Quick links to invoices and subscription detail
 
 ### Server Action Buttons
 
-| Action  | When shown                 | API                        |
-| ------- | -------------------------- | -------------------------- |
-| Start   | Server is stoppable or off | `POST .../actions/start`   |
-| Stop    | Server is online           | `POST .../actions/stop`    |
-| Restart | Server is online           | `POST .../actions/restart` |
+| Action  | When shown                            | API                                 |
+| ------- | ------------------------------------- | ----------------------------------- |
+| Start   | Server is stoppable or off            | `POST .../actions/start`            |
+| Stop    | Server is online                      | `POST .../actions/stop`             |
+| Restart | Server is online                      | `POST .../actions/restart`          |
+| SSH key | Instance ready; disabled after reveal | `GET .../ssh-access-key` (one-time) |
 
 Buttons are disabled while an action is in progress. After a successful action, the UI refreshes server info from REST (or waits for the next WebSocket tick when the socket is connected).
+
+### SSH Access Key Reveal
+
+1. User clicks the key button in the server action group.
+2. Confirmation modal explains that viewing may limit technical support for that service and that the key can be retrieved only once.
+3. On confirm, the API returns the private key once and sets `sshAccessGranted` on the subscription item.
+4. Confirm modal closes; a display modal shows the key (copyable). The button becomes permanently disabled and the list shows an “SSH access granted” badge.
+5. A second reveal returns `409 Conflict`.
+
+`GET /subscriptions/{subscriptionId}/items` and dashboard status WebSocket items include `sshAccessGranted` and `serviceTypeName` so the UI can reflect prior reveals and show the catalog service type name without calling admin catalog endpoints.
 
 ## Data Loading
 

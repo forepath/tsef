@@ -31,7 +31,8 @@ export type SubscriptionWebhookEventType =
   | 'subscription.resumed'
   | 'subscription.config_change_requested'
   | 'subscription.config_changed'
-  | 'subscription.config_change_failed';
+  | 'subscription.config_change_failed'
+  | 'subscription.ssh_access_granted';
 
 /**
  * Config-change webhook context. Only identifiers and status live here: the requested payload can
@@ -151,6 +152,28 @@ export class BillingNotificationPublisher implements IIdentityNotificationPublis
         ...(extras?.addons && extras.addons.length > 0 ? { addons: extras.addons } : {}),
       },
       subscription.userId,
+    );
+  }
+
+  /**
+   * Metadata-only SSH access grant webhook. Never include private key material.
+   */
+  publishSshAccessGranted(params: {
+    subscription: SubscriptionEntity;
+    itemId: string;
+    hostname?: string;
+    grantedAt: Date;
+  }): void {
+    this.publish(
+      'subscription.ssh_access_granted',
+      {
+        subscriptionId: params.subscription.id,
+        subscriptionNumber: params.subscription.number ?? null,
+        itemId: params.itemId,
+        hostname: params.hostname ?? null,
+        grantedAt: this.toIsoString(params.grantedAt),
+      },
+      params.subscription.userId,
     );
   }
 

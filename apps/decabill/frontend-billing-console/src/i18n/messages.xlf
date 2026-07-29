@@ -1400,6 +1400,54 @@
       <trans-unit id="featureOverview-serverRestartButtonTitle" datatype="html">
         <source>Restart server</source>
         </trans-unit>
+      <trans-unit id="featureOverview-sshAccessButtonTitle" datatype="html">
+        <source>Show SSH access key</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessGrantedButtonTitle" datatype="html">
+        <source>SSH access key already revealed</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessGrantedBadge" datatype="html">
+        <source>SSH access granted</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessGrantedBadgeTitle" datatype="html">
+        <source>SSH access granted</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessConfirmTitle" datatype="html">
+        <source>Reveal SSH access key?</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessConfirmBody" datatype="html">
+        <source> Viewing the SSH access key for this service may limit technical support for that specific service. The key can only be retrieved once. After you continue, this action cannot be repeated. </source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessCancel" datatype="html">
+        <source>Cancel</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessConfirm" datatype="html">
+        <source>Reveal key</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessDisplayTitle" datatype="html">
+        <source>SSH access key</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessDisplayHint" datatype="html">
+        <source> Store this private key securely. It will not be shown again in the billing console. </source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessKeyLabel" datatype="html">
+        <source>SSH private key</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessCopy" datatype="html">
+        <source>Copy</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessCopied" datatype="html">
+        <source>Copied</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessClose" datatype="html">
+        <source>Close</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessAlreadyRevealed" datatype="html">
+        <source>The SSH access key has already been revealed for this service.</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessRevealFailed" datatype="html">
+        <source>Could not retrieve the SSH access key. Please try again or contact support.</source>
+        </trans-unit>
       <trans-unit id="featureOverview-serverStatusUpdating" datatype="html">
         <source>Server status updating…</source>
         </trans-unit>

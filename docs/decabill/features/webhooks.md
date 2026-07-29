@@ -54,6 +54,7 @@ Events are published from the **billing** service after successful mutations.
 - `customer_trust.level_changed`
 - `subscription.created`, `subscription.updated`, `subscription.cancel_scheduled`, `subscription.canceled`, `subscription.resumed`, `subscription.period_charged`
 - `subscription.config_change_requested`, `subscription.config_changed`, `subscription.config_change_failed`
+- `subscription.ssh_access_granted` (metadata only: subscription/item ids, hostname, grantedAt — never the private key)
 - `addon.activated`, `addon.deactivated`, `addon.provision_failed`, `addon.teardown_failed`
 
 Addon payloads include subscription id/number, plan id/name, addon id/key/name, and status timestamps. Config snapshots and secrets are never included. See [Addons](./addons.md).

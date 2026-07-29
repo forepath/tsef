@@ -5,6 +5,7 @@ import {
   loadOverviewServerInfo,
   loadOverviewServerInfoFailure,
   loadOverviewServerInfoSuccess,
+  markSshAccessGranted,
   refreshSubscriptionServerInfoSuccess,
   restartServer,
   restartServerSuccess,
@@ -70,8 +71,47 @@ describe('subscriptionServerInfoReducer', () => {
       expect(newState.serverInfoBySubscriptionId).toEqual(serverInfoBySubscriptionId);
       expect(newState.activeItemIdBySubscriptionId).toEqual(activeItemIdBySubscriptionId);
       expect(newState.provisioningStatusBySubscriptionId).toEqual(provisioningStatusBySubscriptionId);
+      expect(newState.sshAccessGrantedBySubscriptionId).toEqual({});
+      expect(newState.serviceTypeNameBySubscriptionId).toEqual({});
       expect(newState.loading).toBe(false);
       expect(newState.error).toBeNull();
+    });
+
+    it('should store serviceTypeNameBySubscriptionId when provided', () => {
+      const newState = subscriptionServerInfoReducer(
+        initialSubscriptionServerInfoState,
+        loadOverviewServerInfoSuccess({
+          serverInfoBySubscriptionId: { 'sub-1': mockServerInfo },
+          activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
+          serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
+        }),
+      );
+
+      expect(newState.serviceTypeNameBySubscriptionId).toEqual({ 'sub-1': 'Hetzner' });
+    });
+
+    it('should store sshAccessGrantedBySubscriptionId when provided', () => {
+      const newState = subscriptionServerInfoReducer(
+        initialSubscriptionServerInfoState,
+        loadOverviewServerInfoSuccess({
+          serverInfoBySubscriptionId: { 'sub-1': mockServerInfo },
+          activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
+          sshAccessGrantedBySubscriptionId: { 'sub-1': true },
+        }),
+      );
+
+      expect(newState.sshAccessGrantedBySubscriptionId).toEqual({ 'sub-1': true });
+    });
+  });
+
+  describe('markSshAccessGranted', () => {
+    it('should set sshAccessGranted for the subscription', () => {
+      const newState = subscriptionServerInfoReducer(
+        initialSubscriptionServerInfoState,
+        markSshAccessGranted({ subscriptionId: 'sub-1' }),
+      );
+
+      expect(newState.sshAccessGrantedBySubscriptionId['sub-1']).toBe(true);
     });
   });
 
@@ -168,6 +208,50 @@ describe('subscriptionServerInfoReducer', () => {
       expect(newState.actionInProgress['sub-1']).toBeUndefined();
       expect(newState.actionInProgress['sub-2']).toBe('stop');
       expect(newState.provisioningStatusBySubscriptionId['sub-1']).toBe('active');
+    });
+
+    it('should set sshAccessGranted when push includes the marker', () => {
+      const newState = subscriptionServerInfoReducer(
+        initialSubscriptionServerInfoState,
+        billingDashboardStatusPush({
+          generatedAt: '2025-01-01T00:00:00.000Z',
+          items: [
+            {
+              subscriptionId: 'sub-1',
+              itemId: 'item-1',
+              service: 'controller',
+              name: 's1',
+              publicIp: '1.1.1.1',
+              status: 'running',
+              sshAccessGranted: true,
+            },
+          ],
+        }),
+      );
+
+      expect(newState.sshAccessGrantedBySubscriptionId['sub-1']).toBe(true);
+    });
+
+    it('should set serviceTypeName when push includes the catalog name', () => {
+      const newState = subscriptionServerInfoReducer(
+        initialSubscriptionServerInfoState,
+        billingDashboardStatusPush({
+          generatedAt: '2025-01-01T00:00:00.000Z',
+          items: [
+            {
+              subscriptionId: 'sub-1',
+              itemId: 'item-1',
+              service: 'controller',
+              serviceTypeName: 'Hetzner',
+              name: 's1',
+              publicIp: '1.1.1.1',
+              status: 'running',
+            },
+          ],
+        }),
+      );
+
+      expect(newState.serviceTypeNameBySubscriptionId['sub-1']).toBe('Hetzner');
     });
   });
 

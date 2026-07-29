@@ -46,6 +46,8 @@ export interface DashboardStatusItemPayload {
   subscriptionId: string;
   itemId: string;
   service: 'controller' | 'manager' | 'custom';
+  /** User-facing service type name from the catalog. */
+  serviceTypeName: string;
   name: string;
   publicIp: string;
   privateIp?: string;
@@ -53,6 +55,7 @@ export interface DashboardStatusItemPayload {
   metadata?: Record<string, unknown>;
   hostname?: string;
   hostnameFqdn?: string;
+  sshAccessGranted: boolean;
 }
 
 export interface DashboardStatusUpdatePayload {
@@ -219,6 +222,7 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
             subscriptionId: sub.id,
             itemId: activeItem.id,
             service: activeItem.service ?? 'controller',
+            serviceTypeName: activeItem.serviceTypeName,
             name: info.name,
             publicIp: info.publicIp,
             privateIp: info.privateIp,
@@ -226,6 +230,7 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
             metadata: info.metadata,
             hostname: info.hostname,
             hostnameFqdn: info.hostnameFqdn,
+            sshAccessGranted: activeItem.sshAccessGranted === true,
           });
         } catch (err) {
           this.logger.debug(`Skipping subscription ${sub.id} in status tick: ${(err as Error).message ?? err}`);

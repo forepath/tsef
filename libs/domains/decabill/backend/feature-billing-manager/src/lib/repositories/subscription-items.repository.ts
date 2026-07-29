@@ -135,6 +135,23 @@ export class SubscriptionItemsRepository {
   }
 
   /**
+   * Atomically marks SSH access as granted. Returns true when this call claimed the reveal;
+   * false when access was already granted (or the item is missing).
+   * Callers must authorize the item (tenant + ownership) before invoking.
+   */
+  async claimSshAccessGranted(id: string): Promise<boolean> {
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(SubscriptionItemEntity)
+      .set({ sshAccessGrantedAt: new Date() })
+      .where('id = :id', { id })
+      .andWhere('ssh_access_granted_at IS NULL')
+      .execute();
+
+    return (result.affected ?? 0) > 0;
+  }
+
+  /**
    * Returns provisioned subscription items that have an SSH private key and belong to an active subscription.
    * Used by the update scheduler to run docker compose pull/up over SSH.
    */

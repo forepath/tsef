@@ -1,0 +1,13 @@
+{{#> email-layout}}
+<h1 class="email-title">SSH access key revealed</h1>
+<p>Dear {{recipientName}},</p>
+<p>
+  The SSH access key for your subscription {{#if subscriptionNumber}}"<strong>{{subscriptionNumber}}</strong>" {{/if}}
+  ({{planName}}{{#if hostname}}, host <strong>{{hostname}}</strong>{{/if}}) has been shown in the billing console.
+</p>
+{{#if grantedAt}}
+<p>Time: <strong>{{grantedAt}}</strong></p>
+{{/if}}
+<p>Viewing this key may limit technical support for this specific service. The key can only be retrieved once.</p>
+<p>If you did not perform this action yourself, please contact support immediately.</p>
+{{/email-layout}}

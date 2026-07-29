@@ -8,6 +8,7 @@ import {
   loadOverviewServerInfo,
   loadOverviewServerInfoFailure,
   loadOverviewServerInfoSuccess,
+  markSshAccessGranted,
   refreshSubscriptionServerInfoSuccess,
   restartServer,
   restartServerFailure,
@@ -37,6 +38,10 @@ export interface SubscriptionServerInfoState {
   serviceBySubscriptionId: Record<string, ProvisioningServiceKind>;
   /** Provisioning status per subscription id from the tracked item. */
   provisioningStatusBySubscriptionId: Record<string, ProvisioningStatus>;
+  /** Whether the customer has revealed the SSH key for the tracked item. */
+  sshAccessGrantedBySubscriptionId: Record<string, boolean>;
+  /** User-facing service type name for the tracked item. */
+  serviceTypeNameBySubscriptionId: Record<string, string>;
   loading: boolean;
   error: string | null;
   actionInProgress: Record<string, ServerActionType>;
@@ -49,6 +54,8 @@ export const initialSubscriptionServerInfoState: SubscriptionServerInfoState = {
   activeItemIdBySubscriptionId: {},
   serviceBySubscriptionId: {},
   provisioningStatusBySubscriptionId: {},
+  sshAccessGrantedBySubscriptionId: {},
+  serviceTypeNameBySubscriptionId: {},
   loading: false,
   error: null,
   actionInProgress: {},
@@ -87,6 +94,8 @@ export const subscriptionServerInfoReducer = createReducer(
         activeItemIdBySubscriptionId,
         serviceBySubscriptionId,
         provisioningStatusBySubscriptionId,
+        sshAccessGrantedBySubscriptionId,
+        serviceTypeNameBySubscriptionId,
       },
     ) => ({
       ...state,
@@ -94,6 +103,8 @@ export const subscriptionServerInfoReducer = createReducer(
       activeItemIdBySubscriptionId: activeItemIdBySubscriptionId ?? {},
       serviceBySubscriptionId: serviceBySubscriptionId ?? {},
       provisioningStatusBySubscriptionId: provisioningStatusBySubscriptionId ?? {},
+      sshAccessGrantedBySubscriptionId: sshAccessGrantedBySubscriptionId ?? {},
+      serviceTypeNameBySubscriptionId: serviceTypeNameBySubscriptionId ?? {},
       loading: false,
       error: null,
     }),
@@ -103,11 +114,20 @@ export const subscriptionServerInfoReducer = createReducer(
     loading: false,
     error,
   })),
+  on(markSshAccessGranted, (state, { subscriptionId }) => ({
+    ...state,
+    sshAccessGrantedBySubscriptionId: {
+      ...state.sshAccessGrantedBySubscriptionId,
+      [subscriptionId]: true,
+    },
+  })),
   on(billingDashboardStatusPush, (state, { generatedAt, items }) => {
     const serverInfoBySubscriptionId = { ...state.serverInfoBySubscriptionId };
     const activeItemIdBySubscriptionId = { ...state.activeItemIdBySubscriptionId };
     const serviceBySubscriptionId = { ...state.serviceBySubscriptionId };
     const provisioningStatusBySubscriptionId = { ...state.provisioningStatusBySubscriptionId };
+    const sshAccessGrantedBySubscriptionId = { ...state.sshAccessGrantedBySubscriptionId };
+    const serviceTypeNameBySubscriptionId = { ...state.serviceTypeNameBySubscriptionId };
     const actionInProgress = { ...state.actionInProgress };
     const history = [...state.billingStatusHistory];
 
@@ -124,6 +144,12 @@ export const subscriptionServerInfoReducer = createReducer(
       activeItemIdBySubscriptionId[item.subscriptionId] = item.itemId;
       serviceBySubscriptionId[item.subscriptionId] = item.service;
       provisioningStatusBySubscriptionId[item.subscriptionId] = 'active';
+      if (item.sshAccessGranted === true) {
+        sshAccessGrantedBySubscriptionId[item.subscriptionId] = true;
+      }
+      if (item.serviceTypeName?.trim()) {
+        serviceTypeNameBySubscriptionId[item.subscriptionId] = item.serviceTypeName.trim();
+      }
       delete actionInProgress[item.subscriptionId];
       history.push({
         generatedAt,
@@ -141,6 +167,8 @@ export const subscriptionServerInfoReducer = createReducer(
       activeItemIdBySubscriptionId,
       serviceBySubscriptionId,
       provisioningStatusBySubscriptionId,
+      sshAccessGrantedBySubscriptionId,
+      serviceTypeNameBySubscriptionId,
       actionInProgress,
       billingStatusHistory,
       loading: false,

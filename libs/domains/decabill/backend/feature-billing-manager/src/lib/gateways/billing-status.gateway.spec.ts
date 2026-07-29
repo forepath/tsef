@@ -135,9 +135,11 @@ describe('BillingStatusGateway', () => {
           id: 'item-1',
           subscriptionId: 'sub-a',
           serviceTypeId: 'st',
+          serviceTypeName: 'Hetzner',
           provisioningStatus: 'active',
           hostname: 'h1',
           service: 'controller' as const,
+          sshAccessGranted: true,
         },
       ]);
       itemServerService.getServerInfo.mockResolvedValue({
@@ -164,9 +166,11 @@ describe('BillingStatusGateway', () => {
               subscriptionId: 'sub-a',
               itemId: 'item-1',
               service: 'controller',
+              serviceTypeName: 'Hetzner',
               name: 'srv',
               publicIp: '1.1.1.1',
               status: 'running',
+              sshAccessGranted: true,
             }),
           ],
         }),

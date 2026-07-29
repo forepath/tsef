@@ -2,6 +2,7 @@ import { RequireScopes } from '@forepath/identity/backend';
 import { BadRequestException, Controller, Get, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
 
 import { ServerInfoResponseDto } from '../dto/server-info-response.dto';
+import { SubscriptionSshAccessKeyResponseDto } from '../dto/subscription-item-response.dto';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { getUserFromRequest, type RequestWithUser } from '../utils/billing-access.utils';
 
@@ -22,6 +23,22 @@ export class SubscriptionItemsController {
     }
 
     return await this.subscriptionItemServerService.listItems(subscriptionId, userInfo.userId);
+  }
+
+  @RequireScopes('subscriptions:write')
+  @Get(':itemId/ssh-access-key')
+  async getSshAccessKey(
+    @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
+    @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
+    @Req() req?: RequestWithUser,
+  ): Promise<SubscriptionSshAccessKeyResponseDto> {
+    const userInfo = getUserFromRequest(req ?? ({} as RequestWithUser));
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.subscriptionItemServerService.getSshAccessKey(subscriptionId, itemId, userInfo.userId);
   }
 
   @RequireScopes('subscriptions:read')

@@ -70,6 +70,8 @@ export function loadOverviewServerInfoEffect(
             activeItemIdBySubscriptionId: {},
             serviceBySubscriptionId: {},
             provisioningStatusBySubscriptionId: {},
+            sshAccessGrantedBySubscriptionId: {},
+            serviceTypeNameBySubscriptionId: {},
           }),
         );
       }
@@ -84,6 +86,8 @@ export function loadOverviewServerInfoEffect(
           const serviceBySubscriptionId: Record<string, ProvisioningServiceKind> = {};
           const activeItemIdBySubscriptionId: Record<string, string> = {};
           const provisioningStatusBySubscriptionId: Record<string, ProvisioningStatus> = {};
+          const sshAccessGrantedBySubscriptionId: Record<string, boolean> = {};
+          const serviceTypeNameBySubscriptionId: Record<string, string> = {};
 
           results.forEach(({ sub, items }) => {
             const tracked = pickTrackedSubscriptionItem(items);
@@ -95,6 +99,10 @@ export function loadOverviewServerInfoEffect(
             activeItemIdBySubscriptionId[sub.id] = tracked.id;
             serviceBySubscriptionId[sub.id] = tracked.service ?? 'controller';
             provisioningStatusBySubscriptionId[sub.id] = tracked.provisioningStatus;
+            sshAccessGrantedBySubscriptionId[sub.id] = tracked.sshAccessGranted === true;
+            if (tracked.serviceTypeName?.trim()) {
+              serviceTypeNameBySubscriptionId[sub.id] = tracked.serviceTypeName.trim();
+            }
 
             if (tracked.provisioningStatus === 'active') {
               toFetch.push({ subscriptionId: sub.id, itemId: tracked.id });
@@ -108,6 +116,8 @@ export function loadOverviewServerInfoEffect(
                 activeItemIdBySubscriptionId,
                 serviceBySubscriptionId,
                 provisioningStatusBySubscriptionId,
+                sshAccessGrantedBySubscriptionId,
+                serviceTypeNameBySubscriptionId,
               }),
             );
           }
@@ -131,6 +141,8 @@ export function loadOverviewServerInfoEffect(
                 activeItemIdBySubscriptionId,
                 serviceBySubscriptionId,
                 provisioningStatusBySubscriptionId,
+                sshAccessGrantedBySubscriptionId,
+                serviceTypeNameBySubscriptionId,
               });
             }),
           );

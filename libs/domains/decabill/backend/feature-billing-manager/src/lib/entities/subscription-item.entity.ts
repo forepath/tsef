@@ -63,7 +63,10 @@ export class SubscriptionItemEntity {
   @Column({ type: 'jsonb', nullable: true, name: 'server_info_snapshot' })
   serverInfoSnapshot?: Record<string, unknown>;
 
-  /** SSH private key for server access; encrypted at rest via AES-256-GCM. Never exposed via API. */
+  /**
+   * SSH private key for server access; encrypted at rest via AES-256-GCM.
+   * Exposed once via GET .../ssh-access-key; afterward sshAccessGrantedAt blocks re-fetch.
+   */
   @Column({
     type: 'text',
     nullable: true,
@@ -71,6 +74,10 @@ export class SubscriptionItemEntity {
     transformer: createAes256GcmTransformer(),
   })
   sshPrivateKey?: string;
+
+  /** Set when the customer successfully reveals the SSH private key (one-time). */
+  @Column({ type: 'timestamptz', nullable: true, name: 'ssh_access_granted_at' })
+  sshAccessGrantedAt?: Date;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

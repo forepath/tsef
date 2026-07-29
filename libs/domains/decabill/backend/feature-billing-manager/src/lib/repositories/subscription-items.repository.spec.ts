@@ -140,4 +140,46 @@ describe('SubscriptionItemsRepository', () => {
     });
     expect(mockTake).toHaveBeenCalledWith(50);
   });
+
+  it('claimSshAccessGranted returns true when a row is updated', async () => {
+    const mockExecute = jest.fn().mockResolvedValue({ affected: 1 });
+    const mockUpdateSet = jest.fn().mockReturnValue({
+      where: jest.fn().mockReturnValue({
+        andWhere: jest.fn().mockReturnValue({
+          execute: mockExecute,
+        }),
+      }),
+    });
+
+    mockCreateQueryBuilder.mockReturnValue({
+      update: jest.fn().mockReturnValue({
+        set: mockUpdateSet,
+      }),
+    } as never);
+
+    const result = await repository.claimSshAccessGranted('item-1');
+
+    expect(result).toBe(true);
+    expect(mockExecute).toHaveBeenCalled();
+  });
+
+  it('claimSshAccessGranted returns false when no row is updated', async () => {
+    const mockExecute = jest.fn().mockResolvedValue({ affected: 0 });
+
+    mockCreateQueryBuilder.mockReturnValue({
+      update: jest.fn().mockReturnValue({
+        set: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            andWhere: jest.fn().mockReturnValue({
+              execute: mockExecute,
+            }),
+          }),
+        }),
+      }),
+    } as never);
+
+    const result = await repository.claimSshAccessGranted('item-1');
+
+    expect(result).toBe(false);
+  });
 });
