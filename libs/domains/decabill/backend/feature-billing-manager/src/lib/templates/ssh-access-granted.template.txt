@@ -1,0 +1,12 @@
+SSH access key revealed
+
+Dear {{recipientName}},
+
+The SSH access key for your subscription{{#if subscriptionNumber}} "{{subscriptionNumber}}"{{/if}} ({{planName}}{{#if hostname}}, host {{hostname}}{{/if}}) has been shown in the billing console.
+{{#if grantedAt}}
+Time: {{grantedAt}}
+{{/if}}
+
+Viewing this key may limit technical support for this specific service. The key can only be retrieved once.
+
+If you did not perform this action yourself, please contact support immediately.

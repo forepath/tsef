@@ -18,6 +18,10 @@ export const loadOverviewServerInfoSuccess = createAction(
     serviceBySubscriptionId?: Record<string, ProvisioningServiceKind>;
     /** Latest provisioning status per subscription id from the tracked item. */
     provisioningStatusBySubscriptionId?: Record<string, ProvisioningStatus>;
+    /** Whether SSH access was granted per subscription id. */
+    sshAccessGrantedBySubscriptionId?: Record<string, boolean>;
+    /** User-facing service type name per subscription id. */
+    serviceTypeNameBySubscriptionId?: Record<string, string>;
   }>(),
 );
 
@@ -78,4 +82,9 @@ export const refreshSubscriptionServerInfoSuccess = createAction(
 export const billingDashboardStatusPush = createAction(
   '[Subscription Server Info] Billing Dashboard Status Push',
   props<BillingDashboardStatusUpdatePayload>(),
+);
+
+export const markSshAccessGranted = createAction(
+  '[Subscription Server Info] Mark SSH Access Granted',
+  props<{ subscriptionId: string }>(),
 );

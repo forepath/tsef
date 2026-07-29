@@ -52,3 +52,7 @@
 .info-badge.billing-admin__chip--status-unknown {
   @include billing-admin-chip-tint(var(--bs-secondary), var(--bs-secondary-text-emphasis, var(--bs-secondary)));
 }
+
+.info-badge.billing-admin__chip--status-warning {
+  @include billing-admin-chip-tint(var(--bs-warning), var(--bs-warning-text-emphasis, var(--bs-warning)));
+}

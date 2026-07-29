@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -14,6 +14,7 @@ import {
   isBillingServerStartable,
   isBillingServerStatusTransitional,
   ProjectsFacade,
+  SubscriptionItemsService,
   SubscriptionServerInfoFacade,
   SubscriptionsFacade,
   type BackorderResponse,
@@ -26,7 +27,7 @@ import {
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import type { Environment } from '@forepath/shared/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
-import { combineLatest, filter, map, take } from 'rxjs';
+import { combineLatest, filter, finalize, map, take } from 'rxjs';
 
 import {
   getProfileCompleteLabel,
@@ -34,6 +35,7 @@ import {
   getProvisioningStatusLabel,
 } from '../billing-status-labels';
 import { filterItemsBySearch } from '../billing-list-search';
+import { hideBillingModal, showBillingModal } from '../billing-modal';
 
 @Component({
   selector: 'framework-billing-overview',
@@ -45,6 +47,7 @@ import { filterItemsBySearch } from '../billing-list-search';
 export class OverviewComponent implements OnInit {
   private readonly subscriptionsFacade = inject(SubscriptionsFacade);
   readonly serverInfoFacade = inject(SubscriptionServerInfoFacade);
+  private readonly subscriptionItemsService = inject(SubscriptionItemsService);
   private readonly billingDashboardSocketFacade = inject(BillingDashboardSocketFacade);
   private readonly environment = inject<Environment>(ENVIRONMENT);
   private readonly destroyRef = inject(DestroyRef);
@@ -52,6 +55,17 @@ export class OverviewComponent implements OnInit {
   private readonly projectsFacade = inject(ProjectsFacade);
   private readonly customerProfileFacade = inject(CustomerProfileFacade);
   private readonly invoicesFacade = inject(InvoicesFacade);
+
+  @ViewChild('sshAccessConfirmModal', { static: false })
+  private sshAccessConfirmModal!: ElementRef<HTMLDivElement>;
+  @ViewChild('sshAccessDisplayModal', { static: false })
+  private sshAccessDisplayModal!: ElementRef<HTMLDivElement>;
+
+  sshRevealTarget: SubscriptionWithServerInfo | null = null;
+  revealedSshPrivateKey: string | null = null;
+  sshRevealLoading = false;
+  sshRevealError: string | null = null;
+  sshAccessKeyCopied = false;
 
   readonly subscriptions$ = this.subscriptionsFacade.getSubscriptions$();
   readonly invoicesSummary$ = this.invoicesFacade.getInvoicesSummary$();
@@ -115,6 +129,8 @@ export class OverviewComponent implements OnInit {
   readonly isServerStartable = isBillingServerStartable;
   readonly isServerStatusTransitional = isBillingServerStatusTransitional;
   readonly serverLocationLabel = getBillingServerLocationLabel;
+  readonly sshAccessButtonTitle = $localize`:@@featureOverview-sshAccessButtonTitle:Show SSH access key`;
+  readonly sshAccessGrantedButtonTitle = $localize`:@@featureOverview-sshAccessGrantedButtonTitle:SSH access key already revealed`;
 
   profileCompleteLabel(isComplete: boolean): string {
     return getProfileCompleteLabel(isComplete);
@@ -145,14 +161,12 @@ export class OverviewComponent implements OnInit {
   }
 
   instanceSearchHaystack(item: SubscriptionWithServerInfo): string {
-    const provider = item.serverInfo?.metadata?.['provider'];
-
     return [
       item.subscription.number,
       this.serviceTypeLabel(item.service),
       this.provisioningStatusLabel(item.provisioningStatus),
       item.serverInfo ? this.serverStatusLabel(item.serverInfo) : undefined,
-      this.getProviderName(provider),
+      item.serviceTypeName,
       item.serverInfo ? this.serverLocationLabel(item.serverInfo.metadata) : undefined,
       item.serverInfo?.hostnameFqdn,
       item.serverInfo?.publicIp,
@@ -236,15 +250,78 @@ export class OverviewComponent implements OnInit {
       .subscribe(() => this.serverInfoFacade.loadOverviewServerInfo());
   }
 
-  getProviderName(provider: unknown): string | undefined {
-    switch (provider) {
-      case 'hetzner':
-        return 'Hetzner Cloud-Init';
-      case 'digital-ocean':
-      case 'digitalocean':
-        return 'DigitalOcean Cloud-Init';
-      default:
-        return undefined;
+  openSshAccessConfirm(item: SubscriptionWithServerInfo): void {
+    if (item.sshAccessGranted) {
+      return;
+    }
+
+    this.sshRevealTarget = item;
+    this.sshRevealError = null;
+    this.sshRevealLoading = false;
+    this.revealedSshPrivateKey = null;
+    showBillingModal(this.sshAccessConfirmModal);
+  }
+
+  confirmSshAccessReveal(): void {
+    const target = this.sshRevealTarget;
+
+    if (!target || this.sshRevealLoading) {
+      return;
+    }
+
+    this.sshRevealLoading = true;
+    this.sshRevealError = null;
+
+    this.subscriptionItemsService
+      .getSshAccessKey(target.subscription.id, target.itemId)
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.sshRevealLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          this.serverInfoFacade.markSshAccessGranted(target.subscription.id);
+          this.revealedSshPrivateKey = response.privateKey;
+          this.sshAccessKeyCopied = false;
+          hideBillingModal(this.sshAccessConfirmModal);
+          showBillingModal(this.sshAccessDisplayModal);
+        },
+        error: (error: unknown) => {
+          const status =
+            error && typeof error === 'object' && 'status' in error ? Number((error as { status: unknown }).status) : 0;
+          this.sshRevealError =
+            status === 409
+              ? $localize`:@@featureOverview-sshAccessAlreadyRevealed:The SSH access key has already been revealed for this service.`
+              : $localize`:@@featureOverview-sshAccessRevealFailed:Could not retrieve the SSH access key. Please try again or contact support.`;
+
+          if (status === 409) {
+            this.serverInfoFacade.markSshAccessGranted(target.subscription.id);
+          }
+        },
+      });
+  }
+
+  closeSshAccessDisplay(): void {
+    this.revealedSshPrivateKey = null;
+    this.sshRevealTarget = null;
+    this.sshAccessKeyCopied = false;
+    hideBillingModal(this.sshAccessDisplayModal);
+  }
+
+  async copySshPrivateKey(): Promise<void> {
+    const key = this.revealedSshPrivateKey;
+
+    if (!key || !navigator.clipboard?.writeText) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(key);
+      this.sshAccessKeyCopied = true;
+    } catch {
+      this.sshAccessKeyCopied = false;
     }
   }
 }

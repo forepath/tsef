@@ -1802,7 +1802,7 @@ paths:
     get:
       summary: List subscription items
       operationId: listSubscriptionItems
-      description: Returns items for the subscription (id, provisioningStatus, serviceTypeId). User must own the subscription.
+      description: Returns items for the subscription (id, provisioningStatus, serviceTypeId, serviceTypeName). User must own the subscription.
       parameters:
         - name: subscriptionId
           in: path
@@ -1872,6 +1872,60 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Subscription or item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key:
+    get:
+      summary: Reveal provisioning SSH private key (one-time)
+      operationId: getSubscriptionItemSshAccessKey
+      description: >
+        Returns the provisioning SSH private key for a subscription item owned by the caller.
+        Succeeds only once per item; sets sshAccessGranted on the item and blocks subsequent
+        reveals. Viewing may limit technical support for that service. Never log the response body.
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Subscription ID
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Subscription item ID
+      responses:
+        '200':
+          description: SSH private key (shown once)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionSshAccessKeyResponse'
+        '400':
+          description: Not provisioned, key unavailable, or not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription or item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: SSH access key has already been revealed
           content:
             application/json:
               schema:
@@ -5643,6 +5697,11 @@ components:
         id: { type: string, format: uuid }
         subscriptionId: { type: string, format: uuid }
         serviceTypeId: { type: string, format: uuid }
+        serviceTypeName:
+          {
+            type: string,
+            description: User-facing service type name from the catalog (billing_service_types.name),
+          }
         provisioningStatus: { type: string, enum: [pending, active, failed] }
         hostname:
           {
@@ -5657,6 +5716,20 @@ components:
             description: Product service from config snapshot; controller (full stack),
             manager (agent manager only),
             or custom Docker template. Defaults to controller.,
+          }
+        sshAccessGranted:
+          {
+            type: boolean,
+            description: True after the customer has revealed the provisioning SSH private key at least once,
+          }
+    SubscriptionSshAccessKeyResponse:
+      type: object
+      required: [privateKey]
+      properties:
+        privateKey:
+          {
+            type: string,
+            description: OpenSSH private key for root access. Returned only once per item. Never log this value.,
           }
     ServerInfoResponse:
       type: object

@@ -4,7 +4,11 @@ import type { Environment } from '@forepath/shared/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
 import { Observable } from 'rxjs';
 
-import type { ServerInfoResponse, SubscriptionItemResponse } from '../types/billing.types';
+import type {
+  ServerInfoResponse,
+  SubscriptionItemResponse,
+  SubscriptionSshAccessKeyResponse,
+} from '../types/billing.types';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +28,12 @@ export class SubscriptionItemsService {
   getServerInfo(subscriptionId: string, itemId: string): Observable<ServerInfoResponse> {
     return this.http.get<ServerInfoResponse>(
       `${this.apiUrl}/subscriptions/${subscriptionId}/items/${itemId}/server-info`,
+    );
+  }
+
+  getSshAccessKey(subscriptionId: string, itemId: string): Observable<SubscriptionSshAccessKeyResponse> {
+    return this.http.get<SubscriptionSshAccessKeyResponse>(
+      `${this.apiUrl}/subscriptions/${subscriptionId}/items/${itemId}/ssh-access-key`,
     );
   }
 

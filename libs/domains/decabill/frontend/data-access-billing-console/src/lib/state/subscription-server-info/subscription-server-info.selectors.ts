@@ -17,6 +17,10 @@ export interface SubscriptionWithServerInfo {
   /** Product service from active item config. Defaults to controller. */
   service: ProvisioningServiceKind;
   provisioningStatus: ProvisioningStatus;
+  /** True after the customer has revealed the provisioning SSH private key at least once. */
+  sshAccessGranted: boolean;
+  /** User-facing service type name from the catalog. */
+  serviceTypeName?: string;
 }
 
 const selectSubscriptionServerInfoState = createFeatureSelector<SubscriptionServerInfoState>('subscriptionServerInfo');
@@ -39,6 +43,16 @@ export const selectServiceBySubscriptionId = createSelector(
 export const selectProvisioningStatusBySubscriptionId = createSelector(
   selectSubscriptionServerInfoState,
   (state) => state.provisioningStatusBySubscriptionId,
+);
+
+export const selectSshAccessGrantedBySubscriptionId = createSelector(
+  selectSubscriptionServerInfoState,
+  (state) => state.sshAccessGrantedBySubscriptionId,
+);
+
+export const selectServiceTypeNameBySubscriptionId = createSelector(
+  selectSubscriptionServerInfoState,
+  (state) => state.serviceTypeNameBySubscriptionId,
 );
 
 export const selectOverviewServerInfoLoading = createSelector(
@@ -70,12 +84,16 @@ export const selectSubscriptionsWithServerInfo = createSelector(
   selectActiveItemIdBySubscriptionId,
   selectServiceBySubscriptionId,
   selectProvisioningStatusBySubscriptionId,
+  selectSshAccessGrantedBySubscriptionId,
+  selectServiceTypeNameBySubscriptionId,
   (
     subscriptions,
     serverInfoBySubscriptionId,
     activeItemIdBySubscriptionId,
     serviceBySubscriptionId,
     provisioningStatusBySubscriptionId,
+    sshAccessGrantedBySubscriptionId,
+    serviceTypeNameBySubscriptionId,
   ): SubscriptionWithServerInfo[] =>
     subscriptions
       .filter((sub) => sub.status === 'active' && activeItemIdBySubscriptionId[sub.id] != null)
@@ -85,5 +103,7 @@ export const selectSubscriptionsWithServerInfo = createSelector(
         itemId: activeItemIdBySubscriptionId[subscription.id],
         service: serviceBySubscriptionId[subscription.id] ?? 'controller',
         provisioningStatus: provisioningStatusBySubscriptionId[subscription.id] ?? 'active',
+        sshAccessGranted: sshAccessGrantedBySubscriptionId[subscription.id] === true,
+        serviceTypeName: serviceTypeNameBySubscriptionId[subscription.id],
       })),
 );

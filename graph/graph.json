@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-27T17:08:29.046Z",
+  "generatedAt": "2026-07-29T15:32:58.797Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -10525,6 +10525,20 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/ssh-access-granted",
+      "type": "email",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/ssh-access-granted",
+        "languageOrKind": "template",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "templateName": "ssh-access-granted",
+        "memberFiles": [
+          "ssh-access-granted.template.html",
+          "ssh-access-granted.template.txt"
+        ]
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-cancel-scheduled",
       "type": "email",
       "attrs": {
@@ -14608,6 +14622,17 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+        "operationId": "getSubscriptionItemSshAccessKey",
+        "summary": "Reveal provisioning SSH private key (one-time)",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
       "type": "endpoint",
       "attrs": {
@@ -16270,6 +16295,15 @@
       }
     },
     {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.ssh_access_granted",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.ssh_access_granted",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
       "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.updated",
       "type": "webhook-event",
       "attrs": {
@@ -17355,7 +17389,7 @@
       "id": "concept:agenstra-related-documentation",
       "type": "concept",
       "attrs": {
-        "title": "Related Documentation",
+        "title": "Related documentation",
         "docPath": "docs/agenstra/README.md",
         "sectionAnchor": "related-documentation",
         "domain": "agenstra"
@@ -17365,7 +17399,7 @@
       "id": "concept:agenstra-external-resources",
       "type": "concept",
       "attrs": {
-        "title": "External Resources",
+        "title": "External resources",
         "docPath": "docs/agenstra/README.md",
         "sectionAnchor": "external-resources",
         "domain": "agenstra"
@@ -17458,16 +17492,6 @@
         "title": "Usage",
         "docPath": "docs/agenstra/ai-agents/agentctx.md",
         "sectionAnchor": "usage",
-        "domain": "agenstra"
-      }
-    },
-    {
-      "id": "concept:agenstra-related",
-      "type": "concept",
-      "attrs": {
-        "title": "Related",
-        "docPath": "docs/agenstra/ai-agents/agentctx.md",
-        "sectionAnchor": "related",
         "domain": "agenstra"
       }
     },
@@ -19745,7 +19769,7 @@
       "id": "concept:agenstra-file-entry-directory-relative-to-dynamic-provider-plugin-path",
       "type": "concept",
       "attrs": {
-        "title": "file: entry — directory relative to DYNAMIC_PROVIDER_PLUGIN_PATH",
+        "title": "file: entry (directory relative to DYNAMIC_PROVIDER_PLUGIN_PATH)",
         "docPath": "docs/agenstra/features/dynamic-provider-plugins.md",
         "sectionAnchor": "file-entry-directory-relative-to-dynamic-provider-plugin-path",
         "domain": "agenstra"
@@ -20625,7 +20649,7 @@
       "id": "concept:agenstra-ar-001-desktop-app-no-os-trusted-code-signing-no-in-app-auto-update",
       "type": "concept",
       "attrs": {
-        "title": "AR-001 - Desktop app: no OS-trusted code signing / no in-app auto-update",
+        "title": "AR-001 (Desktop app: no OS-trusted code signing / no in-app auto-update)",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-001-desktop-app-no-os-trusted-code-signing-no-in-app-auto-update",
         "domain": "agenstra"
@@ -20635,7 +20659,7 @@
       "id": "concept:agenstra-ar-002-web-frontends-csp-unsafe-inline-unsafe-eval-monaco",
       "type": "concept",
       "attrs": {
-        "title": "AR-002 - Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)",
+        "title": "AR-002 (Web frontends: CSP `unsafe-inline` / `unsafe-eval`, Monaco)",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-002-web-frontends-csp-unsafe-inline-unsafe-eval-monaco",
         "domain": "agenstra"
@@ -20645,7 +20669,7 @@
       "id": "concept:agenstra-ar-003-backend-authentication-method-resolution",
       "type": "concept",
       "attrs": {
-        "title": "AR-003 - Backend authentication method resolution",
+        "title": "AR-003 (Backend authentication method resolution)",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-003-backend-authentication-method-resolution",
         "domain": "agenstra"
@@ -20655,7 +20679,7 @@
       "id": "concept:agenstra-ar-004-desktop-window-open-policy-native-agent-console",
       "type": "concept",
       "attrs": {
-        "title": "AR-004 - Desktop window open policy (`native-agent-console`)",
+        "title": "AR-004 (Desktop window open policy, `native-agent-console`)",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-004-desktop-window-open-policy-native-agent-console",
         "domain": "agenstra"
@@ -20665,7 +20689,7 @@
       "id": "concept:agenstra-ar-005-ci-local-trivy-unfixed-vulnerabilities-not-gated",
       "type": "concept",
       "attrs": {
-        "title": "AR-005 - CI / local Trivy: unfixed vulnerabilities not gated",
+        "title": "AR-005 (CI / local Trivy: unfixed vulnerabilities not gated)",
         "docPath": "docs/agenstra/security/accepted-risks.md",
         "sectionAnchor": "ar-005-ci-local-trivy-unfixed-vulnerabilities-not-gated",
         "domain": "agenstra"
@@ -20925,7 +20949,7 @@
       "id": "concept:agenstra-agent-controller-remote-client-endpoints-ssrf",
       "type": "concept",
       "attrs": {
-        "title": "Agent Controller - remote client endpoints (SSRF)",
+        "title": "Agent Controller (remote client endpoints, SSRF)",
         "docPath": "docs/agenstra/security/operational-hardening.md",
         "sectionAnchor": "agent-controller-remote-client-endpoints-ssrf",
         "domain": "agenstra"
@@ -20935,7 +20959,7 @@
       "id": "concept:agenstra-http-proxy-to-remote-agent-manager-headers",
       "type": "concept",
       "attrs": {
-        "title": "HTTP proxy to remote agent-manager - headers",
+        "title": "HTTP proxy to remote agent-manager (headers)",
         "docPath": "docs/agenstra/security/operational-hardening.md",
         "sectionAnchor": "http-proxy-to-remote-agent-manager-headers",
         "domain": "agenstra"
@@ -20995,7 +21019,7 @@
       "id": "concept:agenstra-electron-shell-new-windows",
       "type": "concept",
       "attrs": {
-        "title": "Electron shell - new windows",
+        "title": "Electron shell (new windows)",
         "docPath": "docs/agenstra/security/operational-hardening.md",
         "sectionAnchor": "electron-shell-new-windows",
         "domain": "agenstra"
@@ -21435,7 +21459,7 @@
       "id": "concept:decabill-external-resources",
       "type": "concept",
       "attrs": {
-        "title": "External Resources",
+        "title": "External resources",
         "docPath": "docs/decabill/README.md",
         "sectionAnchor": "external-resources",
         "domain": "decabill"
@@ -21452,12 +21476,12 @@
       }
     },
     {
-      "id": "concept:decabill-ai-agents-decabill",
+      "id": "concept:decabill-ai-agents-context-agenstra",
       "type": "concept",
       "attrs": {
-        "title": "AI Agents (Decabill)",
+        "title": "AI Agents Context (.agenstra)",
         "docPath": "docs/decabill/ai-agents/README.md",
-        "sectionAnchor": "ai-agents-decabill",
+        "sectionAnchor": "ai-agents-context-agenstra",
         "domain": "decabill"
       }
     },
@@ -21522,12 +21546,12 @@
       }
     },
     {
-      "id": "concept:decabill-related-product-docs",
+      "id": "concept:decabill-related-documentation",
       "type": "concept",
       "attrs": {
-        "title": "Related product docs",
+        "title": "Related documentation",
         "docPath": "docs/decabill/ai-agents/README.md",
-        "sectionAnchor": "related-product-docs",
+        "sectionAnchor": "related-documentation",
         "domain": "decabill"
       }
     },
@@ -21568,16 +21592,6 @@
         "title": "Usage",
         "docPath": "docs/decabill/ai-agents/agentctx.md",
         "sectionAnchor": "usage",
-        "domain": "decabill"
-      }
-    },
-    {
-      "id": "concept:decabill-related",
-      "type": "concept",
-      "attrs": {
-        "title": "Related",
-        "docPath": "docs/decabill/ai-agents/agentctx.md",
-        "sectionAnchor": "related",
         "domain": "decabill"
       }
     },
@@ -22018,16 +22032,6 @@
         "title": "Generated Client Package",
         "docPath": "docs/decabill/api-reference/README.md",
         "sectionAnchor": "generated-client-package",
-        "domain": "decabill"
-      }
-    },
-    {
-      "id": "concept:decabill-related-documentation",
-      "type": "concept",
-      "attrs": {
-        "title": "Related Documentation",
-        "docPath": "docs/decabill/api-reference/README.md",
-        "sectionAnchor": "related-documentation",
         "domain": "decabill"
       }
     },
@@ -23802,16 +23806,6 @@
       }
     },
     {
-      "id": "concept:decabill-related-code",
-      "type": "concept",
-      "attrs": {
-        "title": "Related code",
-        "docPath": "docs/decabill/features/automatic-price-recalculation.md",
-        "sectionAnchor": "related-code",
-        "domain": "decabill"
-      }
-    },
-    {
       "id": "concept:decabill-backorders",
       "type": "concept",
       "attrs": {
@@ -23938,16 +23932,6 @@
         "title": "Admin Projects",
         "docPath": "docs/decabill/features/billing-administration.md",
         "sectionAnchor": "admin-projects",
-        "domain": "decabill"
-      }
-    },
-    {
-      "id": "concept:decabill-related-admin-pages",
-      "type": "concept",
-      "attrs": {
-        "title": "Related Admin Pages",
-        "docPath": "docs/decabill/features/billing-administration.md",
-        "sectionAnchor": "related-admin-pages",
         "domain": "decabill"
       }
     },
@@ -24432,12 +24416,12 @@
       }
     },
     {
-      "id": "concept:decabill-delivery-retries",
+      "id": "concept:decabill-delivery-and-retries",
       "type": "concept",
       "attrs": {
-        "title": "Delivery & retries",
+        "title": "Delivery and retries",
         "docPath": "docs/decabill/features/email-notifications.md",
-        "sectionAnchor": "delivery-retries",
+        "sectionAnchor": "delivery-and-retries",
         "domain": "decabill"
       }
     },
@@ -25002,16 +24986,6 @@
       }
     },
     {
-      "id": "concept:decabill-related-docs",
-      "type": "concept",
-      "attrs": {
-        "title": "Related docs",
-        "docPath": "docs/decabill/features/promotions.md",
-        "sectionAnchor": "related-docs",
-        "domain": "decabill"
-      }
-    },
-    {
       "id": "concept:decabill-public-statutory-withdrawal",
       "type": "concept",
       "attrs": {
@@ -25542,16 +25516,6 @@
       }
     },
     {
-      "id": "concept:decabill-delivery-and-retries",
-      "type": "concept",
-      "attrs": {
-        "title": "Delivery and retries",
-        "docPath": "docs/decabill/features/webhooks.md",
-        "sectionAnchor": "delivery-and-retries",
-        "domain": "decabill"
-      }
-    },
-    {
       "id": "concept:decabill-delivery-log-retention",
       "type": "concept",
       "attrs": {
@@ -25845,7 +25809,7 @@
       "id": "concept:decabill-dr-001-provisioning-ssh-cloud-init-templates",
       "type": "concept",
       "attrs": {
-        "title": "DR-001 - Provisioning SSH (cloud-init templates)",
+        "title": "DR-001 (Provisioning SSH, cloud-init templates)",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-001-provisioning-ssh-cloud-init-templates",
         "domain": "decabill"
@@ -25855,7 +25819,7 @@
       "id": "concept:decabill-dr-002-billing-multi-tenant-api-key-scope-static-api-key-tenant-id-unset",
       "type": "concept",
       "attrs": {
-        "title": "DR-002 - Billing multi-tenant API key scope (`STATIC_API_KEY_TENANT_ID` unset)",
+        "title": "DR-002 (Billing multi-tenant API key scope, `STATIC_API_KEY_TENANT_ID` unset)",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-002-billing-multi-tenant-api-key-scope-static-api-key-tenant-id-unset",
         "domain": "decabill"
@@ -25865,7 +25829,7 @@
       "id": "concept:decabill-dr-003-web-frontends-csp-unsafe-inline-unsafe-eval-monaco",
       "type": "concept",
       "attrs": {
-        "title": "DR-003 - Web frontends: CSP `unsafe-inline` / `unsafe-eval` (Monaco)",
+        "title": "DR-003 (Web frontends: CSP `unsafe-inline` / `unsafe-eval`, Monaco)",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-003-web-frontends-csp-unsafe-inline-unsafe-eval-monaco",
         "domain": "decabill"
@@ -25875,7 +25839,7 @@
       "id": "concept:decabill-dr-004-backend-authentication-method-resolution",
       "type": "concept",
       "attrs": {
-        "title": "DR-004 - Backend authentication method resolution",
+        "title": "DR-004 (Backend authentication method resolution)",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-004-backend-authentication-method-resolution",
         "domain": "decabill"
@@ -25885,7 +25849,7 @@
       "id": "concept:decabill-dr-005-ci-local-trivy-unfixed-vulnerabilities-not-gated",
       "type": "concept",
       "attrs": {
-        "title": "DR-005 - CI / local Trivy: unfixed vulnerabilities not gated",
+        "title": "DR-005 (CI / local Trivy: unfixed vulnerabilities not gated)",
         "docPath": "docs/decabill/security/accepted-risks.md",
         "sectionAnchor": "dr-005-ci-local-trivy-unfixed-vulnerabilities-not-gated",
         "domain": "decabill"
@@ -33835,6 +33799,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/ssh-access-granted",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/templates/subscription-cancel-scheduled",
       "type": "contains"
     },
@@ -35375,6 +35344,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
       "type": "contains"
     },
@@ -36170,6 +36144,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.ssh_access_granted",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.updated",
       "type": "contains"
     },
@@ -36765,7 +36744,7 @@
     },
     {
       "from": "file:docs/agenstra/ai-agents/agentctx.md",
-      "to": "concept:agenstra-related",
+      "to": "concept:agenstra-related-documentation",
       "type": "contains"
     },
     {
@@ -36805,7 +36784,7 @@
     },
     {
       "from": "file:docs/agenstra/ai-agents/agents.md",
-      "to": "concept:agenstra-related",
+      "to": "concept:agenstra-related-documentation",
       "type": "contains"
     },
     {
@@ -36840,7 +36819,7 @@
     },
     {
       "from": "file:docs/agenstra/ai-agents/commands.md",
-      "to": "concept:agenstra-related",
+      "to": "concept:agenstra-related-documentation",
       "type": "contains"
     },
     {
@@ -36915,7 +36894,7 @@
     },
     {
       "from": "file:docs/agenstra/ai-agents/mcp-definitions.md",
-      "to": "concept:agenstra-related",
+      "to": "concept:agenstra-related-documentation",
       "type": "contains"
     },
     {
@@ -36975,7 +36954,7 @@
     },
     {
       "from": "file:docs/agenstra/ai-agents/rules.md",
-      "to": "concept:agenstra-related",
+      "to": "concept:agenstra-related-documentation",
       "type": "contains"
     },
     {
@@ -37030,7 +37009,7 @@
     },
     {
       "from": "file:docs/agenstra/ai-agents/skills.md",
-      "to": "concept:agenstra-related",
+      "to": "concept:agenstra-related-documentation",
       "type": "contains"
     },
     {
@@ -38904,6 +38883,11 @@
       "type": "contains"
     },
     {
+      "from": "file:docs/agenstra/features/web-ide.md",
+      "to": "concept:agenstra-external-resources",
+      "type": "contains"
+    },
+    {
       "from": "file:docs/agenstra/features/webhooks.md",
       "to": "concept:agenstra-webhooks-agenstra",
       "type": "contains"
@@ -39464,6 +39448,11 @@
       "type": "contains"
     },
     {
+      "from": "file:docs/agenstra/security/vulnerability-reporting-and-artifacts.md",
+      "to": "concept:agenstra-external-resources",
+      "type": "contains"
+    },
+    {
       "from": "file:docs/agenstra/troubleshooting/README.md",
       "to": "concept:agenstra-troubleshooting-documentation",
       "type": "contains"
@@ -39695,7 +39684,7 @@
     },
     {
       "from": "file:docs/decabill/ai-agents/README.md",
-      "to": "concept:decabill-ai-agents-decabill",
+      "to": "concept:decabill-ai-agents-context-agenstra",
       "type": "contains"
     },
     {
@@ -39730,7 +39719,7 @@
     },
     {
       "from": "file:docs/decabill/ai-agents/README.md",
-      "to": "concept:decabill-related-product-docs",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -39755,7 +39744,7 @@
     },
     {
       "from": "file:docs/decabill/ai-agents/agentctx.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -39795,7 +39784,7 @@
     },
     {
       "from": "file:docs/decabill/ai-agents/agents.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -39830,7 +39819,7 @@
     },
     {
       "from": "file:docs/decabill/ai-agents/commands.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -39915,7 +39904,7 @@
     },
     {
       "from": "file:docs/decabill/ai-agents/knowledge-graph.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -39950,7 +39939,7 @@
     },
     {
       "from": "file:docs/decabill/ai-agents/mcp-definitions.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -40010,7 +39999,7 @@
     },
     {
       "from": "file:docs/decabill/ai-agents/rules.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -40065,7 +40054,7 @@
     },
     {
       "from": "file:docs/decabill/ai-agents/skills.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -41085,7 +41074,7 @@
     },
     {
       "from": "file:docs/decabill/features/addons.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -41125,7 +41114,7 @@
     },
     {
       "from": "file:docs/decabill/features/advance-billing-and-yearly-interval.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -41215,7 +41204,7 @@
     },
     {
       "from": "file:docs/decabill/features/auto-billing.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -41280,7 +41269,7 @@
     },
     {
       "from": "file:docs/decabill/features/automatic-price-recalculation.md",
-      "to": "concept:decabill-related-code",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -41356,11 +41345,6 @@
     {
       "from": "file:docs/decabill/features/billing-administration.md",
       "to": "concept:decabill-admin-projects",
-      "type": "contains"
-    },
-    {
-      "from": "file:docs/decabill/features/billing-administration.md",
-      "to": "concept:decabill-related-admin-pages",
       "type": "contains"
     },
     {
@@ -41675,7 +41659,7 @@
     },
     {
       "from": "file:docs/decabill/features/email-notifications.md",
-      "to": "concept:decabill-delivery-retries",
+      "to": "concept:decabill-delivery-and-retries",
       "type": "contains"
     },
     {
@@ -41889,6 +41873,11 @@
       "type": "contains"
     },
     {
+      "from": "file:docs/decabill/features/payment-processing.md",
+      "to": "concept:decabill-external-resources",
+      "type": "contains"
+    },
+    {
       "from": "file:docs/decabill/features/project-board.md",
       "to": "concept:decabill-project-board",
       "type": "contains"
@@ -42045,7 +42034,7 @@
     },
     {
       "from": "file:docs/decabill/features/promotions.md",
-      "to": "concept:decabill-related-docs",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -42095,7 +42084,7 @@
     },
     {
       "from": "file:docs/decabill/features/public-withdrawal.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -42315,7 +42304,7 @@
     },
     {
       "from": "file:docs/decabill/features/subscription-config-change.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -42420,7 +42409,7 @@
     },
     {
       "from": "file:docs/decabill/features/vat-and-tax-treatment.md",
-      "to": "concept:decabill-related",
+      "to": "concept:decabill-related-documentation",
       "type": "contains"
     },
     {
@@ -42901,6 +42890,11 @@
     {
       "from": "file:docs/decabill/security/vulnerability-reporting-and-artifacts.md",
       "to": "concept:decabill-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/security/vulnerability-reporting-and-artifacts.md",
+      "to": "concept:decabill-external-resources",
       "type": "contains"
     },
     {
@@ -45946,6 +45940,16 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
       "type": "implements"
     },
     {
@@ -50849,6 +50853,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-server.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/service-plans.repository.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-update.job-handler.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
       "type": "injects"
@@ -53935,6 +53944,11 @@
     },
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscription-items.service.ts",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscription-items.service.ts",
       "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
       "type": "calls"
     },
@@ -54831,26 +54845,6 @@
     {
       "from": "concept:agenstra-documentation-structure",
       "to": "api:HTTP:GET:/config",
-      "type": "documents"
-    },
-    {
-      "from": "concept:agenstra-related",
-      "to": "api:HTTP:GET:/knowledge",
-      "type": "documents"
-    },
-    {
-      "from": "concept:agenstra-related",
-      "to": "api:HTTP:POST:/knowledge",
-      "type": "documents"
-    },
-    {
-      "from": "concept:agenstra-related",
-      "to": "api:HTTP:GET:/agents",
-      "type": "documents"
-    },
-    {
-      "from": "concept:agenstra-related",
-      "to": "api:HTTP:POST:/agents",
       "type": "documents"
     },
     {
@@ -56724,16 +56718,6 @@
       "type": "documents"
     },
     {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:GET:/customer-profile",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:POST:/customer-profile",
-      "type": "documents"
-    },
-    {
       "from": "concept:decabill-agents-and-subagents",
       "to": "api:HTTP:GET:/agents",
       "type": "documents"
@@ -58085,6 +58069,11 @@
     },
     {
       "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
       "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
       "type": "documents"
     },
@@ -58454,31 +58443,6 @@
       "type": "documents"
     },
     {
-      "from": "concept:decabill-related-admin-pages",
-      "to": "api:HTTP:GET:/users",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related-admin-pages",
-      "to": "api:HTTP:POST:/users",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related-admin-pages",
-      "to": "api:HTTP:GET:/customer-profile",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related-admin-pages",
-      "to": "api:HTTP:POST:/customer-profile",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related-admin-pages",
-      "to": "api:HTTP:GET:/projects",
-      "type": "documents"
-    },
-    {
       "from": "concept:decabill-webhook-notifications",
       "to": "api:HTTP:GET:/admin/billing/webhooks/event-types",
       "type": "documents"
@@ -58831,6 +58795,26 @@
     {
       "from": "concept:decabill-extensibility",
       "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-overview-page",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-overview-page",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-overview-page",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-overview-page",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
       "type": "documents"
     },
     {
@@ -59519,16 +59503,6 @@
       "type": "documents"
     },
     {
-      "from": "concept:decabill-related-docs",
-      "to": "api:HTTP:GET:/subscriptions",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related-docs",
-      "to": "api:HTTP:POST:/subscriptions",
-      "type": "documents"
-    },
-    {
       "from": "concept:decabill-public-statutory-withdrawal",
       "to": "api:HTTP:GET:/subscriptions",
       "type": "documents"
@@ -59611,6 +59585,31 @@
     {
       "from": "concept:decabill-custom-service-kind",
       "to": "api:HTTP:POST:/cloud-init-configs",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-ssh-access",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-ssh-access",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-ssh-access",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-ssh-access",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-ssh-access",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
       "type": "documents"
     },
     {
@@ -61964,11 +61963,6 @@
       "type": "belongs_to"
     },
     {
-      "from": "concept:agenstra-related",
-      "to": "domain:agenstra",
-      "type": "belongs_to"
-    },
-    {
       "from": "concept:agenstra-agents-and-subagents",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -63959,7 +63953,7 @@
       "type": "belongs_to"
     },
     {
-      "from": "concept:decabill-ai-agents-decabill",
+      "from": "concept:decabill-ai-agents-context-agenstra",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -63994,7 +63988,7 @@
       "type": "belongs_to"
     },
     {
-      "from": "concept:decabill-related-product-docs",
+      "from": "concept:decabill-related-documentation",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -64015,11 +64009,6 @@
     },
     {
       "from": "concept:decabill-usage",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
-      "from": "concept:decabill-related",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -64240,11 +64229,6 @@
     },
     {
       "from": "concept:decabill-generated-client-package",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
-      "from": "concept:decabill-related-documentation",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -65134,11 +65118,6 @@
       "type": "belongs_to"
     },
     {
-      "from": "concept:decabill-related-code",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
       "from": "concept:decabill-backorders",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -65200,11 +65179,6 @@
     },
     {
       "from": "concept:decabill-admin-projects",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
-      "from": "concept:decabill-related-admin-pages",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -65449,7 +65423,7 @@
       "type": "belongs_to"
     },
     {
-      "from": "concept:decabill-delivery-retries",
+      "from": "concept:decabill-delivery-and-retries",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -65734,11 +65708,6 @@
       "type": "belongs_to"
     },
     {
-      "from": "concept:decabill-related-docs",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
       "from": "concept:decabill-public-statutory-withdrawal",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -66000,11 +65969,6 @@
     },
     {
       "from": "concept:decabill-payload-examples",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
-      "from": "concept:decabill-delivery-and-retries",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

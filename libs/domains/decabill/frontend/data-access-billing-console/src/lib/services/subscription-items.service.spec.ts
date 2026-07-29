@@ -119,4 +119,20 @@ describe('SubscriptionItemsService', () => {
       req.flush({ success: true });
     });
   });
+
+  describe('getSshAccessKey', () => {
+    it('should GET ssh access key', (done) => {
+      const response = { privateKey: '-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n-----END OPENSSH PRIVATE KEY-----' };
+
+      service.getSshAccessKey('sub-1', 'item-1').subscribe((result) => {
+        expect(result).toEqual(response);
+        done();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/subscriptions/sub-1/items/item-1/ssh-access-key`);
+
+      expect(req.request.method).toBe('GET');
+      req.flush(response);
+    });
+  });
 });

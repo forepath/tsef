@@ -183,22 +183,23 @@ Active subscriptions can change server type and addons without switching plans. 
 
 ## API Endpoints
 
-| Method | Path                                                             | Purpose                   |
-| ------ | ---------------------------------------------------------------- | ------------------------- |
-| GET    | `/subscriptions`                                                 | List user's subscriptions |
-| POST   | `/subscriptions`                                                 | Create subscription       |
-| GET    | `/subscriptions/{subscriptionId}`                                | Get subscription detail   |
-| POST   | `/subscriptions/{subscriptionId}/cancel`                         | Cancel subscription       |
-| POST   | `/subscriptions/{subscriptionId}/withdraw`                       | Statutory withdrawal      |
-| POST   | `/subscriptions/{subscriptionId}/resume`                         | Resume pending cancel     |
-| GET    | `/subscriptions/{subscriptionId}/config-change/eligibility`      | Config-change options     |
-| POST   | `/subscriptions/{subscriptionId}/config-change/preview`          | Advisory pricing delta    |
-| POST   | `/subscriptions/{subscriptionId}/config-change`                  | Submit config change      |
-| GET    | `/subscriptions/{subscriptionId}/items`                          | List subscription items   |
-| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/server-info`     | Live server info          |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/start`   | Start server              |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/stop`    | Stop server               |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/restart` | Restart server            |
+| Method | Path                                                             | Purpose                                               |
+| ------ | ---------------------------------------------------------------- | ----------------------------------------------------- |
+| GET    | `/subscriptions`                                                 | List user's subscriptions                             |
+| POST   | `/subscriptions`                                                 | Create subscription                                   |
+| GET    | `/subscriptions/{subscriptionId}`                                | Get subscription detail                               |
+| POST   | `/subscriptions/{subscriptionId}/cancel`                         | Cancel subscription                                   |
+| POST   | `/subscriptions/{subscriptionId}/withdraw`                       | Statutory withdrawal                                  |
+| POST   | `/subscriptions/{subscriptionId}/resume`                         | Resume pending cancel                                 |
+| GET    | `/subscriptions/{subscriptionId}/config-change/eligibility`      | Config-change options                                 |
+| POST   | `/subscriptions/{subscriptionId}/config-change/preview`          | Advisory pricing delta                                |
+| POST   | `/subscriptions/{subscriptionId}/config-change`                  | Submit config change                                  |
+| GET    | `/subscriptions/{subscriptionId}/items`                          | List subscription items (includes `sshAccessGranted`) |
+| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/server-info`     | Live server info                                      |
+| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key`  | Reveal SSH key (one-time)                             |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/start`   | Start server                                          |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/stop`    | Stop server                                           |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/restart` | Restart server                                        |
 
 See [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) for schemas.
 

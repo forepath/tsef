@@ -82,7 +82,14 @@ describe('BILLING_EMAIL_SUBJECTS', () => {
         'subscription.created',
         'subscription.withdrawn',
         'subscription.price_changed',
+        'subscription.ssh_access_granted',
       ]),
+    );
+  });
+
+  it('builds ssh access granted subject', () => {
+    expect(resolveEmailSubject(BILLING_EMAIL_SUBJECTS, 'ssh-access-granted', { planName: 'Pro' })).toBe(
+      'SSH access key revealed: Pro',
     );
   });
 

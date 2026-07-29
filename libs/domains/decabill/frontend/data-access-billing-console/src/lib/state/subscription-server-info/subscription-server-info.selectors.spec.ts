@@ -101,6 +101,7 @@ describe('Subscription Server Info Selectors', () => {
         serverInfoBySubscriptionId: { 'sub-1': mockServerInfo },
         activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
         provisioningStatusBySubscriptionId: { 'sub-1': 'active' },
+        serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
       });
       const rootState = {
         subscriptions: subscriptionsState,
@@ -114,6 +115,34 @@ describe('Subscription Server Info Selectors', () => {
       expect(result[0].itemId).toBe('item-1');
       expect(result[0].service).toBe('controller');
       expect(result[0].provisioningStatus).toBe('active');
+      expect(result[0].sshAccessGranted).toBe(false);
+      expect(result[0].serviceTypeName).toBe('Hetzner');
+    });
+
+    it('should map sshAccessGranted from state', () => {
+      const subscriptionsState = {
+        entities: [mockSubscription],
+        selectedSubscription: null,
+        loading: false,
+        loadingSubscription: false,
+        creating: false,
+        canceling: false,
+        resuming: false,
+        error: null,
+      };
+      const serverInfoState = createServerInfoState({
+        serverInfoBySubscriptionId: { 'sub-1': mockServerInfo },
+        activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
+        provisioningStatusBySubscriptionId: { 'sub-1': 'active' },
+        sshAccessGrantedBySubscriptionId: { 'sub-1': true },
+      });
+      const rootState = {
+        subscriptions: subscriptionsState,
+        subscriptionServerInfo: serverInfoState,
+      };
+      const result = selectSubscriptionsWithServerInfo(rootState as never);
+
+      expect(result[0].sshAccessGranted).toBe(true);
     });
 
     it('should include active subscriptions with pending provisioning items', () => {

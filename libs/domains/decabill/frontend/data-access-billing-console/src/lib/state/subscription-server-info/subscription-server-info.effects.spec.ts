@@ -51,6 +51,7 @@ describe('Subscription Server Info Effects', () => {
     id: 'item-1',
     subscriptionId: 'sub-1',
     serviceTypeId: 'st-1',
+    serviceTypeName: 'Hetzner',
     provisioningStatus: 'active',
   };
   const mockServerInfo: ServerInfoResponse = {
@@ -94,6 +95,8 @@ describe('Subscription Server Info Effects', () => {
           activeItemIdBySubscriptionId: {},
           serviceBySubscriptionId: {},
           provisioningStatusBySubscriptionId: {},
+          sshAccessGrantedBySubscriptionId: {},
+          serviceTypeNameBySubscriptionId: {},
         }),
       );
       done();
@@ -114,6 +117,8 @@ describe('Subscription Server Info Effects', () => {
           activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
           serviceBySubscriptionId: { 'sub-1': 'controller' },
           provisioningStatusBySubscriptionId: { 'sub-1': 'active' },
+          sshAccessGrantedBySubscriptionId: { 'sub-1': false },
+          serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
         }),
       );
       expect(subscriptionItemsService.listSubscriptionItems).toHaveBeenCalledWith('sub-1');
@@ -137,6 +142,8 @@ describe('Subscription Server Info Effects', () => {
           activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
           serviceBySubscriptionId: { 'sub-1': 'controller' },
           provisioningStatusBySubscriptionId: { 'sub-1': 'pending' },
+          sshAccessGrantedBySubscriptionId: { 'sub-1': false },
+          serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
         }),
       );
       expect(subscriptionItemsService.getServerInfo).not.toHaveBeenCalled();
@@ -159,6 +166,8 @@ describe('Subscription Server Info Effects', () => {
           activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
           serviceBySubscriptionId: { 'sub-1': 'controller' },
           provisioningStatusBySubscriptionId: { 'sub-1': 'failed' },
+          sshAccessGrantedBySubscriptionId: { 'sub-1': false },
+          serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
         }),
       );
       expect(subscriptionItemsService.getServerInfo).not.toHaveBeenCalled();
@@ -198,6 +207,8 @@ describe('Subscription Server Info Effects', () => {
           activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
           serviceBySubscriptionId: { 'sub-1': 'controller' },
           provisioningStatusBySubscriptionId: { 'sub-1': 'active' },
+          sshAccessGrantedBySubscriptionId: { 'sub-1': false },
+          serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
         }),
       );
       expect(subscriptionItemsService.listSubscriptionItems).toHaveBeenCalledTimes(1);

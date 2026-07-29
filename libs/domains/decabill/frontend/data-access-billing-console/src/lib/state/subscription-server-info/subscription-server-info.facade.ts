@@ -2,7 +2,13 @@ import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { loadOverviewServerInfo, restartServer, startServer, stopServer } from './subscription-server-info.actions';
+import {
+  loadOverviewServerInfo,
+  markSshAccessGranted,
+  restartServer,
+  startServer,
+  stopServer,
+} from './subscription-server-info.actions';
 import type { ServerActionType } from './subscription-server-info.reducer';
 import type { SubscriptionWithServerInfo } from './subscription-server-info.selectors';
 import {
@@ -58,5 +64,9 @@ export class SubscriptionServerInfoFacade {
 
   restartServer(subscriptionId: string, itemId: string): void {
     this.store.dispatch(restartServer({ subscriptionId, itemId }));
+  }
+
+  markSshAccessGranted(subscriptionId: string): void {
+    this.store.dispatch(markSshAccessGranted({ subscriptionId }));
   }
 }

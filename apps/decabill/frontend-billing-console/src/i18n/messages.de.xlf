@@ -1384,6 +1384,70 @@
         <source>Restart server</source>
         <target>Server neu starten</target>
       </trans-unit>
+      <trans-unit id="featureOverview-sshAccessButtonTitle" datatype="html">
+        <source>Show SSH access key</source>
+        <target>SSH-Zugangsschlüssel anzeigen</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessGrantedButtonTitle" datatype="html">
+        <source>SSH access key already revealed</source>
+        <target>SSH-Zugangsschlüssel bereits angezeigt</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessGrantedBadge" datatype="html">
+        <source>SSH access granted</source>
+        <target>SSH-Zugang gewährt</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessGrantedBadgeTitle" datatype="html">
+        <source>SSH access granted</source>
+        <target>SSH-Zugang gewährt</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessConfirmTitle" datatype="html">
+        <source>Reveal SSH access key?</source>
+        <target>SSH-Zugangsschlüssel anzeigen?</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessConfirmBody" datatype="html">
+        <source> Viewing the SSH access key for this service may limit technical support for that specific service. The key can only be retrieved once. After you continue, this action cannot be repeated. </source>
+        <target> Das Anzeigen des SSH-Zugangsschlüssels für diesen Dienst kann den technischen Support für genau diesen Dienst einschränken. Der Schlüssel kann nur einmal abgerufen werden. Nach dem Fortfahren kann diese Aktion nicht wiederholt werden. </target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessCancel" datatype="html">
+        <source>Cancel</source>
+        <target>Abbrechen</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessConfirm" datatype="html">
+        <source>Reveal key</source>
+        <target>Schlüssel anzeigen</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessDisplayTitle" datatype="html">
+        <source>SSH access key</source>
+        <target>SSH-Zugangsschlüssel</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessDisplayHint" datatype="html">
+        <source> Store this private key securely. It will not be shown again in the billing console. </source>
+        <target> Bewahren Sie diesen privaten Schlüssel sicher auf. Er wird in der Billing-Konsole nicht erneut angezeigt. </target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessKeyLabel" datatype="html">
+        <source>SSH private key</source>
+        <target>SSH-Privatschlüssel</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessCopy" datatype="html">
+        <source>Copy</source>
+        <target>Kopieren</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessCopied" datatype="html">
+        <source>Copied</source>
+        <target>Kopiert</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessClose" datatype="html">
+        <source>Close</source>
+        <target>Schließen</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessAlreadyRevealed" datatype="html">
+        <source>The SSH access key has already been revealed for this service.</source>
+        <target>Der SSH-Zugangsschlüssel wurde für diesen Dienst bereits angezeigt.</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-sshAccessRevealFailed" datatype="html">
+        <source>Could not retrieve the SSH access key. Please try again or contact support.</source>
+        <target>Der SSH-Zugangsschlüssel konnte nicht abgerufen werden. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.</target>
+      </trans-unit>
       <trans-unit id="featureOverview-serverStatusUpdating" datatype="html">
         <source>Server status updating…</source>
         <target>Serverstatus wird aktualisiert…</target>

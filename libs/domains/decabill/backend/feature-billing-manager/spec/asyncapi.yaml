@@ -193,6 +193,27 @@ components:
             type: array
             items:
               type: object
+              properties:
+                subscriptionId: { type: string, format: uuid }
+                itemId: { type: string, format: uuid }
+                service: { type: string, enum: [controller, manager, custom] }
+                serviceTypeName:
+                  {
+                    type: string,
+                    description: User-facing service type name from the catalog,
+                  }
+                name: { type: string }
+                publicIp: { type: string }
+                privateIp: { type: string }
+                status: { type: string }
+                hostname: { type: string }
+                hostnameFqdn: { type: string }
+                sshAccessGranted:
+                  type: boolean
+                  description: True after the customer has revealed the provisioning SSH private key at least once
+                metadata:
+                  type: object
+                  additionalProperties: true
     SetProject:
       name: SetProject
       contentType: application/json

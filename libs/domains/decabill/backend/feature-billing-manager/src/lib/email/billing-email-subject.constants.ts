@@ -29,6 +29,7 @@ export const BILLING_EMAIL_SUBJECTS: EmailSubjectRegistry = {
   'addon-deactivated': (ctx) => `Addon deactivated: ${asString(ctx.addonName)}`,
   'addon-provision-failed': (ctx) => `Addon provisioning failed: ${asString(ctx.addonName)}`,
   'addon-teardown-failed': (ctx) => `Addon teardown failed: ${asString(ctx.addonName)}`,
+  'ssh-access-granted': (ctx) => `SSH access key revealed: ${asString(ctx.planName)}`,
 };
 
 export const BILLING_EMAIL_EVENTS = [
@@ -48,6 +49,7 @@ export const BILLING_EMAIL_EVENTS = [
   'subscription.config_changed',
   'subscription.config_change_failed',
   'subscription.price_changed',
+  'subscription.ssh_access_granted',
   'addon.activated',
   'addon.deactivated',
   'addon.provision_failed',
