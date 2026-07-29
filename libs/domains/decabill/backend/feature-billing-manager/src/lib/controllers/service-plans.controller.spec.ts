@@ -221,7 +221,7 @@ describe('ServicePlansController', () => {
       findAll: jest.fn(),
       findByIdOrThrow: jest.fn().mockResolvedValue({
         ...basePlanRow,
-        providerConfigDefaults: { service: 'manager', region: 'fsn1' },
+        providerConfigDefaults: { service: 'agenstra-manager', region: 'fsn1' },
       }),
       create: jest.fn(),
       update,
@@ -400,7 +400,7 @@ describe('ServicePlansController', () => {
       billingIntervalType: BillingIntervalType.MONTH,
       billingIntervalValue: 1,
       providerConfigDefaults: {
-        service: 'manager',
+        service: 'agenstra-manager',
         region: 'fsn1',
         serverType: 'cx23',
       },
@@ -409,15 +409,15 @@ describe('ServicePlansController', () => {
     expect(cloudInitConfigServiceStub.assertActiveConfigForPlanDefaults).toHaveBeenCalledWith(
       basePlanRow.serviceTypeId,
       expect.objectContaining({
-        provisioningOptions: [{ type: 'integrated', service: 'manager' }],
-        service: 'manager',
+        provisioningOptions: [{ type: 'integrated', service: 'agenstra-manager' }],
+        service: 'agenstra-manager',
       }),
     );
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
         providerConfigDefaults: expect.objectContaining({
-          provisioningOptions: [{ type: 'integrated', service: 'manager' }],
-          service: 'manager',
+          provisioningOptions: [{ type: 'integrated', service: 'agenstra-manager' }],
+          service: 'agenstra-manager',
         }),
       }),
     );
@@ -436,7 +436,7 @@ describe('ServicePlansController', () => {
 
     await controller.update('11111111-1111-4111-8111-111111111111', {
       providerConfigDefaults: {
-        service: 'manager',
+        service: 'agenstra-manager',
         region: 'fsn1',
         serverType: 'cx23',
       },
@@ -446,8 +446,8 @@ describe('ServicePlansController', () => {
       '11111111-1111-4111-8111-111111111111',
       expect.objectContaining({
         providerConfigDefaults: expect.objectContaining({
-          provisioningOptions: [{ type: 'integrated', service: 'manager' }],
-          service: 'manager',
+          provisioningOptions: [{ type: 'integrated', service: 'agenstra-manager' }],
+          service: 'agenstra-manager',
         }),
       }),
     );
@@ -455,7 +455,12 @@ describe('ServicePlansController', () => {
 
   it('lists order provisioning options for a plan', async () => {
     const options = [
-      { optionKey: 'integrated:controller', type: 'integrated', service: 'controller', label: 'Agenstra Controller' },
+      {
+        optionKey: 'integrated:agenstra-controller',
+        type: 'integrated',
+        service: 'agenstra-controller',
+        label: 'Agenstra Controller',
+      },
     ];
     cloudInitConfigServiceStub.buildOrderProvisioningOptions.mockResolvedValue(options);
     const moduleRef = await setupRepositoryMock({

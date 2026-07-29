@@ -18,6 +18,10 @@ import { SubscriptionStatus } from '../entities/subscription.entity';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { SubscriptionService } from '../services/subscription.service';
 import { getBillingUserIdFromSocketUser } from '../utils/billing-socket-user.utils';
+import {
+  canonicalizeCloudInitService,
+  CloudInitServiceType,
+} from '../utils/cloud-init/integrated-provisioning-service';
 
 const MIN_POLL_MS = 10_000;
 const MAX_POLL_MS = 120_000;
@@ -45,7 +49,7 @@ function clampPollIntervalMs(requested: number | undefined): number {
 export interface DashboardStatusItemPayload {
   subscriptionId: string;
   itemId: string;
-  service: 'controller' | 'manager' | 'custom';
+  service: CloudInitServiceType;
   /** User-facing service type name from the catalog. */
   serviceTypeName: string;
   name: string;
@@ -221,7 +225,7 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
           items.push({
             subscriptionId: sub.id,
             itemId: activeItem.id,
-            service: activeItem.service ?? 'controller',
+            service: canonicalizeCloudInitService(activeItem.service),
             serviceTypeName: activeItem.serviceTypeName,
             name: info.name,
             publicIp: info.publicIp,

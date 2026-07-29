@@ -138,7 +138,7 @@ describe('BillingStatusGateway', () => {
           serviceTypeName: 'Hetzner',
           provisioningStatus: 'active',
           hostname: 'h1',
-          service: 'controller' as const,
+          service: 'agenstra-controller' as const,
           sshAccessGranted: true,
         },
       ]);
@@ -165,7 +165,7 @@ describe('BillingStatusGateway', () => {
             expect.objectContaining({
               subscriptionId: 'sub-a',
               itemId: 'item-1',
-              service: 'controller',
+              service: 'agenstra-controller',
               serviceTypeName: 'Hetzner',
               name: 'srv',
               publicIp: '1.1.1.1',

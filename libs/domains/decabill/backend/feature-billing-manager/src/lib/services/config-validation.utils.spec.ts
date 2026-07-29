@@ -49,4 +49,15 @@ describe('validateConfigSchema', () => {
 
     expect(errors.length).toBe(0);
   });
+
+  it('accepts canonical agenstra service ids against legacy service enums', () => {
+    const errors = validateConfigSchema(
+      {
+        properties: { service: { type: 'string', enum: ['controller', 'manager', 'custom'] } },
+      },
+      { service: 'agenstra-controller' },
+    );
+
+    expect(errors.length).toBe(0);
+  });
 });

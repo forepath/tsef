@@ -14,7 +14,7 @@ export interface SubscriptionWithServerInfo {
   subscription: SubscriptionResponse;
   serverInfo?: ServerInfoResponse;
   itemId: string;
-  /** Product service from active item config. Defaults to controller. */
+  /** Product service from active item config. Defaults to agenstra-controller. */
   service: ProvisioningServiceKind;
   provisioningStatus: ProvisioningStatus;
   /** True after the customer has revealed the provisioning SSH private key at least once. */
@@ -101,7 +101,7 @@ export const selectSubscriptionsWithServerInfo = createSelector(
         subscription,
         serverInfo: serverInfoBySubscriptionId[subscription.id],
         itemId: activeItemIdBySubscriptionId[subscription.id],
-        service: serviceBySubscriptionId[subscription.id] ?? 'controller',
+        service: serviceBySubscriptionId[subscription.id] ?? 'agenstra-controller',
         provisioningStatus: provisioningStatusBySubscriptionId[subscription.id] ?? 'active',
         sshAccessGranted: sshAccessGrantedBySubscriptionId[subscription.id] === true,
         serviceTypeName: serviceTypeNameBySubscriptionId[subscription.id],

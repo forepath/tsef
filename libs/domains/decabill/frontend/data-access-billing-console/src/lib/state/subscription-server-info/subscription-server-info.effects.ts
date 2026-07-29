@@ -97,7 +97,7 @@ export function loadOverviewServerInfoEffect(
             }
 
             activeItemIdBySubscriptionId[sub.id] = tracked.id;
-            serviceBySubscriptionId[sub.id] = tracked.service ?? 'controller';
+            serviceBySubscriptionId[sub.id] = tracked.service ?? 'agenstra-controller';
             provisioningStatusBySubscriptionId[sub.id] = tracked.provisioningStatus;
             sshAccessGrantedBySubscriptionId[sub.id] = tracked.sshAccessGranted === true;
             if (tracked.serviceTypeName?.trim()) {

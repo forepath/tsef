@@ -114,7 +114,12 @@ describe('ServicePlansService', () => {
   describe('getOrderProvisioningOptions', () => {
     it('should return order provisioning options for a plan', (done) => {
       const options = [
-        { optionKey: 'integrated:controller', type: 'integrated', service: 'controller', label: 'Agenstra Controller' },
+        {
+          optionKey: 'integrated:agenstra-controller',
+          type: 'integrated',
+          service: 'agenstra-controller',
+          label: 'Agenstra Controller',
+        },
       ];
 
       service.getOrderProvisioningOptions('sp-1').subscribe((result) => {

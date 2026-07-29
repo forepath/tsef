@@ -1,5 +1,11 @@
+import {
+  IntegratedProvisioningService,
+  allIntegratedProvisioningServices,
+  canonicalizeIntegratedProvisioningService,
+} from './cloud-init/integrated-provisioning-service';
+
 export type ProviderConfigFieldScope = 'server' | 'product' | 'internal';
-export type IntegratedProductService = 'controller' | 'manager';
+export type IntegratedProductService = IntegratedProvisioningService;
 
 export interface ConfigSchemaPropertyDefinition {
   type?: string;
@@ -12,6 +18,8 @@ export interface ConfigSchemaPropertyDefinition {
 }
 
 const INTERNAL_PROVIDER_KEYS = new Set(['service', 'cloudInitConfigId', 'cloudInitConfigIds', 'provisioningOptions']);
+
+const ALL_INTEGRATED_PRODUCT_SERVICES = allIntegratedProvisioningServices();
 
 export function getProviderConfigFieldScope(
   key: string,
@@ -38,12 +46,14 @@ export function getProductServicesForProperty(
   const services = property?.productServices;
 
   if (Array.isArray(services) && services.length > 0) {
-    return services.filter(
-      (service): service is IntegratedProductService => service === 'controller' || service === 'manager',
-    );
+    const canonical = services
+      .map((service) => (typeof service === 'string' ? canonicalizeIntegratedProvisioningService(service) : null))
+      .filter((service): service is IntegratedProductService => service !== null);
+
+    return [...new Set(canonical)];
   }
 
-  return ['controller', 'manager'];
+  return [...ALL_INTEGRATED_PRODUCT_SERVICES];
 }
 
 export function isProviderConfigPropertyVisible(property: ConfigSchemaPropertyDefinition | undefined): boolean {
@@ -98,15 +108,18 @@ export function getProductProviderConfigKeys(
 }
 
 export const PRODUCT_FIELD_SERVICES: Record<string, IntegratedProductService[]> = {
-  authenticationMethod: ['controller', 'manager'],
-  staticApiKey: ['controller', 'manager'],
-  smtp: ['controller', 'manager'],
-  keycloak: ['controller', 'manager'],
-  disableSignup: ['controller'],
-  hetznerApiToken: ['controller'],
-  digitaloceanApiToken: ['controller'],
-  git: ['manager'],
-  cursorApiKey: ['manager'],
+  authenticationMethod: [
+    IntegratedProvisioningService.AgenstraController,
+    IntegratedProvisioningService.AgenstraManager,
+  ],
+  staticApiKey: [IntegratedProvisioningService.AgenstraController, IntegratedProvisioningService.AgenstraManager],
+  smtp: [IntegratedProvisioningService.AgenstraController, IntegratedProvisioningService.AgenstraManager],
+  keycloak: [IntegratedProvisioningService.AgenstraController, IntegratedProvisioningService.AgenstraManager],
+  disableSignup: [IntegratedProvisioningService.AgenstraController],
+  hetznerApiToken: [IntegratedProvisioningService.AgenstraController],
+  digitaloceanApiToken: [IntegratedProvisioningService.AgenstraController],
+  git: [IntegratedProvisioningService.AgenstraManager],
+  cursorApiKey: [IntegratedProvisioningService.AgenstraManager],
 };
 
 /**
@@ -128,7 +141,7 @@ export function applyProviderConfigFieldScopes(
         return [key, { ...prop, scope: 'internal', visible: false }];
       }
 
-      const productServices = PRODUCT_FIELD_SERVICES[key] ?? ['controller', 'manager'];
+      const productServices = PRODUCT_FIELD_SERVICES[key] ?? [...ALL_INTEGRATED_PRODUCT_SERVICES];
 
       return [key, { ...prop, scope: 'product', visible: false, productServices }];
     }),

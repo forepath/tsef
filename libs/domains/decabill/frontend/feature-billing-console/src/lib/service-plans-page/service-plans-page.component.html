@@ -566,16 +566,25 @@
                   Choose which integrated stacks and CloudInit configs customers may pick when ordering this plan.
                 </p>
                 @if (
-                  serviceEnumIncludes(data.serviceTypes, data.providerDetails, createForm.serviceTypeId, 'controller')
+                  serviceEnumIncludes(
+                    data.serviceTypes,
+                    data.providerDetails,
+                    createForm.serviceTypeId,
+                    'agenstra-controller'
+                  )
                 ) {
                   <div class="form-check mb-2">
                     <input
                       type="checkbox"
                       class="form-check-input"
                       id="createProvisioningController"
-                      [checked]="isProvisioningOptionSelected('create', 'integrated:controller')"
+                      [checked]="isProvisioningOptionSelected('create', 'integrated:agenstra-controller')"
                       (change)="
-                        toggleProvisioningOption('create', 'integrated:controller', $any($event.target).checked)
+                        toggleProvisioningOption(
+                          'create',
+                          'integrated:agenstra-controller',
+                          $any($event.target).checked
+                        )
                       "
                       [disabled]="(creating$ | async) === true"
                     />
@@ -583,15 +592,22 @@
                   </div>
                 }
                 @if (
-                  serviceEnumIncludes(data.serviceTypes, data.providerDetails, createForm.serviceTypeId, 'manager')
+                  serviceEnumIncludes(
+                    data.serviceTypes,
+                    data.providerDetails,
+                    createForm.serviceTypeId,
+                    'agenstra-manager'
+                  )
                 ) {
                   <div class="form-check mb-2">
                     <input
                       type="checkbox"
                       class="form-check-input"
                       id="createProvisioningManager"
-                      [checked]="isProvisioningOptionSelected('create', 'integrated:manager')"
-                      (change)="toggleProvisioningOption('create', 'integrated:manager', $any($event.target).checked)"
+                      [checked]="isProvisioningOptionSelected('create', 'integrated:agenstra-manager')"
+                      (change)="
+                        toggleProvisioningOption('create', 'integrated:agenstra-manager', $any($event.target).checked)
+                      "
                       [disabled]="(creating$ | async) === true"
                     />
                     <label class="form-check-label" for="createProvisioningManager">Agenstra Manager</label>
@@ -1438,30 +1454,44 @@
                   </div>
                 }
                 @if (
-                  serviceEnumIncludes(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId, 'controller')
+                  serviceEnumIncludes(
+                    data.serviceTypes,
+                    data.providerDetails,
+                    editingPlan.serviceTypeId,
+                    'agenstra-controller'
+                  )
                 ) {
                   <div class="form-check mb-2">
                     <input
                       type="checkbox"
                       class="form-check-input"
                       id="editProvisioningController"
-                      [checked]="isProvisioningOptionSelected('edit', 'integrated:controller')"
-                      (change)="toggleProvisioningOption('edit', 'integrated:controller', $any($event.target).checked)"
+                      [checked]="isProvisioningOptionSelected('edit', 'integrated:agenstra-controller')"
+                      (change)="
+                        toggleProvisioningOption('edit', 'integrated:agenstra-controller', $any($event.target).checked)
+                      "
                       [disabled]="(updating$ | async) === true"
                     />
                     <label class="form-check-label" for="editProvisioningController">Agenstra Controller</label>
                   </div>
                 }
                 @if (
-                  serviceEnumIncludes(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId, 'manager')
+                  serviceEnumIncludes(
+                    data.serviceTypes,
+                    data.providerDetails,
+                    editingPlan.serviceTypeId,
+                    'agenstra-manager'
+                  )
                 ) {
                   <div class="form-check mb-2">
                     <input
                       type="checkbox"
                       class="form-check-input"
                       id="editProvisioningManager"
-                      [checked]="isProvisioningOptionSelected('edit', 'integrated:manager')"
-                      (change)="toggleProvisioningOption('edit', 'integrated:manager', $any($event.target).checked)"
+                      [checked]="isProvisioningOptionSelected('edit', 'integrated:agenstra-manager')"
+                      (change)="
+                        toggleProvisioningOption('edit', 'integrated:agenstra-manager', $any($event.target).checked)
+                      "
                       [disabled]="(updating$ | async) === true"
                     />
                     <label class="form-check-label" for="editProvisioningManager">Agenstra Manager</label>

@@ -152,13 +152,13 @@ export interface CloudInitConfigOrderField {
 }
 
 export type PlanProvisioningOption =
-  | { type: 'integrated'; service: 'controller' | 'manager' }
+  | { type: 'integrated'; service: 'agenstra-controller' | 'agenstra-manager' }
   | { type: 'custom'; cloudInitConfigId: string };
 
 export interface OrderProvisioningOption {
   optionKey: string;
   type: 'integrated' | 'custom';
-  service?: 'controller' | 'manager';
+  service?: 'agenstra-controller' | 'agenstra-manager';
   cloudInitConfigId?: string;
   label: string;
   description?: string | null;
@@ -436,7 +436,7 @@ export interface GitConfig {
 }
 
 /** Provisioned product service kind on a subscription item or cloud-init request. */
-export type ProvisioningServiceKind = 'controller' | 'manager' | 'custom';
+export type ProvisioningServiceKind = 'agenstra-controller' | 'agenstra-manager' | 'custom';
 
 /** Cloud-init related part of requestedConfig (authentication, SMTP, optional provisioning tokens). */
 export interface RequestedConfigCloudInit {
@@ -493,7 +493,7 @@ export interface SubscriptionItemResponse {
   provisioningStatus: ProvisioningStatus;
   provisionedAt?: string | null;
   hostname?: string | null;
-  /** Product service: controller, manager, or custom CloudInit template. Defaults to controller. */
+  /** Product service: agenstra-controller, agenstra-manager, or custom CloudInit template. Defaults to agenstra-controller. */
   service?: ProvisioningServiceKind;
   /** True after the customer has revealed the provisioning SSH private key at least once. */
   sshAccessGranted?: boolean;

@@ -13,9 +13,12 @@ describe('providerConfigSchemaUtils', () => {
   const schema = {
     serverType: { scope: 'server' as const },
     location: { scope: 'server' as const },
-    authenticationMethod: { scope: 'product' as const, productServices: ['controller', 'manager'] as const },
-    git: { scope: 'product' as const, productServices: ['manager'] as const },
-    disableSignup: { scope: 'product' as const, productServices: ['controller'] as const },
+    authenticationMethod: {
+      scope: 'product' as const,
+      productServices: ['agenstra-controller', 'agenstra-manager'] as const,
+    },
+    git: { scope: 'product' as const, productServices: ['agenstra-manager'] as const },
+    disableSignup: { scope: 'product' as const, productServices: ['agenstra-controller'] as const },
   };
 
   it('returns only server keys for provider defaults', () => {
@@ -23,11 +26,23 @@ describe('providerConfigSchemaUtils', () => {
   });
 
   it('returns product keys required by selected integrated services', () => {
-    expect(getProductProviderConfigKeys(schema, Object.keys(schema), ['controller'])).toEqual([
+    expect(getProductProviderConfigKeys(schema, Object.keys(schema), ['agenstra-controller'])).toEqual([
       'authenticationMethod',
       'disableSignup',
     ]);
-    expect(getProductProviderConfigKeys(schema, Object.keys(schema), ['manager'])).toEqual([
+    expect(getProductProviderConfigKeys(schema, Object.keys(schema), ['agenstra-manager'])).toEqual([
+      'authenticationMethod',
+      'git',
+    ]);
+  });
+
+  it('maps legacy productServices aliases when filtering product keys', () => {
+    const legacySchema = {
+      ...schema,
+      git: { scope: 'product' as const, productServices: ['manager'] as const },
+    };
+
+    expect(getProductProviderConfigKeys(legacySchema, Object.keys(legacySchema), ['agenstra-manager'])).toEqual([
       'authenticationMethod',
       'git',
     ]);

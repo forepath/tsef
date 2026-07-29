@@ -9,6 +9,7 @@ import { ServiceTypesRepository } from '../repositories/service-types.repository
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { buildProvisioningUserData, normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
+import { CloudInitServiceType } from '../utils/cloud-init/integrated-provisioning-service';
 import {
   applyResolvedProvisioningSelectionToConfig,
   resolveOrderProvisioningSelection,
@@ -172,7 +173,10 @@ export class BackorderService {
 
     const service = normalizeCloudInitService(effectiveConfig.service as string | undefined);
 
-    if (service === 'manager' && (effectiveConfig.authenticationMethod as string) === 'users') {
+    if (
+      service === CloudInitServiceType.AgenstraManager &&
+      (effectiveConfig.authenticationMethod as string) === 'users'
+    ) {
       effectiveConfig.authenticationMethod = 'api-key';
     }
 

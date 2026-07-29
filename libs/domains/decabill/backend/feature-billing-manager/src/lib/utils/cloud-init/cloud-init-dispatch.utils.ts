@@ -5,15 +5,12 @@ import {
   buildCustomConfigurationCloudInitConfigFromRequest,
   buildCustomConfigurationCloudInitUserData,
 } from './custom-configuration.utils';
+import { CloudInitServiceType, canonicalizeCloudInitService } from './integrated-provisioning-service';
 
-export type CloudInitServiceType = 'controller' | 'manager' | 'custom';
+export { CloudInitServiceType } from './integrated-provisioning-service';
 
 export function normalizeCloudInitService(service: string | undefined): CloudInitServiceType {
-  if (service === 'manager' || service === 'custom') {
-    return service;
-  }
-
-  return 'controller';
+  return canonicalizeCloudInitService(service);
 }
 
 export function buildProvisioningUserData(params: {
@@ -26,7 +23,7 @@ export function buildProvisioningUserData(params: {
 }): string {
   const { service, effectiveConfig, hostname, baseDomain, customTemplate, resolvedCustomEnv } = params;
 
-  if (service === 'custom') {
+  if (service === CloudInitServiceType.Custom) {
     if (!customTemplate || !resolvedCustomEnv) {
       throw new Error('Custom CloudInit provisioning requires template and resolved environment variables');
     }
@@ -43,7 +40,7 @@ export function buildProvisioningUserData(params: {
     );
   }
 
-  if (service === 'manager') {
+  if (service === CloudInitServiceType.AgenstraManager) {
     return buildAgentManagerCloudInitUserData(
       buildAgentManagerCloudInitConfigFromRequest(effectiveConfig, hostname, baseDomain),
     );

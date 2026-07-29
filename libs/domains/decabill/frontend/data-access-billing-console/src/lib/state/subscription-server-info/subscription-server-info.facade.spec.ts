@@ -29,7 +29,7 @@ describe('SubscriptionServerInfoFacade', () => {
       subscription: mockSubscription,
       serverInfo: mockServerInfo,
       itemId: 'item-1',
-      service: 'controller' as const,
+      service: 'agenstra-controller' as const,
       provisioningStatus: 'active' as const,
     },
   ];

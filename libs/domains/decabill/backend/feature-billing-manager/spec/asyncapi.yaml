@@ -196,7 +196,11 @@ components:
               properties:
                 subscriptionId: { type: string, format: uuid }
                 itemId: { type: string, format: uuid }
-                service: { type: string, enum: [controller, manager, custom] }
+                service:
+                  {
+                    type: string,
+                    enum: [agenstra-controller, agenstra-manager, custom],
+                  }
                 serviceTypeName:
                   {
                     type: string,

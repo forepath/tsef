@@ -143,7 +143,7 @@ describe('createJsonAes256GcmTransformer', () => {
 
   it('should encrypt and decrypt a JSON object (round-trip)', () => {
     const transformer = createJsonAes256GcmTransformer();
-    const obj = { region: 'fsn1', serverType: 'cx11', service: 'controller' };
+    const obj = { region: 'fsn1', serverType: 'cx11', service: 'agenstra-controller' };
     const stored = transformer.to(obj);
 
     expect(stored).toBeTruthy();

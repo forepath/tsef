@@ -97,8 +97,8 @@ Service plans can expose one or more provisioning options that customers choose 
 ```json
 {
   "provisioningOptions": [
-    { "type": "integrated", "service": "controller" },
-    { "type": "integrated", "service": "manager" },
+    { "type": "integrated", "service": "agenstra-controller" },
+    { "type": "integrated", "service": "agenstra-manager" },
     { "type": "custom", "cloudInitConfigId": "<uuid-a>" },
     { "type": "custom", "cloudInitConfigId": "<uuid-b>" }
   ],
@@ -116,7 +116,7 @@ The plan editor shows checkboxes for integrated stacks (Agenstra Controller, Age
 When a customer orders a plan with provisioning options:
 
 1. The console loads `GET /service-plans/{id}/order-provisioning-options`.
-2. When more than one option exists, the customer selects one via `requestedConfig.provisioningOptionKey` (for example `integrated:controller` or `custom:<uuid>`).
+2. When more than one option exists, the customer selects one via `requestedConfig.provisioningOptionKey` (for example `integrated:agenstra-controller` or `custom:<uuid>`).
 3. For custom options, the console loads `GET /service-plans/{planId}/cloud-init-configs/{configId}/order-fields` for the selected config on the current plan.
 4. Only variables with `showInOrderForm` appear in the order modal.
 5. Fields with admin defaults (static or random) are optional (`required: false`) and expose `hasDefault: true` in the order-fields response. Default values are resolved server-side at order time and are not returned to customers.
@@ -127,11 +127,13 @@ Integrated and custom fieldsets are shown based on the selected option. When onl
 
 ## Provisioning
 
-Custom cloud-init is built by `custom-configuration.utils` and dispatched through `buildProvisioningUserData` alongside controller and manager paths.
+Custom cloud-init is built by `custom-configuration.utils` and dispatched through `buildProvisioningUserData` alongside agenstra-controller and agenstra-manager paths.
+
+Integrated service ids are `agenstra-controller` and `agenstra-manager` (option keys `integrated:agenstra-controller` / `integrated:agenstra-manager`). Legacy `controller` / `manager` values are accepted when reading older plan defaults, service-type schemas, or client requests; persisted data (including `billing_service_types.config_schema` enums/`productServices`) is rewritten by migration `1775500000000_RenameIntegratedProvisioningServiceIds`.
 
 ### Automated image updates
 
-The **subscription-item-update** background job SSHes to provisioned hosts and runs `docker compose up -d --pull=always` for integrated controller and manager stacks. **Custom service items are skipped** because their runtime layout is defined per CloudInit template (single compose service, optional user-data-only mode) and is not compatible with the bundled stack update command. Operators must roll out template or image changes to custom instances manually (re-provision, SSH, or a future template-specific update path).
+The **subscription-item-update** background job SSHes to provisioned hosts and runs `docker compose up -d --pull=always` for integrated agenstra-controller and agenstra-manager stacks. **Custom service items are skipped** because their runtime layout is defined per CloudInit template (single compose service, optional user-data-only mode) and is not compatible with the bundled stack update command. Operators must roll out template or image changes to custom instances manually (re-provision, SSH, or a future template-specific update path).
 
 `workDir` must match `/opt/<segment>` with alphanumeric path segments; values are validated on admin save and quoted in generated bootstrap scripts.
 

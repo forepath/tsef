@@ -1,3 +1,4 @@
+import { IntegratedProvisioningService } from './integrated-provisioning-service';
 import {
   applyResolvedProvisioningSelectionToConfig,
   collectCustomCloudInitConfigIdsFromPlanDefaults,
@@ -18,13 +19,13 @@ describe('planProvisioningOptionsUtils', () => {
     it('reads explicit provisioningOptions only', () => {
       const options = parsePlanProvisioningOptions({
         provisioningOptions: [
-          { type: 'integrated', service: 'controller' },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
           { type: 'custom', cloudInitConfigId: 'cfg-1' },
         ],
       });
 
       expect(options).toEqual([
-        { type: 'integrated', service: 'controller' },
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
         { type: 'custom', cloudInitConfigId: 'cfg-1' },
       ]);
     });
@@ -36,7 +37,7 @@ describe('planProvisioningOptionsUtils', () => {
           cloudInitConfigId: 'cfg-legacy',
         }),
       ).toEqual([]);
-      expect(parsePlanProvisioningOptions({ service: 'manager' })).toEqual([]);
+      expect(parsePlanProvisioningOptions({ service: IntegratedProvisioningService.AgenstraManager })).toEqual([]);
       expect(parsePlanProvisioningOptions({ cloudInitConfigIds: ['cfg-a', 'cfg-b'] })).toEqual([]);
     });
   });
@@ -44,23 +45,27 @@ describe('planProvisioningOptionsUtils', () => {
   describe('migrateLegacyPlanProviderConfigDefaults', () => {
     it('preserves a single legacy integrated controller option', () => {
       const migrated = migrateLegacyPlanProviderConfigDefaults({
-        service: 'controller',
+        service: IntegratedProvisioningService.AgenstraController,
         region: 'fsn1',
       });
 
-      expect(migrated?.['provisioningOptions']).toEqual([{ type: 'integrated', service: 'controller' }]);
-      expect(migrated?.['service']).toBe('controller');
+      expect(migrated?.['provisioningOptions']).toEqual([
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+      ]);
+      expect(migrated?.['service']).toBe('agenstra-controller');
       expect(migrated?.['region']).toBe('fsn1');
     });
 
     it('preserves a single legacy integrated manager option', () => {
       const migrated = migrateLegacyPlanProviderConfigDefaults({
-        service: 'manager',
+        service: IntegratedProvisioningService.AgenstraManager,
         region: 'fsn1',
       });
 
-      expect(migrated?.['provisioningOptions']).toEqual([{ type: 'integrated', service: 'manager' }]);
-      expect(migrated?.['service']).toBe('manager');
+      expect(migrated?.['provisioningOptions']).toEqual([
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
+      ]);
+      expect(migrated?.['service']).toBe('agenstra-manager');
     });
 
     it('preserves legacy custom configs without adding integrated options', () => {
@@ -76,8 +81,8 @@ describe('planProvisioningOptionsUtils', () => {
 
     it('skips plans that already have provisioningOptions', () => {
       const defaults = {
-        provisioningOptions: [{ type: 'integrated', service: 'manager' }],
-        service: 'controller',
+        provisioningOptions: [{ type: 'integrated', service: IntegratedProvisioningService.AgenstraManager }],
+        service: IntegratedProvisioningService.AgenstraController,
       };
 
       expect(migrateLegacyPlanProviderConfigDefaults(defaults)).toBe(defaults);
@@ -91,7 +96,7 @@ describe('planProvisioningOptionsUtils', () => {
         cloudInitConfigId: 'cfg-1',
         region: 'fsn1',
         provisioningOptions: [
-          { type: 'integrated', service: 'controller' },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
           { type: 'custom', cloudInitConfigId: 'cfg-1' },
         ],
       });
@@ -106,14 +111,14 @@ describe('planProvisioningOptionsUtils', () => {
       const normalized = normalizePlanProviderConfigDefaults({
         region: 'fsn1',
         provisioningOptions: [
-          { type: 'integrated', service: 'controller' },
-          { type: 'integrated', service: 'manager' },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
         ],
       });
 
       expect(normalized?.['provisioningOptions']).toEqual([
-        { type: 'integrated', service: 'controller' },
-        { type: 'integrated', service: 'manager' },
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
       ]);
       expect(normalized?.['service']).toBeUndefined();
       expect(normalized?.['region']).toBe('fsn1');
@@ -122,15 +127,15 @@ describe('planProvisioningOptionsUtils', () => {
     it('preserves integrated and custom options together on save', () => {
       const normalized = normalizePlanProviderConfigDefaults({
         provisioningOptions: [
-          { type: 'integrated', service: 'controller' },
-          { type: 'integrated', service: 'manager' },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
           { type: 'custom', cloudInitConfigId: 'cfg-1' },
         ],
       });
 
       expect(normalized?.['provisioningOptions']).toEqual([
-        { type: 'integrated', service: 'controller' },
-        { type: 'integrated', service: 'manager' },
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
         { type: 'custom', cloudInitConfigId: 'cfg-1' },
       ]);
       expect(normalized?.['service']).toBeUndefined();
@@ -140,22 +145,26 @@ describe('planProvisioningOptionsUtils', () => {
     it('keeps derived single integrated service fields', () => {
       const normalized = normalizePlanProviderConfigDefaults({
         region: 'fsn1',
-        provisioningOptions: [{ type: 'integrated', service: 'controller' }],
+        provisioningOptions: [{ type: 'integrated', service: IntegratedProvisioningService.AgenstraController }],
       });
 
-      expect(normalized?.['service']).toBe('controller');
-      expect(normalized?.['provisioningOptions']).toEqual([{ type: 'integrated', service: 'controller' }]);
+      expect(normalized?.['service']).toBe('agenstra-controller');
+      expect(normalized?.['provisioningOptions']).toEqual([
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+      ]);
     });
 
     it('promotes legacy integrated service into provisioningOptions on save', () => {
       const normalized = normalizePlanProviderConfigDefaults({
-        service: 'manager',
+        service: IntegratedProvisioningService.AgenstraManager,
         cloudInitConfigId: 'cfg-1',
         region: 'fsn1',
       });
 
-      expect(normalized?.['provisioningOptions']).toEqual([{ type: 'integrated', service: 'manager' }]);
-      expect(normalized?.['service']).toBe('manager');
+      expect(normalized?.['provisioningOptions']).toEqual([
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
+      ]);
+      expect(normalized?.['service']).toBe('agenstra-manager');
       expect(normalized?.['cloudInitConfigId']).toBeUndefined();
       expect(normalized?.['region']).toBe('fsn1');
     });
@@ -175,7 +184,7 @@ describe('planProvisioningOptionsUtils', () => {
 
   describe('reconcilePlanProviderConfigDefaults', () => {
     it('matches normalize for legacy payloads', () => {
-      const defaults = { service: 'manager', region: 'fsn1' };
+      const defaults = { service: IntegratedProvisioningService.AgenstraManager, region: 'fsn1' };
 
       expect(reconcilePlanProviderConfigDefaults(defaults)).toEqual(normalizePlanProviderConfigDefaults(defaults));
     });
@@ -184,7 +193,7 @@ describe('planProvisioningOptionsUtils', () => {
   describe('resolveOrderProvisioningSelection', () => {
     const multiPlan = {
       provisioningOptions: [
-        { type: 'integrated', service: 'controller' },
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
         { type: 'custom', cloudInitConfigId: 'cfg-1' },
       ],
     };
@@ -198,17 +207,20 @@ describe('planProvisioningOptionsUtils', () => {
     it('accepts legacy requested service when it matches a plan option', () => {
       expect(
         resolveOrderProvisioningSelection(multiPlan, {
-          service: 'controller',
+          service: IntegratedProvisioningService.AgenstraController,
         }),
-      ).toEqual({ service: 'controller' });
+      ).toEqual({ service: IntegratedProvisioningService.AgenstraController });
     });
 
     it('accepts provisioningOptionKey for integrated option', () => {
       expect(
         resolveOrderProvisioningSelection(multiPlan, {
-          provisioningOptionKey: encodeProvisioningOptionKey({ type: 'integrated', service: 'controller' }),
+          provisioningOptionKey: encodeProvisioningOptionKey({
+            type: 'integrated',
+            service: IntegratedProvisioningService.AgenstraController,
+          }),
         }),
-      ).toEqual({ service: 'controller' });
+      ).toEqual({ service: IntegratedProvisioningService.AgenstraController });
     });
 
     it('accepts provisioningOptionKey for custom option', () => {
@@ -222,7 +234,10 @@ describe('planProvisioningOptionsUtils', () => {
     it('rejects option not on plan', () => {
       expect(() =>
         resolveOrderProvisioningSelection(multiPlan, {
-          provisioningOptionKey: encodeProvisioningOptionKey({ type: 'integrated', service: 'manager' }),
+          provisioningOptionKey: encodeProvisioningOptionKey({
+            type: 'integrated',
+            service: IntegratedProvisioningService.AgenstraManager,
+          }),
         }),
       ).toThrow('Provisioning option is not available for this plan');
     });
@@ -254,11 +269,16 @@ describe('planProvisioningOptionsUtils', () => {
     });
 
     it('resolves legacy service defaults before migration backfill', () => {
-      expect(resolveOrderProvisioningSelection({ service: 'manager', region: 'fsn1' }, {})).toEqual({
-        service: 'manager',
+      expect(
+        resolveOrderProvisioningSelection(
+          { service: IntegratedProvisioningService.AgenstraManager, region: 'fsn1' },
+          {},
+        ),
+      ).toEqual({
+        service: IntegratedProvisioningService.AgenstraManager,
       });
-      expect(resolvePlanProvisioningOptions({ service: 'manager' })).toEqual([
-        { type: 'integrated', service: 'manager' },
+      expect(resolvePlanProvisioningOptions({ service: IntegratedProvisioningService.AgenstraManager })).toEqual([
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
       ]);
     });
 
@@ -279,15 +299,29 @@ describe('planProvisioningOptionsUtils', () => {
     });
 
     it('parses integrated and custom keys', () => {
-      expect(parseProvisioningOptionKey('integrated:manager')).toEqual({ type: 'integrated', service: 'manager' });
+      expect(parseProvisioningOptionKey('integrated:agenstra-manager')).toEqual({
+        type: 'integrated',
+        service: IntegratedProvisioningService.AgenstraManager,
+      });
       expect(parseProvisioningOptionKey('custom:cfg-1')).toEqual({ type: 'custom', cloudInitConfigId: 'cfg-1' });
+    });
+
+    it('maps legacy integrated keys to canonical service ids', () => {
+      expect(parseProvisioningOptionKey('integrated:controller')).toEqual({
+        type: 'integrated',
+        service: IntegratedProvisioningService.AgenstraController,
+      });
+      expect(parseProvisioningOptionKey('integrated:manager')).toEqual({
+        type: 'integrated',
+        service: IntegratedProvisioningService.AgenstraManager,
+      });
     });
   });
 
   describe('resolvePlanProvisioningOptions', () => {
     it('defaults to controller when no explicit or legacy options exist', () => {
       expect(resolvePlanProvisioningOptions({ region: 'fsn1' })).toEqual([
-        { type: 'integrated', service: 'controller' },
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
       ]);
     });
 
@@ -306,8 +340,8 @@ describe('planProvisioningOptionsUtils', () => {
       expect(
         parsePlanProvisioningOptions({
           provisioningOptions: [
-            { type: 'integrated', service: 'controller' },
-            { type: 'integrated', service: 'controller' },
+            { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+            { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
             { type: 'custom', cloudInitConfigId: 'cfg-1' },
             { type: 'custom', cloudInitConfigId: 'cfg-1' },
             { type: 'integrated', service: 'invalid' },
@@ -315,7 +349,7 @@ describe('planProvisioningOptionsUtils', () => {
           ],
         }),
       ).toEqual([
-        { type: 'integrated', service: 'controller' },
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
         { type: 'custom', cloudInitConfigId: 'cfg-1' },
       ]);
     });
@@ -324,23 +358,25 @@ describe('planProvisioningOptionsUtils', () => {
   describe('correctOverBackfilledProvisioningOptions', () => {
     it('collapses dual integrated backfill to legacy manager service', () => {
       const corrected = correctOverBackfilledProvisioningOptions({
-        service: 'manager',
+        service: IntegratedProvisioningService.AgenstraManager,
         region: 'fsn1',
         provisioningOptions: [
-          { type: 'integrated', service: 'controller' },
-          { type: 'integrated', service: 'manager' },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
         ],
       });
 
-      expect(corrected?.['provisioningOptions']).toEqual([{ type: 'integrated', service: 'manager' }]);
-      expect(corrected?.['service']).toBe('manager');
+      expect(corrected?.['provisioningOptions']).toEqual([
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
+      ]);
+      expect(corrected?.['service']).toBe('agenstra-manager');
     });
 
     it('keeps custom options when dual integrated backfill included custom configs', () => {
       const corrected = correctOverBackfilledProvisioningOptions({
         provisioningOptions: [
-          { type: 'integrated', service: 'controller' },
-          { type: 'integrated', service: 'manager' },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
           { type: 'custom', cloudInitConfigId: 'cfg-1' },
         ],
       });
@@ -353,8 +389,8 @@ describe('planProvisioningOptionsUtils', () => {
     it('returns undefined when no corrective action is needed', () => {
       expect(
         correctOverBackfilledProvisioningOptions({
-          provisioningOptions: [{ type: 'integrated', service: 'manager' }],
-          service: 'manager',
+          provisioningOptions: [{ type: 'integrated', service: IntegratedProvisioningService.AgenstraManager }],
+          service: IntegratedProvisioningService.AgenstraManager,
         }),
       ).toBeUndefined();
     });
@@ -363,13 +399,15 @@ describe('planProvisioningOptionsUtils', () => {
       const corrected = correctOverBackfilledProvisioningOptions({
         region: 'fsn1',
         provisioningOptions: [
-          { type: 'integrated', service: 'controller' },
-          { type: 'integrated', service: 'manager' },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+          { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
         ],
       });
 
-      expect(corrected?.['provisioningOptions']).toEqual([{ type: 'integrated', service: 'controller' }]);
-      expect(corrected?.['service']).toBe('controller');
+      expect(corrected?.['provisioningOptions']).toEqual([
+        { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
+      ]);
+      expect(corrected?.['service']).toBe('agenstra-controller');
     });
   });
 
@@ -384,14 +422,14 @@ describe('planProvisioningOptionsUtils', () => {
       expect(
         planHasCustomerProvisioningChoice({
           provisioningOptions: [
-            { type: 'integrated', service: 'controller' },
+            { type: 'integrated', service: IntegratedProvisioningService.AgenstraController },
             { type: 'custom', cloudInitConfigId: 'cfg-1' },
           ],
         }),
       ).toBe(true);
       expect(
         planHasCustomerProvisioningChoice({
-          provisioningOptions: [{ type: 'integrated', service: 'controller' }],
+          provisioningOptions: [{ type: 'integrated', service: IntegratedProvisioningService.AgenstraController }],
         }),
       ).toBe(false);
     });
@@ -400,7 +438,7 @@ describe('planProvisioningOptionsUtils', () => {
       expect(
         collectCustomCloudInitConfigIdsFromPlanDefaults({
           provisioningOptions: [
-            { type: 'integrated', service: 'manager' },
+            { type: 'integrated', service: IntegratedProvisioningService.AgenstraManager },
             { type: 'custom', cloudInitConfigId: 'cfg-1' },
             { type: 'custom', cloudInitConfigId: 'cfg-2' },
           ],
@@ -410,8 +448,8 @@ describe('planProvisioningOptionsUtils', () => {
 
     it('applies resolved selection to effective config', () => {
       const effectiveConfig: Record<string, unknown> = {
-        provisioningOptions: [{ type: 'integrated', service: 'controller' }],
-        provisioningOptionKey: 'integrated:controller',
+        provisioningOptions: [{ type: 'integrated', service: IntegratedProvisioningService.AgenstraController }],
+        provisioningOptionKey: 'integrated:agenstra-controller',
         region: 'fsn1',
       };
 

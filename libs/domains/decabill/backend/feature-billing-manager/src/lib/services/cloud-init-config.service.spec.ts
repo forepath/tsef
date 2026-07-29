@@ -357,7 +357,7 @@ describe('CloudInitConfigService', () => {
       await expect(
         service.assertActiveConfigForPlanDefaults('st-1', {
           provisioningOptions: [
-            { type: 'integrated', service: 'controller' },
+            { type: 'integrated', service: 'agenstra-controller' },
             { type: 'custom', cloudInitConfigId: 'cfg-1' },
           ],
         }),
@@ -400,13 +400,17 @@ describe('CloudInitConfigService', () => {
 
       const options = await service.buildOrderProvisioningOptions({
         provisioningOptions: [
-          { type: 'integrated', service: 'manager' },
+          { type: 'integrated', service: 'agenstra-manager' },
           { type: 'custom', cloudInitConfigId: 'cfg-1' },
         ],
       });
 
       expect(options).toEqual([
-        expect.objectContaining({ optionKey: 'integrated:manager', type: 'integrated', label: 'Agenstra Manager' }),
+        expect.objectContaining({
+          optionKey: 'integrated:agenstra-manager',
+          type: 'integrated',
+          label: 'Agenstra Manager',
+        }),
         expect.objectContaining({
           optionKey: 'custom:cfg-1',
           type: 'custom',
@@ -418,10 +422,14 @@ describe('CloudInitConfigService', () => {
     });
 
     it('falls back to legacy service defaults', async () => {
-      const options = await service.buildOrderProvisioningOptions({ service: 'manager', region: 'fsn1' });
+      const options = await service.buildOrderProvisioningOptions({ service: 'agenstra-manager', region: 'fsn1' });
 
       expect(options).toEqual([
-        expect.objectContaining({ optionKey: 'integrated:manager', type: 'integrated', label: 'Agenstra Manager' }),
+        expect.objectContaining({
+          optionKey: 'integrated:agenstra-manager',
+          type: 'integrated',
+          label: 'Agenstra Manager',
+        }),
       ]);
     });
 
@@ -449,7 +457,7 @@ describe('CloudInitConfigService', () => {
       await expect(
         service.buildOrderProvisioningOptions({
           provisioningOptions: [
-            { type: 'integrated', service: 'controller' },
+            { type: 'integrated', service: 'agenstra-controller' },
             { type: 'custom', cloudInitConfigId: 'cfg-inactive' },
             { type: 'custom', cloudInitConfigId: 'cfg-active' },
           ],

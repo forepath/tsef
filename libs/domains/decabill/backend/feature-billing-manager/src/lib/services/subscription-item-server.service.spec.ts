@@ -66,7 +66,7 @@ describe('SubscriptionItemServerService', () => {
           serviceType: { name: 'DigitalOcean' },
           provisioningStatus: ProvisioningStatus.ACTIVE,
           hostname: 'host1',
-          configSnapshot: { service: 'controller' },
+          configSnapshot: { service: 'agenstra-controller' },
         },
       ]);
 
@@ -84,7 +84,7 @@ describe('SubscriptionItemServerService', () => {
           serviceTypeId: 'st-1',
           provisioningStatus: ProvisioningStatus.ACTIVE,
           hostname: 'host1',
-          configSnapshot: { service: 'controller' },
+          configSnapshot: { service: 'agenstra-controller' },
         },
       ]);
 

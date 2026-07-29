@@ -193,12 +193,12 @@ export class ServicePlansPageComponent implements OnInit {
 
     target.clear();
 
-    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'controller')) {
-      target.add('integrated:controller');
+    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-controller')) {
+      target.add('integrated:agenstra-controller');
     }
 
-    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'manager')) {
-      target.add('integrated:manager');
+    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-manager')) {
+      target.add('integrated:agenstra-manager');
     }
   }
 
@@ -212,15 +212,15 @@ export class ServicePlansPageComponent implements OnInit {
 
     for (const optionKey of [...target]) {
       if (
-        optionKey === 'integrated:controller' &&
-        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'controller')
+        optionKey === 'integrated:agenstra-controller' &&
+        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-controller')
       ) {
         target.delete(optionKey);
       }
 
       if (
-        optionKey === 'integrated:manager' &&
-        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'manager')
+        optionKey === 'integrated:agenstra-manager' &&
+        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-manager')
       ) {
         target.delete(optionKey);
       }
@@ -265,7 +265,14 @@ export class ServicePlansPageComponent implements OnInit {
       return false;
     }
 
-    return serviceEnum.some((value) => value === 'controller' || value === 'manager' || value === 'custom');
+    return serviceEnum.some(
+      (value) =>
+        value === 'agenstra-controller' ||
+        value === 'agenstra-manager' ||
+        value === 'controller' ||
+        value === 'manager' ||
+        value === 'custom',
+    );
   }
 
   serviceEnumIncludes(
@@ -277,7 +284,24 @@ export class ServicePlansPageComponent implements OnInit {
     const schema = this.getProviderSchema(serviceTypes, providerDetails, serviceTypeId);
     const serviceEnum = this.getProviderConfigEnum(schema, 'service');
 
-    return !!serviceEnum?.includes(value);
+    if (!serviceEnum?.length) {
+      return false;
+    }
+
+    if (serviceEnum.includes(value)) {
+      return true;
+    }
+
+    // Accept legacy schema enums until provider rows are updated.
+    if (value === 'agenstra-controller') {
+      return serviceEnum.includes('controller');
+    }
+
+    if (value === 'agenstra-manager') {
+      return serviceEnum.includes('manager');
+    }
+
+    return false;
   }
 
   isProvisioningOptionSelected(form: 'create' | 'edit', optionKey: string): boolean {
@@ -493,12 +517,12 @@ export class ServicePlansPageComponent implements OnInit {
     const optionKeys = form === 'create' ? this.createProvisioningOptionKeys : this.editProvisioningOptionKeys;
     const services: IntegratedProductService[] = [];
 
-    if (optionKeys.has('integrated:controller')) {
-      services.push('controller');
+    if (optionKeys.has('integrated:agenstra-controller')) {
+      services.push('agenstra-controller');
     }
 
-    if (optionKeys.has('integrated:manager')) {
-      services.push('manager');
+    if (optionKeys.has('integrated:agenstra-manager')) {
+      services.push('agenstra-manager');
     }
 
     if (services.length > 0) {

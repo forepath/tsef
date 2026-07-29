@@ -196,7 +196,7 @@ describe('subscriptionServerInfoReducer', () => {
             {
               subscriptionId: 'sub-1',
               itemId: 'item-1',
-              service: 'controller',
+              service: 'agenstra-controller',
               name: 's1',
               publicIp: '1.1.1.1',
               status: 'running',
@@ -219,7 +219,7 @@ describe('subscriptionServerInfoReducer', () => {
             {
               subscriptionId: 'sub-1',
               itemId: 'item-1',
-              service: 'controller',
+              service: 'agenstra-controller',
               name: 's1',
               publicIp: '1.1.1.1',
               status: 'running',
@@ -241,7 +241,7 @@ describe('subscriptionServerInfoReducer', () => {
             {
               subscriptionId: 'sub-1',
               itemId: 'item-1',
-              service: 'controller',
+              service: 'agenstra-controller',
               serviceTypeName: 'Hetzner',
               name: 's1',
               publicIp: '1.1.1.1',

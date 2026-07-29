@@ -1,5 +1,5 @@
 export type ProviderConfigFieldScope = 'server' | 'product' | 'internal';
-export type IntegratedProductService = 'controller' | 'manager';
+export type IntegratedProductService = 'agenstra-controller' | 'agenstra-manager';
 
 export type ConfigSchemaPropertyType = 'string' | 'number' | 'boolean' | 'object';
 
@@ -34,6 +34,25 @@ const CONFIG_FIELD_LABEL_OVERRIDES: Record<string, string> = {
   commitAuthorEmail: 'Commit author email',
   privateKey: 'Private key',
 };
+
+const LEGACY_INTEGRATED_SERVICE_ALIASES: Record<string, IntegratedProductService> = {
+  controller: 'agenstra-controller',
+  manager: 'agenstra-manager',
+};
+
+function canonicalizeIntegratedProvisioningService(value: string): IntegratedProductService | null {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (trimmed === 'agenstra-controller' || trimmed === 'agenstra-manager') {
+    return trimmed;
+  }
+
+  return LEGACY_INTEGRATED_SERVICE_ALIASES[trimmed] ?? null;
+}
 
 export function getSchemaPropertyType(property: ConfigSchemaPropertyDefinition | undefined): ConfigSchemaPropertyType {
   const type = property?.type;
@@ -116,12 +135,14 @@ export function getProductServicesForProperty(
   const services = property?.productServices;
 
   if (Array.isArray(services) && services.length > 0) {
-    return services.filter(
-      (service): service is IntegratedProductService => service === 'controller' || service === 'manager',
-    );
+    const canonical = services
+      .map((service) => (typeof service === 'string' ? canonicalizeIntegratedProvisioningService(service) : null))
+      .filter((service): service is IntegratedProductService => service !== null);
+
+    return [...new Set(canonical)];
   }
 
-  return ['controller', 'manager'];
+  return ['agenstra-controller', 'agenstra-manager'];
 }
 
 export function getServerProviderConfigKeys(

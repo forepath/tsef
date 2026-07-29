@@ -1,0 +1,157 @@
+/**
+ * Integrated Agenstra product stacks offered as plan provisioning options.
+ * String values are persisted in plan defaults and subscription item snapshots.
+ */
+export enum IntegratedProvisioningService {
+  AgenstraController = 'agenstra-controller',
+  AgenstraManager = 'agenstra-manager',
+}
+
+/**
+ * Cloud-init dispatch target: integrated stacks plus admin-defined custom templates.
+ */
+export enum CloudInitServiceType {
+  AgenstraController = IntegratedProvisioningService.AgenstraController,
+  AgenstraManager = IntegratedProvisioningService.AgenstraManager,
+  Custom = 'custom',
+}
+
+const INTEGRATED_SERVICE_VALUES = new Set<string>(Object.values(IntegratedProvisioningService));
+
+/** Legacy ids accepted only when reading/parsing pre-rename data or clients. */
+const LEGACY_INTEGRATED_SERVICE_ALIASES: Record<string, IntegratedProvisioningService> = {
+  controller: IntegratedProvisioningService.AgenstraController,
+  manager: IntegratedProvisioningService.AgenstraManager,
+};
+
+const LEGACY_TO_CANONICAL: Record<string, string> = {
+  controller: IntegratedProvisioningService.AgenstraController,
+  manager: IntegratedProvisioningService.AgenstraManager,
+};
+
+const CANONICAL_TO_LEGACY: Record<string, string> = {
+  [IntegratedProvisioningService.AgenstraController]: 'controller',
+  [IntegratedProvisioningService.AgenstraManager]: 'manager',
+};
+
+export function isIntegratedProvisioningService(value: string): value is IntegratedProvisioningService {
+  return INTEGRATED_SERVICE_VALUES.has(value);
+}
+
+/**
+ * Maps a stored or requested service id to a canonical integrated service, including legacy aliases.
+ */
+export function canonicalizeIntegratedProvisioningService(value: string): IntegratedProvisioningService | null {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (isIntegratedProvisioningService(trimmed)) {
+    return trimmed;
+  }
+
+  return LEGACY_INTEGRATED_SERVICE_ALIASES[trimmed] ?? null;
+}
+
+/**
+ * Maps a stored or requested cloud-init service id (integrated, custom, or legacy) to the enum.
+ */
+export function canonicalizeCloudInitService(value: string | undefined): CloudInitServiceType {
+  if (value === CloudInitServiceType.Custom || value === 'custom') {
+    return CloudInitServiceType.Custom;
+  }
+
+  const integrated = value ? canonicalizeIntegratedProvisioningService(value) : null;
+
+  if (integrated === IntegratedProvisioningService.AgenstraManager) {
+    return CloudInitServiceType.AgenstraManager;
+  }
+
+  return CloudInitServiceType.AgenstraController;
+}
+
+export function allIntegratedProvisioningServices(): IntegratedProvisioningService[] {
+  return Object.values(IntegratedProvisioningService);
+}
+
+function rewriteServiceId(value: unknown, map: Record<string, string>): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  return map[value];
+}
+
+function rewriteProvisioningOptionKey(value: unknown, map: Record<string, string>): string | undefined {
+  if (typeof value !== 'string' || !value.startsWith('integrated:')) {
+    return undefined;
+  }
+
+  const rawService = value.slice('integrated:'.length);
+  const rewritten = map[rawService];
+
+  return rewritten ? `integrated:${rewritten}` : undefined;
+}
+
+/**
+ * Rewrites legacy or canonical integrated service ids inside a config/defaults object.
+ * Used by the data migration (and reversible down path).
+ */
+export function rewriteIntegratedServiceIdsInConfig(
+  config: Record<string, unknown>,
+  direction: 'toCanonical' | 'toLegacy',
+): { changed: boolean; config: Record<string, unknown> } {
+  const map = direction === 'toCanonical' ? LEGACY_TO_CANONICAL : CANONICAL_TO_LEGACY;
+  let changed = false;
+  const next: Record<string, unknown> = { ...config };
+
+  const rewrittenService = rewriteServiceId(next['service'], map);
+
+  if (rewrittenService) {
+    next['service'] = rewrittenService;
+    changed = true;
+  }
+
+  const rewrittenKey = rewriteProvisioningOptionKey(next['provisioningOptionKey'], map);
+
+  if (rewrittenKey) {
+    next['provisioningOptionKey'] = rewrittenKey;
+    changed = true;
+  }
+
+  const rawOptions = next['provisioningOptions'];
+
+  if (Array.isArray(rawOptions)) {
+    let optionsChanged = false;
+    const rewrittenOptions = rawOptions.map((entry) => {
+      if (!entry || typeof entry !== 'object') {
+        return entry;
+      }
+
+      const option = entry as Record<string, unknown>;
+
+      if (option['type'] !== 'integrated') {
+        return entry;
+      }
+
+      const rewritten = rewriteServiceId(option['service'], map);
+
+      if (!rewritten) {
+        return entry;
+      }
+
+      optionsChanged = true;
+
+      return { ...option, service: rewritten };
+    });
+
+    if (optionsChanged) {
+      next['provisioningOptions'] = rewrittenOptions;
+      changed = true;
+    }
+  }
+
+  return { changed, config: next };
+}
