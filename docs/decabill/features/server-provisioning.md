@@ -52,7 +52,7 @@ sequenceDiagram
 
 ## Bundled Product Stack
 
-Cloud-init installs Docker CE and deploys a docker-compose stack on the instance. The default controller bundle includes:
+Cloud-init installs Docker CE and deploys a docker-compose stack on the instance. The default agenstra-controller bundle includes:
 
 - **PostgreSQL** Application database with health checks
 - **Backend API** NestJS billing or agent controller API container (depending on service plan configuration)
@@ -65,7 +65,7 @@ Operators choose service kind and image tags through service type and plan confi
 
 ## Custom Service Kind
 
-Plans may set `providerConfigDefaults.service` to `custom` and reference a CloudInit config id. This third path deploys a single Docker service defined by an admin template instead of the bundled controller or manager stack.
+Plans may set `providerConfigDefaults.service` to `custom` and reference a CloudInit config id. This third path deploys a single Docker service defined by an admin template instead of the bundled agenstra-controller or agenstra-manager stack.
 
 Custom cloud-init installs Docker and runs one compose service with resolved environment variables. It does not install Nginx, Certbot, or the bundled PostgreSQL and product containers. The subscription item update scheduler skips custom items.
 

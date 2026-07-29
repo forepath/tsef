@@ -4873,7 +4873,7 @@ components:
           type: object
           description: |
             Optional JSON schema for provider-specific configuration when creating subscriptions.
-            - `properties`: each property may include `type`, `description`, optionally `enum` (array of allowed values), `scope` (`server` or `product`), and `productServices` (`controller`, `manager`).
+            - `properties`: each property may include `type`, `description`, optionally `enum` (array of allowed values), `scope` (`server` or `product`), and `productServices` (`agenstra-controller`, `agenstra-manager`).
               Server-scoped fields appear under provider defaults in the plan editor; product-scoped fields appear under product defaults when required by selected customer options.
             - `basePriceFromField`: optional string (e.g. "serverType") indicating which field's selected option drives the plan base price;
               the UI should fetch options from GET .../providers/{id}/server-types and use the selected option's price as base price.
@@ -5237,7 +5237,7 @@ components:
           description: |
             Provider defaults merged with customer requestedConfig on order.
             Provisioning-enabled plans store customer-selectable stacks in provisioningOptions
-            (integrated controller/manager and/or custom CloudInit config ids).
+            (integrated agenstra-controller/agenstra-manager and/or custom CloudInit config ids).
             Legacy service and cloudInitConfigId keys are derived at persistence time only for single-option plans.
         orderingHighlights:
           type: array
@@ -5376,19 +5376,19 @@ components:
         serverType overrides are accepted only when the plan has allowCustomerServerTypeSelection and the value is listed in allowedServerTypes; otherwise serverType is stripped from requestedConfig before merge.
         The FQDN (hostname.DNS_BASE_DOMAIN) is used for SSL certificates and CORS; DNS_BASE_DOMAIN
         defaults to spirde.com when not set.
-        For service manager, disableSignup and provisioning tokens are ignored; authenticationMethod must be api-key or keycloak (not users).
+        For service agenstra-manager, disableSignup and provisioning tokens are ignored; authenticationMethod must be api-key or keycloak (not users).
       additionalProperties: true
       properties:
         provisioningOptionKey:
           type: string
           description: |
             Customer choice when the plan offers multiple provisioningOptions entries
-            (for example integrated:controller or custom:<cloud-init-config-uuid>).
+            (for example integrated:agenstra-controller or custom:<cloud-init-config-uuid>).
             Required when the plan has more than one option; omitted when the plan has exactly one option.
         service:
           type: string
-          enum: [controller, manager, custom]
-          description: Product service kind. Use controller for the full stack, manager for the agent manager only, or custom for admin-defined Docker templates.
+          enum: [agenstra-controller, agenstra-manager, custom]
+          description: Product service kind. Use agenstra-controller for the full stack, agenstra-manager for the agent manager only, or custom for admin-defined Docker templates.
         env:
           type: object
           additionalProperties: { type: string }
@@ -5712,10 +5712,10 @@ components:
         service:
           {
             type: string,
-            enum: [controller, manager, custom],
-            description: Product service from config snapshot; controller (full stack),
-            manager (agent manager only),
-            or custom Docker template. Defaults to controller.,
+            enum: [agenstra-controller, agenstra-manager, custom],
+            description: Product service from config snapshot; agenstra-controller (full stack),
+            agenstra-manager (agent manager only),
+            or custom Docker template. Defaults to agenstra-controller.,
           }
         sshAccessGranted:
           {

@@ -1,3 +1,4 @@
+import { IntegratedProvisioningService } from './cloud-init/integrated-provisioning-service';
 import {
   applyProviderConfigFieldScopes,
   getProductProviderConfigKeys,
@@ -21,7 +22,7 @@ describe('providerConfigSchemaUtils', () => {
 
       expect(properties['serverType']?.['scope']).toBe('server');
       expect(properties['authenticationMethod']?.['scope']).toBe('product');
-      expect(properties['git']?.['productServices']).toEqual(['manager']);
+      expect(properties['git']?.['productServices']).toEqual([IntegratedProvisioningService.AgenstraManager]);
     });
   });
 
@@ -52,14 +53,29 @@ describe('providerConfigSchemaUtils', () => {
         ['serverType'],
       );
 
-      expect(getProductProviderConfigKeys(schema, Object.keys(schema), ['controller'])).toEqual([
-        'authenticationMethod',
-        'disableSignup',
-      ]);
-      expect(getProductProviderConfigKeys(schema, Object.keys(schema), ['manager'])).toEqual([
-        'authenticationMethod',
-        'git',
-      ]);
+      expect(
+        getProductProviderConfigKeys(schema, Object.keys(schema), [IntegratedProvisioningService.AgenstraController]),
+      ).toEqual(['authenticationMethod', 'disableSignup']);
+      expect(
+        getProductProviderConfigKeys(schema, Object.keys(schema), [IntegratedProvisioningService.AgenstraManager]),
+      ).toEqual(['authenticationMethod', 'git']);
+    });
+
+    it('maps legacy productServices aliases when filtering product keys', () => {
+      const schema = {
+        authenticationMethod: {
+          scope: 'product' as const,
+          productServices: ['controller', 'manager'] as unknown as IntegratedProvisioningService[],
+        },
+        git: {
+          scope: 'product' as const,
+          productServices: ['manager'] as unknown as IntegratedProvisioningService[],
+        },
+      };
+
+      expect(
+        getProductProviderConfigKeys(schema, Object.keys(schema), [IntegratedProvisioningService.AgenstraManager]),
+      ).toEqual(['authenticationMethod', 'git']);
     });
   });
 

@@ -1,20 +1,23 @@
-export type IntegratedProvisioningService = 'controller' | 'manager';
+import {
+  IntegratedProvisioningService,
+  allIntegratedProvisioningServices,
+  canonicalizeIntegratedProvisioningService,
+  isIntegratedProvisioningService,
+} from './integrated-provisioning-service';
+
+export { IntegratedProvisioningService, CloudInitServiceType } from './integrated-provisioning-service';
 
 export type PlanProvisioningOption =
   | { type: 'integrated'; service: IntegratedProvisioningService }
   | { type: 'custom'; cloudInitConfigId: string };
 
 export interface ResolvedOrderProvisioningSelection {
-  service: 'controller' | 'manager' | 'custom';
+  service: IntegratedProvisioningService | 'custom';
   cloudInitConfigId?: string;
 }
 
-export const DEFAULT_INTEGRATED_PROVISIONING_OPTIONS: PlanProvisioningOption[] = [
-  { type: 'integrated', service: 'controller' },
-  { type: 'integrated', service: 'manager' },
-];
-
-const INTEGRATED_SERVICES = new Set<IntegratedProvisioningService>(['controller', 'manager']);
+export const DEFAULT_INTEGRATED_PROVISIONING_OPTIONS: PlanProvisioningOption[] =
+  allIntegratedProvisioningServices().map((service) => ({ type: 'integrated' as const, service }));
 
 export function encodeProvisioningOptionKey(option: PlanProvisioningOption): string {
   if (option.type === 'integrated') {
@@ -32,9 +35,10 @@ export function parseProvisioningOptionKey(key: string): PlanProvisioningOption 
   }
 
   if (trimmed.startsWith('integrated:')) {
-    const service = trimmed.slice('integrated:'.length) as IntegratedProvisioningService;
+    const rawService = trimmed.slice('integrated:'.length);
+    const service = canonicalizeIntegratedProvisioningService(rawService);
 
-    return INTEGRATED_SERVICES.has(service) ? { type: 'integrated', service } : null;
+    return service ? { type: 'integrated', service } : null;
   }
 
   if (trimmed.startsWith('custom:')) {
@@ -57,8 +61,12 @@ function parseProvisioningOptionEntry(value: unknown): PlanProvisioningOption | 
   if (type === 'integrated') {
     const service = entry['service'];
 
-    if (typeof service === 'string' && INTEGRATED_SERVICES.has(service as IntegratedProvisioningService)) {
-      return { type: 'integrated', service: service as IntegratedProvisioningService };
+    if (typeof service === 'string') {
+      const canonical = canonicalizeIntegratedProvisioningService(service);
+
+      if (canonical) {
+        return { type: 'integrated', service: canonical };
+      }
     }
 
     return null;
@@ -135,8 +143,12 @@ function inferLegacyPlanProvisioningOptions(
 
   const legacyService = providerConfigDefaults['service'];
 
-  if (legacyService === 'manager' || legacyService === 'controller') {
-    return [{ type: 'integrated', service: legacyService }];
+  if (typeof legacyService === 'string') {
+    const integrated = canonicalizeIntegratedProvisioningService(legacyService);
+
+    if (integrated) {
+      return [{ type: 'integrated', service: integrated }];
+    }
   }
 
   const customOptions = collectLegacyCustomProvisioningOptions(providerConfigDefaults);
@@ -149,7 +161,7 @@ function inferLegacyPlanProvisioningOptions(
     return [];
   }
 
-  return [{ type: 'integrated', service: 'controller' }];
+  return [{ type: 'integrated', service: IntegratedProvisioningService.AgenstraController }];
 }
 
 /**
@@ -201,8 +213,8 @@ function hasBothIntegratedOptions(options: PlanProvisioningOption[]): boolean {
   );
 
   return (
-    integrated.some((option) => option.service === 'controller') &&
-    integrated.some((option) => option.service === 'manager')
+    integrated.some((option) => option.service === IntegratedProvisioningService.AgenstraController) &&
+    integrated.some((option) => option.service === IntegratedProvisioningService.AgenstraManager)
   );
 }
 
@@ -249,7 +261,7 @@ function applyProvisioningOptionsToDefaults(
  * implies a single integrated or custom-only plan.
  *
  * Migration-only helper: it must never run on normal admin saves, otherwise it would
- * collapse legitimate multi-option selections (e.g. controller + manager) down to one.
+ * collapse legitimate multi-option selections (e.g. agenstra-controller + agenstra-manager) down to one.
  */
 export function correctOverBackfilledProvisioningOptions(
   providerConfigDefaults: Record<string, unknown> | undefined,
@@ -279,7 +291,9 @@ export function correctOverBackfilledProvisioningOptions(
 
   if (bothIntegrated && customOptions.length === 0 && options.length === 2) {
     const resolvedService: IntegratedProvisioningService =
-      legacyService === 'manager' || legacyService === 'controller' ? legacyService : 'controller';
+      typeof legacyService === 'string'
+        ? (canonicalizeIntegratedProvisioningService(legacyService) ?? IntegratedProvisioningService.AgenstraController)
+        : IntegratedProvisioningService.AgenstraController;
     const singleOption: PlanProvisioningOption[] = [{ type: 'integrated', service: resolvedService }];
 
     return applyProvisioningOptionsToDefaults(
@@ -366,8 +380,14 @@ function resolveLegacyRequestedProvisioningSelection(
 ): ResolvedOrderProvisioningSelection | null {
   const service = requestedConfig?.['service'];
 
-  if (service === 'manager' || service === 'controller') {
-    return { service };
+  if (typeof service !== 'string') {
+    return null;
+  }
+
+  const integrated = canonicalizeIntegratedProvisioningService(service);
+
+  if (integrated) {
+    return { service: integrated };
   }
 
   if (service === 'custom') {
@@ -461,3 +481,5 @@ export function applyResolvedProvisioningSelectionToConfig(
     delete effectiveConfig['cloudInitConfigId'];
   }
 }
+
+export { isIntegratedProvisioningService, canonicalizeIntegratedProvisioningService };

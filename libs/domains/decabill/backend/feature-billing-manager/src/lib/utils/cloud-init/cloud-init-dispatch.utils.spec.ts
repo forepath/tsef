@@ -1,5 +1,6 @@
 import { CloudInitConfigEntity } from '../../entities/cloud-init-config.entity';
 import { buildProvisioningUserData, normalizeCloudInitService } from './cloud-init-dispatch.utils';
+import { CloudInitServiceType } from './integrated-provisioning-service';
 
 jest.mock('./agent-controller.utils', () => ({
   buildCloudInitConfigFromRequest: jest.fn().mockReturnValue({ host: {} }),
@@ -19,29 +20,38 @@ jest.mock('./custom-configuration.utils', () => ({
 describe('cloud-init-dispatch.utils', () => {
   describe('normalizeCloudInitService', () => {
     it('returns manager and custom when specified', () => {
-      expect(normalizeCloudInitService('manager')).toBe('manager');
+      expect(normalizeCloudInitService('agenstra-manager')).toBe('agenstra-manager');
       expect(normalizeCloudInitService('custom')).toBe('custom');
     });
 
+    it('maps legacy controller and manager aliases to canonical ids', () => {
+      expect(normalizeCloudInitService('controller')).toBe('agenstra-controller');
+      expect(normalizeCloudInitService('manager')).toBe('agenstra-manager');
+    });
+
     it('defaults to controller for unknown values', () => {
-      expect(normalizeCloudInitService(undefined)).toBe('controller');
-      expect(normalizeCloudInitService('other')).toBe('controller');
+      expect(normalizeCloudInitService(undefined)).toBe('agenstra-controller');
+      expect(normalizeCloudInitService('other')).toBe('agenstra-controller');
     });
   });
 
   describe('buildProvisioningUserData', () => {
     const baseParams = {
-      effectiveConfig: { service: 'controller' },
+      effectiveConfig: { service: CloudInitServiceType.AgenstraController },
       hostname: 'host1',
       baseDomain: 'spirde.com',
     };
 
     it('builds controller user data by default', () => {
-      expect(buildProvisioningUserData({ ...baseParams, service: 'controller' })).toBe('controller-user-data');
+      expect(buildProvisioningUserData({ ...baseParams, service: CloudInitServiceType.AgenstraController })).toBe(
+        'controller-user-data',
+      );
     });
 
     it('builds manager user data', () => {
-      expect(buildProvisioningUserData({ ...baseParams, service: 'manager' })).toBe('manager-user-data');
+      expect(buildProvisioningUserData({ ...baseParams, service: CloudInitServiceType.AgenstraManager })).toBe(
+        'manager-user-data',
+      );
     });
 
     it('builds custom user data when template and env are provided', () => {
@@ -50,7 +60,7 @@ describe('cloud-init-dispatch.utils', () => {
       expect(
         buildProvisioningUserData({
           ...baseParams,
-          service: 'custom',
+          service: CloudInitServiceType.Custom,
           customTemplate: template,
           resolvedCustomEnv: { FOO: 'bar' },
         }),
@@ -58,7 +68,7 @@ describe('cloud-init-dispatch.utils', () => {
     });
 
     it('throws when custom service lacks template or env', () => {
-      expect(() => buildProvisioningUserData({ ...baseParams, service: 'custom' })).toThrow(
+      expect(() => buildProvisioningUserData({ ...baseParams, service: CloudInitServiceType.Custom })).toThrow(
         'Custom CloudInit provisioning requires template and resolved environment variables',
       );
     });

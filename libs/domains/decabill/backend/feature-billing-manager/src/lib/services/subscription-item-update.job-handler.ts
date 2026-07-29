@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
-import { normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
+import { CloudInitServiceType, normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
 import { buildAgentControllerUpdateCommand } from '../utils/cloud-init/agent-controller.utils';
 import { buildAgentManagerUpdateCommand } from '../utils/cloud-init/agent-manager.utils';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
@@ -52,13 +52,16 @@ export class SubscriptionItemUpdateJobHandler {
 
     const service = normalizeCloudInitService(item.configSnapshot?.service as string | undefined);
 
-    if (service === 'custom') {
+    if (service === CloudInitServiceType.Custom) {
       this.logger.log(`Skipping update for custom subscription item ${item.id}`);
 
       return;
     }
 
-    const command = service === 'manager' ? buildAgentManagerUpdateCommand() : buildAgentControllerUpdateCommand();
+    const command =
+      service === CloudInitServiceType.AgenstraManager
+        ? buildAgentManagerUpdateCommand()
+        : buildAgentControllerUpdateCommand();
     const result = await this.sshExecutor.exec(serverInfo.publicIp, SSH_PORT, SSH_USER, item.sshPrivateKey, command);
 
     if (result.code !== 0) {

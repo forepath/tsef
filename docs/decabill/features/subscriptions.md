@@ -95,7 +95,7 @@ When `allowCustomerServerTypeSelection` is true on the plan, customers may pass 
 
 When the plan sets `providerConfigDefaults.service` to `custom`, customers supply environment variables in `requestedConfig.env` as a string map. The billing console loads order fields from `GET /service-plans/{planId}/cloud-init-configs/{configId}/order-fields` (only for configs offered on the selected plan) and renders only variables with `showInOrderForm`.
 
-The backend merges customer values with decrypted admin defaults. Variables without a default and without a customer value cause a validation error at order time. Controller and manager authentication fields are not used for custom plans.
+The backend merges customer values with decrypted admin defaults. Variables without a default and without a customer value cause a validation error at order time. Agenstra Controller and Agenstra Manager authentication fields are not used for custom plans.
 
 See **[CloudInit Configs](./cloud-init-configs.md)**.
 
@@ -148,7 +148,7 @@ Each item tracks:
 - Provisioning status (`pending`, `active`, `failed`, etc.)
 - Provider reference (cloud server id)
 - Hostname and FQDN under `DNS_BASE_DOMAIN`
-- Service kind (for example controller stack)
+- Service kind (for example agenstra-controller stack)
 
 ### Server Info
 
@@ -160,7 +160,7 @@ Start, stop, and restart actions are available for provisioned items. See [Dashb
 
 ### Automated stack updates
 
-The **subscription-item-update** scheduler refreshes bundled controller and manager Docker stacks on a schedule. **Custom CloudInit subscription items are excluded** from this job; see [CloudInit Configs](./cloud-init-configs.md#automated-image-updates).
+The **subscription-item-update** scheduler refreshes bundled agenstra-controller and agenstra-manager Docker stacks on a schedule. **Custom CloudInit subscription items are excluded** from this job; see [CloudInit Configs](./cloud-init-configs.md#automated-image-updates).
 
 ## Usage Records
 

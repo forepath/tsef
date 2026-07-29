@@ -10,8 +10,8 @@ export interface SubscriptionItemResponseDto {
   provisioningStatus: 'pending' | 'active' | 'failed';
   /** Single-level subdomain when provisioned (e.g. awesome-armadillo-abc12) */
   hostname?: string;
-  /** Product service from config snapshot: controller, manager, or custom CloudInit template. Defaults to controller. */
-  service?: 'controller' | 'manager' | 'custom';
+  /** Product service from config snapshot: agenstra-controller, agenstra-manager, or custom CloudInit template. Defaults to agenstra-controller. */
+  service?: 'agenstra-controller' | 'agenstra-manager' | 'custom';
   /** True after the customer has revealed the provisioning SSH private key at least once. */
   sshAccessGranted: boolean;
 }

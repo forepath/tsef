@@ -113,7 +113,7 @@ describe('Subscription Server Info Selectors', () => {
       expect(result[0].subscription).toEqual(mockSubscription);
       expect(result[0].serverInfo).toEqual(mockServerInfo);
       expect(result[0].itemId).toBe('item-1');
-      expect(result[0].service).toBe('controller');
+      expect(result[0].service).toBe('agenstra-controller');
       expect(result[0].provisioningStatus).toBe('active');
       expect(result[0].sshAccessGranted).toBe(false);
       expect(result[0].serviceTypeName).toBe('Hetzner');
@@ -158,7 +158,7 @@ describe('Subscription Server Info Selectors', () => {
       };
       const serverInfoState = createServerInfoState({
         activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
-        serviceBySubscriptionId: { 'sub-1': 'manager' },
+        serviceBySubscriptionId: { 'sub-1': 'agenstra-manager' },
         provisioningStatusBySubscriptionId: { 'sub-1': 'pending' },
       });
       const rootState = {
@@ -171,7 +171,7 @@ describe('Subscription Server Info Selectors', () => {
       expect(result[0].subscription.id).toBe('sub-1');
       expect(result[0].provisioningStatus).toBe('pending');
       expect(result[0].serverInfo).toBeUndefined();
-      expect(result[0].service).toBe('manager');
+      expect(result[0].service).toBe('agenstra-manager');
     });
 
     it('should exclude subscriptions without tracked items', () => {

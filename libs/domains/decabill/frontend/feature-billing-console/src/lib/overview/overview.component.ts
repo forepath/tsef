@@ -181,7 +181,7 @@ export class OverviewComponent implements OnInit {
   }
 
   serviceTypeLabel(service: SubscriptionWithServerInfo['service']): string {
-    if (service === 'manager' || service === 'controller') {
+    if (service === 'agenstra-manager' || service === 'agenstra-controller') {
       return integratedProvisioningServiceLabel(service);
     }
 
@@ -189,7 +189,7 @@ export class OverviewComponent implements OnInit {
       return $localize`:@@featureOverview-customService:Custom application`;
     }
 
-    return integratedProvisioningServiceLabel('controller');
+    return integratedProvisioningServiceLabel('agenstra-controller');
   }
 
   serverStatusLabel(serverInfo: ServerInfoResponse): string {

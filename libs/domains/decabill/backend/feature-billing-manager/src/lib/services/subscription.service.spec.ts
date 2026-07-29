@@ -28,17 +28,17 @@ jest.mock('../utils/config-validation.utils', () => ({
 jest.mock('../utils/cloud-init/cloud-init-dispatch.utils', () => ({
   buildProvisioningUserData: jest.fn().mockReturnValue('mock-user-data'),
   normalizeCloudInitService: jest.fn().mockImplementation((service?: string) => {
-    if (service === 'manager' || service === 'custom') {
+    if (service === 'agenstra-manager' || service === 'custom') {
       return service;
     }
 
-    return 'controller';
+    return 'agenstra-controller';
   }),
 }));
 
 describe('SubscriptionService', () => {
   const controllerProvisioningDefaults = {
-    provisioningOptions: [{ type: 'integrated', service: 'controller' }],
+    provisioningOptions: [{ type: 'integrated', service: 'agenstra-controller' }],
   };
   const plansRepository = {
     findByIdOrThrow: jest.fn(),
@@ -202,11 +202,11 @@ describe('SubscriptionService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (normalizeCloudInitService as jest.Mock).mockImplementation((service?: string) => {
-      if (service === 'manager' || service === 'custom') {
+      if (service === 'agenstra-manager' || service === 'custom') {
         return service;
       }
 
-      return 'controller';
+      return 'agenstra-controller';
     });
     (customerProfilesService.getByUserId as jest.Mock).mockResolvedValue(completeProfile);
     (customerProfilesService.isProfileComplete as jest.Mock).mockReturnValue(true);
@@ -380,7 +380,7 @@ describe('SubscriptionService', () => {
     expect((itemsRepository.updateSshPrivateKey as jest.Mock).mock.calls[0][1].length).toBeGreaterThan(0);
     expect(buildProvisioningUserData).toHaveBeenCalledWith(
       expect.objectContaining({
-        service: 'controller',
+        service: 'agenstra-controller',
         hostname: 'awesome-armadillo-abc12',
         baseDomain: 'spirde.com',
         effectiveConfig: expect.objectContaining({
@@ -401,7 +401,7 @@ describe('SubscriptionService', () => {
       billingIntervalValue: 1,
       billingDayOfMonth: undefined,
       providerConfigDefaults: {
-        provisioningOptions: [{ type: 'integrated', service: 'manager' }],
+        provisioningOptions: [{ type: 'integrated', service: 'agenstra-manager' }],
       },
     });
     typesRepository.findByIdOrThrow = jest.fn().mockResolvedValue({
@@ -421,17 +421,17 @@ describe('SubscriptionService', () => {
     (availabilityService.checkAvailability as jest.Mock).mockResolvedValue({ isAvailable: true });
     (provisioningService.provision as jest.Mock).mockResolvedValue({ serverId: 'srv-1' });
 
-    await service.createSubscription('user-1', 'plan-1', { region: 'fsn1', service: 'manager' });
+    await service.createSubscription('user-1', 'plan-1', { region: 'fsn1', service: 'agenstra-manager' });
     await provisionCreatedItem();
 
     expect(itemsRepository.updateSshPrivateKey).toHaveBeenCalledWith('item-1', expect.any(String));
     expect(buildProvisioningUserData).toHaveBeenCalledWith(
       expect.objectContaining({
-        service: 'manager',
+        service: 'agenstra-manager',
         hostname: 'awesome-armadillo-abc12',
         effectiveConfig: expect.objectContaining({
           region: 'fsn1',
-          service: 'manager',
+          service: 'agenstra-manager',
           sshPublicKey: expect.any(String),
         }),
       }),
@@ -502,7 +502,7 @@ describe('SubscriptionService', () => {
         region: 'fsn1',
         serverType: 'cx23',
         provisioningOptions: [
-          { type: 'integrated', service: 'controller' },
+          { type: 'integrated', service: 'agenstra-controller' },
           { type: 'custom', cloudInitConfigId: 'cfg-2' },
         ],
       },
@@ -538,7 +538,7 @@ describe('SubscriptionService', () => {
       serviceTypeId: 'stype-1',
       billingIntervalType: BillingIntervalType.DAY,
       billingIntervalValue: 1,
-      providerConfigDefaults: { service: 'manager', region: 'fsn1', serverType: 'cx23' },
+      providerConfigDefaults: { service: 'agenstra-manager', region: 'fsn1', serverType: 'cx23' },
     });
     typesRepository.findByIdOrThrow = jest.fn().mockResolvedValue({
       id: 'stype-1',
@@ -557,10 +557,10 @@ describe('SubscriptionService', () => {
     (availabilityService.checkAvailability as jest.Mock).mockResolvedValue({ isAvailable: true });
     (provisioningService.provision as jest.Mock).mockResolvedValue({ serverId: 'srv-1' });
 
-    await service.createSubscription('user-1', 'plan-1', { service: 'manager', region: 'fsn1' });
+    await service.createSubscription('user-1', 'plan-1', { service: 'agenstra-manager', region: 'fsn1' });
     await provisionCreatedItem();
 
-    expect(buildProvisioningUserData).toHaveBeenCalledWith(expect.objectContaining({ service: 'manager' }));
+    expect(buildProvisioningUserData).toHaveBeenCalledWith(expect.objectContaining({ service: 'agenstra-manager' }));
   });
 
   it('rejects invalid provisioning selections', async () => {
@@ -571,7 +571,7 @@ describe('SubscriptionService', () => {
       billingIntervalValue: 1,
       providerConfigDefaults: {
         provisioningOptions: [
-          { type: 'integrated', service: 'controller' },
+          { type: 'integrated', service: 'agenstra-controller' },
           { type: 'custom', cloudInitConfigId: 'cfg-1' },
         ],
       },
@@ -835,7 +835,7 @@ describe('SubscriptionService', () => {
         ...controllerProvisioningDefaults,
         region: 'fsn1',
         serverType: 'cx23',
-        service: 'controller',
+        service: 'agenstra-controller',
         authenticationMethod: 'api-key',
       },
     });
@@ -859,7 +859,7 @@ describe('SubscriptionService', () => {
     await service.createSubscription('user-1', 'plan-1', {
       region: 'nbg1',
       serverType: 'cx23',
-      service: 'controller',
+      service: 'agenstra-controller',
       authenticationMethod: 'api-key',
     });
 
@@ -879,7 +879,7 @@ describe('SubscriptionService', () => {
         ...controllerProvisioningDefaults,
         region: 'fsn1',
         serverType: 'cx23',
-        service: 'controller',
+        service: 'agenstra-controller',
         authenticationMethod: 'api-key',
       },
     });
@@ -903,7 +903,7 @@ describe('SubscriptionService', () => {
     await service.createSubscription('user-1', 'plan-1', {
       region: 'nbg1',
       serverType: 'cx23',
-      service: 'controller',
+      service: 'agenstra-controller',
       authenticationMethod: 'api-key',
     });
 

@@ -335,10 +335,10 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     { initialValue: false },
   );
 
-  onServiceChange(value: 'controller' | 'manager'): void {
+  onServiceChange(value: 'agenstra-controller' | 'agenstra-manager'): void {
     this.orderRequestedConfig = { ...this.orderRequestedConfig, service: value };
 
-    if (value === 'manager' && this.orderRequestedConfig.authenticationMethod === 'users') {
+    if (value === 'agenstra-manager' && this.orderRequestedConfig.authenticationMethod === 'users') {
       this.orderRequestedConfig = { ...this.orderRequestedConfig, authenticationMethod: 'api-key' };
       this.authMethod.set('api-key');
     }
@@ -365,7 +365,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   }
 
   orderRequestedConfig: {
-    service: 'controller' | 'manager' | 'custom';
+    service: 'agenstra-controller' | 'agenstra-manager' | 'custom';
     authenticationMethod: 'users' | 'api-key' | 'keycloak';
     staticApiKey: string;
     disableSignup: boolean;
@@ -385,7 +385,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     };
     cursorApiKey: string;
   } = {
-    service: 'controller',
+    service: 'agenstra-controller',
     authenticationMethod: 'users',
     staticApiKey: '',
     disableSignup: false,
@@ -1296,7 +1296,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     if (option.type === 'integrated' && option.service) {
       this.orderRequestedConfig = { ...this.orderRequestedConfig, service: option.service };
 
-      if (option.service === 'manager' && this.orderRequestedConfig.authenticationMethod === 'users') {
+      if (option.service === 'agenstra-manager' && this.orderRequestedConfig.authenticationMethod === 'users') {
         this.orderRequestedConfig = { ...this.orderRequestedConfig, authenticationMethod: 'api-key' };
         this.authMethod.set('api-key');
       }
@@ -1577,7 +1577,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
       smtp: { ...cfg.smtp },
     };
 
-    if (cfg.service === 'controller') {
+    if (cfg.service === 'agenstra-controller') {
       requestedConfig['disableSignup'] = cfg.disableSignup;
     }
 
@@ -1589,7 +1589,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
       requestedConfig['keycloak'] = { ...cfg.keycloak };
     }
 
-    if (cfg.service === 'controller') {
+    if (cfg.service === 'agenstra-controller') {
       if (cfg.hetznerApiToken?.trim()) {
         requestedConfig['hetznerApiToken'] = cfg.hetznerApiToken.trim();
       }
@@ -1607,7 +1607,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
       requestedConfig['serverType'] = this.orderProvisioningServerType.trim();
     }
 
-    if (cfg.service === 'manager') {
+    if (cfg.service === 'agenstra-manager') {
       const gitSetupMode = cfg.git?.setupMode ?? 'clone';
       const hasGitCloneFields =
         (cfg.git?.repositoryUrl?.trim() ?? '') !== '' ||
@@ -2420,7 +2420,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     this.orderCustomFieldsRequestId++;
     this.authMethod.set('users');
     this.orderRequestedConfig = {
-      service: 'controller',
+      service: 'agenstra-controller',
       authenticationMethod: 'users',
       staticApiKey: '',
       disableSignup: false,

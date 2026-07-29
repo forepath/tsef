@@ -1,17 +1,39 @@
 import type { PlanProvisioningOption } from '../types/billing.types';
 
-const INTEGRATED_SERVICES = new Set(['controller', 'manager']);
+export type IntegratedProvisioningService = 'agenstra-controller' | 'agenstra-manager';
 
-export const DEFAULT_INTEGRATED_PROVISIONING_OPTION_KEYS = ['integrated:controller', 'integrated:manager'] as const;
+const INTEGRATED_SERVICES = new Set<IntegratedProvisioningService>(['agenstra-controller', 'agenstra-manager']);
+
+const LEGACY_INTEGRATED_SERVICE_ALIASES: Record<string, IntegratedProvisioningService> = {
+  controller: 'agenstra-controller',
+  manager: 'agenstra-manager',
+};
+
+export const DEFAULT_INTEGRATED_PROVISIONING_OPTION_KEYS = [
+  'integrated:agenstra-controller',
+  'integrated:agenstra-manager',
+] as const;
 
 /** Display labels for integrated Agenstra stacks (match plan editor and provisioning API). */
 export const INTEGRATED_CONTROLLER_SERVICE_LABEL = 'Agenstra Controller';
 export const INTEGRATED_MANAGER_SERVICE_LABEL = 'Agenstra Manager';
 
-export type IntegratedProvisioningService = 'controller' | 'manager';
+export function canonicalizeIntegratedProvisioningService(value: string): IntegratedProvisioningService | null {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (INTEGRATED_SERVICES.has(trimmed as IntegratedProvisioningService)) {
+    return trimmed as IntegratedProvisioningService;
+  }
+
+  return LEGACY_INTEGRATED_SERVICE_ALIASES[trimmed] ?? null;
+}
 
 export function integratedProvisioningServiceLabel(service: IntegratedProvisioningService): string {
-  return service === 'manager' ? INTEGRATED_MANAGER_SERVICE_LABEL : INTEGRATED_CONTROLLER_SERVICE_LABEL;
+  return service === 'agenstra-manager' ? INTEGRATED_MANAGER_SERVICE_LABEL : INTEGRATED_CONTROLLER_SERVICE_LABEL;
 }
 
 export function encodeProvisioningOptionKey(option: PlanProvisioningOption): string {
@@ -30,11 +52,9 @@ export function parseProvisioningOptionKey(key: string): PlanProvisioningOption 
   }
 
   if (trimmed.startsWith('integrated:')) {
-    const service = trimmed.slice('integrated:'.length);
+    const service = canonicalizeIntegratedProvisioningService(trimmed.slice('integrated:'.length));
 
-    return INTEGRATED_SERVICES.has(service)
-      ? { type: 'integrated', service: service as 'controller' | 'manager' }
-      : null;
+    return service ? { type: 'integrated', service } : null;
   }
 
   if (trimmed.startsWith('custom:')) {
@@ -53,8 +73,12 @@ function parseProvisioningOptionEntry(value: unknown): PlanProvisioningOption | 
 
   const entry = value as Record<string, unknown>;
 
-  if (entry['type'] === 'integrated' && INTEGRATED_SERVICES.has(String(entry['service']))) {
-    return { type: 'integrated', service: entry['service'] as 'controller' | 'manager' };
+  if (entry['type'] === 'integrated' && typeof entry['service'] === 'string') {
+    const service = canonicalizeIntegratedProvisioningService(entry['service']);
+
+    if (service) {
+      return { type: 'integrated', service };
+    }
   }
 
   if (
@@ -134,8 +158,12 @@ function inferLegacyPlanProvisioningOptionKeys(providerConfigDefaults: Record<st
 
   const legacyService = providerConfigDefaults['service'];
 
-  if (legacyService === 'manager' || legacyService === 'controller') {
-    return [encodeProvisioningOptionKey({ type: 'integrated', service: legacyService })];
+  if (typeof legacyService === 'string') {
+    const integrated = canonicalizeIntegratedProvisioningService(legacyService);
+
+    if (integrated) {
+      return [encodeProvisioningOptionKey({ type: 'integrated', service: integrated })];
+    }
   }
 
   const customKeys = collectLegacyCustomProvisioningOptionKeys(providerConfigDefaults);
@@ -148,7 +176,7 @@ function inferLegacyPlanProvisioningOptionKeys(providerConfigDefaults: Record<st
     return [];
   }
 
-  return [encodeProvisioningOptionKey({ type: 'integrated', service: 'controller' })];
+  return [encodeProvisioningOptionKey({ type: 'integrated', service: 'agenstra-controller' })];
 }
 
 export function resolvePlanProvisioningOptionKeys(

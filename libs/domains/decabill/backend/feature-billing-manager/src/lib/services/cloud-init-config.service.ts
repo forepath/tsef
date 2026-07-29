@@ -17,6 +17,7 @@ import {
   resolvePlanProvisioningOptions,
   type PlanProvisioningOption,
 } from '../utils/cloud-init/plan-provisioning-options.utils';
+import { IntegratedProvisioningService } from '../utils/cloud-init/integrated-provisioning-service';
 import {
   CloudInitTemplateContext,
   interpolateCloudInitTemplate,
@@ -342,9 +343,14 @@ export class CloudInitConfigService {
           optionKey: encodeProvisioningOptionKey(option),
           type: 'integrated',
           service: option.service,
-          label: option.service === 'controller' ? 'Agenstra Controller' : 'Agenstra Manager',
+          label:
+            option.service === IntegratedProvisioningService.AgenstraController
+              ? 'Agenstra Controller'
+              : 'Agenstra Manager',
           description:
-            option.service === 'controller' ? 'Runs the full agent controller stack.' : 'Runs the agent manager only.',
+            option.service === IntegratedProvisioningService.AgenstraController
+              ? 'Runs the full agent controller stack.'
+              : 'Runs the agent manager only.',
         });
         continue;
       }

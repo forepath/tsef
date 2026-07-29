@@ -115,7 +115,7 @@ describe('Subscription Server Info Effects', () => {
         loadOverviewServerInfoSuccess({
           serverInfoBySubscriptionId: { 'sub-1': mockServerInfo },
           activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
-          serviceBySubscriptionId: { 'sub-1': 'controller' },
+          serviceBySubscriptionId: { 'sub-1': 'agenstra-controller' },
           provisioningStatusBySubscriptionId: { 'sub-1': 'active' },
           sshAccessGrantedBySubscriptionId: { 'sub-1': false },
           serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
@@ -140,7 +140,7 @@ describe('Subscription Server Info Effects', () => {
         loadOverviewServerInfoSuccess({
           serverInfoBySubscriptionId: {},
           activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
-          serviceBySubscriptionId: { 'sub-1': 'controller' },
+          serviceBySubscriptionId: { 'sub-1': 'agenstra-controller' },
           provisioningStatusBySubscriptionId: { 'sub-1': 'pending' },
           sshAccessGrantedBySubscriptionId: { 'sub-1': false },
           serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
@@ -164,7 +164,7 @@ describe('Subscription Server Info Effects', () => {
         loadOverviewServerInfoSuccess({
           serverInfoBySubscriptionId: {},
           activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
-          serviceBySubscriptionId: { 'sub-1': 'controller' },
+          serviceBySubscriptionId: { 'sub-1': 'agenstra-controller' },
           provisioningStatusBySubscriptionId: { 'sub-1': 'failed' },
           sshAccessGrantedBySubscriptionId: { 'sub-1': false },
           serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
@@ -205,7 +205,7 @@ describe('Subscription Server Info Effects', () => {
         loadOverviewServerInfoSuccess({
           serverInfoBySubscriptionId: { 'sub-1': mockServerInfo },
           activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
-          serviceBySubscriptionId: { 'sub-1': 'controller' },
+          serviceBySubscriptionId: { 'sub-1': 'agenstra-controller' },
           provisioningStatusBySubscriptionId: { 'sub-1': 'active' },
           sshAccessGrantedBySubscriptionId: { 'sub-1': false },
           serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
