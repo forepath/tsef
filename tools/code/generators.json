@@ -1,42 +1,42 @@
 {
   "generators": {
     "backend": {
-      "factory": "./src/generators/backend/backend",
+      "factory": "./src/generators/backend/backend.ts",
       "schema": "./src/generators/backend/schema.json",
       "description": "backend generator"
     },
     "frontend": {
-      "factory": "./src/generators/frontend/frontend",
+      "factory": "./src/generators/frontend/frontend.ts",
       "schema": "./src/generators/frontend/schema.json",
       "description": "frontend generator"
     },
     "keycloak-theme": {
-      "factory": "./src/generators/keycloak-theme/keycloak-theme",
+      "factory": "./src/generators/keycloak-theme/keycloak-theme.ts",
       "schema": "./src/generators/keycloak-theme/schema.json",
       "description": "keycloak-theme generator"
     },
     "domain": {
-      "factory": "./src/generators/domain/domain",
+      "factory": "./src/generators/domain/domain.ts",
       "schema": "./src/generators/domain/schema.json",
       "description": "domain generator"
     },
     "lib": {
-      "factory": "./src/generators/lib/lib",
+      "factory": "./src/generators/lib/lib.ts",
       "schema": "./src/generators/lib/schema.json",
       "description": "lib generator"
     },
     "mcp": {
-      "factory": "./src/generators/mcp/mcp",
+      "factory": "./src/generators/mcp/mcp.ts",
       "schema": "./src/generators/mcp/schema.json",
       "description": "mcp generator"
     },
     "native": {
-      "factory": "./src/generators/native/native",
+      "factory": "./src/generators/native/native.ts",
       "schema": "./src/generators/native/schema.json",
       "description": "native generator"
     },
     "init": {
-      "factory": "./src/generators/init/init",
+      "factory": "./src/generators/init/init.ts",
       "schema": "./src/generators/init/schema.json",
       "description": "init generator"
     }

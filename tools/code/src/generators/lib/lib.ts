@@ -13,7 +13,7 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
   const libRoot = `${domainRoot}/${libFolder}`;
   let generatorFn: (tree: Tree, schema: any) => Promise<GeneratorCallback>;
 
-  switch (options.generator) {
+  switch (options.baseGenerator) {
     case 'js':
       generatorFn = jsLibraryGenerator;
       break;
@@ -24,7 +24,7 @@ export async function libGenerator(tree: Tree, options: LibGeneratorSchema) {
       generatorFn = angularLibraryGenerator;
       break;
     default:
-      throw new Error(`Unsupported generator type: ${options.generator}`);
+      throw new Error(`Unsupported base generator type: ${options.baseGenerator}`);
   }
 
   const importPath = `@forepath/${options.domain}/${options.scope}/${libImportRoot}`;
