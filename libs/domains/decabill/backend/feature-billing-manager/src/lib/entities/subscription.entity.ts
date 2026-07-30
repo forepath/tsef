@@ -15,6 +15,7 @@ export enum SubscriptionStatus {
   PENDING_BACKORDER = 'pending_backorder',
   PENDING_CANCEL = 'pending_cancel',
   PENDING_WITHDRAWAL = 'pending_withdrawal',
+  PENDING_INSTANT_CANCEL = 'pending_instant_cancel',
   PENDING_CONFIG_CHANGE = 'pending_config_change',
   CANCELED = 'canceled',
 }
@@ -73,6 +74,17 @@ export class SubscriptionEntity {
 
   @Column({ type: 'varchar', length: 30, nullable: true, name: 'withdraw_phase' })
   withdrawPhase?: WithdrawalTeardownPhase;
+
+  /**
+   * When true, the subscription is marked for admin instant removal (abuse / force teardown).
+   * Paired with `pending_instant_cancel` and `instantCanceledAt` for the dedicated job.
+   */
+  @Column({ type: 'boolean', name: 'instant_removal', default: false })
+  instantRemoval!: boolean;
+
+  /** Due marker for the instant-cancel job (mirrors `withdrawnAt` for withdrawals). */
+  @Column({ type: 'timestamp', nullable: true, name: 'instant_canceled_at' })
+  instantCanceledAt?: Date;
 
   /** Whether a provisioning failure should fall back to an automatic backorder retry. */
   @Column({ type: 'boolean', name: 'auto_backorder', default: false })

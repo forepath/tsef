@@ -12,6 +12,7 @@ describe('AdminBillingController', () => {
     listSubscriptionsForAdmin: jest.fn(),
     cancelSubscriptionForAdmin: jest.fn(),
     withdrawSubscriptionForAdmin: jest.fn(),
+    instantCancelSubscriptionForAdmin: jest.fn(),
     resumeSubscriptionForAdmin: jest.fn(),
   };
   const adminBillNowService = { queueBillNow: jest.fn() };
@@ -253,6 +254,18 @@ describe('AdminBillingController', () => {
 
     expect(billingAdminService.withdrawSubscriptionForAdmin).toHaveBeenCalledWith('sub-1');
     expect(result.status).toBe('pending_withdrawal');
+  });
+
+  it('instantCancelSubscription delegates to billing admin service', async () => {
+    billingAdminService.instantCancelSubscriptionForAdmin.mockResolvedValue({
+      id: 'sub-1',
+      status: 'pending_instant_cancel',
+    });
+
+    const result = await controller.instantCancelSubscription('sub-1', {});
+
+    expect(billingAdminService.instantCancelSubscriptionForAdmin).toHaveBeenCalledWith('sub-1');
+    expect(result.status).toBe('pending_instant_cancel');
   });
 
   it('resumeSubscription delegates to billing admin service', async () => {

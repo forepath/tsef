@@ -75,6 +75,41 @@ export class SubscriptionTeardownService {
     });
   }
 
+  /**
+   * Completes a queued admin instant cancel: prepaid plans settle like statutory
+   * withdrawal advance cases; arrear plans bill used time via teardown open position.
+   */
+  async processInstantCancel(subscriptionId: string): Promise<void> {
+    const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+    const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);
+    const cutoff = subscription.instantCanceledAt ?? new Date();
+    const billInAdvance = plan.billInAdvance === true;
+
+    if (billInAdvance) {
+      const unbilled = await this.openPositionsRepository.findUnbilledBySubscription(subscription.id);
+
+      if (unbilled.length > 0) {
+        await this.openPositionsRepository.updateUnbilledBillUntil(subscription.id, cutoff);
+      } else {
+        await this.withdrawalRefundService.applyProvisionedWithdrawalRefund(subscription, cutoff);
+      }
+
+      await this.teardownImmediate(subscriptionId, {
+        withdrawn: false,
+        billUntil: cutoff,
+        skipOpenPosition: true,
+      });
+
+      return;
+    }
+
+    await this.teardownImmediate(subscriptionId, {
+      withdrawn: false,
+      billUntil: cutoff,
+      skipOpenPosition: false,
+    });
+  }
+
   async teardownImmediate(subscriptionId: string, options: TeardownOptions = {}): Promise<void> {
     const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
     const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);

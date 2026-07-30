@@ -118,6 +118,17 @@
                     <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
                   </button>
                 }
+                @if (canInstantCancel(sub)) {
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    (click)="openInstantCancelConfirm(sub)"
+                    title="Instant cancel subscription"
+                    i18n-title="@@featureAdminSubscriptions-instantCancelButtonTitle"
+                  >
+                    <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+                  </button>
+                }
                 @if (sub.status === 'active') {
                   <button
                     type="button"
@@ -210,6 +221,34 @@
           i18n="@@featureSubscriptions-withdraw"
         >
           Withdraw
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" tabindex="-1" aria-hidden="true" #instantCancelSubscriptionModal>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" i18n="@@featureAdminSubscriptions-instantCancelTitle">Instant cancel subscription?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p i18n="@@featureAdminSubscriptions-instantCancelConfirm">
+          Force-remove this subscription immediately. Access ends now. Arrear plans are billed for used time; prepaid
+          plans refund unused time like a statutory withdrawal. This cannot be resumed.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="confirmInstantCancelSubscription()"
+          [disabled]="(instantCanceling$ | async) === true"
+          i18n="@@featureAdminSubscriptions-instantCancel"
+        >
+          Instant cancel
         </button>
       </div>
     </div>

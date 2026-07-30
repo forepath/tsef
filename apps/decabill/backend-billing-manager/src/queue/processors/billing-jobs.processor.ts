@@ -18,6 +18,7 @@ import {
   SubscriptionProvisioningJobHandler,
   SubscriptionRenewalReminderJobHandler,
   SubscriptionWithdrawalJobHandler,
+  SubscriptionInstantCancelJobHandler,
   VatIdValidationJobHandler,
 } from '@forepath/decabill/backend';
 import {
@@ -58,6 +59,7 @@ export class BillingJobsProcessor extends WorkerHost {
     private readonly subscriptionBilling: SubscriptionBillingJobHandler,
     private readonly subscriptionExpiration: SubscriptionExpirationJobHandler,
     private readonly subscriptionWithdrawal: SubscriptionWithdrawalJobHandler,
+    private readonly subscriptionInstantCancel: SubscriptionInstantCancelJobHandler,
     private readonly subscriptionProvisioning: SubscriptionProvisioningJobHandler,
     private readonly subscriptionConfigChange: SubscriptionConfigChangeJobHandler,
     private readonly invoiceOverdue: InvoiceOverdueJobHandler,
@@ -97,6 +99,9 @@ export class BillingJobsProcessor extends WorkerHost {
         break;
       case BillingJobName.SUBSCRIPTION_WITHDRAWAL_COORDINATOR:
         await this.runSubscriptionWithdrawalCoordinator();
+        break;
+      case BillingJobName.SUBSCRIPTION_INSTANT_CANCEL_COORDINATOR:
+        await this.runSubscriptionInstantCancelCoordinator();
         break;
       case BillingJobName.SUBSCRIPTION_PROVISIONING_COORDINATOR:
         await this.runSubscriptionProvisioningCoordinator();
@@ -165,6 +170,11 @@ export class BillingJobsProcessor extends WorkerHost {
               break;
             case BillingJobName.SUBSCRIPTION_WITHDRAWAL_UNIT:
               await this.subscriptionWithdrawal.processSubscriptionWithdrawal(
+                (job.data as { subscriptionId: string }).subscriptionId,
+              );
+              break;
+            case BillingJobName.SUBSCRIPTION_INSTANT_CANCEL_UNIT:
+              await this.subscriptionInstantCancel.processSubscriptionInstantCancel(
                 (job.data as { subscriptionId: string }).subscriptionId,
               );
               break;
@@ -300,6 +310,22 @@ export class BillingJobsProcessor extends WorkerHost {
           jobName: BillingJobName.SUBSCRIPTION_WITHDRAWAL_UNIT,
           payload: { subscriptionId, tenantId },
           jobIdNamespace: 'withdrawal:subscription',
+          jobIdParts: [tenantId, subscriptionId],
+        });
+      }
+    });
+  }
+
+  private async runSubscriptionInstantCancelCoordinator(): Promise<void> {
+    await this.forEachConfiguredTenant(async (tenantId) => {
+      const ids = await this.subscriptionInstantCancel.findPendingInstantCancelIds();
+
+      for (const subscriptionId of ids) {
+        await this.enqueueBillingUnitJob({
+          queue: this.billingQueue,
+          jobName: BillingJobName.SUBSCRIPTION_INSTANT_CANCEL_UNIT,
+          payload: { subscriptionId, tenantId },
+          jobIdNamespace: 'instant-cancel:subscription',
           jobIdParts: [tenantId, subscriptionId],
         });
       }

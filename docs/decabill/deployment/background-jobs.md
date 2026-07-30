@@ -35,21 +35,22 @@ Job registration (queue names, repeatable intervals, job names) lives in:
 
 Registered by the scheduler from `getBillingRepeatableJobs()`:
 
-| Coordinator job name                     | Env interval variable                      | Default interval |
-| ---------------------------------------- | ------------------------------------------ | ---------------- |
-| `subscription-billing.coordinator`       | `BILLING_SCHEDULER_INTERVAL`               | 60s              |
-| `subscription-expiration.coordinator`    | `EXPIRATION_SCHEDULER_INTERVAL`            | 60s              |
-| `subscription-withdrawal.coordinator`    | `WITHDRAWAL_SCHEDULER_INTERVAL`            | 60s              |
-| `subscription-provisioning.coordinator`  | `PROVISIONING_SCHEDULER_INTERVAL`          | 30s              |
-| `subscription-config-change.coordinator` | `CONFIG_CHANGE_SCHEDULER_INTERVAL`         | 30s              |
-| `invoice-overdue.coordinator`            | `INVOICE_OVERDUE_SCHEDULER_INTERVAL`       | 24h              |
-| `invoice-auto-payment.coordinator`       | `INVOICE_AUTO_PAYMENT_SCHEDULER_INTERVAL`  | 60s              |
-| `open-position-invoice.coordinator`      | `OPEN_POSITION_INVOICE_SCHEDULER_INTERVAL` | 24h              |
-| `renewal-reminder.coordinator`           | `REMINDER_SCHEDULER_INTERVAL`              | 1h               |
-| `subscription-item-update.coordinator`   | `SUBSCRIPTION_UPDATE_SCHEDULER_INTERVAL`   | 24h              |
-| `backorder-retry.coordinator`            | `BACKORDER_RETRY_INTERVAL_MS`              | 60s              |
-| `datev-export.coordinator`               | `BILLING_DATEV_EXPORT_CRON` (cron)         | 1st of month     |
-| `price-recalc.coordinator`               | `BILLING_PRICE_RECALC_CRON` (cron)         | daily 00:00      |
+| Coordinator job name                      | Env interval variable                      | Default interval |
+| ----------------------------------------- | ------------------------------------------ | ---------------- |
+| `subscription-billing.coordinator`        | `BILLING_SCHEDULER_INTERVAL`               | 60s              |
+| `subscription-expiration.coordinator`     | `EXPIRATION_SCHEDULER_INTERVAL`            | 60s              |
+| `subscription-withdrawal.coordinator`     | `WITHDRAWAL_SCHEDULER_INTERVAL`            | 60s              |
+| `subscription-instant-cancel.coordinator` | `INSTANT_CANCEL_SCHEDULER_INTERVAL`        | 60s              |
+| `subscription-provisioning.coordinator`   | `PROVISIONING_SCHEDULER_INTERVAL`          | 30s              |
+| `subscription-config-change.coordinator`  | `CONFIG_CHANGE_SCHEDULER_INTERVAL`         | 30s              |
+| `invoice-overdue.coordinator`             | `INVOICE_OVERDUE_SCHEDULER_INTERVAL`       | 24h              |
+| `invoice-auto-payment.coordinator`        | `INVOICE_AUTO_PAYMENT_SCHEDULER_INTERVAL`  | 60s              |
+| `open-position-invoice.coordinator`       | `OPEN_POSITION_INVOICE_SCHEDULER_INTERVAL` | 24h              |
+| `renewal-reminder.coordinator`            | `REMINDER_SCHEDULER_INTERVAL`              | 1h               |
+| `subscription-item-update.coordinator`    | `SUBSCRIPTION_UPDATE_SCHEDULER_INTERVAL`   | 24h              |
+| `backorder-retry.coordinator`             | `BACKORDER_RETRY_INTERVAL_MS`              | 60s              |
+| `datev-export.coordinator`                | `BILLING_DATEV_EXPORT_CRON` (cron)         | 1st of month     |
+| `price-recalc.coordinator`                | `BILLING_PRICE_RECALC_CRON` (cron)         | daily 00:00      |
 
 The DATEV coordinator is registered only when `BILLING_DATEV_EXPORT_ENABLED=true`. The price-recalc coordinator is registered only when `BILLING_PRICE_RECALC_ENABLED=true` (default true). See [Automatic daily price recalculation](../features/automatic-price-recalculation.md).
 
@@ -62,6 +63,7 @@ Coordinators fan out unit jobs such as:
 - `subscription-billing.unit`
 - `subscription-expiration.unit`
 - `subscription-withdrawal.unit`
+- `subscription-instant-cancel.unit`
 - `subscription-provisioning.unit`
 - `subscription-config-change.unit`
 - `invoice-overdue.unit`

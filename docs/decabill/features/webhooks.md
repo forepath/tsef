@@ -63,6 +63,8 @@ Config-change payloads carry the subscription payload plus `configChangeId`, `ap
 
 Subscription payloads include `billInAdvance` and `billingIntervalType`. **Breaking:** cancel requests emit `subscription.cancel_scheduled`; `subscription.canceled` is reserved for final teardown. See [Advance billing and yearly interval](./advance-billing-and-yearly-interval.md).
 
+Admin instant cancel (like statutory withdrawal accept) emits `subscription.updated` when queued, then `subscription.canceled` on teardown. Prepaid unused-period refunds reuse withdrawal refund accounting; the final event stays canceled (not a separate withdrawn type). See [Subscriptions — Admin instant cancel](./subscriptions.md#admin-instant-cancel).
+
 Payment success/failure payloads may include `mode` (`checkout` | `auto`). Auto-billing events are documented in [Auto-Billing](./auto-billing.md).
 `customer_trust.level_changed` only includes identifiers plus level and score metadata; it never includes billing-profile address fields or other PII.
 

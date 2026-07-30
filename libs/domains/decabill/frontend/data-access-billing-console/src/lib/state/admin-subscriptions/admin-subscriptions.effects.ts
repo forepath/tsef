@@ -15,6 +15,9 @@ import {
   adminWithdrawSubscription,
   adminWithdrawSubscriptionFailure,
   adminWithdrawSubscriptionSuccess,
+  adminInstantCancelSubscription,
+  adminInstantCancelSubscriptionFailure,
+  adminInstantCancelSubscriptionSuccess,
   adminResumeSubscription,
   adminResumeSubscriptionFailure,
   adminResumeSubscriptionSuccess,
@@ -114,6 +117,20 @@ export const adminWithdrawSubscription$ = createEffect(
         service.withdrawSubscription(id).pipe(
           map((subscription) => adminWithdrawSubscriptionSuccess({ subscription })),
           catchError((error) => of(adminWithdrawSubscriptionFailure({ error: normalizeError(error) }))),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
+export const adminInstantCancelSubscription$ = createEffect(
+  (actions$ = inject(Actions), service = inject(AdminBillingService)) =>
+    actions$.pipe(
+      ofType(adminInstantCancelSubscription),
+      switchMap(({ id }) =>
+        service.instantCancelSubscription(id).pipe(
+          map((subscription) => adminInstantCancelSubscriptionSuccess({ subscription })),
+          catchError((error) => of(adminInstantCancelSubscriptionFailure({ error: normalizeError(error) }))),
         ),
       ),
     ),

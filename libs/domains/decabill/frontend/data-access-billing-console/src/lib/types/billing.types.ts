@@ -9,6 +9,7 @@ export type SubscriptionStatus =
   | 'pending_cancel'
   | 'pending_config_change'
   | 'pending_withdrawal'
+  | 'pending_instant_cancel'
   | 'canceled';
 
 export type BackorderStatus = 'pending' | 'retrying' | 'fulfilled' | 'cancelled' | 'failed';
@@ -399,6 +400,8 @@ export interface SubscriptionResponse {
   cancelEffectiveAt?: string | null;
   resumedAt?: string | null;
   withdrawnAt?: string | null;
+  instantRemoval?: boolean;
+  instantCanceledAt?: string | null;
   withdrawalEligibility?: WithdrawalEligibility;
   withdrawalResult?: WithdrawalResult;
   periodTotalPrice?: number;

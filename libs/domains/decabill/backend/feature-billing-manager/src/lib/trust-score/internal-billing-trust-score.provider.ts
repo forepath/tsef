@@ -41,7 +41,11 @@ export class InternalBillingTrustScoreProvider implements TrustScoreProvider {
     const hasSubscriptionHistory = subscriptions.length > 0;
     const hasWithdrawal = subscriptions.some(
       (subscription) =>
-        subscription.status === SubscriptionStatus.PENDING_WITHDRAWAL || subscription.withdrawnAt != null,
+        subscription.status === SubscriptionStatus.PENDING_WITHDRAWAL ||
+        subscription.status === SubscriptionStatus.PENDING_INSTANT_CANCEL ||
+        subscription.withdrawnAt != null ||
+        subscription.instantRemoval === true ||
+        subscription.instantCanceledAt != null,
     );
 
     if (profile && this.customerProfilesService.isProfileComplete(profile)) {

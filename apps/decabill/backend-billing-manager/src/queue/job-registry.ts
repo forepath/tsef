@@ -16,6 +16,8 @@ export const BillingJobName = {
   SUBSCRIPTION_EXPIRATION_UNIT: 'subscription-expiration.unit',
   SUBSCRIPTION_WITHDRAWAL_COORDINATOR: 'subscription-withdrawal.coordinator',
   SUBSCRIPTION_WITHDRAWAL_UNIT: 'subscription-withdrawal.unit',
+  SUBSCRIPTION_INSTANT_CANCEL_COORDINATOR: 'subscription-instant-cancel.coordinator',
+  SUBSCRIPTION_INSTANT_CANCEL_UNIT: 'subscription-instant-cancel.unit',
   SUBSCRIPTION_PROVISIONING_COORDINATOR: 'subscription-provisioning.coordinator',
   SUBSCRIPTION_PROVISIONING_UNIT: 'subscription-provisioning.unit',
   SUBSCRIPTION_CONFIG_CHANGE_COORDINATOR: 'subscription-config-change.coordinator',
@@ -96,6 +98,11 @@ export function getBillingRepeatableJobs(): BillingRepeatableJobDefinition[] {
       name: BillingJobName.SUBSCRIPTION_WITHDRAWAL_COORDINATOR,
       coordinatorJobId: buildCoordinatorJobId('subscription-withdrawal'),
       everyMs: parseIntervalMs('WITHDRAWAL_SCHEDULER_INTERVAL', 60_000),
+    },
+    {
+      name: BillingJobName.SUBSCRIPTION_INSTANT_CANCEL_COORDINATOR,
+      coordinatorJobId: buildCoordinatorJobId('subscription-instant-cancel'),
+      everyMs: parseIntervalMs('INSTANT_CANCEL_SCHEDULER_INTERVAL', 60_000),
     },
     {
       name: BillingJobName.SUBSCRIPTION_PROVISIONING_COORDINATOR,

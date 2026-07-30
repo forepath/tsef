@@ -1042,6 +1042,57 @@ describe('SubscriptionService', () => {
     expect(result.withdrawalResult?.paymentRefundStatus).toBe('pending');
   });
 
+  it('queues instant cancel for an active subscription', async () => {
+    subscriptionsRepository.findByIdOrThrow = jest
+      .fn()
+      .mockResolvedValueOnce({
+        id: 'sub-1',
+        userId: 'user-1',
+        planId: 'plan-1',
+        status: SubscriptionStatus.ACTIVE,
+      })
+      .mockResolvedValueOnce({
+        id: 'sub-1',
+        userId: 'user-1',
+        planId: 'plan-1',
+        status: SubscriptionStatus.ACTIVE,
+      })
+      .mockResolvedValueOnce({
+        id: 'sub-1',
+        userId: 'user-1',
+        planId: 'plan-1',
+        status: SubscriptionStatus.PENDING_INSTANT_CANCEL,
+        instantRemoval: true,
+        instantCanceledAt: new Date(),
+      });
+    subscriptionsRepository.update = jest.fn().mockResolvedValue(undefined);
+    plansRepository.findByIdOrThrow = jest.fn().mockResolvedValue({ id: 'plan-1', serviceTypeId: 'st-1' });
+
+    const result = await service.instantCancelSubscription('sub-1', 'user-1');
+
+    expect(backordersRepository.cancelPendingForUserPlan).toHaveBeenCalledWith('user-1', 'plan-1');
+    expect(subscriptionsRepository.update).toHaveBeenCalledWith('sub-1', {
+      status: SubscriptionStatus.PENDING_INSTANT_CANCEL,
+      instantRemoval: true,
+      instantCanceledAt: expect.any(Date),
+      cancelEffectiveAt: null,
+    });
+    expect(result.subscription.status).toBe(SubscriptionStatus.PENDING_INSTANT_CANCEL);
+  });
+
+  it('rejects instant cancel when status is not allowed', async () => {
+    subscriptionsRepository.findByIdOrThrow = jest.fn().mockResolvedValue({
+      id: 'sub-1',
+      userId: 'user-1',
+      planId: 'plan-1',
+      status: SubscriptionStatus.PENDING_WITHDRAWAL,
+    });
+
+    await expect(service.instantCancelSubscription('sub-1', 'user-1')).rejects.toThrow(
+      'Instant cancel is not permitted for this subscription',
+    );
+  });
+
   describe('provisionSubscriptionItem', () => {
     it('skips when the item is not found', async () => {
       (itemsRepository.findByIdWithRelations as jest.Mock).mockResolvedValue(null);

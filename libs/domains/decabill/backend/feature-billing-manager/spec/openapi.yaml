@@ -2908,6 +2908,38 @@ paths:
           description: Admin access required
         '404':
           description: Subscription not found
+  /admin/billing/subscriptions/{subscriptionId}/instant-cancel:
+    post:
+      tags: [Admin Billing]
+      summary: Instant-cancel subscription (admin only)
+      description: |
+        Force-remove access immediately, bypassing commercial cancel and statutory withdrawal policy.
+        Marks the subscription `pending_instant_cancel` with `instantRemoval=true` for the dedicated teardown job.
+        Arrear plans bill used time through cancel; prepaid plans refund unused period like statutory withdrawal.
+      operationId: adminInstantCancelSubscription
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstantCancelSubscriptionDto'
+      responses:
+        '200':
+          description: Subscription marked for instant cancel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSubscriptionListItem'
+        '400':
+          description: Instant cancel not permitted
+        '401':
+          description: Unauthorized
+        '403':
+          description: Admin access required
+        '404':
+          description: Subscription not found
   /admin/billing/subscriptions/{subscriptionId}/resume:
     post:
       tags: [Admin Billing]
@@ -5494,6 +5526,8 @@ components:
                 pending_backorder,
                 pending_cancel,
                 pending_withdrawal,
+                pending_instant_cancel,
+                pending_config_change,
                 canceled,
               ],
           }
@@ -5504,6 +5538,8 @@ components:
         cancelEffectiveAt: { type: string, format: date-time, nullable: true }
         resumedAt: { type: string, format: date-time, nullable: true }
         withdrawnAt: { type: string, format: date-time, nullable: true }
+        instantRemoval: { type: boolean }
+        instantCanceledAt: { type: string, format: date-time, nullable: true }
         withdrawalEligibility:
           $ref: '#/components/schemas/WithdrawalEligibility'
         withdrawalResult:
@@ -5514,6 +5550,12 @@ components:
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     WithdrawSubscriptionDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 500
+    InstantCancelSubscriptionDto:
       type: object
       properties:
         reason:

@@ -50,6 +50,19 @@ export const adminWithdrawSubscriptionFailure = createAction(
   props<{ error: string }>(),
 );
 
+export const adminInstantCancelSubscription = createAction(
+  '[AdminSubscriptions] Instant Cancel Subscription',
+  props<{ id: string }>(),
+);
+export const adminInstantCancelSubscriptionSuccess = createAction(
+  '[AdminSubscriptions] Instant Cancel Subscription Success',
+  props<{ subscription: AdminSubscriptionListItem }>(),
+);
+export const adminInstantCancelSubscriptionFailure = createAction(
+  '[AdminSubscriptions] Instant Cancel Subscription Failure',
+  props<{ error: string }>(),
+);
+
 export const adminResumeSubscription = createAction(
   '[AdminSubscriptions] Resume Subscription',
   props<{ id: string }>(),

@@ -12,6 +12,9 @@ import {
   adminWithdrawSubscription,
   adminWithdrawSubscriptionFailure,
   adminWithdrawSubscriptionSuccess,
+  adminInstantCancelSubscription,
+  adminInstantCancelSubscriptionFailure,
+  adminInstantCancelSubscriptionSuccess,
   loadAdminSubscriptions,
   loadAdminSubscriptionsBatch,
   loadAdminSubscriptionsFailure,
@@ -23,6 +26,7 @@ export interface AdminSubscriptionsState {
   loading: boolean;
   canceling: boolean;
   withdrawing: boolean;
+  instantCanceling: boolean;
   resuming: boolean;
   error: string | null;
 }
@@ -32,6 +36,7 @@ export const initialAdminSubscriptionsState: AdminSubscriptionsState = {
   loading: false,
   canceling: false,
   withdrawing: false,
+  instantCanceling: false,
   resuming: false,
   error: null,
 };
@@ -103,6 +108,22 @@ export const adminSubscriptionsReducer = createReducer(
   on(adminWithdrawSubscriptionFailure, (state, { error }) => ({
     ...state,
     withdrawing: false,
+    error,
+  })),
+  on(adminInstantCancelSubscription, (state) => ({
+    ...state,
+    instantCanceling: true,
+    error: null,
+  })),
+  on(adminInstantCancelSubscriptionSuccess, (state, { subscription }) => ({
+    ...state,
+    instantCanceling: false,
+    subscriptions: upsertSubscription(state.subscriptions, subscription),
+    error: null,
+  })),
+  on(adminInstantCancelSubscriptionFailure, (state, { error }) => ({
+    ...state,
+    instantCanceling: false,
     error,
   })),
   on(adminResumeSubscription, (state) => ({

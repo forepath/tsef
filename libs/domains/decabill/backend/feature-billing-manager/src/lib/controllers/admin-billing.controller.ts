@@ -22,6 +22,7 @@ import {
 import type { Response } from 'express';
 
 import { CancelSubscriptionDto } from '../dto/cancel-subscription.dto';
+import { InstantCancelSubscriptionDto } from '../dto/instant-cancel-subscription.dto';
 import { ResumeSubscriptionDto } from '../dto/resume-subscription.dto';
 import { WithdrawSubscriptionDto } from '../dto/withdraw-subscription.dto';
 import type {
@@ -156,6 +157,15 @@ export class AdminBillingController {
     @Body() _dto: WithdrawSubscriptionDto,
   ): Promise<AdminSubscriptionListItemDto> {
     return await this.billingAdminService.withdrawSubscriptionForAdmin(id);
+  }
+
+  @RequireScopes('billing_admin:write')
+  @Post('subscriptions/:id/instant-cancel')
+  async instantCancelSubscription(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() _dto: InstantCancelSubscriptionDto,
+  ): Promise<AdminSubscriptionListItemDto> {
+    return await this.billingAdminService.instantCancelSubscriptionForAdmin(id);
   }
 
   @RequireScopes('billing_admin:write')

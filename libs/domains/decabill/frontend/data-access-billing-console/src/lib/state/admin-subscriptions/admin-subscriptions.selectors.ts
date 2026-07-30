@@ -18,6 +18,11 @@ export const selectAdminSubscriptionsWithdrawing = createSelector(
   (state) => state.withdrawing,
 );
 
+export const selectAdminSubscriptionsInstantCanceling = createSelector(
+  selectAdminSubscriptionsState,
+  (state) => state.instantCanceling,
+);
+
 export const selectAdminSubscriptionsResuming = createSelector(
   selectAdminSubscriptionsState,
   (state) => state.resuming,
