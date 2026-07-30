@@ -1,13 +1,13 @@
 <section class="section__row" [class.section__row--marketing-hidden]="!showAuthMarketingPanel">
   <div
-    class="section__column section__column--marketing d-flex align-items-center justify-content-center bg-body-tertiary h-100"
+    class="section__column section__column--marketing d-flex align-items-center justify-content-center bg-body-tertiary h-100 border-end"
   >
     <div class="p-4" style="width: 700px; max-width: 100%">
       <h1 class="display-5 fw-bold mb-3">{{ productName }}</h1>
       <p class="lead mb-4">{{ authMarketing.loginDescription }}</p>
       <ul class="list-unstyled">
         @for (feature of authMarketing.features; track feature.title) {
-          <li class="mb-2 d-flex align-items-center gap-2 bg-body-secondary py-2 px-3 rounded-2">
+          <li class="mb-2 d-flex align-items-center gap-2 py-2 px-3 rounded-2 border bg-body">
             <i class="bi bi-check-circle-fill text-primary me-2 fs-5"></i>
             <div class="d-flex flex-column">
               <strong>{{ feature.title }}</strong>

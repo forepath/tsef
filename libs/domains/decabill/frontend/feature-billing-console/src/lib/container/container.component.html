@@ -129,7 +129,7 @@
     </div>
   </section>
 }
-<div class="d-flex justify-content-end flex-grow-1 overflow-hidden">
+<div class="d-flex justify-content-end flex-grow-1 overflow-hidden" [class.border-top]="!isMainMask()">
   @if (isMainMask()) {
     <aside class="sidebar bg-body-tertiary h-100">
       <a
