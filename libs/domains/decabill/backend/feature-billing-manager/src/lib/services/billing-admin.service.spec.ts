@@ -10,6 +10,7 @@ describe('BillingAdminService', () => {
     mapManyToResponses: jest.fn(),
     cancelSubscription: jest.fn(),
     withdrawSubscription: jest.fn(),
+    instantCancelSubscription: jest.fn(),
     resumeSubscription: jest.fn(),
   };
   const usersRepository = { findByIdForTenant: jest.fn() };
@@ -93,6 +94,24 @@ describe('BillingAdminService', () => {
 
     expect(subscriptionService.cancelSubscription).toHaveBeenCalledWith('sub-1', 'user-1');
     expect(result.status).toBe('pending_cancel');
+    expect(result.userEmail).toBe('user@test.local');
+  });
+
+  it('instantCancelSubscriptionForAdmin cancels on behalf of the subscription owner', async () => {
+    subscriptionsRepository.findByIdOrThrow.mockResolvedValue({ id: 'sub-1', userId: 'user-1' });
+    subscriptionService.instantCancelSubscription.mockResolvedValue({
+      subscription: { id: 'sub-1', userId: 'user-1', planId: 'plan-1', status: 'pending_instant_cancel' },
+    });
+    subscriptionService.mapManyToResponses.mockResolvedValue([
+      { id: 'sub-1', userId: 'user-1', planId: 'plan-1', status: 'pending_instant_cancel' },
+    ]);
+    usersRepository.findByIdForTenant.mockResolvedValue({ id: 'user-1', email: 'user@test.local' });
+    servicePlansRepository.findById.mockResolvedValue({ id: 'plan-1', name: 'Basic Plan' });
+
+    const result = await service.instantCancelSubscriptionForAdmin('sub-1');
+
+    expect(subscriptionService.instantCancelSubscription).toHaveBeenCalledWith('sub-1', 'user-1');
+    expect(result.status).toBe('pending_instant_cancel');
     expect(result.userEmail).toBe('user@test.local');
   });
 });

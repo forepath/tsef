@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-29T15:32:58.797Z",
+  "generatedAt": "2026-07-30T16:21:17.199Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -5969,6 +5969,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/instant-cancel-subscription.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/instant-cancel-subscription.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/invoice-detail-response.dto.ts",
       "type": "dto",
       "attrs": {
@@ -7782,6 +7791,15 @@
       "type": "job",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-expiration.job-handler.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-instant-cancel.job-handler.ts",
+      "type": "job",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-instant-cancel.job-handler.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -15047,6 +15065,17 @@
         "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/withdraw",
         "operationId": "adminWithdrawSubscription",
         "summary": "Withdraw subscription (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/instant-cancel",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/instant-cancel",
+        "operationId": "adminInstantCancelSubscription",
+        "summary": "Instant-cancel subscription (admin only)",
         "specKind": "openapi"
       }
     },
@@ -23586,6 +23615,16 @@
       }
     },
     {
+      "id": "concept:decabill-admin-instant-cancel-advance",
+      "type": "concept",
+      "attrs": {
+        "title": "Admin instant cancel (advance)",
+        "docPath": "docs/decabill/features/advance-billing-and-yearly-interval.md",
+        "sectionAnchor": "admin-instant-cancel-advance",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-authentication-methods",
       "type": "concept",
       "attrs": {
@@ -23902,6 +23941,16 @@
         "title": "Billing Dashboard",
         "docPath": "docs/decabill/features/billing-administration.md",
         "sectionAnchor": "billing-dashboard",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-admin-subscriptions",
+      "type": "concept",
+      "attrs": {
+        "title": "Admin Subscriptions",
+        "docPath": "docs/decabill/features/billing-administration.md",
+        "sectionAnchor": "admin-subscriptions",
         "domain": "decabill"
       }
     },
@@ -31314,6 +31363,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/instant-cancel-subscription.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/invoice-detail-response.dto.ts",
       "type": "contains"
     },
@@ -32320,6 +32374,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-expiration.job-handler.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-instant-cancel.job-handler.ts",
       "type": "contains"
     },
     {
@@ -35535,6 +35594,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/withdraw",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/instant-cancel",
       "type": "contains"
     },
     {
@@ -41109,6 +41173,11 @@
     },
     {
       "from": "file:docs/decabill/features/advance-billing-and-yearly-interval.md",
+      "to": "concept:decabill-admin-instant-cancel-advance",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/advance-billing-and-yearly-interval.md",
       "to": "concept:decabill-notifications",
       "type": "contains"
     },
@@ -41330,6 +41399,11 @@
     {
       "from": "file:docs/decabill/features/billing-administration.md",
       "to": "concept:decabill-billing-dashboard",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/billing-administration.md",
+      "to": "concept:decabill-admin-subscriptions",
       "type": "contains"
     },
     {
@@ -44525,6 +44599,16 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/withdraw",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/instant-cancel",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/instant-cancel",
       "type": "implements"
     },
     {
@@ -50833,6 +50917,16 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-instant-cancel.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-instant-cancel.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-teardown.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-server.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
       "type": "injects"
@@ -51745,6 +51839,11 @@
     {
       "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-withdrawal.job-handler.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-instant-cancel.job-handler.ts",
       "type": "injects"
     },
     {
@@ -52834,6 +52933,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-instant-cancel.job-handler.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-provisioning.job-handler.ts",
       "type": "provides"
     },
@@ -53510,6 +53614,11 @@
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
       "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/withdraw",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/instant-cancel",
       "type": "calls"
     },
     {
@@ -57938,6 +58047,21 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-admin-instant-cancel-advance",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-instant-cancel-advance",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-instant-cancel-advance",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-authentication-methods",
       "to": "api:HTTP:POST:/auth/login",
       "type": "documents"
@@ -58290,6 +58414,21 @@
     {
       "from": "concept:decabill-billing-dashboard",
       "to": "api:HTTP:GET:/admin/billing/statistics/by-country",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-subscriptions",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-subscriptions",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-subscriptions",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions",
       "type": "documents"
     },
     {
@@ -59898,6 +60037,16 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-cancel-and-resume",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-cancel-and-resume",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/instant-cancel",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-statutory-withdrawal-widerruf",
       "to": "api:HTTP:GET:/subscriptions",
       "type": "documents"
@@ -60090,6 +60239,16 @@
     {
       "from": "concept:decabill-event-catalog",
       "to": "api:HTTP:POST:/addons",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-event-catalog",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-event-catalog",
+      "to": "api:HTTP:POST:/subscriptions",
       "type": "documents"
     },
     {
@@ -65008,6 +65167,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:decabill-admin-instant-cancel-advance",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:decabill-authentication-methods",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -65164,6 +65328,11 @@
     },
     {
       "from": "concept:decabill-billing-dashboard",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-admin-subscriptions",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

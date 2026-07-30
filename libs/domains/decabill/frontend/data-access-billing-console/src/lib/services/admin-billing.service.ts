@@ -184,6 +184,13 @@ export class AdminBillingService {
     return this.http.post<AdminSubscriptionListItem>(`${this.apiUrl}/admin/billing/subscriptions/${id}/withdraw`, {});
   }
 
+  instantCancelSubscription(id: string): Observable<AdminSubscriptionListItem> {
+    return this.http.post<AdminSubscriptionListItem>(
+      `${this.apiUrl}/admin/billing/subscriptions/${id}/instant-cancel`,
+      {},
+    );
+  }
+
   resumeSubscription(id: string): Observable<AdminSubscriptionListItem> {
     return this.http.post<AdminSubscriptionListItem>(`${this.apiUrl}/admin/billing/subscriptions/${id}/resume`, {});
   }

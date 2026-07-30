@@ -184,6 +184,8 @@ These variables control repeatable **coordinator** intervals in milliseconds:
 | `EXPIRATION_SCHEDULER_BATCH_SIZE`          | `100`      | Expiration batch size                        |
 | `WITHDRAWAL_SCHEDULER_INTERVAL`            | `60000`    | Subscription withdrawal teardown             |
 | `WITHDRAWAL_SCHEDULER_BATCH_SIZE`          | `100`      | Withdrawal batch size                        |
+| `INSTANT_CANCEL_SCHEDULER_INTERVAL`        | `60000`    | Admin instant-cancel teardown                |
+| `INSTANT_CANCEL_SCHEDULER_BATCH_SIZE`      | `100`      | Instant-cancel batch size                    |
 | `PROVISIONING_SCHEDULER_INTERVAL`          | `30000`    | Subscription server provisioning             |
 | `PROVISIONING_SCHEDULER_BATCH_SIZE`        | `100`      | Provisioning batch size                      |
 | `CONFIG_CHANGE_SCHEDULER_INTERVAL`         | `30000`    | Mid-life subscription config change          |

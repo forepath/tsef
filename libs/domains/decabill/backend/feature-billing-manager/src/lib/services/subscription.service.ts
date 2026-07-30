@@ -730,6 +730,48 @@ export class SubscriptionService {
     return { subscription: updated, withdrawalResult };
   }
 
+  async instantCancelSubscription(
+    subscriptionId: string,
+    userId: string,
+  ): Promise<{ subscription: SubscriptionEntity }> {
+    await this.getSubscription(subscriptionId, userId);
+
+    return this.executeInstantCancel(subscriptionId);
+  }
+
+  async executeInstantCancel(subscriptionId: string): Promise<{ subscription: SubscriptionEntity }> {
+    const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+    const allowedStatuses: SubscriptionStatus[] = [
+      SubscriptionStatus.ACTIVE,
+      SubscriptionStatus.PENDING_CANCEL,
+      SubscriptionStatus.PENDING_BACKORDER,
+    ];
+
+    if (!allowedStatuses.includes(subscription.status)) {
+      throw new BadRequestException('Instant cancel is not permitted for this subscription');
+    }
+
+    const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);
+
+    await this.backordersRepository.cancelPendingForUserPlan(subscription.userId, subscription.planId);
+
+    const instantCanceledAt = new Date();
+
+    await this.subscriptionsRepository.update(subscriptionId, {
+      status: SubscriptionStatus.PENDING_INSTANT_CANCEL,
+      instantRemoval: true,
+      instantCanceledAt,
+      cancelEffectiveAt: null,
+    });
+
+    const updated = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+
+    this.billingNotificationPublisher.publishSubscription('subscription.updated', updated, plan);
+    this.customerTrustScoreService.triggerRecomputeForUser(updated.userId);
+
+    return { subscription: updated };
+  }
+
   async mapToResponse(
     subscription: SubscriptionEntity,
     items = [] as Awaited<ReturnType<SubscriptionItemsRepository['findBySubscription']>>,
@@ -792,6 +834,8 @@ export class SubscriptionService {
       cancelEffectiveAt: subscription.cancelEffectiveAt,
       resumedAt: subscription.resumedAt,
       withdrawnAt: subscription.withdrawnAt,
+      instantRemoval: subscription.instantRemoval,
+      instantCanceledAt: subscription.instantCanceledAt,
       withdrawalEligibility: eligibility,
       withdrawalResult,
       periodTotalPrice,

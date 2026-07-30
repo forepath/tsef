@@ -230,6 +230,7 @@ import { SubscriptionExpirationJobHandler } from './services/subscription-expira
 import { SubscriptionPeriodChargeService } from './services/subscription-period-charge.service';
 import { SubscriptionProvisioningJobHandler } from './services/subscription-provisioning.job-handler';
 import { SubscriptionWithdrawalJobHandler } from './services/subscription-withdrawal.job-handler';
+import { SubscriptionInstantCancelJobHandler } from './services/subscription-instant-cancel.job-handler';
 import { SubscriptionItemServerService } from './services/subscription-item-server.service';
 import { SubscriptionItemUpdateJobHandler } from './services/subscription-item-update.job-handler';
 import { SubscriptionRenewalReminderJobHandler } from './services/subscription-renewal-reminder.job-handler';
@@ -679,6 +680,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionBillingJobHandler,
     SubscriptionExpirationJobHandler,
     SubscriptionWithdrawalJobHandler,
+    SubscriptionInstantCancelJobHandler,
     SubscriptionProvisioningJobHandler,
     SubscriptionConfigChangeJobHandler,
     PriceRecalcJobHandler,
@@ -776,6 +778,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionBillingJobHandler,
     SubscriptionExpirationJobHandler,
     SubscriptionWithdrawalJobHandler,
+    SubscriptionInstantCancelJobHandler,
     SubscriptionProvisioningJobHandler,
     SubscriptionConfigChangeJobHandler,
     PriceRecalcJobHandler,

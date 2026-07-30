@@ -40,6 +40,10 @@ Same eligibility as arrear. Accounting:
 2. **Unbilled open position for the current prepaid period** (including unprovisioned withdraw after an immediate advance charge), set `billUntil = withdrawnAt` on unbilled rows; no credit note (even if older invoices exist); no extra open position.
 3. **Neither** fall back to arrear teardown OP with `billUntil = withdrawnAt`.
 
+## Admin instant cancel (advance)
+
+Admin `POST /admin/billing/subscriptions/{id}/instant-cancel` uses the **same prepaid settlement branches** as withdrawal above (cutoff = `instantCanceledAt`), then tears down with the canceled email/webhook path (`withdrawn: false`). Arrear instant cancel bills used time via teardown OP only (no unused-period credit). See [Subscriptions — Admin instant cancel](./subscriptions.md#admin-instant-cancel).
+
 Mid-life [config change](./subscription-config-change.md) and [automatic price recalculation](./automatic-price-recalculation.md) use the same prepaid notion of an **unbilled recurring period charge** (`adjustment_net IS NULL`) when choosing between an open-position correction and a partial credit document. Unrelated adjustment open positions do not flip that branch.
 
 ## Notifications

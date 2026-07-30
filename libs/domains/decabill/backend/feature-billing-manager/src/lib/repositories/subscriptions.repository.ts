@@ -208,6 +208,21 @@ export class SubscriptionsRepository {
     return await qb.getMany();
   }
 
+  async findDueForInstantCancel(now: Date = new Date(), limit = 100): Promise<SubscriptionEntity[]> {
+    const qb = this.repository
+      .createQueryBuilder('subscription')
+      .innerJoin('users', 'user', 'user.id = subscription.user_id')
+      .where('subscription.status = :status', { status: 'pending_instant_cancel' })
+      .andWhere('subscription.instantRemoval = :instantRemoval', { instantRemoval: true })
+      .andWhere('subscription.instantCanceledAt <= :now', { now })
+      .orderBy('subscription.instantCanceledAt', 'ASC')
+      .take(limit);
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getMany();
+  }
+
   async countByStatus(status: string): Promise<number> {
     const qb = this.repository
       .createQueryBuilder('subscription')

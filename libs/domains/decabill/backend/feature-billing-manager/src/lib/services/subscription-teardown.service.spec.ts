@@ -283,4 +283,96 @@ describe('SubscriptionTeardownService', () => {
       expect(openPositionsRepository.create).not.toHaveBeenCalled();
     });
   });
+
+  describe('processInstantCancel', () => {
+    it('bills used time via open position for arrear plans', async () => {
+      const instantCanceledAt = new Date('2024-07-01T12:00:00Z');
+
+      subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'sub-1',
+        number: 'SUB-001',
+        userId: 'user-1',
+        planId: 'plan-1',
+        status: SubscriptionStatus.PENDING_INSTANT_CANCEL,
+        instantRemoval: true,
+        instantCanceledAt,
+      });
+
+      await service.processInstantCancel('sub-1');
+
+      expect(withdrawalRefundService.applyProvisionedWithdrawalRefund).not.toHaveBeenCalled();
+      expect(openPositionsRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: 'Subscription SUB-001',
+          billUntil: instantCanceledAt,
+        }),
+      );
+      expect(billingEmailPublisher.publishSubscriptionCanceled).toHaveBeenCalled();
+      expect(billingEmailPublisher.publishSubscriptionWithdrawn).not.toHaveBeenCalled();
+    });
+
+    it('shrinks unbilled advance debt and skips teardown open position', async () => {
+      const instantCanceledAt = new Date('2024-07-01T12:00:00Z');
+
+      subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'sub-1',
+        number: 'SUB-001',
+        userId: 'user-1',
+        planId: 'plan-1',
+        status: SubscriptionStatus.PENDING_INSTANT_CANCEL,
+        instantRemoval: true,
+        instantCanceledAt,
+      });
+      servicePlansRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'plan-1',
+        name: 'Advance Plan',
+        billInAdvance: true,
+        autoRecalculatePriceDaily: false,
+        billingIntervalType: 'year',
+      });
+      openPositionsRepository.findUnbilledBySubscription.mockResolvedValue([{ id: 'pos-1' }]);
+
+      await service.processInstantCancel('sub-1');
+
+      expect(openPositionsRepository.updateUnbilledBillUntil).toHaveBeenCalledWith('sub-1', instantCanceledAt);
+      expect(withdrawalRefundService.applyProvisionedWithdrawalRefund).not.toHaveBeenCalled();
+      expect(openPositionsRepository.create).not.toHaveBeenCalled();
+      expect(billingEmailPublisher.publishSubscriptionCanceled).toHaveBeenCalled();
+    });
+
+    it('refunds prepaid invoice like withdrawal when no unbilled open position remains', async () => {
+      const instantCanceledAt = new Date('2024-07-01T12:00:00Z');
+
+      subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'sub-1',
+        number: 'SUB-001',
+        userId: 'user-1',
+        planId: 'plan-1',
+        status: SubscriptionStatus.PENDING_INSTANT_CANCEL,
+        instantRemoval: true,
+        instantCanceledAt,
+      });
+      servicePlansRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'plan-1',
+        name: 'Advance Plan',
+        billInAdvance: true,
+        autoRecalculatePriceDaily: false,
+        billingIntervalType: 'year',
+      });
+      openPositionsRepository.findUnbilledBySubscription.mockResolvedValue([]);
+      withdrawalRefundService.applyProvisionedWithdrawalRefund.mockResolvedValue({
+        paymentRefundStatus: 'succeeded',
+      });
+
+      await service.processInstantCancel('sub-1');
+
+      expect(withdrawalRefundService.applyProvisionedWithdrawalRefund).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'sub-1' }),
+        instantCanceledAt,
+      );
+      expect(openPositionsRepository.create).not.toHaveBeenCalled();
+      expect(billingEmailPublisher.publishSubscriptionCanceled).toHaveBeenCalled();
+      expect(billingEmailPublisher.publishSubscriptionWithdrawn).not.toHaveBeenCalled();
+    });
+  });
 });

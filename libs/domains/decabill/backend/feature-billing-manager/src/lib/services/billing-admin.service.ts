@@ -93,6 +93,16 @@ export class BillingAdminService {
     return { ...item, withdrawalResult };
   }
 
+  async instantCancelSubscriptionForAdmin(subscriptionId: string): Promise<AdminSubscriptionListItemDto> {
+    const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+    const { subscription: updated } = await this.subscriptionService.instantCancelSubscription(
+      subscriptionId,
+      subscription.userId,
+    );
+
+    return (await this.mapEntitiesToAdminListItems([updated]))[0];
+  }
+
   async resumeSubscriptionForAdmin(subscriptionId: string): Promise<AdminSubscriptionListItemDto> {
     const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
     const updated = await this.subscriptionService.resumeSubscription(subscriptionId, subscription.userId);

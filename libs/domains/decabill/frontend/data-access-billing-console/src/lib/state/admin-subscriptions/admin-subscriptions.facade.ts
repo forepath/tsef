@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 
 import {
   adminCancelSubscription,
+  adminInstantCancelSubscription,
   adminResumeSubscription,
   adminWithdrawSubscription,
   loadAdminSubscriptions,
@@ -11,6 +12,7 @@ import {
   selectAdminSubscriptions,
   selectAdminSubscriptionsCanceling,
   selectAdminSubscriptionsError,
+  selectAdminSubscriptionsInstantCanceling,
   selectAdminSubscriptionsLoading,
   selectAdminSubscriptionsResuming,
   selectAdminSubscriptionsWithdrawing,
@@ -24,6 +26,7 @@ export class AdminSubscriptionsFacade {
   readonly loading$ = this.store.select(selectAdminSubscriptionsLoading);
   readonly canceling$ = this.store.select(selectAdminSubscriptionsCanceling);
   readonly withdrawing$ = this.store.select(selectAdminSubscriptionsWithdrawing);
+  readonly instantCanceling$ = this.store.select(selectAdminSubscriptionsInstantCanceling);
   readonly resuming$ = this.store.select(selectAdminSubscriptionsResuming);
   readonly error$ = this.store.select(selectAdminSubscriptionsError);
 
@@ -37,6 +40,10 @@ export class AdminSubscriptionsFacade {
 
   withdrawSubscription(id: string): void {
     this.store.dispatch(adminWithdrawSubscription({ id }));
+  }
+
+  instantCancelSubscription(id: string): void {
+    this.store.dispatch(adminInstantCancelSubscription({ id }));
   }
 
   resumeSubscription(id: string): void {

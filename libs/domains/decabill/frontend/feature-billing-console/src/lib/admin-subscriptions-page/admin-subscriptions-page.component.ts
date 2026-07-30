@@ -27,6 +27,8 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   @ViewChild('cancelSubscriptionModal', { static: false }) private cancelSubscriptionModal!: ElementRef<HTMLDivElement>;
   @ViewChild('withdrawSubscriptionModal', { static: false })
   private withdrawSubscriptionModal!: ElementRef<HTMLDivElement>;
+  @ViewChild('instantCancelSubscriptionModal', { static: false })
+  private instantCancelSubscriptionModal!: ElementRef<HTMLDivElement>;
   @ViewChild('resumeConfirmModal', { static: false }) private resumeConfirmModal!: ElementRef<HTMLDivElement>;
 
   private readonly facade = inject(AdminSubscriptionsFacade);
@@ -39,11 +41,13 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   readonly loading$ = this.facade.loading$;
   readonly canceling$ = this.facade.canceling$;
   readonly withdrawing$ = this.facade.withdrawing$;
+  readonly instantCanceling$ = this.facade.instantCanceling$;
   readonly resuming$ = this.facade.resuming$;
   readonly error$ = this.facade.error$;
 
   subscriptionToCancel: AdminSubscriptionListItem | null = null;
   subscriptionToWithdraw: AdminSubscriptionListItem | null = null;
+  subscriptionToInstantCancel: AdminSubscriptionListItem | null = null;
   subscriptionToResume: AdminSubscriptionListItem | null = null;
 
   readonly activeCount = () => this.subscriptions().filter((sub) => sub.status === 'active').length;
@@ -83,6 +87,21 @@ export class AdminSubscriptionsPageComponent implements OnInit {
     if (!this.subscriptionToWithdraw) return;
 
     this.facade.withdrawSubscription(this.subscriptionToWithdraw.id);
+  }
+
+  canInstantCancel(sub: AdminSubscriptionListItem): boolean {
+    return sub.status === 'active' || sub.status === 'pending_cancel' || sub.status === 'pending_backorder';
+  }
+
+  openInstantCancelConfirm(sub: AdminSubscriptionListItem): void {
+    this.subscriptionToInstantCancel = sub;
+    showBillingModal(this.instantCancelSubscriptionModal);
+  }
+
+  confirmInstantCancelSubscription(): void {
+    if (!this.subscriptionToInstantCancel) return;
+
+    this.facade.instantCancelSubscription(this.subscriptionToInstantCancel.id);
   }
 
   openResumeConfirm(sub: AdminSubscriptionListItem): void {
@@ -155,6 +174,15 @@ export class AdminSubscriptionsPageComponent implements OnInit {
       destroyRef: this.destroyRef,
       onSuccess: () => {
         this.subscriptionToWithdraw = null;
+      },
+    });
+    watchBillingMutationModalClose({
+      loading$: this.instantCanceling$,
+      error$: this.error$,
+      modal: () => this.instantCancelSubscriptionModal,
+      destroyRef: this.destroyRef,
+      onSuccess: () => {
+        this.subscriptionToInstantCancel = null;
       },
     });
     watchBillingMutationModalClose({

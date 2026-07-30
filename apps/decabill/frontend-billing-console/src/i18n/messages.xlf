@@ -563,6 +563,18 @@
       <trans-unit id="featureAdminSubscriptions-empty" datatype="html">
         <source>No contracts found.</source>
         </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-instantCancelButtonTitle" datatype="html">
+        <source>Instant cancel subscription</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-instantCancelTitle" datatype="html">
+        <source>Instant cancel subscription?</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-instantCancelConfirm" datatype="html">
+        <source> Force-remove this subscription immediately. Access ends now. Arrear plans are billed for used time; prepaid plans refund unused time like a statutory withdrawal. This cannot be resumed. </source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-instantCancel" datatype="html">
+        <source>Instant cancel</source>
+        </trans-unit>
       <trans-unit id="featureSubscriptions-subscriptionActionsAria" datatype="html">
         <source>Subscription actions</source>
         </trans-unit>
@@ -700,6 +712,9 @@
         </trans-unit>
       <trans-unit id="featureBilling-subscriptionStatusPendingWithdrawal" datatype="html">
         <source>Pending withdrawal</source>
+        </trans-unit>
+      <trans-unit id="featureBilling-subscriptionStatusPendingInstantCancel" datatype="html">
+        <source>Pending instant cancel</source>
         </trans-unit>
       <trans-unit id="featureBilling-subscriptionStatusCanceled" datatype="html">
         <source>Canceled</source>

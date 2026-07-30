@@ -11,16 +11,7 @@ The order flow requires a complete [Customer Profile](./customer-profiles.md) be
 ## Subscription Lifecycle
 
 ```mermaid
-stateDiagram-v2
-    [*] --> active
-    active --> pending_cancel: cancel request
-    pending_cancel --> active: resume
-    pending_cancel --> canceled: effective_at reached
-    active --> pending_backorder: unavailable
-    pending_backorder --> active: provisioned
-    pending_backorder --> canceled: cancel
-    active --> pending_config_change: config change request
-    pending_config_change --> active: applied or failed
+n
 ```
 
 ### Active
@@ -30,6 +21,10 @@ Subscription is in good standing. Recurring charges create open positions accord
 ### Pending Cancel
 
 User requested cancellation. Subscription remains active until `effective_at`. User may resume before that date.
+
+### Pending Instant Cancel
+
+Admin force-removal in progress (`instantRemoval=true`). Not resumeable. See [Admin instant cancel](#admin-instant-cancel).
 
 ### Pending Config Change
 
@@ -103,6 +98,28 @@ See **[CloudInit Configs](./cloud-init-configs.md)**.
 
 - `POST /subscriptions/{subscriptionId}/cancel` - Schedule cancellation at period end or immediately per plan rules. Advance-billed plans (`billInAdvance`) always defer to period end. Emits `subscription.cancel_scheduled` (not final `subscription.canceled`).
 - `POST /subscriptions/{subscriptionId}/resume` - Reverse a pending cancel before `effective_at`
+
+### Admin instant cancel
+
+Admins can force-remove access immediately via `POST /admin/billing/subscriptions/{subscriptionId}/instant-cancel` (`adminInstantCancelSubscription`). This bypasses `CancellationPolicyService` and `WithdrawalPolicyService`.
+
+Flow (mirrors statutory withdrawal job wiring):
+
+1. Allowed statuses: `active`, `pending_cancel`, `pending_backorder`
+2. Sets `status=pending_instant_cancel`, `instantRemoval=true`, `instantCanceledAt=now`
+3. Emits webhook `subscription.updated`
+4. `subscription-instant-cancel` coordinator/unit runs `processInstantCancel`
+5. Final teardown emits `subscription.canceled` (canceled email, not withdrawn)
+
+Settlement:
+
+| Plan mode                         | Behavior                                                                                              |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Arrear                            | Teardown open position with `billUntil = instantCanceledAt` (bill used time; no unused-period credit) |
+| Advance (unbilled period charge)  | Shrink unbilled OP to `instantCanceledAt`                                                             |
+| Advance (period already invoiced) | Same unused-period refund as statutory withdrawal (`WithdrawalRefundService`)                         |
+
+Not available to customers. Not resumeable.
 
 ## Statutory Withdrawal (Widerruf)
 

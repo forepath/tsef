@@ -38,6 +38,20 @@ The invoice list supports batch loading with client-side search in list-group st
 
 `POST /admin/billing/bill-now` triggers immediate invoice generation for selected users, bypassing the billing-day scheduler when operators need on-demand billing. It uses the same accumulated-invoice path as the billing-day job: if the payable total is below `BILLING_MIN_CHECKOUT_PAYMENT_AMOUNT`, open positions are left unbilled for the next billing day.
 
+## Admin Subscriptions
+
+**Frontend route:** `/administration/subscriptions`
+
+| Method | Path                                               | Purpose                                                 |
+| ------ | -------------------------------------------------- | ------------------------------------------------------- |
+| GET    | `/admin/billing/subscriptions`                     | Paginated subscription list                             |
+| POST   | `/admin/billing/subscriptions/{id}/cancel`         | Schedule cancel (same policy as customer)               |
+| POST   | `/admin/billing/subscriptions/{id}/withdraw`       | Statutory withdraw when eligible                        |
+| POST   | `/admin/billing/subscriptions/{id}/instant-cancel` | Force instant removal (bypasses cancel/Widerruf policy) |
+| POST   | `/admin/billing/subscriptions/{id}/resume`         | Resume pending cancel                                   |
+
+Instant cancel marks `instantRemoval` and queues `subscription-instant-cancel` jobs. See [Subscriptions — Admin instant cancel](./subscriptions.md#admin-instant-cancel).
+
 ## Manual Invoice Administration
 
 **Immutability:** Only invoices in `draft` status can be edited or deleted. Once issued (`issued`, `paid`, `partially_paid`, `overdue`, or `void`), line items and amounts are immutable. Admins can still void unpaid issued invoices or mark payment status manually.
