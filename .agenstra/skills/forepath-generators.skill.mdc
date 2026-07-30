@@ -74,7 +74,7 @@ nx generate @forepath/code:domain payments --prefix=@forepath
 Creates a typed library under a domain.
 
 ```bash
-nx generate @forepath/code:lib --domain=decabill --scope=backend --type=feature --name=billing-manager --generator=node
+nx generate @forepath/code:lib --domain=decabill --scope=backend --type=feature --name=billing-manager --baseGenerator=node
 ```
 
 | Option | Required | Values | Notes |
@@ -83,7 +83,7 @@ nx generate @forepath/code:lib --domain=decabill --scope=backend --type=feature 
 | `scope` | yes | `frontend`, `backend`, `keycloak`, `shared` | Sets `scope:*` tag |
 | `type` | yes | `data-access`, `feature`, `ui`, `util` | Sets `type:*` tag |
 | `name` | yes | — | Library segment name |
-| `generator` | yes | `js`, `node`, `angular` | Base Nx library generator |
+| `baseGenerator` | yes | `js`, `node`, `angular` | Base Nx library generator |
 
 Pick `generator=angular` for frontend UI/libs, `node` for Nest/backend libs, `js` for framework-agnostic shared code.
 

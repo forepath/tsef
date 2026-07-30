@@ -83,10 +83,10 @@ Creates a new domain library (feature, data-access, ui, or util) under a given d
 - **scope** (required) – `frontend`, `backend`, `keycloak`, or `shared`
 - **type** (required) – `data-access`, `feature`, `ui`, or `util`
 - **name** (required) – Library name
-- **generator** (required) – Base Nx generator: `js`, `node`, or `angular`
+- **baseGenerator** (required) – Base Nx library generator: `js`, `node`, or `angular`
 
 ```bash
-nx generate @forepath/code:lib --domain=payments --scope=frontend --type=feature --name=checkout --generator=angular
+nx generate @forepath/code:lib --domain=payments --scope=frontend --type=feature --name=checkout --baseGenerator=angular
 ```
 
 ### mcp

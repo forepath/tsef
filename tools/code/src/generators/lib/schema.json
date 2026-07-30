@@ -61,16 +61,16 @@
       },
       "x-prompt": "What name would you like to use?"
     },
-    "generator": {
+    "baseGenerator": {
       "type": "string",
-      "description": "Which base Nx generator to use?",
+      "description": "Which base Nx library generator to use",
       "$default": {
         "$source": "argv",
         "index": 4
       },
       "enum": ["js", "node", "angular"],
       "x-prompt": {
-        "message": "Which generator would you like to use?",
+        "message": "Which base Nx library generator would you like to use?",
         "type": "list",
         "items": [
           { "value": "js", "label": "Nx JS Library (@nx/js:library)" },
@@ -83,5 +83,5 @@
       }
     }
   },
-  "required": ["name", "scope", "type", "generator", "domain"]
+  "required": ["name", "scope", "type", "baseGenerator", "domain"]
 }
