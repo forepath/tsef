@@ -198,7 +198,7 @@
           </div>
 
           <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary btn-lg" [disabled]="(loading$ | async) ?? false">
+            <button type="submit" class="btn btn-primary" [disabled]="(loading$ | async) ?? false">
               @if ((loading$ | async) ?? false) {
                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               }
@@ -253,7 +253,7 @@
           <div class="d-grid gap-2">
             <button
               type="submit"
-              class="btn btn-primary btn-lg"
+              class="btn btn-primary"
               [disabled]="codeForm.invalid || ((verifying$ | async) ?? false)"
             >
               @if ((verifying$ | async) ?? false) {
@@ -308,7 +308,7 @@
           <div class="d-grid gap-2">
             <button
               type="submit"
-              class="btn btn-danger btn-lg"
+              class="btn btn-danger"
               [disabled]="acknowledgeForm.invalid || ((confirming$ | async) ?? false)"
             >
               @if ((confirming$ | async) ?? false) {
