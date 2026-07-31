@@ -89,7 +89,7 @@
     "jest-preset-angular": "16.1.2",
     "jest-util": "30.3.0",
     "jsonc-eslint-parser": "2.4.1",
-    "nx": "22.6.4",
+    "nx": "22.7.2",
     "only-allow": "1.2.2",
     "patch-package": "8.0.1",
     "postinstall-postinstall": "2.1.0",
