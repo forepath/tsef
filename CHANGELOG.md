@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.22.0](https://github.com/forepath/one/compare/v2.21.0...v2.22.0) (2026-07-31)
+
+
+### Features
+
+* decabill instant cancellations ([#536](https://github.com/forepath/one/issues/536)) ([9aab888](https://github.com/forepath/one/commit/9aab888f715e418d5cf54427009d24085aad494f))
+* decabill ssh key reveal with marker ([#534](https://github.com/forepath/one/issues/534)) ([7f5a348](https://github.com/forepath/one/commit/7f5a348463ce7cbfbececb3515838a0c3011d691))
+
+
+### Bug Fixes
+
+* generator input and entrypoint mapping ([#537](https://github.com/forepath/one/issues/537)) ([1ae4d85](https://github.com/forepath/one/commit/1ae4d85cfdaaf3352eccd6ba075e7f0cdeaaef42))
+* login sections styling ([#538](https://github.com/forepath/one/issues/538)) ([70c5393](https://github.com/forepath/one/commit/70c53938ed51dbfaa694bb1c56750e2173bc99b7))
+
+
+### Code Refactoring
+
+* change product keys ([#535](https://github.com/forepath/one/issues/535)) ([763c0e3](https://github.com/forepath/one/commit/763c0e3f4ab69cf7f0ba779a59743be59f26c978))
+
 ## [2.21.0](https://github.com/forepath/one/compare/v2.20.0...v2.21.0) (2026-07-28)
 
 
