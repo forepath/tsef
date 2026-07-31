@@ -1,13 +1,13 @@
 <section class="section__row" [class.section__row--marketing-hidden]="!showAuthMarketingPanel">
   <div
-    class="section__column section__column--marketing d-flex align-items-center justify-content-center bg-body-tertiary h-100"
+    class="section__column section__column--marketing d-flex align-items-center justify-content-center bg-body-tertiary h-100 border-end"
   >
     <div class="p-4" style="width: 700px; max-width: 100%">
       <h1 class="display-5 fw-bold mb-3">{{ productName }}</h1>
       <p class="lead mb-4">{{ authMarketing.loginDescription }}</p>
       <ul class="list-unstyled">
         @for (feature of authMarketing.features; track feature.title) {
-          <li class="mb-2 d-flex align-items-center gap-2 bg-body-secondary py-2 px-3 rounded-2">
+          <li class="mb-2 d-flex align-items-center gap-2 py-2 px-3 rounded-2 border bg-body">
             <i class="bi bi-check-circle-fill text-primary me-2 fs-5"></i>
             <div class="d-flex flex-column">
               <strong>{{ feature.title }}</strong>
@@ -20,7 +20,7 @@
   </div>
   <div class="section__column section__column--form section__column--scroll d-flex align-items-center">
     <div class="p-4 my-auto" style="width: 500px; max-width: 100%">
-      <h2 class="section__column-title mb-4 text-center" i18n="@@featureLogin-title">Login</h2>
+      <h2 class="section__column-title mb-4 text-end" i18n="@@featureLogin-title">Login</h2>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
         <!-- Success Alert -->
@@ -146,39 +146,34 @@
               <div class="invalid-feedback d-block" i18n="@@featureLogin-passwordRequired">Password is required.</div>
             }
           </div>
-
-          <!-- Links for users auth -->
-          <div
-            class="mb-3 d-flex"
-            [class.justify-content-between]="!isSignupDisabled"
-            [class.justify-content-end]="isSignupDisabled"
-          >
-            @if (!isSignupDisabled) {
-              <a routerLink="/register" class="text-decoration-none small" i18n="@@featureLogin-createAccount"
-                >Create an account</a
-              >
-            }
-            <a
-              routerLink="/request-password-reset"
-              class="text-decoration-none small"
-              i18n="@@featureLogin-forgotPassword"
-              >Forgot password?</a
-            >
-          </div>
         }
 
         <!-- Submit Button -->
-        <div class="d-grid gap-2">
+        <div class="d-flex gap-2 justify-content-between align-items-center">
+          <!-- Links for users auth -->
+          <div class="d-flex gap-3 row-gap-1 flex-wrap">
+            @if (isUsersAuth) {
+              @if (!isSignupDisabled) {
+                <a routerLink="/register" class="text-decoration-none small">
+                  <i class="bi bi-arrow-right me-2"></i>
+                  <span i18n="@@featureLogin-createAccount">Create an account</span>
+                </a>
+              }
+              <a routerLink="/request-password-reset" class="text-decoration-none small">
+                <i class="bi bi-arrow-right me-2"></i>
+                <span i18n="@@featureLogin-forgotPassword">Forgot password?</span>
+              </a>
+            }
+          </div>
           <button
             type="submit"
-            class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-1"
+            class="btn btn-primary d-flex align-items-center justify-content-center gap-1 w-auto"
             [disabled]="loginForm.invalid || ((loading$ | async) ?? false)"
           >
             @if ((loading$ | async) ?? false) {
               <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               <span i18n="@@featureLogin-loggingIn">Logging in...</span>
             } @else {
-              <i class="bi bi-box-arrow-in-right me-2"></i>
               <span i18n="@@featureLogin-submit">Login</span>
             }
           </button>

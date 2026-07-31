@@ -1,6 +1,6 @@
 <section class="section__row" [class.section__row--marketing-hidden]="!showAuthMarketingPanel">
   <div
-    class="section__column section__column--marketing d-flex align-items-center justify-content-center bg-body-tertiary h-100"
+    class="section__column section__column--marketing d-flex align-items-center justify-content-center bg-body-tertiary h-100 border-end"
   >
     <div class="p-4" style="width: 700px; max-width: 100%">
       <h1 class="display-5 fw-bold mb-3" i18n="@@featureConfirmEmail-title">Confirm Your Email</h1>
@@ -9,7 +9,7 @@
   </div>
   <div class="section__column section__column--form section__column--scroll d-flex align-items-center">
     <div class="p-4 my-auto" style="width: 500px; max-width: 100%">
-      <h2 class="section__column-title mb-4 text-center" i18n="@@featureConfirmEmail-formTitle">Email Confirmation</h2>
+      <h2 class="section__column-title mb-4 text-end" i18n="@@featureConfirmEmail-formTitle">Email Confirmation</h2>
 
       @if (!isUsersAuth) {
         <div class="alert alert-info" role="alert">
@@ -108,23 +108,20 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="d-grid gap-2">
+            <div class="d-flex gap-2 justify-content-between align-items-center">
+              <a routerLink="/login" class="text-decoration-none small">
+                <i class="bi bi-arrow-left me-2"></i>
+                <span i18n="@@featureConfirmEmail-backToLogin">Back to login</span>
+              </a>
               <button
                 type="submit"
-                class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-1"
+                class="btn btn-primary d-flex align-items-center justify-content-center gap-1 w-auto"
                 [disabled]="form.invalid || ((confirmingEmail$ | async) ?? false)"
               >
-                <i class="bi bi-check-circle-fill me-2"></i>
                 <span i18n="@@featureConfirmEmail-submit">Confirm Email</span>
               </button>
             </div>
           }
-
-          <div class="mt-4 text-center">
-            <a routerLink="/login" class="text-decoration-none small" i18n="@@featureConfirmEmail-backToLogin"
-              >Back to login</a
-            >
-          </div>
         </form>
       }
     </div>
