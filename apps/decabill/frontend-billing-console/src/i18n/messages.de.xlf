@@ -338,6 +338,54 @@
         <source>View trust score</source>
         <target>Vertrauensscore anzeigen</target>
       </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataButtonTitle" datatype="html">
+        <source>Edit custom data</source>
+        <target>Benutzerdefinierte Daten bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataTitle" datatype="html">
+        <source>Custom data</source>
+        <target>Benutzerdefinierte Daten</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataHelp" datatype="html">
+        <source>Admin-only key/value pairs for linking this customer to external systems. Values are stored encrypted.</source>
+        <target>Nur für Administratoren sichtbare Schlüssel/Wert-Paare zur Verknüpfung dieses Kunden mit externen Systemen. Werte werden verschlüsselt gespeichert.</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataFor" datatype="html">
+        <source>Custom data for</source>
+        <target>Benutzerdefinierte Daten für</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataEmpty" datatype="html">
+        <source>No custom data entries yet.</source>
+        <target>Noch keine benutzerdefinierten Dateneinträge.</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataKey" datatype="html">
+        <source>Key</source>
+        <target>Schlüssel</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataValue" datatype="html">
+        <source>Value</source>
+        <target>Wert</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataKeyPlaceholder" datatype="html">
+        <source>Key</source>
+        <target>Schlüssel</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataValuePlaceholder" datatype="html">
+        <source>Value</source>
+        <target>Wert</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataRemove" datatype="html">
+        <source>Remove entry</source>
+        <target>Eintrag entfernen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataAdd" datatype="html">
+        <source>Add line</source>
+        <target>Zeile hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataSave" datatype="html">
+        <source>Save</source>
+        <target>Speichern</target>
+      </trans-unit>
       <trans-unit id="featureAdminProfiles-deleteButtonTitle" datatype="html">
         <source>Delete profile</source>
         <target>Profil löschen</target>
