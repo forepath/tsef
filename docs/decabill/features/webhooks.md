@@ -101,6 +101,17 @@ Ticket payloads include metadata only; full ticket body content is not included 
 
 DATEV export events are tenant-scoped admin operations; `client_id` is omitted. Export file contents and storage paths are never included in webhook payloads.
 
+### Application updates
+
+Webhook-only (no email). Emitted by the billing-manager update-check job and instance heartbeats:
+
+- `application.update_available` — a newer GitHub release was detected versus the previously stored latest
+- `application.update_check_failed` — GitHub Releases API unreachable or returned an error
+- `application.instance_outdated` — after a successful check, an instance transitioned to `update_available`
+- `application.dependency_health_changed` — Redis, queue, or database health flipped for a tracked instance
+
+See [Application updates](./application-updates.md).
+
 ## Payload examples
 
 ### `project.created`

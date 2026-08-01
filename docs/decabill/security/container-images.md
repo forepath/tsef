@@ -36,6 +36,7 @@ Source: `apps/decabill/backend-billing-manager/Dockerfile.api`
 - Health check: `GET /api/health`
 - **No Docker socket mount** (billing does not orchestrate agent containers on the host)
 - Secrets (database, Stripe, `ENCRYPTION_KEY`, `STATIC_API_KEY`, cloud API tokens) are supplied at **deploy time**, not as default `ENV` in the image
+- **`VERSION`** is baked at image build time (`ARG`/`ENV`, `--build-arg VERSION=$VERSION`). Release sets it from semantic-release (`release.yml` after `needs: publish`). Runtime `VERSION` / `APP_VERSION` may override
 
 ### Volumes (typical compose)
 

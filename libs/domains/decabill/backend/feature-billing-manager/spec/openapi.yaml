@@ -4624,6 +4624,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedWebhookDeliveriesResponseDto'
+  /admin/billing/updates:
+    get:
+      tags: [Admin Billing]
+      summary: Get full application updates state (admin)
+      operationId: getBillingUpdatesFullState
+      responses:
+        '200':
+          description: Full updates state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatesFullStateDto'
+  /admin/billing/updates/status:
+    get:
+      tags: [Admin Billing]
+      summary: Get application updates status summary (admin)
+      operationId: getBillingUpdatesStatusSummary
+      responses:
+        '200':
+          description: Updates status summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatesStatusSummaryDto'
+  /admin/billing/updates/check:
+    post:
+      tags: [Admin Billing]
+      summary: Trigger application update check (admin)
+      operationId: triggerBillingUpdateCheck
+      responses:
+        '202':
+          description: Update check enqueued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateCheckTriggerResultDto'
   /otel/metrics:
     get:
       summary: Prometheus metrics scrape
@@ -7308,6 +7344,88 @@ components:
       properties:
         type: { type: string }
         description: { type: string }
+    UpdateState:
+      type: string
+      enum: [up_to_date, update_available, unknown]
+    DependencyHealthStatus:
+      type: string
+      enum: [healthy, degraded, unknown, not_applicable]
+    InstanceDependencyHealthDto:
+      type: object
+      properties:
+        redis: { $ref: '#/components/schemas/DependencyHealthStatus' }
+        queue: { $ref: '#/components/schemas/DependencyHealthStatus' }
+        database: { $ref: '#/components/schemas/DependencyHealthStatus' }
+    ChangelogEntryDto:
+      type: object
+      properties:
+        text: { type: string }
+        scope: { type: string, enum: [product, shared] }
+        product: { type: string, enum: [agenstra, decabill] }
+        category: { type: string }
+    ScopedChangelogDto:
+      type: object
+      properties:
+        product:
+          type: array
+          items: { $ref: '#/components/schemas/ChangelogEntryDto' }
+        shared:
+          type: array
+          items: { $ref: '#/components/schemas/ChangelogEntryDto' }
+    ServiceInstanceRecordDto:
+      type: object
+      properties:
+        instanceId: { type: string }
+        serviceName: { type: string }
+        role: { type: string }
+        hostname: { type: string }
+        installedVersion: { type: string }
+        updateState: { $ref: '#/components/schemas/UpdateState' }
+        lastHeartbeatAt: { type: string, format: date-time }
+        dependencies:
+          { $ref: '#/components/schemas/InstanceDependencyHealthDto' }
+    ReleaseSnapshotDto:
+      type: object
+      properties:
+        tagName: { type: string }
+        name: { type: string }
+        body: { type: string }
+        htmlUrl: { type: string, format: uri }
+        publishedAt: { type: string, format: date-time }
+        changelog:
+          type: array
+          items: { $ref: '#/components/schemas/ChangelogEntryDto' }
+        scopedChangelog: { $ref: '#/components/schemas/ScopedChangelogDto' }
+    UpdatesStatusSummaryDto:
+      type: object
+      properties:
+        installedVersion: { type: string }
+        latestVersion: { type: string, nullable: true }
+        updateState: { $ref: '#/components/schemas/UpdateState' }
+        lastCheckAt: { type: string, format: date-time, nullable: true }
+        lastCheckStatus:
+          { type: string, enum: [success, failed, pending, unknown] }
+        instanceCount: { type: integer }
+        outdatedInstanceCount: { type: integer }
+    UpdatesFullStateDto:
+      allOf:
+        - $ref: '#/components/schemas/UpdatesStatusSummaryDto'
+        - type: object
+          properties:
+            release:
+              {
+                $ref: '#/components/schemas/ReleaseSnapshotDto',
+                nullable: true,
+              }
+            instances:
+              type: array
+              items: { $ref: '#/components/schemas/ServiceInstanceRecordDto' }
+            scopedChangelog: { $ref: '#/components/schemas/ScopedChangelogDto' }
+    UpdateCheckTriggerResultDto:
+      type: object
+      properties:
+        jobId: { type: string }
+        enqueuedAt: { type: string, format: date-time }
     CreateWebhookEndpointDto:
       type: object
       required: [name, url, httpMethod, subscribedEvents, authType]

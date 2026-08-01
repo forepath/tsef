@@ -215,7 +215,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/shared/frontend-docs/Dockerfile.server",
-        "context": "dist/apps/agenstra/frontend-docs/server"
+        "context": "dist/apps/agenstra/frontend-docs/server",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

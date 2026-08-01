@@ -2,6 +2,7 @@ import { AdminBillNowJobName, DatevExportJobName, VatIdValidationJobName } from 
 import {
   buildCoordinatorJobId,
   getWebhookDeliveryRetentionCoordinatorIntervalMs,
+  UPDATE_CHECK_JOB_NAME,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
 } from '@forepath/shared/backend';
 
@@ -43,6 +44,7 @@ export const BillingJobName = {
   PLAN_PRICE_MIGRATE_UNIT: 'plan-price-migrate.unit',
   VAT_ID_VALIDATION_UNIT: VatIdValidationJobName.UNIT,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
+  UPDATE_CHECK: UPDATE_CHECK_JOB_NAME,
 } as const;
 
 export type BillingJobName = (typeof BillingJobName)[keyof typeof BillingJobName];
@@ -168,6 +170,13 @@ export function getBillingRepeatableJobs(): BillingRepeatableJobDefinition[] {
       tz: process.env.BILLING_PRICE_RECALC_TIMEZONE ?? 'Europe/Berlin',
     });
   }
+
+  jobs.push({
+    name: BillingJobName.UPDATE_CHECK,
+    coordinatorJobId: buildCoordinatorJobId('update-check'),
+    pattern: process.env.UPDATE_CHECK_CRON ?? '0 0 * * *',
+    tz: process.env.UPDATE_CHECK_TIMEZONE ?? 'Europe/Berlin',
+  });
 
   return jobs;
 }

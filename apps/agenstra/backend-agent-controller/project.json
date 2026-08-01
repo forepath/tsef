@@ -141,7 +141,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/agenstra/backend-agent-controller/Dockerfile.api",
-        "context": "dist/apps/agenstra/backend-agent-controller"
+        "context": "dist/apps/agenstra/backend-agent-controller",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

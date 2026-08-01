@@ -92,6 +92,7 @@ import { TicketBoardRealtimeService } from '../services/ticket-board-realtime.se
 import { TicketsService } from '../services/tickets.service';
 
 import { AgenstraNotificationsModule } from './agenstra-notifications.module';
+import { AgenstraUpdatesModule } from './agenstra-updates.module';
 import { ContextImportModule } from './context-import.module';
 import { FilterRulesModule } from './filter-rules.module';
 import { StatisticsModule } from './statistics.module';
@@ -129,6 +130,7 @@ const authMethod = getAuthenticationMethod();
     ]),
     RedisCacheModule,
     AgenstraNotificationsModule,
+    AgenstraUpdatesModule,
     StatisticsModule,
     forwardRef(() => FilterRulesModule),
     forwardRef(() => ContextImportModule),

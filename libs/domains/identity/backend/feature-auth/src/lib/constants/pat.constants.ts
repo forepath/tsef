@@ -26,6 +26,7 @@ export const DUMMY_PAT_BCRYPT_HASH = '$2b$12$lXC..FNUXmNW34wYlfnXpOnNCP2LCz0pK/W
 export const ADMIN_ONLY_PAT_SCOPES = new Set([
   'users:admin',
   'webhooks:admin',
+  'updates:admin',
   'usage:write',
   'catalog:write',
   'promotions:write',

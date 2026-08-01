@@ -214,7 +214,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/decabill/frontend-billing-console/Dockerfile.server",
-        "context": "dist/apps/decabill/frontend-billing-console/server"
+        "context": "dist/apps/decabill/frontend-billing-console/server",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

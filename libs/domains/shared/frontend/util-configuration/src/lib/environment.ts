@@ -5,6 +5,7 @@ import { CLOUDFLARE_TURNSTILE_TEST_SITE_KEY } from './communication.constants';
 export const environment: Environment = {
   production: false,
   productName: 'Agenstra',
+  // appVersion: process.env['VERSION'],
   controller: {
     restApiUrl: 'http://localhost:3100/api',
     websocketUrl: 'http://localhost:8081/clients',

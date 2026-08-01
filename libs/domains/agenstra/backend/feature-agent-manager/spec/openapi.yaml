@@ -342,6 +342,17 @@ paths:
           description: Deleted
         '404':
           description: Not found
+  /instance-status:
+    get:
+      summary: Get agent-manager instance status
+      operationId: getInstanceStatus
+      responses:
+        '200':
+          description: Instance status for update tracking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstanceStatusResponseDto'
   /config:
     get:
       summary: Get configuration parameters
@@ -1655,6 +1666,27 @@ components:
         displayName:
           type: string
           description: Human-readable display name (e.g., 'Cursor', 'OpenAI', 'Anthropic Claude')
+    DependencyHealthStatus:
+      type: string
+      enum: [healthy, degraded, unknown, not_applicable]
+    InstanceDependencyHealthDto:
+      type: object
+      properties:
+        redis: { $ref: '#/components/schemas/DependencyHealthStatus' }
+        queue: { $ref: '#/components/schemas/DependencyHealthStatus' }
+        database: { $ref: '#/components/schemas/DependencyHealthStatus' }
+    InstanceStatusResponseDto:
+      type: object
+      properties:
+        instanceId: { type: string }
+        serviceName: { type: string }
+        role: { type: string }
+        hostname: { type: string }
+        installedVersion: { type: string }
+        startedAt: { type: string, format: date-time }
+        uptimeSeconds: { type: integer }
+        dependencies:
+          { $ref: '#/components/schemas/InstanceDependencyHealthDto' }
     ConfigResponseDto:
       type: object
       required: [agentTypes]

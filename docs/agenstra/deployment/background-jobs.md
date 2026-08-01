@@ -34,6 +34,12 @@ Notification delivery jobs on the same queue:
 
 See [Email notifications](../features/email-notifications.md).
 
+Application update check (same queue):
+
+- `update-check`: daily GitHub Releases fetch + Redis state refresh (`UPDATE_CHECK_CRON`, timezone `UPDATE_CHECK_TIMEZONE`)
+
+See [Application updates](../features/application-updates.md).
+
 ## Redis and queue environment variables
 
 | Variable                    | Purpose                                 | Default (local)                                       |

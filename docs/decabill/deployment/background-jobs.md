@@ -51,8 +51,11 @@ Registered by the scheduler from `getBillingRepeatableJobs()`:
 | `backorder-retry.coordinator`             | `BACKORDER_RETRY_INTERVAL_MS`              | 60s              |
 | `datev-export.coordinator`                | `BILLING_DATEV_EXPORT_CRON` (cron)         | 1st of month     |
 | `price-recalc.coordinator`                | `BILLING_PRICE_RECALC_CRON` (cron)         | daily 00:00      |
+| `update-check`                            | `UPDATE_CHECK_CRON` (cron)                 | daily 00:00      |
 
 The DATEV coordinator is registered only when `BILLING_DATEV_EXPORT_ENABLED=true`. The price-recalc coordinator is registered only when `BILLING_PRICE_RECALC_ENABLED=true` (default true). See [Automatic daily price recalculation](../features/automatic-price-recalculation.md).
+
+The `update-check` job fetches the latest GitHub release for application update reporting (timezone `UPDATE_CHECK_TIMEZONE`, default `Europe/Berlin`). See [Application updates](../features/application-updates.md).
 
 Coordinator job IDs use dot separators (for example `coordinator.subscription-billing`) via `buildCoordinatorJobId`.
 

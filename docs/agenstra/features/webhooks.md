@@ -57,6 +57,17 @@ Environment payloads include variable **name** and metadata only; secret **value
 - `user.created`, `user.updated`, `user.deleted`
 - `client_user.created`, `client_user.deleted`
 
+### Application updates
+
+Webhook-only (no email). Emitted by the agent-controller update-check job and instance heartbeats:
+
+- `application.update_available` — a newer GitHub release was detected versus the previously stored latest
+- `application.update_check_failed` — GitHub Releases API unreachable or returned an error
+- `application.instance_outdated` — after a successful check, an instance transitioned to `update_available`
+- `application.dependency_health_changed` — Redis, queue, or database health flipped for a tracked instance
+
+See [Application updates](./application-updates.md).
+
 ## Payload examples
 
 ### `ticket.comment.created`

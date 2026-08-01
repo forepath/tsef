@@ -25,6 +25,7 @@ describe('BILLING_PAT_SCOPES', () => {
     'datev:write',
     'users:admin',
     'webhooks:admin',
+    'updates:admin',
   ];
 
   it('has unique entries', () => {

@@ -192,6 +192,15 @@
       ],
       "@shared/backend/util-crypto": [
         "libs/domains/shared/backend/util-crypto/src/index.ts"
+      ],
+      "@forepath/shared/backend/feature-updates": [
+        "libs/domains/shared/backend/feature-updates/src/index.ts"
+      ],
+      "@forepath/shared/frontend/data-access-updates": [
+        "libs/domains/shared/frontend/data-access-updates/src/index.ts"
+      ],
+      "@forepath/shared/frontend/feature-updates": [
+        "libs/domains/shared/frontend/feature-updates/src/index.ts"
       ]
     }
   },

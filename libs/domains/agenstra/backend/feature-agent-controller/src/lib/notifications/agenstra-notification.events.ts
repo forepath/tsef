@@ -19,6 +19,10 @@ export const AGENSTRA_NOTIFICATION_EVENTS = [
   'environment.deleted',
   'client_user.created',
   'client_user.deleted',
+  'application.update_available',
+  'application.update_check_failed',
+  'application.instance_outdated',
+  'application.dependency_health_changed',
 ] as const;
 
 export type AgenstraNotificationEventType = (typeof AGENSTRA_NOTIFICATION_EVENTS)[number];

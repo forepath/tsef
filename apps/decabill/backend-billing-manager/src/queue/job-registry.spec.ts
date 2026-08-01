@@ -39,6 +39,15 @@ describe('billing job-registry', () => {
     delete process.env.BILLING_PRICE_RECALC_ENABLED;
   });
 
+  it('getBillingRepeatableJobs includes update check coordinator', () => {
+    const jobs = getBillingRepeatableJobs();
+    const updateCheckJob = jobs.find((job) => job.name === BillingJobName.UPDATE_CHECK);
+
+    expect(updateCheckJob).toBeDefined();
+    expect(updateCheckJob?.pattern).toBe('0 0 * * *');
+    expect(updateCheckJob?.tz).toBe('Europe/Berlin');
+  });
+
   it('coordinator job ids are valid for BullMQ (no colons)', () => {
     for (const job of getBillingRepeatableJobs()) {
       expect(job.coordinatorJobId).not.toContain(':');

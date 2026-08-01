@@ -27,6 +27,8 @@ export interface Environment {
   production: boolean;
   /** Product name shown in page titles, auth screens, and other branded UI. */
   productName: string;
+  /** Optional frontend build version (e.g. from CI `VERSION` env var). */
+  appVersion?: string;
   controller: {
     restApiUrl: string;
     websocketUrl: string;

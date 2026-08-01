@@ -98,9 +98,10 @@ Startup logs (via `OtelSdkBootstrap`):
 - HTTP auto-instrumentation (health and metrics paths ignored)
 - BullMQ job-count gauges when `queueNames` + `BullMqOtelMetricsCollector` (`util-otel/bullmq`) are registered
 
-**Domain (via `registerDomainMetrics`):**
+**Domain (via `registerDomainMetrics` or app collectors):**
 
 - Apps pass a callback to register custom meters at startup (for example Chatwoot configuration gauge on the communication service)
+- Product collectors poll gauges with `setGauge` (billing, agenstra, application updates via `UpdatesMetricsCollector` in `@forepath/shared/backend/feature-updates`)
 
 ## Tests
 

@@ -87,7 +87,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/forepath/backend-communication/Dockerfile.api",
-        "context": "dist/apps/forepath/backend-communication"
+        "context": "dist/apps/forepath/backend-communication",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

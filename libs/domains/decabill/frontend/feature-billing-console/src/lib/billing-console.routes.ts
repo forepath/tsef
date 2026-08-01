@@ -215,6 +215,7 @@ import {
   createNotificationAdminRoutes,
   notificationAdminProviders,
 } from '@forepath/shared/frontend/feature-notifications';
+import { createUpdatesAdminRoutes, updatesAdminProviders } from '@forepath/shared/frontend/feature-updates';
 import { buildPageTitle } from '@forepath/shared/frontend/util-configuration';
 import { provideEffects } from '@ngrx/effects';
 import { provideState } from '@ngrx/store';
@@ -255,6 +256,7 @@ export const billingConsoleRoutes: Route[] = [
       // Identity auth routes (login, register, password reset, email confirmation, user management)
       ...identityAuthRoutes,
       ...createNotificationAdminRoutes([authGuard, adminGuard]),
+      ...createUpdatesAdminRoutes([authGuard, billingAdminGuard]),
       {
         path: 'withdrawal',
         component: PublicWithdrawalComponent,
@@ -409,6 +411,7 @@ export const billingConsoleRoutes: Route[] = [
     providers: [
       ...identityAuthProviders,
       ...notificationAdminProviders,
+      ...updatesAdminProviders,
       CloudInitConfigsFacade,
       AddonsFacade,
       SubscriptionsFacade,

@@ -149,7 +149,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/decabill/backend-billing-manager/Dockerfile.api",
-        "context": "dist/apps/decabill/backend-billing-manager"
+        "context": "dist/apps/decabill/backend-billing-manager",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

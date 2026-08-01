@@ -1,6 +1,7 @@
 import {
   buildCoordinatorJobId,
   getWebhookDeliveryRetentionCoordinatorIntervalMs,
+  UPDATE_CHECK_JOB_NAME,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
 } from '@forepath/shared/backend';
 
@@ -19,6 +20,7 @@ export const ControllerJobName = {
   AUTONOMOUS_TICKET_COORDINATOR: 'autonomous-ticket.coordinator',
   AUTONOMOUS_TICKET_UNIT: 'autonomous-ticket.unit',
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
+  UPDATE_CHECK: UPDATE_CHECK_JOB_NAME,
 } as const;
 
 export type ControllerJobName = (typeof ControllerJobName)[keyof typeof ControllerJobName];
@@ -26,7 +28,9 @@ export type ControllerJobName = (typeof ControllerJobName)[keyof typeof Controll
 export interface ControllerRepeatableJobDefinition {
   name: ControllerJobName;
   coordinatorJobId: string;
-  everyMs: number;
+  everyMs?: number;
+  pattern?: string;
+  tz?: string;
   disabled?: boolean;
 }
 
@@ -77,6 +81,13 @@ export function getControllerRepeatableJobs(): ControllerRepeatableJobDefinition
       everyMs: knowledgeInterval,
     });
   }
+
+  jobs.push({
+    name: ControllerJobName.UPDATE_CHECK,
+    coordinatorJobId: buildCoordinatorJobId('update-check'),
+    pattern: process.env.UPDATE_CHECK_CRON ?? '0 0 * * *',
+    tz: process.env.UPDATE_CHECK_TIMEZONE ?? 'Europe/Berlin',
+  });
 
   return jobs;
 }

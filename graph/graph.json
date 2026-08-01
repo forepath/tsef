@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-01T10:59:32.205Z",
+  "generatedAt": "2026-08-02T07:33:42.844Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -537,6 +537,27 @@
       }
     },
     {
+      "id": "project:shared-frontend-data-access-updates",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-frontend-data-access-updates",
+        "root": "libs/domains/shared/frontend/data-access-updates",
+        "tags": [
+          "domain:shared",
+          "scope:frontend",
+          "type:data-access"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "frontend",
+        "featureGroup": "data-access"
+      }
+    },
+    {
       "id": "project:shared-frontend-feature-landingpage",
       "type": "lib",
       "attrs": {
@@ -749,6 +770,27 @@
       }
     },
     {
+      "id": "project:shared-frontend-feature-updates",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-frontend-feature-updates",
+        "root": "libs/domains/shared/frontend/feature-updates",
+        "tags": [
+          "domain:shared",
+          "scope:frontend",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "frontend",
+        "featureGroup": "feature"
+      }
+    },
+    {
       "id": "project:identity-frontend-feature-auth",
       "type": "lib",
       "attrs": {
@@ -766,6 +808,27 @@
         ],
         "domain": "identity",
         "context": "frontend",
+        "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:shared-backend-feature-updates",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-backend-feature-updates",
+        "root": "libs/domains/shared/backend/feature-updates",
+        "tags": [
+          "domain:shared",
+          "scope:backend",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "backend",
         "featureGroup": "feature"
       }
     },
@@ -4756,6 +4819,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/agenstra-updates.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/agenstra-updates.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-controller"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
       "type": "module",
       "attrs": {
@@ -4922,6 +4994,15 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-manager-filter-rules-client.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-controller"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-manager-instance-scrape.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-manager-instance-scrape.service.ts",
         "languageOrKind": "ts",
         "projectName": "agenstra-backend-feature-agent-controller"
       }
@@ -6558,6 +6639,15 @@
       "type": "module",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-pat-auth.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-updates.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-updates.module.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -8327,6 +8417,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/instance-status.controller.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/instance-status.controller.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/workspace-configuration-overrides.controller.ts",
       "type": "controller",
       "attrs": {
@@ -8493,6 +8592,15 @@
       "type": "dto",
       "attrs": {
         "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/git-status.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/instance-status-response.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/instance-status-response.dto.ts",
         "languageOrKind": "ts",
         "projectName": "agenstra-backend-feature-agent-manager"
       }
@@ -8984,6 +9092,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/instance-status.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/instance-status.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/prompt-context-composer.service.ts",
       "type": "service",
       "attrs": {
@@ -9315,6 +9432,41 @@
       }
     },
     {
+      "id": "file:libs/domains/shared/frontend/data-access-updates/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/frontend/data-access-updates/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-frontend-data-access-updates"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/frontend/data-access-updates/src/lib/services/updates.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/shared/frontend/data-access-updates/src/lib/services/updates.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-frontend-data-access-updates"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/frontend/data-access-updates/src/lib/state/admin-updates",
+      "type": "state",
+      "attrs": {
+        "path": "libs/domains/shared/frontend/data-access-updates/src/lib/state/admin-updates",
+        "languageOrKind": "ts",
+        "projectName": "shared-frontend-data-access-updates",
+        "sliceName": "admin-updates",
+        "memberFiles": [
+          "admin-updates.actions.ts",
+          "admin-updates.effects.ts",
+          "admin-updates.facade.ts",
+          "admin-updates.reducer.ts",
+          "admin-updates.selectors.ts"
+        ]
+      }
+    },
+    {
       "id": "file:libs/domains/shared/frontend/feature-landingpage/README.md",
       "type": "readme",
       "attrs": {
@@ -9521,6 +9673,15 @@
       }
     },
     {
+      "id": "file:libs/domains/shared/frontend/feature-updates/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/frontend/feature-updates/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-frontend-feature-updates"
+      }
+    },
+    {
       "id": "file:libs/domains/identity/frontend/feature-auth/README.md",
       "type": "readme",
       "attrs": {
@@ -9572,6 +9733,69 @@
         "path": "libs/domains/identity/frontend/feature-auth/src/lib/guards/signup-disabled.guard.ts",
         "languageOrKind": "ts",
         "projectName": "identity-frontend-feature-auth"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/feature-updates/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/backend/feature-updates/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-backend-feature-updates"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/feature-updates/src/lib/controllers/updates.controller.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/shared/backend/feature-updates/src/lib/controllers/updates.controller.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-feature-updates"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/feature-updates/src/lib/dto/updates.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/shared/backend/feature-updates/src/lib/dto/updates.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-feature-updates"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/feature-updates/src/lib/services/instance-heartbeat.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/shared/backend/feature-updates/src/lib/services/instance-heartbeat.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-feature-updates"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/feature-updates/src/lib/services/update-check.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/shared/backend/feature-updates/src/lib/services/update-check.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-feature-updates"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/feature-updates/src/lib/services/updates-query.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/shared/backend/feature-updates/src/lib/services/updates-query.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-feature-updates"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/feature-updates/src/lib/updates.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/shared/backend/feature-updates/src/lib/updates.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-feature-updates"
       }
     },
     {
@@ -10949,6 +11173,14 @@
       }
     },
     {
+      "id": "file:docs/agenstra/features/application-updates.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/agenstra/features/application-updates.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
       "id": "file:docs/agenstra/features/atlassian-import.md",
       "type": "doc",
       "attrs": {
@@ -11409,6 +11641,14 @@
       "type": "doc",
       "attrs": {
         "path": "docs/decabill/features/advance-billing-and-yearly-interval.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/decabill/features/application-updates.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/application-updates.md",
         "languageOrKind": "md"
       }
     },
@@ -13875,6 +14115,75 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/admin/updates",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/updates",
+        "operationId": "getAgenstraUpdatesFullState",
+        "summary": "Get full application updates state (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/updates/status",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/updates/status",
+        "operationId": "getAgenstraUpdatesStatusSummary",
+        "summary": "Get application updates status summary (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/updates/check",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/updates/check",
+        "operationId": "triggerAgenstraUpdateCheck",
+        "summary": "Trigger application update check (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:application.dependency_health_changed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "application.dependency_health_changed",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:application.instance_outdated",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "application.instance_outdated",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:application.update_available",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "application.update_available",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:application.update_check_failed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "application.update_check_failed",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
       "id": "webhook-event:agenstra-backend-feature-agent-controller:chat_message.created",
       "type": "webhook-event",
       "attrs": {
@@ -16015,6 +16324,39 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/admin/billing/updates",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/updates",
+        "operationId": "getBillingUpdatesFullState",
+        "summary": "Get full application updates state (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/updates/status",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/updates/status",
+        "operationId": "getBillingUpdatesStatusSummary",
+        "summary": "Get application updates status summary (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/updates/check",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/updates/check",
+        "operationId": "triggerBillingUpdateCheck",
+        "summary": "Trigger application update check (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "webhook-event:decabill-backend-feature-billing-manager:addon.activated",
       "type": "webhook-event",
       "attrs": {
@@ -16046,6 +16388,42 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "addon.teardown_failed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:application.dependency_health_changed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "application.dependency_health_changed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:application.instance_outdated",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "application.instance_outdated",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:application.update_available",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "application.update_available",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:application.update_check_failed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "application.update_check_failed",
         "projectName": "decabill-backend-feature-billing-manager",
         "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
       }
@@ -16889,6 +17267,17 @@
         "pathOrChannel": "/agents-filters/{id}",
         "operationId": "deleteRegexFilterRule",
         "summary": "Delete regex filter rule",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/instance-status",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/instance-status",
+        "operationId": "getInstanceStatus",
+        "summary": "Get agent-manager instance status",
         "specKind": "openapi"
       }
     },
@@ -19501,6 +19890,106 @@
         "title": "Container Interaction",
         "docPath": "docs/agenstra/features/agent-management.md",
         "sectionAnchor": "container-interaction",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-application-updates-agenstra",
+      "type": "concept",
+      "attrs": {
+        "title": "Application updates (Agenstra)",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "application-updates-agenstra",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-access-admin-only",
+      "type": "concept",
+      "attrs": {
+        "title": "Access (admin only)",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "access-admin-only",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-instance-identity",
+      "type": "concept",
+      "attrs": {
+        "title": "Instance identity",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "instance-identity",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-update-check-job",
+      "type": "concept",
+      "attrs": {
+        "title": "Update check job",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "update-check-job",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-changelog-scoping",
+      "type": "concept",
+      "attrs": {
+        "title": "Changelog scoping",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "changelog-scoping",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-admin-api",
+      "type": "concept",
+      "attrs": {
+        "title": "Admin API",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "admin-api",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-redis-flush",
+      "type": "concept",
+      "attrs": {
+        "title": "Redis flush",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "redis-flush",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-notification-events-webhook-only",
+      "type": "concept",
+      "attrs": {
+        "title": "Notification events (webhook only)",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "notification-events-webhook-only",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-frontend",
+      "type": "concept",
+      "attrs": {
+        "title": "Frontend",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "frontend",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-out-of-scope",
+      "type": "concept",
+      "attrs": {
+        "title": "Out of scope",
+        "docPath": "docs/agenstra/features/application-updates.md",
+        "sectionAnchor": "out-of-scope",
         "domain": "agenstra"
       }
     },
@@ -23685,6 +24174,86 @@
       }
     },
     {
+      "id": "concept:decabill-application-updates-decabill",
+      "type": "concept",
+      "attrs": {
+        "title": "Application updates (Decabill)",
+        "docPath": "docs/decabill/features/application-updates.md",
+        "sectionAnchor": "application-updates-decabill",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-access-admin-only",
+      "type": "concept",
+      "attrs": {
+        "title": "Access (admin only)",
+        "docPath": "docs/decabill/features/application-updates.md",
+        "sectionAnchor": "access-admin-only",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-instance-identity",
+      "type": "concept",
+      "attrs": {
+        "title": "Instance identity",
+        "docPath": "docs/decabill/features/application-updates.md",
+        "sectionAnchor": "instance-identity",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-update-check-job",
+      "type": "concept",
+      "attrs": {
+        "title": "Update check job",
+        "docPath": "docs/decabill/features/application-updates.md",
+        "sectionAnchor": "update-check-job",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-changelog-scoping",
+      "type": "concept",
+      "attrs": {
+        "title": "Changelog scoping",
+        "docPath": "docs/decabill/features/application-updates.md",
+        "sectionAnchor": "changelog-scoping",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-redis-flush",
+      "type": "concept",
+      "attrs": {
+        "title": "Redis flush",
+        "docPath": "docs/decabill/features/application-updates.md",
+        "sectionAnchor": "redis-flush",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-notification-events-webhook-only",
+      "type": "concept",
+      "attrs": {
+        "title": "Notification events (webhook only)",
+        "docPath": "docs/decabill/features/application-updates.md",
+        "sectionAnchor": "notification-events-webhook-only",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-out-of-scope",
+      "type": "concept",
+      "attrs": {
+        "title": "Out of scope",
+        "docPath": "docs/decabill/features/application-updates.md",
+        "sectionAnchor": "out-of-scope",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-authentication-methods",
       "type": "concept",
       "attrs": {
@@ -26938,6 +27507,16 @@
     },
     {
       "from": "project:decabill-frontend-feature-billing-console",
+      "to": "project:shared-frontend-feature-updates",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-feature-billing-console",
+      "to": "project:shared-frontend-data-access-updates",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-feature-billing-console",
       "to": "project:shared-frontend-util-provisioning-geography",
       "type": "depends_on"
     },
@@ -27018,7 +27597,17 @@
     },
     {
       "from": "project:agenstra-frontend-feature-agent-console",
+      "to": "project:shared-frontend-feature-updates",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-feature-agent-console",
       "to": "project:shared-frontend-util-configuration",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-feature-agent-console",
+      "to": "project:shared-frontend-data-access-updates",
       "type": "depends_on"
     },
     {
@@ -27182,6 +27771,16 @@
       "type": "depends_on"
     },
     {
+      "from": "project:shared-frontend-feature-updates",
+      "to": "project:shared-frontend-data-access-updates",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-feature-updates",
+      "to": "project:shared-frontend-util-configuration",
+      "type": "depends_on"
+    },
+    {
       "from": "project:identity-frontend-feature-auth",
       "to": "project:identity-frontend-util-auth",
       "type": "depends_on"
@@ -27189,6 +27788,16 @@
     {
       "from": "project:identity-frontend-feature-auth",
       "to": "project:shared-frontend-util-configuration",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "project:shared-backend-util-queue",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
     {
@@ -27318,6 +27927,11 @@
     },
     {
       "from": "project:decabill-frontend-billing-console",
+      "to": "project:shared-frontend-data-access-updates",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-billing-console",
       "to": "project:decabill-frontend-feature-billing-console",
       "type": "depends_on"
     },
@@ -27404,6 +28018,11 @@
     {
       "from": "project:agenstra-frontend-agent-console",
       "to": "project:shared-frontend-data-access-notifications",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-agent-console",
+      "to": "project:shared-frontend-data-access-updates",
       "type": "depends_on"
     },
     {
@@ -30768,6 +31387,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/agenstra-updates.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
       "type": "contains"
     },
@@ -30859,6 +31483,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-controller",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-manager-filter-rules-client.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-manager-instance-scrape.service.ts",
       "type": "contains"
     },
     {
@@ -31759,6 +32388,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-pat-auth.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-updates.module.ts",
       "type": "contains"
     },
     {
@@ -32743,6 +33377,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/instance-status.controller.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/workspace-configuration-overrides.controller.ts",
       "type": "contains"
     },
@@ -32834,6 +33473,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/git-status.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/instance-status-response.dto.ts",
       "type": "contains"
     },
     {
@@ -33108,6 +33752,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/instance-status.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/prompt-context-composer.service.ts",
       "type": "contains"
     },
@@ -33282,6 +33931,21 @@
       "type": "contains"
     },
     {
+      "from": "project:shared-frontend-data-access-updates",
+      "to": "file:libs/domains/shared/frontend/data-access-updates/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-frontend-data-access-updates",
+      "to": "file:libs/domains/shared/frontend/data-access-updates/src/lib/services/updates.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-frontend-data-access-updates",
+      "to": "file:libs/domains/shared/frontend/data-access-updates/src/lib/state/admin-updates",
+      "type": "contains"
+    },
+    {
       "from": "project:shared-frontend-feature-landingpage",
       "to": "file:libs/domains/shared/frontend/feature-landingpage/README.md",
       "type": "contains"
@@ -33387,6 +34051,11 @@
       "type": "contains"
     },
     {
+      "from": "project:shared-frontend-feature-updates",
+      "to": "file:libs/domains/shared/frontend/feature-updates/README.md",
+      "type": "contains"
+    },
+    {
       "from": "project:identity-frontend-feature-auth",
       "to": "file:libs/domains/identity/frontend/feature-auth/README.md",
       "type": "contains"
@@ -33414,6 +34083,41 @@
     {
       "from": "project:identity-frontend-feature-auth",
       "to": "file:libs/domains/identity/frontend/feature-auth/src/lib/guards/signup-disabled.guard.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "file:libs/domains/shared/backend/feature-updates/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/controllers/updates.controller.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/dto/updates.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/services/instance-heartbeat.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/services/update-check.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/services/updates-query.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/updates.module.ts",
       "type": "contains"
     },
     {
@@ -34983,7 +35687,42 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/updates",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/updates/status",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/updates/check",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
       "to": "api:HTTP:GET:/otel/metrics",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:application.dependency_health_changed",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:application.instance_outdated",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:application.update_available",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:application.update_check_failed",
       "type": "contains"
     },
     {
@@ -36098,6 +36837,21 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/updates",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/updates/status",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/updates/check",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/otel/metrics",
       "type": "contains"
     },
@@ -36119,6 +36873,26 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:addon.teardown_failed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:application.dependency_health_changed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:application.instance_outdated",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:application.update_available",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:application.update_check_failed",
       "type": "contains"
     },
     {
@@ -36569,6 +37343,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
       "to": "api:HTTP:DELETE:/agents-filters/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/instance-status",
       "type": "contains"
     },
     {
@@ -38309,6 +39088,71 @@
     {
       "from": "file:docs/agenstra/features/agent-management.md",
       "to": "concept:agenstra-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-application-updates-agenstra",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-access-admin-only",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-architecture",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-instance-identity",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-update-check-job",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-changelog-scoping",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-admin-api",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-redis-flush",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-configuration",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-opentelemetry",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-notification-events-webhook-only",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-frontend",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "concept:agenstra-out-of-scope",
       "type": "contains"
     },
     {
@@ -41284,6 +42128,71 @@
     {
       "from": "file:docs/decabill/features/advance-billing-and-yearly-interval.md",
       "to": "concept:decabill-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-application-updates-decabill",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-access-admin-only",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-architecture",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-instance-identity",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-update-check-job",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-changelog-scoping",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-admin-api",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-redis-flush",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-configuration",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-opentelemetry",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-notification-events-webhook-only",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-frontend",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
+      "to": "concept:decabill-out-of-scope",
       "type": "contains"
     },
     {
@@ -45327,6 +46236,36 @@
       "type": "implements"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/updates",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/updates",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/updates/status",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/updates/status",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/updates/check",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/updates/check",
+      "type": "implements"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-customer-profiles.controller.ts",
       "to": "api:HTTP:GET:/admin/billing/customer-profiles",
       "type": "implements"
@@ -47307,6 +48246,16 @@
       "type": "implements"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/instance-status.controller.ts",
+      "to": "api:HTTP:GET:/instance-status",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:HTTP:GET:/instance-status",
+      "type": "implements"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/workspace-configuration-overrides.controller.ts",
       "to": "api:HTTP:GET:/configuration-overrides",
       "type": "implements"
@@ -48768,6 +49717,11 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-manager-filter-rules-client.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/clients.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-manager-instance-scrape.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/clients.repository.ts",
       "type": "injects"
     },
@@ -51552,6 +52506,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/instance-status.controller.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/instance-status.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/workspace-configuration-overrides.controller.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/workspace-configuration-overrides.service.ts",
       "type": "injects"
@@ -51857,6 +52816,16 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/shared/backend/feature-updates/src/lib/controllers/updates.controller.ts",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/services/updates-query.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/shared/backend/feature-updates/src/lib/controllers/updates.controller.ts",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/services/update-check.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/identity/backend/feature-auth/src/lib/controllers/auth.controller.ts",
       "to": "file:libs/domains/identity/backend/feature-auth/src/lib/services/auth.service.ts",
       "type": "injects"
@@ -51972,6 +52941,11 @@
       "type": "injects"
     },
     {
+      "from": "file:apps/agenstra/backend-agent-controller/src/queue/processors/controller-jobs.processor.ts",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/services/update-check.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-tenant.service.ts",
       "type": "injects"
@@ -52077,6 +53051,11 @@
       "type": "injects"
     },
     {
+      "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
+      "to": "file:libs/domains/shared/backend/feature-updates/src/lib/services/update-check.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/forepath/backend/feature-communication-manager/src/lib/communication.module.ts",
       "to": "file:libs/domains/forepath/backend/feature-communication-manager/src/lib/controllers/public-contact-requests.controller.ts",
       "type": "provides"
@@ -52089,6 +53068,16 @@
     {
       "from": "file:libs/domains/forepath/backend/feature-communication-manager/src/lib/communication.module.ts",
       "to": "file:libs/domains/forepath/backend/feature-communication-manager/src/lib/services/contact-request.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/agenstra-updates.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/clients.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/agenstra-updates.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-manager-instance-scrape.service.ts",
       "type": "provides"
     },
     {
@@ -53372,6 +54361,11 @@
       "type": "provides"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-updates.module.ts",
+      "type": "provides"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-identity-email-bridge.module.ts",
       "to": "file:libs/domains/shared/backend/feature-notifications/src/lib/services/email-notification-dispatcher.service.ts",
       "type": "provides"
@@ -53419,6 +54413,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/config.controller.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/instance-status.controller.ts",
       "type": "provides"
     },
     {
@@ -53489,6 +54488,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/config.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/instance-status.service.ts",
       "type": "provides"
     },
     {
@@ -56032,6 +57036,56 @@
       "type": "documents"
     },
     {
+      "from": "concept:agenstra-application-updates-agenstra",
+      "to": "api:HTTP:POST:/auth/login",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-access-admin-only",
+      "to": "api:HTTP:GET:/admin/updates",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-instance-identity",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-instance-identity",
+      "to": "api:HTTP:GET:/instance-status",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-update-check-job",
+      "to": "api:HTTP:GET:/admin/updates",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-update-check-job",
+      "to": "api:HTTP:POST:/admin/updates/check",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-admin-api",
+      "to": "api:HTTP:GET:/admin/updates",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-admin-api",
+      "to": "api:HTTP:GET:/admin/updates/status",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-admin-api",
+      "to": "api:HTTP:POST:/admin/updates/check",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-out-of-scope",
+      "to": "api:HTTP:POST:/auth/login",
+      "type": "documents"
+    },
+    {
       "from": "concept:agenstra-why-controller-native",
       "to": "api:HTTP:GET:/tickets",
       "type": "documents"
@@ -58224,6 +59278,36 @@
     {
       "from": "concept:decabill-admin-instant-cancel-advance",
       "to": "api:HTTP:GET:/admin/billing/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-application-updates-decabill",
+      "to": "api:HTTP:POST:/auth/login",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-access-admin-only",
+      "to": "api:HTTP:GET:/admin/billing/updates",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-instance-identity",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-update-check-job",
+      "to": "api:HTTP:GET:/admin/billing/updates",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-update-check-job",
+      "to": "api:HTTP:POST:/admin/billing/updates/check",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-out-of-scope",
+      "to": "api:HTTP:POST:/auth/login",
       "type": "documents"
     },
     {
@@ -61072,6 +62156,21 @@
       "type": "belongs_to"
     },
     {
+      "from": "project:shared-frontend-data-access-updates",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-frontend-data-access-updates",
+      "to": "context:frontend",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-frontend-data-access-updates",
+      "to": "feature-group:data-access",
+      "type": "belongs_to"
+    },
+    {
       "from": "project:shared-frontend-feature-landingpage",
       "to": "domain:shared",
       "type": "belongs_to"
@@ -61222,6 +62321,21 @@
       "type": "belongs_to"
     },
     {
+      "from": "project:shared-frontend-feature-updates",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-frontend-feature-updates",
+      "to": "context:frontend",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-frontend-feature-updates",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
       "from": "project:identity-frontend-feature-auth",
       "to": "domain:identity",
       "type": "belongs_to"
@@ -61233,6 +62347,21 @@
     },
     {
       "from": "project:identity-frontend-feature-auth",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "context:backend",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
       "to": "feature-group:feature",
       "type": "belongs_to"
     },
@@ -61797,6 +62926,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "file:docs/agenstra/features/application-updates.md",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
       "from": "file:docs/agenstra/features/atlassian-import.md",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -62083,6 +63217,11 @@
     },
     {
       "from": "file:docs/decabill/features/advance-billing-and-yearly-interval.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/decabill/features/application-updates.md",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -63323,6 +64462,56 @@
     },
     {
       "from": "concept:agenstra-container-interaction",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-application-updates-agenstra",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-access-admin-only",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-instance-identity",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-update-check-job",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-changelog-scoping",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-admin-api",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-redis-flush",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-notification-events-webhook-only",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-frontend",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-out-of-scope",
       "to": "domain:agenstra",
       "type": "belongs_to"
     },
@@ -65413,6 +66602,46 @@
     },
     {
       "from": "concept:decabill-admin-instant-cancel-advance",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-application-updates-decabill",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-access-admin-only",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-instance-identity",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-update-check-job",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-changelog-scoping",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-redis-flush",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-notification-events-webhook-only",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-out-of-scope",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

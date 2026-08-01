@@ -68,6 +68,7 @@ docker exec -u agenstra <container> sudo /usr/bin/chown --version   # expect: su
   `stat -c '%g' /var/run/docker.sock`
 - Entrypoint: if the socket is present, sync the `docker` group GID, add `agenstra` to `docker`, then start Node with **`sg docker`** so socket access is effective without running Node as root.
 - Secrets (database, Keycloak, `STATIC_API_KEY`, etc.) are supplied at **deploy time**, not as default `ENV` in the image.
+- **`VERSION`** is baked at image build time (`ARG`/`ENV`, `--build-arg VERSION=$VERSION`). Release sets it from semantic-release (`release.yml` after `needs: publish`). Runtime `VERSION` / `APP_VERSION` may override.
 
 ## SSH sidecar image
 

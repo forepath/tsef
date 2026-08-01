@@ -40,6 +40,10 @@ describe('BILLING_NOTIFICATION_EVENTS', () => {
         'subscription.ssh_access_granted',
         'service_plan.price_recalculated',
         'subscription.price_changed',
+        'application.update_available',
+        'application.update_check_failed',
+        'application.instance_outdated',
+        'application.dependency_health_changed',
       ]),
     );
   });

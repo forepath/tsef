@@ -176,7 +176,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/decabill/frontend-landingpage/Dockerfile.server",
-        "context": "dist/apps/decabill/frontend-landingpage/server"
+        "context": "dist/apps/decabill/frontend-landingpage/server",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

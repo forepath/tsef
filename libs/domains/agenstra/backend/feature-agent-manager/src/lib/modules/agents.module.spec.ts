@@ -5,6 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { AgentsDeploymentsController } from '../controllers/agents-deployments.controller';
 import { AgentsMessagesController } from '../controllers/agents-messages.controller';
 import { AgentsController } from '../controllers/agents.controller';
+import { InstanceStatusController } from '../controllers/instance-status.controller';
 import { AgentEnvironmentVariableEntity } from '../entities/agent-environment-variable.entity';
 import { AgentMessageEventEntity } from '../entities/agent-message-event.entity';
 import { AgentMessageEntity } from '../entities/agent-message.entity';
@@ -38,6 +39,7 @@ import { AgentMessagesService } from '../services/agent-messages.service';
 import { AgentsService } from '../services/agents.service';
 import { DeploymentsService } from '../services/deployments.service';
 import { DockerService } from '../services/docker.service';
+import { InstanceStatusService } from '../services/instance-status.service';
 
 import { AgentsModule } from './agents.module';
 
@@ -50,6 +52,23 @@ describe('AgentsModule', () => {
     save: jest.fn(),
     remove: jest.fn(),
     count: jest.fn(),
+  };
+  const mockInstanceStatusService = {
+    onModuleInit: jest.fn(),
+    getStatus: jest.fn().mockResolvedValue({
+      instanceId: 'agent-manager:api:host',
+      serviceName: 'agent-manager',
+      role: 'api',
+      hostname: 'host',
+      installedVersion: '0.0.0',
+      startedAt: new Date().toISOString(),
+      uptimeSeconds: 0,
+      dependencies: {
+        redis: 'not_applicable',
+        queue: 'not_applicable',
+        database: 'healthy',
+      },
+    }),
   };
 
   beforeEach(async () => {
@@ -72,6 +91,8 @@ describe('AgentsModule', () => {
       .useValue(mockRepository)
       .overrideProvider(getRepositoryToken(WorkspaceConfigurationOverrideEntity))
       .useValue(mockRepository)
+      .overrideProvider(InstanceStatusService)
+      .useValue(mockInstanceStatusService)
       .compile();
   });
 
@@ -109,6 +130,19 @@ describe('AgentsModule', () => {
 
     expect(service).toBeDefined();
     expect(service).toBeInstanceOf(DockerService);
+  });
+
+  it('should provide InstanceStatusService', () => {
+    const service = module.get(InstanceStatusService);
+
+    expect(service).toBe(mockInstanceStatusService);
+  });
+
+  it('should provide InstanceStatusController', () => {
+    const controller = module.get<InstanceStatusController>(InstanceStatusController);
+
+    expect(controller).toBeDefined();
+    expect(controller).toBeInstanceOf(InstanceStatusController);
   });
 
   it('should provide AgentsController', () => {

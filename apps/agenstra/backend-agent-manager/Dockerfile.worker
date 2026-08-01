@@ -14,6 +14,8 @@ FROM docker.io/debian:trixie-slim
 
 ARG APP_UID=10001
 ARG APP_GID=10001
+ARG VERSION=0.0.0
+ENV VERSION=${VERSION}
 
 ENV NVM_DIR=/home/agenstra/.nvm
 ENV NODE_VERSION=24.14.1
@@ -60,7 +62,8 @@ RUN install -d -o agenstra -g agenstra /home/agenstra/.local/bin /home/agenstra/
     curl -fsSL https://cursor.com/install | bash -s -- --prefix /home/agenstra/.local && \
     chown -R agenstra:agenstra /home/agenstra/.local
 
-RUN HOME=/home/agenstra bash -c 'curl -fsSL https://opencode.ai/install | bash' && \
+# OpenCode's installer reads VERSION as the CLI release tag; unset the image VERSION build-arg.
+RUN env -u VERSION HOME=/home/agenstra bash -c 'curl -fsSL https://opencode.ai/install | bash' && \
     chown -R agenstra:agenstra /home/agenstra/.opencode
 
 RUN printf '%s\n' \

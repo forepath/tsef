@@ -1323,6 +1323,15 @@
       <trans-unit id="featureContainer-webhooks" datatype="html">
         <source>Webhooks</source>
         </trans-unit>
+      <trans-unit id="featureContainer-updatesTitle" datatype="html">
+        <source>Updates</source>
+        </trans-unit>
+      <trans-unit id="featureContainer-updates" datatype="html">
+        <source>Updates</source>
+        </trans-unit>
+      <trans-unit id="featureContainer-updatesAttention" datatype="html">
+        <source>Updates need attention</source>
+        </trans-unit>
       <trans-unit id="featureContainer-userManagementTitle" datatype="html">
         <source>User Management</source>
         </trans-unit>
@@ -3927,6 +3936,189 @@
         </trans-unit>
       <trans-unit id="featureNotifications-enabled" datatype="html">
         <source>Enabled</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-pageTitle" datatype="html">
+        <source>Updates</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-title" datatype="html">
+        <source>Updates</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-checkNow" datatype="html">
+        <source>Check now</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-loading" datatype="html">
+        <source>Loading updates...</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-empty" datatype="html">
+        <source>No update information available.</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-checkInProgress" datatype="html">
+        <source>Checking for updates...</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-statusUpdateAvailable" datatype="html">
+        <source>Update available</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-statusUpToDate" datatype="html">
+        <source>Up to date</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-statusUnknown" datatype="html">
+        <source>Unknown</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-installedVersion" datatype="html">
+        <source>Installed version</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-latestVersion" datatype="html">
+        <source>Latest version</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-viewRelease" datatype="html">
+        <source>View release</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-frontendVersion" datatype="html">
+        <source>Frontend version</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-lastCheck" datatype="html">
+        <source>Last check</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-instanceCount" datatype="html">
+        <source>Instances</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-outdatedInstances" datatype="html">
+        <source>Outdated instances</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-instancesTitle" datatype="html">
+        <source>Service instances</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-mobilePanelInstances" datatype="html">
+        <source>Instances</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-mobilePanelProduct" datatype="html">
+        <source>Product</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-mobilePanelShared" datatype="html">
+        <source>Shared</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-searchInstancesPlaceholder" datatype="html">
+        <source>Search instances</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-searchProductChangelogPlaceholder" datatype="html">
+        <source>Search product changelog</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-searchSharedChangelogPlaceholder" datatype="html">
+        <source>Search shared changelog</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-noInstances" datatype="html">
+        <source>No service instances reported yet.</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colInstanceId" datatype="html">
+        <source>Instance</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colService" datatype="html">
+        <source>Service</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colRole" datatype="html">
+        <source>Role</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colHostname" datatype="html">
+        <source>Hostname</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colInstalledVersion" datatype="html">
+        <source>Installed</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colUpdateState" datatype="html">
+        <source>Update state</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colLastHeartbeat" datatype="html">
+        <source>Last heartbeat</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colRedis" datatype="html">
+        <source>Redis</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colQueue" datatype="html">
+        <source>Queue</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-colDatabase" datatype="html">
+        <source>Database</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-changelogProduct" datatype="html">
+        <source>Product changelog</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-changelogShared" datatype="html">
+        <source>Shared changelog</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-noChangelogProduct" datatype="html">
+        <source>No product changelog entries.</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-noChangelogShared" datatype="html">
+        <source>No shared changelog entries.</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-dependencyHealthy" datatype="html">
+        <source>Healthy</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-dependencyDegraded" datatype="html">
+        <source>Degraded</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-dependencyNotApplicable" datatype="html">
+        <source>N/A</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-dependencyUnknown" datatype="html">
+        <source>Unknown</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-serviceBillingManager" datatype="html">
+        <source>Billing manager</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-serviceAgentController" datatype="html">
+        <source>Agent controller</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-serviceAgentManager" datatype="html">
+        <source>Agent manager</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-roleApi" datatype="html">
+        <source>API</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-roleWorker" datatype="html">
+        <source>Worker</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-roleScheduler" datatype="html">
+        <source>Scheduler</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-roleAll" datatype="html">
+        <source>All</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryFeatures" datatype="html">
+        <source>Features</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryBugFixes" datatype="html">
+        <source>Bug fixes</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryDocumentation" datatype="html">
+        <source>Documentation</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryStyle" datatype="html">
+        <source>Style</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryRefactor" datatype="html">
+        <source>Refactor</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryPerformance" datatype="html">
+        <source>Performance</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryTests" datatype="html">
+        <source>Tests</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryBuild" datatype="html">
+        <source>Build</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryCi" datatype="html">
+        <source>CI</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryChore" datatype="html">
+        <source>Chore</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryRevert" datatype="html">
+        <source>Revert</source>
+        </trans-unit>
+      <trans-unit id="featureUpdates-categoryBreakingChanges" datatype="html">
+        <source>Breaking changes</source>
         </trans-unit>
       <trans-unit id="utilCookieConsent-message" datatype="html">
         <source>This website uses cookies to ensure you get the best experience on our website.</source>

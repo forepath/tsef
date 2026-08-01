@@ -8,6 +8,7 @@ import {
   IdentityLogoutConfirmModalComponent,
   IDENTITY_AUTH_ENVIRONMENT,
 } from '@forepath/identity/frontend';
+import { AdminUpdatesFacade } from '@forepath/shared/frontend/data-access-updates';
 import { ENVIRONMENT, LocaleService } from '@forepath/shared/frontend/util-configuration';
 import { StandaloneLoadingService } from '@forepath/shared/frontend';
 import { combineLatest, filter, map, startWith } from 'rxjs';
@@ -28,6 +29,7 @@ interface AdminNavItem {
   activePaths: string[];
   icon: string;
   label: string;
+  navKey?: 'updates';
   routerLink: string[];
   title: string;
 }
@@ -46,6 +48,7 @@ function getBootstrapPopover(): BootstrapPopoverConstructor | undefined {
 export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
   private readonly authenticationFacade = inject(AuthenticationFacade);
   private readonly billingCapabilitiesFacade = inject(BillingCapabilitiesFacade);
+  private readonly adminUpdatesFacade = inject(AdminUpdatesFacade);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -83,6 +86,7 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
             url.includes('/administration') ||
             url.includes('/users') ||
             url.includes('/webhooks') ||
+            url.includes('/updates') ||
             url.includes('/settings/tokens'),
         ),
       ),
@@ -96,6 +100,7 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
         this.router.url.includes('/administration') ||
         this.router.url.includes('/users') ||
         this.router.url.includes('/webhooks') ||
+        this.router.url.includes('/updates') ||
         this.router.url.includes('/settings/tokens'),
     },
   );
@@ -110,6 +115,8 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
    * This also implies that the user can access the administration console.
    */
   readonly canAccessAdministration$ = this.authenticationFacade.canAccessBillingAdministration$;
+  readonly updatesAttentionBadge$ = this.adminUpdatesFacade.hasAttention$;
+  readonly updatesAttentionBadge = toSignal(this.updatesAttentionBadge$, { initialValue: false });
 
   readonly datevExportEnabled = toSignal(this.billingCapabilitiesFacade.datevExportEnabled$, {
     initialValue: false,
@@ -120,13 +127,20 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
       map(() => this.router.url),
       startWith(this.router.url),
-      map((url) => url.includes('/administration') || url.includes('/users') || url.includes('/webhooks')),
+      map(
+        (url) =>
+          url.includes('/administration') ||
+          url.includes('/users') ||
+          url.includes('/webhooks') ||
+          url.includes('/updates'),
+      ),
     ),
     {
       initialValue:
         this.router.url.includes('/administration') ||
         this.router.url.includes('/users') ||
-        this.router.url.includes('/webhooks'),
+        this.router.url.includes('/webhooks') ||
+        this.router.url.includes('/updates'),
     },
   );
 
@@ -185,6 +199,7 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
       .subscribe((canAccess) => {
         if (canAccess) {
           this.billingCapabilitiesFacade.loadCapabilities();
+          this.adminUpdatesFacade.loadStatus();
         }
       });
 
@@ -303,6 +318,16 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
       label.textContent = item.label;
 
       link.append(icon, label);
+
+      if (item.navKey === 'updates' && this.updatesAttentionBadge()) {
+        const badge = document.createElement('span');
+
+        badge.className = 'notification-badge sidebar-admin-popover__tile-badge';
+        badge.setAttribute('aria-hidden', 'true');
+        link.classList.add('position-relative');
+        link.appendChild(badge);
+      }
+
       link.addEventListener('click', (event) => {
         event.preventDefault();
         void this.router.navigate(item.routerLink);
@@ -357,6 +382,14 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
         icon: 'bi-tag',
         title: $localize`:@@featureContainer-adminPromotionsTitle:Promotions`,
         label: $localize`:@@featureContainer-adminPromotions:Promotions`,
+      },
+      {
+        routerLink: ['/updates'],
+        activePaths: ['/updates'],
+        icon: 'bi-arrow-repeat',
+        navKey: 'updates',
+        title: $localize`:@@featureContainer-updatesTitle:Updates`,
+        label: $localize`:@@featureContainer-updates:Updates`,
       },
       {
         routerLink: ['/webhooks'],

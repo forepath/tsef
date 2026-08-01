@@ -12,6 +12,8 @@ import {
   enqueueUnitJob,
   resolveEmailDeliverJobPayload,
   resolveWebhookDeliverJobPayload,
+  UPDATE_CHECK_JOB_NAME,
+  UpdateCheckService,
   WebhookDeliveryRetentionService,
   WebhookDeliveryService,
   WEBHOOK_DELIVER_JOB_NAME,
@@ -51,6 +53,7 @@ export class ControllerJobsProcessor extends WorkerHost {
     private readonly webhookDeliveryService: WebhookDeliveryService,
     private readonly webhookDeliveryRetentionService: WebhookDeliveryRetentionService,
     private readonly emailDeliveryService: EmailDeliveryService,
+    private readonly updateCheckService: UpdateCheckService,
   ) {
     super();
   }
@@ -102,6 +105,10 @@ export class ControllerJobsProcessor extends WorkerHost {
         break;
       case WEBHOOK_DELIVERY_RETENTION_COORDINATOR:
         await this.webhookDeliveryRetentionService.applyRetentionForAllEndpoints();
+        break;
+      case ControllerJobName.UPDATE_CHECK:
+      case UPDATE_CHECK_JOB_NAME:
+        await this.updateCheckService.runCheck();
         break;
       default:
         this.logger.warn(`Unknown controller job name: ${job.name}`);

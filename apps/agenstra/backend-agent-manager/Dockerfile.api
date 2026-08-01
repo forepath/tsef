@@ -16,6 +16,8 @@ FROM docker.io/debian:trixie-slim
 ARG APP_UID=10001
 ARG APP_GID=10001
 ARG DOCKER_GID=995
+# Release sets VERSION via --build-arg (see api-container-image / release.yml).
+ARG VERSION=0.0.0
 
 ENV HOST=0.0.0.0
 ENV PORT=3000
@@ -24,6 +26,7 @@ ENV NVM_DIR=/home/agenstra/.nvm
 ENV NODE_VERSION=24.14.1
 ENV HOME=/home/agenstra
 ENV PATH="/home/agenstra/.nvm/versions/node/v${NODE_VERSION}/bin:${PATH}"
+ENV VERSION=${VERSION}
 
 WORKDIR /app
 

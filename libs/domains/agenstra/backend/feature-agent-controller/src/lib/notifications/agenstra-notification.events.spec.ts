@@ -19,6 +19,10 @@ describe('AGENSTRA_NOTIFICATION_EVENTS', () => {
         'environment.updated',
         'environment.deleted',
         'ticket.comment.created',
+        'application.update_available',
+        'application.update_check_failed',
+        'application.instance_outdated',
+        'application.dependency_health_changed',
       ]),
     );
   });

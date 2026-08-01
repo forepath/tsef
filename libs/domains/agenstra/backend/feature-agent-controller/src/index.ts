@@ -113,6 +113,7 @@ export * from './lib/modules/filter-rules.module';
 export * from './lib/modules/context-import.module';
 export * from './lib/modules/clients.module';
 export * from './lib/modules/agenstra-notifications.module';
+export * from './lib/modules/agenstra-updates.module';
 export * from './lib/modules/agenstra-otel.module';
 export * from './lib/modules/identity-notification-bridge.module';
 export * from './lib/modules/identity-email-bridge.module';

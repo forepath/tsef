@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AgentsDeploymentsController } from '../controllers/agents-deployments.controller';
+import { InstanceStatusController } from '../controllers/instance-status.controller';
 import { AgentsEnvironmentVariablesController } from '../controllers/agents-environment-variables.controller';
 import { AgentsFilesController } from '../controllers/agents-files.controller';
 import { AgentsFiltersController } from '../controllers/agents-filters.controller';
@@ -62,6 +63,7 @@ import { AgentsVcsService } from '../services/agents-vcs.service';
 import { AgentsVerificationService } from '../services/agents-verification.service';
 import { AgentsService } from '../services/agents.service';
 import { ConfigService } from '../services/config.service';
+import { InstanceStatusService } from '../services/instance-status.service';
 import { DeploymentsService } from '../services/deployments.service';
 import { DockerService } from '../services/docker.service';
 import { PromptContextComposerService } from '../services/prompt-context-composer.service';
@@ -96,6 +98,7 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
     AgentsEnvironmentVariablesController,
     AgentsFiltersController,
     ConfigController,
+    InstanceStatusController,
     WorkspaceConfigurationOverridesController,
   ],
   providers: [
@@ -112,6 +115,7 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
     AgentsVcsService,
     AgentsVerificationService,
     ConfigService,
+    InstanceStatusService,
     PasswordService,
     DeploymentsService,
     AgentsRepository,
