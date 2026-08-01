@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-30T19:02:33.289Z",
+  "generatedAt": "2026-08-01T10:59:32.205Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -15377,6 +15377,39 @@
       }
     },
     {
+      "id": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/customer-profiles/{id}/data",
+        "operationId": "addAdminCustomerProfileCustomData",
+        "summary": "Add custom data key on customer billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/customer-profiles/{id}/data/{key}",
+        "operationId": "updateAdminCustomerProfileCustomData",
+        "summary": "Update custom data value on customer billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/admin/billing/customer-profiles/{id}/data/{key}",
+        "operationId": "deleteAdminCustomerProfileCustomData",
+        "summary": "Delete custom data key on customer billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "api:HTTP:GET:/admin/billing/customer-profiles/{id}/trust-score",
       "type": "endpoint",
       "attrs": {
@@ -16031,6 +16064,33 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "auto_billing.enabled",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:customer_profile.custom_data_added",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "customer_profile.custom_data_added",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:customer_profile.custom_data_deleted",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "customer_profile.custom_data_deleted",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:customer_profile.custom_data_updated",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "customer_profile.custom_data_updated",
         "projectName": "decabill-backend-feature-billing-manager",
         "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
       }
@@ -24101,6 +24161,16 @@
         "title": "Admin Management",
         "docPath": "docs/decabill/features/customer-profiles.md",
         "sectionAnchor": "admin-management",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-custom-data-admin-only",
+      "type": "concept",
+      "attrs": {
+        "title": "Custom Data (Admin Only)",
+        "docPath": "docs/decabill/features/customer-profiles.md",
+        "sectionAnchor": "custom-data-admin-only",
         "domain": "decabill"
       }
     },
@@ -35738,6 +35808,21 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}/trust-score",
       "type": "contains"
     },
@@ -36044,6 +36129,21 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:auto_billing.enabled",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:customer_profile.custom_data_added",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:customer_profile.custom_data_deleted",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:customer_profile.custom_data_updated",
       "type": "contains"
     },
     {
@@ -41518,6 +41618,11 @@
     },
     {
       "from": "file:docs/decabill/features/customer-profiles.md",
+      "to": "concept:decabill-custom-data-admin-only",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-profiles.md",
       "to": "concept:decabill-validation-flow",
       "type": "contains"
     },
@@ -44843,6 +44948,36 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
       "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}/trust-score",
       "type": "implements"
     },
@@ -45214,6 +45349,21 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-customer-profiles.controller.ts",
       "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-customer-profiles.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-customer-profiles.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-customer-profiles.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
       "type": "implements"
     },
     {
@@ -53727,6 +53877,21 @@
       "type": "calls"
     },
     {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-customer-profiles.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-customer-profiles.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-customer-profiles.service.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "calls"
+    },
+    {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-projects.service.ts",
       "to": "api:HTTP:GET:/admin/billing/projects",
       "type": "calls"
@@ -58528,6 +58693,21 @@
     },
     {
       "from": "concept:decabill-customer-billing-profiles-admin",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-customer-billing-profiles-admin",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-customer-billing-profiles-admin",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-customer-billing-profiles-admin",
       "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}/trust-score",
       "type": "documents"
     },
@@ -58809,6 +58989,71 @@
     {
       "from": "concept:decabill-admin-management",
       "to": "api:HTTP:POST:/admin/billing/customer-profiles",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-management",
+      "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-management",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-management",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:GET:/customer-profile",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:POST:/customer-profile",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:GET:/admin/billing/customer-profiles",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
       "type": "documents"
     },
     {
@@ -65408,6 +65653,11 @@
     },
     {
       "from": "concept:decabill-admin-management",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-custom-data-admin-only",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

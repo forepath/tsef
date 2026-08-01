@@ -7,6 +7,7 @@ import {
   loadAdminCustomerProfiles,
   loadAdminCustomerProfileTrustScore,
   recomputeAdminCustomerProfileTrustScore,
+  saveAdminCustomerProfileCustomData,
   updateAdminCustomerProfile,
 } from './admin-customer-profiles.actions';
 import { AdminCustomerProfilesFacade } from './admin-customer-profiles.facade';
@@ -62,5 +63,13 @@ describe('AdminCustomerProfilesFacade', () => {
     facade.recomputeTrustScore('p-1');
 
     expect(store.dispatch).toHaveBeenCalledWith(recomputeAdminCustomerProfileTrustScore({ id: 'p-1' }));
+  });
+
+  it('saveCustomData dispatches saveAdminCustomerProfileCustomData', () => {
+    facade.saveCustomData('p-1', { a: '1' }, { a: '2' });
+
+    expect(store.dispatch).toHaveBeenCalledWith(
+      saveAdminCustomerProfileCustomData({ id: 'p-1', original: { a: '1' }, next: { a: '2' } }),
+    );
   });
 });

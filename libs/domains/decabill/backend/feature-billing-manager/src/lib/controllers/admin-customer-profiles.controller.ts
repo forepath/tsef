@@ -18,6 +18,7 @@ import type {
   CreateAdminCustomerProfileDto,
   PaginatedAdminCustomerProfilesResponseDto,
 } from '../dto/admin-customer-profile.dto';
+import { AddCustomerProfileCustomDataDto, UpdateCustomerProfileCustomDataDto } from '../dto/admin-customer-profile.dto';
 import { CustomerProfileDto } from '../dto/customer-profile.dto';
 import type { CustomerProfileResponseDto } from '../dto/customer-profile-response.dto';
 import type { CustomerTrustScoreResponseDto } from '../dto/customer-trust-score.dto';
@@ -82,6 +83,31 @@ export class AdminCustomerProfilesController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<CustomerProfileResponseDto> {
     return await this.customerProfilesAdminService.markVatIdValidated(id);
+  }
+
+  @Post(':id/data')
+  async addCustomData(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() dto: AddCustomerProfileCustomDataDto,
+  ): Promise<AdminCustomerProfileDetailDto> {
+    return await this.customerProfilesAdminService.addCustomData(id, dto.key, dto.value);
+  }
+
+  @Post(':id/data/:key')
+  async updateCustomData(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('key') key: string,
+    @Body() dto: UpdateCustomerProfileCustomDataDto,
+  ): Promise<AdminCustomerProfileDetailDto> {
+    return await this.customerProfilesAdminService.updateCustomData(id, key, dto.value);
+  }
+
+  @Delete(':id/data/:key')
+  async deleteCustomData(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('key') key: string,
+  ): Promise<AdminCustomerProfileDetailDto> {
+    return await this.customerProfilesAdminService.deleteCustomData(id, key);
   }
 
   @Delete(':id')

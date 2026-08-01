@@ -41,6 +41,7 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
   @ViewChild('editModal', { static: false }) private editModal!: ElementRef<HTMLDivElement>;
   @ViewChild('deleteModal', { static: false }) private deleteModal!: ElementRef<HTMLDivElement>;
   @ViewChild('trustScoreModal', { static: false }) private trustScoreModal!: ElementRef<HTMLDivElement>;
+  @ViewChild('customDataModal', { static: false }) private customDataModal!: ElementRef<HTMLDivElement>;
   @ViewChild('createUserSelect') private createUserSelect?: BillingAdminUserSelectComponent;
 
   private readonly facade = inject(AdminCustomerProfilesFacade);
@@ -67,6 +68,7 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
   readonly creating$ = this.facade.creating$;
   readonly updating$ = this.facade.updating$;
   readonly deleting$ = this.facade.deleting$;
+  readonly customDataSaving$ = this.facade.customDataSaving$;
   readonly error$ = this.facade.error$;
   readonly trustScoreDetail$ = this.facade.trustScoreDetail$;
   readonly trustScoreLoading$ = this.facade.trustScoreLoading$;
@@ -79,6 +81,7 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
   });
   readonly trustScoreLoading = toSignal(this.trustScoreLoading$, { initialValue: false });
   readonly trustScoreRefreshing = toSignal(this.trustScoreRefreshing$, { initialValue: false });
+  readonly customDataSaving = toSignal(this.customDataSaving$, { initialValue: false });
 
   readonly usersWithoutProfile = computed(() => {
     const profileUserIds = new Set(this.profiles().map((profile) => profile.userId));
@@ -94,6 +97,11 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
   } = this.emptyEditForm();
   profileToDelete: AdminCustomerProfileListItem | null = null;
   trustScoreProfile: AdminCustomerProfileListItem | null = null;
+  customDataProfile: AdminCustomerProfileListItem | null = null;
+  customDataProfileId = '';
+  customDataOriginal: Record<string, string> = {};
+  customDataRows: Array<{ key: string; value: string; existingKey: boolean }> = [];
+  customDataLoading = signal(false);
 
   ngOnInit(): void {
     this.facade.loadProfiles();
@@ -144,6 +152,42 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
     showBillingModal(this.trustScoreModal);
   }
 
+  openCustomDataModal(profile: AdminCustomerProfileListItem): void {
+    this.customDataProfile = profile;
+    this.customDataProfileId = profile.id;
+    this.customDataOriginal = {};
+    this.customDataRows = [];
+    this.customDataLoading.set(true);
+    showBillingModal(this.customDataModal);
+    this.profilesService.getById(profile.id).subscribe({
+      next: (full) => {
+        const customData = full.customData ?? {};
+
+        this.customDataOriginal = { ...customData };
+        this.customDataRows = Object.entries(customData).map(([key, value]) => ({
+          key,
+          value,
+          existingKey: true,
+        }));
+        this.customDataLoading.set(false);
+      },
+      error: () => {
+        this.customDataLoading.set(false);
+      },
+    });
+  }
+
+  addCustomDataRow(): void {
+    this.customDataRows = [...this.customDataRows, { key: '', value: '', existingKey: false }];
+  }
+
+  removeCustomDataRow(index: number): void {
+    const list = [...this.customDataRows];
+
+    list.splice(index, 1);
+    this.customDataRows = list;
+  }
+
   submitCreate(): void {
     if (!this.createForm.userId) return;
 
@@ -158,6 +202,26 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
     const { id, vatIdValidationStatus: _status, vatIdValidatedAt: _validatedAt, ...dto } = this.editForm;
 
     this.facade.updateProfile(id, dto);
+  }
+
+  submitCustomData(): void {
+    if (!this.customDataProfileId || this.customDataLoading() || this.customDataSaving()) return;
+
+    const next: Record<string, string> = {};
+    const seenKeys = new Set<string>();
+
+    for (const row of this.customDataRows) {
+      const key = row.key.trim();
+
+      if (!key) continue;
+
+      if (seenKeys.has(key)) return;
+
+      seenKeys.add(key);
+      next[key] = row.value;
+    }
+
+    this.facade.saveCustomData(this.customDataProfileId, this.customDataOriginal, next);
   }
 
   confirmDelete(): void {
@@ -298,6 +362,14 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
     this.editForm = this.emptyEditForm();
   }
 
+  private resetCustomDataForm(): void {
+    this.customDataProfile = null;
+    this.customDataProfileId = '';
+    this.customDataOriginal = {};
+    this.customDataRows = [];
+    this.customDataLoading.set(false);
+  }
+
   private registerModalCloseWatchers(): void {
     const reloadProfiles = (): void => {
       this.facade.loadProfiles();
@@ -330,6 +402,15 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
       destroyRef: this.destroyRef,
       onSuccess: () => {
         this.profileToDelete = null;
+      },
+    });
+    watchBillingMutationModalClose({
+      loading$: this.customDataSaving$,
+      error$: this.error$,
+      modal: () => this.customDataModal,
+      destroyRef: this.destroyRef,
+      onSuccess: () => {
+        this.resetCustomDataForm();
       },
     });
   }

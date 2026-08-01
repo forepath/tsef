@@ -52,6 +52,7 @@ Events are published from the **billing** service after successful mutations.
 - `auto_billing.enabled`, `auto_billing.disabled`
 - `payment_method.attached`
 - `customer_trust.level_changed`
+- `customer_profile.custom_data_added`, `customer_profile.custom_data_updated`, `customer_profile.custom_data_deleted`
 - `subscription.created`, `subscription.updated`, `subscription.cancel_scheduled`, `subscription.canceled`, `subscription.resumed`, `subscription.period_charged`
 - `subscription.config_change_requested`, `subscription.config_changed`, `subscription.config_change_failed`
 - `subscription.ssh_access_granted` (metadata only: subscription/item ids, hostname, grantedAt — never the private key)
@@ -67,6 +68,7 @@ Admin instant cancel (like statutory withdrawal accept) emits `subscription.upda
 
 Payment success/failure payloads may include `mode` (`checkout` | `auto`). Auto-billing events are documented in [Auto-Billing](./auto-billing.md).
 `customer_trust.level_changed` only includes identifiers plus level and score metadata; it never includes billing-profile address fields or other PII.
+`customer_profile.custom_data_*` events include `profileId`, `userId`, and `key` only — custom data values are never included in webhook payloads.
 
 ### Projects
 

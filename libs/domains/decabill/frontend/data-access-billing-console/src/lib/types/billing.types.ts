@@ -1081,6 +1081,17 @@ export interface AdminCustomerProfileDetail extends CustomerProfileResponse {
   trustScore?: number;
   trustLevel?: CustomerTrustLevel;
   trustScoreUpdatedAt?: string;
+  /** Admin-only encrypted custom key/value map; never present on customer profile responses. */
+  customData: Record<string, string>;
+}
+
+export interface AddCustomerProfileCustomDataDto {
+  key: string;
+  value: string;
+}
+
+export interface UpdateCustomerProfileCustomDataDto {
+  value: string;
 }
 
 export type CustomerTrustLevel = 'green' | 'yellow' | 'red';

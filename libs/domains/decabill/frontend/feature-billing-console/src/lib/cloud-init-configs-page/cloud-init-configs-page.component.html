@@ -51,9 +51,14 @@
                 <div class="min-w-0">
                   <div class="fw-semibold mb-1">{{ config.name }}</div>
                   <div class="small text-muted d-flex align-items-center gap-3 flex-wrap">
-                    <span [ngClass]="activeStatusTextClass(config.isActive)">{{
-                      activeStatusLabel(config.isActive)
-                    }}</span>
+                    <span [ngClass]="activeStatusTextClass(config.isActive)">
+                      @if (config.isActive) {
+                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i>
+                      } @else {
+                        <i class="bi bi-pause-circle me-1" aria-hidden="true"></i>
+                      }
+                      {{ activeStatusLabel(config.isActive) }}
+                    </span>
                     <span><i class="bi bi-key me-1" aria-hidden="true"></i>{{ configKeyLabel(config.key) }}</span>
                     <span><i class="bi bi-box me-1" aria-hidden="true"></i>{{ configSummaryLabel(config) }}</span>
                     <span

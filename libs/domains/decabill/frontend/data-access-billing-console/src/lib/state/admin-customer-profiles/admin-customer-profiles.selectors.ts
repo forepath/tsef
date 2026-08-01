@@ -27,6 +27,11 @@ export const selectAdminCustomerProfilesDeleting = createSelector(
   (state) => state.deleting,
 );
 
+export const selectAdminCustomerProfilesCustomDataSaving = createSelector(
+  selectAdminCustomerProfilesState,
+  (state) => state.customDataSaving,
+);
+
 export const selectAdminCustomerProfilesError = createSelector(
   selectAdminCustomerProfilesState,
   (state) => state.error,

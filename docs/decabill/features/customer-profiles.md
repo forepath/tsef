@@ -49,8 +49,23 @@ Rules:
 - One profile per user
 - Delete is blocked when the user has existing invoices or subscriptions
 - Admin create is used when onboarding customers who cannot self-register
+- **Custom data** (encrypted key/value map) is admin-only for external-system linkage. It is returned on `GET /admin/billing/customer-profiles/{id}` and managed via nested `/data` endpoints. It is **never** exposed on customer self-service `GET/POST /customer-profile`.
 
 **Frontend route:** `/administration/customer-profiles`
+
+## Custom Data (Admin Only)
+
+Operators can attach arbitrary string key/value pairs to a billing profile for integrations (ERP ids, CRM references, and similar).
+
+| Method | Path                                               | Purpose                                 |
+| ------ | -------------------------------------------------- | --------------------------------------- |
+| POST   | `/admin/billing/customer-profiles/{id}/data`       | Add a key (409 if it already exists)    |
+| POST   | `/admin/billing/customer-profiles/{id}/data/{key}` | Update an existing key (404 if missing) |
+| DELETE | `/admin/billing/customer-profiles/{id}/data/{key}` | Delete an existing key (404 if missing) |
+
+Storage: `custom_data` column on `billing_customer_profiles`, encrypted at rest with AES-256-GCM (`ENCRYPTION_KEY`) via `createJsonAes256GcmTransformer` (ciphertext stored as `text`, not PostgreSQL `jsonb`).
+
+Webhook events (values never included): `customer_profile.custom_data_added`, `customer_profile.custom_data_updated`, `customer_profile.custom_data_deleted`. See [Webhooks](./webhooks.md).
 
 ## Validation Flow
 
@@ -73,7 +88,7 @@ Project bill-time (`POST /admin/billing/projects/{projectId}/bill-time`) also re
 
 Profiles are stored in `billing_customer_profiles` in PostgreSQL, scoped by tenant through the user's `tenant_id`.
 
-Sensitive fields follow standard application encryption and access controls. Stripe customer ids are stored for payment orchestration only.
+Sensitive fields follow standard application encryption and access controls. Stripe customer ids are stored for payment orchestration only. Admin custom data is encrypted at rest with AES-256-GCM and omitted from customer-facing profile responses.
 
 ## User Billing Day
 

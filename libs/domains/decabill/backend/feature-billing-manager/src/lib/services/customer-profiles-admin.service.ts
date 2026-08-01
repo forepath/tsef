@@ -1,5 +1,5 @@
 import { UsersRepository } from '@forepath/identity/backend';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 
 import type {
   AdminCustomerProfileDetailDto,
@@ -11,6 +11,7 @@ import type { CustomerProfileDto } from '../dto/customer-profile.dto';
 import type { CustomerProfileResponseDto } from '../dto/customer-profile-response.dto';
 import type { CustomerTrustScoreResponseDto } from '../dto/customer-trust-score.dto';
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
+import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { CustomerProfilesRepository } from '../repositories/customer-profiles.repository';
 import { InvoicesRepository } from '../repositories/invoices.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
@@ -27,6 +28,7 @@ export class CustomerProfilesAdminService {
     private readonly invoicesRepository: InvoicesRepository,
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly customerTrustScoreService: CustomerTrustScoreService,
+    private readonly billingNotificationPublisher: BillingNotificationPublisher,
   ) {}
 
   async list(limit: number, offset: number): Promise<PaginatedAdminCustomerProfilesResponseDto> {
@@ -61,14 +63,7 @@ export class CustomerProfilesAdminService {
     );
     const user = await this.usersRepository.findByIdForTenant(profile.userId);
 
-    return {
-      ...this.mapResponse(profile),
-      userEmail: user?.email,
-      isComplete: this.customerProfilesService.isProfileComplete(profile),
-      trustScore: profile.trustScore,
-      trustLevel: profile.trustLevel,
-      trustScoreUpdatedAt: profile.trustScoreUpdatedAt,
-    };
+    return this.mapDetail(profile, user?.email);
   }
 
   async getTrustScore(id: string): Promise<CustomerTrustScoreResponseDto> {
@@ -146,10 +141,103 @@ export class CustomerProfilesAdminService {
     await this.customerProfilesRepository.delete(id);
   }
 
+  async addCustomData(id: string, key: string, value: string): Promise<AdminCustomerProfileDetailDto> {
+    this.assertCustomDataKey(key);
+    const profile = await this.customerProfilesRepository.findByIdOrThrow(id);
+    const customData = this.normalizeCustomData(profile.customData);
+
+    if (Object.prototype.hasOwnProperty.call(customData, key)) {
+      throw new ConflictException('Custom data key already exists');
+    }
+
+    const next = { ...customData, [key]: value };
+    const updated = await this.customerProfilesRepository.update(id, { customData: next });
+    const user = await this.usersRepository.findByIdForTenant(updated.userId);
+
+    this.billingNotificationPublisher.publish(
+      'customer_profile.custom_data_added',
+      { profileId: updated.id, userId: updated.userId, key },
+      updated.userId,
+    );
+
+    return this.mapDetail(updated, user?.email);
+  }
+
+  async updateCustomData(id: string, key: string, value: string): Promise<AdminCustomerProfileDetailDto> {
+    this.assertCustomDataKey(key);
+    const profile = await this.customerProfilesRepository.findByIdOrThrow(id);
+    const customData = this.normalizeCustomData(profile.customData);
+
+    if (!Object.prototype.hasOwnProperty.call(customData, key)) {
+      throw new NotFoundException('Custom data key not found');
+    }
+
+    const next = { ...customData, [key]: value };
+    const updated = await this.customerProfilesRepository.update(id, { customData: next });
+    const user = await this.usersRepository.findByIdForTenant(updated.userId);
+
+    this.billingNotificationPublisher.publish(
+      'customer_profile.custom_data_updated',
+      { profileId: updated.id, userId: updated.userId, key },
+      updated.userId,
+    );
+
+    return this.mapDetail(updated, user?.email);
+  }
+
+  async deleteCustomData(id: string, key: string): Promise<AdminCustomerProfileDetailDto> {
+    this.assertCustomDataKey(key);
+    const profile = await this.customerProfilesRepository.findByIdOrThrow(id);
+    const customData = this.normalizeCustomData(profile.customData);
+
+    if (!Object.prototype.hasOwnProperty.call(customData, key)) {
+      throw new NotFoundException('Custom data key not found');
+    }
+
+    const next = { ...customData };
+
+    delete next[key];
+
+    const updated = await this.customerProfilesRepository.update(id, { customData: next });
+    const user = await this.usersRepository.findByIdForTenant(updated.userId);
+
+    this.billingNotificationPublisher.publish(
+      'customer_profile.custom_data_deleted',
+      { profileId: updated.id, userId: updated.userId, key },
+      updated.userId,
+    );
+
+    return this.mapDetail(updated, user?.email);
+  }
+
+  private assertCustomDataKey(key: string): void {
+    if (!key || key.length > 64 || !/^[a-zA-Z0-9._-]+$/.test(key)) {
+      throw new BadRequestException('Invalid custom data key');
+    }
+  }
+
   private sanitizeUpdate(dto: CustomerProfileDto): Partial<CustomerProfileEntity> {
     const { ...fields } = dto;
 
     return fields;
+  }
+
+  private normalizeCustomData(value: Record<string, string> | null | undefined): Record<string, string> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return {};
+    }
+
+    const result: Record<string, string> = {};
+
+    for (const [key, entry] of Object.entries(value)) {
+      if (typeof entry === 'string') {
+        result[key] = entry;
+      } else if (entry != null) {
+        result[key] = String(entry);
+      }
+    }
+
+    return result;
   }
 
   private mapListItem(profile: CustomerProfileEntity, userEmail?: string): AdminCustomerProfileListItemDto {
@@ -197,6 +285,18 @@ export class CustomerProfilesAdminService {
       hasPaymentMethodOnFile: Boolean(row.defaultPaymentMethodExternalId),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+    };
+  }
+
+  private mapDetail(profile: CustomerProfileEntity, userEmail?: string): AdminCustomerProfileDetailDto {
+    return {
+      ...this.mapResponse(profile),
+      userEmail,
+      isComplete: this.customerProfilesService.isProfileComplete(profile),
+      trustScore: profile.trustScore,
+      trustLevel: profile.trustLevel,
+      trustScoreUpdatedAt: profile.trustScoreUpdatedAt,
+      customData: this.normalizeCustomData(profile.customData),
     };
   }
 

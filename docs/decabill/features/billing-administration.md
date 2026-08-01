@@ -93,14 +93,17 @@ Customer billing data is stored in `billing_customer_profiles` (one profile per 
 | Method | Path                                                          | Purpose                                                |
 | ------ | ------------------------------------------------------------- | ------------------------------------------------------ |
 | GET    | `/admin/billing/customer-profiles`                            | Paginated list                                         |
-| GET    | `/admin/billing/customer-profiles/{id}`                       | Full profile detail                                    |
+| GET    | `/admin/billing/customer-profiles/{id}`                       | Full profile detail (includes encrypted `customData`)  |
+| POST   | `/admin/billing/customer-profiles/{id}/data`                  | Add custom data key (409 if exists)                    |
+| POST   | `/admin/billing/customer-profiles/{id}/data/{key}`            | Update custom data value (404 if missing)              |
+| DELETE | `/admin/billing/customer-profiles/{id}/data/{key}`            | Delete custom data key (404 if missing)                |
 | GET    | `/admin/billing/customer-profiles/{id}/trust-score`           | Recomputed trust score detail                          |
 | POST   | `/admin/billing/customer-profiles/{id}/trust-score/recompute` | Force trust recompute                                  |
 | POST   | `/admin/billing/customer-profiles`                            | Create for user                                        |
 | POST   | `/admin/billing/customer-profiles/{id}`                       | Update                                                 |
 | DELETE | `/admin/billing/customer-profiles/{id}`                       | Delete (blocked if user has invoices or subscriptions) |
 
-Self-service `GET/POST /customer-profile` remains for end users. See [Customer Profiles](./customer-profiles.md).
+Self-service `GET/POST /customer-profile` remains for end users and **never** returns `customData`. See [Customer Profiles](./customer-profiles.md).
 Trust ranking remains admin-only. See [Customer Trust Score](./customer-trust-score.md).
 
 **Frontend:** `/administration/customer-profiles` in the billing console.

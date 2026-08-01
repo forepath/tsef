@@ -1,6 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 
 import type {
+  AdminCustomerProfileDetail,
   AdminCustomerProfileListItem,
   CustomerTrustScoreDetail,
   CreateAdminCustomerProfileDto,
@@ -84,5 +85,18 @@ export const recomputeAdminCustomerProfileTrustScoreSuccess = createAction(
 );
 export const recomputeAdminCustomerProfileTrustScoreFailure = createAction(
   '[AdminCustomerProfiles] Recompute Trust Score Failure',
+  props<{ error: string }>(),
+);
+
+export const saveAdminCustomerProfileCustomData = createAction(
+  '[AdminCustomerProfiles] Save Custom Data',
+  props<{ id: string; original: Record<string, string>; next: Record<string, string> }>(),
+);
+export const saveAdminCustomerProfileCustomDataSuccess = createAction(
+  '[AdminCustomerProfiles] Save Custom Data Success',
+  props<{ detail: AdminCustomerProfileDetail }>(),
+);
+export const saveAdminCustomerProfileCustomDataFailure = createAction(
+  '[AdminCustomerProfiles] Save Custom Data Failure',
   props<{ error: string }>(),
 );

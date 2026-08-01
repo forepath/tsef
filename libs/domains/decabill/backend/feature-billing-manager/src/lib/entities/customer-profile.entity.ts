@@ -1,3 +1,4 @@
+import { createJsonAes256GcmTransformer } from '@forepath/shared/backend';
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { CustomerType } from '../constants/customer-type.constants';
@@ -92,6 +93,15 @@ export class CustomerProfileEntity {
 
   @Column({ type: 'timestamp', nullable: true, name: 'trust_score_updated_at' })
   trustScoreUpdatedAt?: Date | null;
+
+  /** Admin-only key/value map for external-system linkage; encrypted at rest via AES-256-GCM. */
+  @Column({
+    type: 'text',
+    name: 'custom_data',
+    nullable: true,
+    transformer: createJsonAes256GcmTransformer(),
+  })
+  customData!: Record<string, string>;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

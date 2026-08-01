@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 
 import { CustomerProfilesAdminService } from './customer-profiles-admin.service';
 
@@ -25,6 +25,7 @@ describe('CustomerProfilesAdminService', () => {
     getSummaryForProfileId: jest.fn(),
     recomputeForProfileId: jest.fn(),
   };
+  const billingNotificationPublisher = { publish: jest.fn() };
 
   const service = new CustomerProfilesAdminService(
     customerProfilesRepository as never,
@@ -33,6 +34,7 @@ describe('CustomerProfilesAdminService', () => {
     invoicesRepository as never,
     subscriptionsRepository as never,
     customerTrustScoreService as never,
+    billingNotificationPublisher as never,
   );
 
   const profile = {
@@ -41,6 +43,7 @@ describe('CustomerProfilesAdminService', () => {
     firstName: 'Jane',
     lastName: 'Doe',
     email: 'jane@example.com',
+    customData: {} as Record<string, string>,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -102,21 +105,26 @@ describe('CustomerProfilesAdminService', () => {
     expect(result.items).toHaveLength(1);
     expect(result.items[0].userEmail).toBe('user@example.com');
     expect(result.total).toBe(1);
+    expect(result.items[0]).not.toHaveProperty('customData');
   });
 
-  it('getById returns profile with completeness', async () => {
-    customerProfilesRepository.findByIdOrThrow.mockResolvedValue(profile);
+  it('getById returns profile with completeness and customData', async () => {
+    customerProfilesRepository.findByIdOrThrow.mockResolvedValue({
+      ...profile,
+      customData: { erpId: 'ERP-1' },
+    });
 
     const result = await service.getById('profile-1');
 
     expect(result.id).toBe('profile-1');
     expect(result.isComplete).toBe(true);
     expect(result.userEmail).toBe('user@example.com');
+    expect(result.customData).toEqual({ erpId: 'ERP-1' });
   });
 
-  it('create persists profile for valid user', async () => {
+  it('create persists profile for valid user without customData on customer response', async () => {
     customerProfilesRepository.findByUserId.mockResolvedValue(null);
-    customerProfilesService.upsert.mockResolvedValue(profile);
+    customerProfilesService.upsert.mockResolvedValue({ ...profile, customData: { secret: 'x' } });
 
     const result = await service.create({
       userId: 'user-1',
@@ -126,6 +134,7 @@ describe('CustomerProfilesAdminService', () => {
     });
 
     expect(result.userId).toBe('user-1');
+    expect(result).not.toHaveProperty('customData');
     expect(customerProfilesService.upsert).toHaveBeenCalledWith(
       'user-1',
       expect.objectContaining({
@@ -136,9 +145,9 @@ describe('CustomerProfilesAdminService', () => {
     );
   });
 
-  it('update persists profile changes', async () => {
+  it('update persists profile changes without customData on customer response', async () => {
     customerProfilesRepository.findByIdOrThrow.mockResolvedValue(profile);
-    customerProfilesService.upsert.mockResolvedValue({ ...profile, country: 'DE' });
+    customerProfilesService.upsert.mockResolvedValue({ ...profile, country: 'DE', customData: { secret: 'x' } });
 
     const result = await service.update('profile-1', {
       firstName: 'Jane',
@@ -148,6 +157,7 @@ describe('CustomerProfilesAdminService', () => {
     } as never);
 
     expect(result.country).toBe('DE');
+    expect(result).not.toHaveProperty('customData');
     expect(customerProfilesService.upsert).toHaveBeenCalledWith('user-1', expect.objectContaining({ country: 'DE' }));
   });
 
@@ -185,5 +195,92 @@ describe('CustomerProfilesAdminService', () => {
     expect(result.profileId).toBe('profile-1');
     expect(result.score).toBe(118);
     expect(customerTrustScoreService.recomputeForProfileId).toHaveBeenCalledWith('profile-1');
+  });
+
+  it('addCustomData stores a new key and publishes webhook without value', async () => {
+    customerProfilesRepository.findByIdOrThrow.mockResolvedValue({ ...profile, customData: {} });
+    customerProfilesRepository.update.mockResolvedValue({
+      ...profile,
+      customData: { erpId: 'ERP-1' },
+    });
+
+    const result = await service.addCustomData('profile-1', 'erpId', 'ERP-1');
+
+    expect(result.customData).toEqual({ erpId: 'ERP-1' });
+    expect(customerProfilesRepository.update).toHaveBeenCalledWith('profile-1', {
+      customData: { erpId: 'ERP-1' },
+    });
+    expect(billingNotificationPublisher.publish).toHaveBeenCalledWith(
+      'customer_profile.custom_data_added',
+      { profileId: 'profile-1', userId: 'user-1', key: 'erpId' },
+      'user-1',
+    );
+    expect(JSON.stringify(billingNotificationPublisher.publish.mock.calls[0][1])).not.toContain('ERP-1');
+  });
+
+  it('addCustomData rejects duplicate keys', async () => {
+    customerProfilesRepository.findByIdOrThrow.mockResolvedValue({
+      ...profile,
+      customData: { erpId: 'ERP-1' },
+    });
+
+    await expect(service.addCustomData('profile-1', 'erpId', 'ERP-2')).rejects.toThrow(ConflictException);
+    expect(customerProfilesRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('updateCustomData updates an existing key', async () => {
+    customerProfilesRepository.findByIdOrThrow.mockResolvedValue({
+      ...profile,
+      customData: { erpId: 'ERP-1' },
+    });
+    customerProfilesRepository.update.mockResolvedValue({
+      ...profile,
+      customData: { erpId: 'ERP-2' },
+    });
+
+    const result = await service.updateCustomData('profile-1', 'erpId', 'ERP-2');
+
+    expect(result.customData).toEqual({ erpId: 'ERP-2' });
+    expect(billingNotificationPublisher.publish).toHaveBeenCalledWith(
+      'customer_profile.custom_data_updated',
+      { profileId: 'profile-1', userId: 'user-1', key: 'erpId' },
+      'user-1',
+    );
+  });
+
+  it('updateCustomData rejects missing keys', async () => {
+    customerProfilesRepository.findByIdOrThrow.mockResolvedValue({ ...profile, customData: {} });
+
+    await expect(service.updateCustomData('profile-1', 'missing', 'x')).rejects.toThrow(NotFoundException);
+  });
+
+  it('deleteCustomData removes an existing key', async () => {
+    customerProfilesRepository.findByIdOrThrow.mockResolvedValue({
+      ...profile,
+      customData: { erpId: 'ERP-1', other: 'y' },
+    });
+    customerProfilesRepository.update.mockResolvedValue({
+      ...profile,
+      customData: { other: 'y' },
+    });
+
+    const result = await service.deleteCustomData('profile-1', 'erpId');
+
+    expect(result.customData).toEqual({ other: 'y' });
+    expect(billingNotificationPublisher.publish).toHaveBeenCalledWith(
+      'customer_profile.custom_data_deleted',
+      { profileId: 'profile-1', userId: 'user-1', key: 'erpId' },
+      'user-1',
+    );
+  });
+
+  it('deleteCustomData rejects missing keys', async () => {
+    customerProfilesRepository.findByIdOrThrow.mockResolvedValue({ ...profile, customData: {} });
+
+    await expect(service.deleteCustomData('profile-1', 'missing')).rejects.toThrow(NotFoundException);
+  });
+
+  it('rejects invalid custom data keys', async () => {
+    await expect(service.addCustomData('profile-1', 'bad key!', 'x')).rejects.toThrow(BadRequestException);
   });
 });
