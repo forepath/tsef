@@ -646,6 +646,14 @@
         <source>Pricing</source>
         <target state="translated">Preise</target>
       </trans-unit>
+      <trans-unit id="featureDecabillPortal-githubAriaLabel" datatype="html">
+        <source>GitHub</source>
+        <target state="translated">GitHub</target>
+      </trans-unit>
+      <trans-unit id="featureDecabillPortal-githubTitle" datatype="html">
+        <source>View on GitHub</source>
+        <target state="translated">Auf GitHub ansehen</target>
+      </trans-unit>
       <trans-unit id="featureDecabillPortal-bookDemoButton" datatype="html">
         <source>Book a Demo</source>
         <target state="translated">Demo buchen</target>

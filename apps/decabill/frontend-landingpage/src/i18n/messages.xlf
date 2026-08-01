@@ -482,6 +482,12 @@
       <trans-unit id="featureDecabillPortal-navComparison" datatype="html">
         <source>Comparison</source>
         </trans-unit>
+      <trans-unit id="featureDecabillPortal-githubAriaLabel" datatype="html">
+        <source>GitHub</source>
+        </trans-unit>
+      <trans-unit id="featureDecabillPortal-githubTitle" datatype="html">
+        <source>View on GitHub</source>
+        </trans-unit>
       <trans-unit id="featureDecabillPortal-bookDemoButton" datatype="html">
         <source>Book a Demo</source>
         </trans-unit>
