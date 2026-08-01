@@ -1,6 +1,7 @@
 import type { AdminCustomerProfilesState } from './admin-customer-profiles.reducer';
 import {
   selectAdminCustomerProfiles,
+  selectAdminCustomerProfilesCustomDataSaving,
   selectAdminCustomerProfileTrustScoreDetail,
   selectAdminCustomerProfileTrustScoreLoading,
   selectAdminCustomerProfileTrustScoreRefreshing,
@@ -19,6 +20,7 @@ describe('adminCustomerProfilesSelectors', () => {
     creating: true,
     updating: true,
     deleting: true,
+    customDataSaving: true,
     trustScoreDetail: {
       profileId: 'p-1',
       userId: 'u-1',
@@ -48,6 +50,7 @@ describe('adminCustomerProfilesSelectors', () => {
     expect(selectAdminCustomerProfilesCreating(rootState as never)).toBe(true);
     expect(selectAdminCustomerProfilesUpdating(rootState as never)).toBe(true);
     expect(selectAdminCustomerProfilesDeleting(rootState as never)).toBe(true);
+    expect(selectAdminCustomerProfilesCustomDataSaving(rootState as never)).toBe(true);
   });
 
   it('selects error', () => {

@@ -242,6 +242,42 @@
       <trans-unit id="featureAdminProfiles-trustButtonTitle" datatype="html">
         <source>View trust score</source>
         </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataButtonTitle" datatype="html">
+        <source>Edit custom data</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataTitle" datatype="html">
+        <source>Custom data</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataHelp" datatype="html">
+        <source>Admin-only key/value pairs for linking this customer to external systems. Values are stored encrypted.</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataFor" datatype="html">
+        <source>Custom data for</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataEmpty" datatype="html">
+        <source>No custom data entries yet.</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataKey" datatype="html">
+        <source>Key</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataValue" datatype="html">
+        <source>Value</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataKeyPlaceholder" datatype="html">
+        <source>Key</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataValuePlaceholder" datatype="html">
+        <source>Value</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataRemove" datatype="html">
+        <source>Remove entry</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataAdd" datatype="html">
+        <source>Add line</source>
+        </trans-unit>
+      <trans-unit id="featureAdminProfiles-customDataSave" datatype="html">
+        <source>Save</source>
+        </trans-unit>
       <trans-unit id="featureAdminProfiles-deleteButtonTitle" datatype="html">
         <source>Delete profile</source>
         </trans-unit>

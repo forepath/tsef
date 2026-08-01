@@ -13,6 +13,8 @@ import type {
   CustomerProfileResponse,
   ListParams,
   PaginatedAdminCustomerProfilesResponse,
+  AddCustomerProfileCustomDataDto,
+  UpdateCustomerProfileCustomDataDto,
 } from '../types/billing.types';
 
 @Injectable({
@@ -63,5 +65,26 @@ export class AdminCustomerProfilesService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/admin/billing/customer-profiles/${id}`);
+  }
+
+  addCustomData(id: string, dto: AddCustomerProfileCustomDataDto): Observable<AdminCustomerProfileDetail> {
+    return this.http.post<AdminCustomerProfileDetail>(`${this.apiUrl}/admin/billing/customer-profiles/${id}/data`, dto);
+  }
+
+  updateCustomData(
+    id: string,
+    key: string,
+    dto: UpdateCustomerProfileCustomDataDto,
+  ): Observable<AdminCustomerProfileDetail> {
+    return this.http.post<AdminCustomerProfileDetail>(
+      `${this.apiUrl}/admin/billing/customer-profiles/${id}/data/${encodeURIComponent(key)}`,
+      dto,
+    );
+  }
+
+  deleteCustomData(id: string, key: string): Observable<AdminCustomerProfileDetail> {
+    return this.http.delete<AdminCustomerProfileDetail>(
+      `${this.apiUrl}/admin/billing/customer-profiles/${id}/data/${encodeURIComponent(key)}`,
+    );
   }
 }

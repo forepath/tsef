@@ -106,4 +106,39 @@ describe('AdminCustomerProfilesService', () => {
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
   });
+
+  it('adds custom data', (done) => {
+    service.addCustomData('profile-1', { key: 'erpId', value: 'ERP-1' }).subscribe((res) => {
+      expect(res.customData).toEqual({ erpId: 'ERP-1' });
+      done();
+    });
+    const req = httpMock.expectOne(`${apiUrl}/admin/billing/customer-profiles/profile-1/data`);
+
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ key: 'erpId', value: 'ERP-1' });
+    req.flush({ id: 'profile-1', userId: 'user-1', isComplete: true, customData: { erpId: 'ERP-1' } });
+  });
+
+  it('updates custom data', (done) => {
+    service.updateCustomData('profile-1', 'erpId', { value: 'ERP-2' }).subscribe((res) => {
+      expect(res.customData).toEqual({ erpId: 'ERP-2' });
+      done();
+    });
+    const req = httpMock.expectOne(`${apiUrl}/admin/billing/customer-profiles/profile-1/data/erpId`);
+
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ value: 'ERP-2' });
+    req.flush({ id: 'profile-1', userId: 'user-1', isComplete: true, customData: { erpId: 'ERP-2' } });
+  });
+
+  it('deletes custom data', (done) => {
+    service.deleteCustomData('profile-1', 'erpId').subscribe((res) => {
+      expect(res.customData).toEqual({});
+      done();
+    });
+    const req = httpMock.expectOne(`${apiUrl}/admin/billing/customer-profiles/profile-1/data/erpId`);
+
+    expect(req.request.method).toBe('DELETE');
+    req.flush({ id: 'profile-1', userId: 'user-1', isComplete: true, customData: {} });
+  });
 });

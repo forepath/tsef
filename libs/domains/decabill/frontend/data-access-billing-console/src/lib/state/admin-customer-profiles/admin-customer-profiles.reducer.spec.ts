@@ -15,6 +15,9 @@ import {
   recomputeAdminCustomerProfileTrustScore,
   recomputeAdminCustomerProfileTrustScoreFailure,
   recomputeAdminCustomerProfileTrustScoreSuccess,
+  saveAdminCustomerProfileCustomData,
+  saveAdminCustomerProfileCustomDataFailure,
+  saveAdminCustomerProfileCustomDataSuccess,
   updateAdminCustomerProfile,
   updateAdminCustomerProfileFailure,
   updateAdminCustomerProfileSuccess,
@@ -202,5 +205,38 @@ describe('adminCustomerProfilesReducer', () => {
 
     expect(loadErrorState.error).toBe('Trust load failed');
     expect(recomputeErrorState.error).toBe('Trust recompute failed');
+  });
+
+  it('tracks custom data saving lifecycle', () => {
+    const savingState = adminCustomerProfilesReducer(
+      initialAdminCustomerProfilesState,
+      saveAdminCustomerProfileCustomData({
+        id: 'p-1',
+        original: {},
+        next: { erpId: 'ERP-1' },
+      }),
+    );
+    const successState = adminCustomerProfilesReducer(
+      savingState,
+      saveAdminCustomerProfileCustomDataSuccess({
+        detail: {
+          id: 'p-1',
+          userId: 'u-1',
+          isComplete: true,
+          customData: { erpId: 'ERP-1' },
+          createdAt: '',
+          updatedAt: '',
+        },
+      }),
+    );
+    const failureState = adminCustomerProfilesReducer(
+      savingState,
+      saveAdminCustomerProfileCustomDataFailure({ error: 'Save failed' }),
+    );
+
+    expect(savingState.customDataSaving).toBe(true);
+    expect(successState.customDataSaving).toBe(false);
+    expect(failureState.customDataSaving).toBe(false);
+    expect(failureState.error).toBe('Save failed');
   });
 });

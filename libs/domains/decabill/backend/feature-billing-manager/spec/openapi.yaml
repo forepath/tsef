@@ -3495,6 +3495,99 @@ paths:
       responses:
         '204':
           description: Profile deleted
+  /admin/billing/customer-profiles/{id}/data:
+    post:
+      tags: [Admin Billing]
+      summary: Add custom data key on customer billing profile (admin only)
+      description: >
+        Adds a new key/value pair to the encrypted admin-only custom data map.
+        Fails with 409 if the key already exists. Values are never included in webhook payloads.
+      operationId: addAdminCustomerProfileCustomData
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCustomerProfileCustomDataDto'
+      responses:
+        '200':
+          description: Updated admin profile detail including customData
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCustomerProfileDetailResponse'
+        '409':
+          description: Custom data key already exists
+  /admin/billing/customer-profiles/{id}/data/{key}:
+    post:
+      tags: [Admin Billing]
+      summary: Update custom data value on customer billing profile (admin only)
+      description: >
+        Updates an existing key in the encrypted admin-only custom data map.
+        Fails with 404 if the key does not exist. Values are never included in webhook payloads.
+      operationId: updateAdminCustomerProfileCustomData
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+            pattern: '^[a-zA-Z0-9._-]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerProfileCustomDataDto'
+      responses:
+        '200':
+          description: Updated admin profile detail including customData
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCustomerProfileDetailResponse'
+        '404':
+          description: Custom data key not found
+    delete:
+      tags: [Admin Billing]
+      summary: Delete custom data key on customer billing profile (admin only)
+      description: >
+        Removes an existing key from the encrypted admin-only custom data map.
+        Fails with 404 if the key does not exist. Values are never included in webhook payloads.
+      operationId: deleteAdminCustomerProfileCustomData
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+            pattern: '^[a-zA-Z0-9._-]+$'
+      responses:
+        '200':
+          description: Updated admin profile detail including customData
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCustomerProfileDetailResponse'
+        '404':
+          description: Custom data key not found
   /admin/billing/customer-profiles/{id}/trust-score:
     get:
       tags: [Admin Billing]
@@ -6559,6 +6652,33 @@ components:
               { type: string, enum: [green, yellow, red], nullable: true }
             trustScoreUpdatedAt:
               { type: string, format: date-time, nullable: true }
+            customData:
+              type: object
+              description: >
+                Admin-only encrypted custom key/value map for external-system linkage.
+                Never returned on customer self-service profile endpoints.
+              additionalProperties:
+                type: string
+              default: {}
+    AddCustomerProfileCustomDataDto:
+      type: object
+      required: [key, value]
+      properties:
+        key:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: '^[a-zA-Z0-9._-]+$'
+        value:
+          type: string
+          maxLength: 4096
+    UpdateCustomerProfileCustomDataDto:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: string
+          maxLength: 4096
     CustomerTrustScoreFactor:
       type: object
       properties:

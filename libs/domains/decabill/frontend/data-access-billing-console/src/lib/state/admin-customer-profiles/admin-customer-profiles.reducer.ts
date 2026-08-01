@@ -23,6 +23,9 @@ import {
   recomputeAdminCustomerProfileTrustScore,
   recomputeAdminCustomerProfileTrustScoreFailure,
   recomputeAdminCustomerProfileTrustScoreSuccess,
+  saveAdminCustomerProfileCustomData,
+  saveAdminCustomerProfileCustomDataFailure,
+  saveAdminCustomerProfileCustomDataSuccess,
   updateAdminCustomerProfile,
   updateAdminCustomerProfileFailure,
   updateAdminCustomerProfileSuccess,
@@ -34,6 +37,7 @@ export interface AdminCustomerProfilesState {
   creating: boolean;
   updating: boolean;
   deleting: boolean;
+  customDataSaving: boolean;
   trustScoreDetail: CustomerTrustScoreDetail | null;
   trustScoreLoading: boolean;
   trustScoreRefreshing: boolean;
@@ -46,6 +50,7 @@ export const initialAdminCustomerProfilesState: AdminCustomerProfilesState = {
   creating: false,
   updating: false,
   deleting: false,
+  customDataSaving: false,
   trustScoreDetail: null,
   trustScoreLoading: false,
   trustScoreRefreshing: false,
@@ -184,6 +189,21 @@ export const adminCustomerProfilesReducer = createReducer(
   on(recomputeAdminCustomerProfileTrustScoreFailure, (state, { error }) => ({
     ...state,
     trustScoreRefreshing: false,
+    error,
+  })),
+  on(saveAdminCustomerProfileCustomData, (state) => ({
+    ...state,
+    customDataSaving: true,
+    error: null,
+  })),
+  on(saveAdminCustomerProfileCustomDataSuccess, (state) => ({
+    ...state,
+    customDataSaving: false,
+    error: null,
+  })),
+  on(saveAdminCustomerProfileCustomDataFailure, (state, { error }) => ({
+    ...state,
+    customDataSaving: false,
     error,
   })),
 );

@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, IsUUID, Length } from 'class-validator';
+import { IsString, IsUUID, Length, Matches, MaxLength } from 'class-validator';
 
 import type { CustomerTrustLevel } from '../trust-score/trust-score.types';
 
@@ -7,6 +7,25 @@ import { CustomerProfileDto } from './customer-profile.dto';
 export class CreateAdminCustomerProfileDto extends CustomerProfileDto {
   @IsUUID('4', { message: 'User ID must be a valid UUID' })
   userId!: string;
+}
+
+export class AddCustomerProfileCustomDataDto {
+  @IsString()
+  @Length(1, 64)
+  @Matches(/^[a-zA-Z0-9._-]+$/, {
+    message: 'Key must contain only letters, numbers, dots, underscores, or hyphens',
+  })
+  key!: string;
+
+  @IsString()
+  @MaxLength(4096)
+  value!: string;
+}
+
+export class UpdateCustomerProfileCustomDataDto {
+  @IsString()
+  @MaxLength(4096)
+  value!: string;
 }
 
 export class AdminCustomerProfileListItemDto {
@@ -39,6 +58,7 @@ export class AdminCustomerProfileDetailDto extends CustomerProfileDto {
   trustScore?: number | null;
   trustLevel?: CustomerTrustLevel | null;
   trustScoreUpdatedAt?: Date | null;
+  customData!: Record<string, string>;
   createdAt!: Date;
   updatedAt!: Date;
 }

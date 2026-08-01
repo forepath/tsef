@@ -1,8 +1,9 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { catchError, concatMap, from, map, of, switchMap, toArray } from 'rxjs';
 
 import { AdminCustomerProfilesService } from '../../services/admin-customer-profiles.service';
+import type { AdminCustomerProfileDetail } from '../../types/billing.types';
 
 import {
   createAdminCustomerProfile,
@@ -21,6 +22,9 @@ import {
   recomputeAdminCustomerProfileTrustScore,
   recomputeAdminCustomerProfileTrustScoreFailure,
   recomputeAdminCustomerProfileTrustScoreSuccess,
+  saveAdminCustomerProfileCustomData,
+  saveAdminCustomerProfileCustomDataFailure,
+  saveAdminCustomerProfileCustomDataSuccess,
   updateAdminCustomerProfile,
   updateAdminCustomerProfileFailure,
   updateAdminCustomerProfileSuccess,
@@ -37,6 +41,36 @@ function normalizeError(error: unknown): string {
 }
 
 const BATCH_SIZE = 10;
+
+type CustomDataMutation =
+  | { type: 'add'; key: string; value: string }
+  | { type: 'update'; key: string; value: string }
+  | { type: 'delete'; key: string };
+
+function buildCustomDataMutations(
+  original: Record<string, string>,
+  next: Record<string, string>,
+): CustomDataMutation[] {
+  const mutations: CustomDataMutation[] = [];
+  const originalKeys = new Set(Object.keys(original));
+  const nextKeys = new Set(Object.keys(next));
+
+  for (const key of nextKeys) {
+    if (!originalKeys.has(key)) {
+      mutations.push({ type: 'add', key, value: next[key] });
+    } else if (original[key] !== next[key]) {
+      mutations.push({ type: 'update', key, value: next[key] });
+    }
+  }
+
+  for (const key of originalKeys) {
+    if (!nextKeys.has(key)) {
+      mutations.push({ type: 'delete', key });
+    }
+  }
+
+  return mutations;
+}
 
 export const loadAdminCustomerProfiles$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminCustomerProfilesService)) =>
@@ -155,6 +189,45 @@ export const recomputeAdminCustomerProfileTrustScore$ = createEffect(
           catchError((error) => of(recomputeAdminCustomerProfileTrustScoreFailure({ error: normalizeError(error) }))),
         ),
       ),
+    ),
+  { functional: true },
+);
+
+export const saveAdminCustomerProfileCustomData$ = createEffect(
+  (actions$ = inject(Actions), service = inject(AdminCustomerProfilesService)) =>
+    actions$.pipe(
+      ofType(saveAdminCustomerProfileCustomData),
+      switchMap(({ id, original, next }) => {
+        const mutations = buildCustomDataMutations(original, next);
+
+        if (mutations.length === 0) {
+          return service.getById(id).pipe(
+            map((detail) => saveAdminCustomerProfileCustomDataSuccess({ detail })),
+            catchError((error) => of(saveAdminCustomerProfileCustomDataFailure({ error: normalizeError(error) }))),
+          );
+        }
+
+        return from(mutations).pipe(
+          concatMap((mutation) => {
+            if (mutation.type === 'add') {
+              return service.addCustomData(id, { key: mutation.key, value: mutation.value });
+            }
+
+            if (mutation.type === 'update') {
+              return service.updateCustomData(id, mutation.key, { value: mutation.value });
+            }
+
+            return service.deleteCustomData(id, mutation.key);
+          }),
+          toArray(),
+          map((results: AdminCustomerProfileDetail[]) => {
+            const detail = results[results.length - 1];
+
+            return saveAdminCustomerProfileCustomDataSuccess({ detail });
+          }),
+          catchError((error) => of(saveAdminCustomerProfileCustomDataFailure({ error: normalizeError(error) }))),
+        );
+      }),
     ),
   { functional: true },
 );

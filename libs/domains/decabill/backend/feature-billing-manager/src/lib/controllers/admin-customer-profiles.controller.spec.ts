@@ -11,6 +11,9 @@ describe('AdminCustomerProfilesController', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    addCustomData: jest.fn(),
+    updateCustomData: jest.fn(),
+    deleteCustomData: jest.fn(),
   };
   const controller = new AdminCustomerProfilesController(customerProfilesAdminService as never);
 
@@ -36,7 +39,12 @@ describe('AdminCustomerProfilesController', () => {
   });
 
   it('get delegates to admin service', async () => {
-    customerProfilesAdminService.getById.mockResolvedValue({ id: 'profile-1', userId: 'user-1', isComplete: true });
+    customerProfilesAdminService.getById.mockResolvedValue({
+      id: 'profile-1',
+      userId: 'user-1',
+      isComplete: true,
+      customData: {},
+    });
 
     const result = await controller.get('profile-1');
 
@@ -67,5 +75,41 @@ describe('AdminCustomerProfilesController', () => {
     await controller.delete('profile-1');
 
     expect(customerProfilesAdminService.delete).toHaveBeenCalledWith('profile-1');
+  });
+
+  it('addCustomData delegates to admin service', async () => {
+    const dto = { key: 'erpId', value: 'ERP-1' };
+
+    customerProfilesAdminService.addCustomData.mockResolvedValue({
+      id: 'profile-1',
+      customData: { erpId: 'ERP-1' },
+    });
+
+    const result = await controller.addCustomData('profile-1', dto);
+
+    expect(result.customData).toEqual({ erpId: 'ERP-1' });
+    expect(customerProfilesAdminService.addCustomData).toHaveBeenCalledWith('profile-1', 'erpId', 'ERP-1');
+  });
+
+  it('updateCustomData delegates to admin service', async () => {
+    customerProfilesAdminService.updateCustomData.mockResolvedValue({
+      id: 'profile-1',
+      customData: { erpId: 'ERP-2' },
+    });
+
+    await controller.updateCustomData('profile-1', 'erpId', { value: 'ERP-2' });
+
+    expect(customerProfilesAdminService.updateCustomData).toHaveBeenCalledWith('profile-1', 'erpId', 'ERP-2');
+  });
+
+  it('deleteCustomData delegates to admin service', async () => {
+    customerProfilesAdminService.deleteCustomData.mockResolvedValue({
+      id: 'profile-1',
+      customData: {},
+    });
+
+    await controller.deleteCustomData('profile-1', 'erpId');
+
+    expect(customerProfilesAdminService.deleteCustomData).toHaveBeenCalledWith('profile-1', 'erpId');
   });
 });
