@@ -6,6 +6,6 @@ describe('IDENTITY_PAT_SCOPES', () => {
   });
 
   it('matches the expected shared catalog', () => {
-    expect(IDENTITY_PAT_SCOPES).toEqual(['users:admin', 'webhooks:admin']);
+    expect(IDENTITY_PAT_SCOPES).toEqual(['users:admin', 'webhooks:admin', 'updates:admin']);
   });
 });

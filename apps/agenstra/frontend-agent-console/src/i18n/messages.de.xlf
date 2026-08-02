@@ -5264,6 +5264,250 @@
         <source>Enabled</source>
         <target>Aktiviert</target>
       </trans-unit>
+      <trans-unit id="featureUpdates-pageTitle" datatype="html">
+        <source>Updates</source>
+        <target>Updates</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-title" datatype="html">
+        <source>Updates</source>
+        <target>Updates</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-checkNow" datatype="html">
+        <source>Check now</source>
+        <target>Jetzt prüfen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-loading" datatype="html">
+        <source>Loading updates...</source>
+        <target>Updates werden geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-empty" datatype="html">
+        <source>No update information available.</source>
+        <target>Keine Update-Informationen verfügbar.</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-checkInProgress" datatype="html">
+        <source>Checking for updates...</source>
+        <target>Updates werden geprüft…</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-statusUpdateAvailable" datatype="html">
+        <source>Update available</source>
+        <target>Update verfügbar</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-statusUpToDate" datatype="html">
+        <source>Up to date</source>
+        <target>Aktuell</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-statusUnknown" datatype="html">
+        <source>Unknown</source>
+        <target>Unbekannt</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-installedVersion" datatype="html">
+        <source>Installed version</source>
+        <target>Installierte Version</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-latestVersion" datatype="html">
+        <source>Latest version</source>
+        <target>Neueste Version</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-viewRelease" datatype="html">
+        <source>View release</source>
+        <target>Release anzeigen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-frontendVersion" datatype="html">
+        <source>Frontend version</source>
+        <target>Frontend-Version</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-lastCheck" datatype="html">
+        <source>Last check</source>
+        <target>Letzte Prüfung</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-instanceCount" datatype="html">
+        <source>Instances</source>
+        <target>Instanzen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-outdatedInstances" datatype="html">
+        <source>Outdated instances</source>
+        <target>Veraltete Instanzen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-instancesTitle" datatype="html">
+        <source>Service instances</source>
+        <target>Service-Instanzen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-mobilePanelInstances" datatype="html">
+        <source>Instances</source>
+        <target>Instanzen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-mobilePanelProduct" datatype="html">
+        <source>Product</source>
+        <target>Produkt</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-mobilePanelShared" datatype="html">
+        <source>Shared</source>
+        <target>Geteilt</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-searchInstancesPlaceholder" datatype="html">
+        <source>Search instances</source>
+        <target>Instanzen suchen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-searchProductChangelogPlaceholder" datatype="html">
+        <source>Search product changelog</source>
+        <target>Produkt-Changelog suchen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-searchSharedChangelogPlaceholder" datatype="html">
+        <source>Search shared changelog</source>
+        <target>Geteiltes Changelog suchen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-noInstances" datatype="html">
+        <source>No service instances reported yet.</source>
+        <target>Noch keine Service-Instanzen gemeldet.</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colInstanceId" datatype="html">
+        <source>Instance</source>
+        <target>Instanz</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colService" datatype="html">
+        <source>Service</source>
+        <target>Service</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colRole" datatype="html">
+        <source>Role</source>
+        <target>Rolle</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colHostname" datatype="html">
+        <source>Hostname</source>
+        <target>Hostname</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colInstalledVersion" datatype="html">
+        <source>Installed</source>
+        <target>Installiert</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colUpdateState" datatype="html">
+        <source>Update state</source>
+        <target>Update-Status</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colLastHeartbeat" datatype="html">
+        <source>Last heartbeat</source>
+        <target>Letzter Heartbeat</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colRedis" datatype="html">
+        <source>Redis</source>
+        <target>Redis</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colQueue" datatype="html">
+        <source>Queue</source>
+        <target>Warteschlange</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-colDatabase" datatype="html">
+        <source>Database</source>
+        <target>Datenbank</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-changelogProduct" datatype="html">
+        <source>Product changelog</source>
+        <target>Produkt-Changelog</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-changelogShared" datatype="html">
+        <source>Shared changelog</source>
+        <target>Geteiltes Changelog</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-noChangelogProduct" datatype="html">
+        <source>No product changelog entries.</source>
+        <target>Keine Einträge im Produkt-Changelog.</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-noChangelogShared" datatype="html">
+        <source>No shared changelog entries.</source>
+        <target>Keine Einträge im geteilten Changelog.</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-dependencyHealthy" datatype="html">
+        <source>Healthy</source>
+        <target>Gesund</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-dependencyDegraded" datatype="html">
+        <source>Degraded</source>
+        <target>Eingeschränkt</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-dependencyNotApplicable" datatype="html">
+        <source>N/A</source>
+        <target>N/V</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-dependencyUnknown" datatype="html">
+        <source>Unknown</source>
+        <target>Unbekannt</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-serviceBillingManager" datatype="html">
+        <source>Billing manager</source>
+        <target>Billing-Manager</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-serviceAgentController" datatype="html">
+        <source>Agent controller</source>
+        <target>Agent-Controller</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-serviceAgentManager" datatype="html">
+        <source>Agent manager</source>
+        <target>Agent-Manager</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-roleApi" datatype="html">
+        <source>API</source>
+        <target>API</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-roleWorker" datatype="html">
+        <source>Worker</source>
+        <target>Worker</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-roleScheduler" datatype="html">
+        <source>Scheduler</source>
+        <target>Scheduler</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-roleAll" datatype="html">
+        <source>All</source>
+        <target>Alle</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryFeatures" datatype="html">
+        <source>Features</source>
+        <target>Funktionen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryBugFixes" datatype="html">
+        <source>Bug fixes</source>
+        <target>Fehlerbehebungen</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryDocumentation" datatype="html">
+        <source>Documentation</source>
+        <target>Dokumentation</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryStyle" datatype="html">
+        <source>Style</source>
+        <target>Stil</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryRefactor" datatype="html">
+        <source>Refactor</source>
+        <target>Refactoring</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryPerformance" datatype="html">
+        <source>Performance</source>
+        <target>Leistung</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryTests" datatype="html">
+        <source>Tests</source>
+        <target>Tests</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryBuild" datatype="html">
+        <source>Build</source>
+        <target>Build</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryCi" datatype="html">
+        <source>CI</source>
+        <target>CI</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryChore" datatype="html">
+        <source>Chore</source>
+        <target>Wartung</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryRevert" datatype="html">
+        <source>Revert</source>
+        <target>Rückgängig</target>
+      </trans-unit>
+      <trans-unit id="featureUpdates-categoryBreakingChanges" datatype="html">
+        <source>Breaking changes</source>
+        <target>Breaking Changes</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

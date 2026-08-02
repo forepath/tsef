@@ -205,7 +205,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/shared/frontend-docs/Dockerfile.server",
-        "context": "dist/apps/decabill/frontend-docs/server"
+        "context": "dist/apps/decabill/frontend-docs/server",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

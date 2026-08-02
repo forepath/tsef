@@ -55,4 +55,22 @@ html[data-bs-theme='dark'] {
       background-color: var(--sidebar-item-active-bg);
     }
   }
+
+  // Popover is appended to body; badge styles must be global (not component-scoped).
+  .sidebar__item.position-relative {
+    position: relative;
+  }
+
+  .notification-badge,
+  .sidebar-admin-popover__tile-badge {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: var(--bs-primary);
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+  }
 }

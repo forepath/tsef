@@ -33,6 +33,7 @@ import { BillingEmailAttachmentResolver } from './email/billing-email-attachment
 import { BillingEmailPublisher } from './email/billing-email.publisher';
 import { BillingIdentityEmailBridgeModule } from './modules/billing-identity-email-bridge.module';
 import { BillingIdentityNotificationBridgeModule } from './modules/billing-identity-notification-bridge.module';
+import { BillingUpdatesModule } from './modules/billing-updates.module';
 import { AdminBillingController } from './controllers/admin-billing.controller';
 import { AdminPromotionsController } from './controllers/admin-promotions.controller';
 import { PromotionsController } from './controllers/promotions.controller';
@@ -446,6 +447,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
   imports: [
     BillingIdentityEmailBridgeModule,
     BillingIdentityNotificationBridgeModule,
+    BillingUpdatesModule,
     TypeOrmModule.forFeature([
       ServiceTypeEntity,
       ServicePlanEntity,
@@ -808,6 +810,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     ProviderRegistryService,
     BillingIdentityEmailBridgeModule,
     BillingIdentityNotificationBridgeModule,
+    BillingUpdatesModule,
   ],
 })
 export class BillingModule implements OnModuleInit {

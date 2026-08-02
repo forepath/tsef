@@ -177,7 +177,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/forepath/frontend-landingpage/Dockerfile.server",
-        "context": "dist/apps/forepath/frontend-landingpage/server"
+        "context": "dist/apps/forepath/frontend-landingpage/server",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

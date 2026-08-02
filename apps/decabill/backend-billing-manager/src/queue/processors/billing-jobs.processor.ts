@@ -29,6 +29,8 @@ import {
   runWithTenantId,
   resolveEmailDeliverJobPayload,
   resolveWebhookDeliverJobPayload,
+  UPDATE_CHECK_JOB_NAME,
+  UpdateCheckService,
   WEBHOOK_DELIVER_JOB_NAME,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
   WebhookDeliveryRetentionService,
@@ -76,6 +78,7 @@ export class BillingJobsProcessor extends WorkerHost {
     private readonly webhookDeliveryService: WebhookDeliveryService,
     private readonly webhookDeliveryRetentionService: WebhookDeliveryRetentionService,
     private readonly emailDeliveryService: EmailDeliveryService,
+    private readonly updateCheckService: UpdateCheckService,
   ) {
     super();
   }
@@ -132,6 +135,10 @@ export class BillingJobsProcessor extends WorkerHost {
         break;
       case BillingJobName.PRICE_RECALC_COORDINATOR:
         await this.runPriceRecalcCoordinator();
+        break;
+      case BillingJobName.UPDATE_CHECK:
+      case UPDATE_CHECK_JOB_NAME:
+        await this.updateCheckService.runCheck();
         break;
       case BillingJobName.DATEV_EXPORT_UNIT:
         await this.runDatevExportUnit(

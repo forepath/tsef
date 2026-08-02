@@ -213,7 +213,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/agenstra/frontend-agent-console/Dockerfile.server",
-        "context": "dist/apps/agenstra/frontend-agent-console/server"
+        "context": "dist/apps/agenstra/frontend-agent-console/server",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

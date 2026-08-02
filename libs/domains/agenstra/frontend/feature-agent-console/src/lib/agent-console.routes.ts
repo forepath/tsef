@@ -192,6 +192,7 @@ import {
   createNotificationAdminRoutes,
   notificationAdminProviders,
 } from '@forepath/shared/frontend/feature-notifications';
+import { createUpdatesAdminRoutes, updatesAdminProviders } from '@forepath/shared/frontend/feature-updates';
 import { provideEffects } from '@ngrx/effects';
 import { provideState } from '@ngrx/store';
 import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
@@ -220,6 +221,7 @@ export const agentConsoleRoutes: Route[] = [
       // Identity auth routes (login, register, password reset, email confirmation, user management)
       ...identityAuthRoutes,
       ...createNotificationAdminRoutes([authGuard, adminGuard]),
+      ...createUpdatesAdminRoutes([authGuard, adminGuard]),
       {
         path: 'audit',
         canActivate: [authGuard],
@@ -309,6 +311,7 @@ export const agentConsoleRoutes: Route[] = [
       // Identity auth state (authentication reducer, facade, and auth effects)
       ...identityAuthProviders,
       ...notificationAdminProviders,
+      ...updatesAdminProviders,
       provideAgenstraNotificationAdminClientProvider(),
       // Facades
       AgentsFacade,

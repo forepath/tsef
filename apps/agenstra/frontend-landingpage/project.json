@@ -175,7 +175,8 @@
       "options": {
         "engine": "docker",
         "file": "apps/agenstra/frontend-landingpage/Dockerfile.server",
-        "context": "dist/apps/agenstra/frontend-landingpage/server"
+        "context": "dist/apps/agenstra/frontend-landingpage/server",
+        "build-args": ["VERSION"]
       },
       "configurations": {
         "test": {

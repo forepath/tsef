@@ -7,6 +7,7 @@ import {
 } from '@forepath/agenstra/frontend/data-access-agent-console';
 import { Environment, ENVIRONMENT, environment, provideLocale } from '@forepath/shared/frontend/util-configuration';
 import { NOTIFICATION_ADMIN_ENVIRONMENT } from '@forepath/shared/frontend/data-access-notifications';
+import { UPDATES_ADMIN_ENVIRONMENT } from '@forepath/shared/frontend/data-access-updates';
 import { IDENTITY_AUTH_ENVIRONMENT, LOGIN_SUCCESS_REDIRECT_TARGET, provideKeycloak } from '@forepath/identity/frontend';
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
@@ -39,6 +40,15 @@ export const appConfig: ApplicationConfig = {
         webhooksBasePath: 'admin/webhooks',
         applicationId: 'agenstra' as const,
         clientFilterEnabled: true,
+      }),
+      deps: [ENVIRONMENT],
+    },
+    {
+      provide: UPDATES_ADMIN_ENVIRONMENT,
+      useFactory: (env: Environment) => ({
+        apiUrl: env.controller.restApiUrl,
+        updatesBasePath: 'admin/updates',
+        frontendVersion: env.appVersion,
       }),
       deps: [ENVIRONMENT],
     },

@@ -83,6 +83,23 @@ Domain gauges (meter `forepath.agenstra`, polled every 60 seconds when OTEL is e
 | `agenstra.filter_rules`             | `enabled`                                    | Console regex filter rules                          |
 | `agenstra.filter_rule_sync_targets` | `sync_status`                                | Rule sync targets (`pending` / `synced` / `failed`) |
 
+### Application updates
+
+When the controller registers `UpdatesModule`, shared update gauges (meter
+`forepath.updates`, polled every 60 seconds when OTEL is enabled) expose release
+and instance freshness. Labels always include `application_id` and `service_name`.
+
+| Gauge                                  | Labels (extra)                                                                 | Description                                          |
+| -------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| `updates.info`                         | `installed_version`, `latest_version`, `update_state`, `last_check_status`     | Info gauge (`1`) for the checking process            |
+| `updates.update_available`             | -                                                                              | `1` when this process is behind latest, else `0`     |
+| `updates.instance_count`               | -                                                                              | Heartbeating / scraped instances in Redis            |
+| `updates.outdated_instance_count`      | -                                                                              | Instances with `update_state=update_available`       |
+| `updates.last_check_timestamp_seconds` | -                                                                              | Unix time of last check completion (or `0` if never) |
+| `updates.instance_outdated`            | `instance_id`, `role`, `instance_service`, `installed_version`, `update_state` | `1` when that instance is outdated, else `0`         |
+
+See **[Application updates](./application-updates.md)**.
+
 ### Manager-specific
 
 The agent manager enables shared host and runtime metrics. When OTEL is enabled it also polls domain gauges every 60 seconds (local DB equivalents of the controller chat/filter surface; tickets/workspaces live on the controller only):

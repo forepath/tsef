@@ -1,5 +1,6 @@
 import {
   AgenstraNotificationsModule,
+  AgenstraUpdatesModule,
   ClientsModule,
   ContextImportModule,
   FilterRulesModule,
@@ -17,6 +18,7 @@ import { ControllerJobsProcessor } from './processors/controller-jobs.processor'
       queueNames: [CONTROLLER_QUEUE_NAME],
     }),
     AgenstraNotificationsModule,
+    AgenstraUpdatesModule,
     forwardRef(() => ClientsModule),
     forwardRef(() => FilterRulesModule),
     forwardRef(() => ContextImportModule),

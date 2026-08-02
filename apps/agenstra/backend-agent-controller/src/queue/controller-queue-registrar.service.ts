@@ -26,8 +26,14 @@ export class ControllerQueueRegistrarService implements OnModuleInit {
         name: definition.name,
         coordinatorJobId: definition.coordinatorJobId,
         everyMs: definition.everyMs,
+        pattern: definition.pattern,
+        tz: definition.tz,
       });
-      this.logger.log(`Registered repeatable job ${definition.name} every ${definition.everyMs}ms`);
+      if (definition.pattern) {
+        this.logger.log(`Registered repeatable job ${definition.name} cron ${definition.pattern}`);
+      } else {
+        this.logger.log(`Registered repeatable job ${definition.name} every ${definition.everyMs}ms`);
+      }
     }
   }
 }

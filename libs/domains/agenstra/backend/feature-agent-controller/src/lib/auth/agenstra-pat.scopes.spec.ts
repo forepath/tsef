@@ -24,6 +24,7 @@ describe('AGENSTRA_PAT_SCOPES', () => {
         'statistics:read',
         'users:admin',
         'webhooks:admin',
+        'updates:admin',
       ]),
     );
   });

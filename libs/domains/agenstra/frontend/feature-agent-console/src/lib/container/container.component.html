@@ -203,7 +203,7 @@
       @if (canAccessUserManager$ | async) {
         <span
           #adminNavTrigger
-          class="sidebar__item border-top"
+          class="sidebar__item border-top position-relative"
           [class.active]="isAdminRouteActive()"
           tabindex="0"
           role="button"
@@ -214,6 +214,11 @@
         >
           <i class="bi bi-gear me-1"></i>
           <span class="small" i18n="@@featureContainer-admin">Admin</span>
+          @if (updatesAttentionBadge$ | async) {
+            <span class="notification-badge" aria-hidden="true">
+              <span class="visually-hidden" i18n="@@featureContainer-updatesAttention">Updates need attention</span>
+            </span>
+          }
         </span>
       }
     </aside>

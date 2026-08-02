@@ -1,0 +1,333 @@
+<div class="updates-manager-container border-top d-flex flex-column h-100">
+  <div class="p-3 border-bottom bg-body-tertiary d-flex justify-content-between align-items-center">
+    <h5 class="mb-0 fw-semibold" i18n="@@featureUpdates-title">Updates</h5>
+    <button
+      type="button"
+      class="btn btn-sm btn-primary"
+      (click)="onCheckNow()"
+      [disabled]="(checking$ | async) === true || (fullLoading$ | async) === true"
+      i18n="@@featureUpdates-checkNow"
+    >
+      Check now
+    </button>
+  </div>
+
+  <div class="section__container flex-grow-1 d-flex flex-column min-h-0">
+    @if (fullLoading$ | async) {
+      <div class="d-flex justify-content-center align-items-center p-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden" i18n="@@featureUpdates-loading">Loading updates...</span>
+        </div>
+      </div>
+    } @else {
+      @if (error(); as errorMessage) {
+        <div class="alert alert-danger mb-0 rounded-0 border-0 border-bottom" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          {{ errorMessage }}
+        </div>
+      }
+
+      @if (fullState(); as state) {
+        <div class="updates-manager__summary-bar flex-shrink-0">
+          <div
+            class="row g-0 updates-manager__summary-grid"
+            [class.updates-manager__summary-grid--three]="summaryCardCount() === 3"
+            [class.updates-manager__summary-grid--four]="summaryCardCount() === 4"
+          >
+            <div class="col-6" [class.col-md-4]="summaryCardCount() === 3" [class.col-md-3]="summaryCardCount() === 4">
+              <div class="card h-100 rounded-0 updates-manager__summary-card updates-manager__summary-card--first">
+                <div class="card-body">
+                  <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureUpdates-installedVersion">
+                    Installed version
+                  </h6>
+                  <div class="d-flex align-items-center gap-2">
+                    <p class="card-title mb-0 fs-4 fw-bold">{{ formatVersion(state.installedVersion) }}</p>
+                    <i
+                      class="bi fs-5"
+                      [class]="updateStateIconClass(state.updateState)"
+                      [attr.title]="updateStateLabel(state.updateState)"
+                      [attr.aria-label]="updateStateLabel(state.updateState)"
+                      role="img"
+                    ></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6" [class.col-md-4]="summaryCardCount() === 3" [class.col-md-3]="summaryCardCount() === 4">
+              <div class="card h-100 rounded-0 updates-manager__summary-card updates-manager__summary-card--second">
+                <div class="card-body d-flex flex-column">
+                  <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureUpdates-latestVersion">
+                    Latest version
+                  </h6>
+                  <div class="d-flex align-items-center justify-content-between gap-2 mt-auto">
+                    <p class="card-title mb-0 fs-4 fw-bold">{{ formatVersion(state.latestVersion) }}</p>
+                    @if (state.release?.htmlUrl; as releaseUrl) {
+                      <a
+                        class="btn btn-sm btn-outline-secondary flex-shrink-0"
+                        [href]="releaseUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="View release"
+                        i18n-title="@@featureUpdates-viewRelease"
+                        i18n-aria-label="@@featureUpdates-viewRelease"
+                        aria-label="View release"
+                      >
+                        <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                      </a>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6" [class.col-md-4]="summaryCardCount() === 3" [class.col-md-3]="summaryCardCount() === 4">
+              <div class="card h-100 rounded-0 updates-manager__summary-card updates-manager__summary-card--third">
+                <div class="card-body">
+                  <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureUpdates-lastCheck">Last check</h6>
+                  @if ((checking$ | async) === true) {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually-hidden" i18n="@@featureUpdates-checkInProgress">Checking for updates...</span>
+                  } @else {
+                    <p class="card-title mb-0 fs-4 fw-bold">{{ formatDate(state.lastCheckAt) }}</p>
+                  }
+                </div>
+              </div>
+            </div>
+            @if (environment.frontendVersion) {
+              <div class="col-6 col-md-3">
+                <div class="card h-100 rounded-0 updates-manager__summary-card updates-manager__summary-card--fourth">
+                  <div class="card-body">
+                    <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureUpdates-frontendVersion">
+                      Frontend version
+                    </h6>
+                    <p class="card-title mb-0 fs-4 fw-bold">{{ formatVersion(environment.frontendVersion) }}</p>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-0 d-md-none border-bottom btn-group-options flex-shrink-0">
+          @for (panel of mobilePanels; track panel) {
+            <button
+              type="button"
+              class="btn btn-sm btn-options"
+              [class.btn-outline-secondary]="mobilePanel() !== panel"
+              [class.btn-primary]="mobilePanel() === panel"
+              (click)="mobilePanel.set(panel)"
+            >
+              {{ mobilePanelLabel(panel) }}
+            </button>
+          }
+        </div>
+
+        <div
+          class="updates-manager__instances-lane card flex-grow-1 border-0 border-bottom rounded-0 d-md-flex flex-column min-h-0"
+          [class.d-none]="mobilePanel() !== 'instances'"
+          [class.d-flex]="mobilePanel() === 'instances'"
+        >
+          <div
+            class="card-header updates-manager__lane-header py-2 small fw-semibold flex-shrink-0"
+            i18n="@@featureUpdates-instancesTitle"
+          >
+            Service instances
+          </div>
+          <form class="updates-manager__instances-search flex-shrink-0">
+            <div class="input-group search-input-container border-bottom">
+              <i class="bi bi-search" aria-hidden="true"></i>
+              <input
+                type="text"
+                class="form-control border-0 search-input"
+                name="instanceSearch"
+                [ngModel]="searchQuery()"
+                (ngModelChange)="searchQuery.set($event)"
+                placeholder="Search instances"
+                i18n-placeholder="@@featureUpdates-searchInstancesPlaceholder"
+              />
+            </div>
+          </form>
+          <div class="list-group list-group-flush updates-manager__lane-list">
+            @if (filteredInstances().length === 0) {
+              <div class="text-muted p-3" i18n="@@featureUpdates-noInstances">No service instances reported yet.</div>
+            } @else {
+              @for (instance of filteredInstances(); track instance.instanceId) {
+                <div class="list-group-item d-flex align-items-stretch p-0 border-bottom">
+                  <div class="min-w-0 flex-grow-1 p-3">
+                    <div class="fw-semibold mb-1 d-flex align-items-center gap-2 flex-wrap">
+                      <span>{{ serviceNameLabel(instance.serviceName) }}</span>
+                      <i
+                        class="bi"
+                        [class]="updateStateIconClass(instance.updateState)"
+                        [attr.title]="updateStateLabel(instance.updateState)"
+                        [attr.aria-label]="updateStateLabel(instance.updateState)"
+                        role="img"
+                      ></i>
+                    </div>
+                    <div class="small text-muted d-flex align-items-center gap-3 row-gap-1 flex-wrap">
+                      <span>
+                        <i class="bi bi-fingerprint me-1" aria-hidden="true"></i
+                        ><span class="font-monospace">{{ instance.instanceId }}</span>
+                      </span>
+                      <span> <i class="bi bi-hdd me-1" aria-hidden="true"></i>{{ instance.hostname }} </span>
+                      <span>
+                        <i class="bi bi-tag me-1" aria-hidden="true"></i>{{ formatVersion(instance.installedVersion) }}
+                      </span>
+                      <span>
+                        <i class="bi bi-heart-pulse me-1" aria-hidden="true"></i
+                        >{{ formatDate(instance.lastHeartbeatAt) }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="updates-manager__role-status d-flex align-items-center justify-content-center px-4">
+                    <span class="badge text-bg-secondary">{{ roleLabel(instance.role) }}</span>
+                  </div>
+                  <div class="d-flex flex-shrink-0 align-self-stretch" role="group" aria-label="Dependencies">
+                    <div
+                      class="updates-manager__dependency-status d-flex align-items-center justify-content-center px-3 border-start {{
+                        dependencyHealthClass(instance.dependencies.redis)
+                      }}"
+                      [attr.title]="dependencyStatusTitle('Redis', instance.dependencies.redis)"
+                      [attr.aria-label]="dependencyStatusTitle('Redis', instance.dependencies.redis)"
+                      role="img"
+                    >
+                      <i class="bi bi-memory" aria-hidden="true"></i>
+                    </div>
+                    <div
+                      class="updates-manager__dependency-status d-flex align-items-center justify-content-center px-3 border-start {{
+                        dependencyHealthClass(instance.dependencies.queue)
+                      }}"
+                      [attr.title]="dependencyStatusTitle('Queue', instance.dependencies.queue)"
+                      [attr.aria-label]="dependencyStatusTitle('Queue', instance.dependencies.queue)"
+                      role="img"
+                    >
+                      <i class="bi bi-stack" aria-hidden="true"></i>
+                    </div>
+                    <div
+                      class="updates-manager__dependency-status d-flex align-items-center justify-content-center px-3 border-start {{
+                        dependencyHealthClass(instance.dependencies.database)
+                      }}"
+                      [attr.title]="dependencyStatusTitle('Database', instance.dependencies.database)"
+                      [attr.aria-label]="dependencyStatusTitle('Database', instance.dependencies.database)"
+                      role="img"
+                    >
+                      <i class="bi bi-database" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        <div
+          class="section__row flex-grow-1 min-h-0 d-md-flex"
+          [class.d-none]="mobilePanel() === 'instances'"
+          [class.d-flex]="mobilePanel() !== 'instances'"
+        >
+          <div
+            class="section__column d-md-flex flex-column min-h-0"
+            [class.d-none]="mobilePanel() !== 'product'"
+            [class.d-flex]="mobilePanel() === 'product'"
+          >
+            <div class="card updates-manager__changelog-card border-0 rounded-0 d-flex flex-column">
+              <div
+                class="card-header updates-manager__lane-header py-2 small fw-semibold flex-shrink-0"
+                i18n="@@featureUpdates-changelogProduct"
+              >
+                Product changelog
+              </div>
+              <form class="updates-manager__changelog-search flex-shrink-0">
+                <div class="input-group search-input-container border-bottom">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    class="form-control border-0 search-input"
+                    name="productChangelogSearch"
+                    [ngModel]="productChangelogSearch()"
+                    (ngModelChange)="productChangelogSearch.set($event)"
+                    placeholder="Search product changelog"
+                    i18n-placeholder="@@featureUpdates-searchProductChangelogPlaceholder"
+                  />
+                </div>
+              </form>
+              <div class="list-group list-group-flush updates-manager__changelog-list">
+                @if (filteredProductChangelog().length === 0) {
+                  <div class="text-muted p-3" i18n="@@featureUpdates-noChangelogProduct">
+                    No product changelog entries.
+                  </div>
+                } @else {
+                  @for (entry of filteredProductChangelog(); track $index) {
+                    <div class="list-group-item border-bottom">
+                      @if (entry.category) {
+                        <span class="badge text-bg-secondary me-2">{{ changelogCategoryLabel(entry.category) }}</span>
+                      }
+                      @for (part of changelogTextParts(entry.text); track $index) {
+                        @if (part.kind === 'link') {
+                          <a [href]="part.href" target="_blank" rel="noopener noreferrer">{{ part.label }}</a>
+                        } @else {
+                          {{ part.value }}
+                        }
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+          <div
+            class="section__column d-md-flex flex-column min-h-0 border-start"
+            [class.d-none]="mobilePanel() !== 'shared'"
+            [class.d-flex]="mobilePanel() === 'shared'"
+          >
+            <div class="card updates-manager__changelog-card border-0 rounded-0 d-flex flex-column">
+              <div
+                class="card-header updates-manager__lane-header py-2 small fw-semibold flex-shrink-0"
+                i18n="@@featureUpdates-changelogShared"
+              >
+                Shared changelog
+              </div>
+              <form class="updates-manager__changelog-search flex-shrink-0">
+                <div class="input-group search-input-container border-bottom">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    class="form-control border-0 search-input"
+                    name="sharedChangelogSearch"
+                    [ngModel]="sharedChangelogSearch()"
+                    (ngModelChange)="sharedChangelogSearch.set($event)"
+                    placeholder="Search shared changelog"
+                    i18n-placeholder="@@featureUpdates-searchSharedChangelogPlaceholder"
+                  />
+                </div>
+              </form>
+              <div class="list-group list-group-flush updates-manager__changelog-list">
+                @if (filteredSharedChangelog().length === 0) {
+                  <div class="text-muted p-3" i18n="@@featureUpdates-noChangelogShared">
+                    No shared changelog entries.
+                  </div>
+                } @else {
+                  @for (entry of filteredSharedChangelog(); track $index) {
+                    <div class="list-group-item border-bottom">
+                      @if (entry.category) {
+                        <span class="badge text-bg-secondary me-2">{{ changelogCategoryLabel(entry.category) }}</span>
+                      }
+                      @for (part of changelogTextParts(entry.text); track $index) {
+                        @if (part.kind === 'link') {
+                          <a [href]="part.href" target="_blank" rel="noopener noreferrer">{{ part.label }}</a>
+                        } @else {
+                          {{ part.value }}
+                        }
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else if (!error()) {
+        <div class="text-muted p-4" i18n="@@featureUpdates-empty">No update information available.</div>
+      }
+    }
+  </div>
+</div>

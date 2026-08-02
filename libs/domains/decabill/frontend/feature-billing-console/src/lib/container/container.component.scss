@@ -114,3 +114,20 @@
     display: none;
   }
 }
+
+.notification-badge {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background-color: var(--bs-primary);
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+}
+
+.sidebar-admin-popover__tile-badge {
+  top: 0.35rem;
+  right: 0.35rem;
+}

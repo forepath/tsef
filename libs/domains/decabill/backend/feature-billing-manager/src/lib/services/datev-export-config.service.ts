@@ -1,4 +1,4 @@
-import { DEFAULT_TENANT } from '@forepath/shared/backend';
+import { DEFAULT_TENANT, envCronOrDefault } from '@forepath/shared/backend';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 
 import { parseBooleanEnv, parseCsvTenantIds } from '../utils/datev-format.util';
@@ -82,7 +82,7 @@ export class DatevExportConfigService implements OnModuleInit {
   }
 
   getExportCronPattern(): string {
-    return process.env.BILLING_DATEV_EXPORT_CRON ?? '0 0 1 * *';
+    return envCronOrDefault('BILLING_DATEV_EXPORT_CRON', '0 0 1 * *');
   }
 
   resolveForTenant(tenantId: string): DatevTenantExportConfig | null {

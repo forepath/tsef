@@ -56,6 +56,10 @@ export const BILLING_NOTIFICATION_EVENTS = [
   'datev_export.started',
   'datev_export.completed',
   'datev_export.failed',
+  'application.update_available',
+  'application.update_check_failed',
+  'application.instance_outdated',
+  'application.dependency_health_changed',
 ] as const;
 
 export type BillingNotificationEventType = (typeof BILLING_NOTIFICATION_EVENTS)[number];

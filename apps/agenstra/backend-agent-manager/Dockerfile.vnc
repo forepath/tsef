@@ -16,6 +16,8 @@ FROM docker.io/debian:trixie
 
 ARG APP_UID=10001
 ARG APP_GID=10001
+ARG VERSION=0.0.0
+ENV VERSION=${VERSION}
 
 WORKDIR /home/agenstra/environment
 

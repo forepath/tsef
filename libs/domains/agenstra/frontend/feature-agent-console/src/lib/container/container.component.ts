@@ -8,6 +8,7 @@ import {
   NotificationsFacade,
 } from '@forepath/agenstra/frontend/data-access-agent-console';
 import { IdentityLogoutConfirmModalComponent, IDENTITY_AUTH_ENVIRONMENT } from '@forepath/identity/frontend';
+import { AdminUpdatesFacade } from '@forepath/shared/frontend/data-access-updates';
 import { LocaleService } from '@forepath/shared/frontend/util-configuration';
 import { StandaloneLoadingService } from '@forepath/shared/frontend';
 import { combineLatest, filter, map, startWith } from 'rxjs';
@@ -28,6 +29,7 @@ interface AdminNavItem {
   activePaths: string[];
   icon: string;
   label: string;
+  navKey?: 'updates';
   routerLink: string[];
   title: string;
 }
@@ -47,6 +49,7 @@ export class AgentConsoleContainerComponent implements OnInit, OnDestroy {
   private readonly authenticationFacade = inject(AuthenticationFacade);
   private readonly clientsFacade = inject(ClientsFacade);
   protected readonly notificationsFacade = inject(NotificationsFacade);
+  private readonly adminUpdatesFacade = inject(AdminUpdatesFacade);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -79,6 +82,7 @@ export class AgentConsoleContainerComponent implements OnInit, OnDestroy {
               url.includes('/users') ||
               url.includes('/filters') ||
               url.includes('/webhooks') ||
+              url.includes('/updates') ||
               url.includes('/audit') ||
               url.includes('/tickets') ||
               url.includes('/imports') ||
@@ -94,6 +98,8 @@ export class AgentConsoleContainerComponent implements OnInit, OnDestroy {
         (this.router.url.includes('/clients') ||
           this.router.url.includes('/users') ||
           this.router.url.includes('/filters') ||
+          this.router.url.includes('/webhooks') ||
+          this.router.url.includes('/updates') ||
           this.router.url.includes('/audit') ||
           this.router.url.includes('/tickets') ||
           this.router.url.includes('/imports') ||
@@ -110,6 +116,8 @@ export class AgentConsoleContainerComponent implements OnInit, OnDestroy {
    */
   readonly isAuthenticated$ = this.authenticationFacade.isAuthenticated$;
   readonly spacesAttentionBadge$ = this.notificationsFacade.spacesAttentionBadge$;
+  readonly updatesAttentionBadge$ = this.adminUpdatesFacade.hasAttention$;
+  readonly updatesAttentionBadge = toSignal(this.updatesAttentionBadge$, { initialValue: false });
 
   /** Selected space (client); tickets need a client context in the UI. */
   readonly activeClientId$ = this.clientsFacade.activeClientId$;
@@ -137,7 +145,11 @@ export class AgentConsoleContainerComponent implements OnInit, OnDestroy {
       startWith(this.router.url),
       map(
         (url) =>
-          url.includes('/users') || url.includes('/filters') || url.includes('/imports') || url.includes('/webhooks'),
+          url.includes('/users') ||
+          url.includes('/filters') ||
+          url.includes('/imports') ||
+          url.includes('/webhooks') ||
+          url.includes('/updates'),
       ),
     ),
     {
@@ -145,7 +157,8 @@ export class AgentConsoleContainerComponent implements OnInit, OnDestroy {
         this.router.url.includes('/users') ||
         this.router.url.includes('/filters') ||
         this.router.url.includes('/imports') ||
-        this.router.url.includes('/webhooks'),
+        this.router.url.includes('/webhooks') ||
+        this.router.url.includes('/updates'),
     },
   );
 
@@ -208,6 +221,12 @@ export class AgentConsoleContainerComponent implements OnInit, OnDestroy {
           this.notificationsFacade.disconnectSocket();
         }
       });
+
+    this.authenticationFacade.canAccessUserManager$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((canAccess) => {
+      if (canAccess) {
+        this.adminUpdatesFacade.loadStatus();
+      }
+    });
 
     // Check initial query params immediately
     const initialParams = this.route.snapshot.queryParams;
@@ -325,6 +344,16 @@ export class AgentConsoleContainerComponent implements OnInit, OnDestroy {
       label.textContent = item.label;
 
       link.append(icon, label);
+
+      if (item.navKey === 'updates' && this.updatesAttentionBadge()) {
+        const badge = document.createElement('span');
+
+        badge.className = 'notification-badge sidebar-admin-popover__tile-badge';
+        badge.setAttribute('aria-hidden', 'true');
+        link.classList.add('position-relative');
+        link.appendChild(badge);
+      }
+
       link.addEventListener('click', (event) => {
         event.preventDefault();
         void this.router.navigate(item.routerLink);
@@ -338,6 +367,14 @@ export class AgentConsoleContainerComponent implements OnInit, OnDestroy {
 
   private getAdminNavItems(): AdminNavItem[] {
     return [
+      {
+        routerLink: ['/updates'],
+        activePaths: ['/updates'],
+        icon: 'bi-arrow-repeat',
+        navKey: 'updates',
+        title: $localize`:@@featureContainer-updatesTitle:Updates`,
+        label: $localize`:@@featureContainer-updates:Updates`,
+      },
       {
         routerLink: ['/webhooks'],
         activePaths: ['/webhooks'],

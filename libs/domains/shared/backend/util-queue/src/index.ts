@@ -2,6 +2,7 @@ export * from './lib/bull-board-auth';
 export * from './lib/bull-board-auth.middleware';
 export * from './lib/bull-board-global-prefix';
 export * from './lib/enqueue-unit-job';
+export * from './lib/env-cron-or-default';
 export * from './lib/is-duplicate-job-enqueue-error';
 export * from './lib/job-id.util';
 export * from './lib/job-retention';
