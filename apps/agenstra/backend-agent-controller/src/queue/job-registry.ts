@@ -1,5 +1,6 @@
 import {
   buildCoordinatorJobId,
+  envCronOrDefault,
   getWebhookDeliveryRetentionCoordinatorIntervalMs,
   UPDATE_CHECK_JOB_NAME,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
@@ -85,7 +86,7 @@ export function getControllerRepeatableJobs(): ControllerRepeatableJobDefinition
   jobs.push({
     name: ControllerJobName.UPDATE_CHECK,
     coordinatorJobId: buildCoordinatorJobId('update-check'),
-    pattern: process.env.UPDATE_CHECK_CRON ?? '0 0 * * *',
+    pattern: envCronOrDefault('UPDATE_CHECK_CRON', '0 0 * * *'),
     tz: process.env.UPDATE_CHECK_TIMEZONE ?? 'Europe/Berlin',
   });
 

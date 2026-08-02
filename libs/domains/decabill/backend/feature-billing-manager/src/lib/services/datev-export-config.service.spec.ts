@@ -86,6 +86,14 @@ describe('DatevExportConfigService', () => {
     expect(service.getExportCronPattern()).toBe('0 0 1 * *');
   });
 
+  it('falls back when BILLING_DATEV_EXPORT_CRON is empty', () => {
+    process.env.BILLING_DATEV_EXPORT_CRON = '';
+    const service = new DatevExportConfigService();
+
+    service.onModuleInit();
+    expect(service.getExportCronPattern()).toBe('0 0 1 * *');
+  });
+
   it('applies tenant overrides from JSON config', () => {
     process.env.BILLING_DATEV_CONSULTANT_NUMBER = '1111111';
     process.env.BILLING_DATEV_CLIENT_NUMBER = '22222';

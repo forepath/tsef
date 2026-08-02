@@ -1,6 +1,7 @@
 import { AdminBillNowJobName, DatevExportJobName, VatIdValidationJobName } from '@forepath/decabill/backend';
 import {
   buildCoordinatorJobId,
+  envCronOrDefault,
   getWebhookDeliveryRetentionCoordinatorIntervalMs,
   UPDATE_CHECK_JOB_NAME,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
@@ -157,7 +158,7 @@ export function getBillingRepeatableJobs(): BillingRepeatableJobDefinition[] {
     jobs.push({
       name: BillingJobName.DATEV_EXPORT_COORDINATOR,
       coordinatorJobId: buildCoordinatorJobId('datev-export'),
-      pattern: process.env.BILLING_DATEV_EXPORT_CRON ?? '0 0 1 * *',
+      pattern: envCronOrDefault('BILLING_DATEV_EXPORT_CRON', '0 0 1 * *'),
       tz: process.env.BILLING_DATEV_EXPORT_TIMEZONE ?? 'Europe/Berlin',
     });
   }
@@ -166,7 +167,7 @@ export function getBillingRepeatableJobs(): BillingRepeatableJobDefinition[] {
     jobs.push({
       name: BillingJobName.PRICE_RECALC_COORDINATOR,
       coordinatorJobId: buildCoordinatorJobId('price-recalc'),
-      pattern: process.env.BILLING_PRICE_RECALC_CRON ?? '0 0 * * *',
+      pattern: envCronOrDefault('BILLING_PRICE_RECALC_CRON', '0 0 * * *'),
       tz: process.env.BILLING_PRICE_RECALC_TIMEZONE ?? 'Europe/Berlin',
     });
   }
@@ -174,7 +175,7 @@ export function getBillingRepeatableJobs(): BillingRepeatableJobDefinition[] {
   jobs.push({
     name: BillingJobName.UPDATE_CHECK,
     coordinatorJobId: buildCoordinatorJobId('update-check'),
-    pattern: process.env.UPDATE_CHECK_CRON ?? '0 0 * * *',
+    pattern: envCronOrDefault('UPDATE_CHECK_CRON', '0 0 * * *'),
     tz: process.env.UPDATE_CHECK_TIMEZONE ?? 'Europe/Berlin',
   });
 
