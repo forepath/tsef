@@ -80,6 +80,91 @@ describe('BillingNotificationPublisher', () => {
     });
   });
 
+  it('publishes subscription.provisioned and subscription.provision_failed with item metadata', () => {
+    const dispatcher = {
+      publishFireAndForget: jest.fn(),
+    } as unknown as NotificationDispatcherService;
+    const publisher = new BillingNotificationPublisher(dispatcher);
+    const subscription = {
+      id: 'sub-1',
+      number: 'SUB-001',
+      planId: 'plan-1',
+      userId: 'user-1',
+      status: SubscriptionStatus.ACTIVE,
+      createdAt: new Date('2026-07-01T10:00:00.000Z'),
+      updatedAt: new Date('2026-07-02T10:00:00.000Z'),
+    } as SubscriptionEntity;
+
+    publisher.publishSubscriptionProvisioned({
+      subscription,
+      itemId: 'item-1',
+      hostname: 'host-1',
+      service: 'decabill-billing',
+      providerReference: 'srv-1',
+    });
+    publisher.publishSubscriptionProvisionFailed({
+      subscription,
+      itemId: 'item-1',
+      errorMessage: 'provider unavailable',
+      providerReference: null,
+    });
+
+    expect(dispatcher.publishFireAndForget).toHaveBeenCalledWith({
+      type: 'subscription.provisioned',
+      scopeKey: 'tenant-a',
+      clientId: 'user-1',
+      data: expect.objectContaining({
+        id: 'sub-1',
+        itemId: 'item-1',
+        hostname: 'host-1',
+        service: 'decabill-billing',
+        providerReference: 'srv-1',
+      }),
+    });
+    expect(dispatcher.publishFireAndForget).toHaveBeenCalledWith({
+      type: 'subscription.provision_failed',
+      scopeKey: 'tenant-a',
+      clientId: 'user-1',
+      data: expect.objectContaining({
+        id: 'sub-1',
+        itemId: 'item-1',
+        errorMessage: 'provider unavailable',
+        providerReference: null,
+      }),
+    });
+  });
+
+  it('sanitizes multiline provision failure messages for webhooks', () => {
+    const dispatcher = {
+      publishFireAndForget: jest.fn(),
+    } as unknown as NotificationDispatcherService;
+    const publisher = new BillingNotificationPublisher(dispatcher);
+    const subscription = {
+      id: 'sub-1',
+      number: 'SUB-001',
+      planId: 'plan-1',
+      userId: 'user-1',
+      status: SubscriptionStatus.ACTIVE,
+      createdAt: new Date('2026-07-01T10:00:00.000Z'),
+      updatedAt: new Date('2026-07-02T10:00:00.000Z'),
+    } as SubscriptionEntity;
+
+    publisher.publishSubscriptionProvisionFailed({
+      subscription,
+      itemId: 'item-1',
+      errorMessage: 'line1\nline2\ttoken',
+    });
+
+    expect(dispatcher.publishFireAndForget).toHaveBeenCalledWith({
+      type: 'subscription.provision_failed',
+      scopeKey: 'tenant-a',
+      clientId: 'user-1',
+      data: expect.objectContaining({
+        errorMessage: 'line1 line2 token',
+      }),
+    });
+  });
+
   it('publishes project, milestone, time entry, and ticket events with tenant scope', () => {
     const dispatcher = {
       publishFireAndForget: jest.fn(),

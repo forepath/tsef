@@ -38,6 +38,8 @@ describe('BILLING_NOTIFICATION_EVENTS', () => {
         'subscription.resumed',
         'subscription.period_charged',
         'subscription.ssh_access_granted',
+        'subscription.provisioned',
+        'subscription.provision_failed',
         'service_plan.price_recalculated',
         'subscription.price_changed',
         'application.update_available',

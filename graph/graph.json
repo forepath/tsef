@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-02T07:33:42.844Z",
+  "generatedAt": "2026-08-03T18:42:25.796Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -16753,6 +16753,24 @@
       }
     },
     {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.provision_failed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.provision_failed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.provisioned",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.provisioned",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
       "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.resumed",
       "type": "webhook-event",
       "attrs": {
@@ -25850,6 +25868,16 @@
         "title": "Subscription Item Update Scheduler",
         "docPath": "docs/decabill/features/server-provisioning.md",
         "sectionAnchor": "subscription-item-update-scheduler",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-provisioning-outcome-notifications",
+      "type": "concept",
+      "attrs": {
+        "title": "Provisioning outcome notifications",
+        "docPath": "docs/decabill/features/server-provisioning.md",
+        "sectionAnchor": "provisioning-outcome-notifications",
         "domain": "decabill"
       }
     },
@@ -37077,6 +37105,16 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.provision_failed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.provisioned",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.resumed",
       "type": "contains"
     },
@@ -43273,6 +43311,11 @@
     {
       "from": "file:docs/decabill/features/server-provisioning.md",
       "to": "concept:decabill-subscription-item-update-scheduler",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/server-provisioning.md",
+      "to": "concept:decabill-provisioning-outcome-notifications",
       "type": "contains"
     },
     {
@@ -67442,6 +67485,11 @@
     },
     {
       "from": "concept:decabill-subscription-item-update-scheduler",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-provisioning-outcome-notifications",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

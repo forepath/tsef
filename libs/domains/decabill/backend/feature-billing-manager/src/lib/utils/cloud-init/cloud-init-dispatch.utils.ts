@@ -5,6 +5,10 @@ import {
   buildCustomConfigurationCloudInitConfigFromRequest,
   buildCustomConfigurationCloudInitUserData,
 } from './custom-configuration.utils';
+import {
+  buildDecabillBillingCloudInitConfigFromRequest,
+  buildDecabillBillingCloudInitUserData,
+} from './decabill-billing.utils';
 import { CloudInitServiceType, canonicalizeCloudInitService } from './integrated-provisioning-service';
 
 export { CloudInitServiceType } from './integrated-provisioning-service';
@@ -43,6 +47,12 @@ export function buildProvisioningUserData(params: {
   if (service === CloudInitServiceType.AgenstraManager) {
     return buildAgentManagerCloudInitUserData(
       buildAgentManagerCloudInitConfigFromRequest(effectiveConfig, hostname, baseDomain),
+    );
+  }
+
+  if (service === CloudInitServiceType.DecabillBilling) {
+    return buildDecabillBillingCloudInitUserData(
+      buildDecabillBillingCloudInitConfigFromRequest(effectiveConfig, hostname, baseDomain),
     );
   }
 

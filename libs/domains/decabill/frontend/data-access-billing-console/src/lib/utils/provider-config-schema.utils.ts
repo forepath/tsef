@@ -1,5 +1,5 @@
 export type ProviderConfigFieldScope = 'server' | 'product' | 'internal';
-export type IntegratedProductService = 'agenstra-controller' | 'agenstra-manager';
+export type IntegratedProductService = 'agenstra-controller' | 'agenstra-manager' | 'decabill-billing';
 
 export type ConfigSchemaPropertyType = 'string' | 'number' | 'boolean' | 'object';
 
@@ -47,7 +47,7 @@ function canonicalizeIntegratedProvisioningService(value: string): IntegratedPro
     return null;
   }
 
-  if (trimmed === 'agenstra-controller' || trimmed === 'agenstra-manager') {
+  if (trimmed === 'agenstra-controller' || trimmed === 'agenstra-manager' || trimmed === 'decabill-billing') {
     return trimmed;
   }
 
@@ -142,7 +142,7 @@ export function getProductServicesForProperty(
     return [...new Set(canonical)];
   }
 
-  return ['agenstra-controller', 'agenstra-manager'];
+  return ['agenstra-controller', 'agenstra-manager', 'decabill-billing'];
 }
 
 export function getServerProviderConfigKeys(

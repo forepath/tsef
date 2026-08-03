@@ -12,6 +12,11 @@ jest.mock('./agent-manager.utils', () => ({
   buildAgentManagerCloudInitUserData: jest.fn().mockReturnValue('manager-user-data'),
 }));
 
+jest.mock('./decabill-billing.utils', () => ({
+  buildDecabillBillingCloudInitConfigFromRequest: jest.fn().mockReturnValue({ host: {} }),
+  buildDecabillBillingCloudInitUserData: jest.fn().mockReturnValue('decabill-user-data'),
+}));
+
 jest.mock('./custom-configuration.utils', () => ({
   buildCustomConfigurationCloudInitConfigFromRequest: jest.fn().mockReturnValue({ app: {} }),
   buildCustomConfigurationCloudInitUserData: jest.fn().mockReturnValue('custom-user-data'),
@@ -19,8 +24,9 @@ jest.mock('./custom-configuration.utils', () => ({
 
 describe('cloud-init-dispatch.utils', () => {
   describe('normalizeCloudInitService', () => {
-    it('returns manager and custom when specified', () => {
+    it('returns manager, decabill-billing, and custom when specified', () => {
       expect(normalizeCloudInitService('agenstra-manager')).toBe('agenstra-manager');
+      expect(normalizeCloudInitService('decabill-billing')).toBe('decabill-billing');
       expect(normalizeCloudInitService('custom')).toBe('custom');
     });
 
@@ -51,6 +57,12 @@ describe('cloud-init-dispatch.utils', () => {
     it('builds manager user data', () => {
       expect(buildProvisioningUserData({ ...baseParams, service: CloudInitServiceType.AgenstraManager })).toBe(
         'manager-user-data',
+      );
+    });
+
+    it('builds decabill-billing user data', () => {
+      expect(buildProvisioningUserData({ ...baseParams, service: CloudInitServiceType.DecabillBilling })).toBe(
+        'decabill-user-data',
       );
     });
 

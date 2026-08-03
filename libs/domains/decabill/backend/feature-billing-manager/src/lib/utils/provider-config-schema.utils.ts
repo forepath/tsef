@@ -111,13 +111,29 @@ export const PRODUCT_FIELD_SERVICES: Record<string, IntegratedProductService[]> 
   authenticationMethod: [
     IntegratedProvisioningService.AgenstraController,
     IntegratedProvisioningService.AgenstraManager,
+    IntegratedProvisioningService.DecabillBilling,
   ],
-  staticApiKey: [IntegratedProvisioningService.AgenstraController, IntegratedProvisioningService.AgenstraManager],
-  smtp: [IntegratedProvisioningService.AgenstraController, IntegratedProvisioningService.AgenstraManager],
-  keycloak: [IntegratedProvisioningService.AgenstraController, IntegratedProvisioningService.AgenstraManager],
-  disableSignup: [IntegratedProvisioningService.AgenstraController],
-  hetznerApiToken: [IntegratedProvisioningService.AgenstraController],
-  digitaloceanApiToken: [IntegratedProvisioningService.AgenstraController],
+  staticApiKey: [
+    IntegratedProvisioningService.AgenstraController,
+    IntegratedProvisioningService.AgenstraManager,
+    IntegratedProvisioningService.DecabillBilling,
+  ],
+  smtp: [
+    IntegratedProvisioningService.AgenstraController,
+    IntegratedProvisioningService.AgenstraManager,
+    IntegratedProvisioningService.DecabillBilling,
+  ],
+  keycloak: [
+    IntegratedProvisioningService.AgenstraController,
+    IntegratedProvisioningService.AgenstraManager,
+    IntegratedProvisioningService.DecabillBilling,
+  ],
+  disableSignup: [IntegratedProvisioningService.AgenstraController, IntegratedProvisioningService.DecabillBilling],
+  hetznerApiToken: [IntegratedProvisioningService.AgenstraController, IntegratedProvisioningService.DecabillBilling],
+  digitaloceanApiToken: [
+    IntegratedProvisioningService.AgenstraController,
+    IntegratedProvisioningService.DecabillBilling,
+  ],
   git: [IntegratedProvisioningService.AgenstraManager],
   cursorApiKey: [IntegratedProvisioningService.AgenstraManager],
 };

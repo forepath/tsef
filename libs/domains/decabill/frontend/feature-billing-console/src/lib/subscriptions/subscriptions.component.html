@@ -741,7 +741,10 @@
                                     [disabled]="(subscriptionsCreating$ | async) === true"
                                     aria-describedby="orderAuthMethodHelp"
                                   >
-                                    @if (orderRequestedConfig.service === 'agenstra-controller') {
+                                    @if (
+                                      orderRequestedConfig.service === 'agenstra-controller' ||
+                                      orderRequestedConfig.service === 'decabill-billing'
+                                    ) {
                                       <option [ngValue]="'users'" i18n="@@featureSubscriptions-authUsers">Users</option>
                                     }
                                     <option [ngValue]="'api-key'" i18n="@@featureSubscriptions-authApiKey">
@@ -762,7 +765,10 @@
                                 <div>
                                   @switch (authMethod()) {
                                     @case ('users') {
-                                      @if (orderRequestedConfig.service === 'agenstra-controller') {
+                                      @if (
+                                        orderRequestedConfig.service === 'agenstra-controller' ||
+                                        orderRequestedConfig.service === 'decabill-billing'
+                                      ) {
                                         <div class="form-check mb-3">
                                           <input
                                             type="checkbox"
@@ -1165,7 +1171,10 @@
                                     }
                                   </fieldset>
                                 }
-                                @if (orderRequestedConfig.service === 'agenstra-controller') {
+                                @if (
+                                  orderRequestedConfig.service === 'agenstra-controller' ||
+                                  orderRequestedConfig.service === 'decabill-billing'
+                                ) {
                                   <fieldset class="mt-3 mb-0">
                                     <legend class="form-label fs-6" i18n="@@featureSubscriptions-provisioningSection">
                                       Provisioning (optional)

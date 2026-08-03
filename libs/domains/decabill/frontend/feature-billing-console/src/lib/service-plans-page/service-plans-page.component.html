@@ -613,6 +613,28 @@
                     <label class="form-check-label" for="createProvisioningManager">Agenstra Manager</label>
                   </div>
                 }
+                @if (
+                  serviceEnumIncludes(
+                    data.serviceTypes,
+                    data.providerDetails,
+                    createForm.serviceTypeId,
+                    'decabill-billing'
+                  )
+                ) {
+                  <div class="form-check mb-2">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      id="createProvisioningDecabill"
+                      [checked]="isProvisioningOptionSelected('create', 'integrated:decabill-billing')"
+                      (change)="
+                        toggleProvisioningOption('create', 'integrated:decabill-billing', $any($event.target).checked)
+                      "
+                      [disabled]="(creating$ | async) === true"
+                    />
+                    <label class="form-check-label" for="createProvisioningDecabill">Decabill Billing</label>
+                  </div>
+                }
                 @for (cfg of cloudInitConfigs$ | async; track cfg.id) {
                   <div class="form-check mb-2">
                     <input
@@ -1495,6 +1517,28 @@
                       [disabled]="(updating$ | async) === true"
                     />
                     <label class="form-check-label" for="editProvisioningManager">Agenstra Manager</label>
+                  </div>
+                }
+                @if (
+                  serviceEnumIncludes(
+                    data.serviceTypes,
+                    data.providerDetails,
+                    editingPlan.serviceTypeId,
+                    'decabill-billing'
+                  )
+                ) {
+                  <div class="form-check mb-2">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      id="editProvisioningDecabill"
+                      [checked]="isProvisioningOptionSelected('edit', 'integrated:decabill-billing')"
+                      (change)="
+                        toggleProvisioningOption('edit', 'integrated:decabill-billing', $any($event.target).checked)
+                      "
+                      [disabled]="(updating$ | async) === true"
+                    />
+                    <label class="form-check-label" for="editProvisioningDecabill">Decabill Billing</label>
                   </div>
                 }
                 @for (cfg of cloudInitConfigs$ | async; track cfg.id) {

@@ -181,7 +181,7 @@ export class OverviewComponent implements OnInit {
   }
 
   serviceTypeLabel(service: SubscriptionWithServerInfo['service']): string {
-    if (service === 'agenstra-manager' || service === 'agenstra-controller') {
+    if (service === 'agenstra-manager' || service === 'agenstra-controller' || service === 'decabill-billing') {
       return integratedProvisioningServiceLabel(service);
     }
 

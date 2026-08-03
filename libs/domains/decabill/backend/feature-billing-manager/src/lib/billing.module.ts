@@ -268,8 +268,8 @@ const HETZNER_CONFIG_PROPERTIES: Record<string, Record<string, unknown>> = {
   service: {
     type: 'string',
     description:
-      'Product service: agenstra-controller (full stack), agenstra-manager (agent manager only), or custom (admin CloudInit template)',
-    enum: ['agenstra-controller', 'agenstra-manager', 'custom'],
+      'Product service: agenstra-controller (full stack), agenstra-manager (agent manager only), decabill-billing (Decabill stack), or custom (admin CloudInit template)',
+    enum: ['agenstra-controller', 'agenstra-manager', 'decabill-billing', 'custom'],
   },
   cloudInitConfigId: {
     type: 'string',
@@ -358,8 +358,8 @@ const DIGITALOCEAN_CONFIG_PROPERTIES: Record<string, Record<string, unknown>> = 
   service: {
     type: 'string',
     description:
-      'Product service: agenstra-controller (full stack), agenstra-manager (agent manager only), or custom (admin CloudInit template)',
-    enum: ['agenstra-controller', 'agenstra-manager', 'custom'],
+      'Product service: agenstra-controller (full stack), agenstra-manager (agent manager only), decabill-billing (Decabill stack), or custom (admin CloudInit template)',
+    enum: ['agenstra-controller', 'agenstra-manager', 'decabill-billing', 'custom'],
   },
   cloudInitConfigId: {
     type: 'string',

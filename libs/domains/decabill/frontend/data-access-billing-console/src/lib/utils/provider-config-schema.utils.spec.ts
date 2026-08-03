@@ -15,10 +15,13 @@ describe('providerConfigSchemaUtils', () => {
     location: { scope: 'server' as const },
     authenticationMethod: {
       scope: 'product' as const,
-      productServices: ['agenstra-controller', 'agenstra-manager'] as const,
+      productServices: ['agenstra-controller', 'agenstra-manager', 'decabill-billing'] as const,
     },
     git: { scope: 'product' as const, productServices: ['agenstra-manager'] as const },
-    disableSignup: { scope: 'product' as const, productServices: ['agenstra-controller'] as const },
+    disableSignup: {
+      scope: 'product' as const,
+      productServices: ['agenstra-controller', 'decabill-billing'] as const,
+    },
   };
 
   it('returns only server keys for provider defaults', () => {
@@ -33,6 +36,10 @@ describe('providerConfigSchemaUtils', () => {
     expect(getProductProviderConfigKeys(schema, Object.keys(schema), ['agenstra-manager'])).toEqual([
       'authenticationMethod',
       'git',
+    ]);
+    expect(getProductProviderConfigKeys(schema, Object.keys(schema), ['decabill-billing'])).toEqual([
+      'authenticationMethod',
+      'disableSignup',
     ]);
   });
 
