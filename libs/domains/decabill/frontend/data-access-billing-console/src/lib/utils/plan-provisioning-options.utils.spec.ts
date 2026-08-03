@@ -13,12 +13,14 @@ describe('planProvisioningOptionsUtils', () => {
     expect(DEFAULT_INTEGRATED_PROVISIONING_OPTION_KEYS).toEqual([
       'integrated:agenstra-controller',
       'integrated:agenstra-manager',
+      'integrated:decabill-billing',
     ]);
   });
 
-  it('integratedProvisioningServiceLabel returns Agenstra stack names', () => {
+  it('integratedProvisioningServiceLabel returns stack names', () => {
     expect(integratedProvisioningServiceLabel('agenstra-controller')).toBe('Agenstra Controller');
     expect(integratedProvisioningServiceLabel('agenstra-manager')).toBe('Agenstra Manager');
+    expect(integratedProvisioningServiceLabel('decabill-billing')).toBe('Decabill Billing');
   });
 
   it('encodes integrated and custom option keys', () => {

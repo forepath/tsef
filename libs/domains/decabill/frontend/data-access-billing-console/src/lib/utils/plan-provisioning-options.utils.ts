@@ -1,8 +1,12 @@
 import type { PlanProvisioningOption } from '../types/billing.types';
 
-export type IntegratedProvisioningService = 'agenstra-controller' | 'agenstra-manager';
+export type IntegratedProvisioningService = 'agenstra-controller' | 'agenstra-manager' | 'decabill-billing';
 
-const INTEGRATED_SERVICES = new Set<IntegratedProvisioningService>(['agenstra-controller', 'agenstra-manager']);
+const INTEGRATED_SERVICES = new Set<IntegratedProvisioningService>([
+  'agenstra-controller',
+  'agenstra-manager',
+  'decabill-billing',
+]);
 
 const LEGACY_INTEGRATED_SERVICE_ALIASES: Record<string, IntegratedProvisioningService> = {
   controller: 'agenstra-controller',
@@ -12,11 +16,13 @@ const LEGACY_INTEGRATED_SERVICE_ALIASES: Record<string, IntegratedProvisioningSe
 export const DEFAULT_INTEGRATED_PROVISIONING_OPTION_KEYS = [
   'integrated:agenstra-controller',
   'integrated:agenstra-manager',
+  'integrated:decabill-billing',
 ] as const;
 
-/** Display labels for integrated Agenstra stacks (match plan editor and provisioning API). */
+/** Display labels for integrated product stacks (match plan editor and provisioning API). */
 export const INTEGRATED_CONTROLLER_SERVICE_LABEL = 'Agenstra Controller';
 export const INTEGRATED_MANAGER_SERVICE_LABEL = 'Agenstra Manager';
+export const INTEGRATED_DECABILL_BILLING_SERVICE_LABEL = 'Decabill Billing';
 
 export function canonicalizeIntegratedProvisioningService(value: string): IntegratedProvisioningService | null {
   const trimmed = value?.trim();
@@ -33,7 +39,14 @@ export function canonicalizeIntegratedProvisioningService(value: string): Integr
 }
 
 export function integratedProvisioningServiceLabel(service: IntegratedProvisioningService): string {
-  return service === 'agenstra-manager' ? INTEGRATED_MANAGER_SERVICE_LABEL : INTEGRATED_CONTROLLER_SERVICE_LABEL;
+  switch (service) {
+    case 'agenstra-manager':
+      return INTEGRATED_MANAGER_SERVICE_LABEL;
+    case 'decabill-billing':
+      return INTEGRATED_DECABILL_BILLING_SERVICE_LABEL;
+    default:
+      return INTEGRATED_CONTROLLER_SERVICE_LABEL;
+  }
 }
 
 export function encodeProvisioningOptionKey(option: PlanProvisioningOption): string {

@@ -335,7 +335,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     { initialValue: false },
   );
 
-  onServiceChange(value: 'agenstra-controller' | 'agenstra-manager'): void {
+  onServiceChange(value: 'agenstra-controller' | 'agenstra-manager' | 'decabill-billing'): void {
     this.orderRequestedConfig = { ...this.orderRequestedConfig, service: value };
 
     if (value === 'agenstra-manager' && this.orderRequestedConfig.authenticationMethod === 'users') {
@@ -365,7 +365,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   }
 
   orderRequestedConfig: {
-    service: 'agenstra-controller' | 'agenstra-manager' | 'custom';
+    service: 'agenstra-controller' | 'agenstra-manager' | 'decabill-billing' | 'custom';
     authenticationMethod: 'users' | 'api-key' | 'keycloak';
     staticApiKey: string;
     disableSignup: boolean;
@@ -1577,7 +1577,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
       smtp: { ...cfg.smtp },
     };
 
-    if (cfg.service === 'agenstra-controller') {
+    if (cfg.service === 'agenstra-controller' || cfg.service === 'decabill-billing') {
       requestedConfig['disableSignup'] = cfg.disableSignup;
     }
 
@@ -1589,7 +1589,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
       requestedConfig['keycloak'] = { ...cfg.keycloak };
     }
 
-    if (cfg.service === 'agenstra-controller') {
+    if (cfg.service === 'agenstra-controller' || cfg.service === 'decabill-billing') {
       if (cfg.hetznerApiToken?.trim()) {
         requestedConfig['hetznerApiToken'] = cfg.hetznerApiToken.trim();
       }

@@ -199,7 +199,13 @@ components:
                 service:
                   {
                     type: string,
-                    enum: [agenstra-controller, agenstra-manager, custom],
+                    enum:
+                      [
+                        agenstra-controller,
+                        agenstra-manager,
+                        decabill-billing,
+                        custom,
+                      ],
                   }
                 serviceTypeName:
                   {

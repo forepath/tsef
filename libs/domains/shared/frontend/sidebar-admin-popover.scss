@@ -16,6 +16,7 @@ html[data-bs-theme='dark'] {
   --bs-popover-arrow-width: 0;
   --bs-popover-arrow-height: 0;
   --bs-popover-max-width: none;
+  --bs-popover-zindex: calc(var(--bs-popover-zindex) - 20);
 
   .popover-body {
     padding: 0;

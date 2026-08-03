@@ -1,10 +1,11 @@
 /**
- * Integrated Agenstra product stacks offered as plan provisioning options.
+ * Integrated product stacks offered as plan provisioning options.
  * String values are persisted in plan defaults and subscription item snapshots.
  */
 export enum IntegratedProvisioningService {
   AgenstraController = 'agenstra-controller',
   AgenstraManager = 'agenstra-manager',
+  DecabillBilling = 'decabill-billing',
 }
 
 /**
@@ -13,6 +14,7 @@ export enum IntegratedProvisioningService {
 export enum CloudInitServiceType {
   AgenstraController = IntegratedProvisioningService.AgenstraController,
   AgenstraManager = IntegratedProvisioningService.AgenstraManager,
+  DecabillBilling = IntegratedProvisioningService.DecabillBilling,
   Custom = 'custom',
 }
 
@@ -57,6 +59,7 @@ export function canonicalizeIntegratedProvisioningService(value: string): Integr
 
 /**
  * Maps a stored or requested cloud-init service id (integrated, custom, or legacy) to the enum.
+ * Unknown values default to agenstra-controller for backward compatibility.
  */
 export function canonicalizeCloudInitService(value: string | undefined): CloudInitServiceType {
   if (value === CloudInitServiceType.Custom || value === 'custom') {
@@ -69,11 +72,37 @@ export function canonicalizeCloudInitService(value: string | undefined): CloudIn
     return CloudInitServiceType.AgenstraManager;
   }
 
+  if (integrated === IntegratedProvisioningService.DecabillBilling) {
+    return CloudInitServiceType.DecabillBilling;
+  }
+
   return CloudInitServiceType.AgenstraController;
 }
 
 export function allIntegratedProvisioningServices(): IntegratedProvisioningService[] {
   return Object.values(IntegratedProvisioningService);
+}
+
+export function integratedProvisioningServiceLabel(service: IntegratedProvisioningService): string {
+  switch (service) {
+    case IntegratedProvisioningService.AgenstraManager:
+      return 'Agenstra Manager';
+    case IntegratedProvisioningService.DecabillBilling:
+      return 'Decabill Billing';
+    default:
+      return 'Agenstra Controller';
+  }
+}
+
+export function integratedProvisioningServiceDescription(service: IntegratedProvisioningService): string {
+  switch (service) {
+    case IntegratedProvisioningService.AgenstraManager:
+      return 'Runs the agent manager only.';
+    case IntegratedProvisioningService.DecabillBilling:
+      return 'Runs the Decabill billing manager and console stack.';
+    default:
+      return 'Runs the full agent controller stack.';
+  }
 }
 
 function rewriteServiceId(value: unknown, map: Record<string, string>): string | undefined {

@@ -55,6 +55,7 @@ Events are published from the **billing** service after successful mutations.
 - `customer_profile.custom_data_added`, `customer_profile.custom_data_updated`, `customer_profile.custom_data_deleted`
 - `subscription.created`, `subscription.updated`, `subscription.cancel_scheduled`, `subscription.canceled`, `subscription.resumed`, `subscription.period_charged`
 - `subscription.config_change_requested`, `subscription.config_changed`, `subscription.config_change_failed`
+- `subscription.provisioned`, `subscription.provision_failed` (itemId plus hostname/service/providerReference or errorMessage; never secrets)
 - `subscription.ssh_access_granted` (metadata only: subscription/item ids, hostname, grantedAt — never the private key)
 - `addon.activated`, `addon.deactivated`, `addon.provision_failed`, `addon.teardown_failed`
 

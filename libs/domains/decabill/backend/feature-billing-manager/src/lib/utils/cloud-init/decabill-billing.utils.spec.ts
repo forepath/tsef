@@ -1,0 +1,87 @@
+import {
+  DECABILL_BILLING_STACK_DIR,
+  buildDecabillBillingCloudInitConfigFromRequest,
+  buildDecabillBillingCloudInitUserData,
+  buildDecabillBillingUpdateCommand,
+} from './decabill-billing.utils';
+
+describe('decabill-billing.utils', () => {
+  describe('buildDecabillBillingCloudInitConfigFromRequest', () => {
+    it('sets host.fqdn, cors, and billingFrontendUrl from hostname and baseDomain', () => {
+      const config = buildDecabillBillingCloudInitConfigFromRequest(
+        { authenticationMethod: 'users' },
+        'awesome-armadillo-abc12',
+        'spirde.com',
+      );
+
+      expect(config.host.hostname).toBe('awesome-armadillo-abc12');
+      expect(config.host.fqdn).toBe('awesome-armadillo-abc12.spirde.com');
+      expect(config.backend.cors.origin).toBe('https://awesome-armadillo-abc12.spirde.com');
+      expect(config.backend.billingFrontendUrl).toBe('https://awesome-armadillo-abc12.spirde.com');
+      expect(config.backend.port).toBe(3200);
+      expect(config.frontend.port).toBe(4500);
+      expect(config.backend.websocketNamespace).toBe('billing');
+    });
+
+    it('generates random encryptionKey, jwtSecret, and database password', () => {
+      const config1 = buildDecabillBillingCloudInitConfigFromRequest({}, 'host1');
+      const config2 = buildDecabillBillingCloudInitConfigFromRequest({}, 'host2');
+
+      expect(config1.backend.encryption.encryptionKey).toBeTruthy();
+      expect(config1.backend.encryption.jwtSecret).toBeTruthy();
+      expect(config1.backend.database?.password).toBeTruthy();
+      expect(config1.backend.encryption.encryptionKey).not.toBe(config2.backend.encryption.encryptionKey);
+      expect(config1.backend.database?.password).not.toBe(config2.backend.database?.password);
+      expect(config1.backend.rateLimit.enabled).toBe(true);
+    });
+
+    it('sets provisioning tokens from effectiveConfig when provided', () => {
+      const config = buildDecabillBillingCloudInitConfigFromRequest(
+        {
+          hetznerApiToken: 'secret-hetzner',
+          digitaloceanApiToken: 'secret-do',
+        },
+        'host1',
+      );
+
+      expect(config.backend.provisioning?.hetznerApiToken).toBe('secret-hetzner');
+      expect(config.backend.provisioning?.digitaloceanApiToken).toBe('secret-do');
+    });
+
+    it('defaults ssh.publicKey to empty string when not provided', () => {
+      const config = buildDecabillBillingCloudInitConfigFromRequest({}, 'host1');
+
+      expect(config.ssh.publicKey).toBe('');
+    });
+  });
+
+  describe('buildDecabillBillingCloudInitUserData', () => {
+    it('returns base64-encoded user data that decodes to a bash script with Decabill images', () => {
+      const config = buildDecabillBillingCloudInitConfigFromRequest(
+        { authenticationMethod: 'users', sshPublicKey: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIexample' },
+        'host1',
+        'example.com',
+      );
+      const encoded = buildDecabillBillingCloudInitUserData(config);
+      const script = Buffer.from(encoded, 'base64').toString('utf8');
+
+      expect(script).toContain('#!/bin/bash');
+      expect(script).toContain('ghcr.io/forepath/decabill-billing-api:latest');
+      expect(script).toContain('ghcr.io/forepath/decabill-billing-console-server:latest');
+      expect(script).toContain('postgres:16-alpine');
+      expect(script).toContain(DECABILL_BILLING_STACK_DIR);
+      expect(script).toContain('REDIS_KEY_PREFIX: decabill-billing');
+      expect(script).toContain('BILLING_FRONTEND_URL:');
+    });
+  });
+
+  describe('buildDecabillBillingUpdateCommand', () => {
+    it('targets the Decabill billing stack directory', () => {
+      const command = buildDecabillBillingUpdateCommand();
+
+      expect(command).toContain(`cd ${DECABILL_BILLING_STACK_DIR}`);
+      expect(command).toContain('docker compose up -d --pull=always');
+      expect(command).toContain('/var/log/decabill-billing-update.log');
+    });
+  });
+});

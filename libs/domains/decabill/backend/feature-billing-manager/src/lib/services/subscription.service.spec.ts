@@ -133,6 +133,8 @@ describe('SubscriptionService', () => {
     publishInvoice: jest.fn(),
     publishPayment: jest.fn(),
     publishSubscription: jest.fn(),
+    publishSubscriptionProvisioned: jest.fn(),
+    publishSubscriptionProvisionFailed: jest.fn(),
     publish: jest.fn(),
   };
   const billingEmailPublisher = {

@@ -21,6 +21,17 @@ import { BILLING_NOTIFICATION_EVENTS, type BillingNotificationEventType } from '
 
 export { BILLING_NOTIFICATION_EVENTS, type BillingNotificationEventType };
 
+/** Webhook-safe provision failure text: no multiline blobs or overly long provider dumps. */
+export function sanitizeProvisioningErrorMessage(message: string): string {
+  const normalized = message.replace(/[\r\n\t]+/g, ' ').trim();
+
+  if (!normalized) {
+    return 'Provisioning failed';
+  }
+
+  return normalized.length > 240 ? `${normalized.slice(0, 237)}...` : normalized;
+}
+
 export type SubscriptionPlanBillingFields = Pick<ServicePlanEntity, 'billInAdvance' | 'billingIntervalType'>;
 
 export type SubscriptionWebhookEventType =
@@ -32,7 +43,9 @@ export type SubscriptionWebhookEventType =
   | 'subscription.config_change_requested'
   | 'subscription.config_changed'
   | 'subscription.config_change_failed'
-  | 'subscription.ssh_access_granted';
+  | 'subscription.ssh_access_granted'
+  | 'subscription.provisioned'
+  | 'subscription.provision_failed';
 
 /**
  * Config-change webhook context. Only identifiers and status live here: the requested payload can
@@ -172,6 +185,53 @@ export class BillingNotificationPublisher implements IIdentityNotificationPublis
         itemId: params.itemId,
         hostname: params.hostname ?? null,
         grantedAt: this.toIsoString(params.grantedAt),
+      },
+      params.subscription.userId,
+    );
+  }
+
+  /**
+   * Fired when a subscription item finishes cloud provisioning successfully.
+   */
+  publishSubscriptionProvisioned(params: {
+    subscription: SubscriptionEntity;
+    plan?: SubscriptionPlanBillingFields;
+    itemId: string;
+    hostname?: string | null;
+    service?: string | null;
+    providerReference?: string | null;
+  }): void {
+    this.publish(
+      'subscription.provisioned',
+      {
+        ...this.toSubscriptionPayload(params.subscription, params.plan),
+        itemId: params.itemId,
+        hostname: params.hostname ?? null,
+        service: params.service ?? null,
+        providerReference: params.providerReference ?? null,
+      },
+      params.subscription.userId,
+    );
+  }
+
+  /**
+   * Fired when cloud provisioning fails for a subscription item.
+   * Never include secrets from config snapshots. Error text is sanitized for webhooks.
+   */
+  publishSubscriptionProvisionFailed(params: {
+    subscription: SubscriptionEntity;
+    plan?: SubscriptionPlanBillingFields;
+    itemId: string;
+    errorMessage: string;
+    providerReference?: string | null;
+  }): void {
+    this.publish(
+      'subscription.provision_failed',
+      {
+        ...this.toSubscriptionPayload(params.subscription, params.plan),
+        itemId: params.itemId,
+        errorMessage: sanitizeProvisioningErrorMessage(params.errorMessage),
+        providerReference: params.providerReference ?? null,
       },
       params.subscription.userId,
     );

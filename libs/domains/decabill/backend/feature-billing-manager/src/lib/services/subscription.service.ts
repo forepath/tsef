@@ -481,6 +481,15 @@ export class SubscriptionService {
         const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);
         const refreshedItem = await this.subscriptionItemsRepository.findByIdWithRelations(itemId);
 
+        this.billingNotificationPublisher.publishSubscriptionProvisioned({
+          subscription,
+          plan,
+          itemId,
+          hostname,
+          service: typeof effectiveConfig.service === 'string' ? effectiveConfig.service : null,
+          providerReference: provisioned.serverId,
+        });
+
         if (refreshedItem) {
           await this.addonLifecycleService.activateAfterProvisioning({
             subscription,
@@ -506,6 +515,12 @@ export class SubscriptionService {
       if (provisionedServerId) {
         await this.subscriptionItemsRepository.updateProvisioningStatus(itemId, 'failed');
         this.logger.error(`Provisioning item ${itemId} failed after server creation: ${(error as Error).message}`);
+        this.billingNotificationPublisher.publishSubscriptionProvisionFailed({
+          subscription,
+          itemId,
+          errorMessage: (error as Error).message,
+          providerReference: provisionedServerId,
+        });
 
         return;
       }
@@ -530,6 +545,12 @@ export class SubscriptionService {
           providerErrors: { reason: (error as Error).message },
         });
       }
+
+      this.billingNotificationPublisher.publishSubscriptionProvisionFailed({
+        subscription,
+        itemId,
+        errorMessage: (error as Error).message,
+      });
 
       this.logger.error(`Provisioning item ${itemId} failed: ${(error as Error).message}`);
     }

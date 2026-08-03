@@ -200,6 +200,10 @@ export class ServicePlansPageComponent implements OnInit {
     if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-manager')) {
       target.add('integrated:agenstra-manager');
     }
+
+    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'decabill-billing')) {
+      target.add('integrated:decabill-billing');
+    }
   }
 
   private pruneInvalidProvisioningOptionKeys(
@@ -221,6 +225,13 @@ export class ServicePlansPageComponent implements OnInit {
       if (
         optionKey === 'integrated:agenstra-manager' &&
         !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-manager')
+      ) {
+        target.delete(optionKey);
+      }
+
+      if (
+        optionKey === 'integrated:decabill-billing' &&
+        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'decabill-billing')
       ) {
         target.delete(optionKey);
       }
@@ -269,6 +280,7 @@ export class ServicePlansPageComponent implements OnInit {
       (value) =>
         value === 'agenstra-controller' ||
         value === 'agenstra-manager' ||
+        value === 'decabill-billing' ||
         value === 'controller' ||
         value === 'manager' ||
         value === 'custom',
@@ -523,6 +535,10 @@ export class ServicePlansPageComponent implements OnInit {
 
     if (optionKeys.has('integrated:agenstra-manager')) {
       services.push('agenstra-manager');
+    }
+
+    if (optionKeys.has('integrated:decabill-billing')) {
+      services.push('decabill-billing');
     }
 
     if (services.length > 0) {

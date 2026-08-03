@@ -3,6 +3,7 @@ import {
   IntegratedProvisioningService,
   canonicalizeCloudInitService,
   canonicalizeIntegratedProvisioningService,
+  integratedProvisioningServiceLabel,
   rewriteIntegratedServiceIdsInConfig,
 } from './integrated-provisioning-service';
 
@@ -14,6 +15,9 @@ describe('integrated-provisioning-service', () => {
       );
       expect(canonicalizeIntegratedProvisioningService(IntegratedProvisioningService.AgenstraManager)).toBe(
         IntegratedProvisioningService.AgenstraManager,
+      );
+      expect(canonicalizeIntegratedProvisioningService(IntegratedProvisioningService.DecabillBilling)).toBe(
+        IntegratedProvisioningService.DecabillBilling,
       );
     });
 
@@ -33,10 +37,25 @@ describe('integrated-provisioning-service', () => {
   describe('canonicalizeCloudInitService', () => {
     it('maps integrated, custom, and legacy values', () => {
       expect(canonicalizeCloudInitService('agenstra-manager')).toBe(CloudInitServiceType.AgenstraManager);
+      expect(canonicalizeCloudInitService('decabill-billing')).toBe(CloudInitServiceType.DecabillBilling);
       expect(canonicalizeCloudInitService('custom')).toBe(CloudInitServiceType.Custom);
       expect(canonicalizeCloudInitService('controller')).toBe(CloudInitServiceType.AgenstraController);
       expect(canonicalizeCloudInitService('manager')).toBe(CloudInitServiceType.AgenstraManager);
       expect(canonicalizeCloudInitService(undefined)).toBe(CloudInitServiceType.AgenstraController);
+    });
+  });
+
+  describe('integratedProvisioningServiceLabel', () => {
+    it('returns labels for all integrated services', () => {
+      expect(integratedProvisioningServiceLabel(IntegratedProvisioningService.AgenstraController)).toBe(
+        'Agenstra Controller',
+      );
+      expect(integratedProvisioningServiceLabel(IntegratedProvisioningService.AgenstraManager)).toBe(
+        'Agenstra Manager',
+      );
+      expect(integratedProvisioningServiceLabel(IntegratedProvisioningService.DecabillBilling)).toBe(
+        'Decabill Billing',
+      );
     });
   });
 

@@ -59,6 +59,9 @@ describe('providerConfigSchemaUtils', () => {
       expect(
         getProductProviderConfigKeys(schema, Object.keys(schema), [IntegratedProvisioningService.AgenstraManager]),
       ).toEqual(['authenticationMethod', 'git']);
+      expect(
+        getProductProviderConfigKeys(schema, Object.keys(schema), [IntegratedProvisioningService.DecabillBilling]),
+      ).toEqual(['authenticationMethod', 'disableSignup']);
     });
 
     it('maps legacy productServices aliases when filtering product keys', () => {

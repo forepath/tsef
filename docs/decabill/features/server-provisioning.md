@@ -52,12 +52,13 @@ sequenceDiagram
 
 ## Bundled Product Stack
 
-Cloud-init installs Docker CE and deploys a docker-compose stack on the instance. The default agenstra-controller bundle includes:
+Cloud-init installs Docker CE and deploys a docker-compose stack on the instance. Integrated service kinds:
 
-- **PostgreSQL** Application database with health checks
-- **Backend API** NestJS billing or agent controller API container (depending on service plan configuration)
-- **Frontend console** Angular SSR web application served behind reverse proxy
-- **Nginx** Terminates HTTP and HTTPS, proxies to backend and frontend containers, serves ACME HTTP-01 challenges at `/.well-known/acme-challenge/`
+| Service id            | Stack                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `agenstra-controller` | PostgreSQL (pgvector), Redis, Agenstra Controller API (api/worker/scheduler), agent console, Nginx + Certbot under `/opt/agent-controller` |
+| `agenstra-manager`    | PostgreSQL, Agenstra Manager API, Nginx under `/opt/agent-manager`                                                                         |
+| `decabill-billing`    | PostgreSQL, Redis, Decabill billing API (api/worker/scheduler), billing console, Nginx + Certbot under `/opt/decabill-billing`             |
 
 Containers share a defined application directory on the host (typically under `/opt/`). Environment variables for authentication, database connection, and product-specific settings are interpolated into the generated compose file from the subscription's requested configuration.
 
@@ -65,7 +66,7 @@ Operators choose service kind and image tags through service type and plan confi
 
 ## Custom Service Kind
 
-Plans may set `providerConfigDefaults.service` to `custom` and reference a CloudInit config id. This third path deploys a single Docker service defined by an admin template instead of the bundled agenstra-controller or agenstra-manager stack.
+Plans may set `providerConfigDefaults.service` to `custom` and reference a CloudInit config id. This path deploys a single Docker service defined by an admin template instead of the bundled agenstra-controller, agenstra-manager, or decabill-billing stacks.
 
 Custom cloud-init installs Docker and runs one compose service with resolved environment variables. It does not install Nginx, Certbot, or the bundled PostgreSQL and product containers. The subscription item update scheduler skips custom items.
 
@@ -129,7 +130,18 @@ A background scheduler connects to each provisioned host via SSH (key stored on 
 docker compose up -d --pull=always
 ```
 
-in the application directory. This pulls latest container images and recreates services. Failures are logged on the host under `/var/log/agent-controller-update.log` or equivalent per service kind.
+in the application directory. This pulls latest container images and recreates services. Failures are logged on the host under `/var/log/agent-controller-update.log`, `/var/log/decabill-billing-update.log`, or equivalent per service kind.
+
+## Provisioning outcome notifications
+
+When a subscription item finishes (or fails) cloud provisioning, Decabill publishes:
+
+| Event                           | When                                                                                                                 |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `subscription.provisioned`      | Item reaches `provisioningStatus=active` after server create (includes itemId, hostname, service, providerReference) |
+| `subscription.provision_failed` | Provisioning fails (includes itemId, errorMessage, optional providerReference; never config secrets)                 |
+
+See [Webhooks](./webhooks.md).
 
 ## Optional Instance Configuration
 

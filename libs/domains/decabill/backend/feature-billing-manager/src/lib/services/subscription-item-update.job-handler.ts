@@ -4,6 +4,7 @@ import { SubscriptionItemsRepository } from '../repositories/subscription-items.
 import { CloudInitServiceType, normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
 import { buildAgentControllerUpdateCommand } from '../utils/cloud-init/agent-controller.utils';
 import { buildAgentManagerUpdateCommand } from '../utils/cloud-init/agent-manager.utils';
+import { buildDecabillBillingUpdateCommand } from '../utils/cloud-init/decabill-billing.utils';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
 
 import { ProvisioningService } from './provisioning.service';
@@ -58,10 +59,16 @@ export class SubscriptionItemUpdateJobHandler {
       return;
     }
 
-    const command =
-      service === CloudInitServiceType.AgenstraManager
-        ? buildAgentManagerUpdateCommand()
-        : buildAgentControllerUpdateCommand();
+    let command: string;
+
+    if (service === CloudInitServiceType.AgenstraManager) {
+      command = buildAgentManagerUpdateCommand();
+    } else if (service === CloudInitServiceType.DecabillBilling) {
+      command = buildDecabillBillingUpdateCommand();
+    } else {
+      command = buildAgentControllerUpdateCommand();
+    }
+
     const result = await this.sshExecutor.exec(serverInfo.publicIp, SSH_PORT, SSH_USER, item.sshPrivateKey, command);
 
     if (result.code !== 0) {

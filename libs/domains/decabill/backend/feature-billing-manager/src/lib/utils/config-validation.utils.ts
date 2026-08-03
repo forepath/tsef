@@ -79,6 +79,10 @@ function expandConfigEnumAllowlist(key: string, enumList: unknown[]): Set<unknow
       allowed.add('manager');
       allowed.add('agenstra-manager');
     }
+
+    if (entry === 'decabill-billing') {
+      allowed.add('decabill-billing');
+    }
   }
 
   return allowed;
