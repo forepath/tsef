@@ -30,12 +30,13 @@ export class SubscriptionItemEntity {
   @JoinColumn({ name: 'subscription_id' })
   subscription?: SubscriptionEntity;
 
-  @Column({ type: 'uuid', name: 'service_type_id' })
-  serviceTypeId!: string;
+  /** Null when the parent plan has no service type. */
+  @Column({ type: 'uuid', name: 'service_type_id', nullable: true })
+  serviceTypeId!: string | null;
 
-  @ManyToOne(() => ServiceTypeEntity, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => ServiceTypeEntity, { onDelete: 'RESTRICT', nullable: true })
   @JoinColumn({ name: 'service_type_id' })
-  serviceType?: ServiceTypeEntity;
+  serviceType?: ServiceTypeEntity | null;
 
   /** Plan/config snapshot; encrypted at rest via AES-256-GCM. */
   @Column({

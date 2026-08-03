@@ -4,7 +4,7 @@ Order service plans, manage subscription lifecycle, and provision cloud infrastr
 
 ## Overview
 
-Subscriptions link a user to a service plan. Plans reference a service type that may include Hetzner or DigitalOcean provisioning. Each subscription can have one or more subscription items representing provisioned or pending instances.
+Subscriptions link a user to a service plan. Plans usually reference a service type that may include Hetzner or DigitalOcean provisioning. Plans may also use `serviceTypeId: null` (billing-only, no deployment). Each subscription can have one or more subscription items representing provisioned, pending, or immediately active (non-provisioned) instances.
 
 The order flow requires a complete [Customer Profile](./customer-profiles.md) before `POST /subscriptions` is accepted.
 

@@ -25,10 +25,12 @@ import { OrderProvisioningOptionDto } from '../dto/order-provisioning-option.dto
 import { ServicePlanResponseDto } from '../dto/service-plan-response.dto';
 import { UpdateServicePlanDto } from '../dto/update-service-plan.dto';
 import { ServicePlanEntity } from '../entities/service-plan.entity';
+import { fromApiServiceTypeId, isNoneServiceTypeId, toApiServiceTypeId } from '../constants/service-type-id.constants';
 import { TaxCategory } from '../constants/tax-category.constants';
 import { AddonsRepository } from '../repositories/addons.repository';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
 import { ServiceTypesRepository } from '../repositories/service-types.repository';
+import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { AddonService } from '../services/addon.service';
 import { CloudInitConfigService } from '../services/cloud-init-config.service';
 import { ProviderRegistryService } from '../services/provider-registry.service';
@@ -41,6 +43,7 @@ import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
 import { normalizePlanProviderConfigDefaults } from '../utils/cloud-init/plan-provisioning-options.utils';
 import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
 import { commercialPricingFieldsChanged, snapshotCommercialPricing } from '../utils/plan-commercial-pricing.utils';
+import { isPostgresForeignKeyViolation } from '../utils/postgres-foreign-key-violation.util';
 import { effectiveSchemaSupportsLocationSelection } from '../utils/provider-location.utils';
 import {
   effectiveSchemaSupportsServerTypeSelection,
@@ -58,6 +61,7 @@ export class ServicePlansController {
     private readonly cloudInitConfigService: CloudInitConfigService,
     private readonly addonService: AddonService,
     private readonly addonsRepository: AddonsRepository,
+    private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly withdrawalPolicyService: WithdrawalPolicyService,
     @Inject(PLAN_PRICE_MIGRATE_ENQUEUE)
     private readonly planPriceMigrateEnqueue: PlanPriceMigrateEnqueuePort,
@@ -72,8 +76,10 @@ export class ServicePlansController {
   ): Promise<ServicePlanResponseDto[]> {
     let rows = await this.servicePlansRepository.findAll(limit ?? 10, offset ?? 0);
 
-    if (serviceTypeId) {
-      rows = rows.filter((row) => row.serviceTypeId === serviceTypeId);
+    if (serviceTypeId !== undefined) {
+      const dbTypeId = isNoneServiceTypeId(serviceTypeId) ? null : serviceTypeId.trim();
+
+      rows = rows.filter((row) => row.serviceTypeId === dbTypeId);
     }
 
     return await Promise.all(rows.map((row) => this.mapToResponse(row)));
@@ -86,6 +92,10 @@ export class ServicePlansController {
   ): Promise<OrderProvisioningOptionDto[]> {
     const row = await this.servicePlansRepository.findByIdOrThrow(id);
 
+    if (!row.serviceTypeId) {
+      return [];
+    }
+
     return this.cloudInitConfigService.buildOrderProvisioningOptions(row.providerConfigDefaults ?? {});
   }
 
@@ -93,6 +103,11 @@ export class ServicePlansController {
   @Get(':id/addons')
   async listOrderAddons(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<PlanAddonOptionDto[]> {
     const plan = await this.servicePlansRepository.findByIdOrThrow(id);
+
+    if (!plan.serviceTypeId) {
+      return [];
+    }
+
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
 
     if (!this.addonService.providerSupportsAddons(serviceType.provider)) {
@@ -132,6 +147,12 @@ export class ServicePlansController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) planId: string,
     @Param('configId', new ParseUUIDPipe({ version: '4' })) configId: string,
   ): Promise<CloudInitConfigOrderFieldDto[]> {
+    const plan = await this.servicePlansRepository.findByIdOrThrow(planId);
+
+    if (!plan.serviceTypeId) {
+      return [];
+    }
+
     return this.cloudInitConfigService.getOrderFieldsForPlan(planId, configId);
   }
 
@@ -148,25 +169,37 @@ export class ServicePlansController {
   @KeycloakRoles(UserRole.ADMIN)
   @UsersRoles(UserRole.ADMIN)
   async create(@Body() dto: CreateServicePlanDto): Promise<ServicePlanResponseDto> {
-    await this.assertAllowLocationAllowed(dto.serviceTypeId, dto.allowCustomerLocationSelection === true);
-    await this.assertAllowServerTypeAllowed(
-      dto.serviceTypeId,
-      dto.allowCustomerServerTypeSelection === true,
-      dto.allowedServerTypes,
-    );
-    const normalizedDefaults = normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
-    const allowCustomerServerTypeSelection = dto.allowCustomerServerTypeSelection === true;
+    const dbServiceTypeId = fromApiServiceTypeId(dto.serviceTypeId);
+    const isNone = dbServiceTypeId == null;
+
+    if (isNone) {
+      this.assertNonePlanConstraints(dto);
+    } else {
+      await this.assertAllowLocationAllowed(dbServiceTypeId, dto.allowCustomerLocationSelection === true);
+      await this.assertAllowServerTypeAllowed(
+        dbServiceTypeId,
+        dto.allowCustomerServerTypeSelection === true,
+        dto.allowedServerTypes,
+      );
+    }
+
+    const normalizedDefaults = isNone ? {} : normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
+    const allowCustomerServerTypeSelection = isNone ? false : dto.allowCustomerServerTypeSelection === true;
     const allowedServerTypes = allowCustomerServerTypeSelection
       ? normalizeAllowedServerTypes(dto.allowedServerTypes)
       : [];
 
-    await this.cloudInitConfigService.assertActiveConfigForPlanDefaults(dto.serviceTypeId, normalizedDefaults);
-    await this.addonService.assertAllowedAddonIdsForPlan(
-      dto.serviceTypeId,
-      parsePlanAllowedAddonIds(normalizedDefaults),
-    );
+    if (!isNone && dbServiceTypeId) {
+      await this.cloudInitConfigService.assertActiveConfigForPlanDefaults(dbServiceTypeId, normalizedDefaults);
+      await this.addonService.assertAllowedAddonIdsForPlan(
+        dbServiceTypeId,
+        parsePlanAllowedAddonIds(normalizedDefaults),
+      );
+    }
+
     const row = await this.servicePlansRepository.create({
-      serviceTypeId: dto.serviceTypeId,
+      serviceTypeId: dbServiceTypeId,
+      tenantId: getTenantIdOrDefault(),
       name: dto.name,
       description: dto.description,
       billingIntervalType: dto.billingIntervalType,
@@ -174,7 +207,7 @@ export class ServicePlansController {
       billingDayOfMonth: dto.billingDayOfMonth,
       cancelAtPeriodEnd: dto.cancelAtPeriodEnd ?? true,
       billInAdvance: dto.billInAdvance ?? false,
-      autoRecalculatePriceDaily: dto.autoRecalculatePriceDaily ?? false,
+      autoRecalculatePriceDaily: isNone ? false : (dto.autoRecalculatePriceDaily ?? false),
       minCommitmentDays: dto.minCommitmentDays ?? 0,
       noticeDays: dto.noticeDays ?? 0,
       basePrice: dto.basePrice,
@@ -182,7 +215,7 @@ export class ServicePlansController {
       marginFixed: dto.marginFixed,
       providerConfigDefaults: normalizedDefaults ?? {},
       orderingHighlights: dto.orderingHighlights ?? [],
-      allowCustomerLocationSelection: dto.allowCustomerLocationSelection ?? false,
+      allowCustomerLocationSelection: isNone ? false : (dto.allowCustomerLocationSelection ?? false),
       allowCustomerServerTypeSelection,
       allowedServerTypes,
       taxCategory: dto.taxCategory ?? TaxCategory.STANDARD,
@@ -201,25 +234,34 @@ export class ServicePlansController {
     @Body() dto: UpdateServicePlanDto,
   ): Promise<ServicePlanResponseDto> {
     const existing = await this.servicePlansRepository.findByIdOrThrow(id);
+    const isNone = !existing.serviceTypeId;
 
-    if (dto.allowCustomerLocationSelection === true) {
-      await this.assertAllowLocationAllowed(existing.serviceTypeId, true);
+    if (isNone) {
+      this.assertNonePlanUpdateConstraints(dto);
     }
 
-    if (dto.allowCustomerServerTypeSelection === true) {
-      await this.assertAllowServerTypeAllowed(
-        existing.serviceTypeId,
-        true,
-        dto.allowedServerTypes ?? existing.allowedServerTypes,
-      );
+    if (!isNone && existing.serviceTypeId) {
+      if (dto.allowCustomerLocationSelection === true) {
+        await this.assertAllowLocationAllowed(existing.serviceTypeId, true);
+      }
+
+      if (dto.allowCustomerServerTypeSelection === true) {
+        await this.assertAllowServerTypeAllowed(
+          existing.serviceTypeId,
+          true,
+          dto.allowedServerTypes ?? existing.allowedServerTypes,
+        );
+      }
     }
 
-    const allowCustomerServerTypeSelection =
-      dto.allowCustomerServerTypeSelection !== undefined
+    const allowCustomerServerTypeSelection = isNone
+      ? false
+      : dto.allowCustomerServerTypeSelection !== undefined
         ? dto.allowCustomerServerTypeSelection === true
         : existing.allowCustomerServerTypeSelection === true;
-    const allowedServerTypes =
-      dto.allowedServerTypes !== undefined
+    const allowedServerTypes = isNone
+      ? []
+      : dto.allowedServerTypes !== undefined
         ? allowCustomerServerTypeSelection
           ? normalizeAllowedServerTypes(dto.allowedServerTypes)
           : []
@@ -227,7 +269,7 @@ export class ServicePlansController {
           ? normalizeAllowedServerTypes(existing.allowedServerTypes)
           : [];
 
-    if (dto.providerConfigDefaults !== undefined) {
+    if (!isNone && existing.serviceTypeId && dto.providerConfigDefaults !== undefined) {
       const normalizedDefaults = normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
 
       await this.cloudInitConfigService.assertActiveConfigForPlanDefaults(existing.serviceTypeId, normalizedDefaults);
@@ -251,7 +293,7 @@ export class ServicePlansController {
       ...(dto.cancelAtPeriodEnd !== undefined ? { cancelAtPeriodEnd: dto.cancelAtPeriodEnd } : {}),
       ...(dto.billInAdvance !== undefined ? { billInAdvance: dto.billInAdvance } : {}),
       ...(dto.autoRecalculatePriceDaily !== undefined
-        ? { autoRecalculatePriceDaily: dto.autoRecalculatePriceDaily }
+        ? { autoRecalculatePriceDaily: isNone ? false : dto.autoRecalculatePriceDaily }
         : {}),
       ...(dto.minCommitmentDays !== undefined ? { minCommitmentDays: dto.minCommitmentDays } : {}),
       ...(dto.noticeDays !== undefined ? { noticeDays: dto.noticeDays } : {}),
@@ -259,16 +301,16 @@ export class ServicePlansController {
       ...(dto.marginPercent !== undefined ? { marginPercent: dto.marginPercent } : {}),
       ...(dto.marginFixed !== undefined ? { marginFixed: dto.marginFixed } : {}),
       ...(dto.providerConfigDefaults !== undefined
-        ? { providerConfigDefaults: normalizePlanProviderConfigDefaults(dto.providerConfigDefaults) }
+        ? {
+            providerConfigDefaults: isNone ? {} : normalizePlanProviderConfigDefaults(dto.providerConfigDefaults),
+          }
         : {}),
       ...(dto.orderingHighlights !== undefined ? { orderingHighlights: dto.orderingHighlights } : {}),
       ...(dto.allowCustomerLocationSelection !== undefined
-        ? { allowCustomerLocationSelection: dto.allowCustomerLocationSelection }
+        ? { allowCustomerLocationSelection: isNone ? false : dto.allowCustomerLocationSelection }
         : {}),
-      ...(dto.allowCustomerServerTypeSelection !== undefined
-        ? { allowCustomerServerTypeSelection: dto.allowCustomerServerTypeSelection }
-        : {}),
-      ...(dto.allowedServerTypes !== undefined || dto.allowCustomerServerTypeSelection !== undefined
+      ...(dto.allowCustomerServerTypeSelection !== undefined || isNone ? { allowCustomerServerTypeSelection } : {}),
+      ...(dto.allowedServerTypes !== undefined || dto.allowCustomerServerTypeSelection !== undefined || isNone
         ? { allowedServerTypes }
         : {}),
       ...(dto.taxCategory !== undefined ? { taxCategory: dto.taxCategory } : {}),
@@ -306,15 +348,38 @@ export class ServicePlansController {
   @UsersRoles(UserRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    await this.servicePlansRepository.delete(id);
+    await this.servicePlansRepository.findByIdOrThrow(id);
+
+    const subscriptionCount = await this.subscriptionsRepository.countByPlanId(id);
+
+    if (subscriptionCount > 0) {
+      throw new BadRequestException(
+        `Service plan is referenced by ${subscriptionCount} subscription(s) and cannot be deleted`,
+      );
+    }
+
+    try {
+      await this.servicePlansRepository.delete(id);
+    } catch (error: unknown) {
+      if (isPostgresForeignKeyViolation(error)) {
+        this.logger.warn(`Blocked delete of service plan ${id}: still referenced by subscriptions`);
+        throw new BadRequestException('Service plan is referenced by subscriptions and cannot be deleted');
+      }
+
+      throw error;
+    }
   }
 
   private async mapToResponse(row: ServicePlanEntity): Promise<ServicePlanResponseDto> {
-    const serviceType = await this.serviceTypesRepository.findByIdOrThrow(row.serviceTypeId);
+    const withdrawalPolicy = row.serviceTypeId
+      ? this.withdrawalPolicyService.buildPolicyInfo(
+          await this.serviceTypesRepository.findByIdOrThrow(row.serviceTypeId),
+        )
+      : this.withdrawalPolicyService.buildPolicyInfo({ disallowStatutoryWithdrawal: false });
 
     return {
       id: row.id,
-      serviceTypeId: row.serviceTypeId,
+      serviceTypeId: toApiServiceTypeId(row.serviceTypeId),
       name: row.name,
       description: row.description,
       billingIntervalType: row.billingIntervalType,
@@ -334,11 +399,51 @@ export class ServicePlansController {
       allowCustomerServerTypeSelection: row.allowCustomerServerTypeSelection === true,
       allowedServerTypes: normalizeAllowedServerTypes(row.allowedServerTypes),
       taxCategory: row.taxCategory ?? TaxCategory.STANDARD,
-      withdrawalPolicy: this.withdrawalPolicyService.buildPolicyInfo(serviceType),
+      withdrawalPolicy,
       isActive: row.isActive,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };
+  }
+
+  private assertNonePlanConstraints(dto: CreateServicePlanDto): void {
+    if (dto.allowCustomerLocationSelection === true) {
+      throw new BadRequestException(
+        'allowCustomerLocationSelection is not supported when serviceTypeId is null (no deployment)',
+      );
+    }
+
+    if (dto.allowCustomerServerTypeSelection === true) {
+      throw new BadRequestException(
+        'allowCustomerServerTypeSelection is not supported when serviceTypeId is null (no deployment)',
+      );
+    }
+
+    if (dto.autoRecalculatePriceDaily === true) {
+      throw new BadRequestException(
+        'autoRecalculatePriceDaily is not supported when serviceTypeId is null (no deployment)',
+      );
+    }
+  }
+
+  private assertNonePlanUpdateConstraints(dto: UpdateServicePlanDto): void {
+    if (dto.allowCustomerLocationSelection === true) {
+      throw new BadRequestException(
+        'allowCustomerLocationSelection is not supported when serviceTypeId is null (no deployment)',
+      );
+    }
+
+    if (dto.allowCustomerServerTypeSelection === true) {
+      throw new BadRequestException(
+        'allowCustomerServerTypeSelection is not supported when serviceTypeId is null (no deployment)',
+      );
+    }
+
+    if (dto.autoRecalculatePriceDaily === true) {
+      throw new BadRequestException(
+        'autoRecalculatePriceDaily is not supported when serviceTypeId is null (no deployment)',
+      );
+    }
   }
 
   private async assertAllowLocationAllowed(serviceTypeId: string, allow: boolean): Promise<void> {

@@ -7,7 +7,7 @@ export class PublicServicePlanOfferingDto {
   id!: string;
   name!: string;
   description!: string | null;
-  serviceTypeId!: string;
+  serviceTypeId!: string | null;
   serviceTypeName!: string;
   billingIntervalType!: BillingIntervalType;
   billingIntervalValue!: number;

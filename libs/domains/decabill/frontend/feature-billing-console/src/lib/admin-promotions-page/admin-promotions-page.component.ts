@@ -234,14 +234,14 @@ export class AdminPromotionsPageComponent implements OnInit {
 
   planLabel(
     planId: string,
-    plans: { id: string; name: string; serviceTypeId: string }[],
+    plans: { id: string; name: string; serviceTypeId: string | null }[],
     types: { id: string; name: string }[],
   ): string {
     const plan = plans.find((item) => item.id === planId);
 
     if (!plan) return planId;
 
-    const typeName = types.find((item) => item.id === plan.serviceTypeId)?.name ?? '';
+    const typeName = plan.serviceTypeId ? (types.find((item) => item.id === plan.serviceTypeId)?.name ?? '') : '';
 
     return typeName ? `${plan.name} (${typeName})` : plan.name;
   }

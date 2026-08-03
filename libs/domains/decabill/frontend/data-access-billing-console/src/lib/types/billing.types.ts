@@ -309,7 +309,7 @@ export interface ServicePlanOrderingHighlight {
 
 export interface ServicePlanResponse {
   id: string;
-  serviceTypeId: string;
+  serviceTypeId: string | null;
   name: string;
   description?: string | null;
   billingIntervalType: BillingIntervalType;
@@ -338,7 +338,8 @@ export interface ServicePlanResponse {
 }
 
 export interface CreateServicePlanDto {
-  serviceTypeId: string;
+  /** UUID of a service type, or null for no deployment. */
+  serviceTypeId?: string | null;
   name: string;
   description?: string;
   billingIntervalType: BillingIntervalType;
@@ -490,7 +491,7 @@ export type ProvisioningStatus = 'pending' | 'active' | 'failed';
 export interface SubscriptionItemResponse {
   id: string;
   subscriptionId: string;
-  serviceTypeId: string;
+  serviceTypeId: string | null;
   /** User-facing service type name from the catalog. */
   serviceTypeName?: string;
   provisioningStatus: ProvisioningStatus;

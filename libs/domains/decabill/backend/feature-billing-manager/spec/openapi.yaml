@@ -602,6 +602,12 @@ paths:
       responses:
         '204':
           description: Service plan deleted
+        '400':
+          description: Plan cannot be deleted (e.g. still referenced by subscriptions)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized
           content:
@@ -5308,9 +5314,13 @@ components:
         serviceTypeId:
           type: string
           format: uuid
+          nullable: true
+          description: >
+            Service type UUID, or null when the plan has no service type
+            and deploys nothing.
         serviceTypeName:
           type: string
-          description: Display name of the service type (no config schema)
+          description: Display name of the service type (no config schema); empty when serviceTypeId is null
         billingIntervalType:
           type: string
           enum: [hour, day, month, year]
@@ -5352,12 +5362,15 @@ components:
           $ref: '#/components/schemas/WithdrawalPolicy'
     CreateServicePlanDto:
       type: object
-      required: [serviceTypeId, name, billingIntervalType, billingIntervalValue]
+      required: [name, billingIntervalType, billingIntervalValue]
       properties:
         serviceTypeId:
           type: string
           format: uuid
-          description: Service type ID
+          nullable: true
+          description: >
+            UUID of an existing service type, or null/omitted for a billing-only plan that deploys
+            nothing (default in the admin UI).
         name:
           type: string
         description:
@@ -5467,7 +5480,11 @@ components:
       type: object
       properties:
         id: { type: string, format: uuid }
-        serviceTypeId: { type: string, format: uuid }
+        serviceTypeId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Service type UUID, or null when the plan has no service type / no deployment
         name: { type: string }
         description: { type: string, nullable: true }
         billingIntervalType: { type: string, enum: [hour, day, month, year] }
@@ -5868,11 +5885,15 @@ components:
       properties:
         id: { type: string, format: uuid }
         subscriptionId: { type: string, format: uuid }
-        serviceTypeId: { type: string, format: uuid }
+        serviceTypeId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Service type UUID, or null when the parent plan has no service type
         serviceTypeName:
           {
             type: string,
-            description: User-facing service type name from the catalog (billing_service_types.name),
+            description: User-facing service type name from the catalog (billing_service_types.name); empty when serviceTypeId is null,
           }
         provisioningStatus: { type: string, enum: [pending, active, failed] }
         hostname:

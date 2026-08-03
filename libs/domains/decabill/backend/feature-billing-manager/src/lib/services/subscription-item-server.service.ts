@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 
+import { toApiServiceTypeId } from '../constants/service-type-id.constants';
 import {
   SubscriptionItemResponseDto,
   SubscriptionSshAccessKeyResponseDto,
@@ -162,23 +163,26 @@ export class SubscriptionItemServerService {
   private toItemResponse(item: {
     id: string;
     subscriptionId: string;
-    serviceTypeId: string;
+    serviceTypeId: string | null;
     serviceType?: { name?: string } | null;
     provisioningStatus: ProvisioningStatus;
     hostname?: string;
     configSnapshot?: Record<string, unknown>;
     sshAccessGrantedAt?: Date | null;
   }): SubscriptionItemResponseDto {
-    const service = normalizeCloudInitService(item.configSnapshot?.service as string | undefined);
+    const hasServiceType = item.serviceTypeId != null;
+    const service = hasServiceType
+      ? normalizeCloudInitService(item.configSnapshot?.service as string | undefined)
+      : undefined;
 
     return {
       id: item.id,
       subscriptionId: item.subscriptionId,
-      serviceTypeId: item.serviceTypeId,
+      serviceTypeId: toApiServiceTypeId(item.serviceTypeId),
       serviceTypeName: item.serviceType?.name?.trim() || '',
       provisioningStatus: item.provisioningStatus,
       hostname: item.hostname,
-      service,
+      ...(service ? { service } : {}),
       sshAccessGranted: item.sshAccessGrantedAt != null,
     };
   }

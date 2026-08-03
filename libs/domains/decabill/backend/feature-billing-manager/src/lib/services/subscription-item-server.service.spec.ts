@@ -92,6 +92,25 @@ describe('SubscriptionItemServerService', () => {
 
       expect(items[0]?.serviceTypeName).toBe('');
     });
+
+    it('maps null serviceTypeId as null', async () => {
+      subscriptionItemsRepository.findBySubscription.mockResolvedValue([
+        {
+          id: 'item-1',
+          subscriptionId: 'sub-1',
+          serviceTypeId: null,
+          provisioningStatus: ProvisioningStatus.ACTIVE,
+          hostname: undefined,
+          configSnapshot: {},
+        },
+      ]);
+
+      const items = await service.listItems('sub-1', 'user-1');
+
+      expect(items[0]?.serviceTypeId).toBeNull();
+      expect(items[0]?.serviceTypeName).toBe('');
+      expect(items[0]?.service).toBeUndefined();
+    });
   });
 
   describe('getSshAccessKey', () => {

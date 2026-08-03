@@ -43,6 +43,7 @@ import {
   type SubscriptionResponse,
   formatBillingProviderLocationLabel,
   formatServerTypeOption,
+  isNoneServiceTypeId,
   normalizeAllowedServerTypeIds,
   providerLocationCatalogFromList,
   type ProviderLocationCatalog,
@@ -1358,9 +1359,16 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   private getProviderSchemaFullForOrder(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
   ): Record<string, unknown> | null {
-    if (!serviceTypeId?.trim() || !serviceTypes?.length || !providerDetails?.length) return null;
+    if (
+      !serviceTypeId?.trim() ||
+      isNoneServiceTypeId(serviceTypeId) ||
+      !serviceTypes?.length ||
+      !providerDetails?.length
+    ) {
+      return null;
+    }
 
     const serviceType = serviceTypes.find((st) => st.id === serviceTypeId);
 
@@ -1439,14 +1447,16 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
         const serviceType = serviceTypes?.find((st) => st.id === plan.serviceTypeId);
 
         if (serviceType?.provider) {
-          this.serviceTypesService.getProviderLocations(serviceType.provider, plan.serviceTypeId).subscribe({
-            next: (locations) => {
-              this.orderLocationCatalog = providerLocationCatalogFromList(locations);
-            },
-            error: () => {
-              this.orderLocationCatalog = new Map();
-            },
-          });
+          this.serviceTypesService
+            .getProviderLocations(serviceType.provider, plan.serviceTypeId ?? undefined)
+            .subscribe({
+              next: (locations) => {
+                this.orderLocationCatalog = providerLocationCatalogFromList(locations);
+              },
+              error: () => {
+                this.orderLocationCatalog = new Map();
+              },
+            });
         }
       });
   }
@@ -1486,37 +1496,39 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
         this.orderServerTypesLoading = true;
         const allowed = new Set(normalizeAllowedServerTypeIds(plan.allowedServerTypes));
-        this.serviceTypesService.getProviderServerTypes(serviceType.provider, plan.serviceTypeId).subscribe({
-          next: (types) => {
-            if (requestId !== this.orderServerTypesRequestId) {
-              return;
-            }
+        this.serviceTypesService
+          .getProviderServerTypes(serviceType.provider, plan.serviceTypeId ?? undefined)
+          .subscribe({
+            next: (types) => {
+              if (requestId !== this.orderServerTypesRequestId) {
+                return;
+              }
 
-            this.orderServerTypeOptions = types.filter((st) => allowed.has(st.id));
-            const defaults = plan.providerConfigDefaults ?? {};
-            const fromPlan = defaults['serverType'];
-            const fromPlanStr = typeof fromPlan === 'string' ? fromPlan : '';
-            const options = this.orderServerTypeOptions.map((st) => st.id);
+              this.orderServerTypeOptions = types.filter((st) => allowed.has(st.id));
+              const defaults = plan.providerConfigDefaults ?? {};
+              const fromPlan = defaults['serverType'];
+              const fromPlanStr = typeof fromPlan === 'string' ? fromPlan : '';
+              const options = this.orderServerTypeOptions.map((st) => st.id);
 
-            this.orderProvisioningServerType = options.includes(fromPlanStr) ? fromPlanStr : (options[0] ?? '');
-            this.orderServerTypesLoading = false;
-            this.clampOrderWizardStepIndex();
-            this.syncOrderPricingPreview();
-            this.cdr.detectChanges();
-          },
-          error: () => {
-            if (requestId !== this.orderServerTypesRequestId) {
-              return;
-            }
+              this.orderProvisioningServerType = options.includes(fromPlanStr) ? fromPlanStr : (options[0] ?? '');
+              this.orderServerTypesLoading = false;
+              this.clampOrderWizardStepIndex();
+              this.syncOrderPricingPreview();
+              this.cdr.detectChanges();
+            },
+            error: () => {
+              if (requestId !== this.orderServerTypesRequestId) {
+                return;
+              }
 
-            this.orderServerTypeOptions = [];
-            this.orderProvisioningServerType = '';
-            this.orderServerTypesLoading = false;
-            this.clampOrderWizardStepIndex();
-            this.syncOrderPricingPreview();
-            this.cdr.detectChanges();
-          },
-        });
+              this.orderServerTypeOptions = [];
+              this.orderProvisioningServerType = '';
+              this.orderServerTypesLoading = false;
+              this.clampOrderWizardStepIndex();
+              this.syncOrderPricingPreview();
+              this.cdr.detectChanges();
+            },
+          });
       });
   }
 

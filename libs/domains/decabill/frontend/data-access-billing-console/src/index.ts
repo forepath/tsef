@@ -18,6 +18,7 @@ export * from './lib/utils/config-change-error.utils';
 
 // Constants
 export * from './lib/constants/supported-countries';
+export * from './lib/constants/service-type-id.constants';
 
 // Services
 export * from './lib/services/service-types.service';

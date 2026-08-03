@@ -30,12 +30,17 @@ export class ServicePlanEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id!: string;
 
-  @Column({ type: 'uuid', name: 'service_type_id' })
-  serviceTypeId!: string;
+  /** Null when the plan has no service type and deploys nothing. */
+  @Column({ type: 'uuid', name: 'service_type_id', nullable: true })
+  serviceTypeId!: string | null;
 
-  @ManyToOne(() => ServiceTypeEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ServiceTypeEntity, { onDelete: 'CASCADE', nullable: true })
   @JoinColumn({ name: 'service_type_id' })
-  serviceType?: ServiceTypeEntity;
+  serviceType?: ServiceTypeEntity | null;
+
+  /** Tenant ownership (required when serviceTypeId is null; otherwise mirrors the type). */
+  @Column({ type: 'varchar', length: 64, name: 'tenant_id', default: 'default' })
+  tenantId!: string;
 
   @Column({ type: 'varchar', length: 255, name: 'name' })
   name!: string;

@@ -126,6 +126,18 @@ export class SubscriptionService {
     }
 
     const plan = await this.servicePlansRepository.findByIdOrThrow(planId);
+
+    if (!plan.serviceTypeId) {
+      return this.createSubscriptionWithoutServiceType(
+        userId,
+        plan,
+        autoBackorder,
+        promotionCode,
+        promotionBenefitStartsAt,
+        addonIds,
+      );
+    }
+
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
     const selectedAddonIds = [...new Set((addonIds ?? []).filter(Boolean))];
 
@@ -335,6 +347,90 @@ export class SubscriptionService {
     await this.billingEmailPublisher.publishSubscriptionCreated(created, plan.name, {
       billInAdvance: plan.billInAdvance === true,
       addons: addonSummaries.map((addon) => ({ name: addon.name, periodPrice: addon.periodPrice })),
+    });
+    this.customerTrustScoreService.triggerRecomputeForUser(created.userId);
+
+    return created;
+  }
+
+  /**
+   * Billing-only plans with no service type: no cloud config, availability, or provisioning.
+   * Creates the subscription and an immediately active item with null serviceTypeId.
+   */
+  private async createSubscriptionWithoutServiceType(
+    userId: string,
+    plan: ServicePlanEntity,
+    autoBackorder: boolean,
+    promotionCode?: string,
+    promotionBenefitStartsAt?: string,
+    addonIds?: string[],
+  ) {
+    const selectedAddonIds = [...new Set((addonIds ?? []).filter(Boolean))];
+
+    if (selectedAddonIds.length > 0) {
+      throw new BadRequestException('Addons are not supported for plans without a service type');
+    }
+
+    if (autoBackorder) {
+      throw new BadRequestException('Backorders are not supported for plans without a service type');
+    }
+
+    const schedule = this.billingScheduleService.calculateSchedule(
+      plan.billingIntervalType as BillingIntervalType,
+      plan.billingIntervalValue,
+      plan.billingDayOfMonth,
+    );
+    const subscription = await this.subscriptionsRepository.create({
+      userId,
+      planId: plan.id,
+      status: SubscriptionStatus.ACTIVE,
+      autoBackorder: false,
+      currentPeriodStart: schedule.currentPeriodStart,
+      currentPeriodEnd: schedule.currentPeriodEnd,
+      nextBillingAt: schedule.nextBillingAt,
+    });
+
+    const item = await this.subscriptionItemsRepository.create({
+      subscriptionId: subscription.id,
+      serviceTypeId: null,
+      configSnapshot: {},
+    });
+
+    await this.subscriptionItemsRepository.updateProvisioningStatus(item.id, 'active');
+
+    if (promotionCode?.trim()) {
+      try {
+        await this.promotionRedemptionService.redeem(
+          userId,
+          promotionCode.trim(),
+          subscription.id,
+          PromotionRedemptionContext.NEW,
+          { benefitStartsAt: promotionBenefitStartsAt },
+        );
+      } catch (error) {
+        await this.subscriptionsRepository.delete(subscription.id);
+        throw error;
+      }
+    }
+
+    const created = await this.subscriptionsRepository.findByIdOrThrow(subscription.id);
+
+    if (plan.billInAdvance === true) {
+      await this.subscriptionPeriodChargeService.recordOpenPositionForPeriod(
+        created,
+        plan,
+        schedule.currentPeriodEnd,
+        schedule.currentPeriodStart,
+        schedule.currentPeriodEnd,
+      );
+    }
+
+    this.billingNotificationPublisher.publishSubscription('subscription.created', created, plan, {
+      addons: [],
+    });
+    await this.billingEmailPublisher.publishSubscriptionCreated(created, plan.name, {
+      billInAdvance: plan.billInAdvance === true,
+      addons: [],
     });
     this.customerTrustScoreService.triggerRecomputeForUser(created.userId);
 
@@ -707,7 +803,9 @@ export class SubscriptionService {
   ): Promise<{ subscription: SubscriptionEntity; withdrawalResult?: WithdrawalResultDto }> {
     const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
     const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);
-    const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
+    const serviceType = plan.serviceTypeId
+      ? await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId)
+      : { disallowStatutoryWithdrawal: false };
     const items = await this.subscriptionItemsRepository.findBySubscription(subscriptionId);
     const decision = this.withdrawalPolicyService.evaluate({
       subscriptionStatus: subscription.status,
@@ -796,7 +894,7 @@ export class SubscriptionService {
   async mapToResponse(
     subscription: SubscriptionEntity,
     items = [] as Awaited<ReturnType<SubscriptionItemsRepository['findBySubscription']>>,
-    serviceType?: Awaited<ReturnType<ServiceTypesRepository['findByIdOrThrow']>>,
+    serviceType?: { disallowStatutoryWithdrawal: boolean },
     withdrawalResult?: WithdrawalResultDto,
     plan?: ServicePlanEntity,
   ): Promise<SubscriptionResponseDto> {
@@ -883,11 +981,16 @@ export class SubscriptionService {
 
     const planIds = [...new Set(subscriptions.map((s) => s.planId))];
     const plansByPlanId = new Map<string, ServicePlanEntity>();
-    const serviceTypesByPlan = new Map<string, Awaited<ReturnType<ServiceTypesRepository['findByIdOrThrow']>>>();
+    const serviceTypesByPlan = new Map<
+      string,
+      { disallowStatutoryWithdrawal: boolean } | Awaited<ReturnType<ServiceTypesRepository['findByIdOrThrow']>>
+    >();
 
     for (const planId of planIds) {
       const plan = await this.servicePlansRepository.findByIdOrThrow(planId);
-      const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
+      const serviceType = plan.serviceTypeId
+        ? await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId)
+        : { disallowStatutoryWithdrawal: false };
 
       plansByPlanId.set(planId, plan);
       serviceTypesByPlan.set(planId, serviceType);
