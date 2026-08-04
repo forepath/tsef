@@ -6,6 +6,7 @@ export * from './lib/controllers/promotions.controller';
 export * from './lib/controllers/admin-promotions.controller';
 export * from './lib/dto/promotion.dto';
 export * from './lib/constants/promotion.constants';
+export * from './lib/constants/service-type-id.constants';
 export * from './lib/entities/promotion.entity';
 export * from './lib/entities/promotion-redemption.entity';
 export * from './lib/entities/invoice-promotion-application.entity';

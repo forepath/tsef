@@ -151,12 +151,11 @@
                 class="form-select"
                 [(ngModel)]="createForm.serviceTypeId"
                 (ngModelChange)="onCreateServiceTypeIdChange(data.serviceTypes, data.providerDetails)"
-                required
                 [disabled]="(creating$ | async) === true"
               >
-                <option value="" i18n="@@featureServicePlans-chooseType">Choose a service type</option>
+                <option [ngValue]="null" i18n="@@featureServicePlans-noneType">None (no deployment)</option>
                 @for (st of data.serviceTypes; track st.id) {
-                  <option [value]="st.id">{{ st.name }} ({{ st.key }})</option>
+                  <option [ngValue]="st.id">{{ st.name }} ({{ st.key }})</option>
                 }
               </select>
             </div>
@@ -961,30 +960,32 @@
                 Cancellation always takes effect at the end of the already-billed period.
               </div>
             </div>
-            <div class="form-check mb-3">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="createAutoRecalculatePriceDaily"
-                name="autoRecalculatePriceDaily"
-                [(ngModel)]="createForm.autoRecalculatePriceDaily"
-                [disabled]="(creating$ | async) === true"
-              />
-              <label
-                class="form-check-label"
-                for="createAutoRecalculatePriceDaily"
-                i18n="@@featureServicePlans-autoRecalculatePriceDaily"
-                >Automatic daily price recalculation</label
-              >
-              <div
-                class="form-text text-body-secondary small"
-                i18n="@@featureServicePlans-autoRecalculatePriceDailyHelp"
-              >
-                Opt in only when required for EU compliance. When enabled, the package price is recalculated nightly at
-                midnight from the provider catalog. Checkout must disclose this and the statutory withdrawal restart
-                when the price changes.
+            @if (!isNoneServiceType(createForm.serviceTypeId)) {
+              <div class="form-check mb-3">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="createAutoRecalculatePriceDaily"
+                  name="autoRecalculatePriceDaily"
+                  [(ngModel)]="createForm.autoRecalculatePriceDaily"
+                  [disabled]="(creating$ | async) === true"
+                />
+                <label
+                  class="form-check-label"
+                  for="createAutoRecalculatePriceDaily"
+                  i18n="@@featureServicePlans-autoRecalculatePriceDaily"
+                  >Automatic daily price recalculation</label
+                >
+                <div
+                  class="form-text text-body-secondary small"
+                  i18n="@@featureServicePlans-autoRecalculatePriceDailyHelp"
+                >
+                  Opt in only when required for EU compliance. When enabled, the package price is recalculated nightly
+                  at midnight from the provider catalog. Checkout must disclose this and the statutory withdrawal
+                  restart when the price changes.
+                </div>
               </div>
-            </div>
+            }
             <div class="form-check">
               <input
                 type="checkbox"
@@ -1002,7 +1003,7 @@
           <button
             type="submit"
             class="btn btn-primary"
-            [disabled]="!createForm.serviceTypeId?.trim() || !createForm.name?.trim() || (creating$ | async) === true"
+            [disabled]="!createForm.name?.trim() || (creating$ | async) === true"
             i18n="@@featureServicePlans-create"
           >
             Create
@@ -1866,30 +1867,32 @@
                 Cancellation always takes effect at the end of the already-billed period.
               </div>
             </div>
-            <div class="form-check mb-3">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="editAutoRecalculatePriceDaily"
-                name="autoRecalculatePriceDaily"
-                [(ngModel)]="editForm.autoRecalculatePriceDaily"
-                [disabled]="(updating$ | async) === true"
-              />
-              <label
-                class="form-check-label"
-                for="editAutoRecalculatePriceDaily"
-                i18n="@@featureServicePlans-autoRecalculatePriceDaily"
-                >Automatic daily price recalculation</label
-              >
-              <div
-                class="form-text text-body-secondary small"
-                i18n="@@featureServicePlans-autoRecalculatePriceDailyHelp"
-              >
-                Opt in only when required for EU compliance. When enabled, the package price is recalculated nightly at
-                midnight from the provider catalog. Checkout must disclose this and the statutory withdrawal restart
-                when the price changes.
+            @if (editingPlan && !isNoneServiceType(editingPlan.serviceTypeId)) {
+              <div class="form-check mb-3">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="editAutoRecalculatePriceDaily"
+                  name="autoRecalculatePriceDaily"
+                  [(ngModel)]="editForm.autoRecalculatePriceDaily"
+                  [disabled]="(updating$ | async) === true"
+                />
+                <label
+                  class="form-check-label"
+                  for="editAutoRecalculatePriceDaily"
+                  i18n="@@featureServicePlans-autoRecalculatePriceDaily"
+                  >Automatic daily price recalculation</label
+                >
+                <div
+                  class="form-text text-body-secondary small"
+                  i18n="@@featureServicePlans-autoRecalculatePriceDailyHelp"
+                >
+                  Opt in only when required for EU compliance. When enabled, the package price is recalculated nightly
+                  at midnight from the provider catalog. Checkout must disclose this and the statutory withdrawal
+                  restart when the price changes.
+                </div>
               </div>
-            </div>
+            }
             <div class="form-check">
               <input
                 type="checkbox"

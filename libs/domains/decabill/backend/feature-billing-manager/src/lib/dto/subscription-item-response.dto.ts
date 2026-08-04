@@ -4,7 +4,7 @@
 export interface SubscriptionItemResponseDto {
   id: string;
   subscriptionId: string;
-  serviceTypeId: string;
+  serviceTypeId: string | null;
   /** User-facing service type name from the catalog (billing_service_types.name). */
   serviceTypeName: string;
   provisioningStatus: 'pending' | 'active' | 'failed';

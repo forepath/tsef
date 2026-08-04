@@ -5,7 +5,7 @@ import { WithdrawalPolicyDto } from './withdrawal-policy.dto';
 
 export class ServicePlanResponseDto {
   id!: string;
-  serviceTypeId!: string;
+  serviceTypeId!: string | null;
   name!: string;
   description?: string;
   billingIntervalType!: BillingIntervalType;

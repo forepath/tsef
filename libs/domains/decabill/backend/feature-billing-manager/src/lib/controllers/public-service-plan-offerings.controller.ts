@@ -3,6 +3,7 @@ import { Controller, Get, NotFoundException, ParseIntPipe, Query } from '@nestjs
 
 import { PublicServicePlanOfferingDto } from '../dto/public-service-plan-offering.dto';
 import { ServicePlanEntity } from '../entities/service-plan.entity';
+import { toApiServiceTypeId } from '../constants/service-type-id.constants';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
 import { PricingService } from '../services/pricing.service';
 import { ProviderServerTypesService } from '../services/provider-server-types.service';
@@ -132,7 +133,7 @@ export class PublicServicePlanOfferingsController {
       id: row.id,
       name: row.name,
       description: row.description ?? null,
-      serviceTypeId: row.serviceTypeId,
+      serviceTypeId: toApiServiceTypeId(row.serviceTypeId),
       serviceTypeName: row.serviceType?.name ?? '',
       billingIntervalType: row.billingIntervalType,
       billingIntervalValue: row.billingIntervalValue,

@@ -40,6 +40,7 @@ import {
   type TaxCategory,
   type TaxPreviewRates,
   type UpdateServicePlanDto,
+  isNoneServiceTypeId,
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import {
   formatProvisioningLocationLabel,
@@ -94,6 +95,7 @@ export class ServicePlansPageComponent implements OnInit {
   readonly editProductDefaultsExpanded = signal(false);
   readonly showProductDefaultsLabel = $localize`:@@featureServicePlans-showProductDefaults:Show`;
   readonly hideProductDefaultsLabel = $localize`:@@featureServicePlans-hideProductDefaults:Hide`;
+  readonly noneServiceTypeLabel = $localize`:@@featureServicePlans-noneType:None (no deployment)`;
   readonly searchQuery$ = toObservable(this.searchQuery);
   readonly servicePlans$ = combineLatest([
     this.plansFacade.getServicePlans$(),
@@ -105,7 +107,9 @@ export class ServicePlansPageComponent implements OnInit {
       const filteredPlans = !term
         ? plans
         : plans.filter((plan) => {
-            const typeName = serviceTypes.find((type) => type.id === plan.serviceTypeId)?.name ?? '';
+            const typeName = isNoneServiceTypeId(plan.serviceTypeId)
+              ? this.noneServiceTypeLabel
+              : (serviceTypes.find((type) => type.id === plan.serviceTypeId)?.name ?? '');
 
             return JSON.stringify(plan).toLowerCase().includes(term) || typeName.toLowerCase().includes(term);
           });
@@ -155,12 +159,20 @@ export class ServicePlansPageComponent implements OnInit {
   providerLocationCatalog: ProviderLocationCatalog = new Map();
   providerLocationsLoading = false;
 
-  serviceTypeNameById(types: ServiceTypeResponse[] | null, id: string): string {
+  serviceTypeNameById(types: ServiceTypeResponse[] | null, id: string | null | undefined): string {
+    if (isNoneServiceTypeId(id)) {
+      return this.noneServiceTypeLabel;
+    }
+
     if (!types) return getUnavailableLabel();
 
     const serviceType = types.find((item) => item.id === id);
 
     return serviceType?.name?.trim() || getUnavailableLabel();
+  }
+
+  isNoneServiceType(serviceTypeId: string | null | undefined): boolean {
+    return isNoneServiceTypeId(serviceTypeId);
   }
 
   billingIntervalLabel(plan: ServicePlanResponse): string {
@@ -178,7 +190,7 @@ export class ServicePlansPageComponent implements OnInit {
   private applyDefaultProvisioningOptionKeys(
     serviceTypes: ServiceTypeResponse[],
     providerDetails: ProviderDetail[],
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
     form: 'create' | 'edit',
   ): void {
     if (!this.supportsProvisioningOptionsSelection(serviceTypes, providerDetails, serviceTypeId)) {
@@ -209,7 +221,7 @@ export class ServicePlansPageComponent implements OnInit {
   private pruneInvalidProvisioningOptionKeys(
     serviceTypes: ServiceTypeResponse[],
     providerDetails: ProviderDetail[],
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
     form: 'create' | 'edit',
   ): void {
     const target = form === 'create' ? this.createProvisioningOptionKeys : this.editProvisioningOptionKeys;
@@ -267,7 +279,7 @@ export class ServicePlansPageComponent implements OnInit {
   supportsProvisioningOptionsSelection(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
   ): boolean {
     const schema = this.getProviderSchema(serviceTypes, providerDetails, serviceTypeId);
     const serviceEnum = this.getProviderConfigEnum(schema, 'service');
@@ -290,7 +302,7 @@ export class ServicePlansPageComponent implements OnInit {
   serviceEnumIncludes(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
     value: string,
   ): boolean {
     const schema = this.getProviderSchema(serviceTypes, providerDetails, serviceTypeId);
@@ -334,7 +346,7 @@ export class ServicePlansPageComponent implements OnInit {
     addons: AddonResponse[] | null,
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
   ): AddonResponse[] {
     if (!this.providerSupportsAddons(serviceTypes, providerDetails, serviceTypeId)) return [];
 
@@ -350,7 +362,7 @@ export class ServicePlansPageComponent implements OnInit {
   providerSupportsAddons(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
   ): boolean {
     const providerId = this.getProviderId(serviceTypes ?? [], serviceTypeId);
 
@@ -421,7 +433,7 @@ export class ServicePlansPageComponent implements OnInit {
   getProviderSchema(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
   ): ConfigSchemaProperties | null {
     if (!serviceTypeId?.trim() || !serviceTypes?.length || !providerDetails?.length) return null;
 
@@ -442,7 +454,7 @@ export class ServicePlansPageComponent implements OnInit {
   supportsCustomerLocationSelection(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
   ): boolean {
     const full = this.getProviderSchemaFull(serviceTypes, providerDetails, serviceTypeId);
     const props = full?.['properties'] as ConfigSchemaProperties | undefined;
@@ -467,7 +479,7 @@ export class ServicePlansPageComponent implements OnInit {
   supportsCustomerServerTypeSelection(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
   ): boolean {
     return this.getBasePriceFromField(serviceTypes, providerDetails, serviceTypeId) === 'serverType';
   }
@@ -475,7 +487,7 @@ export class ServicePlansPageComponent implements OnInit {
   getProviderSchemaFull(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
   ): Record<string, unknown> | null {
     if (!serviceTypeId?.trim() || !serviceTypes?.length || !providerDetails?.length) return null;
 
@@ -492,7 +504,7 @@ export class ServicePlansPageComponent implements OnInit {
   getBasePriceFromField(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
-    serviceTypeId: string,
+    serviceTypeId: string | null | undefined,
   ): string | null {
     const schema = this.getProviderSchemaFull(serviceTypes, providerDetails, serviceTypeId);
     const field = schema?.['basePriceFromField'];
@@ -501,7 +513,7 @@ export class ServicePlansPageComponent implements OnInit {
   }
 
   /** Provider id for the given service type. */
-  getProviderId(serviceTypes: ServiceTypeResponse[] | null, serviceTypeId: string): string | null {
+  getProviderId(serviceTypes: ServiceTypeResponse[] | null, serviceTypeId: string | null | undefined): string | null {
     if (!serviceTypeId?.trim() || !serviceTypes?.length) return null;
 
     const st = serviceTypes.find((s) => s.id === serviceTypeId);
@@ -750,6 +762,19 @@ export class ServicePlansPageComponent implements OnInit {
 
   /** When create form service type changes, init providerConfigDefaults from schema and load server types if needed. */
   onCreateServiceTypeIdChange(serviceTypes: ServiceTypeResponse[], providerDetails: ProviderDetail[]): void {
+    if (isNoneServiceTypeId(this.createForm.serviceTypeId)) {
+      this.createForm.providerConfigDefaults = {};
+      this.createForm.allowCustomerLocationSelection = false;
+      this.createForm.allowCustomerServerTypeSelection = false;
+      this.createForm.autoRecalculatePriceDaily = false;
+      this.createAllowedServerTypes = [];
+      this.createProvisioningOptionKeys.clear();
+      this.currentServerTypes = [];
+      this.providerLocationCatalog = new Map();
+
+      return;
+    }
+
     const schema = this.getProviderSchema(serviceTypes, providerDetails, this.createForm.serviceTypeId);
 
     this.createForm.providerConfigDefaults = this.createForm.providerConfigDefaults ?? {};
@@ -824,10 +849,10 @@ export class ServicePlansPageComponent implements OnInit {
     return Boolean(this.getProviderConfigEnum(schema, 'location') ?? this.getProviderConfigEnum(schema, 'region'));
   }
 
-  private loadProviderLocations(providerId: string, serviceTypeId?: string): void {
+  private loadProviderLocations(providerId: string, serviceTypeId?: string | null): void {
     this.providerLocationsLoading = true;
     this.providerLocationCatalog = new Map();
-    this.serviceTypesService.getProviderLocations(providerId, serviceTypeId).subscribe({
+    this.serviceTypesService.getProviderLocations(providerId, serviceTypeId ?? undefined).subscribe({
       next: (locations: ProviderLocation[]) => {
         this.providerLocationCatalog = providerLocationCatalogFromList(locations);
         this.providerLocationsLoading = false;
@@ -839,10 +864,10 @@ export class ServicePlansPageComponent implements OnInit {
     });
   }
 
-  private loadServerTypes(providerId: string, serviceTypeId?: string): void {
+  private loadServerTypes(providerId: string, serviceTypeId?: string | null): void {
     this.serverTypesLoading = true;
     this.currentServerTypes = [];
-    this.serviceTypesService.getProviderServerTypes(providerId, serviceTypeId).subscribe({
+    this.serviceTypesService.getProviderServerTypes(providerId, serviceTypeId ?? undefined).subscribe({
       next: (list) => {
         this.currentServerTypes = list;
         this.serverTypesLoading = false;
@@ -1099,7 +1124,7 @@ export class ServicePlansPageComponent implements OnInit {
 
   private getDefaultCreateForm(): CreateServicePlanDto {
     return {
-      serviceTypeId: '',
+      serviceTypeId: null,
       name: '',
       description: '',
       billingIntervalType: 'month',
@@ -1251,27 +1276,32 @@ export class ServicePlansPageComponent implements OnInit {
   }
 
   onSubmitCreate(): void {
-    if (!this.createForm.serviceTypeId?.trim() || !this.createForm.name?.trim()) return;
+    // Null serviceTypeId means no deployment; only name is required.
+    if (!this.createForm.name?.trim()) return;
+
+    const isNone = isNoneServiceTypeId(this.createForm.serviceTypeId);
+    const serviceTypeId = isNone ? null : this.createForm.serviceTypeId!.trim();
 
     this.typesAndProviders$.pipe(take(1)).subscribe(({ serviceTypes, providerDetails }) => {
-      this.pruneInvalidProvisioningOptionKeys(
-        serviceTypes,
-        providerDetails,
-        this.createForm.serviceTypeId.trim(),
-        'create',
-      );
+      if (!isNone && serviceTypeId) {
+        this.pruneInvalidProvisioningOptionKeys(serviceTypes, providerDetails, serviceTypeId, 'create');
+      }
 
       this.cloudInitConfigs$.pipe(take(1)).subscribe((cloudInitConfigs) => {
-        this.pruneInactiveCustomProvisioningOptionKeys(cloudInitConfigs, 'create');
+        if (!isNone) {
+          this.pruneInactiveCustomProvisioningOptionKeys(cloudInitConfigs, 'create');
+        }
 
-        const providerConfigDefaults = this.buildProviderConfigDefaultsForSubmit(
-          this.createForm.providerConfigDefaults,
-          this.createProvisioningOptionKeys,
-        );
+        const providerConfigDefaults = isNone
+          ? {}
+          : this.buildProviderConfigDefaultsForSubmit(
+              this.createForm.providerConfigDefaults,
+              this.createProvisioningOptionKeys,
+            );
         const orderingHighlights = this.sanitizeOrderingHighlights(this.createForm.orderingHighlights);
 
         this.plansFacade.createServicePlan({
-          serviceTypeId: this.createForm.serviceTypeId.trim(),
+          serviceTypeId,
           name: this.createForm.name.trim(),
           description: this.createForm.description?.trim() || undefined,
           billingIntervalType: this.createForm.billingIntervalType,
@@ -1280,7 +1310,7 @@ export class ServicePlansPageComponent implements OnInit {
             this.createForm.billingDayOfMonth != null ? Number(this.createForm.billingDayOfMonth) : undefined,
           cancelAtPeriodEnd: this.createForm.cancelAtPeriodEnd ?? true,
           billInAdvance: this.createForm.billInAdvance === true,
-          autoRecalculatePriceDaily: this.createForm.autoRecalculatePriceDaily === true,
+          autoRecalculatePriceDaily: isNone ? false : this.createForm.autoRecalculatePriceDaily === true,
           minCommitmentDays: Number(this.createForm.minCommitmentDays) || 0,
           noticeDays: Number(this.createForm.noticeDays) || 0,
           basePrice: this.createForm.basePrice?.trim() || undefined,
@@ -1288,10 +1318,12 @@ export class ServicePlansPageComponent implements OnInit {
           marginFixed: this.createForm.marginFixed?.trim() || undefined,
           providerConfigDefaults: Object.keys(providerConfigDefaults).length > 0 ? providerConfigDefaults : undefined,
           orderingHighlights: orderingHighlights.length > 0 ? orderingHighlights : undefined,
-          allowCustomerLocationSelection: this.createForm.allowCustomerLocationSelection === true,
-          allowCustomerServerTypeSelection: this.createForm.allowCustomerServerTypeSelection === true,
+          allowCustomerLocationSelection: isNone ? false : this.createForm.allowCustomerLocationSelection === true,
+          allowCustomerServerTypeSelection: isNone ? false : this.createForm.allowCustomerServerTypeSelection === true,
           allowedServerTypes:
-            this.createForm.allowCustomerServerTypeSelection === true ? [...this.createAllowedServerTypes] : undefined,
+            !isNone && this.createForm.allowCustomerServerTypeSelection === true
+              ? [...this.createAllowedServerTypes]
+              : undefined,
           taxCategory: this.createForm.taxCategory ?? 'standard',
           isActive: this.createForm.isActive ?? true,
         });
@@ -1302,20 +1334,26 @@ export class ServicePlansPageComponent implements OnInit {
   onSubmitEdit(): void {
     if (!this.editForm.id) return;
 
+    const isNone = isNoneServiceTypeId(this.editingPlan?.serviceTypeId);
+
     this.typesAndProviders$.pipe(take(1)).subscribe(({ serviceTypes, providerDetails }) => {
       const serviceTypeId = this.editingPlan?.serviceTypeId?.trim();
 
-      if (serviceTypeId) {
+      if (serviceTypeId && !isNone) {
         this.pruneInvalidProvisioningOptionKeys(serviceTypes, providerDetails, serviceTypeId, 'edit');
       }
 
       this.cloudInitConfigs$.pipe(take(1)).subscribe((cloudInitConfigs) => {
-        this.editStaleCustomConfigIds = this.pruneInactiveCustomProvisioningOptionKeys(cloudInitConfigs, 'edit');
+        this.editStaleCustomConfigIds = isNone
+          ? []
+          : this.pruneInactiveCustomProvisioningOptionKeys(cloudInitConfigs, 'edit');
 
-        const providerConfigDefaults = this.buildProviderConfigDefaultsForSubmit(
-          this.editForm.providerConfigDefaults,
-          this.editProvisioningOptionKeys,
-        );
+        const providerConfigDefaults = isNone
+          ? {}
+          : this.buildProviderConfigDefaultsForSubmit(
+              this.editForm.providerConfigDefaults,
+              this.editProvisioningOptionKeys,
+            );
         const orderingHighlights = this.sanitizeOrderingHighlights(this.editForm.orderingHighlights);
 
         this.plansFacade.updateServicePlan(this.editForm.id, {
@@ -1327,7 +1365,7 @@ export class ServicePlansPageComponent implements OnInit {
             this.editForm.billingDayOfMonth != null ? Number(this.editForm.billingDayOfMonth) : undefined,
           cancelAtPeriodEnd: this.editForm.cancelAtPeriodEnd,
           billInAdvance: this.editForm.billInAdvance === true,
-          autoRecalculatePriceDaily: this.editForm.autoRecalculatePriceDaily === true,
+          autoRecalculatePriceDaily: isNone ? false : this.editForm.autoRecalculatePriceDaily === true,
           minCommitmentDays: Number(this.editForm.minCommitmentDays) ?? 0,
           noticeDays: Number(this.editForm.noticeDays) ?? 0,
           basePrice: this.editForm.basePrice?.trim() || undefined,
@@ -1335,10 +1373,10 @@ export class ServicePlansPageComponent implements OnInit {
           marginFixed: this.editForm.marginFixed?.trim() || undefined,
           providerConfigDefaults: Object.keys(providerConfigDefaults).length > 0 ? providerConfigDefaults : undefined,
           orderingHighlights,
-          allowCustomerLocationSelection: this.editForm.allowCustomerLocationSelection,
-          allowCustomerServerTypeSelection: this.editForm.allowCustomerServerTypeSelection,
+          allowCustomerLocationSelection: isNone ? false : this.editForm.allowCustomerLocationSelection,
+          allowCustomerServerTypeSelection: isNone ? false : this.editForm.allowCustomerServerTypeSelection,
           allowedServerTypes:
-            this.editForm.allowCustomerServerTypeSelection === true ? [...this.editAllowedServerTypes] : [],
+            !isNone && this.editForm.allowCustomerServerTypeSelection === true ? [...this.editAllowedServerTypes] : [],
           taxCategory: this.editForm.taxCategory ?? 'standard',
           migrateExistingSubscriptions: this.editForm.migrateExistingSubscriptions === true,
           isActive: this.editForm.isActive,

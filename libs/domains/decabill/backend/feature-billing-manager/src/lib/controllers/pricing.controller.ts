@@ -84,7 +84,7 @@ export class PricingController {
 
     let planPricing = this.pricingService.calculate(plan);
 
-    if (serverTypeId) {
+    if (serverTypeId && plan.serviceTypeId) {
       const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
       const providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
       const priceMonthly = await resolveServerTypePriceMonthly(
@@ -100,11 +100,19 @@ export class PricingController {
     }
 
     const selectedAddonIds = [...new Set((dto.addonIds ?? []).filter(Boolean))];
-    const addons = await this.addonService.assertAddonIdsForOrder(
-      plan.serviceTypeId,
-      parsePlanAllowedAddonIds(plan.providerConfigDefaults),
-      selectedAddonIds,
-    );
+
+    if (plan.serviceTypeId == null && selectedAddonIds.length > 0) {
+      throw new BadRequestException('Addons are not supported for plans without a service type');
+    }
+
+    const addons =
+      plan.serviceTypeId == null
+        ? []
+        : await this.addonService.assertAddonIdsForOrder(
+            plan.serviceTypeId,
+            parsePlanAllowedAddonIds(plan.providerConfigDefaults),
+            selectedAddonIds,
+          );
     const addonLines = addons.map((addon) => ({
       addonId: addon.id,
       name: addon.name,

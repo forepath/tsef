@@ -77,32 +77,44 @@ API behavior:
 
 ## Service Plans
 
-Service plans belong to a service type and define customer-facing pricing and billing rules.
+Service plans define customer-facing pricing and billing rules. They usually belong to a service type (provider-backed or manual). They may also use **`serviceTypeId: null`** for billing-only plans that deploy nothing.
+
+### Plans without a service type (`null`)
+
+- API and admin UI use **`null`** (or omit the field on create) for no deployment — not a sentinel string.
+- Persistence stores `NULL` in `billing_service_plans.service_type_id` (and on subscription items when ordered); responses expose `null`.
+- Admin create form defaults the service type select to **None (no deployment)**; there is no “Choose a service type” placeholder.
+- Ordering creates an immediately active subscription item with no cloud provisioning, availability check, addons, or backorders.
+- Location/server-type customer selection and `autoRecalculatePriceDaily` are rejected for null-`serviceTypeId` plans.
+- Plans carry their own `tenant_id` so tenant isolation works when the service-type join is absent.
+
+No dedicated webhook events are emitted for plan CRUD or for “non-provision fulfilled” items (same as other non-cloud providers). Customer orders still emit `subscription.created` and related billing events.
 
 ### Admin Endpoints
 
-| Method | Path                                             | Purpose                                       |
-| ------ | ------------------------------------------------ | --------------------------------------------- |
-| GET    | `/service-plans`                                 | List service plans                            |
-| POST   | `/service-plans`                                 | Create plan (admin)                           |
-| GET    | `/service-plans/{id}`                            | Get plan                                      |
-| GET    | `/service-plans/{id}/order-provisioning-options` | List customer-selectable provisioning options |
-| POST   | `/service-plans/{id}`                            | Update plan (admin)                           |
-| DELETE | `/service-plans/{id}`                            | Delete plan (admin)                           |
+| Method | Path                                             | Purpose                                                      |
+| ------ | ------------------------------------------------ | ------------------------------------------------------------ |
+| GET    | `/service-plans`                                 | List service plans                                           |
+| POST   | `/service-plans`                                 | Create plan (admin)                                          |
+| GET    | `/service-plans/{id}`                            | Get plan                                                     |
+| GET    | `/service-plans/{id}/order-provisioning-options` | List customer-selectable provisioning options                |
+| POST   | `/service-plans/{id}`                            | Update plan (admin)                                          |
+| DELETE | `/service-plans/{id}`                            | Delete plan (admin); 400 if subscriptions still reference it |
 
 ### Plan Fields (Conceptual)
 
+- **`serviceTypeId`** UUID of a catalog service type, or **`null`** for no deployment
 - Title, description, and active flag
 - Billing interval (hourly, daily, monthly, **yearly**)
 - **`billInAdvance`** when true, charge at period start (prepaid); default false (arrear). Incompatible with usage-based metering. See [Advance billing and yearly interval](./advance-billing-and-yearly-interval.md).
-- **`autoRecalculatePriceDaily`** when true, nightly job refreshes catalog base price from the provider and migrates eligible subscriptions (default false, opt-in). See [Automatic daily price recalculation](./automatic-price-recalculation.md).
+- **`autoRecalculatePriceDaily`** when true, nightly job refreshes catalog base price from the provider and migrates eligible subscriptions (default false, opt-in; not allowed for null-`serviceTypeId` plans). See [Automatic daily price recalculation](./automatic-price-recalculation.md).
 - **Admin commercial migrate** on plan update, optional request field `migrateExistingSubscriptions` (not stored). When true **and** `basePrice`, `marginPercent`, `marginFixed`, or `taxCategory` actually change, a `plan-price-migrate.unit` job migrates eligible subscriptions with the same settlement, withdrawal restart, and consolidated price-change email as nightly recalc. Unchecked updates affect new orders only.
 - Base price, margin, and computed customer total
-- `providerConfigDefaults` merged with customer `requestedConfig` on order
+- `providerConfigDefaults` merged with customer `requestedConfig` on order (empty for null-`serviceTypeId` plans)
 - For provisioning plans, customers choose from `provisioningOptions` (integrated `agenstra-controller`/`agenstra-manager`/`decabill-billing` and/or custom CloudInit configs). Admins configure these exclusively via **Customer-selectable options** checkboxes in the plan editor; **Product defaults** fields are scoped to the checked options only. New plans default to every integrated stack present in the provider `service` enum (Agenstra Controller, Agenstra Manager, and Decabill Billing when enabled). Existing legacy plans are reconciled by migration `1772000000000_CloudInitAndPlanProvisioningConsolidated`. Integrated service ids were renamed from `controller`/`manager` to `agenstra-controller`/`agenstra-manager` by migration `1775500000000_RenameIntegratedProvisioningServiceIds` (runtime parsers still accept the legacy aliases).
 - `billing_day_of_month` for subscription period alignment
-- `allowCustomerLocationSelection` when geography override is supported
-- `allowCustomerServerTypeSelection` and `allowedServerTypes` when server-type override is supported (provider schema `basePriceFromField: 'serverType'`)
+- `allowCustomerLocationSelection` when geography override is supported (not for null `serviceTypeId`)
+- `allowCustomerServerTypeSelection` and `allowedServerTypes` when server-type override is supported (provider schema `basePriceFromField: 'serverType'`; not for null `serviceTypeId`)
 - Provider `configSchema.properties` may set `scope: "server"` or `scope: "product"` with optional `productServices` (`agenstra-controller`, `agenstra-manager`, `decabill-billing`) to control the plan editor. Server fields stay under **Provider default config**; product fields appear under **Product defaults** when required by selected customer options.
 
 ### Customer Geography Selection

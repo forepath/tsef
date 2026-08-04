@@ -13,6 +13,7 @@ import { CloudInitConfigService } from '../services/cloud-init-config.service';
 import { WithdrawalPolicyService } from '../services/withdrawal-policy.service';
 import { AddonsRepository } from '../repositories/addons.repository';
 import { PLAN_PRICE_MIGRATE_ENQUEUE } from '../queue/plan-price-migrate-enqueue.token';
+import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 
 import { ServicePlansController } from './service-plans.controller';
 
@@ -23,6 +24,7 @@ describe('ServicePlansController', () => {
   const basePlanRow: ServicePlanEntity = {
     id: '11111111-1111-4111-8111-111111111111',
     serviceTypeId: '22222222-2222-4222-8222-222222222222',
+    tenantId: 'default',
     name: 'Pro',
     description: 'Desc',
     billingIntervalType: BillingIntervalType.MONTH,
@@ -74,6 +76,9 @@ describe('ServicePlansController', () => {
   const addonsRepositoryStub = {
     findByIds: jest.fn().mockResolvedValue([]),
   };
+  const subscriptionsRepositoryStub = {
+    countByPlanId: jest.fn().mockResolvedValue(0),
+  };
 
   beforeEach(() => {
     planPriceMigrateEnqueueStub.enqueueUnit.mockReset();
@@ -95,6 +100,8 @@ describe('ServicePlansController', () => {
     addonServiceStub.providerSupportsAddons.mockReturnValue(true);
     addonsRepositoryStub.findByIds.mockReset();
     addonsRepositoryStub.findByIds.mockResolvedValue([]);
+    subscriptionsRepositoryStub.countByPlanId.mockReset();
+    subscriptionsRepositoryStub.countByPlanId.mockResolvedValue(0);
   });
 
   function setupRepositoryMock(mock: Partial<jest.Mocked<ServicePlansRepository>>) {
@@ -107,6 +114,7 @@ describe('ServicePlansController', () => {
         { provide: CloudInitConfigService, useValue: cloudInitConfigServiceStub },
         { provide: AddonService, useValue: addonServiceStub },
         { provide: AddonsRepository, useValue: addonsRepositoryStub },
+        { provide: SubscriptionsRepository, useValue: subscriptionsRepositoryStub },
         { provide: WithdrawalPolicyService, useValue: new WithdrawalPolicyService() },
         { provide: PLAN_PRICE_MIGRATE_ENQUEUE, useValue: planPriceMigrateEnqueueStub },
       ],
@@ -481,7 +489,7 @@ describe('ServicePlansController', () => {
     cloudInitConfigServiceStub.getOrderFieldsForPlan.mockResolvedValue(orderFields);
     const moduleRef = await setupRepositoryMock({
       findAll: jest.fn(),
-      findByIdOrThrow: jest.fn(),
+      findByIdOrThrow: jest.fn().mockResolvedValue(basePlanRow),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -495,5 +503,128 @@ describe('ServicePlansController', () => {
       basePlanRow.id,
       '33333333-3333-4333-8333-333333333333',
     );
+  });
+
+  it('create with null serviceTypeId stores null and skips provider asserts', async () => {
+    const create = jest.fn().mockImplementation((dto: Partial<ServicePlanEntity>) =>
+      Promise.resolve({
+        ...basePlanRow,
+        ...dto,
+        serviceTypeId: dto.serviceTypeId ?? null,
+      }),
+    );
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn(),
+      create,
+      update: jest.fn(),
+      delete: jest.fn(),
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    const result = await controller.create({
+      serviceTypeId: null,
+      name: 'Billing only',
+      billingIntervalType: BillingIntervalType.MONTH,
+      billingIntervalValue: 1,
+      basePrice: '25',
+    } as CreateServicePlanDto);
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        serviceTypeId: null,
+        providerConfigDefaults: {},
+        allowCustomerLocationSelection: false,
+        allowCustomerServerTypeSelection: false,
+        autoRecalculatePriceDaily: false,
+      }),
+    );
+    expect(cloudInitConfigServiceStub.assertActiveConfigForPlanDefaults).not.toHaveBeenCalled();
+    expect(addonServiceStub.assertAllowedAddonIdsForPlan).not.toHaveBeenCalled();
+    expect(serviceTypesRepoStub.findByIdOrThrow).not.toHaveBeenCalled();
+    expect(result.serviceTypeId).toBeNull();
+  });
+
+  it('create with null serviceTypeId rejects location selection', async () => {
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    await expect(
+      controller.create({
+        serviceTypeId: null,
+        name: 'Billing only',
+        billingIntervalType: BillingIntervalType.MONTH,
+        billingIntervalValue: 1,
+        allowCustomerLocationSelection: true,
+      } as CreateServicePlanDto),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('get maps null serviceTypeId as null', async () => {
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn().mockResolvedValue({ ...basePlanRow, serviceTypeId: null }),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    const result = await controller.get(basePlanRow.id);
+
+    expect(result.serviceTypeId).toBeNull();
+    expect(serviceTypesRepoStub.findByIdOrThrow).not.toHaveBeenCalled();
+  });
+
+  it('listOrderProvisioningOptions returns empty for none plans', async () => {
+    cloudInitConfigServiceStub.buildOrderProvisioningOptions.mockClear();
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn().mockResolvedValue({ ...basePlanRow, serviceTypeId: null }),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    await expect(controller.listOrderProvisioningOptions(basePlanRow.id)).resolves.toEqual([]);
+    expect(cloudInitConfigServiceStub.buildOrderProvisioningOptions).not.toHaveBeenCalled();
+  });
+
+  it('remove blocks delete when subscriptions reference the plan', async () => {
+    const deleteFn = jest.fn();
+    subscriptionsRepositoryStub.countByPlanId.mockResolvedValue(2);
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn().mockResolvedValue(basePlanRow),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: deleteFn,
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    await expect(controller.remove(basePlanRow.id)).rejects.toBeInstanceOf(BadRequestException);
+    expect(deleteFn).not.toHaveBeenCalled();
+  });
+
+  it('remove deletes when no subscriptions reference the plan', async () => {
+    const deleteFn = jest.fn().mockResolvedValue(undefined);
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn().mockResolvedValue(basePlanRow),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: deleteFn,
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    await expect(controller.remove(basePlanRow.id)).resolves.toBeUndefined();
+    expect(deleteFn).toHaveBeenCalledWith(basePlanRow.id);
   });
 });

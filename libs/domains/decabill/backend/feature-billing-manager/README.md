@@ -7,7 +7,7 @@ Backend billing module providing subscription management, backorders, availabili
 - WebSocket dashboard status stream: see [`spec/asyncapi.yaml`](spec/asyncapi.yaml) (namespace `billing`, permission-locked; mirrors REST subscription ownership).
 - WebSocket project board stream: see [`spec/asyncapi.yaml`](spec/asyncapi.yaml) (namespace `projects`, room `project:{projectId}`; see [`docs/project-board-realtime.mmd`](docs/project-board-realtime.mmd)).
 - **Projects:** Customer-assigned work tracking with admin CRUD, milestones, tickets, time entries, KPI summaries, and `POST /admin/billing/projects/{projectId}/bill-time` (see [`docs/project-bill-time.mmd`](docs/project-bill-time.mmd)).
-- Service types and plans (admin endpoints), including optional per-plan customer geography selection when the provider schema supports it.
+- Service types and plans (admin endpoints), including optional per-plan customer geography selection when the provider schema supports it, and billing-only plans with `serviceTypeId: null` (no deployment).
 - CloudInit config templates (admin CRUD) and order-fields for custom service plans.
 - Subscription ordering, cancel, resume, and statutory withdrawal for authenticated users.
 - Backorder management for provider capacity failures.

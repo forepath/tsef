@@ -10,8 +10,10 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
@@ -21,9 +23,11 @@ import { BillingIntervalType } from '../entities/service-plan.entity';
 import { ServicePlanOrderingHighlightDto } from './service-plan-ordering-highlight.dto';
 
 export class CreateServicePlanDto {
-  @IsNotEmpty({ message: 'Service type ID is required' })
-  @IsString({ message: 'Service type ID must be a string' })
-  serviceTypeId!: string;
+  /** UUID of a catalog service type, or null/omitted for no deployment. */
+  @IsOptional()
+  @ValidateIf((_, value) => value != null && value !== '')
+  @IsUUID('4', { message: 'Service type ID must be a UUID or null' })
+  serviceTypeId?: string | null;
 
   @IsNotEmpty({ message: 'Name is required' })
   @IsString({ message: 'Name must be a string' })

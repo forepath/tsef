@@ -234,6 +234,11 @@ export class SubscriptionsRepository {
     return await qb.getCount();
   }
 
+  /** All subscriptions referencing a plan (used to block plan delete). */
+  async countByPlanId(planId: string): Promise<number> {
+    return await this.repository.count({ where: { planId } });
+  }
+
   async findUpcomingRenewals(withinDays: number, now: Date = new Date(), limit = 100): Promise<SubscriptionEntity[]> {
     const futureDate = new Date(now);
 

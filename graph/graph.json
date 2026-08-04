@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-03T18:42:25.796Z",
+  "generatedAt": "2026-08-04T14:49:14.978Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -50445,6 +50445,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/service-plans.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/service-plans.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/withdrawal-policy.service.ts",
       "type": "injects"
     },
@@ -61601,6 +61606,16 @@
     {
       "from": "concept:decabill-access",
       "to": "api:HTTP:POST:/admin/billing/webhooks",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-event-catalog",
+      "to": "api:HTTP:GET:/service-types",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-event-catalog",
+      "to": "api:HTTP:POST:/service-types",
       "type": "documents"
     },
     {

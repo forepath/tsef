@@ -2214,8 +2214,8 @@
       <trans-unit id="featureServicePlans-serviceType" datatype="html">
         <source>Service type</source>
         </trans-unit>
-      <trans-unit id="featureServicePlans-chooseType" datatype="html">
-        <source>Choose a service type</source>
+      <trans-unit id="featureServicePlans-noneType" datatype="html">
+        <source>None (no deployment)</source>
         </trans-unit>
       <trans-unit id="featureServicePlans-name" datatype="html">
         <source>Name</source>
