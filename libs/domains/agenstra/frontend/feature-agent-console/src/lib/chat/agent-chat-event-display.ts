@@ -559,6 +559,72 @@ export function consolidateConsecutiveInteractionQueryTimelineRows(
   return out;
 }
 
+/**
+ * Collapses multiple `toolCall` rows that share a concrete `toolCallId` into the earliest row
+ * (ACP emits started then in_progress as separate events). Keeps the latest summary/status.
+ */
+export function coalesceDuplicateToolCallDisplayRows(rows: AgentChatEventDisplayRow[]): AgentChatEventDisplayRow[] {
+  if (rows.length === 0) {
+    return rows;
+  }
+
+  const firstIndexById = new Map<string, number>();
+  const skip = new Set<number>();
+  const replaced = new Map<number, AgentChatEventDisplayRow>();
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+
+    if (row === undefined || row.kind !== 'toolCall' || !isConcreteToolCallId(row.toolCallId)) {
+      continue;
+    }
+
+    const id = row.toolCallId;
+    const firstIndex = firstIndexById.get(id);
+
+    if (firstIndex === undefined) {
+      firstIndexById.set(id, i);
+      continue;
+    }
+
+    const base = replaced.get(firstIndex) ?? rows[firstIndex];
+
+    if (base === undefined) {
+      continue;
+    }
+
+    replaced.set(firstIndex, {
+      ...base,
+      summaryTitle: row.summaryTitle || base.summaryTitle,
+      summaryBody: row.summaryBody || base.summaryBody,
+      badgeClass: row.badgeClass || base.badgeClass,
+      detailJson: row.detailJson || base.detailJson,
+      toolPair: {
+        outcome: row.toolPair?.outcome ?? base.toolPair?.outcome ?? 'pending',
+        callDetailJson: row.toolPair?.callDetailJson ?? base.toolPair?.callDetailJson ?? row.detailJson,
+        resultDetailJson: row.toolPair?.resultDetailJson ?? base.toolPair?.resultDetailJson,
+      },
+    });
+    skip.add(i);
+  }
+
+  const out: AgentChatEventDisplayRow[] = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    if (skip.has(i)) {
+      continue;
+    }
+
+    const row = replaced.get(i) ?? rows[i];
+
+    if (row !== undefined) {
+      out.push(row);
+    }
+  }
+
+  return out;
+}
+
 /** Merges tool call + result rows in a flat timeline (websocket event list) by matching `toolCallId`. */
 export function consolidateConsecutiveToolPairTimelineRows(
   rows: AgentChatEventDisplayRow[],
@@ -567,10 +633,11 @@ export function consolidateConsecutiveToolPairTimelineRows(
     return rows;
   }
 
+  const coalesced = coalesceDuplicateToolCallDisplayRows(rows);
   const { skip, mergedAt } = computeToolPairMergePlanFromIndices({
-    length: rows.length,
+    length: coalesced.length,
     describe: (i) => {
-      const r = rows[i];
+      const r = coalesced[i];
 
       if (r === undefined) {
         return null;
@@ -593,8 +660,8 @@ export function consolidateConsecutiveToolPairTimelineRows(
       return null;
     },
     mergeAt: (callIndex, resultIndex) => {
-      const callRow = rows[callIndex];
-      const resultRow = rows[resultIndex];
+      const callRow = coalesced[callIndex];
+      const resultRow = coalesced[resultIndex];
 
       if (callRow === undefined || resultRow === undefined) {
         throw new Error('tool pair merge: missing row');
@@ -605,7 +672,7 @@ export function consolidateConsecutiveToolPairTimelineRows(
   });
   const out: AgentChatEventDisplayRow[] = [];
 
-  for (let i = 0; i < rows.length; i++) {
+  for (let i = 0; i < coalesced.length; i++) {
     if (skip.has(i)) {
       const row = mergedAt.get(i);
 
@@ -616,7 +683,7 @@ export function consolidateConsecutiveToolPairTimelineRows(
       continue;
     }
 
-    const row = rows[i];
+    const row = coalesced[i];
 
     if (row !== undefined) {
       out.push(row);

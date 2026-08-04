@@ -270,53 +270,6 @@ jobs:
           project-version: ${{ needs.publish.outputs.new_release_version }}
           artifact-name: sbom-container-images-ssh
 
-  build-agi-container-images:
-    name: Build AGI Container Images
-    runs-on: ubuntu-latest
-    needs: publish
-    if: needs.publish.outputs.new_release_published == 'true'
-    permissions:
-      contents: read
-      actions: read
-      packages: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-
-      - name: Set nx shas
-        uses: nrwl/nx-set-shas@v5
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v8
-        with:
-          name: build-artifacts
-          path: .
-
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
-
-      - name: 'Login to container registry'
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish AGI container images
-        env:
-          VERSION: ${{ needs.publish.outputs.new_release_version }}
-        run: |
-          npx nx run-many --target=agi-container-image --configuration=release --parallel=3
-
-      - name: Generate container image SBOMs
-        uses: ./.github/actions/generate-container-image-sboms
-        with:
-          project-version: ${{ needs.publish.outputs.new_release_version }}
-          artifact-name: sbom-container-images-agi
-
   build-server-container-images:
     name: Build Server Container Images
     runs-on: ubuntu-latest
@@ -673,7 +626,6 @@ jobs:
       - build-worker-container-images
       - build-vnc-container-images
       - build-ssh-container-images
-      - build-agi-container-images
       - build-server-container-images
     if: needs.publish.outputs.new_release_published == 'true'
     environment: production
@@ -962,7 +914,6 @@ jobs:
       - build-worker-container-images
       - build-vnc-container-images
       - build-ssh-container-images
-      - build-agi-container-images
       - build-server-container-images
     if: needs.publish.outputs.new_release_published == 'true'
     env:

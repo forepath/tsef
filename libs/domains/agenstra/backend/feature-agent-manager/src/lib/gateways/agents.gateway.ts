@@ -1342,7 +1342,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
             wantsStream &&
             responseMode !== 'sync' &&
             provider.getCapabilities().supportsStreaming &&
-            provider.sendMessageStream;
+            Boolean(provider.streamChatEvents || provider.sendMessageStream);
           const agentResponseTimestamp = new Date().toISOString();
 
           if (supportsStreaming) {
@@ -1350,88 +1350,99 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
             let aggregatedText = '';
             const streamedUnified: AgentResponseObject[] = [];
             let streamingTurnPersisted = false;
-            const consumeStreamingRawLine = async (rawLine: string): Promise<void> => {
-              const parseables = provider.toParseableStrings(rawLine);
+            const consumeParsedResponse = async (parsed: AgentResponseObject | string): Promise<void> => {
+              if (!parsed || (typeof parsed === 'object' && Object.keys(parsed).length === 0)) {
+                return;
+              }
 
-              for (const toParse of parseables) {
-                try {
-                  const parsed = provider.toUnifiedResponse(toParse);
+              if (typeof parsed === 'object') {
+                streamedUnified.push(parsed);
+              }
 
-                  if (!parsed) continue;
+              const events = this.agentResponseToChatEvents(agentUuid, correlationId, sequence++, parsed);
 
-                  streamedUnified.push(parsed);
-                  const events = this.agentResponseToChatEvents(agentUuid, correlationId, sequence++, parsed);
+              for (const ev of events) {
+                if (ev.kind === 'assistantDelta') {
+                  aggregatedText += ev.payload.delta;
+                } else if (ev.kind === 'assistantMessage') {
+                  const text = ev.payload.text;
 
-                  for (const ev of events) {
-                    if (ev.kind === 'assistantDelta') {
-                      aggregatedText += ev.payload.delta;
-                    } else if (ev.kind === 'assistantMessage') {
-                      // Full replacement: deltas already built the prose; final `result` NDJSON repeats it.
-                      // Multiple `result` lines must not be concatenated or persisted text becomes 2–3× duplicate.
-                      const t = ev.payload.text;
-
-                      if (typeof t === 'string' && t.length > 0) {
-                        aggregatedText = t;
-                      }
-                    }
-
-                    this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev);
+                  if (typeof text === 'string' && text.length > 0) {
+                    aggregatedText = text;
                   }
+                }
 
-                  if (!ephemeral && !streamingTurnPersisted && this.isStreamingTerminalUnifiedResponse(parsed)) {
-                    const built = this.mergeTranscriptPartsIntoFinalResponse(
-                      this.buildFinalStreamingResponse(streamedUnified, aggregatedText),
-                      enrichmentTranscriptParts,
-                    );
+                this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev);
+              }
 
-                    if (built) {
-                      await this.persistFilteredAgentChatResponse(agentUuid, agentResponseTimestamp, built);
-                      streamingTurnPersisted = true;
-                    }
-                  }
-                } catch (parseError) {
-                  const parseErr = parseError as { message?: string };
+              if (
+                !ephemeral &&
+                !streamingTurnPersisted &&
+                typeof parsed === 'object' &&
+                this.isStreamingTerminalUnifiedResponse(parsed)
+              ) {
+                const built = this.mergeTranscriptPartsIntoFinalResponse(
+                  this.buildFinalStreamingResponse(streamedUnified, aggregatedText),
+                  enrichmentTranscriptParts,
+                );
 
-                  this.logger.warn(`Failed to parse streaming agent line: ${parseErr.message}`);
-                  const events = this.agentResponseToChatEvents(agentUuid, correlationId, sequence++, toParse);
-
-                  for (const ev of events) {
-                    if (ev.kind === 'assistantDelta') {
-                      aggregatedText += ev.payload.delta;
-                    } else if (ev.kind === 'assistantMessage') {
-                      const t = ev.payload.text;
-
-                      if (typeof t === 'string' && t.length > 0) {
-                        aggregatedText = t;
-                      }
-                    }
-
-                    this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev);
-                  }
+                if (built) {
+                  await this.persistFilteredAgentChatResponse(agentUuid, agentResponseTimestamp, built);
+                  streamingTurnPersisted = true;
                 }
               }
             };
+            const useStructuredStream = Boolean(provider.streamChatEvents);
 
-            for await (const chunk of provider.sendMessageStream(agent.id, containerId, messageToUse, {
-              model: data.model,
-              continue: data.continue,
-              resumeSessionSuffix: data.resumeSessionSuffix,
-            })) {
-              buffered += chunk;
-              const parts = buffered.split('\n');
-
-              buffered = parts.pop() ?? '';
-
-              for (const rawLine of parts) {
-                await consumeStreamingRawLine(rawLine);
+            if (useStructuredStream) {
+              for await (const parsed of provider.streamChatEvents!(agent.id, containerId, messageToUse, {
+                model: data.model,
+                continue: data.continue,
+                resumeSessionSuffix: data.resumeSessionSuffix,
+              })) {
+                await consumeParsedResponse(parsed);
               }
-            }
+            } else if (provider.sendMessageStream) {
+              const consumeStreamingRawLine = async (rawLine: string): Promise<void> => {
+                const parseables = provider.toParseableStrings(rawLine);
 
-            // NDJSON producers often omit a trailing newline on the last frame; without this flush,
-            // the final line never runs through consumeStreamingRawLine and nothing is persisted.
-            if (buffered.trim().length > 0) {
-              await consumeStreamingRawLine(buffered);
-              buffered = '';
+                for (const toParse of parseables) {
+                  try {
+                    const parsed = provider.toUnifiedResponse(toParse);
+
+                    if (!parsed) {
+                      continue;
+                    }
+
+                    await consumeParsedResponse(parsed);
+                  } catch (parseError) {
+                    const parseErr = parseError as { message?: string };
+
+                    this.logger.warn(`Failed to parse streaming agent line: ${parseErr.message}`);
+                    await consumeParsedResponse(toParse);
+                  }
+                }
+              };
+
+              for await (const chunk of provider.sendMessageStream(agent.id, containerId, messageToUse, {
+                model: data.model,
+                continue: data.continue,
+                resumeSessionSuffix: data.resumeSessionSuffix,
+              })) {
+                buffered += chunk;
+                const parts = buffered.split('\n');
+
+                buffered = parts.pop() ?? '';
+
+                for (const rawLine of parts) {
+                  await consumeStreamingRawLine(rawLine);
+                }
+              }
+
+              if (buffered.trim().length > 0) {
+                await consumeStreamingRawLine(buffered);
+                buffered = '';
+              }
             }
 
             if (!ephemeral && !streamingTurnPersisted) {
@@ -1690,8 +1701,14 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
         }
       }
     } catch (error) {
-      socket.emit('error', createErrorResponse('Error processing chat message', 'CHAT_ERROR'));
       const err = error as { message?: string; stack?: string };
+      const errorCode = err.message?.includes('permission denied')
+        ? 'ACP_PERMISSION_DENIED'
+        : err.message?.includes('ACP')
+          ? 'ACP_SESSION_FAILED'
+          : 'CHAT_ERROR';
+
+      socket.emit('error', createErrorResponse('Error processing chat message', errorCode));
 
       this.logger.error(`Chat error for agent ${agentUuid}: ${err.message}`, err.stack);
     }

@@ -1644,7 +1644,7 @@
         <source>Your agents</source>
         </trans-unit>
       <trans-unit id="featurePortalHome-capability4Item2" datatype="html">
-        <source> Use Cursor, OpenCode, OpenClaw, and more on infrastructure you choose </source>
+        <source> Use Cursor and OpenCode on infrastructure you choose </source>
         </trans-unit>
       <trans-unit id="featurePortalHome-pillarConnectPoint3Title" datatype="html">
         <source> Your deployment </source>

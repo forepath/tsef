@@ -959,12 +959,30 @@ export class AgentsService implements OnApplicationBootstrap {
    * @returns The agent response DTO
    */
   private mapToResponseDto(agent: AgentEntity): AgentResponseDto {
+    let capabilities: AgentResponseDto['capabilities'];
+
+    try {
+      const provider = this.agentProviderFactory.getProvider(agent.agentType || 'cursor');
+      const caps = provider.getCapabilities();
+
+      capabilities = {
+        transport: caps.transport,
+        supportsChat: caps.supportsChat,
+        supportsStreaming: caps.supportsStreaming,
+        supportsToolEvents: caps.supportsToolEvents,
+        supportsQuestions: caps.supportsQuestions,
+      };
+    } catch {
+      capabilities = undefined;
+    }
+
     return {
       id: agent.id,
       name: agent.name,
       description: agent.description,
       agentType: agent.agentType,
       containerType: agent.containerType,
+      capabilities,
       vnc: agent.vncHostPort
         ? {
             port: agent.vncHostPort,

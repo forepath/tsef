@@ -299,7 +299,7 @@ export class AgentsFacade {
    * Get commands for a specific client and agent.
    * @param clientId - The client ID
    * @param agentId - The agent ID
-   * @param agentType - The agent type (e.g., 'cursor', 'opencode', 'openclaw')
+   * @param agentType - The agent type (e.g., 'cursor', 'opencode')
    * @returns Observable of commands array
    */
   getClientAgentCommands$(clientId: string, agentId: string, agentType: string): Observable<string[]> {

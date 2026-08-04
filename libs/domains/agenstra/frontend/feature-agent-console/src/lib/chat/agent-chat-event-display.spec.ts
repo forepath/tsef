@@ -261,6 +261,53 @@ describe('agent-chat-event-display', () => {
     expect(rows[0]?.toolPair?.resultDetailJson).toBeDefined();
   });
 
+  it('coalesces started+inProgress toolCalls before pairing so awaiting-result is not left behind', () => {
+    const rows = mapForwardedChatEventsToDisplayRows([
+      {
+        payload: successEnvelope({
+          eventId: 'tc1',
+          agentId: 'a',
+          correlationId: 'c',
+          sequence: 0,
+          timestamp: '2026-04-08T12:00:00.000Z',
+          kind: 'toolCall',
+          payload: { toolCallId: 't1', name: 'shell', status: 'started', args: {} },
+        }),
+        timestamp: 10,
+      },
+      {
+        payload: successEnvelope({
+          eventId: 'tc2',
+          agentId: 'a',
+          correlationId: 'c',
+          sequence: 1,
+          timestamp: '2026-04-08T12:00:01.000Z',
+          kind: 'toolCall',
+          payload: { toolCallId: 't1', name: 'shell', status: 'inProgress', args: {} },
+        }),
+        timestamp: 11,
+      },
+      {
+        payload: successEnvelope({
+          eventId: 'tr',
+          agentId: 'a',
+          correlationId: 'c',
+          sequence: 2,
+          timestamp: '2026-04-08T12:00:02.000Z',
+          kind: 'toolResult',
+          payload: { toolCallId: 't1', name: 'shell', isError: false, result: { stdout: 'ok' } },
+        }),
+        timestamp: 12,
+      },
+    ]);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.kind).toBe('toolCall');
+    expect(rows[0]?.toolPair?.outcome).toBe('success');
+    expect(rows[0]?.toolPair?.resultDetailJson).toBeDefined();
+    expect(rows.filter((r) => r.toolPair?.outcome === 'pending')).toHaveLength(0);
+  });
+
   it('merges toolCall and toolResult with same id when not adjacent in event list', () => {
     const rows = mapForwardedChatEventsToDisplayRows([
       {

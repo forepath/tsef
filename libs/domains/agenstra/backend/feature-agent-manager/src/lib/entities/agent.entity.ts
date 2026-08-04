@@ -84,6 +84,19 @@ export class AgentEntity {
   @Column({ type: 'varchar', length: 16, nullable: true, name: 'git_repository_setup_mode' })
   gitRepositorySetupMode?: GitRepositorySetupMode;
 
+  /**
+   * Agent-issued ACP session ids keyed by resumeSessionSuffix (empty string = primary chat).
+   * Used to call `loadSession` after API restarts for main chat and background automation sessions.
+   */
+  @Column({ type: 'jsonb', nullable: true, name: 'acp_sessions' })
+  acpSessions?: Record<string, string> | null;
+
+  /**
+   * Container id that owned {@link acpSessions}. Ignored when the agent container was replaced.
+   */
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'acp_session_container_id' })
+  acpSessionContainerId?: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

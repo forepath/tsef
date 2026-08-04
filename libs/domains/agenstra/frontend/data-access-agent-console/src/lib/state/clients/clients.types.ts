@@ -1,9 +1,12 @@
+import type { AgentTypeCapabilities } from '../agents/agents.types';
+
 // Types based on OpenAPI spec
 export type ClientAuthenticationType = 'api_key' | 'keycloak';
 
 export interface AgentTypeInfo {
   type: string;
   displayName: string;
+  capabilities: AgentTypeCapabilities;
 }
 
 export interface ConfigResponseDto {

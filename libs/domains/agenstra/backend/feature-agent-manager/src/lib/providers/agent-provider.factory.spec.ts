@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AgentProviderFactory } from './agent-provider.factory';
@@ -116,16 +117,18 @@ describe('AgentProviderFactory', () => {
       expect(provider).toBe(mockProvider1);
     });
 
-    it('should throw error if provider not found', () => {
+    it('should throw BadRequestException if provider not found', () => {
+      expect(() => factory.getProvider('nonexistent')).toThrow(BadRequestException);
       expect(() => factory.getProvider('nonexistent')).toThrow(
         "Agent provider with type 'nonexistent' not found. Available types: none",
       );
     });
 
-    it('should throw error with available types when provider not found', () => {
+    it('should throw BadRequestException with available types when provider not found', () => {
       factory.registerProvider(mockProvider1);
       factory.registerProvider(mockProvider2);
 
+      expect(() => factory.getProvider('nonexistent')).toThrow(BadRequestException);
       expect(() => factory.getProvider('nonexistent')).toThrow(
         "Agent provider with type 'nonexistent' not found. Available types: provider1, provider2",
       );

@@ -13,8 +13,12 @@ export interface AgentResponseObject {
 
 export interface AgentProviderCapabilities {
   /**
+   * Wire transport used for agent messaging.
+   */
+  transport?: 'acp';
+
+  /**
    * Provider supports the chat flow (`chat` websocket event).
-   * Providers like `openclaw` intentionally do not support chat and should keep it disabled.
    */
   supportsChat: boolean;
 
@@ -177,6 +181,16 @@ export interface AgentProvider {
    * @returns The unified response object
    */
   toUnifiedResponse(response: string): AgentResponseObject | undefined;
+
+  /**
+   * Optional structured streaming variant for ACP-native providers.
+   */
+  streamChatEvents?(
+    agentId: string,
+    containerId: string,
+    message: string,
+    options?: AgentProviderOptions,
+  ): AsyncIterable<AgentResponseObject>;
 }
 
 /**

@@ -97,7 +97,10 @@ Agenstra uses a plugin-based agent provider system. Each agent has an `agentType
 
 ### Available Types
 
-- **`cursor`** (default) - Cursor-agent binary running in Docker containers
+- **`cursor`** (default) — Cursor agent via [Agent Client Protocol (ACP)](../ai-agents/agent-client-protocol.md) (`cursor-agent acp`)
+- **`opencode`** — OpenCode via ACP (`opencode acp`)
+
+Both providers advertise capabilities (including `transport: acp`) on manager config and agent profile responses.
 
 ### Adding New Agent Types
 
@@ -140,7 +143,7 @@ See the application and feature docs linked below for details.
 
 ### Chat
 
-Send messages to agents via the chat interface. Messages are sent to the container's stdin and responses are captured from stdout.
+Send messages to agents via the chat interface. The console uses WebSocket chat events unchanged. Internally, the agent-manager speaks [ACP](../ai-agents/agent-client-protocol.md) (JSON-RPC over stdio) to `cursor-agent acp` / `opencode acp` inside the worker container and maps session updates to the existing chat event model.
 
 ### File Operations
 

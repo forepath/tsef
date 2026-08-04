@@ -17,7 +17,6 @@ import { WorkspaceConfigurationOverrideEntity } from '../entities/workspace-conf
 import { AgentsGateway } from '../gateways/agents.gateway';
 import { AgentProviderFactory } from '../providers/agent-provider.factory';
 import { CursorAgentProvider } from '../providers/agents/cursor-agent.provider';
-import { OpenClawAgentProvider } from '../providers/agents/openclaw-agent.provider';
 import { OpenCodeAgentProvider } from '../providers/agents/opencode-agent.provider';
 import { ChatFilterFactory } from '../providers/chat-filter.factory';
 import { BidirectionalChatFilter } from '../providers/filters/bidirectional-chat-filter';
@@ -197,13 +196,6 @@ describe('AgentsModule', () => {
 
     expect(provider).toBeDefined();
     expect(provider).toBeInstanceOf(OpenCodeAgentProvider);
-  });
-
-  it('should provide OpenClawAgentProvider', () => {
-    const provider = module.get<OpenClawAgentProvider>(OpenClawAgentProvider);
-
-    expect(provider).toBeDefined();
-    expect(provider).toBeInstanceOf(OpenClawAgentProvider);
   });
 
   it('should register CursorAgentProvider and OpenCodeAgentProvider via AGENT_PROVIDER_INIT factory', () => {

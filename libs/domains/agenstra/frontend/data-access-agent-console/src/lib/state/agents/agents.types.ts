@@ -1,10 +1,19 @@
 // Types based on OpenAPI spec
+export interface AgentTypeCapabilities {
+  transport?: 'acp';
+  supportsChat: boolean;
+  supportsStreaming: boolean;
+  supportsToolEvents: boolean;
+  supportsQuestions: boolean;
+}
+
 export interface AgentResponseDto {
   id: string;
   name: string;
   description?: string;
   agentType: string;
   containerType: ContainerType;
+  capabilities?: AgentTypeCapabilities;
   vnc?: {
     port: number;
     password: string;

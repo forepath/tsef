@@ -33,7 +33,19 @@ describe('Clients Selectors', () => {
     canManageWorkspaceConfiguration: true,
     config: {
       gitRepositoryUrl: 'https://github.com/user/repo.git',
-      agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
+      agentTypes: [
+        {
+          type: 'cursor',
+          displayName: 'Cursor',
+          capabilities: {
+            transport: 'acp',
+            supportsChat: true,
+            supportsStreaming: true,
+            supportsToolEvents: true,
+            supportsQuestions: true,
+          },
+        },
+      ],
     },
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
@@ -47,7 +59,19 @@ describe('Clients Selectors', () => {
     canManageWorkspaceConfiguration: true,
     config: {
       gitRepositoryUrl: 'https://github.com/user2/repo2.git',
-      agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
+      agentTypes: [
+        {
+          type: 'cursor',
+          displayName: 'Cursor',
+          capabilities: {
+            transport: 'acp',
+            supportsChat: true,
+            supportsStreaming: true,
+            supportsToolEvents: true,
+            supportsQuestions: true,
+          },
+        },
+      ],
     },
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',

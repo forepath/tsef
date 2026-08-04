@@ -1,9 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { GitRepositorySetupMode } from '../constants/git-repository-setup-mode';
+import type { AgentTypeInfo } from '../dto/config-response.dto';
 import { ConfigService } from '../services/config.service';
 
 import { ConfigController } from './config.controller';
+
+const cursorCapabilities = {
+  transport: 'acp' as const,
+  supportsChat: true,
+  supportsStreaming: true,
+  supportsToolEvents: true,
+  supportsQuestions: true,
+};
 
 describe('ConfigController', () => {
   let controller: ConfigController;
@@ -36,7 +45,7 @@ describe('ConfigController', () => {
   describe('getConfig', () => {
     it('should return configuration with git repository URL and agent types when set', async () => {
       const gitRepositoryUrl = 'https://github.com/user/repo.git';
-      const agentTypes = [{ type: 'cursor', displayName: 'Cursor' }];
+      const agentTypes: AgentTypeInfo[] = [{ type: 'cursor', displayName: 'Cursor', capabilities: cursorCapabilities }];
 
       service.getGitRepositoryUrl.mockReturnValue(gitRepositoryUrl);
       service.getGitRepositorySetupMode.mockReturnValue(GitRepositorySetupMode.CLONE);
@@ -54,7 +63,7 @@ describe('ConfigController', () => {
     });
 
     it('should return configuration with undefined git repository URL when not set', async () => {
-      const agentTypes = [{ type: 'cursor', displayName: 'Cursor' }];
+      const agentTypes: AgentTypeInfo[] = [{ type: 'cursor', displayName: 'Cursor', capabilities: cursorCapabilities }];
 
       service.getGitRepositoryUrl.mockReturnValue(undefined);
       service.getGitRepositorySetupMode.mockReturnValue(GitRepositorySetupMode.CLONE);
@@ -72,10 +81,18 @@ describe('ConfigController', () => {
     });
 
     it('should return all registered agent types', async () => {
-      const agentTypes = [
-        { type: 'cursor', displayName: 'Cursor' },
-        { type: 'openai', displayName: 'OpenAI' },
-        { type: 'anthropic', displayName: 'Anthropic Claude' },
+      const agentTypes: AgentTypeInfo[] = [
+        { type: 'cursor', displayName: 'Cursor', capabilities: cursorCapabilities },
+        {
+          type: 'openai',
+          displayName: 'OpenAI',
+          capabilities: { ...cursorCapabilities, transport: undefined },
+        },
+        {
+          type: 'anthropic',
+          displayName: 'Anthropic Claude',
+          capabilities: { ...cursorCapabilities, transport: undefined },
+        },
       ];
 
       service.getGitRepositoryUrl.mockReturnValue(undefined);
@@ -86,9 +103,13 @@ describe('ConfigController', () => {
 
       expect(result.agentTypes).toEqual(agentTypes);
       expect(result.agentTypes).toHaveLength(3);
-      expect(result.agentTypes[0]).toEqual({ type: 'cursor', displayName: 'Cursor' });
-      expect(result.agentTypes[1]).toEqual({ type: 'openai', displayName: 'OpenAI' });
-      expect(result.agentTypes[2]).toEqual({ type: 'anthropic', displayName: 'Anthropic Claude' });
+      expect(result.agentTypes[0]).toEqual({
+        type: 'cursor',
+        displayName: 'Cursor',
+        capabilities: cursorCapabilities,
+      });
+      expect(result.agentTypes[1].type).toBe('openai');
+      expect(result.agentTypes[2].type).toBe('anthropic');
     });
 
     it('should return empty array when no agent types are registered', async () => {

@@ -28,8 +28,12 @@ import { WorkspaceConfigurationOverrideEntity } from '../entities/workspace-conf
 import { AgentsGateway } from '../gateways/agents.gateway';
 import { AgentProviderFactory } from '../providers/agent-provider.factory';
 import type { AgentProvider } from '../providers/agent-provider.interface';
+import { AcpAgentMessagingService } from '../providers/acp/acp-agent-messaging.service';
+import { AcpClientHostFactory } from '../providers/acp/acp-client-host';
+import { AcpNotificationMapper } from '../providers/acp/acp-notification-mapper';
+import { AcpSessionService } from '../providers/acp/acp-session.service';
+import { DockerAcpTransportFactory } from '../providers/acp/docker-acp-transport';
 import { CursorAgentProvider } from '../providers/agents/cursor-agent.provider';
-import { OpenClawAgentProvider } from '../providers/agents/openclaw-agent.provider';
 import { OpenCodeAgentProvider } from '../providers/agents/opencode-agent.provider';
 import { ChatFilterFactory } from '../providers/chat-filter.factory';
 import { BidirectionalChatFilter } from '../providers/filters/bidirectional-chat-filter';
@@ -125,10 +129,14 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
     DeploymentConfigurationsRepository,
     DeploymentRunsRepository,
     DockerService,
+    AcpNotificationMapper,
+    AcpClientHostFactory,
+    DockerAcpTransportFactory,
+    AcpSessionService,
+    AcpAgentMessagingService,
     AgentProviderFactory,
     CursorAgentProvider,
     OpenCodeAgentProvider,
-    OpenClawAgentProvider,
     PipelineProviderFactory,
     GitHubProvider,
     GitLabProvider,
@@ -152,12 +160,10 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
         factory: AgentProviderFactory,
         cursorProvider: CursorAgentProvider,
         opencodeProvider: OpenCodeAgentProvider,
-        openclawProvider: OpenClawAgentProvider,
         dynamicLoader: DynamicProviderLoaderService,
       ) => {
         factory.registerProvider(cursorProvider);
         factory.registerProvider(opencodeProvider);
-        factory.registerProvider(openclawProvider);
 
         await registerDynamicProviders<AgentProvider>({
           envKey: 'DYNAMIC_AGENT_PROVIDERS',
@@ -169,13 +175,7 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
 
         return true;
       },
-      inject: [
-        AgentProviderFactory,
-        CursorAgentProvider,
-        OpenCodeAgentProvider,
-        OpenClawAgentProvider,
-        DynamicProviderLoaderService,
-      ],
+      inject: [AgentProviderFactory, CursorAgentProvider, OpenCodeAgentProvider, DynamicProviderLoaderService],
     },
     {
       provide: 'PIPELINE_PROVIDER_INIT',
