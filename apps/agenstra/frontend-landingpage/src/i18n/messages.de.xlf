@@ -2191,8 +2191,8 @@
         <target> Ihre Agenten </target>
       </trans-unit>
       <trans-unit id="featurePortalHome-capability4Item2" datatype="html">
-        <source>Use Cursor, OpenCode, OpenClaw, and more on infrastructure you choose</source>
-        <target> Nutzen Sie Cursor, OpenCode, OpenClaw und mehr auf Infrastruktur Ihrer Wahl </target>
+        <source>Use Cursor and OpenCode on infrastructure you choose</source>
+        <target> Nutzen Sie Cursor und OpenCode auf Infrastruktur Ihrer Wahl </target>
       </trans-unit>
       <trans-unit id="featurePortalHome-pillarConnectPoint3Title" datatype="html">
         <source>Your deployment</source>

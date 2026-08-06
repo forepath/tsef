@@ -104,6 +104,24 @@ export class AgenstraNotificationPublisher implements IIdentityNotificationPubli
     this.publish('chat_message.created', payload, clientId);
   }
 
+  publishAgentAcpSessionFailed(
+    clientId: string,
+    payload: { agentId: string; message?: string | null; code?: string | null },
+  ): void {
+    this.publish('agent.acp.session_failed', payload, clientId);
+  }
+
+  publishAgentAcpPermissionDenied(clientId: string, payload: { agentId: string; message?: string | null }): void {
+    this.publish('agent.acp.permission_denied', payload, clientId);
+  }
+
+  publishAgentChatFailed(
+    clientId: string,
+    payload: { agentId: string; message?: string | null; code?: string | null },
+  ): void {
+    this.publish('agent.chat.failed', payload, clientId);
+  }
+
   publishFilterRuleTriggered(clientId: string, payload: FilterRuleTriggeredNotificationPayload): void {
     this.publish('filter_rule.triggered', payload, clientId);
   }

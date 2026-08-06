@@ -757,44 +757,7 @@
         </trans-unit>
       <trans-unit id="featureChat-connectToSend" datatype="html">
         <source>Connect to socket to send messages</source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayHeader" datatype="html">
-        <source>Gateway</source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartStep1Title" datatype="html">
-        <source> Step 1: Create the OpenClaw configuration </source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartStep1Intro" datatype="html">
-        <source> Create the default OpenClaw configuration file in the container. This writes <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code class=&quot;text-primary border border-primary rounded px-1&quot;&gt;"/>.openclaw/openclaw.json<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> so the gateway can load its settings. </source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartCreateConfig" datatype="html">
-        <source>Create OpenClaw configuration</source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartStep2AdaptTitle" datatype="html">
-        <source> Step 2: Adapt the configuration </source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartStep2AdaptIntro" datatype="html">
-        <source> Edit the configuration in the editor to customize the gateway settings, adding and configuring channels, AI models, and more. </source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartOpenEditor" datatype="html">
-        <source>Open Editor</source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartStep3Title" datatype="html">
-        <source> Step 3: Restart the agent </source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartStep3Intro" datatype="html">
-        <source> Restart the agent so it picks up the new configuration. </source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartRestartAgent" datatype="html">
-        <source>Restart the agent</source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartStep4Title" datatype="html">
-        <source> Step 4: Start chatting </source>
-        </trans-unit>
-      <trans-unit id="featureChat-gatewayQuickstartStep4Intro" datatype="html">
-        <source> You are all set. Say hello to your new bot in the chat, try a question, or start a task. Have fun! </source>
-        </trans-unit>
-      <trans-unit id="featureChat-selectContextModalTitle" datatype="html">
+        </trans-unit>      <trans-unit id="featureChat-selectContextModalTitle" datatype="html">
         <source> Select context </source>
         </trans-unit>
       <trans-unit id="featureChat-closeAriaLabel" datatype="html">

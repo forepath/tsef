@@ -63,7 +63,19 @@ describe('ClientsController', () => {
     canManageWorkspaceConfiguration: true,
     config: {
       gitRepositoryUrl: 'https://github.com/user/repo.git',
-      agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
+      agentTypes: [
+        {
+          type: 'cursor',
+          displayName: 'Cursor',
+          capabilities: {
+            transport: 'acp',
+            supportsChat: true,
+            supportsStreaming: true,
+            supportsToolEvents: true,
+            supportsQuestions: true,
+          },
+        },
+      ],
     },
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),

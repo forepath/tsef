@@ -2,6 +2,8 @@
 
 Guides for AI coding assistants working on **Agenstra** in this monorepo. Covers the workspace `.agenstra/` agent context used to configure Cursor, OpenCode, and GitHub Copilot from a single, tool-agnostic source.
 
+For **runtime** chat between Agenstra and coding agents in worker containers, see [Agent Client Protocol (ACP)](./agent-client-protocol.md).
+
 ## Overview
 
 The `.agenstra/` context is a **single source of truth** for agent rules, commands, skills, agents, and tools. The `@forepath/ai` transformer reads this directory and emits tool-specific configs so you can maintain one set of files and generate Cursor, OpenCode, and GitHub Copilot output as needed.

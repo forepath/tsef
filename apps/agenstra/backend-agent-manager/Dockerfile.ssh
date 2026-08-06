@@ -42,7 +42,6 @@ RUN printf '%s\n' \
     '#!/bin/bash' \
     'set -euo pipefail' \
     'sudo chown -R agenstra:agenstra /app 2>/dev/null || true' \
-    'sudo chown -R agenstra:agenstra /openclaw 2>/dev/null || true' \
     'if [ -z "${SSH_PASSWORD:-}" ]; then' \
     '  echo "SSH_PASSWORD is required" >&2' \
     '  exit 1' \

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { GitRepositorySetupMode, resolveGitRepositorySetupMode } from '../constants/git-repository-setup-mode';
+import type { AgentTypeInfo } from '../dto/config-response.dto';
 import { AgentProviderFactory } from '../providers/agent-provider.factory';
 
 /**
@@ -28,16 +29,24 @@ export class ConfigService {
   }
 
   /**
-   * Get the list of available agent provider types with display names.
+   * Get the list of available agent provider types with display names and capabilities.
    * @returns Array of agent type information objects
    */
-  getAvailableAgentTypes(): Array<{ type: string; displayName: string }> {
+  getAvailableAgentTypes(): AgentTypeInfo[] {
     return this.agentProviderFactory.getRegisteredTypes().map((type) => {
       const provider = this.agentProviderFactory.getProvider(type);
+      const capabilities = provider.getCapabilities();
 
       return {
         type: provider.getType(),
         displayName: provider.getDisplayName(),
+        capabilities: {
+          transport: capabilities.transport,
+          supportsChat: capabilities.supportsChat,
+          supportsStreaming: capabilities.supportsStreaming,
+          supportsToolEvents: capabilities.supportsToolEvents,
+          supportsQuestions: capabilities.supportsQuestions,
+        },
       };
     });
   }

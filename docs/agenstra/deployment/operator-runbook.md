@@ -36,7 +36,7 @@ Map your intended profile to **[System Requirements](./system-requirements.md)**
 - [ ] Per concurrent agent (worker + VNC): plan ~4 vCPU and 4-8 GiB plus disk under `/opt/agents/{uuid}`
 - [ ] Host totals match expected concurrent agents (see manager host totals table in system requirements)
 - [ ] Image **`DOCKER_GID`** matches host `docker` group GID at build time
-- [ ] Manager **API, worker, VNC, SSH, and AGI** images planned on the **same release tag**
+- [ ] Manager **API, worker, VNC, and SSH** images planned on the **same release tag**
 
 ### Frontend and network
 

@@ -337,7 +337,37 @@ export class ClientsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         const userInfo = (socket as Socket & { data?: { userInfo?: { userId?: string } } }).data?.userInfo;
         const userId = userInfo?.userId;
 
-        if (event === 'chatEnhanceResult' && currentClientId && lastAgentId && args.length > 0) {
+        if (event === 'error' && currentClientId && lastAgentId && args.length > 0) {
+          const errorPayload = args[0] as {
+            code?: string;
+            message?: string;
+            error?: { code?: string; message?: string };
+          };
+          const code = errorPayload?.code ?? errorPayload?.error?.code ?? null;
+          const message = errorPayload?.message ?? errorPayload?.error?.message ?? null;
+
+          if (
+            code === 'ACP_PERMISSION_DENIED' ||
+            (typeof message === 'string' && message.includes('permission denied'))
+          ) {
+            this.notificationPublisher.publishAgentAcpPermissionDenied(currentClientId, {
+              agentId: lastAgentId,
+              message,
+            });
+          } else if (code === 'ACP_SESSION_FAILED') {
+            this.notificationPublisher.publishAgentAcpSessionFailed(currentClientId, {
+              agentId: lastAgentId,
+              message,
+              code,
+            });
+          } else if (code === 'CHAT_ERROR') {
+            this.notificationPublisher.publishAgentChatFailed(currentClientId, {
+              agentId: lastAgentId,
+              message,
+              code,
+            });
+          }
+        } else if (event === 'chatEnhanceResult' && currentClientId && lastAgentId && args.length > 0) {
           const data = args[0] as { success?: boolean; data?: Record<string, unknown> };
           const payload: Record<string, unknown> | undefined = data?.success ? data.data : data;
 

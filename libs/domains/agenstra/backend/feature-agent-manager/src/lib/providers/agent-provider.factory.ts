@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { AgentProvider } from './agent-provider.interface';
 
@@ -30,7 +30,7 @@ export class AgentProviderFactory {
    * Get an agent provider by type.
    * @param type - The agent type identifier
    * @returns The agent provider instance
-   * @throws Error if provider is not found
+   * @throws BadRequestException if provider is not found
    */
   getProvider(type: string): AgentProvider {
     const provider = this.providers.get(type);
@@ -38,7 +38,9 @@ export class AgentProviderFactory {
     if (!provider) {
       const availableTypes = Array.from(this.providers.keys()).join(', ');
 
-      throw new Error(`Agent provider with type '${type}' not found. Available types: ${availableTypes || 'none'}`);
+      throw new BadRequestException(
+        `Agent provider with type '${type}' not found. Available types: ${availableTypes || 'none'}`,
+      );
     }
 
     return provider;

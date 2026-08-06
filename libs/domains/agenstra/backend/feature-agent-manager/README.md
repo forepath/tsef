@@ -23,7 +23,7 @@ Agents are entities that can be created, authenticated, and interacted with thro
 - ✅ Chat message broadcasting
 - ✅ Container command forwarding
 - ✅ Support for UUID or name-based agent identification
-- ✅ **Plugin-based agent provider system** - Support for multiple agent implementations (cursor-agent, OpenAI, Anthropic, etc.) through a unified interface
+- ✅ **Plugin-based agent provider system** - Cursor and OpenCode via [Agent Client Protocol (ACP)](../../../../docs/agenstra/ai-agents/agent-client-protocol.md) over stdio; additional types through the unified `AgentProvider` interface
 - ✅ **Plugin-based chat filter system** - Support for multiple message filtering implementations (profanity, PII, content policy, etc.) through a unified interface
 - ✅ **Extensible architecture** - Easy to add new agent providers and chat filters by implementing the respective interfaces
 

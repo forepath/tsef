@@ -431,8 +431,7 @@ span {
   }
 }
 
-.section__column--chat,
-.section__column--gateway {
+.section__column--chat {
   flex: 2; // Chat takes more space when editor is closed
 
   // Overlay on mobile when editor is open

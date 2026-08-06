@@ -497,48 +497,6 @@ jobs:
           project-version: 0.0.0-SNAPSHOT
           artifact-name: sbom-container-images-ssh
 
-  build-agi-container-images:
-    name: Build AGI Container Images
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-      actions: read
-      packages: read
-      security-events: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Set nx shas
-        uses: nrwl/nx-set-shas@v5
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v8
-        with:
-          name: build-artifacts
-          path: .
-
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
-
-      - name: Build AGI container images
-        run: |
-          npx nx affected --target=agi-container-image --configuration=test --parallel=3
-
-      - name: Scan AGI container images with Trivy
-        uses: ./.github/actions/trivy-scan-local-images
-        with:
-          sarif-category: trivy-images-agi
-
-      - name: Generate container image SBOMs
-        uses: ./.github/actions/generate-container-image-sboms
-        with:
-          project-version: 0.0.0-SNAPSHOT
-          artifact-name: sbom-container-images-agi
-
   build-server-container-images:
     name: Build Server Container Images
     runs-on: ubuntu-latest
@@ -591,7 +549,6 @@ jobs:
       - build-worker-container-images
       - build-vnc-container-images
       - build-ssh-container-images
-      - build-agi-container-images
       - build-server-container-images
     if: always() && needs.detect-affected.outputs.has_affected == 'true'
     steps:
@@ -635,10 +592,9 @@ jobs:
           WORKER: ${{ needs.build-worker-container-images.result }}
           VNC: ${{ needs.build-vnc-container-images.result }}
           SSH: ${{ needs.build-ssh-container-images.result }}
-          AGI: ${{ needs.build-agi-container-images.result }}
           SERVER: ${{ needs.build-server-container-images.result }}
         run: |
-          for result in "$BUILD" "$API" "$WORKER" "$VNC" "$SSH" "$AGI" "$SERVER"; do
+          for result in "$BUILD" "$API" "$WORKER" "$VNC" "$SSH" "$SERVER"; do
             if [ "$result" = "failure" ]; then
               echo "::error::An upstream SBOM build job failed"
               exit 1

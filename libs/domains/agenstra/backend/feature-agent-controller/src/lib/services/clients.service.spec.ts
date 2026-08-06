@@ -327,7 +327,19 @@ describe('ClientsService', () => {
       const clients = [mockClient];
       const mockConfig: ConfigResponseDto = {
         gitRepositoryUrl: 'https://github.com/user/repo.git',
-        agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
+        agentTypes: [
+          {
+            type: 'cursor',
+            displayName: 'Cursor',
+            capabilities: {
+              transport: 'acp',
+              supportsChat: true,
+              supportsStreaming: true,
+              supportsToolEvents: true,
+              supportsQuestions: true,
+            },
+          },
+        ],
       };
       const mockProvisioningReference: ProvisioningReferenceEntity = {
         id: 'ref-uuid',
@@ -423,7 +435,19 @@ describe('ClientsService', () => {
     it('should return client by id with config and isAutoProvisioned set correctly', async () => {
       const mockConfig: ConfigResponseDto = {
         gitRepositoryUrl: 'https://github.com/user/repo.git',
-        agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
+        agentTypes: [
+          {
+            type: 'cursor',
+            displayName: 'Cursor',
+            capabilities: {
+              transport: 'acp',
+              supportsChat: true,
+              supportsStreaming: true,
+              supportsToolEvents: true,
+              supportsQuestions: true,
+            },
+          },
+        ],
       };
       const mockProvisioningReference: ProvisioningReferenceEntity = {
         id: 'ref-uuid',
@@ -473,7 +497,19 @@ describe('ClientsService', () => {
       const updatedClient = { ...mockClient, ...updateDto };
       const mockConfig: ConfigResponseDto = {
         gitRepositoryUrl: 'https://github.com/user/repo.git',
-        agentTypes: [{ type: 'cursor', displayName: 'Cursor' }],
+        agentTypes: [
+          {
+            type: 'cursor',
+            displayName: 'Cursor',
+            capabilities: {
+              transport: 'acp',
+              supportsChat: true,
+              supportsStreaming: true,
+              supportsToolEvents: true,
+              supportsQuestions: true,
+            },
+          },
+        ],
       };
 
       mockRepository.findByIdOrThrow.mockResolvedValue(mockClient);

@@ -7,7 +7,7 @@ Hardware and software requirements for running Agenstra components in developmen
 Agenstra has two backend stacks and the agent console frontend:
 
 1. **Agent controller** control plane with BullMQ roles (`api`, `worker`, `scheduler`), PostgreSQL with **pgvector**, and Redis.
-2. **Agent manager** per-workspace runtime on a **Docker host** that spawns agent workload containers (worker, VNC, SSH, AGI).
+2. **Agent manager** per-workspace runtime on a **Docker host** that spawns agent workload containers (worker, VNC, SSH).
 
 The console talks only to the controller. The controller proxies agent operations to one or more manager instances.
 
@@ -144,7 +144,6 @@ Spawned dynamically per agent. Typical cursor agents use a **worker** container;
 | `agenstra-manager-worker` | 2                | 2-4 GiB                  | 10-50 GiB workspace under `/opt/agents/{uuid}` | Includes cursor-agent, OpenCode, Nx, Git; builds and `npm install` spike usage |
 | `agenstra-manager-vnc`    | 2                | 2-4 GiB                  | 5 GiB                                          | XFCE4 + Chromium at default **1920×1080**                                      |
 | `agenstra-manager-ssh`    | 0.25             | 256-512 MiB              | -                                              | SSH sidecar                                                                    |
-| `agenstra-manager-agi`    | 1-2              | 1-2 GiB                  | 2 GiB                                          | OpenClaw gateway on **18789**                                                  |
 
 Idle agent workers still consume baseline memory; stop agents when not in use.
 

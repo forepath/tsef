@@ -77,11 +77,23 @@ describe('ConfigService', () => {
 
       const result = service.getAvailableAgentTypes();
 
-      expect(result).toEqual([{ type: 'cursor', displayName: 'Cursor' }]);
+      expect(result).toEqual([
+        {
+          type: 'cursor',
+          displayName: 'Cursor',
+          capabilities: {
+            supportsChat: true,
+            supportsStreaming: false,
+            supportsToolEvents: false,
+            supportsQuestions: false,
+          },
+        },
+      ]);
       expect(agentProviderFactory.getRegisteredTypes).toHaveBeenCalled();
       expect(agentProviderFactory.getProvider).toHaveBeenCalledWith('cursor');
       expect(mockProvider.getType).toHaveBeenCalled();
       expect(mockProvider.getDisplayName).toHaveBeenCalled();
+      expect(mockProvider.getCapabilities).toHaveBeenCalled();
     });
 
     it('should return multiple agent types when multiple providers are registered', () => {
@@ -134,9 +146,36 @@ describe('ConfigService', () => {
       const result = service.getAvailableAgentTypes();
 
       expect(result).toEqual([
-        { type: 'cursor', displayName: 'Cursor' },
-        { type: 'openai', displayName: 'OpenAI' },
-        { type: 'anthropic', displayName: 'Anthropic Claude' },
+        {
+          type: 'cursor',
+          displayName: 'Cursor',
+          capabilities: {
+            supportsChat: true,
+            supportsStreaming: false,
+            supportsToolEvents: false,
+            supportsQuestions: false,
+          },
+        },
+        {
+          type: 'openai',
+          displayName: 'OpenAI',
+          capabilities: {
+            supportsChat: true,
+            supportsStreaming: false,
+            supportsToolEvents: false,
+            supportsQuestions: false,
+          },
+        },
+        {
+          type: 'anthropic',
+          displayName: 'Anthropic Claude',
+          capabilities: {
+            supportsChat: true,
+            supportsStreaming: false,
+            supportsToolEvents: false,
+            supportsQuestions: false,
+          },
+        },
       ]);
       expect(result).toHaveLength(3);
     });

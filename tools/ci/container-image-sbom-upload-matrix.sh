@@ -24,7 +24,6 @@ KNOWN_IMAGE_NAMES=(
   agenstra-manager-api
   agenstra-manager-vnc
   agenstra-manager-ssh
-  agenstra-manager-agi
   agenstra-portal-server
   agenstra-docs-server
 )

@@ -369,9 +369,7 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
     return this.automationAgentChoices().filter((a) => enabled.has(a.id));
   });
 
-  readonly chatCapableAgents$: Observable<AgentResponseDto[]> = this.agents$.pipe(
-    map((agents) => agents.filter((a) => a.agentType !== 'openclaw')),
-  );
+  readonly chatCapableAgents$: Observable<AgentResponseDto[]> = this.agents$;
 
   /** Mirrors `chatCapableAgents$` for constructor effects (WebSocket detail updates, socket agent changes). */
   private readonly chatCapableAgentsSignal = toSignal(this.chatCapableAgents$, {

@@ -175,11 +175,9 @@ Optional runtime extensions for provisioning and context import. See [Dynamic pr
 - `OPENCODE_AGENT_VIRTUAL_WORKSPACE_DOCKER_IMAGE` - VNC image (default: `ghcr.io/forepath/agenstra-manager-vnc:latest`)
 - `OPENCODE_AGENT_SSH_CONNECTION_DOCKER_IMAGE` - SSH sidecar image (default: `ghcr.io/forepath/agenstra-manager-ssh:latest`)
 
-### OpenClaw Agent Configuration
+### Agent Client Protocol (ACP)
 
-- `OPENCLAW_AGENT_DOCKER_IMAGE` - Primary gateway image (default: `ghcr.io/forepath/agenstra-manager-agi:latest`)
-- `OPENCLAW_AGENT_VIRTUAL_WORKSPACE_DOCKER_IMAGE` - VNC image (default: `ghcr.io/forepath/agenstra-manager-vnc:latest`)
-- `OPENCLAW_AGENT_SSH_CONNECTION_DOCKER_IMAGE` - SSH sidecar image (default: `ghcr.io/forepath/agenstra-manager-ssh:latest`)
+- `ACP_AUTO_APPROVE` - When not `false`, auto-select the first option on `session/request_permission` (default: enabled for headless agents). See [Agent Client Protocol](../ai-agents/agent-client-protocol.md).
 
 Sidecar containers require runtime passwords where applicable: **`VNC_PASSWORD`** and **`SSH_PASSWORD`** (set by the manager when creating agents; not image defaults). See **[Container image security](../security/container-images.md)**.
 

@@ -6,10 +6,10 @@ For image build targets and registry names, see **[Backend Agent Manager](../app
 
 ## Runtime users
 
-| Image family                                                                 | User       | Default UID/GID | Notes                                   |
-| ---------------------------------------------------------------------------- | ---------- | --------------- | --------------------------------------- |
-| Manager/controller **API**, **worker**, **VNC**, **SSH**, **agi** (OpenClaw) | `agenstra` | **10001**       | `ARG APP_UID` / `APP_GID` at build time |
-| Frontend **server** images (agent console, portal, docs)                     | `node`     | **1000**        | Alpine-based SSR images                 |
+| Image family                                             | User       | Default UID/GID | Notes                                   |
+| -------------------------------------------------------- | ---------- | --------------- | --------------------------------------- |
+| Manager/controller **API**, **worker**, **VNC**, **SSH** | `agenstra` | **10001**       | `ARG APP_UID` / `APP_GID` at build time |
+| Frontend **server** images (agent console, portal, docs) | `node`     | **1000**        | Alpine-based SSR images                 |
 
 Processes do **not** run as root after container start. The optional SSH image still starts **`sshd`** via a single allowed `sudo` invocation in the entrypoint.
 
@@ -25,10 +25,9 @@ When the agent manager creates an agent, it bind-mounts host paths into child co
 
 **Provider `basePath`:**
 
-| Agent type           | Primary image             | `basePath`  | Git clone target      |
-| -------------------- | ------------------------- | ----------- | --------------------- |
-| `cursor`, `opencode` | `agenstra-manager-worker` | `/app`      | `/app`                |
-| `openclaw`           | `agenstra-manager-agi`    | `/openclaw` | `/openclaw/workspace` |
+| Agent type           | Primary image             | `basePath` | Git clone target |
+| -------------------- | ------------------------- | ---------- | ---------------- |
+| `cursor`, `opencode` | `agenstra-manager-worker` | `/app`     | `/app`           |
 
 The same host directory is shared across the worker, SSH, and VNC containers for one agent; only the **in-container mount point** differs (for example worker `/app` vs VNC `/home/agenstra/environment`).
 
@@ -48,7 +47,6 @@ Entrypoint scripts live under **`/usr/local/bin/docker-entrypoint.sh`**, not und
 | ----------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | **worker**                          | `/usr/bin/chown`                                                | Fix ownership on `/app` bind mount at startup                                                  |
 | **VNC**                             | `/usr/bin/chown`                                                | Fix ownership on `/home/agenstra/environment` bind mount                                       |
-| **agi** (OpenClaw)                  | `/usr/bin/chown`                                                | Fix ownership on `/openclaw` bind mount                                                        |
 | **SSH**                             | `/usr/bin/chown`, `/usr/sbin/chpasswd`, `/usr/sbin/sshd`        | Workspace ownership, set login password from `SSH_PASSWORD`, start SSH daemon                  |
 | **Manager API**, **controller API** | `/usr/sbin/groupmod`, `/usr/sbin/groupadd`, `/usr/sbin/usermod` | Align in-container `docker` group GID with mounted `/var/run/docker.sock` before starting Node |
 
@@ -58,7 +56,7 @@ Any other `sudo` attempt (for example `sudo bash`, `sudo apt`) should **fail** w
 
 ```bash
 docker exec -u agenstra <container> sudo id          # expect: not allowed
-docker exec -u agenstra <container> sudo /usr/bin/chown --version   # expect: success (worker/vnc/agi/ssh)
+docker exec -u agenstra <container> sudo /usr/bin/chown --version   # expect: success (worker/vnc/ssh)
 ```
 
 ## Manager and controller API images
@@ -82,14 +80,9 @@ docker exec -u agenstra <container> sudo /usr/bin/chown --version   # expect: su
 - Shared agent repo is mounted at **`/home/agenstra/environment`**, not `/app`.
 - TigerVNC / XFCE / websockify run as `agenstra` without `sudo` after startup `chown`.
 
-## OpenClaw (agi) image
-
-- Registry image: `ghcr.io/forepath/agenstra-manager-agi:latest` (override with `OPENCLAW_AGENT_DOCKER_IMAGE`).
-- Gateway listens on port **18789**; `OPENCLAW_HOME=/openclaw`.
-
 ## Coordinated upgrades
 
-Deploy **manager API, worker, VNC, SSH, and agi** images from the **same release tag** when user IDs, home paths, or mount layouts change. Mismatched tags can break shared volumes or console SSH/VNC URLs.
+Deploy **manager API, worker, VNC, and SSH** images from the **same release tag** when user IDs, home paths, or mount layouts change. Mismatched tags can break shared volumes or console SSH/VNC URLs.
 
 ## Related documentation
 

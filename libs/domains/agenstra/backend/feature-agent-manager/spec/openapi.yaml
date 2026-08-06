@@ -1526,7 +1526,7 @@ components:
           type: [string, 'null']
         agentType:
           type: string
-          enum: [cursor, opencode, openclaw]
+          enum: [cursor, opencode]
           description: Agent provider type (defaults to 'cursor' if not provided)
         gitRepositorySetupMode:
           type: string
@@ -1577,7 +1577,7 @@ components:
           type: [string, 'null']
         agentType:
           type: string
-          enum: [cursor, opencode, openclaw]
+          enum: [cursor, opencode]
           description: Agent provider type
         deploymentConfiguration:
           type: object
@@ -1621,6 +1621,8 @@ components:
         agentType:
           type: string
           description: Agent provider type identifier
+        capabilities:
+          $ref: '#/components/schemas/AgentTypeCapabilities'
         git:
           type: [object, 'null']
           properties:
@@ -1658,14 +1660,33 @@ components:
               type: string
     AgentTypeInfo:
       type: object
-      required: [type, displayName]
+      required: [type, displayName, capabilities]
       properties:
         type:
           type: string
-          description: The unique type identifier (e.g., 'cursor', 'openai', 'anthropic')
+          description: The unique type identifier (e.g., 'cursor', 'opencode')
         displayName:
           type: string
-          description: Human-readable display name (e.g., 'Cursor', 'OpenAI', 'Anthropic Claude')
+          description: Human-readable display name (e.g., 'Cursor', 'OpenCode')
+        capabilities:
+          $ref: '#/components/schemas/AgentTypeCapabilities'
+    AgentTypeCapabilities:
+      type: object
+      required:
+        [supportsChat, supportsStreaming, supportsToolEvents, supportsQuestions]
+      properties:
+        transport:
+          type: string
+          enum: [acp]
+          description: Wire transport for agent messaging (Agent Client Protocol over stdio)
+        supportsChat:
+          type: boolean
+        supportsStreaming:
+          type: boolean
+        supportsToolEvents:
+          type: boolean
+        supportsQuestions:
+          type: boolean
     DependencyHealthStatus:
       type: string
       enum: [healthy, degraded, unknown, not_applicable]

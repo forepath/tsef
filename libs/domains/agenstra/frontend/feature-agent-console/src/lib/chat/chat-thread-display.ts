@@ -117,10 +117,11 @@ export function consolidateInteractionQueriesInSegments(segments: AgentTurnSegme
 }
 
 export function consolidateToolPairsInSegments(segments: AgentTurnSegment[]): AgentTurnSegment[] {
+  const coalescedSegments = coalesceDuplicateToolCallSegments(segments);
   const { skip, mergedAt } = computeToolPairMergePlanFromIndices({
-    length: segments.length,
+    length: coalescedSegments.length,
     describe: (i) => {
-      const s = segments[i];
+      const s = coalescedSegments[i];
 
       if (s === undefined) {
         return null;
@@ -149,8 +150,8 @@ export function consolidateToolPairsInSegments(segments: AgentTurnSegment[]): Ag
       return null;
     },
     mergeAt: (callIndex, resultIndex) => {
-      const callSeg = segments[callIndex];
-      const resultSeg = segments[resultIndex];
+      const callSeg = coalescedSegments[callIndex];
+      const resultSeg = coalescedSegments[resultIndex];
 
       if (callSeg === undefined || resultSeg === undefined) {
         throw new Error('tool pair merge: missing segment');
@@ -165,7 +166,7 @@ export function consolidateToolPairsInSegments(segments: AgentTurnSegment[]): Ag
   });
   const out: AgentTurnSegment[] = [];
 
-  for (let i = 0; i < segments.length; i++) {
+  for (let i = 0; i < coalescedSegments.length; i++) {
     if (skip.has(i)) {
       const row = mergedAt.get(i);
 
@@ -173,6 +174,87 @@ export function consolidateToolPairsInSegments(segments: AgentTurnSegment[]): Ag
         out.push({ kind: 'row', row });
       }
 
+      continue;
+    }
+
+    const seg = coalescedSegments[i];
+
+    if (seg !== undefined) {
+      out.push(seg);
+    }
+  }
+
+  return out;
+}
+
+/** Collapse duplicate toolCall segments that share a toolCallId (status updates). */
+function coalesceDuplicateToolCallSegments(segments: AgentTurnSegment[]): AgentTurnSegment[] {
+  if (segments.length === 0) {
+    return segments;
+  }
+
+  const firstIndexById = new Map<string, number>();
+  const skip = new Set<number>();
+  const replaced = new Map<number, AgentChatEventDisplayRow>();
+
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+
+    if (seg === undefined || seg.kind !== 'row' || seg.row.kind !== 'toolCall') {
+      continue;
+    }
+
+    if (!isConcreteToolCallId(seg.row.toolCallId)) {
+      continue;
+    }
+
+    const id = seg.row.toolCallId;
+    const firstIndex = firstIndexById.get(id);
+
+    if (firstIndex === undefined) {
+      firstIndexById.set(id, i);
+      continue;
+    }
+
+    const baseSeg = segments[firstIndex];
+    const base = replaced.get(firstIndex) ?? (baseSeg?.kind === 'row' ? baseSeg.row : undefined);
+
+    if (base === undefined) {
+      continue;
+    }
+
+    const row = seg.row;
+
+    replaced.set(firstIndex, {
+      ...base,
+      summaryTitle: row.summaryTitle || base.summaryTitle,
+      summaryBody: row.summaryBody || base.summaryBody,
+      badgeClass: row.badgeClass || base.badgeClass,
+      detailJson: row.detailJson || base.detailJson,
+      toolPair: {
+        outcome: row.toolPair?.outcome ?? base.toolPair?.outcome ?? 'pending',
+        callDetailJson: row.toolPair?.callDetailJson ?? base.toolPair?.callDetailJson ?? row.detailJson,
+        resultDetailJson: row.toolPair?.resultDetailJson ?? base.toolPair?.resultDetailJson,
+      },
+    });
+    skip.add(i);
+  }
+
+  if (skip.size === 0) {
+    return segments;
+  }
+
+  const out: AgentTurnSegment[] = [];
+
+  for (let i = 0; i < segments.length; i++) {
+    if (skip.has(i)) {
+      continue;
+    }
+
+    const replacedRow = replaced.get(i);
+
+    if (replacedRow !== undefined) {
+      out.push({ kind: 'row', row: replacedRow });
       continue;
     }
 

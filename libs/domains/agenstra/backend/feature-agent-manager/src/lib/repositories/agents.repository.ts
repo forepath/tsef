@@ -129,4 +129,74 @@ export class AgentsRepository {
 
     await this.repository.remove(agent);
   }
+
+  private acpSessionMapKey(resumeSessionSuffix?: string): string {
+    return resumeSessionSuffix ?? '';
+  }
+
+  /**
+   * Return a persisted ACP session id for the given suffix when the container still matches.
+   * Empty / omitted suffix is the primary chat session.
+   */
+  async findPersistedAcpSessionId(
+    agentId: string,
+    containerId: string,
+    resumeSessionSuffix?: string,
+  ): Promise<string | null> {
+    const agent = await this.findById(agentId);
+
+    if (!agent?.acpSessionContainerId || agent.acpSessionContainerId !== containerId) {
+      return null;
+    }
+
+    const sessionId = agent.acpSessions?.[this.acpSessionMapKey(resumeSessionSuffix)];
+
+    return typeof sessionId === 'string' && sessionId.length > 0 ? sessionId : null;
+  }
+
+  /**
+   * Persist an ACP session id for a suffix (overwrites that key only).
+   * When the container id changes, previous suffix entries are discarded.
+   */
+  async saveAcpSession(
+    agentId: string,
+    containerId: string,
+    acpSessionId: string,
+    resumeSessionSuffix?: string,
+  ): Promise<void> {
+    const agent = await this.findById(agentId);
+    const mapKey = this.acpSessionMapKey(resumeSessionSuffix);
+    const sessions = agent?.acpSessionContainerId === containerId && agent.acpSessions ? { ...agent.acpSessions } : {};
+
+    sessions[mapKey] = acpSessionId;
+
+    await this.repository.update(agentId, {
+      acpSessions: sessions,
+      acpSessionContainerId: containerId,
+    });
+  }
+
+  /**
+   * Clear a persisted ACP session for one suffix (e.g. after prompt/transport failure).
+   * When the map becomes empty, also clear the container binding.
+   */
+  async clearAcpSession(agentId: string, resumeSessionSuffix?: string): Promise<void> {
+    const agent = await this.findById(agentId);
+
+    if (!agent) {
+      return;
+    }
+
+    const mapKey = this.acpSessionMapKey(resumeSessionSuffix);
+    const sessions = { ...(agent.acpSessions ?? {}) };
+
+    delete sessions[mapKey];
+
+    const remainingKeys = Object.keys(sessions);
+
+    await this.repository.update(agentId, {
+      acpSessions: remainingKeys.length > 0 ? sessions : null,
+      acpSessionContainerId: remainingKeys.length > 0 ? agent.acpSessionContainerId : null,
+    });
+  }
 }

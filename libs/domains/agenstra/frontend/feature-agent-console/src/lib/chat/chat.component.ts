@@ -49,7 +49,6 @@ import {
   type CreateAgentDto,
   type CreateClientDto,
   type CreateEnvironmentVariableDto,
-  type CreateFileDto,
   type DeploymentRun,
   type EnvironmentVariableResponseDto,
   type FileManagerContext,
@@ -64,7 +63,6 @@ import {
   type UpsertClientAgentAutonomyDto,
   type WorkspaceConfigurationSettingKey,
   type WorkspaceConfigurationSettingResponseDto,
-  type WriteFileDto,
 } from '@forepath/agenstra/frontend/data-access-agent-console';
 import { ENVIRONMENT, type Environment } from '@forepath/shared/frontend/util-configuration';
 import { StandaloneLoadingService } from '@forepath/shared/frontend';
@@ -558,7 +556,6 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   fileManagerContext = signal<FileManagerContext>('app');
   deploymentManagerOpen = signal<boolean>(false);
   chatVisible = signal<boolean>(false);
-  gatewayVisible = signal<boolean>(false);
   private previousAgentId: string | null = null;
   readonly fileOnlyMode = signal<boolean>(false);
   readonly standaloneMode = signal<boolean>(false);
@@ -738,31 +735,13 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     toObservable(this.chatVisible),
   ]).pipe(
     map(([selectedAgent, editorOpen, deploymentManagerOpen, chatVisible]) => {
-      if (!selectedAgent || selectedAgent.agentType === 'openclaw') {
-        return false;
-      }
-
-      const sidePanelOpen = deploymentManagerOpen;
-
-      return (!editorOpen && !sidePanelOpen) || chatVisible;
-    }),
-  );
-
-  // Computed observable to determine if chat should be visible
-  readonly shouldShowGateway$ = combineLatest([
-    this.selectedAgent$,
-    toObservable(this.editorOpen),
-    toObservable(this.deploymentManagerOpen),
-    toObservable(this.gatewayVisible),
-  ]).pipe(
-    map(([selectedAgent, editorOpen, deploymentManagerOpen, gatewayVisible]) => {
       if (!selectedAgent) {
         return false;
       }
 
       const sidePanelOpen = deploymentManagerOpen;
 
-      return ((!editorOpen && !sidePanelOpen) || gatewayVisible) && selectedAgent.agentType === 'openclaw';
+      return (!editorOpen && !sidePanelOpen) || chatVisible;
     }),
   );
 
@@ -779,54 +758,6 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
       return this.notificationsFacade.getEnvironmentGitDirty$(clientId, agent.id);
     }),
-  );
-
-  /** Path for OpenClaw config file in the container (relative to agent base path). */
-  private static readonly OPENCLAW_CONFIG_PATH = '.openclaw/openclaw.json';
-
-  /** Path for OpenClaw config directory. */
-  private static readonly OPENCLAW_CONFIG_DIR = '.openclaw';
-
-  /**
-   * True when .openclaw/openclaw.json exists in the selected openclaw agent's container.
-   * Triggers a directory list when the gateway is shown for an openclaw agent.
-   */
-  readonly openclawConfigExists$: Observable<boolean> = combineLatest([this.activeClientId$, this.selectedAgent$]).pipe(
-    filter(([clientId, agent]) => !!clientId && !!agent && agent.agentType === 'openclaw'),
-    tap(([clientId, agent]) => {
-      if (!clientId || !agent) {
-        return;
-      }
-
-      this.filesFacade.listDirectory(clientId, agent.id, { path: AgentConsoleChatComponent.OPENCLAW_CONFIG_DIR });
-    }),
-    switchMap(([clientId, agent]) => {
-      if (!clientId || !agent) {
-        return of([]);
-      }
-
-      return this.filesFacade.getDirectoryListing$(clientId, agent.id, AgentConsoleChatComponent.OPENCLAW_CONFIG_DIR);
-    }),
-    map((nodes) => nodes?.some((n) => n.name === 'openclaw.json' && n.type === 'file') ?? false),
-    startWith(false),
-    shareReplay(1),
-  );
-
-  /** True while the OpenClaw config file is being written. */
-  readonly isWritingOpenClawConfig$: Observable<boolean> = combineLatest([
-    this.activeClientId$,
-    this.selectedAgent$,
-  ]).pipe(
-    filter(([clientId, agent]) => !!clientId && !!agent && agent.agentType === 'openclaw'),
-    switchMap(([clientId, agent]) => {
-      if (!clientId || !agent) {
-        return of(false);
-      }
-
-      return this.filesFacade.isWritingFile$(clientId, agent.id, AgentConsoleChatComponent.OPENCLAW_CONFIG_PATH);
-    }),
-    startWith(false),
-    shareReplay(1),
   );
 
   /**
@@ -4020,84 +3951,6 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   onRestartAgent(clientId: string, agentId: string): void {
     this.agentsFacade.restartClientAgent(clientId, agentId);
-  }
-
-  /**
-   * Creates the .openclaw directory and .openclaw/openclaw.json with default configuration,
-   * then refreshes the directory listing so the quickstart step 1 button can disable.
-   */
-  createOpenClawConfig(clientId: string, agentId: string): void {
-    this.filesFacade.createFileOrDirectory(clientId, agentId, AgentConsoleChatComponent.OPENCLAW_CONFIG_DIR, {
-      type: 'directory',
-    } as CreateFileDto);
-
-    of(null)
-      .pipe(delay(400), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        const config = this.getDefaultOpenClawConfig();
-        const content = JSON.stringify(config, null, 2);
-        const base64Content = btoa(unescape(encodeURIComponent(content)));
-        const writeDto: WriteFileDto = { content: base64Content, encoding: 'utf-8' };
-
-        this.filesFacade.writeFile(clientId, agentId, AgentConsoleChatComponent.OPENCLAW_CONFIG_PATH, writeDto);
-
-        this.filesFacade
-          .isWritingFile$(clientId, agentId, AgentConsoleChatComponent.OPENCLAW_CONFIG_PATH)
-          .pipe(
-            filter((writing) => !writing),
-            take(1),
-            takeUntilDestroyed(this.destroyRef),
-          )
-          .subscribe(() => {
-            this.filesFacade.listDirectory(clientId, agentId, {
-              path: AgentConsoleChatComponent.OPENCLAW_CONFIG_DIR,
-            });
-          });
-      });
-  }
-
-  /** Returns the default OpenClaw config object written to .openclaw/openclaw.json. */
-  private getDefaultOpenClawConfig(): object {
-    return {
-      commands: {
-        native: 'auto',
-        nativeSkills: 'auto',
-      },
-      channels: {
-        telegram: {
-          enabled: true,
-          dmPolicy: 'pairing',
-          botToken: '1234567890',
-          groupPolicy: 'allowlist',
-          streamMode: 'partial',
-        },
-      },
-      agents: {
-        defaults: {
-          model: {
-            primary: 'openai/gpt-5.1-codex',
-          },
-          maxConcurrent: 4,
-          subagents: {
-            maxConcurrent: 8,
-          },
-        },
-      },
-      messages: {
-        ackReactionScope: 'group-mentions',
-      },
-      plugins: {
-        entries: {
-          telegram: {
-            enabled: true,
-          },
-        },
-      },
-      meta: {
-        lastTouchedVersion: '2026.2.9',
-        lastTouchedAt: '2026-02-10T19:07:41.424Z',
-      },
-    };
   }
 
   onEditingClientAuthTypeChange(): void {

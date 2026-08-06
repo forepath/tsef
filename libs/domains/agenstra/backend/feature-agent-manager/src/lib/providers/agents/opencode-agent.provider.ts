@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { DockerService } from '../../services/docker.service';
 import {
   AgentProvider,
   AgentProviderCapabilities,
@@ -8,6 +7,8 @@ import {
   AgentProviderOptions,
   AgentResponseObject,
 } from '../agent-provider.interface';
+import { AcpAgentMessagingService } from '../acp/acp-agent-messaging.service';
+import { ACP_INITIALIZATION_INSTRUCTIONS, OPENCODE_ACP_LAUNCH_SPEC } from '../acp/acp-provider.config';
 
 /**
  * OpenCode agent provider implementation.
@@ -18,7 +19,7 @@ export class OpenCodeAgentProvider implements AgentProvider {
   private static readonly TYPE = 'opencode';
   private static readonly LIST_MODELS_COMMAND = 'opencode models';
 
-  constructor(private readonly dockerService: DockerService) {}
+  constructor(private readonly acpMessaging: AcpAgentMessagingService) {}
 
   /**
    * Get the unique type identifier for this provider.
@@ -38,11 +39,26 @@ export class OpenCodeAgentProvider implements AgentProvider {
 
   getCapabilities(): AgentProviderCapabilities {
     return {
+      transport: 'acp',
       supportsChat: true,
       supportsStreaming: true,
       supportsToolEvents: true,
       supportsQuestions: true,
     };
+  }
+
+  async *streamChatEvents(
+    agentId: string,
+    containerId: string,
+    message: string,
+    options?: AgentProviderOptions,
+  ): AsyncIterable<AgentResponseObject> {
+    yield* this.acpMessaging.streamChatEvents(
+      { agentId, containerId, resumeSessionSuffix: options?.resumeSessionSuffix },
+      OPENCODE_ACP_LAUNCH_SPEC,
+      message,
+      options,
+    );
   }
 
   /**
@@ -119,77 +135,32 @@ export class OpenCodeAgentProvider implements AgentProvider {
     return models;
   }
 
-  /**
-   * Send a message to the opencode-agent and get a response.
-   * @param agentId - The UUID of the agent
-   * @param containerId - The Docker container ID where the agent is running
-   * @param message - The message to send to the agent
-   * @param options - Optional configuration (e.g., model name)
-   * @returns The agent's response as a string
-   */
-  private buildRunCommand(options?: AgentProviderOptions): string {
-    let command = `opencode run --format json`;
-
-    if (options?.continue === undefined || options?.continue === true) {
-      command += ` --continue`;
-    }
-
-    if (options?.model && options.model !== 'auto') {
-      command += ` --model ${options.model}`;
-    }
-
-    return command;
-  }
-
-  private wantsSessionContinue(options?: AgentProviderOptions): boolean {
-    return options?.continue === undefined || options?.continue === true;
-  }
-
   async sendMessage(
     agentId: string,
     containerId: string,
     message: string,
     options?: AgentProviderOptions,
   ): Promise<string> {
-    const command = this.buildRunCommand(options);
-    const response = await this.dockerService.sendCommandToContainer(containerId, command, message);
-
-    if (response.includes('Session not found') && this.wantsSessionContinue(options)) {
-      return this.sendMessage(agentId, containerId, message, {
-        ...options,
-        continue: false,
-      });
-    }
-
-    return response;
+    return this.acpMessaging.sendMessage(
+      { agentId, containerId, resumeSessionSuffix: options?.resumeSessionSuffix },
+      OPENCODE_ACP_LAUNCH_SPEC,
+      message,
+      options,
+    );
   }
 
   async *sendMessageStream(
-    _agentId: string,
+    agentId: string,
     containerId: string,
     message: string,
     options?: AgentProviderOptions,
   ): AsyncIterable<string> {
-    const streamOnce = (opts?: AgentProviderOptions): AsyncIterable<{ stream: 'stdout' | 'stderr'; chunk: string }> =>
-      this.dockerService.execCommandStream(containerId, this.buildRunCommand(opts), message);
-    const chunks: string[] = [];
-
-    for await (const { stream, chunk } of streamOnce(options)) {
-      if (stream === 'stdout') {
-        chunks.push(chunk);
-        yield chunk;
-      }
-    }
-
-    const combined = chunks.join('');
-
-    if (combined.includes('Session not found') && this.wantsSessionContinue(options)) {
-      for await (const { stream, chunk } of streamOnce({ ...options, continue: false })) {
-        if (stream === 'stdout') {
-          yield chunk;
-        }
-      }
-    }
+    yield* this.acpMessaging.sendMessageStream(
+      { agentId, containerId, resumeSessionSuffix: options?.resumeSessionSuffix },
+      OPENCODE_ACP_LAUNCH_SPEC,
+      message,
+      options,
+    );
   }
 
   /**
@@ -199,9 +170,13 @@ export class OpenCodeAgentProvider implements AgentProvider {
    * @param _containerId - The Docker container ID where the agent is running (unused for opencode)
    * @param _options - Optional configuration (e.g., model name) (unused for opencode)
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async sendInitialization(_agentId: string, _containerId: string, _options?: AgentProviderOptions): Promise<void> {
-    return;
+  async sendInitialization(agentId: string, containerId: string, options?: AgentProviderOptions): Promise<void> {
+    await this.acpMessaging.sendInitialization(
+      { agentId, containerId, resumeSessionSuffix: options?.resumeSessionSuffix },
+      OPENCODE_ACP_LAUNCH_SPEC,
+      ACP_INITIALIZATION_INSTRUCTIONS,
+      options,
+    );
   }
 
   /**
@@ -211,101 +186,10 @@ export class OpenCodeAgentProvider implements AgentProvider {
    * @returns Array of parseable strings with only valid UTF-8 characters
    */
   toParseableStrings(response: string): string[] {
-    const lines = response.split('\n');
-
-    if (lines.length === 0) {
-      return [];
-    }
-
-    const result: string[] = [];
-
-    for (const line of lines) {
-      let toParse = line.trim();
-      const firstBrace = toParse.indexOf('{');
-
-      if (firstBrace !== -1) {
-        toParse = toParse.slice(firstBrace);
-      }
-
-      const lastBrace = toParse.lastIndexOf('}');
-
-      if (lastBrace !== -1) {
-        toParse = toParse.slice(0, lastBrace + 1);
-      }
-
-      if (!toParse.includes('{')) {
-        continue;
-      }
-
-      try {
-        const parsed = JSON.parse(toParse) as {
-          type?: string;
-          part?: {
-            type?: string;
-            text?: string;
-            callID?: string;
-            tool?: string;
-            state?: { status?: string; input?: unknown };
-          };
-        };
-
-        if (!parsed.type) {
-          continue;
-        }
-
-        if (parsed.type === 'text') {
-          if (parsed.part?.type === 'text' && typeof parsed.part.text === 'string' && parsed.part.text !== '') {
-            result.push(toParse);
-          }
-        } else if (parsed.type === 'tool_use') {
-          const part = parsed.part;
-
-          if (
-            part?.type === 'tool' &&
-            typeof part.callID === 'string' &&
-            typeof part.tool === 'string' &&
-            part.callID.length > 0 &&
-            part.tool.length > 0
-          ) {
-            const toolCallFrame = {
-              type: 'tool_call',
-              toolCallId: part.callID,
-              name: part.tool,
-              args: part.state?.input,
-              status: OpenCodeAgentProvider.mapOpenCodeToolLifecycleStatus(part.state?.status),
-            };
-
-            result.push(JSON.stringify(toolCallFrame));
-          }
-
-          result.push(toParse);
-        } else if (parsed.type === 'error') {
-          result.push(toParse);
-        }
-      } catch {
-        continue;
-      }
-    }
-
-    return result;
-  }
-
-  private static mapOpenCodeToolLifecycleStatus(status: unknown): 'started' | 'inProgress' | 'succeeded' | 'failed' {
-    const s = typeof status === 'string' ? status.toLowerCase() : '';
-
-    if (s === 'completed' || s === 'success' || s === 'succeeded') {
-      return 'succeeded';
-    }
-
-    if (s === 'failed' || s === 'error') {
-      return 'failed';
-    }
-
-    if (s === 'started' || s === 'running' || s === 'pending') {
-      return 'inProgress';
-    }
-
-    return 'inProgress';
+    return response
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
   }
 
   /**
@@ -314,109 +198,7 @@ export class OpenCodeAgentProvider implements AgentProvider {
    * @returns The unified response object
    */
   toUnifiedResponse(response: string): AgentResponseObject | undefined {
-    const responseObject = JSON.parse(response) as {
-      type: string;
-      timestamp?: number;
-      sessionID?: string;
-      part?: {
-        id?: string;
-        sessionID?: string;
-        messageID?: string;
-        type?: string;
-        text?: string;
-        callID?: string;
-        tool?: string;
-        state?: {
-          status?: string;
-          input?: unknown;
-          output?: unknown;
-          title?: string;
-          metadata?: Record<string, unknown>;
-        };
-        time?: {
-          start: number;
-          end: number;
-        };
-      };
-      error?: {
-        name?: string;
-        data?: { message?: string };
-      };
-    };
-
-    if (responseObject.type === 'text' && responseObject.part?.type === 'text') {
-      return {
-        type: 'result',
-        subtype: 'success',
-        result: responseObject.part.text ?? '',
-      };
-    }
-
-    if (responseObject.type === 'tool_call') {
-      const o = responseObject as unknown as {
-        toolCallId?: unknown;
-        name?: unknown;
-        args?: unknown;
-        status?: unknown;
-      };
-
-      if (typeof o.toolCallId !== 'string' || typeof o.name !== 'string') {
-        return undefined;
-      }
-
-      const st = o.status;
-      const status =
-        st === 'started' || st === 'inProgress' || st === 'succeeded' || st === 'failed' ? st : 'inProgress';
-
-      return {
-        type: 'tool_call',
-        toolCallId: o.toolCallId,
-        name: o.name,
-        ...(o.args !== undefined ? { args: o.args } : {}),
-        status,
-      };
-    }
-
-    if (responseObject.type === 'tool_use' && responseObject.part?.type === 'tool') {
-      const part = responseObject.part;
-
-      if (typeof part.callID !== 'string' || typeof part.tool !== 'string') {
-        return undefined;
-      }
-
-      const exit = part.state?.metadata?.exit;
-      const isError = typeof exit === 'number' && exit !== 0;
-
-      return {
-        type: 'tool_result',
-        toolCallId: part.callID,
-        name: part.tool,
-        result: {
-          output: part.state?.output,
-          input: part.state?.input,
-          title: part.state?.title,
-          metadata: part.state?.metadata,
-        },
-        isError,
-      };
-    }
-
-    if (responseObject.type === 'error') {
-      const message =
-        typeof responseObject.error?.data?.message === 'string'
-          ? responseObject.error.data.message
-          : typeof responseObject.error?.name === 'string'
-            ? responseObject.error.name
-            : 'OpenCode error';
-
-      return {
-        type: 'error',
-        is_error: true,
-        result: message,
-      };
-    }
-
-    return undefined;
+    return JSON.parse(response) as AgentResponseObject;
   }
 
   buildModelsCommand(): string {
