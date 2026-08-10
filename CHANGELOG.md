@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.23.0](https://github.com/forepath/one/compare/v2.22.0...v2.23.0) (2026-08-10)
+
+
+### Features
+
+* **agenstra:** acp support ([#555](https://github.com/forepath/one/issues/555)) ([8000989](https://github.com/forepath/one/commit/8000989a8dbebb45a45f3d09354c7d2076fdc8e9))
+* application update checker ([#545](https://github.com/forepath/one/issues/545)) ([4de4d05](https://github.com/forepath/one/commit/4de4d05915c258f7228571eb06fff704bf170ce9))
+* decabill billing provisioning provider ([#550](https://github.com/forepath/one/issues/550)) ([dcd2a55](https://github.com/forepath/one/commit/dcd2a5513503c18a84a9ab13b9b274128cfd66ea))
+* decabill customer profile additional data ([#543](https://github.com/forepath/one/issues/543)) ([9ad41b2](https://github.com/forepath/one/commit/9ad41b25ff42e493a2fef36ef70bd7f15b159246))
+* decabill github link ([#542](https://github.com/forepath/one/issues/542)) ([0217c2d](https://github.com/forepath/one/commit/0217c2db1b97f6174a18ce59445d5f40a7c625e1))
+* decabill noop subscriptions ([#553](https://github.com/forepath/one/issues/553)) ([a1d6c1a](https://github.com/forepath/one/commit/a1d6c1afa3dbfd200253c6ac41a40350f4346714))
+* **decabill:** usage metering ([#556](https://github.com/forepath/one/issues/556)) ([3fa8060](https://github.com/forepath/one/commit/3fa80605915f0e6286ea96d1f070fc0df9331b02))
+
+
+### Bug Fixes
+
+* decabill missing translations ([#544](https://github.com/forepath/one/issues/544)) ([0f4446b](https://github.com/forepath/one/commit/0f4446bc3252f787d7780863c2c84f8019234347))
+
 ## [2.22.0](https://github.com/forepath/one/compare/v2.21.0...v2.22.0) (2026-07-31)
 
 
