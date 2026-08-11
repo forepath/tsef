@@ -12,6 +12,7 @@ import { SubscriptionsRepository } from '../repositories/subscriptions.repositor
 import { UsageRecordsRepository } from '../repositories/usage-records.repository';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 
+import { BillingMeterRealtimeService } from '../gateways/billing-meter-realtime.service';
 import { MeterBillingService } from './meter-billing.service';
 
 @Injectable()
@@ -26,6 +27,7 @@ export class UsageService {
     private readonly subscriptionAddonsRepository: SubscriptionAddonsRepository,
     private readonly meterBillingService: MeterBillingService,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
+    private readonly billingMeterRealtime: BillingMeterRealtimeService,
   ) {}
 
   async getLatestUsage(subscriptionId: string) {
@@ -110,6 +112,8 @@ export class UsageService {
       value: record.value ?? null,
     });
 
+    void this.billingMeterRealtime.emitMeterSummaryUpdate(record.subscriptionId);
+
     return record;
   }
 
@@ -163,6 +167,8 @@ export class UsageService {
       value: updated.value ?? null,
     });
 
+    void this.billingMeterRealtime.emitMeterSummaryUpdate(updated.subscriptionId);
+
     return this.mapEntry(updated);
   }
 
@@ -178,6 +184,8 @@ export class UsageService {
       attachmentType: existing.attachmentType ?? null,
       addonId: existing.addonId ?? null,
     });
+
+    void this.billingMeterRealtime.emitMeterSummaryUpdate(existing.subscriptionId);
   }
 
   private async assertAttachmentAllowed(

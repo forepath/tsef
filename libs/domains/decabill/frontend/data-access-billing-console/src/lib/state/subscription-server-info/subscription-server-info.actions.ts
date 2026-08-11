@@ -22,6 +22,8 @@ export const loadOverviewServerInfoSuccess = createAction(
     sshAccessGrantedBySubscriptionId?: Record<string, boolean>;
     /** User-facing service type name per subscription id. */
     serviceTypeNameBySubscriptionId?: Record<string, string>;
+    /** Customer-defined display name per subscription id for the tracked item. */
+    displayNameBySubscriptionId?: Record<string, string | null>;
   }>(),
 );
 
@@ -32,7 +34,7 @@ export const loadOverviewServerInfoFailure = createAction(
 
 export const startServer = createAction(
   '[Subscription Server Info] Start Server',
-  props<{ subscriptionId: string; itemId: string }>(),
+  props<{ subscriptionId: string; itemId: string; adminMode?: boolean }>(),
 );
 export const startServerSuccess = createAction(
   '[Subscription Server Info] Start Server Success',
@@ -45,7 +47,7 @@ export const startServerFailure = createAction(
 
 export const stopServer = createAction(
   '[Subscription Server Info] Stop Server',
-  props<{ subscriptionId: string; itemId: string }>(),
+  props<{ subscriptionId: string; itemId: string; adminMode?: boolean }>(),
 );
 export const stopServerSuccess = createAction(
   '[Subscription Server Info] Stop Server Success',
@@ -58,7 +60,7 @@ export const stopServerFailure = createAction(
 
 export const restartServer = createAction(
   '[Subscription Server Info] Restart Server',
-  props<{ subscriptionId: string; itemId: string }>(),
+  props<{ subscriptionId: string; itemId: string; adminMode?: boolean }>(),
 );
 export const restartServerSuccess = createAction(
   '[Subscription Server Info] Restart Server Success',
@@ -87,4 +89,9 @@ export const billingDashboardStatusPush = createAction(
 export const markSshAccessGranted = createAction(
   '[Subscription Server Info] Mark SSH Access Granted',
   props<{ subscriptionId: string }>(),
+);
+
+export const setSubscriptionItemDisplayName = createAction(
+  '[Subscription Server Info] Set Subscription Item Display Name',
+  props<{ subscriptionId: string; displayName: string | null }>(),
 );

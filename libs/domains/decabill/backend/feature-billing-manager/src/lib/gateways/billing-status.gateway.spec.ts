@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { SocketAuthService, UserRole, UsersRepository } from '@forepath/identity/backend';
 import { Test, TestingModule } from '@nestjs/testing';
 import type { Socket } from 'socket.io';
@@ -6,12 +7,17 @@ import { SubscriptionStatus } from '../entities/subscription.entity';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { SubscriptionService } from '../services/subscription.service';
 
+import { BillingMeterRealtimeService } from './billing-meter-realtime.service';
 import { BillingStatusGateway } from './billing-status.gateway';
 
-function createMockSocket(overrides: Partial<Socket> & { data?: { userInfo?: unknown } } = {}): Socket {
+function createMockSocket(
+  overrides: Partial<Socket> & { data?: { userInfo?: unknown; meterSubscriptionRooms?: string[] } } = {},
+): Socket {
   return {
     id: 'socket-1',
     emit: jest.fn(),
+    join: jest.fn().mockResolvedValue(undefined),
+    leave: jest.fn().mockResolvedValue(undefined),
     data: {},
     ...overrides,
   } as unknown as Socket;
@@ -20,9 +26,12 @@ function createMockSocket(overrides: Partial<Socket> & { data?: { userInfo?: unk
 describe('BillingStatusGateway', () => {
   let gateway: BillingStatusGateway;
   let socketAuth: jest.Mocked<Pick<SocketAuthService, 'validateAndGetUser'>>;
-  let subscriptionService: jest.Mocked<Pick<SubscriptionService, 'listSubscriptions'>>;
+  let subscriptionService: jest.Mocked<Pick<SubscriptionService, 'listSubscriptions' | 'getSubscription'>>;
   let itemServerService: jest.Mocked<Pick<SubscriptionItemServerService, 'listItems' | 'getServerInfo'>>;
   let usersRepository: jest.Mocked<Pick<UsersRepository, 'findByIdForTenant'>>;
+  let billingMeterRealtime: jest.Mocked<
+    Pick<BillingMeterRealtimeService, 'attachServer' | 'buildMeterSummaryPayload'>
+  >;
   const userSocketInfo = {
     isApiKeyAuth: false,
     userId: 'user-1',
@@ -36,6 +45,7 @@ describe('BillingStatusGateway', () => {
     };
     subscriptionService = {
       listSubscriptions: jest.fn(),
+      getSubscription: jest.fn(),
     };
     itemServerService = {
       listItems: jest.fn(),
@@ -43,6 +53,10 @@ describe('BillingStatusGateway', () => {
     };
     usersRepository = {
       findByIdForTenant: jest.fn().mockResolvedValue({ id: 'user-1', tenantId: 'default' }),
+    };
+    billingMeterRealtime = {
+      attachServer: jest.fn(),
+      buildMeterSummaryPayload: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -52,6 +66,7 @@ describe('BillingStatusGateway', () => {
         { provide: SubscriptionService, useValue: subscriptionService },
         { provide: SubscriptionItemServerService, useValue: itemServerService },
         { provide: UsersRepository, useValue: usersRepository },
+        { provide: BillingMeterRealtimeService, useValue: billingMeterRealtime },
       ],
     }).compile();
 
@@ -100,6 +115,7 @@ describe('BillingStatusGateway', () => {
       expect(next).toHaveBeenCalledWith();
       expect(socketAuth.validateAndGetUser).toHaveBeenCalledWith('Bearer x', 'default');
       expect((mockSocket as unknown as { data: { userInfo: unknown } }).data.userInfo).toEqual(userSocketInfo);
+      expect(billingMeterRealtime.attachServer).toHaveBeenCalledWith(server);
     });
   });
 
@@ -138,6 +154,7 @@ describe('BillingStatusGateway', () => {
           serviceTypeName: 'Hetzner',
           provisioningStatus: 'active',
           hostname: 'h1',
+          displayName: 'My server',
           service: 'agenstra-controller' as const,
           sshAccessGranted: true,
         },
@@ -167,6 +184,7 @@ describe('BillingStatusGateway', () => {
               itemId: 'item-1',
               service: 'agenstra-controller',
               serviceTypeName: 'Hetzner',
+              displayName: 'My server',
               name: 'srv',
               publicIp: '1.1.1.1',
               status: 'running',
@@ -179,6 +197,45 @@ describe('BillingStatusGateway', () => {
       const otherSocket = createMockSocket({ id: 'socket-2', data: { userInfo: userSocketInfo } });
 
       expect(otherSocket.emit).not.toHaveBeenCalled();
+    });
+
+    it('includes null displayName when the item has no label', async () => {
+      const socket = createMockSocket({ data: { userInfo: userSocketInfo } });
+      const sub = {
+        id: 'sub-a',
+        status: SubscriptionStatus.ACTIVE,
+      } as Awaited<ReturnType<SubscriptionService['listSubscriptions']>>[number];
+
+      subscriptionService.listSubscriptions.mockResolvedValue([sub]);
+      itemServerService.listItems.mockResolvedValue([
+        {
+          id: 'item-1',
+          subscriptionId: 'sub-a',
+          serviceTypeId: 'st',
+          serviceTypeName: 'Hetzner',
+          provisioningStatus: 'active',
+          hostname: 'h1',
+          displayName: null,
+          service: 'agenstra-controller' as const,
+          sshAccessGranted: false,
+        },
+      ]);
+      itemServerService.getServerInfo.mockResolvedValue({
+        serverId: 'srv-1',
+        name: 'srv',
+        publicIp: '1.1.1.1',
+        status: 'running',
+        metadata: {},
+      });
+
+      await gateway.handleSubscribe({}, socket);
+
+      expect(socket.emit).toHaveBeenCalledWith(
+        'dashboardStatusUpdate',
+        expect.objectContaining({
+          items: [expect.objectContaining({ displayName: null })],
+        }),
+      );
     });
 
     it('unsubscribeDashboardStatus clears polling', async () => {
@@ -207,6 +264,75 @@ describe('BillingStatusGateway', () => {
       jest.advanceTimersByTime(60_000);
 
       expect(subscriptionService.listSubscriptions.mock.calls.length).toBe(callCountAfterFirst);
+    });
+  });
+
+  describe('subscribeSubscriptionMeters', () => {
+    it('requires subscriptionId', async () => {
+      const socket = createMockSocket({ data: { userInfo: userSocketInfo } });
+
+      await gateway.handleSubscribeMeters({}, socket);
+
+      expect(socket.emit).toHaveBeenCalledWith('error', { message: 'subscriptionId is required' });
+      expect(subscriptionService.getSubscription).not.toHaveBeenCalled();
+    });
+
+    it('emits access denied when the subscription does not belong to the user', async () => {
+      const socket = createMockSocket({ data: { userInfo: userSocketInfo } });
+
+      subscriptionService.getSubscription.mockRejectedValue(
+        new BadRequestException('Subscription does not belong to user'),
+      );
+
+      await gateway.handleSubscribeMeters({ subscriptionId: 'sub-other' }, socket);
+
+      expect(subscriptionService.getSubscription).toHaveBeenCalledWith('sub-other', 'user-1');
+      expect(socket.join).not.toHaveBeenCalled();
+      expect(socket.emit).toHaveBeenCalledWith('error', { message: 'Access denied' });
+    });
+
+    it('joins the subscription room and emits initial meter summaries', async () => {
+      const socket = createMockSocket({ data: { userInfo: userSocketInfo } });
+      const payload = {
+        subscriptionId: 'sub-a',
+        generatedAt: '2026-01-01T00:00:00.000Z',
+        meters: [],
+      };
+
+      subscriptionService.getSubscription.mockResolvedValue({ id: 'sub-a' } as never);
+      billingMeterRealtime.buildMeterSummaryPayload.mockResolvedValue(payload);
+
+      await gateway.handleSubscribeMeters({ subscriptionId: 'sub-a' }, socket);
+
+      expect(socket.join).toHaveBeenCalledWith('subscription:sub-a');
+      expect(billingMeterRealtime.buildMeterSummaryPayload).toHaveBeenCalledWith('sub-a');
+      expect(socket.emit).toHaveBeenCalledWith('meterSummaryUpdate', payload);
+      expect((socket as { data: { meterSubscriptionRooms?: string[] } }).data.meterSubscriptionRooms).toEqual([
+        'subscription:sub-a',
+      ]);
+    });
+
+    it('unsubscribeSubscriptionMeters leaves the room and clears tracking', async () => {
+      const socket = createMockSocket({
+        data: { userInfo: userSocketInfo, meterSubscriptionRooms: ['subscription:sub-a'] },
+      });
+
+      await gateway.handleUnsubscribeMeters({ subscriptionId: 'sub-a' }, socket);
+
+      expect(socket.leave).toHaveBeenCalledWith('subscription:sub-a');
+      expect((socket as { data: { meterSubscriptionRooms?: string[] } }).data.meterSubscriptionRooms).toEqual([]);
+    });
+
+    it('handleDisconnect leaves tracked meter rooms', async () => {
+      const socket = createMockSocket({
+        data: { userInfo: userSocketInfo, meterSubscriptionRooms: ['subscription:sub-a', 'subscription:sub-b'] },
+      });
+
+      gateway.handleDisconnect(socket);
+
+      expect(socket.leave).toHaveBeenCalledWith('subscription:sub-a');
+      expect(socket.leave).toHaveBeenCalledWith('subscription:sub-b');
+      expect((socket as { data: { meterSubscriptionRooms?: string[] } }).data.meterSubscriptionRooms).toEqual([]);
     });
   });
 });

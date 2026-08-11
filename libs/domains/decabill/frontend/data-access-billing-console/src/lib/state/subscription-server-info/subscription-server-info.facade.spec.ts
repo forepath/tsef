@@ -106,17 +106,23 @@ describe('SubscriptionServerInfoFacade', () => {
 
     it('should dispatch startServer', () => {
       facade.startServer('sub-1', 'item-1');
-      expect(store.dispatch).toHaveBeenCalledWith(startServer({ subscriptionId: 'sub-1', itemId: 'item-1' }));
+      expect(store.dispatch).toHaveBeenCalledWith(
+        startServer({ subscriptionId: 'sub-1', itemId: 'item-1', adminMode: false }),
+      );
     });
 
     it('should dispatch stopServer', () => {
       facade.stopServer('sub-1', 'item-1');
-      expect(store.dispatch).toHaveBeenCalledWith(stopServer({ subscriptionId: 'sub-1', itemId: 'item-1' }));
+      expect(store.dispatch).toHaveBeenCalledWith(
+        stopServer({ subscriptionId: 'sub-1', itemId: 'item-1', adminMode: false }),
+      );
     });
 
     it('should dispatch restartServer', () => {
       facade.restartServer('sub-1', 'item-1');
-      expect(store.dispatch).toHaveBeenCalledWith(restartServer({ subscriptionId: 'sub-1', itemId: 'item-1' }));
+      expect(store.dispatch).toHaveBeenCalledWith(
+        restartServer({ subscriptionId: 'sub-1', itemId: 'item-1', adminMode: false }),
+      );
     });
   });
 });

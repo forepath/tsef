@@ -216,10 +216,17 @@
                   <div class="min-w-0">
                     <div class="fw-semibold mb-1">
                       {{ instanceDisplayTitle(item) }}
-                      <a routerLink="/subscriptions" class="ms-1 text-decoration-none">
-                        <i class="bi bi-arrow-right small" aria-hidden="true"></i>
-                        <span class="visually-hidden" i18n="@@featureOverview-viewSubscription">View subscription</span>
-                      </a>
+                      @if (item.itemId) {
+                        <a
+                          [routerLink]="['/subscriptions', item.subscription.id, 'services', item.itemId]"
+                          class="ms-1 text-decoration-none"
+                        >
+                          <i class="bi bi-arrow-right small" aria-hidden="true"></i>
+                          <span class="visually-hidden" i18n="@@featureOverview-viewServiceDetails"
+                            >View service details</span
+                          >
+                        </a>
+                      }
                     </div>
                     <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
                       <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">

@@ -18,6 +18,7 @@ import { SubscriptionStatus } from '../entities/subscription.entity';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { SubscriptionService } from '../services/subscription.service';
 import { getBillingUserIdFromSocketUser } from '../utils/billing-socket-user.utils';
+import { BillingMeterRealtimeService } from './billing-meter-realtime.service';
 import {
   canonicalizeCloudInitService,
   CloudInitServiceType,
@@ -52,6 +53,8 @@ export interface DashboardStatusItemPayload {
   service: CloudInitServiceType;
   /** User-facing service type name from the catalog. */
   serviceTypeName: string;
+  /** Customer-defined label; null when unset. */
+  displayName: string | null;
   name: string;
   publicIp: string;
   privateIp?: string;
@@ -71,7 +74,16 @@ interface SubscribeDashboardStatusPayload {
   pollIntervalMs?: number;
 }
 
-type BillingSocket = Socket & { data: { userInfo?: SocketUserInfo } };
+interface SubscribeSubscriptionMetersPayload {
+  subscriptionId?: string;
+}
+
+type BillingSocket = Socket & {
+  data: {
+    userInfo?: SocketUserInfo;
+    meterSubscriptionRooms?: string[];
+  };
+};
 
 /**
  * WebSocket gateway for billing status updates.
@@ -97,9 +109,11 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
     private readonly subscriptionService: SubscriptionService,
     private readonly subscriptionItemServerService: SubscriptionItemServerService,
     private readonly usersRepository: UsersRepository,
+    private readonly billingMeterRealtime: BillingMeterRealtimeService,
   ) {}
 
   afterInit(server: Server): void {
+    this.billingMeterRealtime.attachServer(server);
     server.use(async (socket, next) => {
       const authHeader = socket.handshake?.headers?.authorization ?? socket.handshake?.auth?.Authorization;
       const tenantId = readIncomingTenantIdFromHandshake(
@@ -139,6 +153,7 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
     this.logger.log(`Billing status client disconnected: ${socket.id}`);
     this.clearPollTimer(socket.id);
     this.tickInFlight.delete(socket.id);
+    this.leaveMeterRooms(socket as BillingSocket);
   }
 
   @SubscribeMessage('subscribeDashboardStatus')
@@ -177,6 +192,65 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
   @SubscribeMessage('unsubscribeDashboardStatus')
   handleUnsubscribe(@ConnectedSocket() socket: Socket): void {
     this.clearPollTimer(socket.id);
+  }
+
+  @SubscribeMessage('subscribeSubscriptionMeters')
+  async handleSubscribeMeters(
+    @MessageBody() body: SubscribeSubscriptionMetersPayload | undefined,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void> {
+    const subscriptionId = body?.subscriptionId;
+
+    if (!subscriptionId) {
+      socket.emit('error', { message: 'subscriptionId is required' });
+
+      return;
+    }
+
+    const userInfo = (socket as BillingSocket).data?.userInfo;
+    const userId = getBillingUserIdFromSocketUser(userInfo);
+
+    if (!userId) {
+      socket.emit('error', { message: 'User not authenticated' });
+
+      return;
+    }
+
+    try {
+      await this.subscriptionService.getSubscription(subscriptionId, userId);
+    } catch {
+      socket.emit('error', { message: 'Access denied' });
+
+      return;
+    }
+
+    const room = BillingMeterRealtimeService.subscriptionRoom(subscriptionId);
+
+    await socket.join(room);
+    this.trackMeterRoom(socket as BillingSocket, room);
+
+    const payload = await this.billingMeterRealtime.buildMeterSummaryPayload(subscriptionId);
+
+    if (payload) {
+      socket.emit('meterSummaryUpdate', payload);
+    }
+  }
+
+  @SubscribeMessage('unsubscribeSubscriptionMeters')
+  async handleUnsubscribeMeters(
+    @MessageBody() body: SubscribeSubscriptionMetersPayload | undefined,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void> {
+    const subscriptionId = body?.subscriptionId;
+
+    if (!subscriptionId) {
+      return;
+    }
+
+    const room = BillingMeterRealtimeService.subscriptionRoom(subscriptionId);
+
+    await socket.leave(room);
+    this.untrackMeterRoom(socket as BillingSocket, room);
   }
 
   private clearPollTimer(socketId: string): void {
@@ -227,6 +301,7 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
             itemId: activeItem.id,
             service: canonicalizeCloudInitService(activeItem.service),
             serviceTypeName: activeItem.serviceTypeName,
+            displayName: activeItem.displayName ?? null,
             name: info.name,
             publicIp: info.publicIp,
             privateIp: info.privateIp,
@@ -255,5 +330,33 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
     } finally {
       this.tickInFlight.delete(socket.id);
     }
+  }
+
+  private trackMeterRoom(socket: BillingSocket, room: string): void {
+    const rooms = socket.data.meterSubscriptionRooms ?? [];
+
+    if (!rooms.includes(room)) {
+      socket.data.meterSubscriptionRooms = [...rooms, room];
+    }
+  }
+
+  private untrackMeterRoom(socket: BillingSocket, room: string): void {
+    const rooms = socket.data.meterSubscriptionRooms;
+
+    if (!rooms) {
+      return;
+    }
+
+    socket.data.meterSubscriptionRooms = rooms.filter((entry) => entry !== room);
+  }
+
+  private leaveMeterRooms(socket: BillingSocket): void {
+    const rooms = socket.data.meterSubscriptionRooms ?? [];
+
+    for (const room of rooms) {
+      void socket.leave(room);
+    }
+
+    socket.data.meterSubscriptionRooms = [];
   }
 }

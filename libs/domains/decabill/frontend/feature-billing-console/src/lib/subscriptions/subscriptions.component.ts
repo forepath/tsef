@@ -41,12 +41,15 @@ import {
   type ServiceTypeResponse,
   type ServerType,
   type SubscriptionResponse,
+  type SubscriptionItemResponse,
   type SubscriptionMeterSummary,
   formatBillingProviderLocationLabel,
   formatServerTypeOption,
   isNoneServiceTypeId,
+  isSubscriptionItemDetailEligible,
   normalizeAllowedServerTypeIds,
   providerLocationCatalogFromList,
+  resolveServiceDisplayLabel,
   type ProviderLocationCatalog,
   type ValidatePromotionRequest,
 } from '@forepath/decabill/frontend/data-access-billing-console';
@@ -626,6 +629,34 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
   subscriptionMeters(sub: SubscriptionResponse): SubscriptionMeterSummary[] {
     return sub.meters ?? [];
+  }
+
+  subscriptionItems(sub: SubscriptionResponse): SubscriptionItemResponse[] {
+    return sub.items ?? [];
+  }
+
+  hasSubscriptionServicesSection(sub: SubscriptionResponse): boolean {
+    return this.subscriptionItems(sub).length > 0 || this.hasSubscriptionMeters(sub);
+  }
+
+  serviceDisplayLabel(item: SubscriptionItemResponse): string {
+    return resolveServiceDisplayLabel(item);
+  }
+
+  isServiceDetailEligible(item: SubscriptionItemResponse): boolean {
+    return isSubscriptionItemDetailEligible(item);
+  }
+
+  itemProvisioningStatusLabel(item: SubscriptionItemResponse): string {
+    return getProvisioningStatusLabel(item.provisioningStatus);
+  }
+
+  itemProvisioningStatusBadgeClass(item: SubscriptionItemResponse): string {
+    return getProvisioningStatusBadgeClass(item.provisioningStatus);
+  }
+
+  serviceDetailLink(sub: SubscriptionResponse, item: SubscriptionItemResponse): string[] {
+    return ['/subscriptions', sub.id, 'services', item.id];
   }
 
   hasSubscriptionMeters(sub: SubscriptionResponse): boolean {

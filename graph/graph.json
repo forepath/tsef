@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-06T11:41:29.954Z",
+  "generatedAt": "2026-08-11T08:25:57.711Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -3140,6 +3140,24 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/service-detail",
+      "type": "state",
+      "attrs": {
+        "path": "libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/service-detail",
+        "languageOrKind": "ts",
+        "projectName": "decabill-frontend-data-access-billing-console",
+        "sliceName": "service-detail",
+        "memberFiles": [
+          "service-detail.actions.ts",
+          "service-detail.constants.ts",
+          "service-detail.effects.ts",
+          "service-detail.facade.ts",
+          "service-detail.reducer.ts",
+          "service-detail.selectors.ts"
+        ]
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/service-plans",
       "type": "state",
       "attrs": {
@@ -5722,6 +5740,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-items.controller.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-items.controller.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
       "type": "controller",
       "attrs": {
@@ -6163,6 +6190,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/meter-history.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/meter-history.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/meter-response.dto.ts",
       "type": "dto",
       "attrs": {
@@ -6316,6 +6352,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/subscription-meter-history-query.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/subscription-meter-history-query.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/subscription-response.dto.ts",
       "type": "dto",
       "attrs": {
@@ -6365,6 +6410,15 @@
       "type": "dto",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/update-service-type.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/update-subscription-item-display-name.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/update-subscription-item-display-name.dto.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -6716,6 +6770,15 @@
       "type": "entity",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/usage-record.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-meter-realtime.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-meter-realtime.service.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -12050,6 +12113,14 @@
       }
     },
     {
+      "id": "file:docs/decabill/features/service-details.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/service-details.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
       "id": "file:docs/decabill/features/service-types-and-plans.md",
       "type": "doc",
       "attrs": {
@@ -14617,10 +14688,34 @@
       }
     },
     {
+      "id": "api:channel:billing/subscribeSubscriptionMeters",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "billing/subscribeSubscriptionMeters",
+        "specKind": "asyncapi"
+      }
+    },
+    {
+      "id": "api:channel:billing/unsubscribeSubscriptionMeters",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "billing/unsubscribeSubscriptionMeters",
+        "specKind": "asyncapi"
+      }
+    },
+    {
       "id": "api:channel:billing/dashboardStatusUpdate",
       "type": "channel",
       "attrs": {
         "pathOrChannel": "billing/dashboardStatusUpdate",
+        "specKind": "asyncapi"
+      }
+    },
+    {
+      "id": "api:channel:billing/meterSummaryUpdate",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "billing/meterSummaryUpdate",
         "specKind": "asyncapi"
       }
     },
@@ -15323,6 +15418,17 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters/history",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/subscriptions/{subscriptionId}/meters/history",
+        "operationId": "getSubscriptionMeterHistory",
+        "summary": "Meter usage history for a subscription",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters",
       "type": "endpoint",
       "attrs": {
@@ -15407,6 +15513,28 @@
         "pathOrChannel": "/subscriptions/{subscriptionId}/items",
         "operationId": "listSubscriptionItems",
         "summary": "List subscription items",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/subscriptions/{subscriptionId}/items/{itemId}",
+        "operationId": "getSubscriptionItemDetail",
+        "summary": "Get subscription item detail",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+        "operationId": "updateSubscriptionItemDisplayName",
+        "summary": "Update subscription item display name",
         "specKind": "openapi"
       }
     },
@@ -15792,6 +15920,83 @@
         "pathOrChannel": "/admin/usage/record",
         "operationId": "recordUsage",
         "summary": "Record usage (admin or API key only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters/history",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/meters/history",
+        "operationId": "adminGetSubscriptionMeterHistory",
+        "summary": "Meter usage history for a subscription (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}",
+        "operationId": "adminGetSubscriptionItemDetail",
+        "summary": "Get subscription item detail (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+        "operationId": "adminUpdateSubscriptionItemDisplayName",
+        "summary": "Update subscription item display name (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+        "operationId": "adminGetSubscriptionItemServerInfo",
+        "summary": "Get subscription item server info (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
+        "operationId": "adminStartSubscriptionItemServer",
+        "summary": "Start provisioned server (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/stop",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/stop",
+        "operationId": "adminStopSubscriptionItemServer",
+        "summary": "Stop provisioned server (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/restart",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/restart",
+        "operationId": "adminRestartSubscriptionItemServer",
+        "summary": "Restart provisioned server (admin)",
         "specKind": "openapi"
       }
     },
@@ -17411,6 +17616,51 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "subscription.resumed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.removed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.service.removed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.renamed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.service.renamed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.restarted",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.service.restarted",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.started",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.service.started",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.stopped",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "subscription.service.stopped",
         "projectName": "decabill-backend-feature-billing-manager",
         "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
       }
@@ -26615,6 +26865,76 @@
       }
     },
     {
+      "id": "concept:decabill-service-details",
+      "type": "concept",
+      "attrs": {
+        "title": "Service details",
+        "docPath": "docs/decabill/features/service-details.md",
+        "sectionAnchor": "service-details",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-routes",
+      "type": "concept",
+      "attrs": {
+        "title": "Routes",
+        "docPath": "docs/decabill/features/service-details.md",
+        "sectionAnchor": "routes",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-display-name",
+      "type": "concept",
+      "attrs": {
+        "title": "Display name",
+        "docPath": "docs/decabill/features/service-details.md",
+        "sectionAnchor": "display-name",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-detail-api",
+      "type": "concept",
+      "attrs": {
+        "title": "Detail API",
+        "docPath": "docs/decabill/features/service-details.md",
+        "sectionAnchor": "detail-api",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-meter-history",
+      "type": "concept",
+      "attrs": {
+        "title": "Meter history",
+        "docPath": "docs/decabill/features/service-details.md",
+        "sectionAnchor": "meter-history",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-realtime",
+      "type": "concept",
+      "attrs": {
+        "title": "Realtime",
+        "docPath": "docs/decabill/features/service-details.md",
+        "sectionAnchor": "realtime",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-related",
+      "type": "concept",
+      "attrs": {
+        "title": "Related",
+        "docPath": "docs/decabill/features/service-details.md",
+        "sectionAnchor": "related",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-service-types-and-plans",
       "type": "concept",
       "attrs": {
@@ -31418,6 +31738,11 @@
     },
     {
       "from": "project:decabill-frontend-data-access-billing-console",
+      "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/service-detail",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-frontend-data-access-billing-console",
       "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/service-plans",
       "type": "contains"
     },
@@ -32718,6 +33043,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-items.controller.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
       "type": "contains"
     },
@@ -32963,6 +33293,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/meter-history.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/meter-response.dto.ts",
       "type": "contains"
     },
@@ -33048,6 +33383,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/subscription-meter-history-query.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/subscription-response.dto.ts",
       "type": "contains"
     },
@@ -33074,6 +33414,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/update-service-type.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/update-subscription-item-display-name.dto.ts",
       "type": "contains"
     },
     {
@@ -33269,6 +33614,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/usage-record.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-meter-realtime.service.ts",
       "type": "contains"
     },
     {
@@ -36798,7 +37148,22 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/asyncapi.yaml",
+      "to": "api:channel:billing/subscribeSubscriptionMeters",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/asyncapi.yaml",
+      "to": "api:channel:billing/unsubscribeSubscriptionMeters",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/asyncapi.yaml",
       "to": "api:channel:billing/dashboardStatusUpdate",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/asyncapi.yaml",
+      "to": "api:channel:billing/meterSummaryUpdate",
       "type": "contains"
     },
     {
@@ -37238,6 +37603,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters/history",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters",
       "type": "contains"
     },
@@ -37274,6 +37644,16 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/display-name",
       "type": "contains"
     },
     {
@@ -37449,6 +37829,41 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:POST:/admin/usage/record",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters/history",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/stop",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/restart",
       "type": "contains"
     },
     {
@@ -38244,6 +38659,31 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.resumed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.removed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.renamed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.restarted",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.started",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.service.stopped",
       "type": "contains"
     },
     {
@@ -44522,6 +44962,46 @@
       "type": "contains"
     },
     {
+      "from": "file:docs/decabill/features/service-details.md",
+      "to": "concept:decabill-service-details",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/service-details.md",
+      "to": "concept:decabill-routes",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/service-details.md",
+      "to": "concept:decabill-display-name",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/service-details.md",
+      "to": "concept:decabill-detail-api",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/service-details.md",
+      "to": "concept:decabill-meter-history",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/service-details.md",
+      "to": "concept:decabill-realtime",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/service-details.md",
+      "to": "concept:decabill-notifications",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/service-details.md",
+      "to": "concept:decabill-related",
+      "type": "contains"
+    },
+    {
       "from": "file:docs/decabill/features/service-types-and-plans.md",
       "to": "concept:decabill-service-types-and-plans",
       "type": "contains"
@@ -46893,6 +47373,76 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters/history",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters/history",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/stop",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/stop",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/restart",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/restart",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
       "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters",
       "type": "implements"
     },
@@ -47754,6 +48304,41 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-promotions.controller.ts",
       "to": "api:HTTP:GET:/admin/billing/promotions/{id}/redemptions",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters/history",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/stop",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/restart",
       "type": "implements"
     },
     {
@@ -48593,6 +49178,16 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters/history",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters/history",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters",
       "type": "implements"
     },
@@ -48669,6 +49264,26 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/display-name",
       "type": "implements"
     },
     {
@@ -50508,12 +51123,42 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-status.gateway.ts",
+      "to": "api:channel:billing/subscribeSubscriptionMeters",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:channel:billing/subscribeSubscriptionMeters",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-status.gateway.ts",
+      "to": "api:channel:billing/unsubscribeSubscriptionMeters",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:channel:billing/unsubscribeSubscriptionMeters",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-status.gateway.ts",
       "to": "api:channel:billing/dashboardStatusUpdate",
       "type": "implements"
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "api:channel:billing/dashboardStatusUpdate",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-status.gateway.ts",
+      "to": "api:channel:billing/meterSummaryUpdate",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:channel:billing/meterSummaryUpdate",
       "type": "implements"
     },
     {
@@ -51772,6 +52417,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-items.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-server.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
       "type": "injects"
@@ -52067,6 +52717,16 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-meter-realtime.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-meter-realtime.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/meter-billing.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-status.gateway.ts",
       "to": "file:libs/domains/identity/backend/feature-auth/src/lib/services/socket-auth.service.ts",
       "type": "injects"
@@ -52084,6 +52744,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-status.gateway.ts",
       "to": "file:libs/domains/identity/backend/feature-auth/src/lib/repositories/users.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-status.gateway.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-meter-realtime.service.ts",
       "type": "injects"
     },
     {
@@ -53783,6 +54448,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-server.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-server.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
       "type": "injects"
     },
@@ -54114,6 +54784,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/usage.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/meter-billing.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/usage.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-meter-realtime.service.ts",
       "type": "injects"
     },
     {
@@ -55333,6 +56008,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-items.controller.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
       "type": "provides"
     },
@@ -55839,6 +56519,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/project-board-realtime.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-meter-realtime.service.ts",
       "type": "provides"
     },
     {
@@ -56742,6 +57427,41 @@
       "type": "calls"
     },
     {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/stop",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/restart",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters/history",
+      "type": "calls"
+    },
+    {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-customer-profiles.service.ts",
       "to": "api:HTTP:GET:/admin/billing/customer-profiles",
       "type": "calls"
@@ -57178,6 +57898,16 @@
     },
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscription-items.service.ts",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscription-items.service.ts",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscription-items.service.ts",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/server-info",
       "type": "calls"
     },
@@ -57259,6 +57989,11 @@
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/usage.service.ts",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/usage.service.ts",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters/history",
       "type": "calls"
     },
     {
@@ -61363,6 +62098,16 @@
     },
     {
       "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:GET:/meters",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:POST:/meters",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
       "to": "api:HTTP:GET:/subscriptions",
       "type": "documents"
     },
@@ -61374,6 +62119,16 @@
     {
       "from": "concept:decabill-api-endpoints",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters/history",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters",
       "type": "documents"
     },
     {
@@ -61409,6 +62164,16 @@
     {
       "from": "concept:decabill-api-endpoints",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/display-name",
       "type": "documents"
     },
     {
@@ -63053,6 +63818,11 @@
     },
     {
       "from": "concept:decabill-ssh-access",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-ssh-access",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
       "type": "documents"
     },
@@ -63078,7 +63848,147 @@
     },
     {
       "from": "concept:decabill-server-information-and-control",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-server-information-and-control",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-routes",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-routes",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-routes",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-detail-api",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-detail-api",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-detail-api",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-detail-api",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-detail-api",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-detail-api",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:GET:/meters",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:POST:/meters",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters/history",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/meters",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters/history",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-related",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-related",
+      "to": "api:HTTP:POST:/subscriptions",
       "type": "documents"
     },
     {
@@ -63444,6 +64354,11 @@
     {
       "from": "concept:decabill-subscription-items",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-subscription-items",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}",
       "type": "documents"
     },
     {
@@ -65643,6 +66558,11 @@
     },
     {
       "from": "file:docs/decabill/features/server-provisioning.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/decabill/features/service-details.md",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -69803,6 +70723,41 @@
     },
     {
       "from": "concept:decabill-optional-instance-configuration",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-service-details",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-routes",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-detail-api",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-meter-history",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-realtime",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-related",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

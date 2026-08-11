@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
+import type { MeterHistorySeriesDto, SubscriptionMeterHistoryDto } from '../dto/meter-history.dto';
 import type { SubscriptionMeterSummaryDto } from '../dto/meter-response.dto';
+import type { MeterAggregator } from '../entities/meter.entity';
 import type { ServicePlanEntity } from '../entities/service-plan.entity';
 import type { SubscriptionEntity } from '../entities/subscription.entity';
+import type { UsageAttachmentType } from '../entities/usage-record.entity';
 import { AddonMetersRepository } from '../repositories/addon-meters.repository';
 import { ServicePlanMetersRepository } from '../repositories/service-plan-meters.repository';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
@@ -15,6 +18,7 @@ import {
   resolveEffectiveUnitPriceNet,
   type MeterUsageEntry,
 } from '../utils/meter-aggregation.util';
+import { formatMeterHistoryPeriodBucket } from '../utils/meter-history-date.util';
 
 export type MeterChargeLine = {
   description: string;
@@ -327,5 +331,180 @@ export class MeterBillingService {
     }
 
     return summaries;
+  }
+
+  async buildSubscriptionMeterHistory(params: {
+    subscription: SubscriptionEntity;
+    from: Date;
+    to: Date;
+    groupBy: 'day' | 'month';
+  }): Promise<SubscriptionMeterHistoryDto> {
+    const usageRows = await this.usageRecordsRepository.findMeteredForSubscriptionInRange(
+      params.subscription.id,
+      params.from,
+      params.to,
+    );
+    const entries: MeterUsageEntry[] = usageRows.map((row) => ({
+      id: row.id,
+      meterId: row.meterId,
+      value: row.value,
+      attachmentType: row.attachmentType,
+      addonId: row.addonId,
+      periodStart: row.periodStart,
+      periodEnd: row.periodEnd,
+      createdAt: row.createdAt,
+    }));
+
+    const meters: MeterHistorySeriesDto[] = [];
+    const planMeters = await this.resolveEffectivePlanMeterLinks(params.subscription.planId);
+
+    for (const link of planMeters) {
+      const meter = link.meter;
+
+      if (!meter) {
+        continue;
+      }
+
+      meters.push(
+        this.buildMeterHistorySeries({
+          meter: {
+            id: meter.id,
+            key: meter.key,
+            name: meter.name,
+            unitLabel: meter.unitLabel ?? null,
+            aggregator: meter.aggregator,
+          },
+          attachmentType: 'plan',
+          addonId: null,
+          addonName: null,
+          entries,
+          groupBy: params.groupBy,
+        }),
+      );
+    }
+
+    const billableAddons = await this.subscriptionAddonsRepository.findBillableBySubscriptionId(params.subscription.id);
+    const addonMeterLinks = await this.addonMetersRepository.findByAddonIds(billableAddons.map((row) => row.addonId));
+    const linksByAddon = new Map<string, typeof addonMeterLinks>();
+
+    for (const link of addonMeterLinks) {
+      const list = linksByAddon.get(link.addonId) ?? [];
+      list.push(link);
+      linksByAddon.set(link.addonId, list);
+    }
+
+    for (const subscriptionAddon of billableAddons) {
+      const links = linksByAddon.get(subscriptionAddon.addonId) ?? [];
+
+      for (const link of links) {
+        const meter = link.meter;
+
+        if (!meter) {
+          continue;
+        }
+
+        meters.push(
+          this.buildMeterHistorySeries({
+            meter: {
+              id: meter.id,
+              key: meter.key,
+              name: meter.name,
+              unitLabel: meter.unitLabel ?? null,
+              aggregator: meter.aggregator,
+            },
+            attachmentType: 'addon',
+            addonId: subscriptionAddon.addonId,
+            addonName: subscriptionAddon.addonNameSnapshot,
+            entries,
+            groupBy: params.groupBy,
+          }),
+        );
+      }
+    }
+
+    return {
+      subscriptionId: params.subscription.id,
+      from: params.from.toISOString().slice(0, 10),
+      to: params.to.toISOString().slice(0, 10),
+      groupBy: params.groupBy,
+      meters,
+    };
+  }
+
+  private buildMeterHistorySeries(params: {
+    meter: {
+      id: string;
+      key: string;
+      name: string;
+      unitLabel: string | null;
+      aggregator: MeterAggregator;
+    };
+    attachmentType: UsageAttachmentType;
+    addonId: string | null;
+    addonName: string | null;
+    entries: MeterUsageEntry[];
+    groupBy: 'day' | 'month';
+  }): MeterHistorySeriesDto {
+    const matching = this.filterEntriesForMeterAttachment(params.entries, {
+      meterId: params.meter.id,
+      attachmentType: params.attachmentType,
+      addonId: params.addonId,
+    });
+    const buckets = new Map<string, MeterUsageEntry[]>();
+
+    for (const entry of matching) {
+      const period = formatMeterHistoryPeriodBucket(entry.periodEnd, params.groupBy);
+      const bucket = buckets.get(period) ?? [];
+
+      bucket.push(entry);
+      buckets.set(period, bucket);
+    }
+
+    const series = Array.from(buckets.entries())
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([period, bucketEntries]) => ({
+        period,
+        value: aggregateMeterValues(bucketEntries, params.meter.aggregator),
+      }));
+
+    return {
+      meterId: params.meter.id,
+      key: params.meter.key,
+      name: params.meter.name,
+      unitLabel: params.meter.unitLabel,
+      aggregator: params.meter.aggregator,
+      attachmentType: params.attachmentType,
+      addonId: params.addonId,
+      addonName: params.addonName,
+      series,
+      totalValue: aggregateMeterValues(matching, params.meter.aggregator),
+    };
+  }
+
+  private filterEntriesForMeterAttachment(
+    entries: MeterUsageEntry[],
+    options: {
+      meterId: string;
+      attachmentType: UsageAttachmentType;
+      addonId?: string | null;
+    },
+  ): MeterUsageEntry[] {
+    return entries.filter((entry) => {
+      if (entry.meterId !== options.meterId) {
+        return false;
+      }
+
+      if ((entry.attachmentType ?? 'plan') !== options.attachmentType) {
+        return false;
+      }
+
+      if (options.attachmentType === 'addon') {
+        if (!options.addonId || entry.addonId !== options.addonId) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
 }

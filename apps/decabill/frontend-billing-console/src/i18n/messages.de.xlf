@@ -1348,6 +1348,134 @@
         <source>By subscription</source>
         <target>Nach Abonnement</target>
       </trans-unit>
+      <trans-unit id="featureServiceDetail-backToSubscriptions" datatype="html">
+        <source>Back to subscriptions</source>
+        <target>Zurück zu Abonnements</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-renameTitleAria" datatype="html">
+        <source>Rename service</source>
+        <target>Dienst umbenennen</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-clearNameAria" datatype="html">
+        <source>Clear display name draft</source>
+        <target>Anzeigenamen-Entwurf löschen</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusOnline" datatype="html">
+        <source>Online</source>
+        <target>Online</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusOff" datatype="html">
+        <source>Stopped</source>
+        <target>Gestoppt</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusUpdating" datatype="html">
+        <source>Updating</source>
+        <target>Wird aktualisiert</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serverActionsAria" datatype="html">
+        <source>Server actions</source>
+        <target>Server-Aktionen</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStartButtonTitle" datatype="html">
+        <source>Start server</source>
+        <target>Server starten</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStopButtonTitle" datatype="html">
+        <source>Stop server</source>
+        <target>Server stoppen</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serverRestartButtonTitle" datatype="html">
+        <source>Restart server</source>
+        <target>Server neu starten</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusUpdatingHint" datatype="html">
+        <source>Server status updating…</source>
+        <target>Serverstatus wird aktualisiert…</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-openConsoleButtonTitle" datatype="html">
+        <source>Open console</source>
+        <target>Konsole öffnen</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-loading" datatype="html">
+        <source>Loading service…</source>
+        <target>Dienst wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serviceInfoTitle" datatype="html">
+        <source>Service info</source>
+        <target>Dienstinformationen</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-publicIp" datatype="html">
+        <source>Public IP</source>
+        <target>Öffentliche IP</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-privateIp" datatype="html">
+        <source>Private IP</source>
+        <target>Private IP</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-hostname" datatype="html">
+        <source>Hostname</source>
+        <target>Hostname</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-hostnameFqdn" datatype="html">
+        <source>FQDN</source>
+        <target>FQDN</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-runtimeStatus" datatype="html">
+        <source>Runtime status</source>
+        <target>Laufzeitstatus</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-location" datatype="html">
+        <source>Location</source>
+        <target>Standort</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-noServerInfo" datatype="html">
+        <source>Server details are not available yet.</source>
+        <target>Serverdetails sind noch nicht verfügbar.</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-usageMetersTitle" datatype="html">
+        <source>Usage meters</source>
+        <target>Nutzungszähler</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-filters" datatype="html">
+        <source>Filters</source>
+        <target>Filter</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-fromDate" datatype="html">
+        <source>From</source>
+        <target>Von</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-toDate" datatype="html">
+        <source>To</source>
+        <target>Bis</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-groupBy" datatype="html">
+        <source>Group by</source>
+        <target>Gruppieren nach</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-groupByDay" datatype="html">
+        <source>Day</source>
+        <target>Tag</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-groupByMonth" datatype="html">
+        <source>Month</source>
+        <target>Monat</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-applyFilters" datatype="html">
+        <source>Apply</source>
+        <target>Anwenden</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-resetFilters" datatype="html">
+        <source>Reset</source>
+        <target>Zurücksetzen</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-noMeterData" datatype="html">
+        <source>No meter usage for the selected period.</source>
+        <target>Keine Zählernutzung für den ausgewählten Zeitraum.</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-meterTotalLabel" datatype="html">
+        <source>Total:</source>
+        <target>Gesamt:</target>
+      </trans-unit>
       <trans-unit id="featureOverview-title" datatype="html">
         <source>Overview</source>
         <target>Übersicht</target>
@@ -1415,6 +1543,10 @@
       <trans-unit id="featureOverview-viewSubscription" datatype="html">
         <source>View subscription</source>
         <target>Abonnement anzeigen</target>
+      </trans-unit>
+      <trans-unit id="featureOverview-viewServiceDetails" datatype="html">
+        <source>View service details</source>
+        <target>Dienstdetails anzeigen</target>
       </trans-unit>
       <trans-unit id="featureOverview-serverActionsAria" datatype="html">
         <source>Server actions</source>
@@ -3758,6 +3890,14 @@
         <source>Project</source>
         <target>Projekt</target>
       </trans-unit>
+      <trans-unit id="featureContainer-serviceDetailPage" datatype="html">
+        <source>Service</source>
+        <target>Dienst</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-adminServiceDetailPage" datatype="html">
+        <source>Service</source>
+        <target>Dienst</target>
+      </trans-unit>
       <trans-unit id="featureContainer-adminPromotionsPage" datatype="html">
         <source>Promotions</source>
         <target>Aktionen</target>
@@ -5851,6 +5991,10 @@
       <trans-unit id="featureSubscriptions-usageMeters" datatype="html">
         <source>Usage meters</source>
         <target>Nutzungszähler</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-openServiceDetails" datatype="html">
+        <source>Open details</source>
+        <target>Details öffnen</target>
       </trans-unit>
       <trans-unit id="featureSubscriptions-addonMeterLabel" datatype="html">
         <source>Meter</source>

@@ -1,0 +1,27 @@
+@import '../section.scss';
+
+.service-detail-page {
+  min-height: 0;
+}
+
+.service-detail-page__title-clickable {
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+    outline: none;
+  }
+}
+
+.service-detail-page__lane-header {
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.service-detail-page__filters {
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.service-detail-page__meters-lane {
+  border-top: 1px solid var(--bs-border-color);
+}

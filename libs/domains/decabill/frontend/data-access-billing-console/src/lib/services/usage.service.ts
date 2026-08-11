@@ -6,6 +6,8 @@ import { Observable } from 'rxjs';
 
 import type {
   CreateUsageRecordDto,
+  MeterHistoryFilters,
+  SubscriptionMeterHistory,
   SubscriptionMeterSummary,
   UsageRecordResponse,
   UsageSummary,
@@ -41,5 +43,18 @@ export class UsageService {
 
   getSubscriptionMeters(subscriptionId: string): Observable<SubscriptionMeterSummary[]> {
     return this.http.get<SubscriptionMeterSummary[]>(`${this.apiUrl}/subscriptions/${subscriptionId}/meters`);
+  }
+
+  getSubscriptionMeterHistory(
+    subscriptionId: string,
+    filters: MeterHistoryFilters,
+  ): Observable<SubscriptionMeterHistory> {
+    return this.http.get<SubscriptionMeterHistory>(`${this.apiUrl}/subscriptions/${subscriptionId}/meters/history`, {
+      params: {
+        from: filters.from,
+        to: filters.to,
+        groupBy: filters.groupBy,
+      },
+    });
   }
 }

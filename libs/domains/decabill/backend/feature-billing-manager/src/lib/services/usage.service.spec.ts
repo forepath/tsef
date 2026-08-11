@@ -35,6 +35,9 @@ describe('UsageService', () => {
   const billingNotificationPublisher = {
     publish: jest.fn(),
   };
+  const billingMeterRealtime = {
+    emitMeterSummaryUpdate: jest.fn().mockResolvedValue(undefined),
+  };
   const service = new UsageService(
     usageRecordsRepository as never,
     subscriptionsRepository as never,
@@ -45,6 +48,7 @@ describe('UsageService', () => {
     subscriptionAddonsRepository as never,
     meterBillingService as never,
     billingNotificationPublisher as never,
+    billingMeterRealtime as never,
   );
 
   beforeEach(() => {
@@ -101,6 +105,7 @@ describe('UsageService', () => {
       'usage.recorded',
       expect.objectContaining({ usageRecordId: 'usage-1' }),
     );
+    expect(billingMeterRealtime.emitMeterSummaryUpdate).toHaveBeenCalledWith('sub-1');
   });
 
   it('requires meterId and value when subscription has meter attachments', async () => {

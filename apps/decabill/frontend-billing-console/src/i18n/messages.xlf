@@ -953,6 +953,12 @@
       <trans-unit id="featureContainer-projectDetailPage" datatype="html">
         <source>Project</source>
         </trans-unit>
+      <trans-unit id="featureContainer-serviceDetailPage" datatype="html">
+        <source>Service</source>
+        </trans-unit>
+      <trans-unit id="featureContainer-adminServiceDetailPage" datatype="html">
+        <source>Service</source>
+        </trans-unit>
       <trans-unit id="featureContainer-serviceTypesPage" datatype="html">
         <source>Service Providers</source>
         </trans-unit>
@@ -1661,6 +1667,102 @@
       <trans-unit id="featureMeters-aggregatorSumPositiveDeltas" datatype="html">
         <source>Sum of positive deltas</source>
         </trans-unit>
+      <trans-unit id="featureServiceDetail-backToSubscriptions" datatype="html">
+        <source>Back to subscriptions</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-renameTitleAria" datatype="html">
+        <source>Rename service</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-clearNameAria" datatype="html">
+        <source>Clear display name draft</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusOnline" datatype="html">
+        <source>Online</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusOff" datatype="html">
+        <source>Stopped</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusUpdating" datatype="html">
+        <source>Updating</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverActionsAria" datatype="html">
+        <source>Server actions</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStartButtonTitle" datatype="html">
+        <source>Start server</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStopButtonTitle" datatype="html">
+        <source>Stop server</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverRestartButtonTitle" datatype="html">
+        <source>Restart server</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusUpdatingHint" datatype="html">
+        <source>Server status updating…</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-openConsoleButtonTitle" datatype="html">
+        <source>Open console</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-loading" datatype="html">
+        <source>Loading service…</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serviceInfoTitle" datatype="html">
+        <source>Service info</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-publicIp" datatype="html">
+        <source>Public IP</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-privateIp" datatype="html">
+        <source>Private IP</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-hostname" datatype="html">
+        <source>Hostname</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-hostnameFqdn" datatype="html">
+        <source>FQDN</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-runtimeStatus" datatype="html">
+        <source>Runtime status</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-location" datatype="html">
+        <source>Location</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-noServerInfo" datatype="html">
+        <source>Server details are not available yet.</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-usageMetersTitle" datatype="html">
+        <source>Usage meters</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-filters" datatype="html">
+        <source>Filters</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-fromDate" datatype="html">
+        <source>From</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-toDate" datatype="html">
+        <source>To</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-groupBy" datatype="html">
+        <source>Group by</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-groupByDay" datatype="html">
+        <source>Day</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-groupByMonth" datatype="html">
+        <source>Month</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-applyFilters" datatype="html">
+        <source>Apply</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-resetFilters" datatype="html">
+        <source>Reset</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-noMeterData" datatype="html">
+        <source>No meter usage for the selected period.</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-meterTotalLabel" datatype="html">
+        <source>Total:</source>
+        </trans-unit>
       <trans-unit id="featureOverview-title" datatype="html">
         <source>Overview</source>
         </trans-unit>
@@ -1720,6 +1822,9 @@
         </trans-unit>
       <trans-unit id="featureOverview-viewSubscription" datatype="html">
         <source>View subscription</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-viewServiceDetails" datatype="html">
+        <source>View service details</source>
         </trans-unit>
       <trans-unit id="featureOverview-provisioningPendingHint" datatype="html">
         <source> Your server is being set up. This usually takes less than a minute. </source>
@@ -2885,6 +2990,9 @@
         </trans-unit>
       <trans-unit id="featureSubscriptions-usageMeters" datatype="html">
         <source>Usage meters</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-openServiceDetails" datatype="html">
+        <source>Open details</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-modifyConfigButtonTitle" datatype="html">
         <source>Upgrade or downgrade</source>

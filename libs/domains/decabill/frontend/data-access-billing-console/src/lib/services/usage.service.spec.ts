@@ -116,4 +116,37 @@ describe('UsageService', () => {
       req.flush(summaries);
     });
   });
+
+  describe('getSubscriptionMeterHistory', () => {
+    it('returns meter history for a subscription', (done) => {
+      const history = {
+        subscriptionId,
+        from: '2026-01-01',
+        to: '2026-01-31',
+        groupBy: 'day' as const,
+        meters: [],
+      };
+
+      service
+        .getSubscriptionMeterHistory(subscriptionId, {
+          from: '2026-01-01',
+          to: '2026-01-31',
+          groupBy: 'day',
+        })
+        .subscribe((result) => {
+          expect(result).toEqual(history);
+          done();
+        });
+
+      const req = httpMock.expectOne(
+        (request) =>
+          request.url === `${apiUrl}/subscriptions/${subscriptionId}/meters/history` &&
+          request.params.get('from') === '2026-01-01' &&
+          request.params.get('to') === '2026-01-31' &&
+          request.params.get('groupBy') === 'day',
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(history);
+    });
+  });
 });

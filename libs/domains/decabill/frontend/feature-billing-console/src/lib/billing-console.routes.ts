@@ -12,6 +12,17 @@ import {
   metersReducer,
   SubscriptionMetersFacade,
   subscriptionMetersReducer,
+  ServiceDetailFacade,
+  serviceDetailReducer,
+  enterServiceDetail$,
+  loadServiceDetail$,
+  loadServiceDetailHistory$,
+  reloadServiceDetailHistoryOnFilters$,
+  updateServiceDetailDisplayName$,
+  clearServiceDetail$,
+  restoreServiceDetailMetersSubscription$,
+  subscribeBillingSubscriptionMeters$,
+  unsubscribeBillingSubscriptionMeters$,
   adminCustomerProfilesReducer,
   adminInvoiceManagerReducer,
   adminSubscriptionsReducer,
@@ -257,6 +268,7 @@ import { SubscriptionsComponent } from './subscriptions/subscriptions.component'
 import { AdminProjectsPageComponent } from './admin-projects-page/admin-projects-page.component';
 import { ProjectsPageComponent } from './projects-page/projects-page.component';
 import { ProjectDetailPageComponent } from './project-detail-page/project-detail-page.component';
+import { ServiceDetailPageComponent } from './service-detail-page/service-detail-page.component';
 import { PublicWithdrawalComponent } from './public-withdrawal/public-withdrawal.component';
 
 export const billingConsoleRoutes: Route[] = [
@@ -299,8 +311,19 @@ export const billingConsoleRoutes: Route[] = [
       {
         path: 'subscriptions',
         canActivate: [authGuard],
-        component: SubscriptionsComponent,
-        title: () => buildPageTitle($localize`:@@featureContainer-subscriptionsPage:Plans`),
+        children: [
+          {
+            path: '',
+            component: SubscriptionsComponent,
+            title: () => buildPageTitle($localize`:@@featureContainer-subscriptionsPage:Plans`),
+          },
+          {
+            path: ':subscriptionId/services/:itemId',
+            component: ServiceDetailPageComponent,
+            data: { serviceViewMode: 'customer' },
+            title: () => buildPageTitle($localize`:@@featureContainer-serviceDetailPage:Service`),
+          },
+        ],
       },
       {
         path: 'promotions',
@@ -391,8 +414,19 @@ export const billingConsoleRoutes: Route[] = [
           {
             path: 'subscriptions',
             canActivate: [authGuard, billingAdminGuard],
-            component: AdminSubscriptionsPageComponent,
-            title: () => buildPageTitle($localize`:@@featureContainer-adminSubscriptionsPage:Contracts`),
+            children: [
+              {
+                path: '',
+                component: AdminSubscriptionsPageComponent,
+                title: () => buildPageTitle($localize`:@@featureContainer-adminSubscriptionsPage:Contracts`),
+              },
+              {
+                path: ':subscriptionId/services/:itemId',
+                component: ServiceDetailPageComponent,
+                data: { serviceViewMode: 'admin' },
+                title: () => buildPageTitle($localize`:@@featureContainer-adminServiceDetailPage:Service`),
+              },
+            ],
           },
           {
             path: 'projects',
@@ -438,6 +472,7 @@ export const billingConsoleRoutes: Route[] = [
       AddonsFacade,
       MetersFacade,
       SubscriptionMetersFacade,
+      ServiceDetailFacade,
       SubscriptionsFacade,
       SubscriptionConfigChangeFacade,
       SubscriptionServerInfoFacade,
@@ -469,6 +504,7 @@ export const billingConsoleRoutes: Route[] = [
       provideState('addons', addonsReducer),
       provideState('meters', metersReducer),
       provideState('subscriptionMeters', subscriptionMetersReducer),
+      provideState('serviceDetail', serviceDetailReducer),
       provideState('invoices', invoicesReducer),
       provideState('adminBilling', adminBillingReducer),
       provideState('billingCapabilities', billingCapabilitiesReducer),
@@ -529,6 +565,15 @@ export const billingConsoleRoutes: Route[] = [
         createMeterEntry$,
         updateMeterEntry$,
         deleteMeterEntry$,
+        enterServiceDetail$,
+        loadServiceDetail$,
+        loadServiceDetailHistory$,
+        reloadServiceDetailHistoryOnFilters$,
+        updateServiceDetailDisplayName$,
+        clearServiceDetail$,
+        restoreServiceDetailMetersSubscription$,
+        subscribeBillingSubscriptionMeters$,
+        unsubscribeBillingSubscriptionMeters$,
         loadServicePlans$,
         loadServicePlansBatch$,
         loadServicePlan$,

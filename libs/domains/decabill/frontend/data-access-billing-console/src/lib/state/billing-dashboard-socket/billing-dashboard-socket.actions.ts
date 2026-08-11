@@ -19,3 +19,13 @@ export const billingDashboardSocketApplicationError = createAction(
   '[Billing Dashboard Socket] Application Error',
   props<{ message: string }>(),
 );
+
+export const subscribeBillingSubscriptionMeters = createAction(
+  '[Billing Dashboard Socket] Subscribe Subscription Meters',
+  props<{ subscriptionId: string }>(),
+);
+
+export const unsubscribeBillingSubscriptionMeters = createAction(
+  '[Billing Dashboard Socket] Unsubscribe Subscription Meters',
+  props<{ subscriptionId: string }>(),
+);

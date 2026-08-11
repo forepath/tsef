@@ -15,6 +15,7 @@ export * from './lib/utils/server-type-format.utils';
 export * from './lib/utils/server-type-list.utils';
 export * from './lib/utils/tax-preview.utils';
 export * from './lib/utils/config-change-error.utils';
+export * from './lib/utils/service-display-label.util';
 
 // Constants
 export * from './lib/constants/supported-countries';
@@ -77,6 +78,14 @@ export * from './lib/state/subscription-meters/subscription-meters.effects';
 export * from './lib/state/subscription-meters/subscription-meters.facade';
 export * from './lib/state/subscription-meters/subscription-meters.reducer';
 export * from './lib/state/subscription-meters/subscription-meters.selectors';
+
+// Service Detail State
+export * from './lib/state/service-detail/service-detail.actions';
+export * from './lib/state/service-detail/service-detail.constants';
+export * from './lib/state/service-detail/service-detail.effects';
+export * from './lib/state/service-detail/service-detail.facade';
+export * from './lib/state/service-detail/service-detail.reducer';
+export * from './lib/state/service-detail/service-detail.selectors';
 
 // Service Plans State
 export * from './lib/state/service-plans/service-plans.actions';

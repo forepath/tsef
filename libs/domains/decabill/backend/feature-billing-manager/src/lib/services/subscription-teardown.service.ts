@@ -153,6 +153,12 @@ export class SubscriptionTeardownService {
         try {
           const credentials = getProvisioningCredentials(item.serviceType.provider, item.serviceType.providerDefaults);
           await this.provisioningService.deprovision(item.serviceType.provider, item.providerReference, credentials);
+          await this.subscriptionItemsRepository.clearProviderReference(item.id);
+          this.billingNotificationPublisher.publish(
+            'subscription.service.removed',
+            { subscriptionId: subscription.id, itemId: item.id },
+            subscription.userId,
+          );
         } catch (error) {
           this.logger.warn(
             `Failed to deprovision resource ${item.providerReference} for subscription ${subscription.id}: ${(error as Error).message}`,

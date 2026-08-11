@@ -111,6 +111,27 @@ export class UsageRecordsRepository {
     return await qb.getMany();
   }
 
+  async findMeteredForSubscriptionInRange(
+    subscriptionId: string,
+    from: Date,
+    to: Date,
+  ): Promise<UsageRecordEntity[]> {
+    const qb = this.repository
+      .createQueryBuilder('usage')
+      .innerJoin('usage.subscription', 'sub')
+      .innerJoin('users', 'user', 'user.id = sub.user_id')
+      .where('usage.subscription_id = :subscriptionId', { subscriptionId })
+      .andWhere('usage.meter_id IS NOT NULL')
+      .andWhere('usage.period_end >= :from', { from })
+      .andWhere('usage.period_end <= :to', { to })
+      .orderBy('usage.period_end', 'ASC')
+      .addOrderBy('usage.createdAt', 'ASC');
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getMany();
+  }
+
   async findLatestCollectorForMeter(params: {
     subscriptionId: string;
     meterId: string;

@@ -6,6 +6,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { of, throwError } from 'rxjs';
 
 import { SubscriptionItemsService } from '../../services/subscription-items.service';
+import { AdminBillingService } from '../../services/admin-billing.service';
 import type { ServerInfoResponse, SubscriptionItemResponse, SubscriptionResponse } from '../../types/billing.types';
 import { createSubscriptionSuccess } from '../subscriptions/subscriptions.actions';
 
@@ -38,6 +39,7 @@ function mockBillingEnvironment(websocketUrl?: string): Environment {
 describe('Subscription Server Info Effects', () => {
   let actions$: Actions;
   let subscriptionItemsService: jest.Mocked<SubscriptionItemsService>;
+  let adminBillingService: jest.Mocked<AdminBillingService>;
   const mockSubscription: SubscriptionResponse = {
     id: 'sub-1',
     number: 'SUB-001',
@@ -71,6 +73,12 @@ describe('Subscription Server Info Effects', () => {
       stopServer: jest.fn(),
       restartServer: jest.fn(),
     } as never;
+    adminBillingService = {
+      getAdminSubscriptionItemServerInfo: jest.fn(),
+      startAdminSubscriptionItemServer: jest.fn(),
+      stopAdminSubscriptionItemServer: jest.fn(),
+      restartAdminSubscriptionItemServer: jest.fn(),
+    } as never;
 
     TestBed.configureTestingModule({
       providers: [
@@ -97,6 +105,7 @@ describe('Subscription Server Info Effects', () => {
           provisioningStatusBySubscriptionId: {},
           sshAccessGrantedBySubscriptionId: {},
           serviceTypeNameBySubscriptionId: {},
+          displayNameBySubscriptionId: {},
         }),
       );
       done();
@@ -119,6 +128,7 @@ describe('Subscription Server Info Effects', () => {
           provisioningStatusBySubscriptionId: { 'sub-1': 'active' },
           sshAccessGrantedBySubscriptionId: { 'sub-1': false },
           serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
+          displayNameBySubscriptionId: {},
         }),
       );
       expect(subscriptionItemsService.listSubscriptionItems).toHaveBeenCalledWith('sub-1');
@@ -144,6 +154,7 @@ describe('Subscription Server Info Effects', () => {
           provisioningStatusBySubscriptionId: { 'sub-1': 'pending' },
           sshAccessGrantedBySubscriptionId: { 'sub-1': false },
           serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
+          displayNameBySubscriptionId: {},
         }),
       );
       expect(subscriptionItemsService.getServerInfo).not.toHaveBeenCalled();
@@ -168,6 +179,7 @@ describe('Subscription Server Info Effects', () => {
           provisioningStatusBySubscriptionId: { 'sub-1': 'failed' },
           sshAccessGrantedBySubscriptionId: { 'sub-1': false },
           serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
+          displayNameBySubscriptionId: {},
         }),
       );
       expect(subscriptionItemsService.getServerInfo).not.toHaveBeenCalled();
@@ -209,6 +221,7 @@ describe('Subscription Server Info Effects', () => {
           provisioningStatusBySubscriptionId: { 'sub-1': 'active' },
           sshAccessGrantedBySubscriptionId: { 'sub-1': false },
           serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
+          displayNameBySubscriptionId: {},
         }),
       );
       expect(subscriptionItemsService.listSubscriptionItems).toHaveBeenCalledTimes(1);
@@ -237,7 +250,7 @@ describe('Subscription Server Info Effects', () => {
 
       const results: unknown[] = [];
 
-      startServerEffect(actions$, subscriptionItemsService, mockBillingEnvironment()).subscribe({
+      startServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe({
         next: (r) => results.push(r),
         complete: () => {
           expect(results).toContainEqual(startServerSuccess({ subscriptionId: 'sub-1', itemId: 'item-1' }));
@@ -259,7 +272,7 @@ describe('Subscription Server Info Effects', () => {
       subscriptionItemsService.startServer.mockReturnValue(throwError(() => new Error('Start failed')));
       actions$ = of(startServer({ subscriptionId: 'sub-1', itemId: 'item-1' }));
 
-      startServerEffect(actions$, subscriptionItemsService, mockBillingEnvironment()).subscribe((result) => {
+      startServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe((result) => {
         expect(result).toEqual(startServerFailure({ subscriptionId: 'sub-1', error: 'Start failed' }));
         done();
       });
@@ -275,6 +288,7 @@ describe('Subscription Server Info Effects', () => {
       startServerEffect(
         actions$,
         subscriptionItemsService,
+        adminBillingService,
         mockBillingEnvironment('wss://billing.example/ws'),
       ).subscribe({
         next: (r) => results.push(r),
@@ -300,7 +314,7 @@ describe('Subscription Server Info Effects', () => {
 
       const results: unknown[] = [];
 
-      stopServerEffect(actions$, subscriptionItemsService, mockBillingEnvironment()).subscribe({
+      stopServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe({
         next: (r) => results.push(r),
         complete: () => {
           expect(results).toContainEqual(stopServerSuccess({ subscriptionId: 'sub-1', itemId: 'item-1' }));
@@ -320,7 +334,7 @@ describe('Subscription Server Info Effects', () => {
       subscriptionItemsService.stopServer.mockReturnValue(throwError(() => new Error('Stop failed')));
       actions$ = of(stopServer({ subscriptionId: 'sub-1', itemId: 'item-1' }));
 
-      stopServerEffect(actions$, subscriptionItemsService, mockBillingEnvironment()).subscribe((result) => {
+      stopServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe((result) => {
         expect(result).toEqual(stopServerFailure({ subscriptionId: 'sub-1', error: 'Stop failed' }));
         done();
       });
@@ -335,7 +349,7 @@ describe('Subscription Server Info Effects', () => {
 
       const results: unknown[] = [];
 
-      restartServerEffect(actions$, subscriptionItemsService, mockBillingEnvironment()).subscribe({
+      restartServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe({
         next: (r) => results.push(r),
         complete: () => {
           expect(results).toContainEqual(restartServerSuccess({ subscriptionId: 'sub-1', itemId: 'item-1' }));
@@ -355,7 +369,7 @@ describe('Subscription Server Info Effects', () => {
       subscriptionItemsService.restartServer.mockReturnValue(throwError(() => new Error('Restart failed')));
       actions$ = of(restartServer({ subscriptionId: 'sub-1', itemId: 'item-1' }));
 
-      restartServerEffect(actions$, subscriptionItemsService, mockBillingEnvironment()).subscribe((result) => {
+      restartServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe((result) => {
         expect(result).toEqual(restartServerFailure({ subscriptionId: 'sub-1', error: 'Restart failed' }));
         done();
       });

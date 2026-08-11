@@ -213,12 +213,17 @@ Active subscriptions can change server type and addons without switching plans. 
 | GET    | `/subscriptions/{subscriptionId}/config-change/eligibility`      | Config-change options                                 |
 | POST   | `/subscriptions/{subscriptionId}/config-change/preview`          | Advisory pricing delta                                |
 | POST   | `/subscriptions/{subscriptionId}/config-change`                  | Submit config change                                  |
-| GET    | `/subscriptions/{subscriptionId}/items`                          | List subscription items (includes `sshAccessGranted`) |
+| GET    | `/subscriptions/{subscriptionId}/items`                          | List subscription items (includes `sshAccessGranted`, `displayName`) |
+| GET    | `/subscriptions/{subscriptionId}/items/{itemId}`                 | Service detail (active items only; includes server info) |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/display-name`    | Set or clear service display-name override            |
 | GET    | `/subscriptions/{subscriptionId}/items/{itemId}/server-info`     | Live server info                                      |
 | GET    | `/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key`  | Reveal SSH key (one-time)                             |
 | POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/start`   | Start server                                          |
 | POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/stop`    | Stop server                                           |
 | POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/restart` | Restart server                                        |
+| GET    | `/subscriptions/{subscriptionId}/meters/history`                 | Meter usage history series (`from`, `to`, `groupBy`)  |
+
+`SubscriptionResponse` embeds `items[]` and `meters[]`. Optional item `displayName` overrides the default service label without changing `SUB-*`.
 
 See [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) for schemas.
 
@@ -226,11 +231,13 @@ See [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) for schemas.
 
 - **[Customer Profiles](./customer-profiles.md)** Required before ordering
 - **[Service Types and Plans](./service-types-and-plans.md)** Catalog and provider schemas
+- **[Service details](./service-details.md)** Service page, rename, meter charts, realtime
 - **[Subscription Config Change](./subscription-config-change.md)** Mid-life server type and addon changes
 - **[Invoices](./invoices.md)** Open positions and billing-day accumulation
 - **[Backorders](./backorders.md)** Capacity retry queue
 - **[Server Provisioning](./server-provisioning.md)** Cloud-init and bundled stacks
 - **[Dashboard and Server Control](./dashboard-and-server-control.md)** Overview and power actions
+- **[Usage meters](./usage-meters.md)** Catalog meters and history API
 
 ---
 

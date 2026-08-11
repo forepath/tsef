@@ -40,6 +40,7 @@ describe('BILLING_NOTIFICATION_EVENTS', () => {
         'subscription.ssh_access_granted',
         'subscription.provisioned',
         'subscription.provision_failed',
+        'subscription.service.removed',
         'service_plan.price_recalculated',
         'subscription.price_changed',
         'addon.activated',

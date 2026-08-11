@@ -98,6 +98,8 @@ Built-in Hetzner / DigitalOcean register stub collectors (empty samples) until r
 
 - `GET /subscriptions/{id}/meters` and admin twin under `/admin/billing/subscriptions/{id}/meters`
 - `SubscriptionResponse.meters` embeds the same summaries (effective price, period aggregate, estimated charge)
+- `GET /subscriptions/{id}/meters/history?from&to&groupBy=day|month` (admin twin under `/admin/billing/subscriptions/{id}/meters/history`) — per-meter time series for the service details UI
+- WebSocket `meterSummaryUpdate` on room `subscription:{id}` after usage mutations (see [Service details](./service-details.md))
 
 ## Invoice charge path (arrear)
 
@@ -137,6 +139,7 @@ Empty aggregates become `0` and omit the line when below the minimum billable am
 - [Service types and plans](./service-types-and-plans.md)
 - [Dynamic provider plugins](./dynamic-provider-plugins.md)
 - [Subscriptions](./subscriptions.md)
+- [Service details](./service-details.md)
 - [Invoices](./invoices.md)
 - [Advance billing](./advance-billing-and-yearly-interval.md)
 - [Webhooks](./webhooks.md)

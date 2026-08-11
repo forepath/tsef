@@ -12,6 +12,7 @@ import {
   refreshSubscriptionServerInfoSuccess,
   restartServer,
   restartServerFailure,
+  setSubscriptionItemDisplayName,
   startServer,
   startServerFailure,
   startServerSuccess,
@@ -42,6 +43,8 @@ export interface SubscriptionServerInfoState {
   sshAccessGrantedBySubscriptionId: Record<string, boolean>;
   /** User-facing service type name for the tracked item. */
   serviceTypeNameBySubscriptionId: Record<string, string>;
+  /** Customer-defined display name for the tracked item. */
+  displayNameBySubscriptionId: Record<string, string | null>;
   loading: boolean;
   error: string | null;
   actionInProgress: Record<string, ServerActionType>;
@@ -56,6 +59,7 @@ export const initialSubscriptionServerInfoState: SubscriptionServerInfoState = {
   provisioningStatusBySubscriptionId: {},
   sshAccessGrantedBySubscriptionId: {},
   serviceTypeNameBySubscriptionId: {},
+  displayNameBySubscriptionId: {},
   loading: false,
   error: null,
   actionInProgress: {},
@@ -96,6 +100,7 @@ export const subscriptionServerInfoReducer = createReducer(
         provisioningStatusBySubscriptionId,
         sshAccessGrantedBySubscriptionId,
         serviceTypeNameBySubscriptionId,
+        displayNameBySubscriptionId,
       },
     ) => ({
       ...state,
@@ -105,6 +110,7 @@ export const subscriptionServerInfoReducer = createReducer(
       provisioningStatusBySubscriptionId: provisioningStatusBySubscriptionId ?? {},
       sshAccessGrantedBySubscriptionId: sshAccessGrantedBySubscriptionId ?? {},
       serviceTypeNameBySubscriptionId: serviceTypeNameBySubscriptionId ?? {},
+      displayNameBySubscriptionId: displayNameBySubscriptionId ?? {},
       loading: false,
       error: null,
     }),
@@ -128,6 +134,7 @@ export const subscriptionServerInfoReducer = createReducer(
     const provisioningStatusBySubscriptionId = { ...state.provisioningStatusBySubscriptionId };
     const sshAccessGrantedBySubscriptionId = { ...state.sshAccessGrantedBySubscriptionId };
     const serviceTypeNameBySubscriptionId = { ...state.serviceTypeNameBySubscriptionId };
+    const displayNameBySubscriptionId = { ...state.displayNameBySubscriptionId };
     const actionInProgress = { ...state.actionInProgress };
     const history = [...state.billingStatusHistory];
 
@@ -150,6 +157,9 @@ export const subscriptionServerInfoReducer = createReducer(
       if (item.serviceTypeName?.trim()) {
         serviceTypeNameBySubscriptionId[item.subscriptionId] = item.serviceTypeName.trim();
       }
+      if (item.displayName !== undefined) {
+        displayNameBySubscriptionId[item.subscriptionId] = item.displayName;
+      }
       delete actionInProgress[item.subscriptionId];
       history.push({
         generatedAt,
@@ -169,6 +179,7 @@ export const subscriptionServerInfoReducer = createReducer(
       provisioningStatusBySubscriptionId,
       sshAccessGrantedBySubscriptionId,
       serviceTypeNameBySubscriptionId,
+      displayNameBySubscriptionId,
       actionInProgress,
       billingStatusHistory,
       loading: false,
@@ -232,5 +243,12 @@ export const subscriptionServerInfoReducer = createReducer(
   on(restartServerFailure, (state, { subscriptionId }) => ({
     ...state,
     actionInProgress: setActionInProgress(state, subscriptionId, null),
+  })),
+  on(setSubscriptionItemDisplayName, (state, { subscriptionId, displayName }) => ({
+    ...state,
+    displayNameBySubscriptionId: {
+      ...state.displayNameBySubscriptionId,
+      [subscriptionId]: displayName,
+    },
   })),
 );

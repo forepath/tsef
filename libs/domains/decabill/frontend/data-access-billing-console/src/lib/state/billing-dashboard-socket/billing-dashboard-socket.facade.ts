@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { connectBillingDashboardSocket, disconnectBillingDashboardSocket } from './billing-dashboard-socket.actions';
+import { connectBillingDashboardSocket, disconnectBillingDashboardSocket, subscribeBillingSubscriptionMeters, unsubscribeBillingSubscriptionMeters } from './billing-dashboard-socket.actions';
 import {
   selectBillingDashboardSocketConnected,
   selectBillingDashboardSocketError,
@@ -21,6 +21,14 @@ export class BillingDashboardSocketFacade {
 
   disconnect(): void {
     this.store.dispatch(disconnectBillingDashboardSocket());
+  }
+
+  subscribeSubscriptionMeters(subscriptionId: string): void {
+    this.store.dispatch(subscribeBillingSubscriptionMeters({ subscriptionId }));
+  }
+
+  unsubscribeSubscriptionMeters(subscriptionId: string): void {
+    this.store.dispatch(unsubscribeBillingSubscriptionMeters({ subscriptionId }));
   }
 
   getStreamPending$(): Observable<boolean> {

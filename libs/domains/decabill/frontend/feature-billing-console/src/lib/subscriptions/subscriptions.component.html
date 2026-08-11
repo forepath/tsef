@@ -286,22 +286,48 @@
           </span>
         </div>
       </div>
-      @if (hasSubscriptionMeters(sub)) {
+      @if (hasSubscriptionServicesSection(sub)) {
         <div class="small text-muted mt-2 w-100">
           <div class="fw-semibold mb-1" i18n="@@featureSubscriptions-usageMeters">Usage meters</div>
-          <div class="d-flex flex-column gap-1">
-            @for (
-              meter of subscriptionMeters(sub);
-              track meter.meterId + meter.attachmentType + (meter.addonId ?? '')
-            ) {
-              <div>
-                <span class="fw-medium">{{ meter.name }}</span>
-                <span class="ms-2">{{ formatMeterValue(meter) }}</span>
-                <span class="ms-2">· {{ formatMeterCharge(meter.estimatedChargeNet) }}</span>
-                <span class="ms-2 text-body-secondary">({{ meterAttachmentLabel(meter) }})</span>
-              </div>
-            }
-          </div>
+          @if (subscriptionItems(sub).length > 0) {
+            <div class="d-flex flex-column gap-2 mb-2">
+              @for (item of subscriptionItems(sub); track item.id) {
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span class="fw-medium">{{ serviceDisplayLabel(item) }}</span>
+                  <span
+                    class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                    [ngClass]="itemProvisioningStatusBadgeClass(item)"
+                  >
+                    {{ itemProvisioningStatusLabel(item) }}
+                  </span>
+                  @if (isServiceDetailEligible(item)) {
+                    <a
+                      [routerLink]="serviceDetailLink(sub, item)"
+                      class="btn btn-sm btn-outline-primary py-0"
+                      i18n="@@featureSubscriptions-openServiceDetails"
+                    >
+                      Open details
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          }
+          @if (hasSubscriptionMeters(sub)) {
+            <div class="d-flex flex-column gap-1">
+              @for (
+                meter of subscriptionMeters(sub);
+                track meter.meterId + meter.attachmentType + (meter.addonId ?? '')
+              ) {
+                <div>
+                  <span class="fw-medium">{{ meter.name }}</span>
+                  <span class="ms-2">{{ formatMeterValue(meter) }}</span>
+                  <span class="ms-2">· {{ formatMeterCharge(meter.estimatedChargeNet) }}</span>
+                  <span class="ms-2 text-body-secondary">({{ meterAttachmentLabel(meter) }})</span>
+                </div>
+              }
+            </div>
+          }
         </div>
       }
     </div>

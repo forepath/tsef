@@ -6,6 +6,7 @@ import { Action, Store } from '@ngrx/store';
 import { Observable, catchError, forkJoin, from, map, mergeMap, of, switchMap, take } from 'rxjs';
 
 import { SubscriptionItemsService } from '../../services/subscription-items.service';
+import { AdminBillingService } from '../../services/admin-billing.service';
 import type {
   ProvisioningServiceKind,
   ProvisioningStatus,
@@ -72,6 +73,7 @@ export function loadOverviewServerInfoEffect(
             provisioningStatusBySubscriptionId: {},
             sshAccessGrantedBySubscriptionId: {},
             serviceTypeNameBySubscriptionId: {},
+            displayNameBySubscriptionId: {},
           }),
         );
       }
@@ -88,6 +90,7 @@ export function loadOverviewServerInfoEffect(
           const provisioningStatusBySubscriptionId: Record<string, ProvisioningStatus> = {};
           const sshAccessGrantedBySubscriptionId: Record<string, boolean> = {};
           const serviceTypeNameBySubscriptionId: Record<string, string> = {};
+          const displayNameBySubscriptionId: Record<string, string | null> = {};
 
           results.forEach(({ sub, items }) => {
             const tracked = pickTrackedSubscriptionItem(items);
@@ -102,6 +105,9 @@ export function loadOverviewServerInfoEffect(
             sshAccessGrantedBySubscriptionId[sub.id] = tracked.sshAccessGranted === true;
             if (tracked.serviceTypeName?.trim()) {
               serviceTypeNameBySubscriptionId[sub.id] = tracked.serviceTypeName.trim();
+            }
+            if (tracked.displayName !== undefined) {
+              displayNameBySubscriptionId[sub.id] = tracked.displayName;
             }
 
             if (tracked.provisioningStatus === 'active') {
@@ -118,6 +124,7 @@ export function loadOverviewServerInfoEffect(
                 provisioningStatusBySubscriptionId,
                 sshAccessGrantedBySubscriptionId,
                 serviceTypeNameBySubscriptionId,
+                displayNameBySubscriptionId,
               }),
             );
           }
@@ -143,6 +150,7 @@ export function loadOverviewServerInfoEffect(
                 provisioningStatusBySubscriptionId,
                 sshAccessGrantedBySubscriptionId,
                 serviceTypeNameBySubscriptionId,
+                displayNameBySubscriptionId,
               });
             }),
           );
@@ -177,8 +185,10 @@ function serverControlEffect(
   actionType: typeof startServer | typeof stopServer | typeof restartServer,
   successAction: typeof startServerSuccess | typeof stopServerSuccess | typeof restartServerSuccess,
   failureAction: typeof startServerFailure | typeof stopServerFailure | typeof restartServerFailure,
-  apiCall: (subscriptionId: string, itemId: string) => Observable<unknown>,
-  subscriptionItemsService: SubscriptionItemsService,
+  customerApiCall: (subscriptionId: string, itemId: string) => Observable<unknown>,
+  adminApiCall: (subscriptionId: string, itemId: string) => Observable<unknown>,
+  customerServerInfoCall: (subscriptionId: string, itemId: string) => Observable<ServerInfoResponse>,
+  adminServerInfoCall: (subscriptionId: string, itemId: string) => Observable<ServerInfoResponse>,
   environment: Environment,
 ) {
   const clearActionInProgressOnRefresh = !environment.billing.websocketUrl?.trim();
@@ -186,10 +196,13 @@ function serverControlEffect(
   return (actions$: Actions) =>
     actions$.pipe(
       ofType(actionType),
-      switchMap(({ subscriptionId, itemId }) =>
-        apiCall(subscriptionId, itemId).pipe(
+      switchMap(({ subscriptionId, itemId, adminMode }) => {
+        const apiCall = adminMode ? adminApiCall : customerApiCall;
+        const serverInfoCall = adminMode ? adminServerInfoCall : customerServerInfoCall;
+
+        return apiCall(subscriptionId, itemId).pipe(
           switchMap(() =>
-            subscriptionItemsService.getServerInfo(subscriptionId, itemId).pipe(
+            serverInfoCall(subscriptionId, itemId).pipe(
               mergeMap((serverInfo) =>
                 from([
                   successAction({ subscriptionId, itemId }),
@@ -203,14 +216,15 @@ function serverControlEffect(
             ),
           ),
           catchError((error) => of(failureAction({ subscriptionId, error: normalizeError(error) }))),
-        ),
-      ),
+        );
+      }),
     );
 }
 
 export function startServerEffect(
   actions$: Actions,
   subscriptionItemsService: SubscriptionItemsService,
+  adminBillingService: AdminBillingService,
   environment: Environment,
 ): Observable<Action> {
   return serverControlEffect(
@@ -218,7 +232,9 @@ export function startServerEffect(
     startServerSuccess,
     startServerFailure,
     (subId, itemId) => subscriptionItemsService.startServer(subId, itemId),
-    subscriptionItemsService,
+    (subId, itemId) => adminBillingService.startAdminSubscriptionItemServer(subId, itemId),
+    (subId, itemId) => subscriptionItemsService.getServerInfo(subId, itemId),
+    (subId, itemId) => adminBillingService.getAdminSubscriptionItemServerInfo(subId, itemId),
     environment,
   )(actions$);
 }
@@ -226,6 +242,7 @@ export function startServerEffect(
 export function stopServerEffect(
   actions$: Actions,
   subscriptionItemsService: SubscriptionItemsService,
+  adminBillingService: AdminBillingService,
   environment: Environment,
 ): Observable<Action> {
   return serverControlEffect(
@@ -233,7 +250,9 @@ export function stopServerEffect(
     stopServerSuccess,
     stopServerFailure,
     (subId, itemId) => subscriptionItemsService.stopServer(subId, itemId),
-    subscriptionItemsService,
+    (subId, itemId) => adminBillingService.stopAdminSubscriptionItemServer(subId, itemId),
+    (subId, itemId) => subscriptionItemsService.getServerInfo(subId, itemId),
+    (subId, itemId) => adminBillingService.getAdminSubscriptionItemServerInfo(subId, itemId),
     environment,
   )(actions$);
 }
@@ -241,6 +260,7 @@ export function stopServerEffect(
 export function restartServerEffect(
   actions$: Actions,
   subscriptionItemsService: SubscriptionItemsService,
+  adminBillingService: AdminBillingService,
   environment: Environment,
 ): Observable<Action> {
   return serverControlEffect(
@@ -248,7 +268,9 @@ export function restartServerEffect(
     restartServerSuccess,
     restartServerFailure,
     (subId, itemId) => subscriptionItemsService.restartServer(subId, itemId),
-    subscriptionItemsService,
+    (subId, itemId) => adminBillingService.restartAdminSubscriptionItemServer(subId, itemId),
+    (subId, itemId) => subscriptionItemsService.getServerInfo(subId, itemId),
+    (subId, itemId) => adminBillingService.getAdminSubscriptionItemServerInfo(subId, itemId),
     environment,
   )(actions$);
 }
@@ -257,23 +279,26 @@ export const startServer$ = createEffect(
   (
     actions$ = inject(Actions),
     subscriptionItemsService = inject(SubscriptionItemsService),
+    adminBillingService = inject(AdminBillingService),
     environment = inject<Environment>(ENVIRONMENT),
-  ) => startServerEffect(actions$, subscriptionItemsService, environment),
+  ) => startServerEffect(actions$, subscriptionItemsService, adminBillingService, environment),
   { functional: true },
 );
 export const stopServer$ = createEffect(
   (
     actions$ = inject(Actions),
     subscriptionItemsService = inject(SubscriptionItemsService),
+    adminBillingService = inject(AdminBillingService),
     environment = inject<Environment>(ENVIRONMENT),
-  ) => stopServerEffect(actions$, subscriptionItemsService, environment),
+  ) => stopServerEffect(actions$, subscriptionItemsService, adminBillingService, environment),
   { functional: true },
 );
 export const restartServer$ = createEffect(
   (
     actions$ = inject(Actions),
     subscriptionItemsService = inject(SubscriptionItemsService),
+    adminBillingService = inject(AdminBillingService),
     environment = inject<Environment>(ENVIRONMENT),
-  ) => restartServerEffect(actions$, subscriptionItemsService, environment),
+  ) => restartServerEffect(actions$, subscriptionItemsService, adminBillingService, environment),
   { functional: true },
 );
