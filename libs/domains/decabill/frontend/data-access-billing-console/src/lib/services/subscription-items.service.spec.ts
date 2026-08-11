@@ -2,7 +2,11 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { TestBed } from '@angular/core/testing';
 import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
 
-import type { ServerInfoResponse, SubscriptionItemDetailResponse, SubscriptionItemResponse } from '../types/billing.types';
+import type {
+  ServerInfoResponse,
+  SubscriptionItemDetailResponse,
+  SubscriptionItemResponse,
+} from '../types/billing.types';
 
 import { SubscriptionItemsService } from './subscription-items.service';
 

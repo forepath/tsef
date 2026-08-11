@@ -65,10 +65,7 @@ export class SubscriptionItemServerService {
   }
 
   /** Admin path: subscription ownership is not checked; caller must enforce admin role. */
-  async getItemDetailAsAdmin(
-    subscriptionId: string,
-    itemId: string,
-  ): Promise<SubscriptionItemDetailResponseDto> {
+  async getItemDetailAsAdmin(subscriptionId: string, itemId: string): Promise<SubscriptionItemDetailResponseDto> {
     await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
 
     return await this.buildItemDetail(subscriptionId, itemId);
@@ -175,11 +172,7 @@ export class SubscriptionItemServerService {
 
     await this.provisioningService.startServer(item.serviceType!.provider!, item.providerReference!, credentials);
 
-    this.billingNotificationPublisher.publish(
-      'subscription.service.started',
-      { subscriptionId, itemId },
-      userId,
-    );
+    this.billingNotificationPublisher.publish('subscription.service.started', { subscriptionId, itemId }, userId);
   }
 
   async stopServer(subscriptionId: string, itemId: string, userId: string): Promise<void> {
@@ -188,11 +181,7 @@ export class SubscriptionItemServerService {
 
     await this.provisioningService.stopServer(item.serviceType!.provider!, item.providerReference!, credentials);
 
-    this.billingNotificationPublisher.publish(
-      'subscription.service.stopped',
-      { subscriptionId, itemId },
-      userId,
-    );
+    this.billingNotificationPublisher.publish('subscription.service.stopped', { subscriptionId, itemId }, userId);
   }
 
   async restartServer(subscriptionId: string, itemId: string, userId: string): Promise<void> {
@@ -201,11 +190,7 @@ export class SubscriptionItemServerService {
 
     await this.provisioningService.restartServer(item.serviceType!.provider!, item.providerReference!, credentials);
 
-    this.billingNotificationPublisher.publish(
-      'subscription.service.restarted',
-      { subscriptionId, itemId },
-      userId,
-    );
+    this.billingNotificationPublisher.publish('subscription.service.restarted', { subscriptionId, itemId }, userId);
   }
 
   async startServerAsAdmin(subscriptionId: string, itemId: string, adminUserId: string): Promise<void> {
@@ -217,11 +202,7 @@ export class SubscriptionItemServerService {
       getProvisioningCredentials(item.serviceType!.provider!, item.serviceType!.providerDefaults),
     );
 
-    this.billingNotificationPublisher.publish(
-      'subscription.service.started',
-      { subscriptionId, itemId },
-      adminUserId,
-    );
+    this.billingNotificationPublisher.publish('subscription.service.started', { subscriptionId, itemId }, adminUserId);
   }
 
   async stopServerAsAdmin(subscriptionId: string, itemId: string, adminUserId: string): Promise<void> {
@@ -233,11 +214,7 @@ export class SubscriptionItemServerService {
       getProvisioningCredentials(item.serviceType!.provider!, item.serviceType!.providerDefaults),
     );
 
-    this.billingNotificationPublisher.publish(
-      'subscription.service.stopped',
-      { subscriptionId, itemId },
-      adminUserId,
-    );
+    this.billingNotificationPublisher.publish('subscription.service.stopped', { subscriptionId, itemId }, adminUserId);
   }
 
   async restartServerAsAdmin(subscriptionId: string, itemId: string, adminUserId: string): Promise<void> {
@@ -256,10 +233,7 @@ export class SubscriptionItemServerService {
     );
   }
 
-  private async buildItemDetail(
-    subscriptionId: string,
-    itemId: string,
-  ): Promise<SubscriptionItemDetailResponseDto> {
+  private async buildItemDetail(subscriptionId: string, itemId: string): Promise<SubscriptionItemDetailResponseDto> {
     const item = await this.subscriptionItemsRepository.findByIdAndSubscriptionId(itemId, subscriptionId);
 
     if (!item || !this.isDetailEligible(item.providerReference, item.provisioningStatus)) {
@@ -275,8 +249,7 @@ export class SubscriptionItemServerService {
 
     if (cachedServerInfo) {
       response.serverInfo = cachedServerInfo;
-    }
-    else {
+    } else {
       const liveInfo = await this.fetchLiveServerInfo(item);
 
       if (liveInfo) {

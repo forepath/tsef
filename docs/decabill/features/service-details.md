@@ -4,10 +4,10 @@ Customer and admin views for a provisioned subscription item (cloud service inst
 
 ## Routes
 
-| Audience | Path |
-|----------|------|
-| Customer | `/subscriptions/{subscriptionId}/services/{itemId}` |
-| Admin | `/administration/subscriptions/{subscriptionId}/services/{itemId}` |
+| Audience | Path                                                               |
+| -------- | ------------------------------------------------------------------ |
+| Customer | `/subscriptions/{subscriptionId}/services/{itemId}`                |
+| Admin    | `/administration/subscriptions/{subscriptionId}/services/{itemId}` |
 
 Customer deep links also come from the dashboard cloud-instances lane. Admin entry is from the Contracts list (`/administration/subscriptions`) nested services subsection (there is no admin dashboard). Removed / non-active items may appear under the list “Usage meters” subsection but **cannot** open this page (UI hides the action; API returns 404). Dashboard continues to list only active provisioned items.
 
@@ -43,10 +43,10 @@ Admin twins live under `/admin/billing/subscriptions/{subscriptionId}/items/...`
 
 ## Meter history
 
-| Audience | Path | PAT scope |
-|----------|------|-----------|
+| Audience | Path                                                                            | PAT scope                   |
+| -------- | ------------------------------------------------------------------------------- | --------------------------- |
 | Customer | `GET /subscriptions/{subscriptionId}/meters/history?from&to&groupBy=day\|month` | ownership + existing scopes |
-| Admin | `GET /admin/billing/subscriptions/{subscriptionId}/meters/history?...` | `billing_admin:read` |
+| Admin    | `GET /admin/billing/subscriptions/{subscriptionId}/meters/history?...`          | `billing_admin:read`        |
 
 Returns per-meter series using each meter’s catalog aggregator within day/month buckets of `periodEnd`. The service detail page filters with a collapsible `from` / `to` / `groupBy` panel (customer-facing adaptation of admin billing filters; no `userId`).
 
@@ -62,11 +62,11 @@ Customers must own the subscription to join the meter room. **ADMIN** sockets ma
 
 ## Notifications
 
-| Event | When |
-|-------|------|
-| `subscription.service.renamed` | Display name set or cleared |
-| `subscription.service.started` / `stopped` / `restarted` | Power actions |
-| `subscription.service.removed` | Item deprovisioned during teardown |
+| Event                                                    | When                               |
+| -------------------------------------------------------- | ---------------------------------- |
+| `subscription.service.renamed`                           | Display name set or cleared        |
+| `subscription.service.started` / `stopped` / `restarted` | Power actions                      |
+| `subscription.service.removed`                           | Item deprovisioned during teardown |
 
 ## Related
 

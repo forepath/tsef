@@ -131,9 +131,7 @@ export const connectBillingDashboardSocket$ = createEffect(
               mergeMap((payload) => from([billingDashboardStatusPush(payload), billingDashboardSocketDataReceived()])),
             );
             const meterSummaryUpdate$ = fromEvent<BillingMeterSummaryUpdatePayload>(socket, 'meterSummaryUpdate').pipe(
-              map((payload) =>
-                meterSummaryPush({ subscriptionId: payload.subscriptionId, meters: payload.meters }),
-              ),
+              map((payload) => meterSummaryPush({ subscriptionId: payload.subscriptionId, meters: payload.meters })),
             );
             const appError$ = fromEvent<{ message: string }>(socket, 'error').pipe(
               map((data) => billingDashboardSocketApplicationError({ message: data.message ?? 'Socket error' })),

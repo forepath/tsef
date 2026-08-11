@@ -31,9 +31,7 @@ describe('BillingStatusGateway', () => {
   let itemServerService: jest.Mocked<Pick<SubscriptionItemServerService, 'listItems' | 'getServerInfo'>>;
   let usersRepository: jest.Mocked<Pick<UsersRepository, 'findByIdForTenant'>>;
   let subscriptionsRepository: jest.Mocked<Pick<SubscriptionsRepository, 'findByIdOrThrow'>>;
-  let billingMeterRealtime: jest.Mocked<
-    Pick<BillingMeterRealtimeService, 'attachServer' | 'buildMeterSummaryPayload'>
-  >;
+  let billingMeterRealtime: jest.Mocked<Pick<BillingMeterRealtimeService, 'attachServer' | 'buildMeterSummaryPayload'>>;
   const userSocketInfo = {
     isApiKeyAuth: false,
     userId: 'user-1',

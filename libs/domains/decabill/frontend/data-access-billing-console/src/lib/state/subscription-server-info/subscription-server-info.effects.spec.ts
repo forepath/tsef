@@ -272,10 +272,12 @@ describe('Subscription Server Info Effects', () => {
       subscriptionItemsService.startServer.mockReturnValue(throwError(() => new Error('Start failed')));
       actions$ = of(startServer({ subscriptionId: 'sub-1', itemId: 'item-1' }));
 
-      startServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe((result) => {
-        expect(result).toEqual(startServerFailure({ subscriptionId: 'sub-1', error: 'Start failed' }));
-        done();
-      });
+      startServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe(
+        (result) => {
+          expect(result).toEqual(startServerFailure({ subscriptionId: 'sub-1', error: 'Start failed' }));
+          done();
+        },
+      );
     });
 
     it('should dispatch refresh with clearActionInProgress false when billing websocket URL is set', (done) => {
@@ -334,10 +336,12 @@ describe('Subscription Server Info Effects', () => {
       subscriptionItemsService.stopServer.mockReturnValue(throwError(() => new Error('Stop failed')));
       actions$ = of(stopServer({ subscriptionId: 'sub-1', itemId: 'item-1' }));
 
-      stopServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe((result) => {
-        expect(result).toEqual(stopServerFailure({ subscriptionId: 'sub-1', error: 'Stop failed' }));
-        done();
-      });
+      stopServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe(
+        (result) => {
+          expect(result).toEqual(stopServerFailure({ subscriptionId: 'sub-1', error: 'Stop failed' }));
+          done();
+        },
+      );
     });
   });
 
@@ -369,10 +373,12 @@ describe('Subscription Server Info Effects', () => {
       subscriptionItemsService.restartServer.mockReturnValue(throwError(() => new Error('Restart failed')));
       actions$ = of(restartServer({ subscriptionId: 'sub-1', itemId: 'item-1' }));
 
-      restartServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe((result) => {
-        expect(result).toEqual(restartServerFailure({ subscriptionId: 'sub-1', error: 'Restart failed' }));
-        done();
-      });
+      restartServerEffect(actions$, subscriptionItemsService, adminBillingService, mockBillingEnvironment()).subscribe(
+        (result) => {
+          expect(result).toEqual(restartServerFailure({ subscriptionId: 'sub-1', error: 'Restart failed' }));
+          done();
+        },
+      );
     });
   });
 });

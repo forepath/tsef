@@ -46,10 +46,7 @@ describe('serviceDetailReducer', () => {
       enterServiceDetail({ subscriptionId: 'sub-1', itemId: 'item-1' }),
     );
     const loadedDetail = serviceDetailReducer(entered, loadDetailSuccess({ detail }));
-    const loadedHistory = serviceDetailReducer(
-      loadedDetail,
-      loadHistorySuccess({ history }),
-    );
+    const loadedHistory = serviceDetailReducer(loadedDetail, loadHistorySuccess({ history }));
 
     expect(entered.loadingDetail).toBe(true);
     expect(entered.loadingHistory).toBe(true);
@@ -124,10 +121,7 @@ describe('serviceDetailReducer', () => {
       initialServiceDetailState,
       enterServiceDetail({ subscriptionId: 'sub-1', itemId: 'item-1' }),
     );
-    const unchanged = serviceDetailReducer(
-      withContext,
-      meterSummaryPush({ subscriptionId: 'sub-2', meters: [] }),
-    );
+    const unchanged = serviceDetailReducer(withContext, meterSummaryPush({ subscriptionId: 'sub-2', meters: [] }));
 
     expect(unchanged.metersFromSocket).toBeNull();
   });

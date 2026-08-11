@@ -35,10 +35,7 @@ import type { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexTitleSubtitle,
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { filter, withLatestFrom } from 'rxjs';
 
-import {
-  getProvisioningStatusBadgeClass,
-  getProvisioningStatusLabel,
-} from '../billing-status-labels';
+import { getProvisioningStatusBadgeClass, getProvisioningStatusLabel } from '../billing-status-labels';
 
 const FILTERS_STORAGE_KEY = 'billing-console-service-detail-filters';
 
@@ -147,11 +144,7 @@ export class ServiceDetailPageComponent implements OnInit {
     const restoredGroupBy = this.groupBy();
     const defaults = createDefaultMeterHistoryFilters();
 
-    if (
-      restoredFrom !== defaults.from ||
-      restoredTo !== defaults.to ||
-      restoredGroupBy !== defaults.groupBy
-    ) {
+    if (restoredFrom !== defaults.from || restoredTo !== defaults.to || restoredGroupBy !== defaults.groupBy) {
       this.facade.applyHistoryFilters(
         { from: restoredFrom, to: restoredTo, groupBy: restoredGroupBy },
         viewMode === 'admin',
@@ -191,13 +184,11 @@ export class ServiceDetailPageComponent implements OnInit {
         }
       });
 
-    this.facade.filters$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((filters) => {
-        this.fromDate.set(filters.from);
-        this.toDate.set(filters.to);
-        this.groupBy.set(filters.groupBy);
-      });
+    this.facade.filters$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((filters) => {
+      this.fromDate.set(filters.from);
+      this.toDate.set(filters.to);
+      this.groupBy.set(filters.groupBy);
+    });
   }
 
   subscriptionsListPath(): string {
@@ -423,9 +414,7 @@ export class ServiceDetailPageComponent implements OnInit {
       fill: { colors: [color] },
       dataLabels: { enabled: false } as ApexDataLabels,
       xaxis: {
-        categories: meter.series.map(
-          (point) => this.datePipe.transform(point.period, axisDateFormat) ?? point.period,
-        ),
+        categories: meter.series.map((point) => this.datePipe.transform(point.period, axisDateFormat) ?? point.period),
         labels: {
           style: { colors: 'var(--bs-body-color)', fontFamily: 'var(--bs-body-font-family)' },
         },

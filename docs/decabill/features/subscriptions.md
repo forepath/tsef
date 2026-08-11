@@ -202,26 +202,26 @@ Active subscriptions can change server type and addons without switching plans. 
 
 ## API Endpoints
 
-| Method | Path                                                             | Purpose                                               |
-| ------ | ---------------------------------------------------------------- | ----------------------------------------------------- |
-| GET    | `/subscriptions`                                                 | List user's subscriptions                             |
-| POST   | `/subscriptions`                                                 | Create subscription                                   |
-| GET    | `/subscriptions/{subscriptionId}`                                | Get subscription detail                               |
-| POST   | `/subscriptions/{subscriptionId}/cancel`                         | Cancel subscription                                   |
-| POST   | `/subscriptions/{subscriptionId}/withdraw`                       | Statutory withdrawal                                  |
-| POST   | `/subscriptions/{subscriptionId}/resume`                         | Resume pending cancel                                 |
-| GET    | `/subscriptions/{subscriptionId}/config-change/eligibility`      | Config-change options                                 |
-| POST   | `/subscriptions/{subscriptionId}/config-change/preview`          | Advisory pricing delta                                |
-| POST   | `/subscriptions/{subscriptionId}/config-change`                  | Submit config change                                  |
+| Method | Path                                                             | Purpose                                                              |
+| ------ | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| GET    | `/subscriptions`                                                 | List user's subscriptions                                            |
+| POST   | `/subscriptions`                                                 | Create subscription                                                  |
+| GET    | `/subscriptions/{subscriptionId}`                                | Get subscription detail                                              |
+| POST   | `/subscriptions/{subscriptionId}/cancel`                         | Cancel subscription                                                  |
+| POST   | `/subscriptions/{subscriptionId}/withdraw`                       | Statutory withdrawal                                                 |
+| POST   | `/subscriptions/{subscriptionId}/resume`                         | Resume pending cancel                                                |
+| GET    | `/subscriptions/{subscriptionId}/config-change/eligibility`      | Config-change options                                                |
+| POST   | `/subscriptions/{subscriptionId}/config-change/preview`          | Advisory pricing delta                                               |
+| POST   | `/subscriptions/{subscriptionId}/config-change`                  | Submit config change                                                 |
 | GET    | `/subscriptions/{subscriptionId}/items`                          | List subscription items (includes `sshAccessGranted`, `displayName`) |
-| GET    | `/subscriptions/{subscriptionId}/items/{itemId}`                 | Service detail (active items only; includes server info) |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/display-name`    | Set or clear service display-name override            |
-| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/server-info`     | Live server info                                      |
-| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key`  | Reveal SSH key (one-time)                             |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/start`   | Start server                                          |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/stop`    | Stop server                                           |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/restart` | Restart server                                        |
-| GET    | `/subscriptions/{subscriptionId}/meters/history`                 | Meter usage history series (`from`, `to`, `groupBy`)  |
+| GET    | `/subscriptions/{subscriptionId}/items/{itemId}`                 | Service detail (active items only; includes server info)             |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/display-name`    | Set or clear service display-name override                           |
+| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/server-info`     | Live server info                                                     |
+| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key`  | Reveal SSH key (one-time)                                            |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/start`   | Start server                                                         |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/stop`    | Stop server                                                          |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/restart` | Restart server                                                       |
+| GET    | `/subscriptions/{subscriptionId}/meters/history`                 | Meter usage history series (`from`, `to`, `groupBy`)                 |
 
 `SubscriptionResponse` embeds `items[]` and `meters[]`. Optional item `displayName` overrides the default service label without changing `SUB-*`.
 

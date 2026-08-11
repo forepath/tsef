@@ -121,7 +121,9 @@ describe('serviceDetailEffects', () => {
     subscriptionItemsService.getItemDetail.mockReturnValue(of(detail));
     actions$ = of(enterServiceDetail({ subscriptionId: 'sub-1', itemId: 'item-1' }));
 
-    TestBed.runInInjectionContext(() => loadServiceDetail$(actions$, subscriptionItemsService, adminBillingService)).subscribe((action) => {
+    TestBed.runInInjectionContext(() =>
+      loadServiceDetail$(actions$, subscriptionItemsService, adminBillingService),
+    ).subscribe((action) => {
       expect(action).toEqual(loadDetailSuccess({ detail }));
       done();
     });
@@ -131,7 +133,9 @@ describe('serviceDetailEffects', () => {
     subscriptionItemsService.getItemDetail.mockReturnValue(throwError(() => new Error('Not found')));
     actions$ = of(enterServiceDetail({ subscriptionId: 'sub-1', itemId: 'item-1' }));
 
-    TestBed.runInInjectionContext(() => loadServiceDetail$(actions$, subscriptionItemsService, adminBillingService)).subscribe((action) => {
+    TestBed.runInInjectionContext(() =>
+      loadServiceDetail$(actions$, subscriptionItemsService, adminBillingService),
+    ).subscribe((action) => {
       expect(action).toEqual(loadDetailFailure({ error: 'Not found' }));
       done();
     });
@@ -141,9 +145,7 @@ describe('serviceDetailEffects', () => {
     usageService.getSubscriptionMeterHistory.mockReturnValue(of(history));
     adminBillingService.getAdminSubscriptionMeterHistory.mockReturnValue(of(history));
 
-    actions$ = of(
-      loadHistory({ subscriptionId: 'sub-1', filters: DEFAULT_METER_HISTORY_FILTERS, adminMode: true }),
-    );
+    actions$ = of(loadHistory({ subscriptionId: 'sub-1', filters: DEFAULT_METER_HISTORY_FILTERS, adminMode: true }));
 
     TestBed.runInInjectionContext(() => loadServiceDetailHistory$(actions$)).subscribe((action) => {
       expect(adminBillingService.getAdminSubscriptionMeterHistory).toHaveBeenCalled();
@@ -184,9 +186,7 @@ describe('serviceDetailEffects', () => {
 
   it('updateServiceDetailDisplayName updates detail and overview label', (done) => {
     subscriptionItemsService.updateDisplayName.mockReturnValue(of({ ...detail, displayName: 'Renamed' }));
-    actions$ = of(
-      updateDisplayName({ subscriptionId: 'sub-1', itemId: 'item-1', displayName: 'Renamed' }),
-    );
+    actions$ = of(updateDisplayName({ subscriptionId: 'sub-1', itemId: 'item-1', displayName: 'Renamed' }));
 
     const emitted: unknown[] = [];
     TestBed.runInInjectionContext(() =>
@@ -205,9 +205,7 @@ describe('serviceDetailEffects', () => {
 
   it('updateServiceDetailDisplayName maps rename failures', (done) => {
     subscriptionItemsService.updateDisplayName.mockReturnValue(throwError(() => new Error('Forbidden')));
-    actions$ = of(
-      updateDisplayName({ subscriptionId: 'sub-1', itemId: 'item-1', displayName: 'Renamed' }),
-    );
+    actions$ = of(updateDisplayName({ subscriptionId: 'sub-1', itemId: 'item-1', displayName: 'Renamed' }));
 
     TestBed.runInInjectionContext(() =>
       updateServiceDetailDisplayName$(actions$, subscriptionItemsService, adminBillingService),

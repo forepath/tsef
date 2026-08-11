@@ -2,10 +2,7 @@ import { KeycloakRoles, RequireScopes, UserRole, UsersRoles } from '@forepath/id
 import { BadRequestException, Body, Controller, Get, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
 
 import { ServerInfoResponseDto } from '../dto/server-info-response.dto';
-import {
-  SubscriptionItemDetailResponseDto,
-  SubscriptionItemResponseDto,
-} from '../dto/subscription-item-response.dto';
+import { SubscriptionItemDetailResponseDto, SubscriptionItemResponseDto } from '../dto/subscription-item-response.dto';
 import { UpdateSubscriptionItemDisplayNameDto } from '../dto/update-subscription-item-display-name.dto';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { toServerInfoResponse } from '../utils/subscription-item-response.utils';

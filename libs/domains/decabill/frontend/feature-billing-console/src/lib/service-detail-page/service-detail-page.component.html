@@ -149,9 +149,7 @@
 
   <div class="service-detail-page__body flex-grow-1 min-h-0 overflow-auto">
     <div class="card border-0 border-bottom rounded-0">
-      <div class="card-header py-2 small fw-semibold" i18n="@@featureServiceDetail-serviceInfoTitle">
-        Service info
-      </div>
+      <div class="card-header py-2 small fw-semibold" i18n="@@featureServiceDetail-serviceInfoTitle">Service info</div>
       <div class="card-body">
         @if (detail()?.serverInfo; as serverInfo) {
           <dl class="row mb-0 small">
@@ -281,7 +279,10 @@
             No meter usage for the selected period.
           </p>
         } @else {
-          @for (entry of meterCharts(); track entry.meter.meterId + entry.meter.attachmentType + (entry.meter.addonId ?? '')) {
+          @for (
+            entry of meterCharts();
+            track entry.meter.meterId + entry.meter.attachmentType + (entry.meter.addonId ?? '')
+          ) {
             <div class="card">
               <div class="card-body">
                 <p class="small text-muted mb-2">

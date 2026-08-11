@@ -2,7 +2,11 @@ import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import type { MeterHistoryFilters, SubscriptionItemDetailResponse, SubscriptionMeterHistory } from '../../types/billing.types';
+import type {
+  MeterHistoryFilters,
+  SubscriptionItemDetailResponse,
+  SubscriptionMeterHistory,
+} from '../../types/billing.types';
 
 import {
   applyFilters,

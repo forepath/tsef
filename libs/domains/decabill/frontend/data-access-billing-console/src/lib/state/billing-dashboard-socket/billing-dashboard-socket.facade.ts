@@ -2,7 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { connectBillingDashboardSocket, disconnectBillingDashboardSocket, subscribeBillingSubscriptionMeters, unsubscribeBillingSubscriptionMeters } from './billing-dashboard-socket.actions';
+import {
+  connectBillingDashboardSocket,
+  disconnectBillingDashboardSocket,
+  subscribeBillingSubscriptionMeters,
+  unsubscribeBillingSubscriptionMeters,
+} from './billing-dashboard-socket.actions';
 import {
   selectBillingDashboardSocketConnected,
   selectBillingDashboardSocketError,

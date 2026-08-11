@@ -245,10 +245,11 @@ describe('SubscriptionItemServerService', () => {
 
       expect(subscriptionItemsRepository.updateDisplayName).toHaveBeenCalledWith('item-1', 'My Service');
       expect(result.displayName).toBe('My Service');
-      expect(billingNotificationPublisher.publish).toHaveBeenCalledWith(
-        'subscription.service.renamed',
-        { subscriptionId: 'sub-1', itemId: 'item-1', displayName: 'My Service' },
-      );
+      expect(billingNotificationPublisher.publish).toHaveBeenCalledWith('subscription.service.renamed', {
+        subscriptionId: 'sub-1',
+        itemId: 'item-1',
+        displayName: 'My Service',
+      });
     });
 
     it('clears display name for empty strings', async () => {
@@ -267,9 +268,9 @@ describe('SubscriptionItemServerService', () => {
     it('rejects display names longer than 255 characters', async () => {
       subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue(item);
 
-      await expect(
-        service.updateDisplayName('sub-1', 'item-1', 'user-1', 'x'.repeat(256)),
-      ).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.updateDisplayName('sub-1', 'item-1', 'user-1', 'x'.repeat(256))).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
       expect(subscriptionItemsRepository.updateDisplayName).not.toHaveBeenCalled();
     });
 

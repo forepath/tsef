@@ -69,16 +69,16 @@ Stripe return URLs typically land on `/invoices?payment=success` or `?payment=ca
 
 ### Administration routes (`billingAdminGuard` plus `authGuard`)
 
-| Path                                 | Component                 | Description                          |
-| ------------------------------------ | ------------------------- | ------------------------------------ |
-| `/administration/service-types`      | ServiceTypesPage          | Provider and service type catalog    |
-| `/administration/cloud-init-configs` | CloudInitConfigsPage      | CloudInit config templates           |
-| `/administration/service-plans`      | ServicePlansPage          | Priced plans and ordering highlights |
-| `/administration/billing`            | AdminBillingPage          | KPIs, bill-now, open/overdue lists   |
-| `/administration/customer-profiles`  | AdminCustomerProfilesPage | Customer billing profile CRUD        |
-| `/administration/subscriptions`      | AdminSubscriptionsPage    | Contracts list, nested services, meters |
-| `/administration/subscriptions/:subscriptionId/services/:itemId` | ServiceDetailPage | Admin service details (metadata, rename, charts) |
-| `/administration/projects`           | AdminProjectsPage         | Project CRUD, time billing, board    |
+| Path                                                             | Component                 | Description                                      |
+| ---------------------------------------------------------------- | ------------------------- | ------------------------------------------------ |
+| `/administration/service-types`                                  | ServiceTypesPage          | Provider and service type catalog                |
+| `/administration/cloud-init-configs`                             | CloudInitConfigsPage      | CloudInit config templates                       |
+| `/administration/service-plans`                                  | ServicePlansPage          | Priced plans and ordering highlights             |
+| `/administration/billing`                                        | AdminBillingPage          | KPIs, bill-now, open/overdue lists               |
+| `/administration/customer-profiles`                              | AdminCustomerProfilesPage | Customer billing profile CRUD                    |
+| `/administration/subscriptions`                                  | AdminSubscriptionsPage    | Contracts list, nested services, meters          |
+| `/administration/subscriptions/:subscriptionId/services/:itemId` | ServiceDetailPage         | Admin service details (metadata, rename, charts) |
+| `/administration/projects`                                       | AdminProjectsPage         | Project CRUD, time billing, board                |
 
 Unknown paths redirect to the shell root (`**` to ``).
 

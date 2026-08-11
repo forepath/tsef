@@ -111,11 +111,7 @@ export class UsageRecordsRepository {
     return await qb.getMany();
   }
 
-  async findMeteredForSubscriptionInRange(
-    subscriptionId: string,
-    from: Date,
-    to: Date,
-  ): Promise<UsageRecordEntity[]> {
+  async findMeteredForSubscriptionInRange(subscriptionId: string, from: Date, to: Date): Promise<UsageRecordEntity[]> {
     const qb = this.repository
       .createQueryBuilder('usage')
       .innerJoin('usage.subscription', 'sub')
