@@ -2,7 +2,11 @@ import { KeycloakRoles, RequireScopes, UserRole, UsersRoles } from '@forepath/id
 import { BadRequestException, Body, Controller, Get, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
 
 import { ServerInfoResponseDto } from '../dto/server-info-response.dto';
-import { SubscriptionItemDetailResponseDto, SubscriptionItemResponseDto } from '../dto/subscription-item-response.dto';
+import {
+  SubscriptionItemDetailResponseDto,
+  SubscriptionItemResponseDto,
+  SubscriptionSshAccessKeyResponseDto,
+} from '../dto/subscription-item-response.dto';
 import { UpdateSubscriptionItemDisplayNameDto } from '../dto/update-subscription-item-display-name.dto';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { toServerInfoResponse } from '../utils/subscription-item-response.utils';
@@ -25,6 +29,24 @@ export class AdminSubscriptionItemsController {
     ensureAdmin(userInfo);
 
     return await this.subscriptionItemServerService.getItemDetailAsAdmin(subscriptionId, itemId);
+  }
+
+  @Get(':itemId/ssh-access-key')
+  @RequireScopes('billing_admin:write')
+  async getSshAccessKey(
+    @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
+    @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
+    @Req() req?: RequestWithUser,
+  ): Promise<SubscriptionSshAccessKeyResponseDto> {
+    const userInfo = getUserFromRequest(req ?? ({} as RequestWithUser));
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    ensureAdmin(userInfo);
+
+    return await this.subscriptionItemServerService.getSshAccessKeyAsAdmin(subscriptionId, itemId, userInfo.userId);
   }
 
   @Post(':itemId/display-name')

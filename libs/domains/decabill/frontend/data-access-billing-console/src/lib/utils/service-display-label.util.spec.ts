@@ -41,20 +41,70 @@ describe('resolveServiceDisplayLabel', () => {
 });
 
 describe('isSubscriptionItemDetailEligible', () => {
-  it('returns true only for active items with hostname', () => {
-    expect(isSubscriptionItemDetailEligible({ provisioningStatus: 'active', hostname: 'host1' })).toBe(true);
-    expect(isSubscriptionItemDetailEligible({ provisioningStatus: 'active', hostname: '  ' })).toBe(false);
-    expect(isSubscriptionItemDetailEligible({ provisioningStatus: 'active' })).toBe(false);
-    expect(isSubscriptionItemDetailEligible({ provisioningStatus: 'pending', hostname: 'host1' })).toBe(false);
-    expect(isSubscriptionItemDetailEligible({ provisioningStatus: 'failed', hostname: 'host1' })).toBe(false);
+  it('returns true only for accessible subscriptions with active items and a live provider', () => {
+    expect(
+      isSubscriptionItemDetailEligible(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'active',
+      ),
+    ).toBe(true);
+    expect(
+      isSubscriptionItemDetailEligible(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'pending_cancel',
+      ),
+    ).toBe(true);
+    expect(
+      isSubscriptionItemDetailEligible(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'canceled',
+      ),
+    ).toBe(false);
+    expect(
+      isSubscriptionItemDetailEligible(
+        { provisioningStatus: 'active', hasProviderReference: false, hostname: 'host1' },
+        'active',
+      ),
+    ).toBe(false);
+    expect(isSubscriptionItemDetailEligible({ provisioningStatus: 'active', hostname: 'host1' }, 'active')).toBe(true);
+    expect(isSubscriptionItemDetailEligible({ provisioningStatus: 'active', hostname: '  ' }, 'active')).toBe(false);
+    expect(
+      isSubscriptionItemDetailEligible(
+        { provisioningStatus: 'pending', hasProviderReference: true, hostname: 'host1' },
+        'active',
+      ),
+    ).toBe(false);
   });
 });
 
 describe('isSubscriptionItemRemoved', () => {
-  it('treats failed and active-without-hostname items as removed', () => {
-    expect(isSubscriptionItemRemoved({ provisioningStatus: 'failed' })).toBe(true);
-    expect(isSubscriptionItemRemoved({ provisioningStatus: 'active' })).toBe(true);
-    expect(isSubscriptionItemRemoved({ provisioningStatus: 'active', hostname: 'host1' })).toBe(false);
-    expect(isSubscriptionItemRemoved({ provisioningStatus: 'pending' })).toBe(false);
+  it('treats terminal subscriptions, failed items, and torn-down active items as removed', () => {
+    expect(
+      isSubscriptionItemRemoved(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'canceled',
+      ),
+    ).toBe(true);
+    expect(
+      isSubscriptionItemRemoved(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'pending_withdrawal',
+      ),
+    ).toBe(true);
+    expect(isSubscriptionItemRemoved({ provisioningStatus: 'failed' }, 'active')).toBe(true);
+    expect(
+      isSubscriptionItemRemoved(
+        { provisioningStatus: 'active', hasProviderReference: false, hostname: 'host1' },
+        'active',
+      ),
+    ).toBe(true);
+    expect(isSubscriptionItemRemoved({ provisioningStatus: 'active' }, 'active')).toBe(true);
+    expect(
+      isSubscriptionItemRemoved(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'active',
+      ),
+    ).toBe(false);
+    expect(isSubscriptionItemRemoved({ provisioningStatus: 'pending' }, 'active')).toBe(false);
   });
 });

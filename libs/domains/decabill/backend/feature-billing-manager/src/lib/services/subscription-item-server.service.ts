@@ -7,6 +7,7 @@ import {
 } from '../dto/subscription-item-response.dto';
 import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { ProvisioningStatus } from '../entities/subscription-item.entity';
+import { SubscriptionEntity, SubscriptionStatus } from '../entities/subscription.entity';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
@@ -18,12 +19,20 @@ import {
   mapServerInfoSnapshotToResponse,
   mapServerInfoToResponse,
   mapSubscriptionItemToResponse,
+  enrichServerInfoWithConfigGeography,
+  serverInfoHasGeography,
 } from '../utils/subscription-item-response.utils';
 
 import { CloudflareDnsService } from './cloudflare-dns.service';
 import { ProvisioningService } from './provisioning.service';
 import { SubscriptionService } from './subscription.service';
 
+const SERVICE_DETAIL_ACCESSIBLE_SUBSCRIPTION_STATUSES: ReadonlySet<SubscriptionStatus> = new Set([
+  SubscriptionStatus.ACTIVE,
+  SubscriptionStatus.PENDING_CANCEL,
+  SubscriptionStatus.PENDING_CONFIG_CHANGE,
+  SubscriptionStatus.PENDING_BACKORDER,
+]);
 @Injectable()
 export class SubscriptionItemServerService {
   private readonly logger = new Logger(SubscriptionItemServerService.name);
@@ -107,7 +116,27 @@ export class SubscriptionItemServerService {
     userId: string,
   ): Promise<SubscriptionSshAccessKeyResponseDto> {
     const subscription = await this.subscriptionService.getSubscription(subscriptionId, userId);
-    const item = await this.subscriptionItemsRepository.findByIdAndSubscriptionId(itemId, subscriptionId);
+
+    return await this.revealSshAccessKey(subscription, itemId, userId);
+  }
+
+  /** Admin path: subscription ownership is not checked; caller must enforce admin role. */
+  async getSshAccessKeyAsAdmin(
+    subscriptionId: string,
+    itemId: string,
+    adminUserId: string,
+  ): Promise<SubscriptionSshAccessKeyResponseDto> {
+    const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+
+    return await this.revealSshAccessKey(subscription, itemId, adminUserId);
+  }
+
+  private async revealSshAccessKey(
+    subscription: SubscriptionEntity,
+    itemId: string,
+    actorUserId: string,
+  ): Promise<SubscriptionSshAccessKeyResponseDto> {
+    const item = await this.subscriptionItemsRepository.findByIdAndSubscriptionId(itemId, subscription.id);
 
     if (!item) {
       throw new NotFoundException(`Subscription item ${itemId} not found`);
@@ -131,7 +160,7 @@ export class SubscriptionItemServerService {
     const plan = await this.servicePlansRepository.findByIdOrThrow(subscription.planId);
 
     this.logger.log(
-      `SSH access granted for subscription item ${itemId} on subscription ${subscriptionId} by user ${userId}`,
+      `SSH access granted for subscription item ${itemId} on subscription ${subscription.id} by user ${actorUserId}`,
     );
 
     this.billingNotificationPublisher.publishSshAccessGranted({
@@ -234,6 +263,12 @@ export class SubscriptionItemServerService {
   }
 
   private async buildItemDetail(subscriptionId: string, itemId: string): Promise<SubscriptionItemDetailResponseDto> {
+    const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+
+    if (!this.isSubscriptionServiceDetailAccessible(subscription.status)) {
+      throw new NotFoundException(`Subscription item ${itemId} not found`);
+    }
+
     const item = await this.subscriptionItemsRepository.findByIdAndSubscriptionId(itemId, subscriptionId);
 
     if (!item || !this.isDetailEligible(item.providerReference, item.provisioningStatus)) {
@@ -243,18 +278,24 @@ export class SubscriptionItemServerService {
     const response: SubscriptionItemDetailResponseDto = mapSubscriptionItemToResponse(item);
     const hostname = item.hostname;
     const hostnameFqdn = hostname ? this.cloudflareDnsService.getFqdn(hostname) : undefined;
-    const cachedServerInfo = item.serverInfoSnapshot
+    const provider = item.serviceType?.provider ?? null;
+    let serverInfo = item.serverInfoSnapshot
       ? mapServerInfoSnapshotToResponse(item.serverInfoSnapshot, hostname, hostnameFqdn)
       : undefined;
 
-    if (cachedServerInfo) {
-      response.serverInfo = cachedServerInfo;
-    } else {
+    // Cached snapshots often omit geography; refresh from the provider before config fallback.
+    if (!serverInfo || !serverInfoHasGeography(serverInfo.metadata)) {
       const liveInfo = await this.fetchLiveServerInfo(item);
 
       if (liveInfo) {
-        response.serverInfo = mapServerInfoToResponse(liveInfo);
+        serverInfo = mapServerInfoToResponse(liveInfo);
       }
+    }
+
+    serverInfo = enrichServerInfoWithConfigGeography(serverInfo, item.configSnapshot, provider);
+
+    if (serverInfo) {
+      response.serverInfo = serverInfo;
     }
 
     return response;
@@ -265,6 +306,12 @@ export class SubscriptionItemServerService {
     itemId: string,
     displayName: string | null,
   ): Promise<SubscriptionItemResponseDto> {
+    const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+
+    if (!this.isSubscriptionServiceDetailAccessible(subscription.status)) {
+      throw new NotFoundException(`Subscription item ${itemId} not found`);
+    }
+
     const item = await this.subscriptionItemsRepository.findByIdAndSubscriptionId(itemId, subscriptionId);
 
     if (!item || !this.isDetailEligible(item.providerReference, item.provisioningStatus)) {
@@ -362,6 +409,11 @@ export class SubscriptionItemServerService {
     return providerReference != null && providerReference !== '' && status === ProvisioningStatus.ACTIVE;
   }
 
+  /** Service details / rename / power remain available while the subscription still owns a live service. */
+  private isSubscriptionServiceDetailAccessible(status: SubscriptionStatus): boolean {
+    return SERVICE_DETAIL_ACCESSIBLE_SUBSCRIPTION_STATUSES.has(status);
+  }
+
   private async resolveItemForAction(subscriptionId: string, itemId: string, userId: string) {
     await this.subscriptionService.getSubscription(subscriptionId, userId);
 
@@ -369,7 +421,11 @@ export class SubscriptionItemServerService {
   }
 
   private async resolveItemForAdminAction(subscriptionId: string, itemId: string) {
-    await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+    const subscription = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+
+    if (!this.isSubscriptionServiceDetailAccessible(subscription.status)) {
+      throw new NotFoundException(`Subscription item ${itemId} not found`);
+    }
 
     const item = await this.subscriptionItemsRepository.findByIdAndSubscriptionId(itemId, subscriptionId);
 

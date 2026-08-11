@@ -17,6 +17,7 @@ import {
   loadHistory,
   loadHistoryFailure,
   loadHistorySuccess,
+  markServiceDetailSshAccessGranted,
   meterSummaryPush,
   resetFilters,
   updateDisplayName,
@@ -119,6 +120,10 @@ export const serviceDetailReducer = createReducer(
     ...state,
     renaming: false,
     error,
+  })),
+  on(markServiceDetailSshAccessGranted, (state) => ({
+    ...state,
+    detail: state.detail ? { ...state.detail, sshAccessGranted: true } : state.detail,
   })),
   on(meterSummaryPush, (state, { subscriptionId, meters }) =>
     state.subscriptionId === subscriptionId

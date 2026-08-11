@@ -1,4 +1,9 @@
-import { formatMeterHistoryPeriodBucket, parseMeterHistoryDateRange } from './meter-history-date.util';
+import {
+  fillMeterHistoryPeriodSeries,
+  formatMeterHistoryPeriodBucket,
+  listMeterHistoryPeriodKeys,
+  parseMeterHistoryDateRange,
+} from './meter-history-date.util';
 
 describe('meter-history-date.util', () => {
   describe('parseMeterHistoryDateRange', () => {
@@ -21,6 +26,45 @@ describe('meter-history-date.util', () => {
       const periodEnd = new Date('2026-02-28T12:00:00Z');
 
       expect(formatMeterHistoryPeriodBucket(periodEnd, 'month')).toBe('2026-02-01');
+    });
+  });
+
+  describe('listMeterHistoryPeriodKeys', () => {
+    it('lists inclusive day keys', () => {
+      expect(listMeterHistoryPeriodKeys('2026-01-30', '2026-02-01', 'day')).toEqual([
+        '2026-01-30',
+        '2026-01-31',
+        '2026-02-01',
+      ]);
+    });
+
+    it('lists inclusive month keys', () => {
+      expect(listMeterHistoryPeriodKeys('2026-01-15', '2026-03-02', 'month')).toEqual([
+        '2026-01-01',
+        '2026-02-01',
+        '2026-03-01',
+      ]);
+    });
+  });
+
+  describe('fillMeterHistoryPeriodSeries', () => {
+    it('fills missing day buckets with defaults', () => {
+      expect(
+        fillMeterHistoryPeriodSeries(
+          [
+            { period: '2026-01-01', value: 4 },
+            { period: '2026-01-03', value: 9 },
+          ],
+          '2026-01-01',
+          '2026-01-03',
+          'day',
+          (period) => ({ period, value: 0 }),
+        ),
+      ).toEqual([
+        { period: '2026-01-01', value: 4 },
+        { period: '2026-01-02', value: 0 },
+        { period: '2026-01-03', value: 9 },
+      ]);
     });
   });
 });

@@ -3516,6 +3516,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerInfoResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key:
+    get:
+      tags: [Admin Billing]
+      summary: Reveal provisioning SSH private key (admin, one-time)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
+        Succeeds only once per item; sets sshAccessGranted and blocks subsequent reveals.
+        Never log the response body.
+      operationId: adminGetSubscriptionItemSshAccessKey
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: SSH private key (shown once)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionSshAccessKeyResponse'
+        '400':
+          description: Not provisioned, key unavailable, or not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: SSH access key has already been revealed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start:
     post:
       tags: [Admin Billing]
@@ -6853,6 +6889,11 @@ components:
           {
             type: boolean,
             description: True after the customer has revealed the provisioning SSH private key at least once,
+          }
+        hasProviderReference:
+          {
+            type: boolean,
+            description: True when a live cloud provider reference exists for this item. The reference value itself is never returned.,
           }
     SubscriptionItemDetailResponse:
       allOf:

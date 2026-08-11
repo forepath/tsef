@@ -12,6 +12,7 @@ import {
   applyFilters,
   clearServiceDetail,
   enterServiceDetail,
+  markServiceDetailSshAccessGranted,
   resetFilters,
   updateDisplayName,
 } from './service-detail.actions';
@@ -71,6 +72,10 @@ export class ServiceDetailFacade {
 
   renameDisplayName(subscriptionId: string, itemId: string, displayName: string | null, adminMode = false): void {
     this.store.dispatch(updateDisplayName({ subscriptionId, itemId, displayName, adminMode }));
+  }
+
+  markSshAccessGranted(): void {
+    this.store.dispatch(markServiceDetailSshAccessGranted());
   }
 
   clear(): void {

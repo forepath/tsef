@@ -248,146 +248,161 @@
 </div>
 
 <ng-template #subscriptionListItem let-sub let-plans="plans">
-  <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
-    <div class="min-w-0">
-      <div class="fw-semibold mb-1">{{ subscriptionDisplayTitle(sub, plans) }}</div>
-      <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
-        <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
-          <span
-            class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
-            [ngClass]="subscriptionStatusBadgeClass(sub.status)"
-            [attr.title]="sub.status ?? undefined"
-          >
-            {{ subscriptionStatusLabel(sub.status) }}
-          </span>
-          @if (showProvisioningStatusBadge(sub.id)) {
+  <div class="list-group-item border-bottom">
+    <div class="d-flex justify-content-between align-items-center gap-2">
+      <div class="min-w-0 flex-grow-1">
+        <div class="fw-semibold mb-1">{{ subscriptionDisplayTitle(sub, plans) }}</div>
+        <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
+          <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
             <span
               class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
-              [ngClass]="provisioningStatusBadgeClass(provisioningStatusForSubscription(sub.id))"
-              [attr.title]="provisioningStatusForSubscription(sub.id) ?? undefined"
+              [ngClass]="subscriptionStatusBadgeClass(sub.status)"
+              [attr.title]="sub.status ?? undefined"
             >
-              @if (provisioningStatusForSubscription(sub.id) === 'failed') {
-                <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
-              }
-              {{ provisioningStatusLabel(provisioningStatusForSubscription(sub.id)) }}
+              {{ subscriptionStatusLabel(sub.status) }}
             </span>
-          }
-          @if (sub.number) {
-            <span class="me-2"> <i class="bi bi-upc-scan me-1" aria-hidden="true"></i>{{ sub.number }} </span>
-          }
-          <span class="me-2">
-            <i class="bi bi-calendar-range me-1" aria-hidden="true"></i>{{ formatSubscriptionPeriod(sub) }}
-          </span>
-          <span class="me-2">
-            <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>{{ formatDate(sub.nextBillingAt) }}
-          </span>
-          <span class="me-2">
-            <i class="bi bi-cash-stack me-1" aria-hidden="true"></i>{{ formatSubscriptionPeriodPrice(sub, plans) }}
-          </span>
+            @if (showProvisioningStatusBadge(sub.id)) {
+              <span
+                class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
+                [ngClass]="provisioningStatusBadgeClass(provisioningStatusForSubscription(sub.id))"
+                [attr.title]="provisioningStatusForSubscription(sub.id) ?? undefined"
+              >
+                @if (provisioningStatusForSubscription(sub.id) === 'failed') {
+                  <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
+                }
+                {{ provisioningStatusLabel(provisioningStatusForSubscription(sub.id)) }}
+              </span>
+            }
+            @if (sub.number) {
+              <span class="me-2"> <i class="bi bi-upc-scan me-1" aria-hidden="true"></i>{{ sub.number }} </span>
+            }
+            <span class="me-2">
+              <i class="bi bi-calendar-range me-1" aria-hidden="true"></i>{{ formatSubscriptionPeriod(sub) }}
+            </span>
+            <span class="me-2">
+              <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>{{ formatDate(sub.nextBillingAt) }}
+            </span>
+            <span class="me-2">
+              <i class="bi bi-cash-stack me-1" aria-hidden="true"></i>{{ formatSubscriptionPeriodPrice(sub, plans) }}
+            </span>
+          </div>
         </div>
       </div>
-      @if (hasSubscriptionServicesSection(sub)) {
-        <div class="small text-muted mt-2 w-100">
-          <div class="fw-semibold mb-1" i18n="@@featureSubscriptions-usageMeters">Usage meters</div>
-          @if (subscriptionItems(sub).length > 0) {
-            <div class="d-flex flex-column gap-2 mb-2">
-              @for (item of subscriptionItems(sub); track item.id) {
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                  <span class="fw-medium">{{ serviceDisplayLabel(item) }}</span>
-                  <span
-                    class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
-                    [ngClass]="itemProvisioningStatusBadgeClass(item)"
-                  >
-                    {{ itemProvisioningStatusLabel(item) }}
-                  </span>
-                  @if (isServiceDetailEligible(item)) {
-                    <a
-                      [routerLink]="serviceDetailLink(sub, item)"
-                      class="btn btn-sm btn-outline-primary py-0"
-                      i18n="@@featureSubscriptions-openServiceDetails"
+      <div
+        class="btn-group btn-group-sm flex-shrink-0"
+        role="group"
+        aria-label="Subscription actions"
+        i18n-aria-label="@@featureSubscriptions-subscriptionActionsAria"
+      >
+        @if (sub.withdrawalEligibility?.canWithdraw) {
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            (click)="openWithdrawConfirm(sub)"
+            title="Withdraw subscription"
+            i18n-title="@@featureSubscriptions-withdrawButtonTitle"
+          >
+            <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
+          </button>
+        }
+        @if (canModifyConfiguration(sub)) {
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="openModifyConfigModal(sub)"
+            title="Upgrade or downgrade"
+            i18n-title="@@featureSubscriptions-modifyConfigButtonTitle"
+          >
+            <i class="bi bi-arrow-down-up" aria-hidden="true"></i>
+          </button>
+        }
+        @if (sub.status === 'active') {
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            (click)="openCancelConfirm(sub)"
+            title="Cancel subscription"
+            i18n-title="@@featureSubscriptions-cancelButtonTitle"
+          >
+            <i class="bi bi-x-circle" aria-hidden="true"></i>
+          </button>
+        }
+        @if (sub.status === 'pending_cancel') {
+          <button
+            type="button"
+            class="btn btn-outline-success"
+            (click)="openResumeConfirm(sub)"
+            title="Resume subscription"
+            i18n-title="@@featureSubscriptions-resumeButtonTitle"
+          >
+            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+    </div>
+    @if (subscriptionItems(sub).length > 0 || hasSubscriptionMeters(sub)) {
+      <div class="row g-2 mt-2">
+        @if (subscriptionItems(sub).length > 0) {
+          <div class="col-md">
+            <div class="small text-muted h-100 bg-body-tertiary rounded border py-2 px-3">
+              <div class="fw-semibold mb-1" i18n="@@featureSubscriptions-services">Services</div>
+              <div class="d-flex flex-column gap-2">
+                @for (item of subscriptionItems(sub); track item.id) {
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span
+                      class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                      [ngClass]="itemProvisioningStatusBadgeClass(sub, item)"
                     >
-                      Open details
-                    </a>
-                  }
-                </div>
-              }
+                      {{ itemProvisioningStatusLabel(sub, item) }}
+                    </span>
+                    <span class="fw-medium">{{ serviceDisplayLabel(item) }}</span>
+                    @if (isServiceDetailEligible(sub, item)) {
+                      <a
+                        [routerLink]="serviceDetailLink(sub, item)"
+                        [queryParams]="{ from: 'subscriptions' }"
+                        class="btn btn-sm btn-outline-primary py-0 ms-auto"
+                        title="Open details"
+                        i18n-title="@@featureSubscriptions-openServiceDetails"
+                      >
+                        <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                        <span class="visually-hidden" i18n="@@featureSubscriptions-openServiceDetails"
+                          >Open details</span
+                        >
+                      </a>
+                    }
+                  </div>
+                }
+              </div>
             </div>
-          }
-          @if (hasSubscriptionMeters(sub)) {
-            <div class="d-flex flex-column gap-1">
-              @for (
-                meter of subscriptionMeters(sub);
-                track meter.meterId + meter.attachmentType + (meter.addonId ?? '')
-              ) {
-                <div>
-                  <span class="fw-medium">{{ meter.name }}</span>
-                  <span class="ms-2">{{ formatMeterValue(meter) }}</span>
-                  <span class="ms-2">· {{ formatMeterCharge(meter.estimatedChargeNet) }}</span>
-                  <span class="ms-2 text-body-secondary">({{ meterAttachmentLabel(meter) }})</span>
-                </div>
-              }
+          </div>
+        }
+        @if (hasSubscriptionMeters(sub)) {
+          <div class="col-md">
+            <div class="small text-muted h-100 bg-body-tertiary rounded border py-2 px-3">
+              <div class="fw-semibold mb-1" i18n="@@featureSubscriptions-usageMeters">Usage meters</div>
+              <div class="d-flex flex-column gap-1">
+                @for (
+                  meter of subscriptionMeters(sub);
+                  track meter.meterId + meter.attachmentType + (meter.addonId ?? '')
+                ) {
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{ meter.name }}</span>
+                    <span>{{ formatMeterValue(meter) }}</span>
+                    <span class="ms-auto">{{ formatMeterCharge(meter.estimatedChargeNet) }}</span>
+                  </div>
+                }
+              </div>
             </div>
-          }
-        </div>
-      }
-    </div>
-    <div
-      class="btn-group btn-group-sm flex-shrink-0"
-      role="group"
-      aria-label="Subscription actions"
-      i18n-aria-label="@@featureSubscriptions-subscriptionActionsAria"
-    >
-      @if (sub.withdrawalEligibility?.canWithdraw) {
-        <button
-          type="button"
-          class="btn btn-outline-danger"
-          (click)="openWithdrawConfirm(sub)"
-          title="Withdraw subscription"
-          i18n-title="@@featureSubscriptions-withdrawButtonTitle"
-        >
-          <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
-        </button>
-      }
-      @if (canModifyConfiguration(sub)) {
-        <button
-          type="button"
-          class="btn btn-outline-primary"
-          (click)="openModifyConfigModal(sub)"
-          title="Upgrade or downgrade"
-          i18n-title="@@featureSubscriptions-modifyConfigButtonTitle"
-        >
-          <i class="bi bi-arrow-down-up" aria-hidden="true"></i>
-        </button>
-      }
-      @if (sub.status === 'active') {
-        <button
-          type="button"
-          class="btn btn-outline-danger"
-          (click)="openCancelConfirm(sub)"
-          title="Cancel subscription"
-          i18n-title="@@featureSubscriptions-cancelButtonTitle"
-        >
-          <i class="bi bi-x-circle" aria-hidden="true"></i>
-        </button>
-      }
-      @if (sub.status === 'pending_cancel') {
-        <button
-          type="button"
-          class="btn btn-outline-success"
-          (click)="openResumeConfirm(sub)"
-          title="Resume subscription"
-          i18n-title="@@featureSubscriptions-resumeButtonTitle"
-        >
-          <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
-        </button>
-      }
-    </div>
+          </div>
+        }
+      </div>
+    }
   </div>
 </ng-template>
 
 <ng-template #backorderListItem let-bo let-plans="plans">
   <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
-    <div class="min-w-0">
+    <div class="min-w-0 flex-grow-1">
       <div class="fw-semibold mb-1">{{ planNameByPlanId(plans, bo.planId) }}</div>
       <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
         <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
@@ -552,10 +567,12 @@
                                   @if (addon.meters?.length) {
                                     <ul class="list-unstyled small text-body-secondary ms-4 mb-0 mt-1">
                                       @for (meter of addon.meters!; track meter.meterId) {
-                                        <li>
-                                          <span i18n="@@featureSubscriptions-addonMeterLabel">Meter</span>:
-                                          {{ meter.name }} · {{ meter.aggregator }} · €{{ meter.effectiveUnitPriceNet
-                                          }}{{ meter.unitLabel ? ' / ' + meter.unitLabel : '' }}
+                                        <li class="d-flex flex-wrap align-items-center gap-2">
+                                          <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{
+                                            meter.name
+                                          }}</span>
+                                          <span>{{ meterAggregatorLabel(meter.aggregator) }}</span>
+                                          <span class="ms-auto text-nowrap">{{ formatOrderMeterPrice(meter) }}</span>
                                         </li>
                                       }
                                     </ul>
@@ -580,14 +597,16 @@
                                 Usage for these meters is recorded in arrears and billed separately from the base plan
                                 price.
                               </p>
-                              <ul class="list-unstyled mb-0 small">
+                              <ul class="list-unstyled mb-0 small d-flex flex-column gap-1">
                                 @for (meter of selectedPlan!.meters!; track meter.meterId) {
-                                  <li class="mb-1">
-                                    <span class="fw-medium">{{ meter.name }}</span>
-                                    <span class="text-body-secondary">
-                                      · {{ meter.aggregator }} · €{{ meter.effectiveUnitPriceNet
-                                      }}{{ meter.unitLabel ? ' / ' + meter.unitLabel : '' }}
-                                    </span>
+                                  <li class="d-flex flex-wrap align-items-center gap-2">
+                                    <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{
+                                      meter.name
+                                    }}</span>
+                                    <span class="text-body-secondary">{{
+                                      meterAggregatorLabel(meter.aggregator)
+                                    }}</span>
+                                    <span class="ms-auto text-nowrap">{{ formatOrderMeterPrice(meter) }}</span>
                                   </li>
                                 }
                               </ul>
@@ -1390,6 +1409,65 @@
                                 </div>
                               }
                             </dl>
+                            @if (hasOrderSummaryMeters(plan)) {
+                              <div class="mb-4 border rounded bg-body p-3 d-flex flex-column gap-3">
+                                <div>
+                                  <div class="fw-semibold mb-2" i18n="@@featureSubscriptions-orderSummaryMeters">
+                                    Usage meters
+                                  </div>
+                                  <p
+                                    class="small text-body-secondary mb-0"
+                                    i18n="@@featureSubscriptions-planMetersHelp"
+                                  >
+                                    Usage for these meters is recorded in arrears and billed separately from the base
+                                    plan price.
+                                  </p>
+                                </div>
+                                @if (plan.meters?.length) {
+                                  <div>
+                                    <div
+                                      class="small fw-semibold text-body-secondary mb-1"
+                                      i18n="@@featureSubscriptions-selectPlan"
+                                    >
+                                      Plan
+                                    </div>
+                                    <ul class="list-unstyled mb-0 small d-flex flex-column gap-1">
+                                      @for (meter of plan.meters!; track meter.meterId) {
+                                        <li class="d-flex flex-wrap align-items-center gap-2">
+                                          <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{
+                                            meter.name
+                                          }}</span>
+                                          <span class="text-body-secondary">{{
+                                            meterAggregatorLabel(meter.aggregator)
+                                          }}</span>
+                                          <span class="ms-auto text-nowrap">{{ formatOrderMeterPrice(meter) }}</span>
+                                        </li>
+                                      }
+                                    </ul>
+                                  </div>
+                                }
+                                @for (addon of selectedOrderAddons(); track addon.id) {
+                                  @if (addon.meters?.length) {
+                                    <div>
+                                      <div class="small fw-semibold text-body-secondary mb-1">{{ addon.name }}</div>
+                                      <ul class="list-unstyled mb-0 small d-flex flex-column gap-1">
+                                        @for (meter of addon.meters!; track meter.meterId) {
+                                          <li class="d-flex flex-wrap align-items-center gap-2">
+                                            <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{
+                                              meter.name
+                                            }}</span>
+                                            <span class="text-body-secondary">{{
+                                              meterAggregatorLabel(meter.aggregator)
+                                            }}</span>
+                                            <span class="ms-auto text-nowrap">{{ formatOrderMeterPrice(meter) }}</span>
+                                          </li>
+                                        }
+                                      </ul>
+                                    </div>
+                                  }
+                                }
+                              </div>
+                            }
                             <div class="mb-3">
                               <label
                                 class="form-label"
@@ -1558,7 +1636,7 @@
                                   [href]="termsUrl"
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  class="ms-1"
+                                  class="ms-1 text-decoration-none"
                                   i18n="@@featureSubscriptions-termsLink"
                                   >Terms and Conditions</a
                                 ><span> &amp; </span
@@ -1566,7 +1644,7 @@
                                   [href]="privacyUrl"
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  class="ms-1"
+                                  class="ms-1 text-decoration-none"
                                   i18n="@@featureSubscriptions-privacyLink"
                                   >Privacy Policy</a
                                 >.
@@ -2046,10 +2124,12 @@
                                   @if (addon.meters?.length) {
                                     <ul class="list-unstyled small text-body-secondary ms-4 mb-0 mt-1">
                                       @for (meter of addon.meters!; track meter.meterId) {
-                                        <li>
-                                          <span i18n="@@featureSubscriptions-addonMeterLabel">Meter</span>:
-                                          {{ meter.name }} · {{ meter.aggregator }} · €{{ meter.effectiveUnitPriceNet
-                                          }}{{ meter.unitLabel ? ' / ' + meter.unitLabel : '' }}
+                                        <li class="d-flex flex-wrap align-items-center gap-2">
+                                          <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{
+                                            meter.name
+                                          }}</span>
+                                          <span>{{ meterAggregatorLabel(meter.aggregator) }}</span>
+                                          <span class="ms-auto text-nowrap">{{ formatOrderMeterPrice(meter) }}</span>
                                         </li>
                                       }
                                     </ul>

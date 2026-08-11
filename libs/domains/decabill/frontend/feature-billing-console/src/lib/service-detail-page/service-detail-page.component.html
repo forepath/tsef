@@ -1,18 +1,18 @@
 <div class="service-detail-page border-top d-flex flex-column h-100">
   <div class="p-3 border-bottom bg-body-tertiary">
-    <a
-      [routerLink]="subscriptionsListLink()"
-      class="small text-decoration-none d-inline-flex align-items-center mb-3"
-      i18n="@@featureServiceDetail-backToSubscriptions"
-    >
+    <a [routerLink]="backLink()" class="small text-decoration-none d-inline-flex align-items-center mb-3">
       <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
-      Back to subscriptions
+      @if (backTarget() === 'subscriptions') {
+        <span i18n="@@featureServiceDetail-backToSubscriptions">Back to subscriptions</span>
+      } @else {
+        <span i18n="@@featureServiceDetail-backToDashboard">Back to dashboard</span>
+      }
     </a>
 
     @if (detail(); as detailValue) {
       <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
         <div class="min-w-0 flex-grow-1">
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
             <span
               class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
               [ngClass]="provisioningStatusBadgeClass(detailValue.provisioningStatus)"
@@ -26,6 +26,16 @@
               >
                 <i class="bi me-1" [ngClass]="serverStatusIconClass(serverInfo)" aria-hidden="true"></i>
                 {{ serverStatusLabel(serverInfo) }}
+              </span>
+            }
+            @if (detailValue.sshAccessGranted) {
+              <span
+                class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded billing-admin__chip--status-warning"
+                title="SSH access granted"
+                i18n-title="@@featureOverview-sshAccessGrantedBadgeTitle"
+              >
+                <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
+                <span i18n="@@featureOverview-sshAccessGrantedBadge">SSH access granted</span>
               </span>
             }
           </div>
@@ -120,6 +130,16 @@
                 >
               </div>
             }
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              (click)="openSshAccessConfirm(detailValue)"
+              [disabled]="!!detailValue.sshAccessGranted"
+              [attr.title]="detailValue.sshAccessGranted ? sshAccessGrantedButtonTitle : sshAccessButtonTitle"
+              [attr.aria-label]="detailValue.sshAccessGranted ? sshAccessGrantedButtonTitle : sshAccessButtonTitle"
+            >
+              <i class="bi bi-key" aria-hidden="true"></i>
+            </button>
             @if (showConsoleLink(detailValue)) {
               <a
                 [href]="consoleHref(serverInfo)"
@@ -147,166 +167,334 @@
     <div class="alert alert-danger mb-0 rounded-0" role="alert">{{ err }}</div>
   }
 
-  <div class="service-detail-page__body flex-grow-1 min-h-0 overflow-auto">
-    <div class="card border-0 border-bottom rounded-0">
-      <div class="card-header py-2 small fw-semibold" i18n="@@featureServiceDetail-serviceInfoTitle">Service info</div>
-      <div class="card-body">
-        @if (detail()?.serverInfo; as serverInfo) {
-          <dl class="row mb-0 small">
-            <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-publicIp">Public IP</dt>
-            <dd class="col-sm-9">{{ serverInfo.publicIp || '—' }}</dd>
-            <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-privateIp">Private IP</dt>
-            <dd class="col-sm-9">{{ serverInfo.privateIp || '—' }}</dd>
-            <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostname">Hostname</dt>
-            <dd class="col-sm-9">{{ serverInfo.hostname || '—' }}</dd>
-            <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostnameFqdn">FQDN</dt>
-            <dd class="col-sm-9">{{ serverInfo.hostnameFqdn || '—' }}</dd>
-            <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-runtimeStatus">Runtime status</dt>
-            <dd class="col-sm-9">{{ serverInfo.status || '—' }}</dd>
-            <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-location">Location</dt>
-            <dd class="col-sm-9">{{ serverLocationLabel(serverInfo.metadata) || '—' }}</dd>
-          </dl>
-        } @else if (detail()?.hostname) {
-          <dl class="row mb-0 small">
-            <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostname">Hostname</dt>
-            <dd class="col-sm-9">{{ detail()!.hostname }}</dd>
-          </dl>
-        } @else {
-          <p class="text-muted small mb-0" i18n="@@featureServiceDetail-noServerInfo">
-            Server details are not available yet.
-          </p>
-        }
-      </div>
-    </div>
-
-    <div class="service-detail-page__meters-lane card border-0 rounded-0">
-      <div
-        class="card-header service-detail-page__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center"
-      >
-        <span i18n="@@featureServiceDetail-usageMetersTitle">Usage meters</span>
+  @if (showUsageMetersSection()) {
+    <div class="d-flex align-items-center gap-0 d-md-none border-bottom btn-group-options">
+      @for (panel of mobilePanels; track panel) {
         <button
           type="button"
-          class="btn btn-sm btn-outline-secondary"
-          (click)="onToggleFilters()"
-          [attr.aria-expanded]="!filtersCollapsed()"
-          aria-controls="serviceDetailFilters"
-          title="Filters"
-          i18n-title="@@featureServiceDetail-filters"
-          i18n-aria-label="@@featureServiceDetail-filters"
-          aria-label="Filters"
+          class="btn btn-sm btn-options"
+          [class.btn-outline-secondary]="mobilePanel() !== panel"
+          [class.btn-primary]="mobilePanel() === panel"
+          (click)="mobilePanel.set(panel)"
         >
-          <i class="bi bi-funnel" aria-hidden="true"></i>
-          <i
-            class="bi ms-1"
-            [class.bi-chevron-down]="filtersCollapsed()"
-            [class.bi-chevron-up]="!filtersCollapsed()"
-            aria-hidden="true"
-          ></i>
+          {{ mobilePanelLabel(panel) }}
         </button>
-      </div>
+      }
+    </div>
+  }
+
+  <div class="service-detail-page__body flex-grow-1 min-h-0 d-flex flex-column">
+    <div
+      class="service-detail-page__lanes flex-grow-1 min-h-0 d-flex flex-column"
+      [class.service-detail-page__lanes--solo]="!showUsageMetersSection()"
+    >
       <div
-        id="serviceDetailFilters"
-        class="service-detail-page__filters border-bottom collapse"
-        [class.show]="!filtersCollapsed()"
+        class="service-detail-page__lane service-detail-page__lane--info d-md-flex flex-column min-h-0"
+        [class.d-none]="showUsageMetersSection() && mobilePanel() !== 'info'"
+        [class.border-bottom]="showUsageMetersSection()"
       >
-        <div class="p-3">
-          <div class="row g-3 mb-0">
-            <div class="col-6">
-              <label class="form-label small" for="serviceDetailFrom" i18n="@@featureServiceDetail-fromDate"
-                >From</label
-              >
-              <input
-                id="serviceDetailFrom"
-                type="date"
-                class="form-control form-control-sm"
-                [ngModel]="fromDate()"
-                (ngModelChange)="fromDate.set($event)"
-              />
-            </div>
-            <div class="col-6">
-              <label class="form-label small" for="serviceDetailTo" i18n="@@featureServiceDetail-toDate">To</label>
-              <input
-                id="serviceDetailTo"
-                type="date"
-                class="form-control form-control-sm"
-                [ngModel]="toDate()"
-                (ngModelChange)="toDate.set($event)"
-              />
-            </div>
-            <div class="col-12">
-              <label class="form-label small" for="serviceDetailGroupBy" i18n="@@featureServiceDetail-groupBy"
-                >Group by</label
-              >
-              <select
-                id="serviceDetailGroupBy"
-                class="form-select form-select-sm"
-                [ngModel]="groupBy()"
-                (ngModelChange)="groupBy.set($event)"
-              >
-                <option value="day" i18n="@@featureServiceDetail-groupByDay">Day</option>
-                <option value="month" i18n="@@featureServiceDetail-groupByMonth">Month</option>
-              </select>
-            </div>
-            <div class="col-12 d-flex gap-2">
-              <button
-                type="button"
-                class="btn btn-sm btn-primary"
-                (click)="onApplyFilters()"
-                i18n="@@featureServiceDetail-applyFilters"
-              >
-                Apply
-              </button>
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-secondary"
-                (click)="onResetFilters()"
-                i18n="@@featureServiceDetail-resetFilters"
-              >
-                Reset
-              </button>
-            </div>
+        <div class="card h-100 border-0 rounded-0 d-flex flex-column min-h-0">
+          <div class="card-body service-detail-page__lane-body">
+            @if (detail(); as detailValue) {
+              <dl class="row mb-0 small">
+                <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-serviceType">Service type</dt>
+                <dd class="col-sm-9">{{ productServiceLabel(detailValue) }}</dd>
+                @if (providerLabel(detailValue); as providerName) {
+                  <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-provider">Provider</dt>
+                  <dd class="col-sm-9">{{ providerName }}</dd>
+                }
+                @if (detailValue.serverInfo; as serverInfo) {
+                  @if (serverInfo.publicIp) {
+                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-publicIp">Public IP</dt>
+                    <dd class="col-sm-9">{{ serverInfo.publicIp }}</dd>
+                  }
+                  @if (serverInfo.privateIp) {
+                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-privateIp">Private IP</dt>
+                    <dd class="col-sm-9">{{ serverInfo.privateIp }}</dd>
+                  }
+                  @if (serverInfo.hostname) {
+                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostname">Hostname</dt>
+                    <dd class="col-sm-9">{{ serverInfo.hostname }}</dd>
+                  }
+                  @if (serverInfo.hostnameFqdn) {
+                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostnameFqdn">FQDN</dt>
+                    <dd class="col-sm-9">{{ serverInfo.hostnameFqdn }}</dd>
+                  }
+                  <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-runtimeStatus">Runtime status</dt>
+                  <dd class="col-sm-9">
+                    <span
+                      class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded d-inline-flex"
+                      [ngClass]="serverStatusBadgeClass(serverInfo)"
+                    >
+                      <i class="bi me-1" [ngClass]="serverStatusIconClass(serverInfo)" aria-hidden="true"></i>
+                      {{ serverStatusLabel(serverInfo) }}
+                    </span>
+                  </dd>
+                  @if (serverLocationLabel(serverInfo.metadata, locationCatalog()); as locationLabel) {
+                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-location">Location</dt>
+                    <dd class="col-sm-9">{{ locationLabel }}</dd>
+                  }
+                } @else if (detailValue.hostname) {
+                  <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostname">Hostname</dt>
+                  <dd class="col-sm-9">{{ detailValue.hostname }}</dd>
+                }
+              </dl>
+            } @else if (loadingDetail$ | async) {
+              <p class="text-muted small mb-0" i18n="@@featureServiceDetail-loading">Loading service…</p>
+            } @else {
+              <p class="text-muted small mb-0" i18n="@@featureServiceDetail-noServerInfo">
+                Server details are not available yet.
+              </p>
+            }
           </div>
         </div>
       </div>
 
-      <div class="service-detail-page__meters-body p-3 d-flex flex-column gap-3">
-        @if (loadingHistory$ | async) {
-          <div class="text-center py-4">
-            <span class="spinner-border spinner-border-sm" role="status"></span>
-          </div>
-        } @else if (meterCharts().length === 0) {
-          <p class="text-muted small mb-0" i18n="@@featureServiceDetail-noMeterData">
-            No meter usage for the selected period.
-          </p>
-        } @else {
-          @for (
-            entry of meterCharts();
-            track entry.meter.meterId + entry.meter.attachmentType + (entry.meter.addonId ?? '')
-          ) {
-            <div class="card">
-              <div class="card-body">
-                <p class="small text-muted mb-2">
-                  <span i18n="@@featureServiceDetail-meterTotalLabel">Total:</span>
-                  {{ formatMeterTotal(entry.meter) }}
-                </p>
-                @if (entry.options; as chart) {
-                  <apx-chart
-                    [series]="chart.series"
-                    [chart]="chart.chart"
-                    [colors]="chart.colors"
-                    [stroke]="chart.stroke"
-                    [fill]="chart.fill"
-                    [dataLabels]="chart.dataLabels"
-                    [xaxis]="chart.xaxis"
-                    [yaxis]="chart.yaxis"
-                    [grid]="chart.grid"
-                    [title]="chart.title"
-                  ></apx-chart>
-                }
+      @if (showUsageMetersSection()) {
+        <div
+          class="service-detail-page__lane service-detail-page__lane--meters d-md-flex flex-column min-h-0"
+          [class.d-none]="mobilePanel() !== 'meters'"
+        >
+          <div class="card h-100 border-0 rounded-0 d-flex flex-column min-h-0">
+            <div
+              class="card-header service-detail-page__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center flex-shrink-0"
+            >
+              <span class="d-none d-md-inline" i18n="@@featureServiceDetail-usageMetersTitle">Usage meters</span>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary ms-auto"
+                (click)="onToggleFilters()"
+                [attr.aria-expanded]="!filtersCollapsed()"
+                aria-controls="serviceDetailFilters"
+                title="Filters"
+                i18n-title="@@featureServiceDetail-filters"
+                i18n-aria-label="@@featureServiceDetail-filters"
+                aria-label="Filters"
+              >
+                <i class="bi bi-funnel" aria-hidden="true"></i>
+                <i
+                  class="bi ms-1"
+                  [class.bi-chevron-down]="filtersCollapsed()"
+                  [class.bi-chevron-up]="!filtersCollapsed()"
+                  aria-hidden="true"
+                ></i>
+              </button>
+            </div>
+            <div
+              id="serviceDetailFilters"
+              class="service-detail-page__filters border-bottom collapse flex-shrink-0"
+              [class.show]="!filtersCollapsed()"
+            >
+              <div class="p-3">
+                <div class="row g-3 mb-0">
+                  <div class="col-6">
+                    <label class="form-label small" for="serviceDetailFrom" i18n="@@featureServiceDetail-fromDate"
+                      >From</label
+                    >
+                    <input
+                      id="serviceDetailFrom"
+                      type="date"
+                      class="form-control form-control-sm"
+                      [ngModel]="fromDate()"
+                      (ngModelChange)="fromDate.set($event)"
+                    />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small" for="serviceDetailTo" i18n="@@featureServiceDetail-toDate"
+                      >To</label
+                    >
+                    <input
+                      id="serviceDetailTo"
+                      type="date"
+                      class="form-control form-control-sm"
+                      [ngModel]="toDate()"
+                      (ngModelChange)="toDate.set($event)"
+                    />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label small" for="serviceDetailGroupBy" i18n="@@featureServiceDetail-groupBy"
+                      >Group by</label
+                    >
+                    <select
+                      id="serviceDetailGroupBy"
+                      class="form-select form-select-sm"
+                      [ngModel]="groupBy()"
+                      (ngModelChange)="groupBy.set($event)"
+                    >
+                      <option value="day" i18n="@@featureServiceDetail-groupByDay">Day</option>
+                      <option value="month" i18n="@@featureServiceDetail-groupByMonth">Month</option>
+                    </select>
+                  </div>
+                  <div class="col-12 d-flex gap-2">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-primary"
+                      (click)="onApplyFilters()"
+                      i18n="@@featureServiceDetail-applyFilters"
+                    >
+                      Apply
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary"
+                      (click)="onResetFilters()"
+                      i18n="@@featureServiceDetail-resetFilters"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          }
+
+            <div class="service-detail-page__lane-body p-3 d-flex flex-column gap-3">
+              @if (loadingHistory()) {
+                <div class="text-center py-4">
+                  <span class="spinner-border spinner-border-sm" role="status"></span>
+                </div>
+              } @else {
+                @for (
+                  entry of meterCharts();
+                  track entry.meter.meterId + entry.meter.attachmentType + (entry.meter.addonId ?? '')
+                ) {
+                  <div class="card">
+                    <div class="card-body">
+                      @if (entry.options; as chart) {
+                        <apx-chart
+                          [series]="chart.series"
+                          [chart]="chart.chart"
+                          [colors]="chart.colors"
+                          [stroke]="chart.stroke"
+                          [fill]="chart.fill"
+                          [dataLabels]="chart.dataLabels"
+                          [xaxis]="chart.xaxis"
+                          [yaxis]="chart.yaxis"
+                          [grid]="chart.grid"
+                          [title]="chart.title"
+                        ></apx-chart>
+                      }
+                      <p class="small text-muted mb-0 mt-2">
+                        <span i18n="@@featureServiceDetail-meterTotalLabel">Total:</span>
+                        {{ formatMeterTotal(entry.meter) }}
+                      </p>
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="serviceDetailSshAccessConfirmModal"
+  tabindex="-1"
+  aria-labelledby="serviceDetailSshAccessConfirmModalLabel"
+  aria-hidden="true"
+  #sshAccessConfirmModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5
+          class="modal-title"
+          id="serviceDetailSshAccessConfirmModalLabel"
+          i18n="@@featureOverview-sshAccessConfirmTitle"
+        >
+          Reveal SSH access key?
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p i18n="@@featureOverview-sshAccessConfirmBody">
+          Viewing the SSH access key for this service may limit technical support for that specific service. The key can
+          only be retrieved once. After you continue, this action cannot be repeated.
+        </p>
+        @if (sshRevealError(); as revealError) {
+          <div class="alert alert-danger mb-0" role="alert">{{ revealError }}</div>
         }
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          data-bs-dismiss="modal"
+          i18n="@@featureOverview-sshAccessCancel"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="confirmSshAccessReveal()"
+          [disabled]="sshRevealLoading()"
+          i18n="@@featureOverview-sshAccessConfirm"
+        >
+          Reveal key
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="serviceDetailSshAccessDisplayModal"
+  tabindex="-1"
+  aria-labelledby="serviceDetailSshAccessDisplayModalLabel"
+  aria-hidden="true"
+  #sshAccessDisplayModal
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5
+          class="modal-title"
+          id="serviceDetailSshAccessDisplayModalLabel"
+          i18n="@@featureOverview-sshAccessDisplayTitle"
+        >
+          SSH access key
+        </h5>
+        <button type="button" class="btn-close" (click)="closeSshAccessDisplay()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted" i18n="@@featureOverview-sshAccessDisplayHint">
+          Store this private key securely. It will not be shown again in the billing console.
+        </p>
+        <label
+          class="form-label visually-hidden"
+          for="serviceDetailSshAccessPrivateKey"
+          i18n="@@featureOverview-sshAccessKeyLabel"
+          >SSH private key</label
+        >
+        <textarea
+          id="serviceDetailSshAccessPrivateKey"
+          class="form-control font-monospace small"
+          rows="12"
+          readonly
+          [value]="revealedSshPrivateKey() ?? ''"
+        ></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="copySshPrivateKey()">
+          @if (sshAccessKeyCopied()) {
+            <span i18n="@@featureOverview-sshAccessCopied">Copied</span>
+          } @else {
+            <span i18n="@@featureOverview-sshAccessCopy">Copy</span>
+          }
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="closeSshAccessDisplay()"
+          i18n="@@featureOverview-sshAccessClose"
+        >
+          Close
+        </button>
       </div>
     </div>
   </div>

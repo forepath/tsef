@@ -49,6 +49,8 @@ export const updateDisplayNameFailure = createAction(
 
 export const clearServiceDetail = createAction('[Service Detail] Clear');
 
+export const markServiceDetailSshAccessGranted = createAction('[Service Detail] Mark SSH Access Granted');
+
 export const meterSummaryPush = createAction(
   '[Service Detail] Meter Summary Push',
   props<{ subscriptionId: string; meters: SubscriptionMeterSummary[] }>(),

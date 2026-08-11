@@ -167,6 +167,7 @@ describe('BillingStatusGateway', () => {
           displayName: 'My server',
           service: 'agenstra-controller' as const,
           sshAccessGranted: true,
+          hasProviderReference: true,
         },
       ]);
       itemServerService.getServerInfo.mockResolvedValue({
@@ -228,6 +229,7 @@ describe('BillingStatusGateway', () => {
           displayName: null,
           service: 'agenstra-controller' as const,
           sshAccessGranted: false,
+          hasProviderReference: true,
         },
       ]);
       itemServerService.getServerInfo.mockResolvedValue({

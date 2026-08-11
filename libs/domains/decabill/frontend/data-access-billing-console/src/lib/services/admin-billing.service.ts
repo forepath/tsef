@@ -27,6 +27,7 @@ import type {
   SubscriptionItemDetailResponse,
   SubscriptionItemResponse,
   SubscriptionResponse,
+  SubscriptionSshAccessKeyResponse,
   UpdateManualInvoiceDto,
   CreateUsageMeterEntryDto,
   MeterHistoryFilters,
@@ -331,6 +332,15 @@ export class AdminBillingService {
   getAdminSubscriptionItemServerInfo(subscriptionId: string, itemId: string): Observable<ServerInfoResponse> {
     return this.http.get<ServerInfoResponse>(
       `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}/server-info`,
+    );
+  }
+
+  getAdminSubscriptionItemSshAccessKey(
+    subscriptionId: string,
+    itemId: string,
+  ): Observable<SubscriptionSshAccessKeyResponse> {
+    return this.http.get<SubscriptionSshAccessKeyResponse>(
+      `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}/ssh-access-key`,
     );
   }
 

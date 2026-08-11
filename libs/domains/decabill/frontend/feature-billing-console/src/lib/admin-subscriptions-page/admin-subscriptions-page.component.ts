@@ -8,6 +8,7 @@ import {
   MetersFacade,
   SubscriptionMetersFacade,
   isSubscriptionItemDetailEligible,
+  isSubscriptionItemRemoved,
   resolveServiceDisplayLabel,
   type AdminSubscriptionListItem,
   type CreateUsageMeterEntryDto,
@@ -35,6 +36,13 @@ interface MeterEntryForm {
   addonId: string;
   periodStart: string;
   periodEnd: string;
+}
+
+interface AddonMeterOption {
+  key: string;
+  meterId: string;
+  addonId: string;
+  label: string;
 }
 
 @Component({
@@ -89,6 +97,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   subscriptionForMeters: AdminSubscriptionListItem | null = null;
   entryToDelete: UsageMeterEntryResponse | null = null;
   entryForm: MeterEntryForm = this.defaultEntryForm();
+  selectedAddonMeterKey = '';
 
   readonly activeCount = () => this.subscriptions().filter((sub) => sub.status === 'active').length;
 
@@ -111,6 +120,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
       )
       .subscribe(() => {
         this.entryForm = this.defaultEntryForm();
+        this.selectedAddonMeterKey = '';
       });
   }
 
@@ -121,6 +131,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   openMetersModal(sub: AdminSubscriptionListItem): void {
     this.subscriptionForMeters = sub;
     this.entryForm = this.defaultEntryForm();
+    this.selectedAddonMeterKey = '';
     this.subscriptionMetersFacade.loadAll(sub.id);
     showBillingModal(this.metersModal);
   }
@@ -128,11 +139,13 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   submitMeterEntry(): void {
     if (!this.subscriptionForMeters || !this.entryForm.meterId || this.entryForm.value < 0) return;
 
+    if (this.entryForm.attachmentType === 'addon' && !this.entryForm.addonId) return;
+
     const dto: CreateUsageMeterEntryDto = {
       meterId: this.entryForm.meterId,
       value: Number(this.entryForm.value) || 0,
       attachmentType: this.entryForm.attachmentType,
-      addonId: this.entryForm.attachmentType === 'addon' ? this.entryForm.addonId || undefined : undefined,
+      addonId: this.entryForm.attachmentType === 'addon' ? this.entryForm.addonId : undefined,
       periodStart: new Date(this.entryForm.periodStart).toISOString(),
       periodEnd: new Date(this.entryForm.periodEnd).toISOString(),
     };
@@ -159,23 +172,27 @@ export class AdminSubscriptionsPageComponent implements OnInit {
     return sub.items ?? [];
   }
 
-  hasSubscriptionServicesSection(sub: AdminSubscriptionListItem): boolean {
-    return this.subscriptionItems(sub).length > 0 || this.hasSubscriptionMeters(sub);
-  }
-
   serviceDisplayLabel(item: SubscriptionItemResponse): string {
     return resolveServiceDisplayLabel(item);
   }
 
-  isServiceDetailEligible(item: SubscriptionItemResponse): boolean {
-    return isSubscriptionItemDetailEligible(item);
+  isServiceDetailEligible(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): boolean {
+    return isSubscriptionItemDetailEligible(item, sub.status);
   }
 
-  itemProvisioningStatusLabel(item: SubscriptionItemResponse): string {
+  itemProvisioningStatusLabel(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): string {
+    if (isSubscriptionItemRemoved(item, sub.status)) {
+      return getProvisioningStatusLabel('removed');
+    }
+
     return getProvisioningStatusLabel(item.provisioningStatus);
   }
 
-  itemProvisioningStatusBadgeClass(item: SubscriptionItemResponse): string {
+  itemProvisioningStatusBadgeClass(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): string {
+    if (isSubscriptionItemRemoved(item, sub.status)) {
+      return getProvisioningStatusBadgeClass('removed');
+    }
+
     return getProvisioningStatusBadgeClass(item.provisioningStatus);
   }
 
@@ -205,6 +222,43 @@ export class AdminSubscriptionsPageComponent implements OnInit {
     return type === 'addon'
       ? $localize`:@@featureAdminSubscriptions-attachmentAddon:Addon`
       : $localize`:@@featureAdminSubscriptions-attachmentPlan:Plan`;
+  }
+
+  availableAddonMeters(): AddonMeterOption[] {
+    return this.meterSummaries()
+      .filter((summary) => summary.attachmentType === 'addon' && !!summary.addonId?.trim())
+      .map((summary) => {
+        const addonId = summary.addonId!.trim();
+        const addonName = summary.addonName?.trim();
+
+        return {
+          key: `${summary.meterId}|${addonId}`,
+          meterId: summary.meterId,
+          addonId,
+          label: addonName ? `${summary.name} · ${addonName}` : summary.name,
+        };
+      });
+  }
+
+  hasAvailableAddonMeters(): boolean {
+    return this.availableAddonMeters().length > 0;
+  }
+
+  onAttachmentTypeChange(): void {
+    if (this.entryForm.attachmentType === 'addon' && !this.hasAvailableAddonMeters()) {
+      this.entryForm.attachmentType = 'plan';
+    }
+
+    this.entryForm.meterId = '';
+    this.entryForm.addonId = '';
+    this.selectedAddonMeterKey = '';
+  }
+
+  onAddonMeterChange(): void {
+    const selected = this.availableAddonMeters().find((option) => option.key === this.selectedAddonMeterKey);
+
+    this.entryForm.meterId = selected?.meterId ?? '';
+    this.entryForm.addonId = selected?.addonId ?? '';
   }
 
   openCancelConfirm(sub: AdminSubscriptionListItem): void {

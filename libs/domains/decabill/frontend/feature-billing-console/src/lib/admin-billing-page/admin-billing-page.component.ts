@@ -18,6 +18,7 @@ import {
   AdminInvoiceManagerFacade,
   InvoicesFacade,
   computeLineTotalsFromRate,
+  fillPeriodSeriesPoints,
   rateForTaxCategory,
   type AdminInvoiceListItem,
   type BillingAuditLogResponse,
@@ -729,12 +730,19 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   }
 
   private buildSeriesChart(series: BillingStatisticsSeriesPoint[]) {
-    if (series.length === 0) return null;
+    const filled = fillPeriodSeriesPoints(series, this.fromDate(), this.toDate(), this.groupBy(), (period) => ({
+      period,
+      totalGross: 0,
+    }));
+
+    if (filled.length === 0) {
+      return null;
+    }
 
     const axisDateFormat = this.groupBy() === 'month' ? 'mediumDate' : 'shortDate';
 
     return {
-      series: [{ name: 'Turnover', data: series.map((p) => p.totalGross) }] as ApexAxisChartSeries,
+      series: [{ name: 'Turnover', data: filled.map((p) => p.totalGross) }] as ApexAxisChartSeries,
       chart: {
         type: 'area',
         height: 240,
@@ -747,7 +755,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       fill: { colors: [BS_CHART_COLORS[0]] },
       dataLabels: { enabled: false } as ApexDataLabels,
       xaxis: {
-        categories: series.map((p) => this.datePipe.transform(p.period, axisDateFormat) ?? p.period),
+        categories: filled.map((p) => this.datePipe.transform(p.period, axisDateFormat) ?? p.period),
         labels: {
           style: { colors: 'var(--bs-body-color)', fontFamily: 'var(--bs-body-font-family)' },
         },

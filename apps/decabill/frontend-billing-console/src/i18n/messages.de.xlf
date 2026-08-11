@@ -670,6 +670,10 @@
         <source>Provisioned</source>
         <target>Bereitgestellt</target>
       </trans-unit>
+      <trans-unit id="featureBilling-provisioningStatusRemoved" datatype="html">
+        <source>Removed</source>
+        <target>Entfernt</target>
+      </trans-unit>
       <trans-unit id="featureBilling-provisioningStatusFailed" datatype="html">
         <source>Provisioning failed</source>
         <target>Bereitstellung fehlgeschlagen</target>
@@ -1351,6 +1355,10 @@
       <trans-unit id="featureServiceDetail-backToSubscriptions" datatype="html">
         <source>Back to subscriptions</source>
         <target>Zurück zu Abonnements</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-backToDashboard" datatype="html">
+        <source>Back to dashboard</source>
+        <target>Zurück zum Dashboard</target>
       </trans-unit>
       <trans-unit id="featureServiceDetail-renameTitleAria" datatype="html">
         <source>Rename service</source>
@@ -4810,6 +4818,10 @@
         <source>Order summary</source>
         <target>Bestellübersicht</target>
       </trans-unit>
+      <trans-unit id="featureSubscriptions-orderSummaryMeters" datatype="html">
+        <source>Usage meters</source>
+        <target>Nutzungszähler</target>
+      </trans-unit>
       <trans-unit id="featurePromotions-orderCodeLabel" datatype="html">
         <source>Promotion code (optional)</source>
         <target>Aktionscode (optional)</target>
@@ -5616,6 +5628,10 @@
         <source>Has usage meters</source>
         <target>Hat Nutzungszähler</target>
       </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-services" datatype="html">
+        <source>Services</source>
+        <target>Dienste</target>
+      </trans-unit>
       <trans-unit id="featureAdminSubscriptions-usageMeters" datatype="html">
         <source>Usage meters</source>
         <target>Nutzungszähler</target>
@@ -5696,9 +5712,13 @@
         <source>Addon</source>
         <target>Add-on</target>
       </trans-unit>
-      <trans-unit id="featureAdminSubscriptions-entryAddonId" datatype="html">
-        <source>Addon ID</source>
-        <target>Add-on-ID</target>
+      <trans-unit id="featureAdminSubscriptions-entryAddonMeter" datatype="html">
+        <source>Addon meter</source>
+        <target>Add-on-Zähler</target>
+      </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-selectAddonMeter" datatype="html">
+        <source>Select addon meter</source>
+        <target>Add-on-Zähler auswählen</target>
       </trans-unit>
       <trans-unit id="featureAdminSubscriptions-entryPeriodStart" datatype="html">
         <source>Period start</source>
@@ -5995,6 +6015,10 @@
       <trans-unit id="featureServiceTypes-metersCatalogLoading" datatype="html">
         <source>Loading meter catalog…</source>
         <target>Zählerkatalog wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureSubscriptions-services" datatype="html">
+        <source>Services</source>
+        <target>Dienste</target>
       </trans-unit>
       <trans-unit id="featureSubscriptions-usageMeters" datatype="html">
         <source>Usage meters</source>

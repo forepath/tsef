@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 
 import { ProvisioningStatus } from '../entities/subscription-item.entity';
+import { SubscriptionStatus } from '../entities/subscription.entity';
 import { SubscriptionItemServerService } from './subscription-item-server.service';
 
 describe('SubscriptionItemServerService', () => {
@@ -8,7 +9,12 @@ describe('SubscriptionItemServerService', () => {
     getSubscription: jest.fn().mockResolvedValue({ id: 'sub-1', userId: 'user-1', planId: 'plan-1', number: 'S-1' }),
   };
   const subscriptionsRepository = {
-    findByIdOrThrow: jest.fn().mockResolvedValue({ id: 'sub-1', userId: 'user-1', planId: 'plan-1' }),
+    findByIdOrThrow: jest.fn().mockResolvedValue({
+      id: 'sub-1',
+      userId: 'user-1',
+      planId: 'plan-1',
+      status: SubscriptionStatus.ACTIVE,
+    }),
   };
   const subscriptionItemsRepository = {
     findBySubscription: jest.fn(),
@@ -49,6 +55,18 @@ describe('SubscriptionItemServerService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'sub-1',
+      userId: 'user-1',
+      planId: 'plan-1',
+      status: SubscriptionStatus.ACTIVE,
+    });
+    subscriptionService.getSubscription.mockResolvedValue({
+      id: 'sub-1',
+      userId: 'user-1',
+      planId: 'plan-1',
+      number: 'S-1',
+    });
   });
 
   describe('listItems', () => {
@@ -73,6 +91,7 @@ describe('SubscriptionItemServerService', () => {
       expect(items[0]?.serviceTypeName).toBe('Hetzner');
       expect(items[0]?.displayName).toBe('Production');
       expect(items[0]?.sshAccessGranted).toBe(true);
+      expect(items[0]?.hasProviderReference).toBe(false);
     });
 
     it('maps sshAccessGranted false when marker is unset', async () => {
@@ -85,6 +104,7 @@ describe('SubscriptionItemServerService', () => {
           provisioningStatus: ProvisioningStatus.ACTIVE,
           hostname: 'host1',
           displayName: null,
+          providerReference: 'srv-1',
           configSnapshot: { service: 'agenstra-controller' },
         },
       ]);
@@ -94,6 +114,7 @@ describe('SubscriptionItemServerService', () => {
       expect(items[0]?.serviceTypeName).toBe('DigitalOcean');
       expect(items[0]?.displayName).toBeNull();
       expect(items[0]?.sshAccessGranted).toBe(false);
+      expect(items[0]?.hasProviderReference).toBe(true);
     });
 
     it('maps empty serviceTypeName when relation is missing', async () => {
@@ -149,6 +170,7 @@ describe('SubscriptionItemServerService', () => {
         name: 'host1',
         publicIp: '203.0.113.10',
         status: 'running',
+        metadata: { provider: 'hetzner', location: 'fsn1', locationName: 'Falkenstein' },
       },
     };
 
@@ -166,8 +188,46 @@ describe('SubscriptionItemServerService', () => {
           status: 'running',
           hostname: 'host1',
           hostnameFqdn: 'host1.example.test',
+          metadata: expect.objectContaining({ location: 'fsn1', locationName: 'Falkenstein' }),
         }),
       );
+      expect(provisioningService.getServerInfo).not.toHaveBeenCalled();
+    });
+
+    it('enriches location from config snapshot when cached server info omits geography', async () => {
+      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue({
+        ...activeItem,
+        configSnapshot: { service: 'agenstra-controller', location: 'nbg1', region: 'nbg1' },
+        serverInfoSnapshot: {
+          name: 'host1',
+          publicIp: '203.0.113.10',
+          status: 'running',
+          metadata: { provider: 'hetzner' },
+        },
+      });
+      provisioningService.getServerInfo.mockResolvedValue(undefined);
+
+      const detail = await service.getItemDetail('sub-1', 'item-1', 'user-1');
+
+      expect(detail.serverInfo?.metadata).toEqual(
+        expect.objectContaining({
+          provider: 'hetzner',
+          location: 'nbg1',
+          region: 'nbg1',
+        }),
+      );
+    });
+
+    it('rejects items on canceled subscriptions even when provider reference remains', async () => {
+      subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'sub-1',
+        userId: 'user-1',
+        planId: 'plan-1',
+        status: SubscriptionStatus.CANCELED,
+      });
+      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue(activeItem);
+
+      await expect(service.getItemDetail('sub-1', 'item-1', 'user-1')).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('rejects removed items without provider reference', async () => {
@@ -235,11 +295,11 @@ describe('SubscriptionItemServerService', () => {
     };
 
     it('trims and persists display name', async () => {
-      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue(item);
-      subscriptionItemsRepository.updateDisplayName.mockResolvedValue({
+      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValueOnce(item).mockResolvedValueOnce({
         ...item,
         displayName: 'My Service',
       });
+      subscriptionItemsRepository.updateDisplayName.mockResolvedValue(undefined);
 
       const result = await service.updateDisplayName('sub-1', 'item-1', 'user-1', '  My Service  ');
 
@@ -253,11 +313,11 @@ describe('SubscriptionItemServerService', () => {
     });
 
     it('clears display name for empty strings', async () => {
-      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue(item);
-      subscriptionItemsRepository.updateDisplayName.mockResolvedValue({
+      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValueOnce(item).mockResolvedValueOnce({
         ...item,
         displayName: null,
       });
+      subscriptionItemsRepository.updateDisplayName.mockResolvedValue(undefined);
 
       const result = await service.updateDisplayName('sub-1', 'item-1', 'user-1', '   ');
 

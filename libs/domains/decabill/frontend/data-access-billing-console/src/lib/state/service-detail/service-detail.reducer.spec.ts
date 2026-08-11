@@ -9,6 +9,7 @@ import {
   loadHistory,
   loadHistoryFailure,
   loadHistorySuccess,
+  markServiceDetailSshAccessGranted,
   meterSummaryPush,
   resetFilters,
   updateDisplayName,
@@ -124,6 +125,15 @@ describe('serviceDetailReducer', () => {
     const unchanged = serviceDetailReducer(withContext, meterSummaryPush({ subscriptionId: 'sub-2', meters: [] }));
 
     expect(unchanged.metersFromSocket).toBeNull();
+  });
+
+  it('marks sshAccessGranted on the loaded detail', () => {
+    const withDetail = serviceDetailReducer(
+      { ...initialServiceDetailState, detail: { ...detail, sshAccessGranted: false } },
+      markServiceDetailSshAccessGranted(),
+    );
+
+    expect(withDetail.detail?.sshAccessGranted).toBe(true);
   });
 
   it('reloads history when loadHistory is dispatched', () => {

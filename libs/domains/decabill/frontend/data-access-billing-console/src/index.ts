@@ -16,7 +16,8 @@ export * from './lib/utils/server-type-list.utils';
 export * from './lib/utils/tax-preview.utils';
 export * from './lib/utils/config-change-error.utils';
 export * from './lib/utils/service-display-label.util';
-
+export * from './lib/utils/fill-period-series.util';
+export * from './lib/utils/patch-subscription-item-display-name.util';
 // Constants
 export * from './lib/constants/supported-countries';
 export * from './lib/constants/service-type-id.constants';

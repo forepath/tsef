@@ -685,6 +685,11 @@ export interface SubscriptionItemResponse {
   service?: ProvisioningServiceKind;
   /** True after the customer has revealed the provisioning SSH private key at least once. */
   sshAccessGranted?: boolean;
+  /**
+   * True when a live cloud provider reference exists.
+   * The reference value itself is never returned by the API.
+   */
+  hasProviderReference?: boolean;
 }
 
 export interface SubscriptionItemDetailResponse extends SubscriptionItemResponse {

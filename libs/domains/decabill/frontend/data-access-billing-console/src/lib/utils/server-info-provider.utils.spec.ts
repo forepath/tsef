@@ -45,8 +45,8 @@ describe('server-info-provider.utils', () => {
       ).toBe('Falkenstein');
     });
 
-    it('should fall back to location slug for Hetzner', () => {
-      expect(getBillingServerLocationLabel({ provider: 'hetzner', location: 'fsn1' })).toBe('fsn1');
+    it('should map location slug via static provider fallbacks', () => {
+      expect(getBillingServerLocationLabel({ provider: 'hetzner', location: 'fsn1' })).toBe('Falkenstein');
     });
 
     it('should prefer regionName for DigitalOcean without slug suffix', () => {
@@ -57,6 +57,20 @@ describe('server-info-provider.utils', () => {
           region: 'fra1',
         }),
       ).toBe('Frankfurt 1');
+    });
+
+    it('should map region slug via static provider fallbacks', () => {
+      expect(getBillingServerLocationLabel({ provider: 'hetzner', region: 'nbg1' })).toBe('Nuremberg');
+    });
+
+    it('should map slug via provided location catalog', () => {
+      const catalog = providerLocationCatalogFromList([{ id: 'custom1', name: 'Custom City' }]);
+
+      expect(getBillingServerLocationLabel({ provider: 'hetzner', location: 'custom1' }, catalog)).toBe('Custom City');
+    });
+
+    it('should hide unresolved technical slugs', () => {
+      expect(getBillingServerLocationLabel({ provider: 'hetzner', location: 'unknown-dc' })).toBeUndefined();
     });
   });
 

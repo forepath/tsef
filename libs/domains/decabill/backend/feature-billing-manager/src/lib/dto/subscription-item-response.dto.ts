@@ -18,6 +18,11 @@ export interface SubscriptionItemResponseDto {
   service?: 'agenstra-controller' | 'agenstra-manager' | 'decabill-billing' | 'custom';
   /** True after the customer has revealed the provisioning SSH private key at least once. */
   sshAccessGranted: boolean;
+  /**
+   * Whether a live cloud provider reference exists for this item.
+   * The reference value itself is never exposed.
+   */
+  hasProviderReference: boolean;
 }
 
 /** Detail view for an active provisioned subscription item, including cached or live server info. */

@@ -15,6 +15,7 @@ export function mapSubscriptionItemToResponse(item: {
   displayName?: string | null;
   configSnapshot?: Record<string, unknown>;
   sshAccessGrantedAt?: Date | null;
+  providerReference?: string | null;
 }): SubscriptionItemResponseDto {
   const hasServiceType = item.serviceTypeId != null;
   const service = hasServiceType
@@ -31,6 +32,7 @@ export function mapSubscriptionItemToResponse(item: {
     displayName: item.displayName ?? null,
     ...(service ? { service } : {}),
     sshAccessGranted: item.sshAccessGrantedAt != null,
+    hasProviderReference: !!item.providerReference?.trim(),
   };
 }
 
@@ -82,4 +84,76 @@ export function mapServerInfoSnapshotToResponse(
 
 export function mapServerInfoToResponse(info: ServerInfo): ServerInfoResponseDto {
   return toServerInfoResponse(info);
+}
+
+function trimConfigGeography(configSnapshot?: Record<string, unknown> | null): string | undefined {
+  const location = configSnapshot?.['location'];
+  const region = configSnapshot?.['region'];
+
+  if (typeof location === 'string' && location.trim()) {
+    return location.trim();
+  }
+
+  if (typeof region === 'string' && region.trim()) {
+    return region.trim();
+  }
+
+  return undefined;
+}
+
+export function serverInfoHasGeography(metadata?: Record<string, unknown>): boolean {
+  if (!metadata) {
+    return false;
+  }
+
+  return ['locationName', 'regionName', 'location', 'region'].some((key) => {
+    const value = metadata[key];
+
+    return typeof value === 'string' && value.trim() !== '';
+  });
+}
+
+/**
+ * Fills missing provider / geography fields on server-info metadata from the item config snapshot.
+ * Cached snapshots and WS payloads sometimes omit location even when the order stored one.
+ */
+export function enrichServerInfoWithConfigGeography(
+  serverInfo: ServerInfoResponseDto | undefined,
+  configSnapshot?: Record<string, unknown> | null,
+  provider?: string | null,
+): ServerInfoResponseDto | undefined {
+  if (!serverInfo) {
+    return undefined;
+  }
+
+  const metadata: Record<string, unknown> = { ...(serverInfo.metadata ?? {}) };
+  let changed = false;
+
+  if (provider?.trim() && (typeof metadata['provider'] !== 'string' || !String(metadata['provider']).trim())) {
+    metadata['provider'] = provider.trim();
+    changed = true;
+  }
+
+  const geography = trimConfigGeography(configSnapshot);
+
+  if (geography) {
+    if (typeof metadata['location'] !== 'string' || !String(metadata['location']).trim()) {
+      metadata['location'] = geography;
+      changed = true;
+    }
+
+    if (typeof metadata['region'] !== 'string' || !String(metadata['region']).trim()) {
+      metadata['region'] = geography;
+      changed = true;
+    }
+  }
+
+  if (!changed) {
+    return serverInfo;
+  }
+
+  return {
+    ...serverInfo,
+    metadata,
+  };
 }

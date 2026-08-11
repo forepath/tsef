@@ -33,3 +33,56 @@ export function formatMeterHistoryPeriodBucket(periodEnd: Date, groupBy: 'day' |
 
   return `${year}-${month}-${day}`;
 }
+
+/**
+ * Lists every period key for [from, to] inclusive (UTC), matching history bucket formatting.
+ */
+export function listMeterHistoryPeriodKeys(from: string, to: string, groupBy: 'day' | 'month'): string[] {
+  const { fromDate, toDate } = parseMeterHistoryDateRange(from, to);
+  const keys: string[] = [];
+
+  if (groupBy === 'month') {
+    let cursor = new Date(Date.UTC(fromDate.getUTCFullYear(), fromDate.getUTCMonth(), 1));
+    const end = new Date(Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth(), 1));
+
+    while (cursor.getTime() <= end.getTime()) {
+      keys.push(formatMeterHistoryPeriodBucket(cursor, 'month'));
+      cursor = new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 1));
+    }
+
+    return keys;
+  }
+
+  let cursor = new Date(Date.UTC(fromDate.getUTCFullYear(), fromDate.getUTCMonth(), fromDate.getUTCDate()));
+  const end = new Date(Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth(), toDate.getUTCDate()));
+
+  while (cursor.getTime() <= end.getTime()) {
+    keys.push(formatMeterHistoryPeriodBucket(cursor, 'day'));
+    cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
+  }
+
+  return keys;
+}
+
+/**
+ * Fills missing period buckets with defaults so time-series charts stay continuous.
+ */
+export function fillMeterHistoryPeriodSeries<T extends { period: string }>(
+  points: T[],
+  from: string,
+  to: string,
+  groupBy: 'day' | 'month',
+  createDefault: (period: string) => T,
+): T[] {
+  const byPeriod = new Map<string, T>();
+
+  for (const point of points) {
+    const period = point.period?.trim();
+
+    if (period) {
+      byPeriod.set(period, point);
+    }
+  }
+
+  return listMeterHistoryPeriodKeys(from, to, groupBy).map((period) => byPeriod.get(period) ?? createDefault(period));
+}

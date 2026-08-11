@@ -18,7 +18,7 @@ import {
   resolveEffectiveUnitPriceNet,
   type MeterUsageEntry,
 } from '../utils/meter-aggregation.util';
-import { formatMeterHistoryPeriodBucket } from '../utils/meter-history-date.util';
+import { formatMeterHistoryPeriodBucket, fillMeterHistoryPeriodSeries } from '../utils/meter-history-date.util';
 
 export type MeterChargeLine = {
   description: string;
@@ -379,6 +379,8 @@ export class MeterBillingService {
           addonName: null,
           entries,
           groupBy: params.groupBy,
+          from: params.from,
+          to: params.to,
         }),
       );
     }
@@ -417,6 +419,8 @@ export class MeterBillingService {
             addonName: subscriptionAddon.addonNameSnapshot,
             entries,
             groupBy: params.groupBy,
+            from: params.from,
+            to: params.to,
           }),
         );
       }
@@ -444,6 +448,8 @@ export class MeterBillingService {
     addonName: string | null;
     entries: MeterUsageEntry[];
     groupBy: 'day' | 'month';
+    from: Date;
+    to: Date;
   }): MeterHistorySeriesDto {
     const matching = this.filterEntriesForMeterAttachment(params.entries, {
       meterId: params.meter.id,
@@ -460,12 +466,18 @@ export class MeterBillingService {
       buckets.set(period, bucket);
     }
 
-    const series = Array.from(buckets.entries())
+    const sparseSeries = Array.from(buckets.entries())
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([period, bucketEntries]) => ({
         period,
         value: aggregateMeterValues(bucketEntries, params.meter.aggregator),
       }));
+    const from = params.from.toISOString().slice(0, 10);
+    const to = params.to.toISOString().slice(0, 10);
+    const series = fillMeterHistoryPeriodSeries(sparseSeries, from, to, params.groupBy, (period) => ({
+      period,
+      value: 0,
+    }));
 
     return {
       meterId: params.meter.id,

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-11T09:14:57.393Z",
+  "generatedAt": "2026-08-11T16:03:38.262Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -15964,6 +15964,17 @@
         "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
         "operationId": "adminGetSubscriptionItemServerInfo",
         "summary": "Get subscription item server info (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+        "operationId": "adminGetSubscriptionItemSshAccessKey",
+        "summary": "Reveal provisioning SSH private key (admin, one-time)",
         "specKind": "openapi"
       }
     },
@@ -37853,6 +37864,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
       "type": "contains"
     },
@@ -47413,6 +47429,16 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
       "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
       "type": "implements"
     },
@@ -48324,6 +48350,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
       "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
       "type": "implements"
     },
     {
@@ -57444,6 +57475,11 @@
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
       "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-billing.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
       "type": "calls"
     },
     {

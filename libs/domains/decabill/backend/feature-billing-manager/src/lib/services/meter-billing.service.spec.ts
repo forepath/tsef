@@ -110,10 +110,19 @@ describe('MeterBillingService buildSubscriptionMeterHistory', () => {
     });
 
     expect(result.meters).toHaveLength(1);
-    expect(result.meters[0]?.series).toEqual([
-      { period: '2026-01-10', value: 10 },
-      { period: '2026-01-11', value: 12 },
-    ]);
+    expect(result.meters[0]?.series).toHaveLength(31);
+    expect(result.meters[0]?.series.find((point) => point.period === '2026-01-10')).toEqual({
+      period: '2026-01-10',
+      value: 10,
+    });
+    expect(result.meters[0]?.series.find((point) => point.period === '2026-01-11')).toEqual({
+      period: '2026-01-11',
+      value: 12,
+    });
+    expect(result.meters[0]?.series.find((point) => point.period === '2026-01-01')).toEqual({
+      period: '2026-01-01',
+      value: 0,
+    });
     expect(result.meters[0]?.totalValue).toBe(22);
   });
 

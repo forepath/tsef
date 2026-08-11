@@ -9,7 +9,7 @@ Customer and admin views for a provisioned subscription item (cloud service inst
 | Customer | `/subscriptions/{subscriptionId}/services/{itemId}`                |
 | Admin    | `/administration/subscriptions/{subscriptionId}/services/{itemId}` |
 
-Customer deep links also come from the dashboard cloud-instances lane. Admin entry is from the Contracts list (`/administration/subscriptions`) nested services subsection (there is no admin dashboard). Removed / non-active items may appear under the list “Usage meters” subsection but **cannot** open this page (UI hides the action; API returns 404). Dashboard continues to list only active provisioned items.
+Customer deep links also come from the dashboard cloud-instances lane. Admin entry is from the Contracts list (`/administration/subscriptions`) nested services subsection (there is no admin dashboard). Items on terminal subscriptions (`canceled`, `pending_withdrawal`, `pending_instant_cancel`), failed items, and active items without a live provider show as **Removed** in the list and **cannot** open this page (UI hides the action; API returns 404). Dashboard continues to list only active provisioned items.
 
 ## Display name
 
@@ -37,7 +37,7 @@ Inline rename follows the project-ticket pattern: click the title → input → 
 
 ## Detail API
 
-Customer: `GET /subscriptions/{subscriptionId}/items/{itemId}` returns the item plus displayable `serverInfo` (IPs, hostname/FQDN, status, metadata). Detail-eligible only when `provisioningStatus === active` and a live provider reference exists.
+Customer: `GET /subscriptions/{subscriptionId}/items/{itemId}` returns the item plus displayable `serverInfo` (IPs, hostname/FQDN, status, metadata). Detail-eligible only when the parent subscription is still live (`active`, `pending_cancel`, `pending_config_change`, or `pending_backorder`), `provisioningStatus === active`, and a live provider reference exists (`hasProviderReference` on list payloads; the reference value is never returned).
 
 Admin twins live under `/admin/billing/subscriptions/{subscriptionId}/items/...` (`billing_admin:read` / `billing_admin:write`) and do not require subscription ownership.
 
