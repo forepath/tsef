@@ -1,4 +1,4 @@
-import { SocketAuthService, type SocketUserInfo } from '@forepath/identity/backend';
+import { SocketAuthService, UserRole, type SocketUserInfo } from '@forepath/identity/backend';
 import { UsersRepository } from '@forepath/identity/backend';
 import { getTenantIdOrDefault, readIncomingTenantIdFromHandshake } from '@forepath/shared/backend';
 import { Logger } from '@nestjs/common';
@@ -15,6 +15,7 @@ import {
 import { Server, Socket } from 'socket.io';
 
 import { SubscriptionStatus } from '../entities/subscription.entity';
+import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { SubscriptionService } from '../services/subscription.service';
 import { getBillingUserIdFromSocketUser } from '../utils/billing-socket-user.utils';
@@ -110,6 +111,7 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
     private readonly subscriptionItemServerService: SubscriptionItemServerService,
     private readonly usersRepository: UsersRepository,
     private readonly billingMeterRealtime: BillingMeterRealtimeService,
+    private readonly subscriptionsRepository: SubscriptionsRepository,
   ) {}
 
   afterInit(server: Server): void {
@@ -217,7 +219,12 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
     }
 
     try {
-      await this.subscriptionService.getSubscription(subscriptionId, userId);
+      if (userInfo?.userRole === UserRole.ADMIN) {
+        // Admins may watch any tenant subscription without ownership.
+        await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+      } else {
+        await this.subscriptionService.getSubscription(subscriptionId, userId);
+      }
     } catch {
       socket.emit('error', { message: 'Access denied' });
 

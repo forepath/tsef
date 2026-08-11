@@ -18,7 +18,7 @@ export class AdminSubscriptionItemsController {
   constructor(private readonly subscriptionItemServerService: SubscriptionItemServerService) {}
 
   @Get(':itemId')
-  @RequireScopes('subscriptions:read')
+  @RequireScopes('billing_admin:read')
   async getItemDetail(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
@@ -31,7 +31,7 @@ export class AdminSubscriptionItemsController {
   }
 
   @Post(':itemId/display-name')
-  @RequireScopes('subscriptions:write')
+  @RequireScopes('billing_admin:write')
   async updateDisplayName(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
@@ -49,7 +49,7 @@ export class AdminSubscriptionItemsController {
   }
 
   @Get(':itemId/server-info')
-  @RequireScopes('subscriptions:read')
+  @RequireScopes('billing_admin:read')
   async getServerInfo(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
@@ -64,7 +64,7 @@ export class AdminSubscriptionItemsController {
   }
 
   @Post(':itemId/actions/start')
-  @RequireScopes('subscriptions:write')
+  @RequireScopes('billing_admin:write')
   async startServer(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
@@ -83,7 +83,7 @@ export class AdminSubscriptionItemsController {
   }
 
   @Post(':itemId/actions/stop')
-  @RequireScopes('subscriptions:write')
+  @RequireScopes('billing_admin:write')
   async stopServer(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
@@ -102,7 +102,7 @@ export class AdminSubscriptionItemsController {
   }
 
   @Post(':itemId/actions/restart')
-  @RequireScopes('subscriptions:write')
+  @RequireScopes('billing_admin:write')
   async restartServer(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,

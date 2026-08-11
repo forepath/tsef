@@ -1,4 +1,5 @@
 import type { SubscriptionResponse } from '../../types/billing.types';
+import { updateDisplayNameSuccess } from '../service-detail/service-detail.actions';
 
 import {
   cancelSubscription,
@@ -350,6 +351,40 @@ describe('subscriptionsReducer', () => {
 
       expect(newState.selectedSubscription).toBeNull();
       expect(newState.entities).toEqual([mockSubscription]);
+    });
+  });
+
+  describe('updateDisplayNameSuccess', () => {
+    it('should patch nested item displayName on matching subscription', () => {
+      const withItems: SubscriptionResponse = {
+        ...mockSubscription,
+        items: [
+          {
+            id: 'item-1',
+            subscriptionId: 'sub-1',
+            serviceTypeId: 'st-1',
+            serviceTypeName: 'Cloud',
+            provisioningStatus: 'active',
+            hostname: 'host-1',
+            displayName: null,
+            service: null,
+            sshAccessGranted: false,
+          },
+        ],
+      };
+      const state: SubscriptionsState = {
+        ...initialSubscriptionsState,
+        entities: [withItems, mockSubscription2],
+        selectedSubscription: withItems,
+      };
+      const newState = subscriptionsReducer(
+        state,
+        updateDisplayNameSuccess({ subscriptionId: 'sub-1', itemId: 'item-1', displayName: 'Prod' }),
+      );
+
+      expect(newState.entities[0].items?.[0].displayName).toBe('Prod');
+      expect(newState.selectedSubscription?.items?.[0].displayName).toBe('Prod');
+      expect(newState.entities[1]).toEqual(mockSubscription2);
     });
   });
 });

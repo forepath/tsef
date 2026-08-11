@@ -1,6 +1,8 @@
 import { createReducer, on } from '@ngrx/store';
 
 import type { SubscriptionResponse } from '../../types/billing.types';
+import { patchSubscriptionItemDisplayName } from '../../utils/patch-subscription-item-display-name.util';
+import { updateDisplayNameSuccess } from '../service-detail/service-detail.actions';
 
 import {
   cancelSubscription,
@@ -176,6 +178,20 @@ export const subscriptionsReducer = createReducer(
     resuming: false,
     error,
   })),
+  on(updateDisplayNameSuccess, (state, { subscriptionId, itemId, displayName }) => {
+    const patchOne = (subscription: SubscriptionResponse): SubscriptionResponse =>
+      subscription.id === subscriptionId
+        ? patchSubscriptionItemDisplayName(subscription, itemId, displayName)
+        : subscription;
+
+    return {
+      ...state,
+      entities: state.entities.map(patchOne),
+      selectedSubscription: state.selectedSubscription
+        ? patchOne(state.selectedSubscription)
+        : state.selectedSubscription,
+    };
+  }),
   // Clear Selected Subscription
   on(clearSelectedSubscription, (state) => ({
     ...state,

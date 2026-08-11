@@ -2,13 +2,17 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
   AdminSubscriptionsFacade,
   MetersFacade,
   SubscriptionMetersFacade,
+  isSubscriptionItemDetailEligible,
+  resolveServiceDisplayLabel,
   type AdminSubscriptionListItem,
   type CreateUsageMeterEntryDto,
   type MeterResponse,
+  type SubscriptionItemResponse,
   type SubscriptionMeterSummary,
   type UsageAttachmentType,
   type UsageMeterEntryResponse,
@@ -16,6 +20,8 @@ import {
 import { debounceTime, distinctUntilChanged, filter, pairwise, skip } from 'rxjs';
 
 import {
+  getProvisioningStatusBadgeClass,
+  getProvisioningStatusLabel,
   getSubscriptionStatusBadgeClass,
   getSubscriptionStatusLabel,
   getUnavailableLabel,
@@ -34,7 +40,7 @@ interface MeterEntryForm {
 @Component({
   selector: 'framework-admin-subscriptions-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   providers: [DatePipe],
   templateUrl: './admin-subscriptions-page.component.html',
   styleUrls: ['./admin-subscriptions-page.component.scss'],
@@ -147,6 +153,34 @@ export class AdminSubscriptionsPageComponent implements OnInit {
 
   subscriptionMeterSummaries(sub: AdminSubscriptionListItem): SubscriptionMeterSummary[] {
     return sub.meters ?? [];
+  }
+
+  subscriptionItems(sub: AdminSubscriptionListItem): SubscriptionItemResponse[] {
+    return sub.items ?? [];
+  }
+
+  hasSubscriptionServicesSection(sub: AdminSubscriptionListItem): boolean {
+    return this.subscriptionItems(sub).length > 0 || this.hasSubscriptionMeters(sub);
+  }
+
+  serviceDisplayLabel(item: SubscriptionItemResponse): string {
+    return resolveServiceDisplayLabel(item);
+  }
+
+  isServiceDetailEligible(item: SubscriptionItemResponse): boolean {
+    return isSubscriptionItemDetailEligible(item);
+  }
+
+  itemProvisioningStatusLabel(item: SubscriptionItemResponse): string {
+    return getProvisioningStatusLabel(item.provisioningStatus);
+  }
+
+  itemProvisioningStatusBadgeClass(item: SubscriptionItemResponse): string {
+    return getProvisioningStatusBadgeClass(item.provisioningStatus);
+  }
+
+  serviceDetailLink(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): string[] {
+    return ['/administration', 'subscriptions', sub.id, 'services', item.id];
   }
 
   hasSubscriptionMeters(sub: AdminSubscriptionListItem): boolean {

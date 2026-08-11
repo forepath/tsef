@@ -5616,6 +5616,14 @@
         <source>Has usage meters</source>
         <target>Hat Nutzungszähler</target>
       </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-usageMeters" datatype="html">
+        <source>Usage meters</source>
+        <target>Nutzungszähler</target>
+      </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-openServiceDetails" datatype="html">
+        <source>Open details</source>
+        <target>Details öffnen</target>
+      </trans-unit>
       <trans-unit id="featureAdminSubscriptions-manageMetersTitle" datatype="html">
         <source>Manage usage meters</source>
         <target>Nutzungszähler verwalten</target>

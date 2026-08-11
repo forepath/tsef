@@ -9,6 +9,9 @@ info:
 
     All connections require authentication via `Authorization` in the handshake. Pass `X-Tenant` in handshake
     `extraHeaders` or `auth.tenantId`. Static API key auth is not sufficient for end-user streams.
+
+    `subscribeSubscriptionMeters` joins room `subscription:{id}`. Customers must own the subscription.
+    ADMIN sockets may join any tenant subscription after an existence check (no ownership required).
 servers:
   billing:
     host: localhost:8082
@@ -208,6 +211,10 @@ components:
         type: object
     SubscribeSubscriptionMeters:
       name: SubscribeSubscriptionMeters
+      summary: Join a subscription meter room
+      description: |
+        Customers must own the subscription. ADMIN users may subscribe to any tenant subscription
+        after the subscription is verified to exist.
       contentType: application/json
       payload:
         type: object

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-11T08:25:57.711Z",
+  "generatedAt": "2026-08-11T09:14:57.393Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -52752,6 +52752,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/gateways/billing-status.gateway.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/admin-projects.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/projects-admin.service.ts",
       "type": "injects"
@@ -62203,6 +62208,11 @@
     },
     {
       "from": "concept:decabill-api-endpoints",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-endpoints",
       "to": "api:HTTP:GET:/config",
       "type": "documents"
     },
@@ -62408,12 +62418,27 @@
     },
     {
       "from": "concept:decabill-admin-subscriptions",
+      "to": "api:HTTP:GET:/meters",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-subscriptions",
+      "to": "api:HTTP:POST:/meters",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-subscriptions",
       "to": "api:HTTP:GET:/subscriptions",
       "type": "documents"
     },
     {
       "from": "concept:decabill-admin-subscriptions",
       "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-subscriptions",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
       "type": "documents"
     },
     {
@@ -63899,6 +63924,21 @@
     {
       "from": "concept:decabill-display-name",
       "to": "api:HTTP:POST:/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-display-name",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions",
       "type": "documents"
     },
     {

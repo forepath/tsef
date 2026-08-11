@@ -96,10 +96,10 @@ Built-in Hetzner / DigitalOcean register stub collectors (empty samples) until r
 
 ## Subscription views
 
-- `GET /subscriptions/{id}/meters` and admin twin under `/admin/billing/subscriptions/{id}/meters`
+- `GET /subscriptions/{id}/meters` and admin twin under `/admin/billing/subscriptions/{id}/meters` (`billing_admin:read`)
 - `SubscriptionResponse.meters` embeds the same summaries (effective price, period aggregate, estimated charge)
-- `GET /subscriptions/{id}/meters/history?from&to&groupBy=day|month` (admin twin under `/admin/billing/subscriptions/{id}/meters/history`) — per-meter time series for the service details UI
-- WebSocket `meterSummaryUpdate` on room `subscription:{id}` after usage mutations (see [Service details](./service-details.md))
+- `GET /subscriptions/{id}/meters/history?from&to&groupBy=day|month` (admin twin under `/admin/billing/subscriptions/{id}/meters/history`, `billing_admin:read`) — per-meter time series for the service details UI
+- WebSocket `meterSummaryUpdate` on room `subscription:{id}` after usage mutations; ADMIN may subscribe without ownership (see [Service details](./service-details.md))
 
 ## Invoice charge path (arrear)
 

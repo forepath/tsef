@@ -1,6 +1,8 @@
 import { createReducer, on } from '@ngrx/store';
 
 import type { AdminSubscriptionListItem } from '../../types/billing.types';
+import { patchSubscriptionItemDisplayName } from '../../utils/patch-subscription-item-display-name.util';
+import { updateDisplayNameSuccess } from '../service-detail/service-detail.actions';
 
 import {
   adminCancelSubscription,
@@ -141,5 +143,13 @@ export const adminSubscriptionsReducer = createReducer(
     ...state,
     resuming: false,
     error,
+  })),
+  on(updateDisplayNameSuccess, (state, { subscriptionId, itemId, displayName }) => ({
+    ...state,
+    subscriptions: state.subscriptions.map((subscription) =>
+      subscription.id === subscriptionId
+        ? patchSubscriptionItemDisplayName(subscription, itemId, displayName)
+        : subscription,
+    ),
   })),
 );

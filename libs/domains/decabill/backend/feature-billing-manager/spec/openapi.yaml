@@ -3369,6 +3369,8 @@ paths:
     get:
       tags: [Admin Billing]
       summary: Meter usage history for a subscription (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:read`. Ownership is not required.
       operationId: adminGetSubscriptionMeterHistory
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
@@ -3430,6 +3432,7 @@ paths:
       description: |
         Returns a subscription item with optional server info when the service is active and provisioned.
         Removed or non-active items respond with 404. Admin access does not require subscription ownership.
+        Requires ADMIN role. PAT callers need `billing_admin:read`.
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
         - name: itemId
@@ -3467,6 +3470,8 @@ paths:
     post:
       tags: [Admin Billing]
       summary: Update subscription item display name (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
       operationId: adminUpdateSubscriptionItemDisplayName
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
@@ -3493,6 +3498,8 @@ paths:
     get:
       tags: [Admin Billing]
       summary: Get subscription item server info (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:read`. Ownership is not required.
       operationId: adminGetSubscriptionItemServerInfo
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
@@ -3513,6 +3520,8 @@ paths:
     post:
       tags: [Admin Billing]
       summary: Start provisioned server (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
       operationId: adminStartSubscriptionItemServer
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
@@ -3533,6 +3542,8 @@ paths:
     post:
       tags: [Admin Billing]
       summary: Stop provisioned server (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
       operationId: adminStopSubscriptionItemServer
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
@@ -3553,6 +3564,8 @@ paths:
     post:
       tags: [Admin Billing]
       summary: Restart provisioned server (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
       operationId: adminRestartSubscriptionItemServer
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
@@ -3573,6 +3586,8 @@ paths:
     get:
       tags: [Admin Billing]
       summary: List subscription meter summaries (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:read`. Ownership is not required.
       operationId: adminListSubscriptionMeters
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'

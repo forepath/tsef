@@ -35,7 +35,7 @@ export class AdminSubscriptionMetersController {
   ) {}
 
   @Get(':id/meters/history')
-  @RequireScopes('usage:read')
+  @RequireScopes('billing_admin:read')
   async getMeterHistory(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Query() query: SubscriptionMeterHistoryQueryDto,
@@ -55,7 +55,7 @@ export class AdminSubscriptionMetersController {
   }
 
   @Get(':id/meters')
-  @RequireScopes('usage:read')
+  @RequireScopes('billing_admin:read')
   async listMeters(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Req() req?: RequestWithUser,

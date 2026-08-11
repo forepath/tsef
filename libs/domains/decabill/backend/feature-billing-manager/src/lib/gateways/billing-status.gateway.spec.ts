@@ -1,9 +1,10 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { SocketAuthService, UserRole, UsersRepository } from '@forepath/identity/backend';
 import { Test, TestingModule } from '@nestjs/testing';
 import type { Socket } from 'socket.io';
 
 import { SubscriptionStatus } from '../entities/subscription.entity';
+import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { SubscriptionService } from '../services/subscription.service';
 
@@ -29,6 +30,7 @@ describe('BillingStatusGateway', () => {
   let subscriptionService: jest.Mocked<Pick<SubscriptionService, 'listSubscriptions' | 'getSubscription'>>;
   let itemServerService: jest.Mocked<Pick<SubscriptionItemServerService, 'listItems' | 'getServerInfo'>>;
   let usersRepository: jest.Mocked<Pick<UsersRepository, 'findByIdForTenant'>>;
+  let subscriptionsRepository: jest.Mocked<Pick<SubscriptionsRepository, 'findByIdOrThrow'>>;
   let billingMeterRealtime: jest.Mocked<
     Pick<BillingMeterRealtimeService, 'attachServer' | 'buildMeterSummaryPayload'>
   >;
@@ -37,6 +39,12 @@ describe('BillingStatusGateway', () => {
     userId: 'user-1',
     userRole: UserRole.USER,
     user: { id: 'user-1', roles: ['user'] },
+  };
+  const adminSocketInfo = {
+    isApiKeyAuth: false,
+    userId: 'admin-1',
+    userRole: UserRole.ADMIN,
+    user: { id: 'admin-1', roles: ['admin'] },
   };
 
   beforeEach(async () => {
@@ -54,6 +62,9 @@ describe('BillingStatusGateway', () => {
     usersRepository = {
       findByIdForTenant: jest.fn().mockResolvedValue({ id: 'user-1', tenantId: 'default' }),
     };
+    subscriptionsRepository = {
+      findByIdOrThrow: jest.fn(),
+    };
     billingMeterRealtime = {
       attachServer: jest.fn(),
       buildMeterSummaryPayload: jest.fn(),
@@ -66,6 +77,7 @@ describe('BillingStatusGateway', () => {
         { provide: SubscriptionService, useValue: subscriptionService },
         { provide: SubscriptionItemServerService, useValue: itemServerService },
         { provide: UsersRepository, useValue: usersRepository },
+        { provide: SubscriptionsRepository, useValue: subscriptionsRepository },
         { provide: BillingMeterRealtimeService, useValue: billingMeterRealtime },
       ],
     }).compile();
@@ -310,6 +322,40 @@ describe('BillingStatusGateway', () => {
       expect((socket as { data: { meterSubscriptionRooms?: string[] } }).data.meterSubscriptionRooms).toEqual([
         'subscription:sub-a',
       ]);
+    });
+
+    it('allows admin to join without ownership when the subscription exists', async () => {
+      const socket = createMockSocket({ data: { userInfo: adminSocketInfo } });
+      const payload = {
+        subscriptionId: 'sub-other',
+        generatedAt: '2026-01-01T00:00:00.000Z',
+        meters: [],
+      };
+
+      subscriptionsRepository.findByIdOrThrow.mockResolvedValue({ id: 'sub-other' } as never);
+      billingMeterRealtime.buildMeterSummaryPayload.mockResolvedValue(payload);
+
+      await gateway.handleSubscribeMeters({ subscriptionId: 'sub-other' }, socket);
+
+      expect(subscriptionsRepository.findByIdOrThrow).toHaveBeenCalledWith('sub-other');
+      expect(subscriptionService.getSubscription).not.toHaveBeenCalled();
+      expect(socket.join).toHaveBeenCalledWith('subscription:sub-other');
+      expect(socket.emit).toHaveBeenCalledWith('meterSummaryUpdate', payload);
+    });
+
+    it('denies admin when the subscription does not exist in the tenant', async () => {
+      const socket = createMockSocket({ data: { userInfo: adminSocketInfo } });
+
+      subscriptionsRepository.findByIdOrThrow.mockRejectedValue(
+        new NotFoundException('Subscription with ID sub-missing not found'),
+      );
+
+      await gateway.handleSubscribeMeters({ subscriptionId: 'sub-missing' }, socket);
+
+      expect(subscriptionsRepository.findByIdOrThrow).toHaveBeenCalledWith('sub-missing');
+      expect(subscriptionService.getSubscription).not.toHaveBeenCalled();
+      expect(socket.join).not.toHaveBeenCalled();
+      expect(socket.emit).toHaveBeenCalledWith('error', { message: 'Access denied' });
     });
 
     it('unsubscribeSubscriptionMeters leaves the room and clears tracking', async () => {

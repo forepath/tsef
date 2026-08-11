@@ -791,6 +791,12 @@
       <trans-unit id="featureAdminSubscriptions-hasMeters" datatype="html">
         <source>Has usage meters</source>
         </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-usageMeters" datatype="html">
+        <source>Usage meters</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-openServiceDetails" datatype="html">
+        <source>Open details</source>
+        </trans-unit>
       <trans-unit id="featureSubscriptions-subscriptionActionsAria" datatype="html">
         <source>Subscription actions</source>
         </trans-unit>
