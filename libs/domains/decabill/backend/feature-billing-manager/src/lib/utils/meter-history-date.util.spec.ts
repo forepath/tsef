@@ -13,6 +13,16 @@ describe('meter-history-date.util', () => {
       expect(fromDate.toISOString()).toBe('2026-01-01T00:00:00.000Z');
       expect(toDate.toISOString()).toBe('2026-01-31T23:59:59.999Z');
     });
+
+    it('rejects day ranges beyond the maximum span', () => {
+      expect(() => parseMeterHistoryDateRange('2025-01-01', '2026-01-02', 'day')).toThrow('maximum span is 366 days');
+    });
+
+    it('rejects month ranges beyond the maximum span', () => {
+      expect(() => parseMeterHistoryDateRange('2021-01-01', '2026-02-01', 'month')).toThrow(
+        'maximum span is 60 months',
+      );
+    });
   });
 
   describe('formatMeterHistoryPeriodBucket', () => {

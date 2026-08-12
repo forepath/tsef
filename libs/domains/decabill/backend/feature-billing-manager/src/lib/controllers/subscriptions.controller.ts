@@ -92,13 +92,14 @@ export class SubscriptionsController {
     }
 
     const subscription = await this.subscriptionService.getSubscription(id, userInfo.userId);
-    const { fromDate, toDate } = parseMeterHistoryDateRange(query.from, query.to);
+    const groupBy = query.groupBy ?? 'day';
+    const { fromDate, toDate } = parseMeterHistoryDateRange(query.from, query.to, groupBy);
 
     return await this.meterBillingService.buildSubscriptionMeterHistory({
       subscription,
       from: fromDate,
       to: toDate,
-      groupBy: query.groupBy ?? 'day',
+      groupBy,
     });
   }
 

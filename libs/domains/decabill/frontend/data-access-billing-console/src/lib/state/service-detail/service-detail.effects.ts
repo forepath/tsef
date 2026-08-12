@@ -23,12 +23,17 @@ import {
   loadHistory,
   loadHistoryFailure,
   loadHistorySuccess,
+  meterSummaryPush,
   resetFilters,
   updateDisplayName,
   updateDisplayNameFailure,
   updateDisplayNameSuccess,
 } from './service-detail.actions';
-import { selectServiceDetailSubscriptionId } from './service-detail.selectors';
+import {
+  selectServiceDetailAdminMode,
+  selectServiceDetailFilters,
+  selectServiceDetailSubscriptionId,
+} from './service-detail.selectors';
 
 function normalizeError(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -111,6 +116,30 @@ export const reloadServiceDetailHistoryOnFilters$ = createEffect(
           }),
         ];
       }),
+    ),
+  { functional: true },
+);
+
+export const reloadServiceDetailHistoryOnMeterPush$ = createEffect(
+  (actions$ = inject(Actions), store = inject(Store)) =>
+    actions$.pipe(
+      ofType(meterSummaryPush),
+      withLatestFrom(
+        store.select(selectServiceDetailSubscriptionId),
+        store.select(selectServiceDetailAdminMode),
+        store.select(selectServiceDetailFilters),
+      ),
+      filter(
+        ([{ subscriptionId }, activeSubscriptionId]) =>
+          !!activeSubscriptionId && subscriptionId === activeSubscriptionId,
+      ),
+      map(([, subscriptionId, adminMode, filters]) =>
+        loadHistory({
+          subscriptionId: subscriptionId!,
+          filters,
+          adminMode,
+        }),
+      ),
     ),
   { functional: true },
 );

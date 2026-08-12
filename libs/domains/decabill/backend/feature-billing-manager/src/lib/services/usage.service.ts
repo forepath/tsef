@@ -117,6 +117,30 @@ export class UsageService {
     return record;
   }
 
+  async createMeterEntry(dto: {
+    subscriptionId: string;
+    periodStart: Date;
+    periodEnd: Date;
+    usageSource: string;
+    usagePayload?: Record<string, unknown>;
+    meterId?: string;
+    value?: number;
+    attachmentType?: UsageAttachmentType;
+    addonId?: string;
+  }): Promise<UsageMeterEntryResponseDto> {
+    if (!dto.meterId) {
+      throw new BadRequestException('meterId is required');
+    }
+
+    const record = await this.createUsage(dto);
+
+    if (!record.meterId) {
+      throw new BadRequestException('Created usage record is not metered');
+    }
+
+    return this.mapEntry(record);
+  }
+
   async updateMeterEntry(
     subscriptionId: string,
     entryId: string,

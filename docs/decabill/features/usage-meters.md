@@ -75,7 +75,7 @@ Rules:
 - `attachmentType=plan`: meter must be on the subscription’s plan or its service type.
 - `attachmentType=addon`: `addonId` required; subscription must have that addon billable; meter must be on that addon.
 
-Admin entry CRUD: `/admin/billing/subscriptions/{id}/meter-entries`.
+Admin entry CRUD: `/admin/billing/subscriptions/{id}/meter-entries` (`billing_admin:read` / `billing_admin:write` for list/update/delete; `usage:write` for create).
 
 ## Collector job (pull)
 

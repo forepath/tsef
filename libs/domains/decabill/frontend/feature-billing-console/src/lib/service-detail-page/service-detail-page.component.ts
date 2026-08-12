@@ -565,8 +565,16 @@ export class ServiceDetailPageComponent implements OnInit {
 
     const trimmed = this.titleDraft().trim();
     const currentDisplayName = detail.displayName?.trim() ?? '';
+    const fallbackLabel = resolveDisplayLabelFallback(detail);
 
     if (trimmed === currentDisplayName) {
+      this.titleEditing.set(false);
+
+      return;
+    }
+
+    // Opening edit without a custom name seeds the draft from the fallback label; ignore no-op blur.
+    if (!currentDisplayName && trimmed === fallbackLabel) {
       this.titleEditing.set(false);
 
       return;

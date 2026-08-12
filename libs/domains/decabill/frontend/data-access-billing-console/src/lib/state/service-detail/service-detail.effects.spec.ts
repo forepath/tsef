@@ -23,6 +23,7 @@ import {
   loadHistory,
   loadHistoryFailure,
   loadHistorySuccess,
+  meterSummaryPush,
   resetFilters,
   updateDisplayName,
   updateDisplayNameFailure,
@@ -35,6 +36,7 @@ import {
   loadServiceDetail$,
   loadServiceDetailHistory$,
   reloadServiceDetailHistoryOnFilters$,
+  reloadServiceDetailHistoryOnMeterPush$,
   updateServiceDetailDisplayName$,
 } from './service-detail.effects';
 
@@ -74,7 +76,25 @@ describe('serviceDetailEffects', () => {
       updateAdminSubscriptionItemDisplayName: jest.fn(),
     } as never;
     store = {
-      select: jest.fn(() => of('sub-1')),
+      select: jest.fn((selector: (state: unknown) => unknown) =>
+        of(
+          selector({
+            serviceDetail: {
+              subscriptionId: 'sub-1',
+              itemId: 'item-1',
+              adminMode: false,
+              detail: null,
+              history: null,
+              filters: DEFAULT_METER_HISTORY_FILTERS,
+              loadingDetail: false,
+              loadingHistory: false,
+              renaming: false,
+              error: null,
+              metersFromSocket: null,
+            },
+          }),
+        ),
+      ),
     };
 
     TestBed.configureTestingModule({
@@ -178,6 +198,21 @@ describe('serviceDetailEffects', () => {
           subscriptionId: 'sub-1',
           filters: DEFAULT_METER_HISTORY_FILTERS,
           adminMode: undefined,
+        }),
+      );
+      done();
+    });
+  });
+
+  it('reloadServiceDetailHistoryOnMeterPush reloads history for the active subscription', (done) => {
+    actions$ = of(meterSummaryPush({ subscriptionId: 'sub-1', meters: [] }));
+
+    TestBed.runInInjectionContext(() => reloadServiceDetailHistoryOnMeterPush$(actions$)).subscribe((action) => {
+      expect(action).toEqual(
+        loadHistory({
+          subscriptionId: 'sub-1',
+          filters: DEFAULT_METER_HISTORY_FILTERS,
+          adminMode: false,
         }),
       );
       done();

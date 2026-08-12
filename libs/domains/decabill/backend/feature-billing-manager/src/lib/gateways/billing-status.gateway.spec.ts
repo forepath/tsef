@@ -12,15 +12,19 @@ import { BillingMeterRealtimeService } from './billing-meter-realtime.service';
 import { BillingStatusGateway } from './billing-status.gateway';
 
 function createMockSocket(
-  overrides: Partial<Socket> & { data?: { userInfo?: unknown; meterSubscriptionRooms?: string[] } } = {},
+  overrides: Partial<Socket> & {
+    data?: { userInfo?: unknown; tenantId?: string; meterSubscriptionRooms?: string[] };
+  } = {},
 ): Socket {
+  const { data: dataOverride, ...rest } = overrides;
+
   return {
     id: 'socket-1',
     emit: jest.fn(),
     join: jest.fn().mockResolvedValue(undefined),
     leave: jest.fn().mockResolvedValue(undefined),
-    data: {},
-    ...overrides,
+    ...rest,
+    data: { tenantId: 'default', ...(dataOverride ?? {}) },
   } as unknown as Socket;
 }
 
@@ -124,7 +128,10 @@ describe('BillingStatusGateway', () => {
       await useCallbacks[0](mockSocket, next);
       expect(next).toHaveBeenCalledWith();
       expect(socketAuth.validateAndGetUser).toHaveBeenCalledWith('Bearer x', 'default');
-      expect((mockSocket as unknown as { data: { userInfo: unknown } }).data.userInfo).toEqual(userSocketInfo);
+      expect((mockSocket as unknown as { data: { userInfo: unknown; tenantId: string } }).data.userInfo).toEqual(
+        userSocketInfo,
+      );
+      expect((mockSocket as unknown as { data: { tenantId: string } }).data.tenantId).toBe('default');
       expect(billingMeterRealtime.attachServer).toHaveBeenCalledWith(server);
     });
   });

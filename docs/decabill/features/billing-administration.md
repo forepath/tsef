@@ -61,7 +61,7 @@ The invoice list supports batch loading with client-side search in list-group st
 | GET    | `/admin/billing/subscriptions/{id}/meters`                                      | Meter summaries for the current period                     |
 | GET    | `/admin/billing/subscriptions/{id}/meters/history`                              | Meter history series (`from`, `to`, `groupBy`)             |
 
-Service-visibility admin APIs require `ADMIN` plus PAT scopes `billing_admin:read` / `billing_admin:write`. Meter-entry CRUD remains on `usage:*`. See [Service details](./service-details.md).
+Service-visibility admin APIs require `ADMIN` plus PAT scopes `billing_admin:read` / `billing_admin:write`. Meter-entry list/update/delete use the same `billing_admin:*` scopes; create remains on `usage:write` for ingestion keys. See [Service details](./service-details.md).
 
 Instant cancel marks `instantRemoval` and queues `subscription-instant-cancel` jobs. See [Subscriptions — Admin instant cancel](./subscriptions.md#admin-instant-cancel).
 

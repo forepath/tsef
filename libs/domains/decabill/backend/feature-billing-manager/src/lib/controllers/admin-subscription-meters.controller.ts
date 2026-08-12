@@ -44,13 +44,14 @@ export class AdminSubscriptionMetersController {
     const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
     ensureAdmin(userInfo);
     const subscription = await this.subscriptionsRepository.findByIdOrThrow(id);
-    const { fromDate, toDate } = parseMeterHistoryDateRange(query.from, query.to);
+    const groupBy = query.groupBy ?? 'day';
+    const { fromDate, toDate } = parseMeterHistoryDateRange(query.from, query.to, groupBy);
 
     return await this.meterBillingService.buildSubscriptionMeterHistory({
       subscription,
       from: fromDate,
       to: toDate,
-      groupBy: query.groupBy ?? 'day',
+      groupBy,
     });
   }
 
@@ -72,7 +73,7 @@ export class AdminSubscriptionMetersController {
   }
 
   @Get(':id/meter-entries')
-  @RequireScopes('usage:read')
+  @RequireScopes('billing_admin:read')
   async listEntries(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Req() req?: RequestWithUser,
@@ -90,7 +91,7 @@ export class AdminSubscriptionMetersController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() body: Omit<CreateUsageRecordDto, 'subscriptionId'>,
     @Req() req?: RequestWithUser,
-  ): Promise<{ id: string }> {
+  ): Promise<UsageMeterEntryResponseDto> {
     const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
 
     if (!userInfo.userId && !userInfo.isApiKeyAuth) {
@@ -100,7 +101,7 @@ export class AdminSubscriptionMetersController {
     ensureAdmin(userInfo);
     await this.subscriptionsRepository.findByIdOrThrow(id);
 
-    const record = await this.usageService.createUsage({
+    return await this.usageService.createMeterEntry({
       subscriptionId: id,
       periodStart: new Date(body.periodStart),
       periodEnd: new Date(body.periodEnd),
@@ -111,12 +112,10 @@ export class AdminSubscriptionMetersController {
       attachmentType: body.attachmentType,
       addonId: body.addonId,
     });
-
-    return { id: record.id };
   }
 
   @Post(':id/meter-entries/:entryId')
-  @RequireScopes('usage:write')
+  @RequireScopes('billing_admin:write')
   async updateEntry(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Param('entryId', new ParseUUIDPipe({ version: '4' })) entryId: string,
@@ -131,7 +130,7 @@ export class AdminSubscriptionMetersController {
   }
 
   @Delete(':id/meter-entries/:entryId')
-  @RequireScopes('usage:write')
+  @RequireScopes('billing_admin:write')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteEntry(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,

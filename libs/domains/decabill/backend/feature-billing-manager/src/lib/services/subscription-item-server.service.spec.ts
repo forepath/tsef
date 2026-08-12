@@ -218,6 +218,29 @@ describe('SubscriptionItemServerService', () => {
       );
     });
 
+    it('keeps cached server info when live provider refresh fails', async () => {
+      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue({
+        ...activeItem,
+        serverInfoSnapshot: {
+          name: 'host1',
+          publicIp: '203.0.113.10',
+          status: 'running',
+          metadata: { provider: 'hetzner' },
+        },
+      });
+      provisioningService.getServerInfo.mockRejectedValue(new Error('provider timeout'));
+
+      const detail = await service.getItemDetail('sub-1', 'item-1', 'user-1');
+
+      expect(detail.serverInfo).toEqual(
+        expect.objectContaining({
+          name: 'host1',
+          publicIp: '203.0.113.10',
+          status: 'running',
+        }),
+      );
+    });
+
     it('rejects items on canceled subscriptions even when provider reference remains', async () => {
       subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
         id: 'sub-1',

@@ -285,10 +285,18 @@ export class SubscriptionItemServerService {
 
     // Cached snapshots often omit geography; refresh from the provider before config fallback.
     if (!serverInfo || !serverInfoHasGeography(serverInfo.metadata)) {
-      const liveInfo = await this.fetchLiveServerInfo(item);
+      try {
+        const liveInfo = await this.fetchLiveServerInfo(item);
 
-      if (liveInfo) {
-        serverInfo = mapServerInfoToResponse(liveInfo);
+        if (liveInfo) {
+          serverInfo = mapServerInfoToResponse(liveInfo);
+        }
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+
+        this.logger.warn(
+          `Live server info refresh failed for item ${itemId}; falling back to cached snapshot: ${message}`,
+        );
       }
     }
 

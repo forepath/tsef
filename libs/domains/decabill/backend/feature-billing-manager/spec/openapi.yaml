@@ -3670,7 +3670,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsageRecordResponse'
+                $ref: '#/components/schemas/UsageMeterEntryResponse'
   /admin/billing/subscriptions/{subscriptionId}/meter-entries/{entryId}:
     post:
       tags: [Admin Billing]
