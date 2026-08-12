@@ -23,9 +23,15 @@ import type {
   PaginatedBillingAuditLogsResponse,
   AdminInvoiceListItem,
   AdminSubscriptionListItem,
+  ServerInfoResponse,
+  SubscriptionItemDetailResponse,
+  SubscriptionItemResponse,
   SubscriptionResponse,
+  SubscriptionSshAccessKeyResponse,
   UpdateManualInvoiceDto,
   CreateUsageMeterEntryDto,
+  MeterHistoryFilters,
+  SubscriptionMeterHistory,
   UpdateUsageMeterEntryDto,
   UsageMeterEntryResponse,
 } from '../types/billing.types';
@@ -303,6 +309,75 @@ export class AdminBillingService {
   deleteSubscriptionMeterEntry(subscriptionId: string, entryId: string): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/meter-entries/${entryId}`,
+    );
+  }
+
+  getAdminSubscriptionItemDetail(subscriptionId: string, itemId: string): Observable<SubscriptionItemDetailResponse> {
+    return this.http.get<SubscriptionItemDetailResponse>(
+      `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}`,
+    );
+  }
+
+  updateAdminSubscriptionItemDisplayName(
+    subscriptionId: string,
+    itemId: string,
+    displayName: string | null,
+  ): Observable<SubscriptionItemResponse> {
+    return this.http.post<SubscriptionItemResponse>(
+      `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}/display-name`,
+      { displayName },
+    );
+  }
+
+  getAdminSubscriptionItemServerInfo(subscriptionId: string, itemId: string): Observable<ServerInfoResponse> {
+    return this.http.get<ServerInfoResponse>(
+      `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}/server-info`,
+    );
+  }
+
+  getAdminSubscriptionItemSshAccessKey(
+    subscriptionId: string,
+    itemId: string,
+  ): Observable<SubscriptionSshAccessKeyResponse> {
+    return this.http.get<SubscriptionSshAccessKeyResponse>(
+      `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}/ssh-access-key`,
+    );
+  }
+
+  startAdminSubscriptionItemServer(subscriptionId: string, itemId: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(
+      `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}/actions/start`,
+      {},
+    );
+  }
+
+  stopAdminSubscriptionItemServer(subscriptionId: string, itemId: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(
+      `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}/actions/stop`,
+      {},
+    );
+  }
+
+  restartAdminSubscriptionItemServer(subscriptionId: string, itemId: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(
+      `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}/actions/restart`,
+      {},
+    );
+  }
+
+  getAdminSubscriptionMeterHistory(
+    subscriptionId: string,
+    filters: MeterHistoryFilters,
+  ): Observable<SubscriptionMeterHistory> {
+    return this.http.get<SubscriptionMeterHistory>(
+      `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/meters/history`,
+      {
+        params: {
+          from: filters.from,
+          to: filters.to,
+          groupBy: filters.groupBy,
+        },
+      },
     );
   }
 }

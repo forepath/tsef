@@ -1,3 +1,5 @@
+import { getProviderLocationFallbackLabels } from './provider-location-fallbacks';
+
 export interface ProviderLocation {
   id: string;
   name: string;
@@ -22,12 +24,13 @@ export function providerLocationCatalogFromList(locations: ProviderLocation[]): 
 }
 
 /**
- * Formats a geography slug for display using a loaded provider catalog.
- * Falls back to the technical slug when no label is known.
+ * Formats a geography slug for display using a loaded provider catalog and static fallbacks.
+ * Returns an empty string when no slug is provided.
  */
 export function formatProvisioningLocationLabel(
   slug: string | null | undefined,
   catalog?: ProviderLocationCatalog | ProviderLocation[],
+  providerId?: string | null,
 ): string {
   const normalizedSlug = slug?.trim();
 
@@ -41,6 +44,14 @@ export function formatProvisioningLocationLabel(
 
     if (entry?.name?.trim()) {
       return entry.name.trim();
+    }
+  }
+
+  if (providerId?.trim()) {
+    const fallback = getProviderLocationFallbackLabels(providerId.trim())[normalizedSlug];
+
+    if (fallback?.trim()) {
+      return fallback.trim();
     }
   }
 

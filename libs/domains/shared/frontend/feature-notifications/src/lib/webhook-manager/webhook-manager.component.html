@@ -88,7 +88,7 @@
         <div class="list-group list-group-flush">
           @for (endpoint of endpoints(); track endpoint.id) {
             <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-3">
-              <div class="min-w-0">
+              <div class="min-w-0 flex-grow-1">
                 <div class="fw-semibold mb-1">{{ endpoint.name }}</div>
                 <div class="small text-muted text-break mb-2">{{ endpoint.url }}</div>
                 <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">

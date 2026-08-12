@@ -809,6 +809,15 @@
       <trans-unit id="featureSubscriptions-resumeButtonTitle" datatype="html">
         <source>Resume subscription</source>
         </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-services" datatype="html">
+        <source>Services</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-openServiceDetails" datatype="html">
+        <source>Open details</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-usageMeters" datatype="html">
+        <source>Usage meters</source>
+        </trans-unit>
       <trans-unit id="featureSubscriptions-cancelSubscriptionTitle" datatype="html">
         <source>Cancel subscription?</source>
         </trans-unit>
@@ -863,15 +872,6 @@
       <trans-unit id="featureAdminSubscriptions-createEntry" datatype="html">
         <source>Record meter entry</source>
         </trans-unit>
-      <trans-unit id="featureAdminSubscriptions-entryMeter" datatype="html">
-        <source>Meter</source>
-        </trans-unit>
-      <trans-unit id="featureAdminSubscriptions-selectMeter" datatype="html">
-        <source>Select meter</source>
-        </trans-unit>
-      <trans-unit id="featureAdminSubscriptions-entryValue" datatype="html">
-        <source>Value</source>
-        </trans-unit>
       <trans-unit id="featureAdminSubscriptions-entryAttachmentType" datatype="html">
         <source>Attachment type</source>
         </trans-unit>
@@ -881,8 +881,20 @@
       <trans-unit id="featureAdminSubscriptions-attachmentAddon" datatype="html">
         <source>Addon</source>
         </trans-unit>
-      <trans-unit id="featureAdminSubscriptions-entryAddonId" datatype="html">
-        <source>Addon ID</source>
+      <trans-unit id="featureAdminSubscriptions-entryValue" datatype="html">
+        <source>Value</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-entryMeter" datatype="html">
+        <source>Meter</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-selectMeter" datatype="html">
+        <source>Select meter</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-entryAddonMeter" datatype="html">
+        <source>Addon meter</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-selectAddonMeter" datatype="html">
+        <source>Select addon meter</source>
         </trans-unit>
       <trans-unit id="featureAdminSubscriptions-entryPeriodStart" datatype="html">
         <source>Period start</source>
@@ -941,6 +953,9 @@
       <trans-unit id="featureContainer-subscriptionsPage" datatype="html">
         <source>Plans</source>
         </trans-unit>
+      <trans-unit id="featureContainer-serviceDetailPage" datatype="html">
+        <source>Service</source>
+        </trans-unit>
       <trans-unit id="featureContainer-promotionsPage" datatype="html">
         <source>Promotions</source>
         </trans-unit>
@@ -980,6 +995,9 @@
       <trans-unit id="featureContainer-adminSubscriptionsPage" datatype="html">
         <source>Contracts</source>
         </trans-unit>
+      <trans-unit id="featureContainer-adminServiceDetailPage" datatype="html">
+        <source>Service</source>
+        </trans-unit>
       <trans-unit id="featureContainer-adminProjectsPage" datatype="html">
         <source>Projects</source>
         </trans-unit>
@@ -994,6 +1012,27 @@
         </trans-unit>
       <trans-unit id="featureBilling-notAvailable" datatype="html">
         <source>N/A</source>
+        </trans-unit>
+      <trans-unit id="featureMeters-aggregatorMax" datatype="html">
+        <source>Max</source>
+        </trans-unit>
+      <trans-unit id="featureMeters-aggregatorMin" datatype="html">
+        <source>Min</source>
+        </trans-unit>
+      <trans-unit id="featureMeters-aggregatorAvg" datatype="html">
+        <source>Average</source>
+        </trans-unit>
+      <trans-unit id="featureMeters-aggregatorFirst" datatype="html">
+        <source>First</source>
+        </trans-unit>
+      <trans-unit id="featureMeters-aggregatorLast" datatype="html">
+        <source>Last</source>
+        </trans-unit>
+      <trans-unit id="featureMeters-aggregatorSum" datatype="html">
+        <source>Sum</source>
+        </trans-unit>
+      <trans-unit id="featureMeters-aggregatorSumPositiveDeltas" datatype="html">
+        <source>Sum of positive deltas</source>
         </trans-unit>
       <trans-unit id="featureBilling-subscriptionStatusEmpty" datatype="html">
         <source>Unknown</source>
@@ -1033,6 +1072,9 @@
         </trans-unit>
       <trans-unit id="featureBilling-provisioningStatusFailed" datatype="html">
         <source>Provisioning failed</source>
+        </trans-unit>
+      <trans-unit id="featureBilling-provisioningStatusRemoved" datatype="html">
+        <source>Removed</source>
         </trans-unit>
       <trans-unit id="featureBilling-provisioningStatusUnknown" datatype="html">
         <source>Unknown (<x id="PH" equiv-text="status"/>)</source>
@@ -1640,27 +1682,6 @@
       <trans-unit id="featureMeters-cannotUndo" datatype="html">
         <source>This action cannot be undone.</source>
         </trans-unit>
-      <trans-unit id="featureMeters-aggregatorMax" datatype="html">
-        <source>Max</source>
-        </trans-unit>
-      <trans-unit id="featureMeters-aggregatorMin" datatype="html">
-        <source>Min</source>
-        </trans-unit>
-      <trans-unit id="featureMeters-aggregatorAvg" datatype="html">
-        <source>Average</source>
-        </trans-unit>
-      <trans-unit id="featureMeters-aggregatorFirst" datatype="html">
-        <source>First</source>
-        </trans-unit>
-      <trans-unit id="featureMeters-aggregatorLast" datatype="html">
-        <source>Last</source>
-        </trans-unit>
-      <trans-unit id="featureMeters-aggregatorSum" datatype="html">
-        <source>Sum</source>
-        </trans-unit>
-      <trans-unit id="featureMeters-aggregatorSumPositiveDeltas" datatype="html">
-        <source>Sum of positive deltas</source>
-        </trans-unit>
       <trans-unit id="featureOverview-title" datatype="html">
         <source>Overview</source>
         </trans-unit>
@@ -1718,20 +1739,8 @@
       <trans-unit id="featureOverview-noSearchResults" datatype="html">
         <source>No instances match your search.</source>
         </trans-unit>
-      <trans-unit id="featureOverview-viewSubscription" datatype="html">
-        <source>View subscription</source>
-        </trans-unit>
-      <trans-unit id="featureOverview-provisioningPendingHint" datatype="html">
-        <source> Your server is being set up. This usually takes less than a minute. </source>
-        </trans-unit>
-      <trans-unit id="featureOverview-provisioningFailedHint" datatype="html">
-        <source> Server setup did not complete. Check backorders or contact support if this persists. </source>
-        </trans-unit>
-      <trans-unit id="featureOverview-sshAccessGrantedBadgeTitle" datatype="html">
-        <source>SSH access granted</source>
-        </trans-unit>
-      <trans-unit id="featureOverview-sshAccessGrantedBadge" datatype="html">
-        <source>SSH access granted</source>
+      <trans-unit id="featureOverview-viewServiceDetails" datatype="html">
+        <source>View service details</source>
         </trans-unit>
       <trans-unit id="featureOverview-serverActionsAria" datatype="html">
         <source>Server actions</source>
@@ -1750,6 +1759,18 @@
         </trans-unit>
       <trans-unit id="featureOverview-openConsoleButtonTitle" datatype="html">
         <source>Open console</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-provisioningPendingHint" datatype="html">
+        <source> Your server is being set up. This usually takes less than a minute. </source>
+        </trans-unit>
+      <trans-unit id="featureOverview-provisioningFailedHint" datatype="html">
+        <source> Server setup did not complete. Check backorders or contact support if this persists. </source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessGrantedBadgeTitle" datatype="html">
+        <source>SSH access granted</source>
+        </trans-unit>
+      <trans-unit id="featureOverview-sshAccessGrantedBadge" datatype="html">
+        <source>SSH access granted</source>
         </trans-unit>
       <trans-unit id="featureOverview-sshAccessConfirmTitle" datatype="html">
         <source> Reveal SSH access key? </source>
@@ -2463,6 +2484,111 @@
       <trans-unit id="featurePublicWithdrawal-backToLoginLink" datatype="html">
         <source>Back to login</source>
         </trans-unit>
+      <trans-unit id="featureServiceDetail-backToSubscriptions" datatype="html">
+        <source>Back to subscriptions</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-backToDashboard" datatype="html">
+        <source>Back to dashboard</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverActionsAria" datatype="html">
+        <source>Server actions</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStartButtonTitle" datatype="html">
+        <source>Start server</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStopButtonTitle" datatype="html">
+        <source>Stop server</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverRestartButtonTitle" datatype="html">
+        <source>Restart server</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusUpdatingHint" datatype="html">
+        <source>Server status updating…</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-openConsoleButtonTitle" datatype="html">
+        <source>Open console</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-loading" datatype="html">
+        <source>Loading service…</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serviceType" datatype="html">
+        <source>Service type</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-provider" datatype="html">
+        <source>Provider</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-publicIp" datatype="html">
+        <source>Public IP</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-privateIp" datatype="html">
+        <source>Private IP</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-hostname" datatype="html">
+        <source>Hostname</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-hostnameFqdn" datatype="html">
+        <source>FQDN</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-runtimeStatus" datatype="html">
+        <source>Runtime status</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-location" datatype="html">
+        <source>Location</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-noServerInfo" datatype="html">
+        <source> Server details are not available yet. </source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-usageMetersTitle" datatype="html">
+        <source>Usage meters</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-filters" datatype="html">
+        <source>Filters</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-fromDate" datatype="html">
+        <source>From</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-toDate" datatype="html">
+        <source>To</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-groupBy" datatype="html">
+        <source>Group by</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-groupByDay" datatype="html">
+        <source>Day</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-groupByMonth" datatype="html">
+        <source>Month</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-applyFilters" datatype="html">
+        <source> Apply </source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-resetFilters" datatype="html">
+        <source> Reset </source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-meterTotalLabel" datatype="html">
+        <source>Total:</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serviceInfoTitle" datatype="html">
+        <source>Service info</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-renameTitleAria" datatype="html">
+        <source>Rename service</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-clearNameAria" datatype="html">
+        <source>Clear display name draft</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusOnline" datatype="html">
+        <source>Online</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusOff" datatype="html">
+        <source>Stopped</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-serverStatusUpdating" datatype="html">
+        <source>Updating</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-customService" datatype="html">
+        <source>Custom application</source>
+        </trans-unit>
       <trans-unit id="featureServicePlans-title" datatype="html">
         <source>Service Plans</source>
         </trans-unit>
@@ -2883,11 +3009,17 @@
       <trans-unit id="featureSubscriptions-noBackorderSearchResults" datatype="html">
         <source> No backorders match your search. </source>
         </trans-unit>
-      <trans-unit id="featureSubscriptions-usageMeters" datatype="html">
-        <source>Usage meters</source>
-        </trans-unit>
       <trans-unit id="featureSubscriptions-modifyConfigButtonTitle" datatype="html">
         <source>Upgrade or downgrade</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-services" datatype="html">
+        <source>Services</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-openServiceDetails" datatype="html">
+        <source>Open details</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-usageMeters" datatype="html">
+        <source>Usage meters</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-backorderActionsAria" datatype="html">
         <source>Backorder actions</source>
@@ -2921,9 +3053,6 @@
         </trans-unit>
       <trans-unit id="featureSubscriptions-addons" datatype="html">
         <source>Addons</source>
-        </trans-unit>
-      <trans-unit id="featureSubscriptions-addonMeterLabel" datatype="html">
-        <source>Meter</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-planMeters" datatype="html">
         <source> Plan usage meters </source>
@@ -3038,6 +3167,9 @@
         </trans-unit>
       <trans-unit id="featureSubscriptions-orderSummaryTitle" datatype="html">
         <source>Order summary</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-orderSummaryMeters" datatype="html">
+        <source> Usage meters </source>
         </trans-unit>
       <trans-unit id="featurePromotions-orderCodeLabel" datatype="html">
         <source>Promotion code (optional)</source>
@@ -3302,12 +3434,6 @@
         </trans-unit>
       <trans-unit id="featureSubscriptions-mobilePanelBackorders" datatype="html">
         <source>Backorders</source>
-        </trans-unit>
-      <trans-unit id="featureSubscriptions-meterAddon" datatype="html">
-        <source>Addon meter</source>
-        </trans-unit>
-      <trans-unit id="featureSubscriptions-meterPlan" datatype="html">
-        <source>Plan meter</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-addonConfigCardTitle" datatype="html">
         <source>Addon: <x id="addonName" equiv-text="addonName"/></source>

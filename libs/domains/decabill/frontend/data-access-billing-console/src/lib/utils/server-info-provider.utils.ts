@@ -74,42 +74,48 @@ export function isBillingServerStartable(serverInfo: Pick<ServerInfoResponse, 's
   return serverInfo.status === 'off';
 }
 
-/**
- * Location/datacenter label for the UI.
- * Prefers provider-supplied human-readable metadata (`locationName`, `regionName`).
- */
-export function getBillingServerLocationLabel(metadata?: Record<string, unknown>): string | undefined {
-  const provider = resolveServerInfoProvider(metadata);
+function trimMetadataString(metadata: Record<string, unknown> | undefined, key: string): string | undefined {
+  const value = metadata?.[key];
 
-  if (provider === 'digital-ocean') {
-    const regionName = metadata?.['regionName'];
-
-    if (typeof regionName === 'string' && regionName.trim()) {
-      return regionName.trim();
-    }
-
-    const region = metadata?.['region'];
-
-    if (typeof region === 'string' && region.trim()) {
-      return region.trim();
-    }
-
+  if (typeof value !== 'string') {
     return undefined;
   }
 
-  const locationName = metadata?.['locationName'];
+  const trimmed = value.trim();
 
-  if (typeof locationName === 'string' && locationName.trim()) {
-    return locationName.trim();
+  return trimmed || undefined;
+}
+
+/**
+ * Location/datacenter label for the UI.
+ * Prefers provider-supplied human-readable metadata (`locationName`, `regionName`),
+ * then maps geography slugs (`location`, `region`) via catalog and static provider labels.
+ * Returns undefined when no human-readable label is available (caller should hide the row).
+ */
+export function getBillingServerLocationLabel(
+  metadata?: Record<string, unknown>,
+  locations?: ProviderLocationCatalog | Array<{ id: string; name: string }>,
+): string | undefined {
+  const humanName = trimMetadataString(metadata, 'locationName') ?? trimMetadataString(metadata, 'regionName');
+
+  if (humanName) {
+    return humanName;
   }
 
-  const location = metadata?.['location'];
+  const slug = trimMetadataString(metadata, 'location') ?? trimMetadataString(metadata, 'region');
 
-  if (typeof location === 'string' && location.trim()) {
-    return location.trim();
+  if (!slug) {
+    return undefined;
   }
 
-  return undefined;
+  const resolved = formatProvisioningLocationLabel(slug, locations, resolveServerInfoProvider(metadata));
+
+  // Hide unresolved technical slugs from the UI.
+  if (!resolved || resolved === slug) {
+    return undefined;
+  }
+
+  return resolved;
 }
 
 /**
@@ -118,8 +124,9 @@ export function getBillingServerLocationLabel(metadata?: Record<string, unknown>
 export function formatBillingProviderLocationLabel(
   slug: string | null | undefined,
   locations?: ProviderLocationCatalog | Array<{ id: string; name: string }>,
+  providerId?: string | null,
 ): string {
-  return formatProvisioningLocationLabel(slug, locations);
+  return formatProvisioningLocationLabel(slug, locations, providerId);
 }
 
 export { providerLocationCatalogFromList, type ProviderLocationCatalog };

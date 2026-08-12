@@ -41,12 +41,16 @@ import {
   type ServiceTypeResponse,
   type ServerType,
   type SubscriptionResponse,
+  type SubscriptionItemResponse,
   type SubscriptionMeterSummary,
   formatBillingProviderLocationLabel,
   formatServerTypeOption,
   isNoneServiceTypeId,
+  isSubscriptionItemDetailEligible,
+  isSubscriptionItemRemoved,
   normalizeAllowedServerTypeIds,
   providerLocationCatalogFromList,
+  resolveServiceDisplayLabel,
   type ProviderLocationCatalog,
   type ValidatePromotionRequest,
 } from '@forepath/decabill/frontend/data-access-billing-console';
@@ -57,6 +61,7 @@ import {
   getBackorderStatusBadgeClass,
   getBackorderStatusLabel,
   getBillingIntervalLabel,
+  getMeterAggregatorLabel,
   getProfileCompleteLabel,
   getProvisioningStatusBadgeClass,
   getProvisioningStatusLabel,
@@ -628,6 +633,38 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return sub.meters ?? [];
   }
 
+  subscriptionItems(sub: SubscriptionResponse): SubscriptionItemResponse[] {
+    return sub.items ?? [];
+  }
+
+  serviceDisplayLabel(item: SubscriptionItemResponse): string {
+    return resolveServiceDisplayLabel(item);
+  }
+
+  isServiceDetailEligible(sub: SubscriptionResponse, item: SubscriptionItemResponse): boolean {
+    return isSubscriptionItemDetailEligible(item, sub.status);
+  }
+
+  itemProvisioningStatusLabel(sub: SubscriptionResponse, item: SubscriptionItemResponse): string {
+    if (isSubscriptionItemRemoved(item, sub.status)) {
+      return getProvisioningStatusLabel('removed');
+    }
+
+    return getProvisioningStatusLabel(item.provisioningStatus);
+  }
+
+  itemProvisioningStatusBadgeClass(sub: SubscriptionResponse, item: SubscriptionItemResponse): string {
+    if (isSubscriptionItemRemoved(item, sub.status)) {
+      return getProvisioningStatusBadgeClass('removed');
+    }
+
+    return getProvisioningStatusBadgeClass(item.provisioningStatus);
+  }
+
+  serviceDetailLink(sub: SubscriptionResponse, item: SubscriptionItemResponse): string[] {
+    return ['/subscriptions', sub.id, 'services', item.id];
+  }
+
   hasSubscriptionMeters(sub: SubscriptionResponse): boolean {
     return this.subscriptionMeters(sub).length > 0;
   }
@@ -642,12 +679,15 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return `${meter.aggregatedValue}${unit}`;
   }
 
-  meterAttachmentLabel(meter: SubscriptionMeterSummary): string {
-    if (meter.attachmentType === 'addon') {
-      return meter.addonName?.trim() || meter.addonId || $localize`:@@featureSubscriptions-meterAddon:Addon meter`;
-    }
+  meterAggregatorLabel(aggregator: string | null | undefined): string {
+    return getMeterAggregatorLabel(aggregator);
+  }
 
-    return $localize`:@@featureSubscriptions-meterPlan:Plan meter`;
+  formatOrderMeterPrice(meter: { effectiveUnitPriceNet: number; unitLabel?: string | null }): string {
+    const price = this.formatCurrencyAmount(meter.effectiveUnitPriceNet);
+    const unit = meter.unitLabel?.trim();
+
+    return unit ? `${price} / ${unit}` : price;
   }
 
   formatBackorderPeriodPrice(bo: BackorderResponse, plans: ServicePlanResponse[] | null): string {
@@ -844,6 +884,14 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
   selectedOrderAddons(): PlanAddonOptionDto[] {
     return this.orderAddons.filter((addon) => this.orderAddonIds.has(addon.id));
+  }
+
+  hasOrderSummaryMeters(plan: ServicePlanResponse | null | undefined): boolean {
+    if ((plan?.meters?.length ?? 0) > 0) {
+      return true;
+    }
+
+    return this.selectedOrderAddons().some((addon) => (addon.meters?.length ?? 0) > 0);
   }
 
   formatOrderAddonsSummary(): string {

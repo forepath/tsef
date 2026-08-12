@@ -33,6 +33,14 @@ export class SubscriptionItemsRepository {
     return await this.repository.save(entity);
   }
 
+  async clearProviderReference(id: string): Promise<SubscriptionItemEntity> {
+    const entity = await this.findByIdInTenant(id);
+
+    entity.providerReference = undefined;
+
+    return await this.repository.save(entity);
+  }
+
   async updateProvisioningStatus(id: string, status: 'pending' | 'active' | 'failed'): Promise<SubscriptionItemEntity> {
     const entity = await this.findByIdInTenant(id);
 
@@ -122,6 +130,14 @@ export class SubscriptionItemsRepository {
     const entity = await this.findByIdInTenant(id);
 
     entity.hostname = hostname ?? undefined;
+
+    return await this.repository.save(entity);
+  }
+
+  async updateDisplayName(id: string, displayName: string | null): Promise<SubscriptionItemEntity> {
+    const entity = await this.findByIdInTenant(id);
+
+    entity.displayName = displayName;
 
     return await this.repository.save(entity);
   }

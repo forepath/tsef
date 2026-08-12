@@ -38,6 +38,7 @@ import { getProvisioningCredentials, normalizeStoredProviderDefaults } from '../
 import { generateSshKeyPair } from '../utils/ssh-key.utils';
 import { assertAddonConfigsMatchSelection } from '../utils/addon-config.utils';
 import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
+import { mapSubscriptionItemToResponse } from '../utils/subscription-item-response.utils';
 
 import { AddonService } from './addon.service';
 import { AddonLifecycleService } from './addon-lifecycle.service';
@@ -965,6 +966,7 @@ export class SubscriptionService {
         periodStart: subscription.currentPeriodStart,
         periodEnd: subscription.currentPeriodEnd,
       }),
+      items: items.map((item) => mapSubscriptionItemToResponse(item)),
       createdAt: subscription.createdAt,
       updatedAt: subscription.updatedAt,
     };

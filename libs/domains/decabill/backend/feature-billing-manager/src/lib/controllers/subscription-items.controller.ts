@@ -1,9 +1,15 @@
 import { RequireScopes } from '@forepath/identity/backend';
-import { BadRequestException, Controller, Get, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
 
 import { ServerInfoResponseDto } from '../dto/server-info-response.dto';
-import { SubscriptionSshAccessKeyResponseDto } from '../dto/subscription-item-response.dto';
+import {
+  SubscriptionItemDetailResponseDto,
+  SubscriptionItemResponseDto,
+  SubscriptionSshAccessKeyResponseDto,
+} from '../dto/subscription-item-response.dto';
+import { UpdateSubscriptionItemDisplayNameDto } from '../dto/update-subscription-item-display-name.dto';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
+import { toServerInfoResponse } from '../utils/subscription-item-response.utils';
 import { getUserFromRequest, type RequestWithUser } from '../utils/billing-access.utils';
 
 @Controller('subscriptions/:subscriptionId/items')
@@ -23,6 +29,44 @@ export class SubscriptionItemsController {
     }
 
     return await this.subscriptionItemServerService.listItems(subscriptionId, userInfo.userId);
+  }
+
+  @RequireScopes('subscriptions:read')
+  @Get(':itemId')
+  async getItemDetail(
+    @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
+    @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
+    @Req() req?: RequestWithUser,
+  ): Promise<SubscriptionItemDetailResponseDto> {
+    const userInfo = getUserFromRequest(req ?? ({} as RequestWithUser));
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.subscriptionItemServerService.getItemDetail(subscriptionId, itemId, userInfo.userId);
+  }
+
+  @RequireScopes('subscriptions:write')
+  @Post(':itemId/display-name')
+  async updateDisplayName(
+    @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
+    @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
+    @Body() dto: UpdateSubscriptionItemDisplayNameDto,
+    @Req() req?: RequestWithUser,
+  ): Promise<SubscriptionItemResponseDto> {
+    const userInfo = getUserFromRequest(req ?? ({} as RequestWithUser));
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.subscriptionItemServerService.updateDisplayName(
+      subscriptionId,
+      itemId,
+      userInfo.userId,
+      dto.displayName ?? null,
+    );
   }
 
   @RequireScopes('subscriptions:write')
@@ -112,24 +156,4 @@ export class SubscriptionItemsController {
 
     return { success: true };
   }
-}
-
-function toServerInfoResponse(info: {
-  name: string;
-  publicIp: string;
-  privateIp?: string;
-  status: string;
-  metadata?: Record<string, unknown>;
-  hostname?: string;
-  hostnameFqdn?: string;
-}): ServerInfoResponseDto {
-  return {
-    name: info.name,
-    publicIp: info.publicIp,
-    privateIp: info.privateIp,
-    status: info.status,
-    metadata: info.metadata,
-    hostname: info.hostname,
-    hostnameFqdn: info.hostnameFqdn,
-  };
 }

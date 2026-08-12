@@ -212,84 +212,22 @@
               </div>
             } @else {
               @for (item of filteredSubscriptionsWithServerInfo(); track item.subscription.id) {
-                <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
-                  <div class="min-w-0">
-                    <div class="fw-semibold mb-1">
-                      {{ instanceDisplayTitle(item) }}
-                      <a routerLink="/subscriptions" class="ms-1 text-decoration-none">
-                        <i class="bi bi-arrow-right small" aria-hidden="true"></i>
-                        <span class="visually-hidden" i18n="@@featureOverview-viewSubscription">View subscription</span>
-                      </a>
+                <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-3">
+                  @if (item.itemId && isInstanceReady(item)) {
+                    <a
+                      [routerLink]="['/subscriptions', item.subscription.id, 'services', item.itemId]"
+                      [queryParams]="{ from: 'dashboard' }"
+                      class="min-w-0 flex-grow-1 text-decoration-none text-body"
+                      title="View service details"
+                      i18n-title="@@featureOverview-viewServiceDetails"
+                    >
+                      <ng-container *ngTemplateOutlet="instanceMain; context: { $implicit: item }" />
+                    </a>
+                  } @else {
+                    <div class="min-w-0 flex-grow-1">
+                      <ng-container *ngTemplateOutlet="instanceMain; context: { $implicit: item }" />
                     </div>
-                    <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
-                      <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
-                        @if (isProvisioningPending(item) || isProvisioningFailed(item)) {
-                          <span
-                            class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
-                            [ngClass]="provisioningStatusBadgeClass(item.provisioningStatus)"
-                          >
-                            {{ provisioningStatusLabel(item.provisioningStatus) }}
-                          </span>
-                          <span class="me-2">
-                            <i class="bi bi-layers me-1" aria-hidden="true"></i>{{ serviceTypeLabel(item.service) }}
-                          </span>
-                          @if (isProvisioningPending(item)) {
-                            <span class="me-2" i18n="@@featureOverview-provisioningPendingHint">
-                              Your server is being set up. This usually takes less than a minute.
-                            </span>
-                          } @else {
-                            <span class="me-2" i18n="@@featureOverview-provisioningFailedHint">
-                              Server setup did not complete. Check backorders or contact support if this persists.
-                            </span>
-                          }
-                        } @else if (item.serverInfo; as serverInfo) {
-                          <span
-                            class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
-                            [ngClass]="serverStatusBadgeClass(serverInfo)"
-                          >
-                            <i class="bi me-1" [ngClass]="serverStatusIconClass(serverInfo)" aria-hidden="true"></i>
-                            {{ serverStatusLabel(serverInfo) }}
-                          </span>
-                          @if (item.sshAccessGranted) {
-                            <span
-                              class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2 billing-admin__chip--status-warning"
-                              title="SSH access granted"
-                              i18n-title="@@featureOverview-sshAccessGrantedBadgeTitle"
-                            >
-                              <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
-                              <span i18n="@@featureOverview-sshAccessGrantedBadge">SSH access granted</span>
-                            </span>
-                          }
-                          <span class="me-2">
-                            <i class="bi bi-layers me-1" aria-hidden="true"></i>{{ serviceTypeLabel(item.service) }}
-                          </span>
-                          @if (item.serviceTypeName) {
-                            <span class="me-2">
-                              <i class="bi bi-hdd-rack me-1" aria-hidden="true"></i>{{ item.serviceTypeName }}
-                              @if (serverLocationLabel(serverInfo.metadata); as loc) {
-                                <span class="text-body-secondary ms-1">({{ loc }})</span>
-                              }
-                            </span>
-                          } @else if (serverLocationLabel(serverInfo.metadata); as loc) {
-                            <span class="me-2"> <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ loc }} </span>
-                          }
-                          @if (serverInfo.hostnameFqdn) {
-                            <span class="me-2">
-                              <i class="bi bi-globe me-1" aria-hidden="true"></i>{{ serverInfo.hostnameFqdn }}
-                            </span>
-                          }
-                          <span class="me-2">
-                            <i class="bi bi-ethernet me-1" aria-hidden="true"></i>{{ serverInfo.publicIp }}
-                          </span>
-                          @if (serverInfo.privateIp) {
-                            <span class="me-2">
-                              <i class="bi bi-diagram-3 me-1" aria-hidden="true"></i>{{ serverInfo.privateIp }}
-                            </span>
-                          }
-                        }
-                      </div>
-                    </div>
-                  </div>
+                  }
                   <div class="d-flex align-items-center gap-2 flex-shrink-0">
                     @if (isInstanceReady(item)) {
                       @if (
@@ -306,7 +244,11 @@
                             <button
                               type="button"
                               class="btn btn-outline-success"
-                              (click)="serverInfoFacade.startServer(item.subscription.id, item.itemId)"
+                              (click)="
+                                $event.preventDefault();
+                                $event.stopPropagation();
+                                serverInfoFacade.startServer(item.subscription.id, item.itemId)
+                              "
                               title="Start server"
                               i18n-title="@@featureOverview-serverStartButtonTitle"
                             >
@@ -317,7 +259,11 @@
                             <button
                               type="button"
                               class="btn btn-outline-danger"
-                              (click)="serverInfoFacade.stopServer(item.subscription.id, item.itemId)"
+                              (click)="
+                                $event.preventDefault();
+                                $event.stopPropagation();
+                                serverInfoFacade.stopServer(item.subscription.id, item.itemId)
+                              "
                               title="Stop server"
                               i18n-title="@@featureOverview-serverStopButtonTitle"
                             >
@@ -326,7 +272,11 @@
                             <button
                               type="button"
                               class="btn btn-outline-warning"
-                              (click)="serverInfoFacade.restartServer(item.subscription.id, item.itemId)"
+                              (click)="
+                                $event.preventDefault();
+                                $event.stopPropagation();
+                                serverInfoFacade.restartServer(item.subscription.id, item.itemId)
+                              "
                               title="Restart server"
                               i18n-title="@@featureOverview-serverRestartButtonTitle"
                             >
@@ -345,7 +295,7 @@
                       <button
                         type="button"
                         class="btn btn-sm btn-outline-secondary"
-                        (click)="openSshAccessConfirm(item)"
+                        (click)="$event.preventDefault(); $event.stopPropagation(); openSshAccessConfirm(item)"
                         [disabled]="item.sshAccessGranted"
                         [attr.title]="item.sshAccessGranted ? sshAccessGrantedButtonTitle : sshAccessButtonTitle"
                         [attr.aria-label]="item.sshAccessGranted ? sshAccessGrantedButtonTitle : sshAccessButtonTitle"
@@ -359,6 +309,7 @@
                           rel="noopener noreferrer"
                           class="btn btn-sm btn-primary"
                           [class.disabled]="!isServerOnline(item.serverInfo!)"
+                          (click)="$event.stopPropagation()"
                           title="Open console"
                           i18n-title="@@featureOverview-openConsoleButtonTitle"
                         >
@@ -376,6 +327,72 @@
     </div>
   </div>
 </div>
+
+<ng-template #instanceMain let-item>
+  <div class="fw-semibold mb-1">{{ instanceDisplayTitle(item) }}</div>
+  <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
+    <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
+      @if (isProvisioningPending(item) || isProvisioningFailed(item)) {
+        <span
+          class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
+          [ngClass]="provisioningStatusBadgeClass(item.provisioningStatus)"
+        >
+          {{ provisioningStatusLabel(item.provisioningStatus) }}
+        </span>
+        <span class="me-2">
+          <i class="bi bi-layers me-1" aria-hidden="true"></i>{{ serviceTypeLabel(item.service) }}
+        </span>
+        @if (isProvisioningPending(item)) {
+          <span class="me-2" i18n="@@featureOverview-provisioningPendingHint">
+            Your server is being set up. This usually takes less than a minute.
+          </span>
+        } @else {
+          <span class="me-2" i18n="@@featureOverview-provisioningFailedHint">
+            Server setup did not complete. Check backorders or contact support if this persists.
+          </span>
+        }
+      } @else if (item.serverInfo; as serverInfo) {
+        <span
+          class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
+          [ngClass]="serverStatusBadgeClass(serverInfo)"
+        >
+          <i class="bi me-1" [ngClass]="serverStatusIconClass(serverInfo)" aria-hidden="true"></i>
+          {{ serverStatusLabel(serverInfo) }}
+        </span>
+        @if (item.sshAccessGranted) {
+          <span
+            class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2 billing-admin__chip--status-warning"
+            title="SSH access granted"
+            i18n-title="@@featureOverview-sshAccessGrantedBadgeTitle"
+          >
+            <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
+            <span i18n="@@featureOverview-sshAccessGrantedBadge">SSH access granted</span>
+          </span>
+        }
+        <span class="me-2">
+          <i class="bi bi-layers me-1" aria-hidden="true"></i>{{ serviceTypeLabel(item.service) }}
+        </span>
+        @if (item.serviceTypeName) {
+          <span class="me-2">
+            <i class="bi bi-hdd-rack me-1" aria-hidden="true"></i>{{ item.serviceTypeName }}
+            @if (serverLocationLabel(serverInfo.metadata); as loc) {
+              <span class="text-body-secondary ms-1">({{ loc }})</span>
+            }
+          </span>
+        } @else if (serverLocationLabel(serverInfo.metadata); as loc) {
+          <span class="me-2"> <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ loc }} </span>
+        }
+        @if (serverInfo.hostnameFqdn) {
+          <span class="me-2"> <i class="bi bi-globe me-1" aria-hidden="true"></i>{{ serverInfo.hostnameFqdn }} </span>
+        }
+        <span class="me-2"> <i class="bi bi-ethernet me-1" aria-hidden="true"></i>{{ serverInfo.publicIp }} </span>
+        @if (serverInfo.privateIp) {
+          <span class="me-2"> <i class="bi bi-diagram-3 me-1" aria-hidden="true"></i>{{ serverInfo.privateIp }} </span>
+        }
+      }
+    </div>
+  </div>
+</ng-template>
 
 <div
   class="modal fade"

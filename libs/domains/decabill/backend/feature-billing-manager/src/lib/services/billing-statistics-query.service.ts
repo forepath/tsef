@@ -7,6 +7,7 @@ import type {
 } from '../dto/admin-billing.dto';
 import { InvoicesRepository } from '../repositories/invoices.repository';
 import { resolveCountryDisplayName } from '../utils/country-display-name.util';
+import { fillMeterHistoryPeriodSeries } from '../utils/meter-history-date.util';
 
 @Injectable()
 export class BillingStatisticsQueryService {
@@ -18,18 +19,24 @@ export class BillingStatisticsQueryService {
     groupBy: 'day' | 'month';
     userId?: string;
   }): Promise<BillingStatisticsSummaryDto> {
-    const [series, paidCount] = await Promise.all([
+    const [sparseSeries, paidCount] = await Promise.all([
       this.invoicesRepository.sumPaidGrossByPeriod(params.from, params.to, params.groupBy, params.userId),
       this.invoicesRepository.countPaidInPeriod(params.from, params.to, params.userId),
     ]);
-    const totalGross = series.reduce((sum, point) => sum + point.totalGross, 0);
+    const from = params.from.toISOString().slice(0, 10);
+    const to = params.to.toISOString().slice(0, 10);
+    const series = fillMeterHistoryPeriodSeries(sparseSeries, from, to, params.groupBy, (period) => ({
+      period,
+      totalGross: 0,
+    }));
+    const totalGross = sparseSeries.reduce((sum, point) => sum + point.totalGross, 0);
 
     return {
       series,
       totalGross: Math.round(totalGross * 100) / 100,
       paidCount,
-      from: params.from.toISOString().slice(0, 10),
-      to: params.to.toISOString().slice(0, 10),
+      from,
+      to,
       groupBy: params.groupBy,
     };
   }

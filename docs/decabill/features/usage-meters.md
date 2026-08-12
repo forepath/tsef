@@ -75,7 +75,7 @@ Rules:
 - `attachmentType=plan`: meter must be on the subscription’s plan or its service type.
 - `attachmentType=addon`: `addonId` required; subscription must have that addon billable; meter must be on that addon.
 
-Admin entry CRUD: `/admin/billing/subscriptions/{id}/meter-entries`.
+Admin entry CRUD: `/admin/billing/subscriptions/{id}/meter-entries` (`billing_admin:read` / `billing_admin:write` for list/update/delete; `usage:write` for create).
 
 ## Collector job (pull)
 
@@ -96,8 +96,10 @@ Built-in Hetzner / DigitalOcean register stub collectors (empty samples) until r
 
 ## Subscription views
 
-- `GET /subscriptions/{id}/meters` and admin twin under `/admin/billing/subscriptions/{id}/meters`
+- `GET /subscriptions/{id}/meters` and admin twin under `/admin/billing/subscriptions/{id}/meters` (`billing_admin:read`)
 - `SubscriptionResponse.meters` embeds the same summaries (effective price, period aggregate, estimated charge)
+- `GET /subscriptions/{id}/meters/history?from&to&groupBy=day|month` (admin twin under `/admin/billing/subscriptions/{id}/meters/history`, `billing_admin:read`) — per-meter time series for the service details UI
+- WebSocket `meterSummaryUpdate` on room `subscription:{id}` after usage mutations; ADMIN may subscribe without ownership (see [Service details](./service-details.md))
 
 ## Invoice charge path (arrear)
 
@@ -137,6 +139,7 @@ Empty aggregates become `0` and omit the line when below the minimum billable am
 - [Service types and plans](./service-types-and-plans.md)
 - [Dynamic provider plugins](./dynamic-provider-plugins.md)
 - [Subscriptions](./subscriptions.md)
+- [Service details](./service-details.md)
 - [Invoices](./invoices.md)
 - [Advance billing](./advance-billing-and-yearly-interval.md)
 - [Webhooks](./webhooks.md)

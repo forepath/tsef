@@ -54,16 +54,16 @@ export class SubscriptionServerInfoFacade {
     this.store.dispatch(loadOverviewServerInfo());
   }
 
-  startServer(subscriptionId: string, itemId: string): void {
-    this.store.dispatch(startServer({ subscriptionId, itemId }));
+  startServer(subscriptionId: string, itemId: string, adminMode = false): void {
+    this.store.dispatch(startServer({ subscriptionId, itemId, adminMode }));
   }
 
-  stopServer(subscriptionId: string, itemId: string): void {
-    this.store.dispatch(stopServer({ subscriptionId, itemId }));
+  stopServer(subscriptionId: string, itemId: string, adminMode = false): void {
+    this.store.dispatch(stopServer({ subscriptionId, itemId, adminMode }));
   }
 
-  restartServer(subscriptionId: string, itemId: string): void {
-    this.store.dispatch(restartServer({ subscriptionId, itemId }));
+  restartServer(subscriptionId: string, itemId: string, adminMode = false): void {
+    this.store.dispatch(restartServer({ subscriptionId, itemId, adminMode }));
   }
 
   markSshAccessGranted(subscriptionId: string): void {

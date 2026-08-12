@@ -351,7 +351,7 @@
               } @else {
                 @for (invoice of invoices(); track invoice.id) {
                   <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
-                    <div class="min-w-0">
+                    <div class="min-w-0 flex-grow-1">
                       <div class="fw-semibold mb-1">{{ invoiceDisplayTitle(invoice) }}</div>
                       <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
                         <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">

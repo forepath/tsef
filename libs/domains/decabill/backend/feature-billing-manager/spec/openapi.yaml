@@ -2017,6 +2017,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/meters/history:
+    get:
+      summary: Meter usage history for a subscription
+      operationId: getSubscriptionMeterHistory
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: groupBy
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [day, month]
+            default: day
+      responses:
+        '200':
+          description: Per-meter time series for the requested date range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionMeterHistory'
+        '400':
+          description: Invalid date range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /subscriptions/{subscriptionId}/meters:
     get:
       summary: List meter summaries for a subscription
@@ -2265,6 +2315,94 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/items/{itemId}:
+    get:
+      summary: Get subscription item detail
+      operationId: getSubscriptionItemDetail
+      description: |
+        Returns a subscription item with optional server info when the service is active and provisioned.
+        Removed or non-active items respond with 404.
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Subscription item detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionItemDetailResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription or item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/items/{itemId}/display-name:
+    post:
+      summary: Update subscription item display name
+      operationId: updateSubscriptionItemDisplayName
+      description: Sets or clears the customer-defined display name for a subscription item.
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionItemDisplayNameDto'
+      responses:
+        '200':
+          description: Updated subscription item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionItemResponse'
+        '400':
+          description: Invalid display name or not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription or item not found
           content:
             application/json:
               schema:
@@ -3227,10 +3365,265 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /admin/billing/subscriptions/{subscriptionId}/meters/history:
+    get:
+      tags: [Admin Billing]
+      summary: Meter usage history for a subscription (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:read`. Ownership is not required.
+      operationId: adminGetSubscriptionMeterHistory
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: groupBy
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [day, month]
+            default: day
+      responses:
+        '200':
+          description: Per-meter time series for the requested date range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionMeterHistory'
+        '400':
+          description: Invalid date range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Admin or API key access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}:
+    get:
+      tags: [Admin Billing]
+      summary: Get subscription item detail (admin)
+      operationId: adminGetSubscriptionItemDetail
+      description: |
+        Returns a subscription item with optional server info when the service is active and provisioned.
+        Removed or non-active items respond with 404. Admin access does not require subscription ownership.
+        Requires ADMIN role. PAT callers need `billing_admin:read`.
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Subscription item detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionItemDetailResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription or item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name:
+    post:
+      tags: [Admin Billing]
+      summary: Update subscription item display name (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
+      operationId: adminUpdateSubscriptionItemDisplayName
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionItemDisplayNameDto'
+      responses:
+        '200':
+          description: Updated subscription item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionItemResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info:
+    get:
+      tags: [Admin Billing]
+      summary: Get subscription item server info (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:read`. Ownership is not required.
+      operationId: adminGetSubscriptionItemServerInfo
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Server info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerInfoResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key:
+    get:
+      tags: [Admin Billing]
+      summary: Reveal provisioning SSH private key (admin, one-time)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
+        Succeeds only once per item; sets sshAccessGranted and blocks subsequent reveals.
+        Never log the response body.
+      operationId: adminGetSubscriptionItemSshAccessKey
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: SSH private key (shown once)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionSshAccessKeyResponse'
+        '400':
+          description: Not provisioned, key unavailable, or not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: SSH access key has already been revealed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start:
+    post:
+      tags: [Admin Billing]
+      summary: Start provisioned server (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
+      operationId: adminStartSubscriptionItemServer
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Action accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerActionResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/stop:
+    post:
+      tags: [Admin Billing]
+      summary: Stop provisioned server (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
+      operationId: adminStopSubscriptionItemServer
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Action accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerActionResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/restart:
+    post:
+      tags: [Admin Billing]
+      summary: Restart provisioned server (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:write`. Ownership is not required.
+      operationId: adminRestartSubscriptionItemServer
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Action accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerActionResponse'
   /admin/billing/subscriptions/{subscriptionId}/meters:
     get:
       tags: [Admin Billing]
       summary: List subscription meter summaries (admin)
+      description: |
+        Requires ADMIN role. PAT callers need `billing_admin:read`. Ownership is not required.
       operationId: adminListSubscriptionMeters
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
@@ -3277,7 +3670,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsageRecordResponse'
+                $ref: '#/components/schemas/UsageMeterEntryResponse'
   /admin/billing/subscriptions/{subscriptionId}/meter-entries/{entryId}:
     post:
       tags: [Admin Billing]
@@ -6262,6 +6655,11 @@ components:
           description: Plan- and addon-scoped meter summaries for the current billing period
           items:
             $ref: '#/components/schemas/SubscriptionMeterSummary'
+        items:
+          type: array
+          description: Subscription items (services) linked to this subscription
+          items:
+            $ref: '#/components/schemas/SubscriptionItemResponse'
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     WithdrawSubscriptionDto:
@@ -6470,6 +6868,13 @@ components:
             nullable: true,
             description: Single-level subdomain when provisioned (e.g. awesome-armadillo-abc12),
           }
+        displayName:
+          {
+            type: string,
+            nullable: true,
+            maxLength: 255,
+            description: Customer-defined label for the service in dashboards and lists,
+          }
         service:
           {
             type: string,
@@ -6485,6 +6890,27 @@ components:
             type: boolean,
             description: True after the customer has revealed the provisioning SSH private key at least once,
           }
+        hasProviderReference:
+          {
+            type: boolean,
+            description: True when a live cloud provider reference exists for this item. The reference value itself is never returned.,
+          }
+    SubscriptionItemDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/SubscriptionItemResponse'
+        - type: object
+          properties:
+            serverInfo:
+              $ref: '#/components/schemas/ServerInfoResponse'
+              description: Cached or live server info when the item is active and provisioned
+    UpdateSubscriptionItemDisplayNameDto:
+      type: object
+      properties:
+        displayName:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: Customer-defined label; null or empty clears the name
     SubscriptionSshAccessKeyResponse:
       type: object
       required: [privateKey]
@@ -7153,6 +7579,49 @@ components:
         entryCount: { type: integer }
         periodStart: { type: string, format: date-time, nullable: true }
         periodEnd: { type: string, format: date-time, nullable: true }
+    MeterHistorySeriesPoint:
+      type: object
+      required: [period, value]
+      properties:
+        period:
+          type: string
+          format: date
+          description: Bucket start (YYYY-MM-DD for day, YYYY-MM-01 for month)
+        value: { type: number }
+    MeterHistorySeries:
+      type: object
+      required:
+        [meterId, key, name, aggregator, attachmentType, series, totalValue]
+      properties:
+        meterId: { type: string, format: uuid }
+        key: { type: string }
+        name: { type: string }
+        unitLabel: { type: string, nullable: true }
+        aggregator:
+          {
+            type: string,
+            enum: [max, min, avg, first, last, sum, sum_positive_deltas],
+          }
+        attachmentType: { type: string, enum: [plan, addon] }
+        addonId: { type: string, format: uuid, nullable: true }
+        addonName: { type: string, nullable: true }
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeterHistorySeriesPoint'
+        totalValue: { type: number }
+    SubscriptionMeterHistory:
+      type: object
+      required: [subscriptionId, from, to, groupBy, meters]
+      properties:
+        subscriptionId: { type: string, format: uuid }
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        groupBy: { type: string, enum: [day, month] }
+        meters:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeterHistorySeries'
     UsageMeterEntryResponse:
       type: object
       required:

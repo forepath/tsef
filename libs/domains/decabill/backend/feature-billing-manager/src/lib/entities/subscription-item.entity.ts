@@ -60,6 +60,10 @@ export class SubscriptionItemEntity {
   @Column({ type: 'varchar', length: 128, nullable: true, name: 'hostname' })
   hostname?: string;
 
+  /** Customer-defined label for the service in dashboards and lists. */
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'display_name' })
+  displayName?: string | null;
+
   /** Cached server info from provider (e.g. status, publicIp); no secrets, not encrypted */
   @Column({ type: 'jsonb', nullable: true, name: 'server_info_snapshot' })
   serverInfoSnapshot?: Record<string, unknown>;

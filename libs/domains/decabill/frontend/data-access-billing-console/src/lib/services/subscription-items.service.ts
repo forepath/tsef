@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 
 import type {
   ServerInfoResponse,
+  SubscriptionItemDetailResponse,
   SubscriptionItemResponse,
   SubscriptionSshAccessKeyResponse,
 } from '../types/billing.types';
@@ -23,6 +24,23 @@ export class SubscriptionItemsService {
 
   listSubscriptionItems(subscriptionId: string): Observable<SubscriptionItemResponse[]> {
     return this.http.get<SubscriptionItemResponse[]>(`${this.apiUrl}/subscriptions/${subscriptionId}/items`);
+  }
+
+  getItemDetail(subscriptionId: string, itemId: string): Observable<SubscriptionItemDetailResponse> {
+    return this.http.get<SubscriptionItemDetailResponse>(
+      `${this.apiUrl}/subscriptions/${subscriptionId}/items/${itemId}`,
+    );
+  }
+
+  updateDisplayName(
+    subscriptionId: string,
+    itemId: string,
+    displayName: string | null,
+  ): Observable<SubscriptionItemResponse> {
+    return this.http.post<SubscriptionItemResponse>(
+      `${this.apiUrl}/subscriptions/${subscriptionId}/items/${itemId}/display-name`,
+      { displayName },
+    );
   }
 
   getServerInfo(subscriptionId: string, itemId: string): Observable<ServerInfoResponse> {

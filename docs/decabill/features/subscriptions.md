@@ -202,23 +202,30 @@ Active subscriptions can change server type and addons without switching plans. 
 
 ## API Endpoints
 
-| Method | Path                                                             | Purpose                                               |
-| ------ | ---------------------------------------------------------------- | ----------------------------------------------------- |
-| GET    | `/subscriptions`                                                 | List user's subscriptions                             |
-| POST   | `/subscriptions`                                                 | Create subscription                                   |
-| GET    | `/subscriptions/{subscriptionId}`                                | Get subscription detail                               |
-| POST   | `/subscriptions/{subscriptionId}/cancel`                         | Cancel subscription                                   |
-| POST   | `/subscriptions/{subscriptionId}/withdraw`                       | Statutory withdrawal                                  |
-| POST   | `/subscriptions/{subscriptionId}/resume`                         | Resume pending cancel                                 |
-| GET    | `/subscriptions/{subscriptionId}/config-change/eligibility`      | Config-change options                                 |
-| POST   | `/subscriptions/{subscriptionId}/config-change/preview`          | Advisory pricing delta                                |
-| POST   | `/subscriptions/{subscriptionId}/config-change`                  | Submit config change                                  |
-| GET    | `/subscriptions/{subscriptionId}/items`                          | List subscription items (includes `sshAccessGranted`) |
-| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/server-info`     | Live server info                                      |
-| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key`  | Reveal SSH key (one-time)                             |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/start`   | Start server                                          |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/stop`    | Stop server                                           |
-| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/restart` | Restart server                                        |
+| Method | Path                                                             | Purpose                                                              |
+| ------ | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| GET    | `/subscriptions`                                                 | List user's subscriptions                                            |
+| POST   | `/subscriptions`                                                 | Create subscription                                                  |
+| GET    | `/subscriptions/{subscriptionId}`                                | Get subscription detail                                              |
+| POST   | `/subscriptions/{subscriptionId}/cancel`                         | Cancel subscription                                                  |
+| POST   | `/subscriptions/{subscriptionId}/withdraw`                       | Statutory withdrawal                                                 |
+| POST   | `/subscriptions/{subscriptionId}/resume`                         | Resume pending cancel                                                |
+| GET    | `/subscriptions/{subscriptionId}/config-change/eligibility`      | Config-change options                                                |
+| POST   | `/subscriptions/{subscriptionId}/config-change/preview`          | Advisory pricing delta                                               |
+| POST   | `/subscriptions/{subscriptionId}/config-change`                  | Submit config change                                                 |
+| GET    | `/subscriptions/{subscriptionId}/items`                          | List subscription items (includes `sshAccessGranted`, `displayName`) |
+| GET    | `/subscriptions/{subscriptionId}/items/{itemId}`                 | Service detail (active items only; includes server info)             |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/display-name`    | Set or clear service display-name override                           |
+| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/server-info`     | Live server info                                                     |
+| GET    | `/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key`  | Reveal SSH key (one-time)                                            |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/start`   | Start server                                                         |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/stop`    | Stop server                                                          |
+| POST   | `/subscriptions/{subscriptionId}/items/{itemId}/actions/restart` | Restart server                                                       |
+| GET    | `/subscriptions/{subscriptionId}/meters/history`                 | Meter usage history series (`from`, `to`, `groupBy`)                 |
+
+`SubscriptionResponse` embeds `items[]` and `meters[]`. Optional item `displayName` overrides the default service label without changing `SUB-*`.
+
+Admin twins for item detail, display-name, server-info, power actions, and meter history live under `/admin/billing/subscriptions/...` (`ADMIN` + `billing_admin:read` / `billing_admin:write`). See [Service details](./service-details.md) and [Billing administration](./billing-administration.md).
 
 See [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) for schemas.
 
@@ -226,11 +233,13 @@ See [Billing Manager OpenAPI](/spec/billing-manager/openapi.yaml) for schemas.
 
 - **[Customer Profiles](./customer-profiles.md)** Required before ordering
 - **[Service Types and Plans](./service-types-and-plans.md)** Catalog and provider schemas
+- **[Service details](./service-details.md)** Service page, rename, meter charts, realtime
 - **[Subscription Config Change](./subscription-config-change.md)** Mid-life server type and addon changes
 - **[Invoices](./invoices.md)** Open positions and billing-day accumulation
 - **[Backorders](./backorders.md)** Capacity retry queue
 - **[Server Provisioning](./server-provisioning.md)** Cloud-init and bundled stacks
 - **[Dashboard and Server Control](./dashboard-and-server-control.md)** Overview and power actions
+- **[Usage meters](./usage-meters.md)** Catalog meters and history API
 
 ---
 

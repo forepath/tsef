@@ -40,15 +40,28 @@ The invoice list supports batch loading with client-side search in list-group st
 
 ## Admin Subscriptions
 
-**Frontend route:** `/administration/subscriptions`
+**Frontend routes:**
 
-| Method | Path                                               | Purpose                                                 |
-| ------ | -------------------------------------------------- | ------------------------------------------------------- |
-| GET    | `/admin/billing/subscriptions`                     | Paginated subscription list                             |
-| POST   | `/admin/billing/subscriptions/{id}/cancel`         | Schedule cancel (same policy as customer)               |
-| POST   | `/admin/billing/subscriptions/{id}/withdraw`       | Statutory withdraw when eligible                        |
-| POST   | `/admin/billing/subscriptions/{id}/instant-cancel` | Force instant removal (bypasses cancel/Widerruf policy) |
-| POST   | `/admin/billing/subscriptions/{id}/resume`         | Resume pending cancel                                   |
+| Path                                                               | Purpose                                                       |
+| ------------------------------------------------------------------ | ------------------------------------------------------------- |
+| `/administration/subscriptions`                                    | Contracts list with nested services / usage meters subsection |
+| `/administration/subscriptions/{subscriptionId}/services/{itemId}` | Service details (metadata, rename, power, meter charts)       |
+
+| Method | Path                                                                            | Purpose                                                    |
+| ------ | ------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| GET    | `/admin/billing/subscriptions`                                                  | Paginated subscription list (embeds `items[]`, `meters[]`) |
+| POST   | `/admin/billing/subscriptions/{id}/cancel`                                      | Schedule cancel (same policy as customer)                  |
+| POST   | `/admin/billing/subscriptions/{id}/withdraw`                                    | Statutory withdraw when eligible                           |
+| POST   | `/admin/billing/subscriptions/{id}/instant-cancel`                              | Force instant removal (bypasses cancel/Widerruf policy)    |
+| POST   | `/admin/billing/subscriptions/{id}/resume`                                      | Resume pending cancel                                      |
+| GET    | `/admin/billing/subscriptions/{id}/items/{itemId}`                              | Service detail (active + provisioned only; no ownership)   |
+| POST   | `/admin/billing/subscriptions/{id}/items/{itemId}/display-name`                 | Set or clear service display-name override                 |
+| GET    | `/admin/billing/subscriptions/{id}/items/{itemId}/server-info`                  | Live server info                                           |
+| POST   | `/admin/billing/subscriptions/{id}/items/{itemId}/actions/start\|stop\|restart` | Power actions                                              |
+| GET    | `/admin/billing/subscriptions/{id}/meters`                                      | Meter summaries for the current period                     |
+| GET    | `/admin/billing/subscriptions/{id}/meters/history`                              | Meter history series (`from`, `to`, `groupBy`)             |
+
+Service-visibility admin APIs require `ADMIN` plus PAT scopes `billing_admin:read` / `billing_admin:write`. Meter-entry list/update/delete use the same `billing_admin:*` scopes; create remains on `usage:write` for ingestion keys. See [Service details](./service-details.md).
 
 Instant cancel marks `instantRemoval` and queues `subscription-instant-cancel` jobs. See [Subscriptions — Admin instant cancel](./subscriptions.md#admin-instant-cancel).
 

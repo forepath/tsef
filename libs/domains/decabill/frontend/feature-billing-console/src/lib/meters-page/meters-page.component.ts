@@ -11,7 +11,7 @@ import {
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import { combineLatest, map } from 'rxjs';
 
-import { getActiveStatusLabel, getActiveStatusTextClass } from '../billing-status-labels';
+import { getActiveStatusLabel, getActiveStatusTextClass, getMeterAggregatorLabel } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
 
 interface MeterForm {
@@ -114,24 +114,7 @@ export class MetersPageComponent implements OnInit {
   }
 
   aggregatorLabel(aggregator: MeterAggregator): string {
-    switch (aggregator) {
-      case 'max':
-        return $localize`:@@featureMeters-aggregatorMax:Max`;
-      case 'min':
-        return $localize`:@@featureMeters-aggregatorMin:Min`;
-      case 'avg':
-        return $localize`:@@featureMeters-aggregatorAvg:Average`;
-      case 'first':
-        return $localize`:@@featureMeters-aggregatorFirst:First`;
-      case 'last':
-        return $localize`:@@featureMeters-aggregatorLast:Last`;
-      case 'sum':
-        return $localize`:@@featureMeters-aggregatorSum:Sum`;
-      case 'sum_positive_deltas':
-        return $localize`:@@featureMeters-aggregatorSumPositiveDeltas:Sum of positive deltas`;
-      default:
-        return aggregator;
-    }
+    return getMeterAggregatorLabel(aggregator);
   }
 
   formatUnitPrice(price: number): string {

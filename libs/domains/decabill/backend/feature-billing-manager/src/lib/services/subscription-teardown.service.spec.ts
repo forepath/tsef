@@ -9,6 +9,7 @@ describe('SubscriptionTeardownService', () => {
   };
   const subscriptionItemsRepository = {
     findBySubscription: jest.fn(),
+    clearProviderReference: jest.fn(),
   };
   const servicePlansRepository = {
     findByIdOrThrow: jest.fn(),
@@ -33,6 +34,7 @@ describe('SubscriptionTeardownService', () => {
   };
   const billingNotificationPublisher = {
     publishSubscription: jest.fn(),
+    publish: jest.fn(),
   };
   const billingEmailPublisher = {
     publishSubscriptionCanceled: jest.fn(),
@@ -82,6 +84,7 @@ describe('SubscriptionTeardownService', () => {
       },
     ]);
     provisioningService.deprovision.mockResolvedValue(undefined);
+    subscriptionItemsRepository.clearProviderReference.mockResolvedValue(undefined);
     openPositionsRepository.create.mockResolvedValue(undefined);
     hostnameReservationService.releaseHostname.mockResolvedValue(undefined);
     cloudflareDnsService.deleteRecord.mockResolvedValue(undefined);
@@ -94,6 +97,12 @@ describe('SubscriptionTeardownService', () => {
     expect(cloudflareDnsService.deleteRecord).toHaveBeenCalledWith('awesome-armadillo-abc12');
     expect(hostnameReservationService.releaseHostname).toHaveBeenCalledWith('item-1');
     expect(provisioningService.deprovision).toHaveBeenCalledWith('hetzner', 'srv-1', {});
+    expect(subscriptionItemsRepository.clearProviderReference).toHaveBeenCalledWith('item-1');
+    expect(billingNotificationPublisher.publish).toHaveBeenCalledWith(
+      'subscription.service.removed',
+      { subscriptionId: 'sub-1', itemId: 'item-1' },
+      'user-1',
+    );
     expect(openPositionsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         subscriptionId: 'sub-1',

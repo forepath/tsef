@@ -7,11 +7,12 @@ import type { Observable } from 'rxjs';
 import { catchError, filter, from, fromEvent, map, merge, mergeMap, of, switchMap, take, takeUntil, tap } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 
-import type { BillingDashboardStatusUpdatePayload } from '../../types/billing.types';
+import type { BillingDashboardStatusUpdatePayload, BillingMeterSummaryUpdatePayload } from '../../types/billing.types';
 import {
   billingDashboardStatusPush,
   loadOverviewServerInfo,
 } from '../subscription-server-info/subscription-server-info.actions';
+import { meterSummaryPush } from '../service-detail/service-detail.actions';
 
 import {
   billingDashboardSocketApplicationError,
@@ -21,6 +22,8 @@ import {
   connectBillingDashboardSocketSuccess,
   disconnectBillingDashboardSocket,
   disconnectBillingDashboardSocketSuccess,
+  subscribeBillingSubscriptionMeters,
+  unsubscribeBillingSubscriptionMeters,
 } from './billing-dashboard-socket.actions';
 import { resolveBillingTenantId } from '../../interceptors/tenant.interceptor';
 
@@ -127,11 +130,14 @@ export const connectBillingDashboardSocket$ = createEffect(
             const statusUpdate$ = fromEvent<BillingDashboardStatusUpdatePayload>(socket, 'dashboardStatusUpdate').pipe(
               mergeMap((payload) => from([billingDashboardStatusPush(payload), billingDashboardSocketDataReceived()])),
             );
+            const meterSummaryUpdate$ = fromEvent<BillingMeterSummaryUpdatePayload>(socket, 'meterSummaryUpdate').pipe(
+              map((payload) => meterSummaryPush({ subscriptionId: payload.subscriptionId, meters: payload.meters })),
+            );
             const appError$ = fromEvent<{ message: string }>(socket, 'error').pipe(
               map((data) => billingDashboardSocketApplicationError({ message: data.message ?? 'Socket error' })),
             );
 
-            return merge(connectSuccess$, connectError$, statusUpdate$, appError$).pipe(
+            return merge(connectSuccess$, connectError$, statusUpdate$, meterSummaryUpdate$, appError$).pipe(
               catchError((error: unknown) => {
                 billingDashboardSocketInstance = null;
                 const message = error instanceof Error ? error.message : 'WebSocket error';
@@ -184,4 +190,26 @@ export const billingDashboardSocketApplicationErrorFallback$ = createEffect(
     );
   },
   { functional: true },
+);
+
+export const subscribeBillingSubscriptionMeters$ = createEffect(
+  (actions$ = inject(Actions)) =>
+    actions$.pipe(
+      ofType(subscribeBillingSubscriptionMeters),
+      tap(({ subscriptionId }) => {
+        getBillingDashboardSocketInstance()?.emit('subscribeSubscriptionMeters', { subscriptionId });
+      }),
+    ),
+  { functional: true, dispatch: false },
+);
+
+export const unsubscribeBillingSubscriptionMeters$ = createEffect(
+  (actions$ = inject(Actions)) =>
+    actions$.pipe(
+      ofType(unsubscribeBillingSubscriptionMeters),
+      tap(({ subscriptionId }) => {
+        getBillingDashboardSocketInstance()?.emit('unsubscribeSubscriptionMeters', { subscriptionId });
+      }),
+    ),
+  { functional: true, dispatch: false },
 );

@@ -27,7 +27,15 @@ describe('BillingStatisticsQueryService', () => {
 
     expect(result.totalGross).toBe(150);
     expect(result.paidCount).toBe(3);
-    expect(result.series).toHaveLength(2);
+    expect(result.series).toHaveLength(31);
+    expect(result.series.find((point) => point.period === '2025-01-01')).toEqual({
+      period: '2025-01-01',
+      totalGross: 100,
+    });
+    expect(result.series.find((point) => point.period === '2025-01-03')).toEqual({
+      period: '2025-01-03',
+      totalGross: 0,
+    });
   });
 
   it('getByProduct returns plan breakdown', async () => {

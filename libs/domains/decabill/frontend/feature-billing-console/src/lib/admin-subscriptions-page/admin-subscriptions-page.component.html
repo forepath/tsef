@@ -71,102 +71,164 @@
       } @else {
         <div class="list-group list-group-flush">
           @for (sub of subscriptions(); track sub.id) {
-            <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
-              <div class="min-w-0">
-                <div class="fw-semibold mb-1">{{ subscriptionTitle(sub) }}</div>
-                <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
-                  <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
-                    <span
-                      class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
-                      [ngClass]="subscriptionStatusBadgeClass(sub.status)"
-                      [attr.title]="sub.status ?? undefined"
-                    >
-                      {{ subscriptionStatusLabel(sub.status) }}
-                    </span>
-                    <span class="me-2">
-                      <i class="bi bi-envelope me-1" aria-hidden="true"></i>{{ subscriptionUserLabel(sub) }}
-                    </span>
-                    @if (sub.number) {
-                      <span class="me-2"> <i class="bi bi-upc-scan me-1" aria-hidden="true"></i>{{ sub.number }} </span>
-                    }
-                    <span class="me-2">
-                      <i class="bi bi-calendar-range me-1" aria-hidden="true"></i>{{ formatSubscriptionPeriod(sub) }}
-                    </span>
-                    <span class="me-2">
-                      <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>{{ formatDate(sub.nextBillingAt) }}
-                    </span>
-                    <span class="me-2">
-                      <i class="bi bi-cash-stack me-1" aria-hidden="true"></i>{{ formatPeriodPrice(sub) }}
-                    </span>
-                    @if (hasSubscriptionMeters(sub)) {
-                      <span class="me-2">
-                        <i class="bi bi-speedometer2 me-1" aria-hidden="true"></i
-                        ><span i18n="@@featureAdminSubscriptions-hasMeters">Has usage meters</span>
+            <div class="list-group-item border-bottom">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div class="min-w-0 flex-grow-1">
+                  <div class="fw-semibold mb-1">{{ subscriptionTitle(sub) }}</div>
+                  <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
+                    <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
+                      <span
+                        class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
+                        [ngClass]="subscriptionStatusBadgeClass(sub.status)"
+                        [attr.title]="sub.status ?? undefined"
+                      >
+                        {{ subscriptionStatusLabel(sub.status) }}
                       </span>
-                    }
+                      <span class="me-2">
+                        <i class="bi bi-envelope me-1" aria-hidden="true"></i>{{ subscriptionUserLabel(sub) }}
+                      </span>
+                      @if (sub.number) {
+                        <span class="me-2">
+                          <i class="bi bi-upc-scan me-1" aria-hidden="true"></i>{{ sub.number }}
+                        </span>
+                      }
+                      <span class="me-2">
+                        <i class="bi bi-calendar-range me-1" aria-hidden="true"></i>{{ formatSubscriptionPeriod(sub) }}
+                      </span>
+                      <span class="me-2">
+                        <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>{{ formatDate(sub.nextBillingAt) }}
+                      </span>
+                      <span class="me-2">
+                        <i class="bi bi-cash-stack me-1" aria-hidden="true"></i>{{ formatPeriodPrice(sub) }}
+                      </span>
+                      @if (hasSubscriptionMeters(sub)) {
+                        <span class="me-2">
+                          <i class="bi bi-speedometer2 me-1" aria-hidden="true"></i
+                          ><span i18n="@@featureAdminSubscriptions-hasMeters">Has usage meters</span>
+                        </span>
+                      }
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div
-                class="btn-group btn-group-sm flex-shrink-0"
-                role="group"
-                aria-label="Subscription actions"
-                i18n-aria-label="@@featureSubscriptions-subscriptionActionsAria"
-              >
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary"
-                  (click)="openMetersModal(sub)"
-                  title="Manage usage meters"
-                  i18n-title="@@featureAdminSubscriptions-manageMetersTitle"
+                <div
+                  class="btn-group btn-group-sm flex-shrink-0"
+                  role="group"
+                  aria-label="Subscription actions"
+                  i18n-aria-label="@@featureSubscriptions-subscriptionActionsAria"
                 >
-                  <i class="bi bi-speedometer2" aria-hidden="true"></i>
-                </button>
-                @if (sub.withdrawalEligibility?.canWithdraw) {
                   <button
                     type="button"
-                    class="btn btn-outline-danger"
-                    (click)="openWithdrawConfirm(sub)"
-                    title="Withdraw subscription"
-                    i18n-title="@@featureSubscriptions-withdrawButtonTitle"
+                    class="btn btn-outline-secondary"
+                    (click)="openMetersModal(sub)"
+                    title="Manage usage meters"
+                    i18n-title="@@featureAdminSubscriptions-manageMetersTitle"
                   >
-                    <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
+                    <i class="bi bi-speedometer2" aria-hidden="true"></i>
                   </button>
-                }
-                @if (canInstantCancel(sub)) {
-                  <button
-                    type="button"
-                    class="btn btn-outline-danger"
-                    (click)="openInstantCancelConfirm(sub)"
-                    title="Instant cancel subscription"
-                    i18n-title="@@featureAdminSubscriptions-instantCancelButtonTitle"
-                  >
-                    <i class="bi bi-lightning-charge" aria-hidden="true"></i>
-                  </button>
-                }
-                @if (sub.status === 'active') {
-                  <button
-                    type="button"
-                    class="btn btn-outline-danger"
-                    (click)="openCancelConfirm(sub)"
-                    title="Cancel subscription"
-                    i18n-title="@@featureSubscriptions-cancelButtonTitle"
-                  >
-                    <i class="bi bi-x-circle" aria-hidden="true"></i>
-                  </button>
-                }
-                @if (sub.status === 'pending_cancel') {
-                  <button
-                    type="button"
-                    class="btn btn-outline-success"
-                    (click)="openResumeConfirm(sub)"
-                    title="Resume subscription"
-                    i18n-title="@@featureSubscriptions-resumeButtonTitle"
-                  >
-                    <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
-                  </button>
-                }
+                  @if (sub.withdrawalEligibility?.canWithdraw) {
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger"
+                      (click)="openWithdrawConfirm(sub)"
+                      title="Withdraw subscription"
+                      i18n-title="@@featureSubscriptions-withdrawButtonTitle"
+                    >
+                      <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
+                    </button>
+                  }
+                  @if (canInstantCancel(sub)) {
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger"
+                      (click)="openInstantCancelConfirm(sub)"
+                      title="Instant cancel subscription"
+                      i18n-title="@@featureAdminSubscriptions-instantCancelButtonTitle"
+                    >
+                      <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+                    </button>
+                  }
+                  @if (sub.status === 'active') {
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger"
+                      (click)="openCancelConfirm(sub)"
+                      title="Cancel subscription"
+                      i18n-title="@@featureSubscriptions-cancelButtonTitle"
+                    >
+                      <i class="bi bi-x-circle" aria-hidden="true"></i>
+                    </button>
+                  }
+                  @if (sub.status === 'pending_cancel') {
+                    <button
+                      type="button"
+                      class="btn btn-outline-success"
+                      (click)="openResumeConfirm(sub)"
+                      title="Resume subscription"
+                      i18n-title="@@featureSubscriptions-resumeButtonTitle"
+                    >
+                      <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    </button>
+                  }
+                </div>
               </div>
+              @if (subscriptionItems(sub).length > 0 || hasSubscriptionMeters(sub)) {
+                <div class="row g-2 mt-2">
+                  @if (subscriptionItems(sub).length > 0) {
+                    <div class="col-md">
+                      <div class="small text-muted h-100 bg-body-tertiary rounded border py-2 px-3">
+                        <div class="fw-semibold mb-1" i18n="@@featureAdminSubscriptions-services">Services</div>
+                        <div class="d-flex flex-column gap-2">
+                          @for (item of subscriptionItems(sub); track item.id) {
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                              <span
+                                class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                                [ngClass]="itemProvisioningStatusBadgeClass(sub, item)"
+                              >
+                                {{ itemProvisioningStatusLabel(sub, item) }}
+                              </span>
+                              <span class="fw-medium">{{ serviceDisplayLabel(item) }}</span>
+                              @if (isServiceDetailEligible(sub, item)) {
+                                <a
+                                  [routerLink]="serviceDetailLink(sub, item)"
+                                  class="btn btn-sm btn-outline-primary py-0 ms-auto"
+                                  title="Open details"
+                                  i18n-title="@@featureAdminSubscriptions-openServiceDetails"
+                                >
+                                  <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                                  <span class="visually-hidden" i18n="@@featureAdminSubscriptions-openServiceDetails"
+                                    >Open details</span
+                                  >
+                                </a>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  @if (hasSubscriptionMeters(sub)) {
+                    <div class="col-md">
+                      <div class="small text-muted h-100 bg-body-tertiary rounded border py-2 px-3">
+                        <div class="fw-semibold mb-1" i18n="@@featureAdminSubscriptions-usageMeters">Usage meters</div>
+                        <div class="d-flex flex-column gap-1">
+                          @for (
+                            meter of subscriptionMeterSummaries(sub);
+                            track meter.meterId + meter.attachmentType + (meter.addonId ?? '')
+                          ) {
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                              <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{
+                                meter.name
+                              }}</span>
+                              <span>{{ formatMeterValue(meter) }}</span>
+                              <span class="ms-auto">{{ formatMeterCharge(meter.estimatedChargeNet) }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             </div>
           }
         </div>
@@ -279,7 +341,10 @@
       </div>
       <div class="modal-body">
         @if (subscriptionForMeters; as sub) {
-          <p class="text-body-secondary small">{{ subscriptionTitle(sub) }} · {{ subscriptionUserLabel(sub) }}</p>
+          <p class="text-body-secondary small d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+            <span>{{ subscriptionTitle(sub) }}</span>
+            <span>{{ subscriptionUserLabel(sub) }}</span>
+          </p>
         }
         @if (metersError$ | async; as metersError) {
           <div class="alert alert-danger" role="alert">{{ metersError }}</div>
@@ -299,12 +364,10 @@
                   summary of meterSummaries();
                   track summary.meterId + summary.attachmentType + (summary.addonId ?? '')
                 ) {
-                  <div class="list-group-item">
-                    <div class="fw-semibold">{{ summary.name }}</div>
-                    <div class="small text-muted">
-                      {{ formatMeterValue(summary) }} · {{ formatMeterCharge(summary.estimatedChargeNet) }} ·
-                      {{ attachmentTypeLabel(summary.attachmentType) }}
-                    </div>
+                  <div class="list-group-item d-flex flex-wrap align-items-center gap-2">
+                    <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{ summary.name }}</span>
+                    <span class="small text-muted">{{ formatMeterValue(summary) }}</span>
+                    <span class="small text-muted ms-auto">{{ formatMeterCharge(summary.estimatedChargeNet) }}</span>
                   </div>
                 }
               </div>
@@ -342,19 +405,22 @@
               <form (ngSubmit)="submitMeterEntry()">
                 <div class="row g-3">
                   <div class="col-md-6">
-                    <label class="form-label" for="entryMeterId" i18n="@@featureAdminSubscriptions-entryMeter"
-                      >Meter</label
+                    <label
+                      class="form-label"
+                      for="entryAttachmentType"
+                      i18n="@@featureAdminSubscriptions-entryAttachmentType"
+                      >Attachment type</label
                     >
                     <select
-                      id="entryMeterId"
+                      id="entryAttachmentType"
                       class="form-select"
-                      [(ngModel)]="entryForm.meterId"
-                      name="entryMeterId"
-                      required
+                      [ngModel]="entryForm.attachmentType"
+                      (ngModelChange)="entryForm.attachmentType = $event; onAttachmentTypeChange()"
+                      name="entryAttachmentType"
                     >
-                      <option value="" i18n="@@featureAdminSubscriptions-selectMeter">Select meter</option>
-                      @for (meter of activeMeters(); track meter.id) {
-                        <option [ngValue]="meter.id">{{ meter.name }}</option>
+                      <option value="plan" i18n="@@featureAdminSubscriptions-attachmentPlan">Plan</option>
+                      @if (hasAvailableAddonMeters()) {
+                        <option value="addon" i18n="@@featureAdminSubscriptions-attachmentAddon">Addon</option>
                       }
                     </select>
                   </div>
@@ -373,35 +439,42 @@
                       required
                     />
                   </div>
-                  <div class="col-md-6">
-                    <label
-                      class="form-label"
-                      for="entryAttachmentType"
-                      i18n="@@featureAdminSubscriptions-entryAttachmentType"
-                      >Attachment type</label
-                    >
-                    <select
-                      id="entryAttachmentType"
-                      class="form-select"
-                      [(ngModel)]="entryForm.attachmentType"
-                      name="entryAttachmentType"
-                    >
-                      <option value="plan" i18n="@@featureAdminSubscriptions-attachmentPlan">Plan</option>
-                      <option value="addon" i18n="@@featureAdminSubscriptions-attachmentAddon">Addon</option>
-                    </select>
-                  </div>
-                  @if (entryForm.attachmentType === 'addon') {
+                  @if (entryForm.attachmentType === 'plan') {
                     <div class="col-md-6">
-                      <label class="form-label" for="entryAddonId" i18n="@@featureAdminSubscriptions-entryAddonId"
-                        >Addon ID</label
+                      <label class="form-label" for="entryMeterId" i18n="@@featureAdminSubscriptions-entryMeter"
+                        >Meter</label
                       >
-                      <input
-                        id="entryAddonId"
-                        class="form-control"
-                        [(ngModel)]="entryForm.addonId"
-                        name="entryAddonId"
+                      <select
+                        id="entryMeterId"
+                        class="form-select"
+                        [(ngModel)]="entryForm.meterId"
+                        name="entryMeterId"
                         required
-                      />
+                      >
+                        <option value="" i18n="@@featureAdminSubscriptions-selectMeter">Select meter</option>
+                        @for (meter of activeMeters(); track meter.id) {
+                          <option [ngValue]="meter.id">{{ meter.name }}</option>
+                        }
+                      </select>
+                    </div>
+                  } @else {
+                    <div class="col-md-6">
+                      <label class="form-label" for="entryAddonMeter" i18n="@@featureAdminSubscriptions-entryAddonMeter"
+                        >Addon meter</label
+                      >
+                      <select
+                        id="entryAddonMeter"
+                        class="form-select"
+                        [ngModel]="selectedAddonMeterKey"
+                        (ngModelChange)="selectedAddonMeterKey = $event; onAddonMeterChange()"
+                        name="entryAddonMeter"
+                        required
+                      >
+                        <option value="" i18n="@@featureAdminSubscriptions-selectAddonMeter">Select addon meter</option>
+                        @for (option of availableAddonMeters(); track option.key) {
+                          <option [ngValue]="option.key">{{ option.label }}</option>
+                        }
+                      </select>
                     </div>
                   }
                   <div class="col-md-6">
@@ -435,7 +508,11 @@
                   <button
                     type="submit"
                     class="btn btn-primary"
-                    [disabled]="(creatingEntry$ | async) === true || !entryForm.meterId"
+                    [disabled]="
+                      (creatingEntry$ | async) === true ||
+                      !entryForm.meterId ||
+                      (entryForm.attachmentType === 'addon' && !entryForm.addonId)
+                    "
                     i18n="@@featureAdminSubscriptions-saveEntry"
                   >
                     Save entry

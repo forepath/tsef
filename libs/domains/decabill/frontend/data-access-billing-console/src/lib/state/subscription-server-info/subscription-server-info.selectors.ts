@@ -21,6 +21,8 @@ export interface SubscriptionWithServerInfo {
   sshAccessGranted: boolean;
   /** User-facing service type name from the catalog. */
   serviceTypeName?: string;
+  /** Customer-defined display name for the tracked item. */
+  displayName?: string | null;
 }
 
 const selectSubscriptionServerInfoState = createFeatureSelector<SubscriptionServerInfoState>('subscriptionServerInfo');
@@ -55,6 +57,11 @@ export const selectServiceTypeNameBySubscriptionId = createSelector(
   (state) => state.serviceTypeNameBySubscriptionId,
 );
 
+export const selectDisplayNameBySubscriptionId = createSelector(
+  selectSubscriptionServerInfoState,
+  (state) => state.displayNameBySubscriptionId,
+);
+
 export const selectOverviewServerInfoLoading = createSelector(
   selectSubscriptionServerInfoState,
   (state) => state.loading,
@@ -86,6 +93,7 @@ export const selectSubscriptionsWithServerInfo = createSelector(
   selectProvisioningStatusBySubscriptionId,
   selectSshAccessGrantedBySubscriptionId,
   selectServiceTypeNameBySubscriptionId,
+  selectDisplayNameBySubscriptionId,
   (
     subscriptions,
     serverInfoBySubscriptionId,
@@ -94,6 +102,7 @@ export const selectSubscriptionsWithServerInfo = createSelector(
     provisioningStatusBySubscriptionId,
     sshAccessGrantedBySubscriptionId,
     serviceTypeNameBySubscriptionId,
+    displayNameBySubscriptionId,
   ): SubscriptionWithServerInfo[] =>
     subscriptions
       .filter((sub) => sub.status === 'active' && activeItemIdBySubscriptionId[sub.id] != null)
@@ -105,5 +114,6 @@ export const selectSubscriptionsWithServerInfo = createSelector(
         provisioningStatus: provisioningStatusBySubscriptionId[subscription.id] ?? 'active',
         sshAccessGranted: sshAccessGrantedBySubscriptionId[subscription.id] === true,
         serviceTypeName: serviceTypeNameBySubscriptionId[subscription.id],
+        displayName: displayNameBySubscriptionId[subscription.id],
       })),
 );

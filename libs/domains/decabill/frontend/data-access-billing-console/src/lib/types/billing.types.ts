@@ -356,6 +356,47 @@ export interface SubscriptionMeterSummary {
   periodEnd?: string | null;
 }
 
+export interface MeterHistorySeriesPoint {
+  period: string;
+  value: number;
+}
+
+export interface MeterHistorySeries {
+  meterId: string;
+  key: string;
+  name: string;
+  unitLabel?: string | null;
+  aggregator: MeterAggregator;
+  attachmentType: UsageAttachmentType;
+  addonId?: string | null;
+  addonName?: string | null;
+  series: MeterHistorySeriesPoint[];
+  totalValue: number;
+}
+
+export type MeterHistoryGroupBy = 'day' | 'month';
+
+export interface MeterHistoryFilters {
+  from: string;
+  to: string;
+  groupBy: MeterHistoryGroupBy;
+}
+
+export interface SubscriptionMeterHistory {
+  subscriptionId: string;
+  from: string;
+  to: string;
+  groupBy: MeterHistoryGroupBy;
+  meters: MeterHistorySeries[];
+}
+
+/** Payload of billing WebSocket `meterSummaryUpdate`. */
+export interface BillingMeterSummaryUpdatePayload {
+  subscriptionId: string;
+  generatedAt: string;
+  meters: SubscriptionMeterSummary[];
+}
+
 export interface UsageMeterEntryResponse {
   id: string;
   subscriptionId: string;
@@ -546,6 +587,7 @@ export interface SubscriptionResponse {
   withdrawalResult?: WithdrawalResult;
   periodTotalPrice?: number;
   meters?: SubscriptionMeterSummary[];
+  items?: SubscriptionItemResponse[];
   createdAt: string;
   updatedAt: string;
 }
@@ -634,6 +676,8 @@ export interface SubscriptionItemResponse {
   serviceTypeId: string | null;
   /** User-facing service type name from the catalog. */
   serviceTypeName?: string;
+  /** Customer-defined label; null when unset. */
+  displayName?: string | null;
   provisioningStatus: ProvisioningStatus;
   provisionedAt?: string | null;
   hostname?: string | null;
@@ -641,6 +685,15 @@ export interface SubscriptionItemResponse {
   service?: ProvisioningServiceKind;
   /** True after the customer has revealed the provisioning SSH private key at least once. */
   sshAccessGranted?: boolean;
+  /**
+   * True when a live cloud provider reference exists.
+   * The reference value itself is never returned by the API.
+   */
+  hasProviderReference?: boolean;
+}
+
+export interface SubscriptionItemDetailResponse extends SubscriptionItemResponse {
+  serverInfo?: ServerInfoResponse;
 }
 
 export interface SubscriptionSshAccessKeyResponse {
@@ -664,6 +717,8 @@ export interface BillingDashboardStatusItem {
   service: ProvisioningServiceKind;
   /** User-facing service type name from the catalog. */
   serviceTypeName?: string;
+  /** Customer-defined label; null when unset. */
+  displayName?: string | null;
   name: string;
   publicIp: string;
   privateIp?: string;

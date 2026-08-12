@@ -2,7 +2,11 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { TestBed } from '@angular/core/testing';
 import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
 
-import type { ServerInfoResponse, SubscriptionItemResponse } from '../types/billing.types';
+import type {
+  ServerInfoResponse,
+  SubscriptionItemDetailResponse,
+  SubscriptionItemResponse,
+} from '../types/billing.types';
 
 import { SubscriptionItemsService } from './subscription-items.service';
 
@@ -58,6 +62,45 @@ describe('SubscriptionItemsService', () => {
 
       expect(req.request.method).toBe('GET');
       req.flush(mockItems);
+    });
+  });
+
+  describe('getItemDetail', () => {
+    it('should GET subscription item detail', (done) => {
+      const detail: SubscriptionItemDetailResponse = {
+        ...mockItems[0],
+        serverInfo: mockServerInfo,
+      };
+
+      service.getItemDetail('sub-1', 'item-1').subscribe((response) => {
+        expect(response).toEqual(detail);
+        done();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/subscriptions/sub-1/items/item-1`);
+
+      expect(req.request.method).toBe('GET');
+      req.flush(detail);
+    });
+  });
+
+  describe('updateDisplayName', () => {
+    it('should POST display name update', (done) => {
+      const updated: SubscriptionItemResponse = {
+        ...mockItems[0],
+        displayName: 'Renamed',
+      };
+
+      service.updateDisplayName('sub-1', 'item-1', 'Renamed').subscribe((response) => {
+        expect(response).toEqual(updated);
+        done();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/subscriptions/sub-1/items/item-1/display-name`);
+
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ displayName: 'Renamed' });
+      req.flush(updated);
     });
   });
 

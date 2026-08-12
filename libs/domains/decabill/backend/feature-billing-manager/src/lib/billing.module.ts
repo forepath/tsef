@@ -85,6 +85,7 @@ import { ServiceTypesController } from './controllers/service-types.controller';
 import { SubscriptionItemsController } from './controllers/subscription-items.controller';
 import { SubscriptionsController } from './controllers/subscriptions.controller';
 import { AdminUsageController } from './controllers/admin-usage.controller';
+import { AdminSubscriptionItemsController } from './controllers/admin-subscription-items.controller';
 import { AdminSubscriptionMetersController } from './controllers/admin-subscription-meters.controller';
 import { MetersController } from './controllers/meters.controller';
 import { UsageController } from './controllers/usage.controller';
@@ -124,6 +125,7 @@ import { SubscriptionEntity } from './entities/subscription.entity';
 import { MeterEntity } from './entities/meter.entity';
 import { UsageRecordEntity } from './entities/usage-record.entity';
 import { BillingStatusGateway } from './gateways/billing-status.gateway';
+import { BillingMeterRealtimeService } from './gateways/billing-meter-realtime.service';
 import { DatevExportEnabledGuard } from './guards/datev-export-enabled.guard';
 import { TenantUserGuard } from './guards/tenant-user.guard';
 import { PaymentProcessorFactory } from './payment-processors/payment-processor.factory';
@@ -531,6 +533,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     PromotionsController,
     AdminPromotionsController,
     AdminBillingController,
+    AdminSubscriptionItemsController,
     AdminSubscriptionMetersController,
     AdminCustomerProfilesController,
     AdminCustomerAutoBillingController,
@@ -697,6 +700,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     ProjectTimeReportPdfService,
     ProjectTimeReportPdfTemplateService,
     ProjectBoardRealtimeService,
+    BillingMeterRealtimeService,
     ProjectBoardSummaryService,
     ProjectBoardGateway,
     ProjectsRepository,

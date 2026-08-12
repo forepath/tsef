@@ -1,6 +1,6 @@
-import { SocketAuthService, type SocketUserInfo } from '@forepath/identity/backend';
+import { SocketAuthService, UserRole, type SocketUserInfo } from '@forepath/identity/backend';
 import { UsersRepository } from '@forepath/identity/backend';
-import { getTenantIdOrDefault, readIncomingTenantIdFromHandshake } from '@forepath/shared/backend';
+import { getOrInitSocketTenantId, readIncomingTenantIdFromHandshake, runWithTenantId } from '@forepath/shared/backend';
 import { Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
@@ -15,9 +15,11 @@ import {
 import { Server, Socket } from 'socket.io';
 
 import { SubscriptionStatus } from '../entities/subscription.entity';
+import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { SubscriptionService } from '../services/subscription.service';
 import { getBillingUserIdFromSocketUser } from '../utils/billing-socket-user.utils';
+import { BillingMeterRealtimeService } from './billing-meter-realtime.service';
 import {
   canonicalizeCloudInitService,
   CloudInitServiceType,
@@ -52,6 +54,8 @@ export interface DashboardStatusItemPayload {
   service: CloudInitServiceType;
   /** User-facing service type name from the catalog. */
   serviceTypeName: string;
+  /** Customer-defined label; null when unset. */
+  displayName: string | null;
   name: string;
   publicIp: string;
   privateIp?: string;
@@ -71,7 +75,17 @@ interface SubscribeDashboardStatusPayload {
   pollIntervalMs?: number;
 }
 
-type BillingSocket = Socket & { data: { userInfo?: SocketUserInfo } };
+interface SubscribeSubscriptionMetersPayload {
+  subscriptionId?: string;
+}
+
+type BillingSocket = Socket & {
+  data: {
+    userInfo?: SocketUserInfo;
+    tenantId?: string;
+    meterSubscriptionRooms?: string[];
+  };
+};
 
 /**
  * WebSocket gateway for billing status updates.
@@ -97,9 +111,12 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
     private readonly subscriptionService: SubscriptionService,
     private readonly subscriptionItemServerService: SubscriptionItemServerService,
     private readonly usersRepository: UsersRepository,
+    private readonly billingMeterRealtime: BillingMeterRealtimeService,
+    private readonly subscriptionsRepository: SubscriptionsRepository,
   ) {}
 
   afterInit(server: Server): void {
+    this.billingMeterRealtime.attachServer(server);
     server.use(async (socket, next) => {
       const authHeader = socket.handshake?.headers?.authorization ?? socket.handshake?.auth?.Authorization;
       const tenantId = readIncomingTenantIdFromHandshake(
@@ -126,7 +143,7 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
         return;
       }
 
-      (socket as BillingSocket).data = { userInfo };
+      (socket as BillingSocket).data = { userInfo, tenantId };
       next();
     });
   }
@@ -139,6 +156,7 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
     this.logger.log(`Billing status client disconnected: ${socket.id}`);
     this.clearPollTimer(socket.id);
     this.tickInFlight.delete(socket.id);
+    this.leaveMeterRooms(socket as BillingSocket);
   }
 
   @SubscribeMessage('subscribeDashboardStatus')
@@ -146,37 +164,124 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
     @MessageBody() body: SubscribeDashboardStatusPayload | undefined,
     @ConnectedSocket() socket: Socket,
   ): Promise<void> {
-    const userInfo = (socket as BillingSocket).data?.userInfo;
-    const userId = getBillingUserIdFromSocketUser(userInfo);
+    const billingSocket = socket as BillingSocket;
+    const tenantId = this.resolveSocketTenantId(billingSocket);
 
-    if (!userId) {
-      socket.emit('error', { message: 'User not authenticated' });
-
-      return;
-    }
-
-    const user = await this.usersRepository.findByIdForTenant(userId);
-
-    if (!user || user.tenantId !== getTenantIdOrDefault()) {
+    if (!tenantId) {
       socket.emit('error', { message: 'Access denied' });
+
       return;
     }
 
-    this.clearPollTimer(socket.id);
-    const intervalMs = clampPollIntervalMs(body?.pollIntervalMs);
+    await runWithTenantId(tenantId, async () => {
+      const userInfo = billingSocket.data?.userInfo;
+      const userId = getBillingUserIdFromSocketUser(userInfo);
 
-    await this.runStatusTick(socket as BillingSocket);
+      if (!userId) {
+        socket.emit('error', { message: 'User not authenticated' });
 
-    const timer = setInterval(() => {
-      void this.runStatusTick(socket as BillingSocket);
-    }, intervalMs);
+        return;
+      }
 
-    this.pollTimerBySocketId.set(socket.id, timer);
+      const user = await this.usersRepository.findByIdForTenant(userId);
+
+      if (!user || user.tenantId !== tenantId) {
+        socket.emit('error', { message: 'Access denied' });
+
+        return;
+      }
+
+      this.clearPollTimer(socket.id);
+      const intervalMs = clampPollIntervalMs(body?.pollIntervalMs);
+
+      await this.runStatusTick(billingSocket);
+
+      const timer = setInterval(() => {
+        void this.runStatusTick(billingSocket);
+      }, intervalMs);
+
+      this.pollTimerBySocketId.set(socket.id, timer);
+    });
   }
 
   @SubscribeMessage('unsubscribeDashboardStatus')
   handleUnsubscribe(@ConnectedSocket() socket: Socket): void {
     this.clearPollTimer(socket.id);
+  }
+
+  @SubscribeMessage('subscribeSubscriptionMeters')
+  async handleSubscribeMeters(
+    @MessageBody() body: SubscribeSubscriptionMetersPayload | undefined,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void> {
+    const subscriptionId = body?.subscriptionId;
+
+    if (!subscriptionId) {
+      socket.emit('error', { message: 'subscriptionId is required' });
+
+      return;
+    }
+
+    const billingSocket = socket as BillingSocket;
+    const tenantId = this.resolveSocketTenantId(billingSocket);
+
+    if (!tenantId) {
+      socket.emit('error', { message: 'Access denied' });
+
+      return;
+    }
+
+    await runWithTenantId(tenantId, async () => {
+      const userInfo = billingSocket.data?.userInfo;
+      const userId = getBillingUserIdFromSocketUser(userInfo);
+
+      if (!userId) {
+        socket.emit('error', { message: 'User not authenticated' });
+
+        return;
+      }
+
+      try {
+        if (userInfo?.userRole === UserRole.ADMIN) {
+          // Admins may watch any subscription in their handshake tenant without ownership.
+          await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
+        } else {
+          await this.subscriptionService.getSubscription(subscriptionId, userId);
+        }
+      } catch {
+        socket.emit('error', { message: 'Access denied' });
+
+        return;
+      }
+
+      const room = BillingMeterRealtimeService.subscriptionRoom(subscriptionId);
+
+      await socket.join(room);
+      this.trackMeterRoom(billingSocket, room);
+
+      const payload = await this.billingMeterRealtime.buildMeterSummaryPayload(subscriptionId);
+
+      if (payload) {
+        socket.emit('meterSummaryUpdate', payload);
+      }
+    });
+  }
+
+  @SubscribeMessage('unsubscribeSubscriptionMeters')
+  async handleUnsubscribeMeters(
+    @MessageBody() body: SubscribeSubscriptionMetersPayload | undefined,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void> {
+    const subscriptionId = body?.subscriptionId;
+
+    if (!subscriptionId) {
+      return;
+    }
+
+    const room = BillingMeterRealtimeService.subscriptionRoom(subscriptionId);
+
+    await socket.leave(room);
+    this.untrackMeterRoom(socket as BillingSocket, room);
   }
 
   private clearPollTimer(socketId: string): void {
@@ -188,6 +293,10 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
     }
   }
 
+  private resolveSocketTenantId(socket: BillingSocket): string | undefined {
+    return socket.data?.tenantId ?? getOrInitSocketTenantId(socket);
+  }
+
   private async runStatusTick(socket: BillingSocket): Promise<void> {
     if (this.tickInFlight.has(socket.id)) {
       return;
@@ -195,65 +304,106 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
 
     this.tickInFlight.add(socket.id);
 
-    const userInfo = socket.data?.userInfo;
-    const currentUserId = getBillingUserIdFromSocketUser(userInfo);
+    const tenantId = this.resolveSocketTenantId(socket);
 
-    if (!currentUserId) {
+    if (!tenantId) {
       this.tickInFlight.delete(socket.id);
       this.clearPollTimer(socket.id);
-      socket.emit('error', { message: 'User not authenticated' });
+      socket.emit('error', { message: 'Access denied' });
 
       return;
     }
 
-    try {
-      const subscriptions = await this.subscriptionService.listSubscriptions(currentUserId, 1000, 0);
-      const active = subscriptions.filter((s) => s.status === SubscriptionStatus.ACTIVE);
-      const items: DashboardStatusItemPayload[] = [];
+    await runWithTenantId(tenantId, async () => {
+      const userInfo = socket.data?.userInfo;
+      const currentUserId = getBillingUserIdFromSocketUser(userInfo);
 
-      for (const sub of active) {
-        try {
-          const subItems = await this.subscriptionItemServerService.listItems(sub.id, currentUserId);
-          const activeItem = subItems.find((i) => i.provisioningStatus === 'active');
+      if (!currentUserId) {
+        this.tickInFlight.delete(socket.id);
+        this.clearPollTimer(socket.id);
+        socket.emit('error', { message: 'User not authenticated' });
 
-          if (!activeItem) {
-            continue;
-          }
-
-          const info = await this.subscriptionItemServerService.getServerInfo(sub.id, activeItem.id, currentUserId);
-
-          items.push({
-            subscriptionId: sub.id,
-            itemId: activeItem.id,
-            service: canonicalizeCloudInitService(activeItem.service),
-            serviceTypeName: activeItem.serviceTypeName,
-            name: info.name,
-            publicIp: info.publicIp,
-            privateIp: info.privateIp,
-            status: info.status,
-            metadata: info.metadata,
-            hostname: info.hostname,
-            hostnameFqdn: info.hostnameFqdn,
-            sshAccessGranted: activeItem.sshAccessGranted === true,
-          });
-        } catch (err) {
-          this.logger.debug(`Skipping subscription ${sub.id} in status tick: ${(err as Error).message ?? err}`);
-        }
+        return;
       }
 
-      const payload: DashboardStatusUpdatePayload = {
-        generatedAt: new Date().toISOString(),
-        items,
-      };
+      try {
+        const subscriptions = await this.subscriptionService.listSubscriptions(currentUserId, 1000, 0);
+        const active = subscriptions.filter((s) => s.status === SubscriptionStatus.ACTIVE);
+        const items: DashboardStatusItemPayload[] = [];
 
-      socket.emit('dashboardStatusUpdate', payload);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Status update failed';
+        for (const sub of active) {
+          try {
+            const subItems = await this.subscriptionItemServerService.listItems(sub.id, currentUserId);
+            const activeItem = subItems.find((i) => i.provisioningStatus === 'active');
 
-      this.logger.warn(`Billing status tick failed for socket ${socket.id}: ${message}`);
-      socket.emit('error', { message: 'Failed to load dashboard status' });
-    } finally {
-      this.tickInFlight.delete(socket.id);
+            if (!activeItem) {
+              continue;
+            }
+
+            const info = await this.subscriptionItemServerService.getServerInfo(sub.id, activeItem.id, currentUserId);
+
+            items.push({
+              subscriptionId: sub.id,
+              itemId: activeItem.id,
+              service: canonicalizeCloudInitService(activeItem.service),
+              serviceTypeName: activeItem.serviceTypeName,
+              displayName: activeItem.displayName ?? null,
+              name: info.name,
+              publicIp: info.publicIp,
+              privateIp: info.privateIp,
+              status: info.status,
+              metadata: info.metadata,
+              hostname: info.hostname,
+              hostnameFqdn: info.hostnameFqdn,
+              sshAccessGranted: activeItem.sshAccessGranted === true,
+            });
+          } catch (err) {
+            this.logger.debug(`Skipping subscription ${sub.id} in status tick: ${(err as Error).message ?? err}`);
+          }
+        }
+
+        const payload: DashboardStatusUpdatePayload = {
+          generatedAt: new Date().toISOString(),
+          items,
+        };
+
+        socket.emit('dashboardStatusUpdate', payload);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Status update failed';
+
+        this.logger.warn(`Billing status tick failed for socket ${socket.id}: ${message}`);
+        socket.emit('error', { message: 'Failed to load dashboard status' });
+      } finally {
+        this.tickInFlight.delete(socket.id);
+      }
+    });
+  }
+
+  private trackMeterRoom(socket: BillingSocket, room: string): void {
+    const rooms = socket.data.meterSubscriptionRooms ?? [];
+
+    if (!rooms.includes(room)) {
+      socket.data.meterSubscriptionRooms = [...rooms, room];
     }
+  }
+
+  private untrackMeterRoom(socket: BillingSocket, room: string): void {
+    const rooms = socket.data.meterSubscriptionRooms;
+
+    if (!rooms) {
+      return;
+    }
+
+    socket.data.meterSubscriptionRooms = rooms.filter((entry) => entry !== room);
+  }
+
+  private leaveMeterRooms(socket: BillingSocket): void {
+    const rooms = socket.data.meterSubscriptionRooms ?? [];
+
+    for (const room of rooms) {
+      void socket.leave(room);
+    }
+
+    socket.data.meterSubscriptionRooms = [];
   }
 }

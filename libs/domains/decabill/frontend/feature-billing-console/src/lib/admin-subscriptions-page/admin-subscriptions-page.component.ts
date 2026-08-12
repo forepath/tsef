@@ -2,13 +2,18 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
   AdminSubscriptionsFacade,
   MetersFacade,
   SubscriptionMetersFacade,
+  isSubscriptionItemDetailEligible,
+  isSubscriptionItemRemoved,
+  resolveServiceDisplayLabel,
   type AdminSubscriptionListItem,
   type CreateUsageMeterEntryDto,
   type MeterResponse,
+  type SubscriptionItemResponse,
   type SubscriptionMeterSummary,
   type UsageAttachmentType,
   type UsageMeterEntryResponse,
@@ -16,6 +21,8 @@ import {
 import { debounceTime, distinctUntilChanged, filter, pairwise, skip } from 'rxjs';
 
 import {
+  getProvisioningStatusBadgeClass,
+  getProvisioningStatusLabel,
   getSubscriptionStatusBadgeClass,
   getSubscriptionStatusLabel,
   getUnavailableLabel,
@@ -31,10 +38,17 @@ interface MeterEntryForm {
   periodEnd: string;
 }
 
+interface AddonMeterOption {
+  key: string;
+  meterId: string;
+  addonId: string;
+  label: string;
+}
+
 @Component({
   selector: 'framework-admin-subscriptions-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   providers: [DatePipe],
   templateUrl: './admin-subscriptions-page.component.html',
   styleUrls: ['./admin-subscriptions-page.component.scss'],
@@ -83,6 +97,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   subscriptionForMeters: AdminSubscriptionListItem | null = null;
   entryToDelete: UsageMeterEntryResponse | null = null;
   entryForm: MeterEntryForm = this.defaultEntryForm();
+  selectedAddonMeterKey = '';
 
   readonly activeCount = () => this.subscriptions().filter((sub) => sub.status === 'active').length;
 
@@ -105,6 +120,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
       )
       .subscribe(() => {
         this.entryForm = this.defaultEntryForm();
+        this.selectedAddonMeterKey = '';
       });
   }
 
@@ -115,6 +131,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   openMetersModal(sub: AdminSubscriptionListItem): void {
     this.subscriptionForMeters = sub;
     this.entryForm = this.defaultEntryForm();
+    this.selectedAddonMeterKey = '';
     this.subscriptionMetersFacade.loadAll(sub.id);
     showBillingModal(this.metersModal);
   }
@@ -122,11 +139,13 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   submitMeterEntry(): void {
     if (!this.subscriptionForMeters || !this.entryForm.meterId || this.entryForm.value < 0) return;
 
+    if (this.entryForm.attachmentType === 'addon' && !this.entryForm.addonId) return;
+
     const dto: CreateUsageMeterEntryDto = {
       meterId: this.entryForm.meterId,
       value: Number(this.entryForm.value) || 0,
       attachmentType: this.entryForm.attachmentType,
-      addonId: this.entryForm.attachmentType === 'addon' ? this.entryForm.addonId || undefined : undefined,
+      addonId: this.entryForm.attachmentType === 'addon' ? this.entryForm.addonId : undefined,
       periodStart: new Date(this.entryForm.periodStart).toISOString(),
       periodEnd: new Date(this.entryForm.periodEnd).toISOString(),
     };
@@ -147,6 +166,38 @@ export class AdminSubscriptionsPageComponent implements OnInit {
 
   subscriptionMeterSummaries(sub: AdminSubscriptionListItem): SubscriptionMeterSummary[] {
     return sub.meters ?? [];
+  }
+
+  subscriptionItems(sub: AdminSubscriptionListItem): SubscriptionItemResponse[] {
+    return sub.items ?? [];
+  }
+
+  serviceDisplayLabel(item: SubscriptionItemResponse): string {
+    return resolveServiceDisplayLabel(item);
+  }
+
+  isServiceDetailEligible(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): boolean {
+    return isSubscriptionItemDetailEligible(item, sub.status);
+  }
+
+  itemProvisioningStatusLabel(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): string {
+    if (isSubscriptionItemRemoved(item, sub.status)) {
+      return getProvisioningStatusLabel('removed');
+    }
+
+    return getProvisioningStatusLabel(item.provisioningStatus);
+  }
+
+  itemProvisioningStatusBadgeClass(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): string {
+    if (isSubscriptionItemRemoved(item, sub.status)) {
+      return getProvisioningStatusBadgeClass('removed');
+    }
+
+    return getProvisioningStatusBadgeClass(item.provisioningStatus);
+  }
+
+  serviceDetailLink(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): string[] {
+    return ['/administration', 'subscriptions', sub.id, 'services', item.id];
   }
 
   hasSubscriptionMeters(sub: AdminSubscriptionListItem): boolean {
@@ -171,6 +222,43 @@ export class AdminSubscriptionsPageComponent implements OnInit {
     return type === 'addon'
       ? $localize`:@@featureAdminSubscriptions-attachmentAddon:Addon`
       : $localize`:@@featureAdminSubscriptions-attachmentPlan:Plan`;
+  }
+
+  availableAddonMeters(): AddonMeterOption[] {
+    return this.meterSummaries()
+      .filter((summary) => summary.attachmentType === 'addon' && !!summary.addonId?.trim())
+      .map((summary) => {
+        const addonId = summary.addonId!.trim();
+        const addonName = summary.addonName?.trim();
+
+        return {
+          key: `${summary.meterId}|${addonId}`,
+          meterId: summary.meterId,
+          addonId,
+          label: addonName ? `${summary.name} · ${addonName}` : summary.name,
+        };
+      });
+  }
+
+  hasAvailableAddonMeters(): boolean {
+    return this.availableAddonMeters().length > 0;
+  }
+
+  onAttachmentTypeChange(): void {
+    if (this.entryForm.attachmentType === 'addon' && !this.hasAvailableAddonMeters()) {
+      this.entryForm.attachmentType = 'plan';
+    }
+
+    this.entryForm.meterId = '';
+    this.entryForm.addonId = '';
+    this.selectedAddonMeterKey = '';
+  }
+
+  onAddonMeterChange(): void {
+    const selected = this.availableAddonMeters().find((option) => option.key === this.selectedAddonMeterKey);
+
+    this.entryForm.meterId = selected?.meterId ?? '';
+    this.entryForm.addonId = selected?.addonId ?? '';
   }
 
   openCancelConfirm(sub: AdminSubscriptionListItem): void {

@@ -93,4 +93,28 @@ describe('UsageRecordsRepository', () => {
     expect(mockOrderBy).toHaveBeenCalledWith('usage.period_end', 'DESC');
     expect(result).toEqual(usage);
   });
+
+  it('findMeteredForSubscriptionInRange filters by periodEnd and meter_id', async () => {
+    const mockGetMany = jest.fn().mockResolvedValue([]);
+    const from = new Date('2026-01-01T00:00:00.000Z');
+    const to = new Date('2026-01-31T23:59:59.999Z');
+
+    const mockRepository = {
+      create: jest.fn(),
+      save: jest.fn(),
+      createQueryBuilder: jest.fn().mockReturnValue({
+        ...createQueryBuilderReturn,
+        addOrderBy: jest.fn().mockReturnThis(),
+        getMany: mockGetMany,
+      }),
+    };
+    const repository = new UsageRecordsRepository(mockRepository as never);
+
+    await runWithTenantId('default', () => repository.findMeteredForSubscriptionInRange('sub-1', from, to));
+
+    expect(mockAndWhere).toHaveBeenCalledWith('usage.meter_id IS NOT NULL');
+    expect(mockAndWhere).toHaveBeenCalledWith('usage.period_end >= :from', { from });
+    expect(mockAndWhere).toHaveBeenCalledWith('usage.period_end <= :to', { to });
+    expect(mockAndWhere).toHaveBeenCalledWith('user.tenant_id = :tenantId', { tenantId: 'default' });
+  });
 });

@@ -5,6 +5,7 @@
 
 import type {
   BillingIntervalType,
+  MeterAggregator,
   PromotionRedemptionContext,
   PromotionRedemptionStatus,
   ProviderDetail,
@@ -14,6 +15,31 @@ import { getCountryDisplayName } from './billing-country-options';
 
 export function getUnavailableLabel(): string {
   return $localize`:@@featureBilling-notAvailable:N/A`;
+}
+
+export function getMeterAggregatorLabel(aggregator: MeterAggregator | string | null | undefined): string {
+  if (aggregator == null || aggregator === '') {
+    return getUnavailableLabel();
+  }
+
+  switch (aggregator) {
+    case 'max':
+      return $localize`:@@featureMeters-aggregatorMax:Max`;
+    case 'min':
+      return $localize`:@@featureMeters-aggregatorMin:Min`;
+    case 'avg':
+      return $localize`:@@featureMeters-aggregatorAvg:Average`;
+    case 'first':
+      return $localize`:@@featureMeters-aggregatorFirst:First`;
+    case 'last':
+      return $localize`:@@featureMeters-aggregatorLast:Last`;
+    case 'sum':
+      return $localize`:@@featureMeters-aggregatorSum:Sum`;
+    case 'sum_positive_deltas':
+      return $localize`:@@featureMeters-aggregatorSumPositiveDeltas:Sum of positive deltas`;
+    default:
+      return String(aggregator);
+  }
 }
 
 export function getSubscriptionStatusLabel(status: string | null | undefined): string {
@@ -53,6 +79,8 @@ export function getProvisioningStatusLabel(status: string | null | undefined): s
       return $localize`:@@featureBilling-provisioningStatusActive:Provisioned`;
     case 'failed':
       return $localize`:@@featureBilling-provisioningStatusFailed:Provisioning failed`;
+    case 'removed':
+      return $localize`:@@featureBilling-provisioningStatusRemoved:Removed`;
     default:
       return $localize`:@@featureBilling-provisioningStatusUnknown:Unknown (${status})`;
   }
@@ -67,6 +95,8 @@ export function getProvisioningStatusBadgeClass(status: string | null | undefine
       return 'billing-admin__chip--status-paid';
     case 'failed':
       return 'billing-admin__chip--status-overdue';
+    case 'removed':
+      return 'billing-admin__chip--status-void';
     default:
       return 'billing-admin__chip--status-unknown';
   }

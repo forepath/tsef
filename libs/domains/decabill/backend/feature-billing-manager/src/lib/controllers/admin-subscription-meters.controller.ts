@@ -10,15 +10,19 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
 } from '@nestjs/common';
 
 import { CreateUsageRecordDto, UpdateUsageMeterEntryDto } from '../dto/create-usage-record.dto';
+import { SubscriptionMeterHistoryDto } from '../dto/meter-history.dto';
 import { SubscriptionMeterSummaryDto, UsageMeterEntryResponseDto } from '../dto/meter-response.dto';
+import { SubscriptionMeterHistoryQueryDto } from '../dto/subscription-meter-history-query.dto';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { MeterBillingService } from '../services/meter-billing.service';
 import { UsageService } from '../services/usage.service';
 import { ensureAdmin, getUserFromRequest, type RequestWithUser } from '../utils/billing-access.utils';
+import { parseMeterHistoryDateRange } from '../utils/meter-history-date.util';
 
 @Controller('admin/billing/subscriptions')
 @KeycloakRoles(UserRole.ADMIN)
@@ -30,8 +34,29 @@ export class AdminSubscriptionMetersController {
     private readonly meterBillingService: MeterBillingService,
   ) {}
 
+  @Get(':id/meters/history')
+  @RequireScopes('billing_admin:read')
+  async getMeterHistory(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Query() query: SubscriptionMeterHistoryQueryDto,
+    @Req() req?: RequestWithUser,
+  ): Promise<SubscriptionMeterHistoryDto> {
+    const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
+    ensureAdmin(userInfo);
+    const subscription = await this.subscriptionsRepository.findByIdOrThrow(id);
+    const groupBy = query.groupBy ?? 'day';
+    const { fromDate, toDate } = parseMeterHistoryDateRange(query.from, query.to, groupBy);
+
+    return await this.meterBillingService.buildSubscriptionMeterHistory({
+      subscription,
+      from: fromDate,
+      to: toDate,
+      groupBy,
+    });
+  }
+
   @Get(':id/meters')
-  @RequireScopes('usage:read')
+  @RequireScopes('billing_admin:read')
   async listMeters(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Req() req?: RequestWithUser,
@@ -48,7 +73,7 @@ export class AdminSubscriptionMetersController {
   }
 
   @Get(':id/meter-entries')
-  @RequireScopes('usage:read')
+  @RequireScopes('billing_admin:read')
   async listEntries(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Req() req?: RequestWithUser,
@@ -66,7 +91,7 @@ export class AdminSubscriptionMetersController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() body: Omit<CreateUsageRecordDto, 'subscriptionId'>,
     @Req() req?: RequestWithUser,
-  ): Promise<{ id: string }> {
+  ): Promise<UsageMeterEntryResponseDto> {
     const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
 
     if (!userInfo.userId && !userInfo.isApiKeyAuth) {
@@ -76,7 +101,7 @@ export class AdminSubscriptionMetersController {
     ensureAdmin(userInfo);
     await this.subscriptionsRepository.findByIdOrThrow(id);
 
-    const record = await this.usageService.createUsage({
+    return await this.usageService.createMeterEntry({
       subscriptionId: id,
       periodStart: new Date(body.periodStart),
       periodEnd: new Date(body.periodEnd),
@@ -87,12 +112,10 @@ export class AdminSubscriptionMetersController {
       attachmentType: body.attachmentType,
       addonId: body.addonId,
     });
-
-    return { id: record.id };
   }
 
   @Post(':id/meter-entries/:entryId')
-  @RequireScopes('usage:write')
+  @RequireScopes('billing_admin:write')
   async updateEntry(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Param('entryId', new ParseUUIDPipe({ version: '4' })) entryId: string,
@@ -107,7 +130,7 @@ export class AdminSubscriptionMetersController {
   }
 
   @Delete(':id/meter-entries/:entryId')
-  @RequireScopes('usage:write')
+  @RequireScopes('billing_admin:write')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteEntry(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,

@@ -9,6 +9,9 @@ info:
 
     All connections require authentication via `Authorization` in the handshake. Pass `X-Tenant` in handshake
     `extraHeaders` or `auth.tenantId`. Static API key auth is not sufficient for end-user streams.
+
+    `subscribeSubscriptionMeters` joins room `subscription:{id}`. Customers must own the subscription.
+    ADMIN sockets may join any tenant subscription after an existence check (no ownership required).
 servers:
   billing:
     host: localhost:8082
@@ -29,11 +32,26 @@ channels:
     messages:
       unsubscribeCommand:
         $ref: '#/components/messages/UnsubscribeDashboardStatus'
+  billing/subscribeSubscriptionMeters:
+    address: billing/subscribeSubscriptionMeters
+    messages:
+      subscribeMetersCommand:
+        $ref: '#/components/messages/SubscribeSubscriptionMeters'
+  billing/unsubscribeSubscriptionMeters:
+    address: billing/unsubscribeSubscriptionMeters
+    messages:
+      unsubscribeMetersCommand:
+        $ref: '#/components/messages/UnsubscribeSubscriptionMeters'
   billing/dashboardStatusUpdate:
     address: billing/dashboardStatusUpdate
     messages:
       statusEvent:
         $ref: '#/components/messages/DashboardStatusUpdate'
+  billing/meterSummaryUpdate:
+    address: billing/meterSummaryUpdate
+    messages:
+      meterSummaryEvent:
+        $ref: '#/components/messages/MeterSummaryUpdate'
   billing/error:
     address: billing/error
     messages:
@@ -108,10 +126,22 @@ operations:
     action: send
     channel:
       $ref: '#/channels/billing~1unsubscribeDashboardStatus'
+  clientSubscribesSubscriptionMeters:
+    action: send
+    channel:
+      $ref: '#/channels/billing~1subscribeSubscriptionMeters'
+  clientUnsubscribesSubscriptionMeters:
+    action: send
+    channel:
+      $ref: '#/channels/billing~1unsubscribeSubscriptionMeters'
   serverEmitsDashboardStatus:
     action: receive
     channel:
       $ref: '#/channels/billing~1dashboardStatusUpdate'
+  serverEmitsMeterSummary:
+    action: receive
+    channel:
+      $ref: '#/channels/billing~1meterSummaryUpdate'
   serverBillingError:
     action: receive
     channel:
@@ -179,6 +209,30 @@ components:
       contentType: application/json
       payload:
         type: object
+    SubscribeSubscriptionMeters:
+      name: SubscribeSubscriptionMeters
+      summary: Join a subscription meter room
+      description: |
+        Customers must own the subscription. ADMIN users may subscribe to any tenant subscription
+        after the subscription is verified to exist.
+      contentType: application/json
+      payload:
+        type: object
+        required: [subscriptionId]
+        properties:
+          subscriptionId:
+            type: string
+            format: uuid
+    UnsubscribeSubscriptionMeters:
+      name: UnsubscribeSubscriptionMeters
+      contentType: application/json
+      payload:
+        type: object
+        required: [subscriptionId]
+        properties:
+          subscriptionId:
+            type: string
+            format: uuid
     DashboardStatusUpdate:
       name: DashboardStatusUpdate
       contentType: application/json
@@ -212,6 +266,12 @@ components:
                     type: string,
                     description: User-facing service type name from the catalog,
                   }
+                displayName:
+                  {
+                    type: string,
+                    nullable: true,
+                    description: Customer-defined label; null when unset,
+                  }
                 name: { type: string }
                 publicIp: { type: string }
                 privateIp: { type: string }
@@ -224,6 +284,54 @@ components:
                 metadata:
                   type: object
                   additionalProperties: true
+    MeterSummaryUpdate:
+      name: MeterSummaryUpdate
+      contentType: application/json
+      payload:
+        type: object
+        required: [subscriptionId, generatedAt, meters]
+        properties:
+          subscriptionId:
+            type: string
+            format: uuid
+          generatedAt:
+            type: string
+            format: date-time
+          meters:
+            type: array
+            items:
+              type: object
+              required:
+                [
+                  meterId,
+                  key,
+                  name,
+                  aggregator,
+                  attachmentType,
+                  effectiveUnitPriceNet,
+                  aggregatedValue,
+                  estimatedChargeNet,
+                  entryCount,
+                ]
+              properties:
+                meterId: { type: string, format: uuid }
+                key: { type: string }
+                name: { type: string }
+                unitLabel: { type: string, nullable: true }
+                aggregator:
+                  type: string
+                  enum: [sum, max, last]
+                attachmentType:
+                  type: string
+                  enum: [plan, addon]
+                addonId: { type: string, format: uuid, nullable: true }
+                addonName: { type: string, nullable: true }
+                effectiveUnitPriceNet: { type: number }
+                aggregatedValue: { type: number }
+                estimatedChargeNet: { type: number }
+                entryCount: { type: integer }
+                periodStart: { type: string, format: date-time, nullable: true }
+                periodEnd: { type: string, format: date-time, nullable: true }
     SetProject:
       name: SetProject
       contentType: application/json

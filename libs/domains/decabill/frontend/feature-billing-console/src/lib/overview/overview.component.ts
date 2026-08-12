@@ -14,6 +14,7 @@ import {
   isBillingServerStartable,
   isBillingServerStatusTransitional,
   ProjectsFacade,
+  resolveServiceDisplayLabel,
   SubscriptionItemsService,
   SubscriptionServerInfoFacade,
   SubscriptionsFacade,
@@ -157,7 +158,11 @@ export class OverviewComponent implements OnInit {
   }
 
   instanceDisplayTitle(item: SubscriptionWithServerInfo): string {
-    return item.subscription.number?.trim() || '—';
+    return resolveServiceDisplayLabel({
+      displayName: item.displayName,
+      serviceTypeName: item.serviceTypeName,
+      service: item.service,
+    });
   }
 
   instanceSearchHaystack(item: SubscriptionWithServerInfo): string {
