@@ -922,8 +922,6 @@
       <trans-unit id="featureServicePlans-addonsHelp" datatype="html"><source>Choose which addons customers may add when ordering this plan.</source><target>Wählen Sie, welche Add-ons Kunden bei der Bestellung dieses Plans hinzufügen dürfen.</target></trans-unit>
       <trans-unit id="featureSubscriptions-loadingAddons" datatype="html"><source>Loading addons…</source><target>Add-ons werden geladen…</target></trans-unit>
       <trans-unit id="featureSubscriptions-addons" datatype="html"><source>Addons</source><target>Add-ons</target></trans-unit>
-      <trans-unit id="featureSubscriptions-addonConfigFields" datatype="html"><source>Configuration for this addon</source><target>Konfiguration für dieses Add-on</target></trans-unit>
-      <trans-unit id="featureSubscriptions-addonConfigSection" datatype="html"><source>Addon configuration</source><target>Add-on-Konfiguration</target></trans-unit>
       <trans-unit id="featureSubscriptions-addonConfigCardTitle" datatype="html"><source>Addon: <x id="addonName" equiv-text="addonName"/></source><target>Add-on: <x id="addonName" equiv-text="addonName"/></target></trans-unit>
       <trans-unit id="featureSubscriptions-addonsTotal" datatype="html"><source>Addons total</source><target>Add-ons gesamt</target></trans-unit>
       <trans-unit id="featureSubscriptions-grandTotal" datatype="html"><source>Plan and addons</source><target>Plan und Add-ons</target></trans-unit>
@@ -1204,34 +1202,6 @@
         <source>No invoices match your search.</source>
         <target>Keine Rechnungen entsprechen Ihrer Suche.</target>
       </trans-unit>
-      <trans-unit id="featureInvoices-invoices" datatype="html">
-        <source>Invoices</source>
-        <target>Rechnungen</target>
-      </trans-unit>
-      <trans-unit id="featureInvoices-selectSubscription" datatype="html">
-        <source> Subscription </source>
-        <target>Abonnement</target>
-      </trans-unit>
-      <trans-unit id="featureInvoices-chooseSubscription" datatype="html">
-        <source>Choose a subscription</source>
-        <target>Abonnement auswählen</target>
-      </trans-unit>
-      <trans-unit id="featureInvoices-searchInvoices" datatype="html">
-        <source> Search invoices </source>
-        <target> Rechnungen suchen </target>
-      </trans-unit>
-      <trans-unit id="featureInvoices-selectFirst" datatype="html">
-        <source>Select a subscription to view invoices.</source>
-        <target>Wählen Sie ein Abonnement, um Rechnungen anzuzeigen.</target>
-      </trans-unit>
-      <trans-unit id="featureInvoices-loading" datatype="html">
-        <source>Loading invoices...</source>
-        <target>Rechnungen werden geladen...</target>
-      </trans-unit>
-      <trans-unit id="featureInvoices-noInvoices" datatype="html">
-        <source>No invoices for this subscription.</source>
-        <target>Keine Rechnungen für dieses Abonnement.</target>
-      </trans-unit>
       <trans-unit id="featureInvoices-invoiceActionsAria" datatype="html">
         <source>Invoice actions</source>
         <target>Rechnungsaktionen</target>
@@ -1348,10 +1318,6 @@
         <source>Open &amp; overdue</source>
         <target>Offen &amp; überfällig</target>
       </trans-unit>
-      <trans-unit id="featureInvoices-mobileSubscription" datatype="html">
-        <source>By subscription</source>
-        <target>Nach Abonnement</target>
-      </trans-unit>
       <trans-unit id="featureServiceDetail-backToSubscriptions" datatype="html">
         <source>Back to subscriptions</source>
         <target>Zurück zu Abonnements</target>
@@ -1407,6 +1373,14 @@
       <trans-unit id="featureServiceDetail-loading" datatype="html">
         <source>Loading service…</source>
         <target>Dienst wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-serviceType" datatype="html">
+        <source>Service type</source>
+        <target>Servicetyp</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-provider" datatype="html">
+        <source>Provider</source>
+        <target>Anbieter</target>
       </trans-unit>
       <trans-unit id="featureServiceDetail-serviceInfoTitle" datatype="html">
         <source>Service info</source>
@@ -1476,13 +1450,13 @@
         <source>Reset</source>
         <target>Zurücksetzen</target>
       </trans-unit>
-      <trans-unit id="featureServiceDetail-noMeterData" datatype="html">
-        <source>No meter usage for the selected period.</source>
-        <target>Keine Zählernutzung für den ausgewählten Zeitraum.</target>
-      </trans-unit>
       <trans-unit id="featureServiceDetail-meterTotalLabel" datatype="html">
         <source>Total:</source>
         <target>Gesamt:</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-customService" datatype="html">
+        <source>Custom application</source>
+        <target>Benutzerdefinierte Anwendung</target>
       </trans-unit>
       <trans-unit id="featureOverview-title" datatype="html">
         <source>Overview</source>
@@ -1547,10 +1521,6 @@
       <trans-unit id="featureOverview-noSearchResults" datatype="html">
         <source>No instances match your search.</source>
         <target>Keine Instanzen entsprechen Ihrer Suche.</target>
-      </trans-unit>
-      <trans-unit id="featureOverview-viewSubscription" datatype="html">
-        <source>View subscription</source>
-        <target>Abonnement anzeigen</target>
       </trans-unit>
       <trans-unit id="featureOverview-viewServiceDetails" datatype="html">
         <source>View service details</source>
@@ -1707,10 +1677,6 @@
       <trans-unit id="featureServicePlans-serviceType" datatype="html">
         <source>Service type</source>
         <target>Servicetyp</target>
-      </trans-unit>
-      <trans-unit id="featureServicePlans-chooseType" datatype="html">
-        <source>Choose a service type</source>
-        <target>Servicetyp wählen</target>
       </trans-unit>
       <trans-unit id="featureServicePlans-name" datatype="html">
         <source>Name</source>
@@ -2392,10 +2358,6 @@
         <source>On file</source>
         <target>Hinterlegt</target>
         </trans-unit>
-      <trans-unit id="featureSubscriptions-paymentMethodMissing" datatype="html">
-        <source>Not on file</source>
-        <target>Nicht hinterlegt</target>
-        </trans-unit>
       <trans-unit id="featureSubscriptions-addPaymentMethod" datatype="html">
         <source>Add payment method</source>
         <target>Zahlungsmethode hinzufügen</target>
@@ -2832,10 +2794,6 @@
         <source>Register</source>
         <target>Registrieren</target>
       </trans-unit>
-      <trans-unit id="featureRegister-alreadyHaveAccount" datatype="html">
-        <source>Already have an account? Log in</source>
-        <target>Bereits ein Konto? Anmelden</target>
-      </trans-unit>
       <trans-unit id="featureResetPasswordConfirmation-title" datatype="html">
         <source>Check Your Email</source>
         <target>Überprüfen Sie Ihre E-Mail</target>
@@ -3218,21 +3176,9 @@
         <source>scopes</source>
         <target>Berechtigungen</target>
       </trans-unit>
-      <trans-unit id="featureTokenManager-created" datatype="html">
-        <source>Created</source>
-        <target>Erstellt</target>
-      </trans-unit>
-      <trans-unit id="featureTokenManager-expires" datatype="html">
-        <source>Expires</source>
-        <target>Läuft ab</target>
-      </trans-unit>
       <trans-unit id="featureTokenManager-noExpiry" datatype="html">
         <source>No expiry</source>
         <target>Kein Ablaufdatum</target>
-      </trans-unit>
-      <trans-unit id="featureTokenManager-lastUsed" datatype="html">
-        <source>Last used</source>
-        <target>Zuletzt verwendet</target>
       </trans-unit>
       <trans-unit id="featureTokenManager-revokeTitle" datatype="html">
         <source>Revoke token</source>
@@ -4870,10 +4816,6 @@
         <source>Price</source>
         <target>Preis</target>
       </trans-unit>
-      <trans-unit id="featurePromotions-orderPlanTotal" datatype="html">
-        <source> Plan total (net) </source>
-        <target>Plan-Gesamtbetrag (netto)</target>
-      </trans-unit>
       <trans-unit id="featurePromotions-orderDiscountLabel" datatype="html">
         <source>Promotion</source>
         <target>Aktion</target>
@@ -5372,14 +5314,6 @@
         <source>Last check</source>
         <target>Letzte Prüfung</target>
       </trans-unit>
-      <trans-unit id="featureUpdates-instanceCount" datatype="html">
-        <source>Instances</source>
-        <target>Instanzen</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-outdatedInstances" datatype="html">
-        <source>Outdated instances</source>
-        <target>Veraltete Instanzen</target>
-      </trans-unit>
       <trans-unit id="featureUpdates-instancesTitle" datatype="html">
         <source>Service instances</source>
         <target>Service-Instanzen</target>
@@ -5411,46 +5345,6 @@
       <trans-unit id="featureUpdates-noInstances" datatype="html">
         <source>No service instances reported yet.</source>
         <target>Noch keine Service-Instanzen gemeldet.</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colInstanceId" datatype="html">
-        <source>Instance</source>
-        <target>Instanz</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colService" datatype="html">
-        <source>Service</source>
-        <target>Service</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colRole" datatype="html">
-        <source>Role</source>
-        <target>Rolle</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colHostname" datatype="html">
-        <source>Hostname</source>
-        <target>Hostname</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colInstalledVersion" datatype="html">
-        <source>Installed</source>
-        <target>Installiert</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colUpdateState" datatype="html">
-        <source>Update state</source>
-        <target>Update-Status</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colLastHeartbeat" datatype="html">
-        <source>Last heartbeat</source>
-        <target>Letzter Heartbeat</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colRedis" datatype="html">
-        <source>Redis</source>
-        <target>Redis</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colQueue" datatype="html">
-        <source>Queue</source>
-        <target>Warteschlange</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colDatabase" datatype="html">
-        <source>Database</source>
-        <target>Datenbank</target>
       </trans-unit>
       <trans-unit id="featureUpdates-changelogProduct" datatype="html">
         <source>Product changelog</source>
@@ -6028,10 +5922,6 @@
         <source>Open details</source>
         <target>Details öffnen</target>
       </trans-unit>
-      <trans-unit id="featureSubscriptions-addonMeterLabel" datatype="html">
-        <source>Meter</source>
-        <target>Zähler</target>
-      </trans-unit>
       <trans-unit id="featureSubscriptions-planMeters" datatype="html">
         <source> Plan usage meters </source>
         <target> Tarif-Nutzungszähler </target>
@@ -6039,14 +5929,6 @@
       <trans-unit id="featureSubscriptions-planMetersHelp" datatype="html">
         <source> Usage for these meters is recorded in arrears and billed separately from the base plan price. </source>
         <target> Die Nutzung dieser Zähler wird nachträglich erfasst und getrennt vom Grundpreis des Tarifs abgerechnet. </target>
-      </trans-unit>
-      <trans-unit id="featureSubscriptions-meterAddon" datatype="html">
-        <source>Addon meter</source>
-        <target>Add-on-Zähler</target>
-      </trans-unit>
-      <trans-unit id="featureSubscriptions-meterPlan" datatype="html">
-        <source>Plan meter</source>
-        <target>Tarif-Zähler</target>
       </trans-unit>
       <trans-unit id="featureRegister-backToLogin" datatype="html">
         <source>Back to login</source>

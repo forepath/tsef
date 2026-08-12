@@ -54,10 +54,6 @@
         <source>Loading...</source>
         <target>Laden...</target>
       </trans-unit>
-      <trans-unit id="featureDocsPage-metaTitleFallback" datatype="html">
-        <source>Documentation :: Agenstra</source>
-        <target>Dokumentation :: Agenstra</target>
-      </trans-unit>
       <trans-unit id="featureDocsPage-metaDescriptionFallback" datatype="html">
         <source>Official Agenstra documentation: install, deploy, secure, and operate agent hosts, workspaces, tickets, APIs, and integrations for platform teams.</source>
         <target>Offizielle Agenstra-Dokumentation: Installation, Deployment, Sicherheit und Betrieb von Agent-Hosts, Workspaces, Tickets, APIs und Integrationen für Plattformteams.</target>
@@ -93,10 +89,6 @@
       <trans-unit id="featureDocsSearchPage-enterQueryHint" datatype="html">
         <source>Enter a search query above to find documentation.</source>
         <target>Geben Sie oben eine Suchanfrage ein, um die Dokumentation zu durchsuchen.</target>
-      </trans-unit>
-      <trans-unit id="featureDocsSearchPage-metaTitle" datatype="html">
-        <source>Search Documentation :: Agenstra</source>
-        <target>Dokumentation durchsuchen :: Agenstra</target>
       </trans-unit>
       <trans-unit id="featureDocsSearchPage-metaDescription" datatype="html">
         <source>Search Agenstra docs for setup guides, API references, security hardening, agent configuration, deployment patterns, and troubleshooting.</source>

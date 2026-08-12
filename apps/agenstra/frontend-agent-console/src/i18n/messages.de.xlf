@@ -1721,9 +1721,21 @@
         <source>Admin</source>
         <target>Admin</target>
       </trans-unit>
+      <trans-unit id="featureContainer-updatesAttention" datatype="html">
+        <source>Updates need attention</source>
+        <target>Updates erfordern Aufmerksamkeit</target>
+      </trans-unit>
       <trans-unit id="featureContainer-ariaLabelRole" datatype="html">
         <source>Role <x id="role" equiv-text="role"/></source>
         <target>Rolle <x id="role" equiv-text="role"/></target>
+      </trans-unit>
+      <trans-unit id="featureContainer-updatesTitle" datatype="html">
+        <source>Updates</source>
+        <target>Updates</target>
+      </trans-unit>
+      <trans-unit id="featureContainer-updates" datatype="html">
+        <source>Updates</source>
+        <target>Updates</target>
       </trans-unit>
       <trans-unit id="featureDeploymentConfig-loadingConfig" datatype="html">
         <source>Loading configuration...</source>
@@ -4135,6 +4147,10 @@
         <source>Privacy Policy</source>
         <target>Datenschutzerklärung</target>
       </trans-unit>
+      <trans-unit id="featureRegister-backToLogin" datatype="html">
+        <source>Back to login</source>
+        <target>Zurück zur Anmeldung</target>
+      </trans-unit>
       <trans-unit id="featureRegister-registering" datatype="html">
         <source>Registering...</source>
         <target>Registrieren...</target>
@@ -4142,10 +4158,6 @@
       <trans-unit id="featureRegister-submit" datatype="html">
         <source>Register</source>
         <target>Registrieren</target>
-      </trans-unit>
-      <trans-unit id="featureRegister-alreadyHaveAccount" datatype="html">
-        <source>Already have an account? Log in</source>
-        <target>Bereits ein Konto? Anmelden</target>
       </trans-unit>
       <trans-unit id="featureResetPasswordConfirmation-title" datatype="html">
         <source>Check Your Email</source>
@@ -4529,21 +4541,9 @@
         <source>scopes</source>
         <target>Berechtigungen</target>
       </trans-unit>
-      <trans-unit id="featureTokenManager-created" datatype="html">
-        <source>Created</source>
-        <target>Erstellt</target>
-      </trans-unit>
-      <trans-unit id="featureTokenManager-expires" datatype="html">
-        <source>Expires</source>
-        <target>Läuft ab</target>
-      </trans-unit>
       <trans-unit id="featureTokenManager-noExpiry" datatype="html">
         <source>No expiry</source>
         <target>Kein Ablaufdatum</target>
-      </trans-unit>
-      <trans-unit id="featureTokenManager-lastUsed" datatype="html">
-        <source>Last used</source>
-        <target>Zuletzt verwendet</target>
       </trans-unit>
       <trans-unit id="featureTokenManager-revokeTitle" datatype="html">
         <source>Revoke token</source>
@@ -5271,14 +5271,6 @@
         <source>Last check</source>
         <target>Letzte Prüfung</target>
       </trans-unit>
-      <trans-unit id="featureUpdates-instanceCount" datatype="html">
-        <source>Instances</source>
-        <target>Instanzen</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-outdatedInstances" datatype="html">
-        <source>Outdated instances</source>
-        <target>Veraltete Instanzen</target>
-      </trans-unit>
       <trans-unit id="featureUpdates-instancesTitle" datatype="html">
         <source>Service instances</source>
         <target>Service-Instanzen</target>
@@ -5310,46 +5302,6 @@
       <trans-unit id="featureUpdates-noInstances" datatype="html">
         <source>No service instances reported yet.</source>
         <target>Noch keine Service-Instanzen gemeldet.</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colInstanceId" datatype="html">
-        <source>Instance</source>
-        <target>Instanz</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colService" datatype="html">
-        <source>Service</source>
-        <target>Service</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colRole" datatype="html">
-        <source>Role</source>
-        <target>Rolle</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colHostname" datatype="html">
-        <source>Hostname</source>
-        <target>Hostname</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colInstalledVersion" datatype="html">
-        <source>Installed</source>
-        <target>Installiert</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colUpdateState" datatype="html">
-        <source>Update state</source>
-        <target>Update-Status</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colLastHeartbeat" datatype="html">
-        <source>Last heartbeat</source>
-        <target>Letzter Heartbeat</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colRedis" datatype="html">
-        <source>Redis</source>
-        <target>Redis</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colQueue" datatype="html">
-        <source>Queue</source>
-        <target>Warteschlange</target>
-      </trans-unit>
-      <trans-unit id="featureUpdates-colDatabase" datatype="html">
-        <source>Database</source>
-        <target>Datenbank</target>
       </trans-unit>
       <trans-unit id="featureUpdates-changelogProduct" datatype="html">
         <source>Product changelog</source>
