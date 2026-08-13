@@ -167,226 +167,257 @@
     <div class="alert alert-danger mb-0 rounded-0" role="alert">{{ err }}</div>
   }
 
-  @if (showUsageMetersSection()) {
-    <div class="d-flex align-items-center gap-0 d-md-none border-bottom btn-group-options">
-      @for (panel of mobilePanels; track panel) {
+  @if (showServiceTabs()) {
+    <div
+      class="d-flex align-items-center gap-0 border-bottom btn-group-options flex-shrink-0"
+      role="tablist"
+      aria-label="Service detail tabs"
+      i18n-aria-label="@@featureServiceDetail-tabsAria"
+    >
+      @for (tab of sortedTabs(); track tab.id) {
         <button
           type="button"
           class="btn btn-sm btn-options"
-          [class.btn-outline-secondary]="mobilePanel() !== panel"
-          [class.btn-primary]="mobilePanel() === panel"
-          (click)="mobilePanel.set(panel)"
+          role="tab"
+          [attr.aria-selected]="activeTabId() === tab.id"
+          [class.btn-primary]="activeTabId() === tab.id"
+          [class.btn-outline-secondary]="activeTabId() !== tab.id"
+          (click)="setTab(tab.id)"
         >
-          {{ mobilePanelLabel(panel) }}
+          {{ tabLabel(tab) }}
         </button>
       }
     </div>
   }
 
-  <div class="service-detail-page__body flex-grow-1 min-h-0 d-flex flex-column">
-    <div
-      class="service-detail-page__lanes flex-grow-1 min-h-0 d-flex flex-column"
-      [class.service-detail-page__lanes--solo]="!showUsageMetersSection()"
-    >
-      <div
-        class="service-detail-page__lane service-detail-page__lane--info d-md-flex flex-column min-h-0"
-        [class.d-none]="showUsageMetersSection() && mobilePanel() !== 'info'"
-        [class.border-bottom]="showUsageMetersSection()"
-      >
-        <div class="card h-100 border-0 rounded-0 d-flex flex-column min-h-0">
-          <div class="card-body service-detail-page__lane-body">
-            @if (detail(); as detailValue) {
-              <dl class="row mb-0 small">
-                <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-serviceType">Service type</dt>
-                <dd class="col-sm-9">{{ productServiceLabel(detailValue) }}</dd>
-                @if (providerLabel(detailValue); as providerName) {
-                  <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-provider">Provider</dt>
-                  <dd class="col-sm-9">{{ providerName }}</dd>
-                }
-                @if (detailValue.serverInfo; as serverInfo) {
-                  @if (serverInfo.publicIp) {
-                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-publicIp">Public IP</dt>
-                    <dd class="col-sm-9">{{ serverInfo.publicIp }}</dd>
-                  }
-                  @if (serverInfo.privateIp) {
-                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-privateIp">Private IP</dt>
-                    <dd class="col-sm-9">{{ serverInfo.privateIp }}</dd>
-                  }
-                  @if (serverInfo.hostname) {
-                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostname">Hostname</dt>
-                    <dd class="col-sm-9">{{ serverInfo.hostname }}</dd>
-                  }
-                  @if (serverInfo.hostnameFqdn) {
-                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostnameFqdn">FQDN</dt>
-                    <dd class="col-sm-9">{{ serverInfo.hostnameFqdn }}</dd>
-                  }
-                  <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-runtimeStatus">Runtime status</dt>
-                  <dd class="col-sm-9">
-                    <span
-                      class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded d-inline-flex"
-                      [ngClass]="serverStatusBadgeClass(serverInfo)"
-                    >
-                      <i class="bi me-1" [ngClass]="serverStatusIconClass(serverInfo)" aria-hidden="true"></i>
-                      {{ serverStatusLabel(serverInfo) }}
-                    </span>
-                  </dd>
-                  @if (serverLocationLabel(serverInfo.metadata, locationCatalog()); as locationLabel) {
-                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-location">Location</dt>
-                    <dd class="col-sm-9">{{ locationLabel }}</dd>
-                  }
-                } @else if (detailValue.hostname) {
-                  <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostname">Hostname</dt>
-                  <dd class="col-sm-9">{{ detailValue.hostname }}</dd>
-                }
-              </dl>
-            } @else if (loadingDetail$ | async) {
-              <p class="text-muted small mb-0" i18n="@@featureServiceDetail-loading">Loading service…</p>
-            } @else {
-              <p class="text-muted small mb-0" i18n="@@featureServiceDetail-noServerInfo">
-                Server details are not available yet.
-              </p>
-            }
-          </div>
-        </div>
+  @if (isDetailsTabActive()) {
+    @if (showUsageMetersSection()) {
+      <div class="d-flex align-items-center gap-0 d-md-none border-bottom btn-group-options">
+        @for (panel of mobilePanels; track panel) {
+          <button
+            type="button"
+            class="btn btn-sm btn-options"
+            [class.btn-outline-secondary]="mobilePanel() !== panel"
+            [class.btn-primary]="mobilePanel() === panel"
+            (click)="mobilePanel.set(panel)"
+          >
+            {{ mobilePanelLabel(panel) }}
+          </button>
+        }
       </div>
+    }
 
-      @if (showUsageMetersSection()) {
+    <div class="service-detail-page__body flex-grow-1 min-h-0 d-flex flex-column">
+      <div
+        class="service-detail-page__lanes flex-grow-1 min-h-0 d-flex flex-column"
+        [class.service-detail-page__lanes--solo]="!showUsageMetersSection()"
+      >
         <div
-          class="service-detail-page__lane service-detail-page__lane--meters d-md-flex flex-column min-h-0"
-          [class.d-none]="mobilePanel() !== 'meters'"
+          class="service-detail-page__lane service-detail-page__lane--info d-md-flex flex-column min-h-0"
+          [class.d-none]="showUsageMetersSection() && mobilePanel() !== 'info'"
+          [class.border-bottom]="showUsageMetersSection()"
         >
           <div class="card h-100 border-0 rounded-0 d-flex flex-column min-h-0">
-            <div
-              class="card-header service-detail-page__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center flex-shrink-0"
-            >
-              <span class="d-none d-md-inline" i18n="@@featureServiceDetail-usageMetersTitle">Usage meters</span>
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-secondary ms-auto"
-                (click)="onToggleFilters()"
-                [attr.aria-expanded]="!filtersCollapsed()"
-                aria-controls="serviceDetailFilters"
-                title="Filters"
-                i18n-title="@@featureServiceDetail-filters"
-                i18n-aria-label="@@featureServiceDetail-filters"
-                aria-label="Filters"
-              >
-                <i class="bi bi-funnel" aria-hidden="true"></i>
-                <i
-                  class="bi ms-1"
-                  [class.bi-chevron-down]="filtersCollapsed()"
-                  [class.bi-chevron-up]="!filtersCollapsed()"
-                  aria-hidden="true"
-                ></i>
-              </button>
-            </div>
-            <div
-              id="serviceDetailFilters"
-              class="service-detail-page__filters border-bottom collapse flex-shrink-0"
-              [class.show]="!filtersCollapsed()"
-            >
-              <div class="p-3">
-                <div class="row g-3 mb-0">
-                  <div class="col-6">
-                    <label class="form-label small" for="serviceDetailFrom" i18n="@@featureServiceDetail-fromDate"
-                      >From</label
-                    >
-                    <input
-                      id="serviceDetailFrom"
-                      type="date"
-                      class="form-control form-control-sm"
-                      [ngModel]="fromDate()"
-                      (ngModelChange)="fromDate.set($event)"
-                    />
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label small" for="serviceDetailTo" i18n="@@featureServiceDetail-toDate"
-                      >To</label
-                    >
-                    <input
-                      id="serviceDetailTo"
-                      type="date"
-                      class="form-control form-control-sm"
-                      [ngModel]="toDate()"
-                      (ngModelChange)="toDate.set($event)"
-                    />
-                  </div>
-                  <div class="col-12">
-                    <label class="form-label small" for="serviceDetailGroupBy" i18n="@@featureServiceDetail-groupBy"
-                      >Group by</label
-                    >
-                    <select
-                      id="serviceDetailGroupBy"
-                      class="form-select form-select-sm"
-                      [ngModel]="groupBy()"
-                      (ngModelChange)="groupBy.set($event)"
-                    >
-                      <option value="day" i18n="@@featureServiceDetail-groupByDay">Day</option>
-                      <option value="month" i18n="@@featureServiceDetail-groupByMonth">Month</option>
-                    </select>
-                  </div>
-                  <div class="col-12 d-flex gap-2">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-primary"
-                      (click)="onApplyFilters()"
-                      i18n="@@featureServiceDetail-applyFilters"
-                    >
-                      Apply
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-secondary"
-                      (click)="onResetFilters()"
-                      i18n="@@featureServiceDetail-resetFilters"
-                    >
-                      Reset
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="service-detail-page__lane-body p-3 d-flex flex-column gap-3">
-              @if (loadingHistory()) {
-                <div class="text-center py-4">
-                  <span class="spinner-border spinner-border-sm" role="status"></span>
-                </div>
+            <div class="card-body service-detail-page__lane-body">
+              @if (detail(); as detailValue) {
+                <dl class="row mb-0 small">
+                  <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-serviceType">Service type</dt>
+                  <dd class="col-sm-9">{{ productServiceLabel(detailValue) }}</dd>
+                  @if (providerLabel(detailValue); as providerName) {
+                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-provider">Provider</dt>
+                    <dd class="col-sm-9">{{ providerName }}</dd>
+                  }
+                  @if (detailValue.serverInfo; as serverInfo) {
+                    @if (serverInfo.publicIp) {
+                      <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-publicIp">Public IP</dt>
+                      <dd class="col-sm-9">{{ serverInfo.publicIp }}</dd>
+                    }
+                    @if (serverInfo.privateIp) {
+                      <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-privateIp">Private IP</dt>
+                      <dd class="col-sm-9">{{ serverInfo.privateIp }}</dd>
+                    }
+                    @if (serverInfo.hostname) {
+                      <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostname">Hostname</dt>
+                      <dd class="col-sm-9">{{ serverInfo.hostname }}</dd>
+                    }
+                    @if (serverInfo.hostnameFqdn) {
+                      <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostnameFqdn">FQDN</dt>
+                      <dd class="col-sm-9">{{ serverInfo.hostnameFqdn }}</dd>
+                    }
+                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-runtimeStatus">Runtime status</dt>
+                    <dd class="col-sm-9">
+                      <span
+                        class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded d-inline-flex"
+                        [ngClass]="serverStatusBadgeClass(serverInfo)"
+                      >
+                        <i class="bi me-1" [ngClass]="serverStatusIconClass(serverInfo)" aria-hidden="true"></i>
+                        {{ serverStatusLabel(serverInfo) }}
+                      </span>
+                    </dd>
+                    @if (serverLocationLabel(serverInfo.metadata, locationCatalog()); as locationLabel) {
+                      <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-location">Location</dt>
+                      <dd class="col-sm-9">{{ locationLabel }}</dd>
+                    }
+                  } @else if (detailValue.hostname) {
+                    <dt class="col-sm-3 text-muted" i18n="@@featureServiceDetail-hostname">Hostname</dt>
+                    <dd class="col-sm-9">{{ detailValue.hostname }}</dd>
+                  }
+                </dl>
+              } @else if (loadingDetail$ | async) {
+                <p class="text-muted small mb-0" i18n="@@featureServiceDetail-loading">Loading service…</p>
               } @else {
-                @for (
-                  entry of meterCharts();
-                  track entry.meter.meterId + entry.meter.attachmentType + (entry.meter.addonId ?? '')
-                ) {
-                  <div class="card">
-                    <div class="card-body">
-                      @if (entry.options; as chart) {
-                        <apx-chart
-                          [series]="chart.series"
-                          [chart]="chart.chart"
-                          [colors]="chart.colors"
-                          [stroke]="chart.stroke"
-                          [fill]="chart.fill"
-                          [dataLabels]="chart.dataLabels"
-                          [xaxis]="chart.xaxis"
-                          [yaxis]="chart.yaxis"
-                          [grid]="chart.grid"
-                          [title]="chart.title"
-                        ></apx-chart>
-                      }
-                      <p class="small text-muted mb-0 mt-2">
-                        <span i18n="@@featureServiceDetail-meterTotalLabel">Total:</span>
-                        {{ formatMeterTotal(entry.meter) }}
-                      </p>
-                    </div>
-                  </div>
-                }
+                <p class="text-muted small mb-0" i18n="@@featureServiceDetail-noServerInfo">
+                  Server details are not available yet.
+                </p>
               }
             </div>
           </div>
         </div>
-      }
+
+        @if (showUsageMetersSection()) {
+          <div
+            class="service-detail-page__lane service-detail-page__lane--meters d-md-flex flex-column min-h-0"
+            [class.d-none]="mobilePanel() !== 'meters'"
+          >
+            <div class="card h-100 border-0 rounded-0 d-flex flex-column min-h-0">
+              <div
+                class="card-header service-detail-page__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center flex-shrink-0"
+              >
+                <span class="d-none d-md-inline" i18n="@@featureServiceDetail-usageMetersTitle">Usage meters</span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary ms-auto"
+                  (click)="onToggleFilters()"
+                  [attr.aria-expanded]="!filtersCollapsed()"
+                  aria-controls="serviceDetailFilters"
+                  title="Filters"
+                  i18n-title="@@featureServiceDetail-filters"
+                  i18n-aria-label="@@featureServiceDetail-filters"
+                  aria-label="Filters"
+                >
+                  <i class="bi bi-funnel" aria-hidden="true"></i>
+                  <i
+                    class="bi ms-1"
+                    [class.bi-chevron-down]="filtersCollapsed()"
+                    [class.bi-chevron-up]="!filtersCollapsed()"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </div>
+              <div
+                id="serviceDetailFilters"
+                class="service-detail-page__filters border-bottom collapse flex-shrink-0"
+                [class.show]="!filtersCollapsed()"
+              >
+                <div class="p-3">
+                  <div class="row g-3 mb-0">
+                    <div class="col-6">
+                      <label class="form-label small" for="serviceDetailFrom" i18n="@@featureServiceDetail-fromDate"
+                        >From</label
+                      >
+                      <input
+                        id="serviceDetailFrom"
+                        type="date"
+                        class="form-control form-control-sm"
+                        [ngModel]="fromDate()"
+                        (ngModelChange)="fromDate.set($event)"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label small" for="serviceDetailTo" i18n="@@featureServiceDetail-toDate"
+                        >To</label
+                      >
+                      <input
+                        id="serviceDetailTo"
+                        type="date"
+                        class="form-control form-control-sm"
+                        [ngModel]="toDate()"
+                        (ngModelChange)="toDate.set($event)"
+                      />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label small" for="serviceDetailGroupBy" i18n="@@featureServiceDetail-groupBy"
+                        >Group by</label
+                      >
+                      <select
+                        id="serviceDetailGroupBy"
+                        class="form-select form-select-sm"
+                        [ngModel]="groupBy()"
+                        (ngModelChange)="groupBy.set($event)"
+                      >
+                        <option value="day" i18n="@@featureServiceDetail-groupByDay">Day</option>
+                        <option value="month" i18n="@@featureServiceDetail-groupByMonth">Month</option>
+                      </select>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-primary"
+                        (click)="onApplyFilters()"
+                        i18n="@@featureServiceDetail-applyFilters"
+                      >
+                        Apply
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        (click)="onResetFilters()"
+                        i18n="@@featureServiceDetail-resetFilters"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="service-detail-page__lane-body p-3 d-flex flex-column gap-3">
+                @if (loadingHistory()) {
+                  <div class="text-center py-4">
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                  </div>
+                } @else {
+                  @for (
+                    entry of meterCharts();
+                    track entry.meter.meterId + entry.meter.attachmentType + (entry.meter.addonId ?? '')
+                  ) {
+                    <div class="card">
+                      <div class="card-body">
+                        @if (entry.options; as chart) {
+                          <apx-chart
+                            [series]="chart.series"
+                            [chart]="chart.chart"
+                            [colors]="chart.colors"
+                            [stroke]="chart.stroke"
+                            [fill]="chart.fill"
+                            [dataLabels]="chart.dataLabels"
+                            [xaxis]="chart.xaxis"
+                            [yaxis]="chart.yaxis"
+                            [grid]="chart.grid"
+                            [title]="chart.title"
+                          ></apx-chart>
+                        }
+                        <p class="small text-muted mb-0 mt-2">
+                          <span i18n="@@featureServiceDetail-meterTotalLabel">Total:</span>
+                          {{ formatMeterTotal(entry.meter) }}
+                        </p>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     </div>
-  </div>
+  } @else if (addonTabComponent(); as addonCmp) {
+    <div class="service-detail-page__body flex-grow-1 min-h-0 d-flex flex-column">
+      <ng-container *ngComponentOutlet="addonCmp; inputs: addonTabInputs()"></ng-container>
+    </div>
+  } @else {
+    <div class="p-3 text-body-secondary" i18n="@@featureServiceDetail-unknownTab">This tab is not available.</div>
+  }
 </div>
 
 <div

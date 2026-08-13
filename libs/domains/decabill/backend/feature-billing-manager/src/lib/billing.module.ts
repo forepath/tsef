@@ -83,6 +83,8 @@ import { AddonsController } from './controllers/addons.controller';
 import { CloudInitConfigsController } from './controllers/cloud-init-configs.controller';
 import { ServiceTypesController } from './controllers/service-types.controller';
 import { SubscriptionItemsController } from './controllers/subscription-items.controller';
+import { ContainerManagerController } from './controllers/container-manager.controller';
+import { AdminContainerManagerController } from './controllers/admin-container-manager.controller';
 import { SubscriptionsController } from './controllers/subscriptions.controller';
 import { AdminUsageController } from './controllers/admin-usage.controller';
 import { AdminSubscriptionItemsController } from './controllers/admin-subscription-items.controller';
@@ -195,12 +197,15 @@ import { WithdrawalPolicyService } from './services/withdrawal-policy.service';
 import { WithdrawalRefundService } from './services/withdrawal-refund.service';
 import { SubscriptionTeardownService } from './services/subscription-teardown.service';
 import { AddonModuleRegistryService } from './services/addon-module-registry.service';
+import { createBuiltinAddonModules } from './services/builtin-addon-modules';
 import { createBuiltinProviderModules } from './services/builtin-provider-modules';
 import { MeterCollectJobHandler } from './services/meter-collect.job-handler';
 import { ProviderModuleRegistryService } from './services/provider-module-registry.service';
 import { AddonLifecycleService } from './services/addon-lifecycle.service';
 import { AddonService } from './services/addon.service';
 import { CloudInitConfigService } from './services/cloud-init-config.service';
+import { ContainerManagerCatalogService } from './services/container-manager-catalog.service';
+import { ContainerManagerService } from './services/container-manager.service';
 import type { BillingAddonModule } from './services/addon-module-registry.service';
 import type { BillingProviderModule } from './services/provider-module-registry.service';
 import { CloudflareDnsService } from './services/cloudflare-dns.service';
@@ -532,6 +537,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     ServicePlansController,
     AvailabilityController,
     SubscriptionItemsController,
+    ContainerManagerController,
     SubscriptionsController,
     BackordersController,
     PricingController,
@@ -540,6 +546,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     AdminPromotionsController,
     AdminBillingController,
     AdminSubscriptionItemsController,
+    AdminContainerManagerController,
     AdminSubscriptionMetersController,
     AdminCustomerProfilesController,
     AdminCustomerAutoBillingController,
@@ -571,6 +578,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     MeterBillingService,
     AddonLifecycleService,
     AddonModuleRegistryService,
+    ContainerManagerCatalogService,
+    ContainerManagerService,
     ProviderModuleRegistryService,
     MeterCollectJobHandler,
     CloudflareDnsService,
@@ -889,6 +898,10 @@ export class BillingModule implements OnModuleInit {
 
     for (const module of createBuiltinProviderModules()) {
       this.providerModuleRegistry.register(module);
+    }
+
+    for (const module of createBuiltinAddonModules()) {
+      this.addonModuleRegistry.register(module);
     }
 
     await registerDynamicProviderMetadata({

@@ -2506,6 +2506,148 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers:
+    get:
+      summary: List Docker containers for Container Manager
+      operationId: listContainerManagerContainers
+      description: |
+        Returns containers and live resource stats collected over SSH when the Container Manager
+        addon is active on the subscription. User must own the subscription.
+        Requires `subscriptions:read`.
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Container list with collection timestamp
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerManagerContainersResponse'
+        '400':
+          description: SSH unavailable, public IP missing, or collection failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription, item, or Container Manager not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/stats-history:
+    get:
+      summary: Get Container Manager stats history for a container
+      operationId: getContainerManagerStatsHistory
+      description: |
+        Returns in-memory stats history points for a container (refreshed by listing containers).
+        User must own the subscription. Requires `subscriptions:read`.
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: containerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Docker container id
+      responses:
+        '200':
+          description: Stats history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerManagerStatsHistoryResponse'
+        '400':
+          description: SSH unavailable, public IP missing, or collection failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription, item, or Container Manager not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/items/{itemId}/container-manager/networks:
+    get:
+      summary: List Docker networks and topology for Container Manager
+      operationId: listContainerManagerNetworks
+      description: |
+        Returns networks plus a simple topology graph collected over SSH when Container Manager
+        is active. User must own the subscription. Requires `subscriptions:read`.
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Networks and topology
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerManagerNetworksResponse'
+        '400':
+          description: SSH unavailable, public IP missing, or collection failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription, item, or Container Manager not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /subscriptions/{subscriptionId}/items/{itemId}/actions/start:
     post:
       summary: Start server for a provisioned subscription item
@@ -3548,6 +3690,153 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
           description: SSH access key has already been revealed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers:
+    get:
+      tags: [Admin Billing]
+      summary: List Docker containers for Container Manager (admin)
+      operationId: adminListContainerManagerContainers
+      description: |
+        Returns containers and live resource stats collected over SSH when Container Manager
+        is active. Requires ADMIN role. PAT callers need `billing_admin:read`. Ownership is not required.
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Container list with collection timestamp
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerManagerContainersResponse'
+        '400':
+          description: SSH unavailable, public IP missing, or collection failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription, item, or Container Manager not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/stats-history:
+    get:
+      tags: [Admin Billing]
+      summary: Get Container Manager stats history for a container (admin)
+      operationId: adminGetContainerManagerStatsHistory
+      description: |
+        Returns in-memory stats history points for a container. Requires ADMIN role.
+        PAT callers need `billing_admin:read`. Ownership is not required.
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: containerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Docker container id
+      responses:
+        '200':
+          description: Stats history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerManagerStatsHistoryResponse'
+        '400':
+          description: SSH unavailable, public IP missing, or collection failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription, item, or Container Manager not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/networks:
+    get:
+      tags: [Admin Billing]
+      summary: List Docker networks and topology for Container Manager (admin)
+      operationId: adminListContainerManagerNetworks
+      description: |
+        Returns networks plus a simple topology graph. Requires ADMIN role.
+        PAT callers need `billing_admin:read`. Ownership is not required.
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Networks and topology
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerManagerNetworksResponse'
+        '400':
+          description: SSH unavailable, public IP missing, or collection failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription, item, or Container Manager not found
           content:
             application/json:
               schema:
@@ -6899,10 +7188,181 @@ components:
       allOf:
         - $ref: '#/components/schemas/SubscriptionItemResponse'
         - type: object
+          required: [tabs, activeAddons]
           properties:
             serverInfo:
               $ref: '#/components/schemas/ServerInfoResponse'
               description: Cached or live server info when the item is active and provisioned
+            tabs:
+              type: array
+              description: Built-in Details tab plus tabs registered by active module addons
+              items:
+                $ref: '#/components/schemas/ServiceDetailTab'
+            activeAddons:
+              type: array
+              description: Active and pending subscription addons relevant to the service details UI
+              items:
+                $ref: '#/components/schemas/ActiveSubscriptionAddonSummary'
+            containerManager:
+              $ref: '#/components/schemas/ContainerManagerSummary'
+              description: Present when Container Manager is active on the subscription
+    ServiceDetailTab:
+      type: object
+      required: [id, label, order, moduleKey]
+      properties:
+        id:
+          {
+            type: string,
+            description: Stable tab id used in routes and the frontend registry,
+          }
+        label: { type: string, description: Customer-facing tab label }
+        order:
+          { type: integer, description: Sort order; Details tab is always 0 }
+        moduleKey:
+          {
+            type: string,
+            nullable: true,
+            description: Module key that registered the tab; null for the built-in Details tab,
+          }
+    ActiveSubscriptionAddonSummary:
+      type: object
+      required: [id, addonId, key, name, moduleKey, status]
+      properties:
+        id: { type: string, format: uuid }
+        addonId: { type: string, format: uuid }
+        key: { type: string }
+        name: { type: string }
+        moduleKey: { type: string, nullable: true }
+        status: { type: string }
+    ContainerManagerSummary:
+      type: object
+      required: [containerCount, healthyCount, lastCollectedAt]
+      properties:
+        containerCount: { type: integer }
+        healthyCount: { type: integer }
+        lastCollectedAt: { type: string, format: date-time, nullable: true }
+    ContainerManagerResourceStats:
+      type: object
+      properties:
+        cpuPercent: { type: number, nullable: true }
+        memoryUsageBytes: { type: number, nullable: true }
+        memoryLimitBytes: { type: number, nullable: true }
+        memoryPercent: { type: number, nullable: true }
+        blockReadBytes: { type: number, nullable: true }
+        blockWriteBytes: { type: number, nullable: true }
+        networkRxBytes: { type: number, nullable: true }
+        networkTxBytes: { type: number, nullable: true }
+    ContainerManagerContainer:
+      type: object
+      required: [id, name, image, state, status, createdAt, stats]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        image: { type: string }
+        state: { type: string }
+        status: { type: string }
+        createdAt: { type: string, nullable: true }
+        stats:
+          allOf:
+            - $ref: '#/components/schemas/ContainerManagerResourceStats'
+          nullable: true
+    ContainerManagerContainersResponse:
+      type: object
+      required: [containers, collectedAt]
+      properties:
+        containers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContainerManagerContainer'
+        collectedAt: { type: string, format: date-time }
+    ContainerManagerStatsHistoryPoint:
+      type: object
+      required:
+        [
+          timestamp,
+          cpuPercent,
+          memoryPercent,
+          blockReadBytes,
+          blockWriteBytes,
+          networkRxBytes,
+          networkTxBytes,
+        ]
+      properties:
+        timestamp: { type: string, format: date-time }
+        cpuPercent: { type: number, nullable: true }
+        memoryPercent: { type: number, nullable: true }
+        blockReadBytes: { type: number, nullable: true }
+        blockWriteBytes: { type: number, nullable: true }
+        networkRxBytes: { type: number, nullable: true }
+        networkTxBytes: { type: number, nullable: true }
+    ContainerManagerStatsHistoryResponse:
+      type: object
+      required: [containerId, points]
+      properties:
+        containerId: { type: string }
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContainerManagerStatsHistoryPoint'
+    ContainerManagerNetworkNode:
+      type: object
+      required: [id, label, kind]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        kind: { type: string, enum: [container, network, exit, route] }
+    ContainerManagerNetworkEdge:
+      type: object
+      required: [id, from, to]
+      properties:
+        id: { type: string }
+        from: { type: string }
+        to: { type: string }
+        label: { type: string }
+    ContainerManagerNetwork:
+      type: object
+      required:
+        [id, name, driver, scope, isOverlay, containers, exitNodes, routes]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        driver: { type: string }
+        scope: { type: string }
+        isOverlay: { type: boolean }
+        containers:
+          type: array
+          items: { type: string }
+        exitNodes:
+          type: array
+          items: { type: string }
+        routes:
+          type: array
+          items:
+            type: object
+            properties:
+              destination: { type: string }
+              gateway: { type: string }
+    ContainerManagerNetworksResponse:
+      type: object
+      required: [networks, topology, collectedAt]
+      properties:
+        networks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContainerManagerNetwork'
+        topology:
+          type: object
+          required: [nodes, edges]
+          properties:
+            nodes:
+              type: array
+              items:
+                $ref: '#/components/schemas/ContainerManagerNetworkNode'
+            edges:
+              type: array
+              items:
+                $ref: '#/components/schemas/ContainerManagerNetworkEdge'
+        collectedAt: { type: string, format: date-time }
     UpdateSubscriptionItemDisplayNameDto:
       type: object
       properties:
@@ -7081,7 +7541,16 @@ components:
     PlanAddonOption:
       type: object
       required:
-        [id, key, name, implementationType, periodPrice, orderFields, meters]
+        [
+          id,
+          key,
+          name,
+          implementationType,
+          periodPrice,
+          orderFields,
+          meters,
+          mandatory,
+        ]
       properties:
         id: { type: string, format: uuid }
         key: { type: string }
@@ -7101,6 +7570,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AttachedMeterResponse'
+        mandatory:
+          {
+            type: boolean,
+            description: When true,
+            the addon is required for this plan and cannot be deselected,
+          }
     CreateAddonDto:
       type: object
       required: [key, name, implementationType]

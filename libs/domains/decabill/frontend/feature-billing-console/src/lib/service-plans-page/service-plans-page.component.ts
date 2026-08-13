@@ -11,6 +11,7 @@ import {
   AdminBillingService,
   MetersFacade,
   ServicePlansService,
+  CONTAINER_MANAGER_ADDON_KEY,
   buildProvisioningOptionsFromKeys,
   collectPlanProductEnvFields,
   formatServerTypeOption,
@@ -356,6 +357,121 @@ export class ServicePlansPageComponent implements OnInit {
     } else {
       target.delete(optionKey);
     }
+
+    this.syncContainerManagerMandatoryForIntegrated(form);
+  }
+
+  isAddonSelected(form: 'create' | 'edit', addonId: string): boolean {
+    const defaults = form === 'create' ? this.createForm.providerConfigDefaults : this.editForm.providerConfigDefaults;
+    const selected = defaults?.['allowedAddonIds'];
+
+    return Array.isArray(selected) && selected.includes(addonId);
+  }
+
+  isAddonMandatory(form: 'create' | 'edit', addonId: string): boolean {
+    const defaults = form === 'create' ? this.createForm.providerConfigDefaults : this.editForm.providerConfigDefaults;
+    const selected = defaults?.['mandatoryAddonIds'];
+
+    return Array.isArray(selected) && selected.includes(addonId);
+  }
+
+  toggleAddon(form: 'create' | 'edit', addonId: string, checked: boolean): void {
+    if (!checked && this.isAddonMandatory(form, addonId)) {
+      return;
+    }
+
+    const target = form === 'create' ? this.createForm : this.editForm;
+    target.providerConfigDefaults = target.providerConfigDefaults ?? {};
+    const current = Array.isArray(target.providerConfigDefaults['allowedAddonIds'])
+      ? (target.providerConfigDefaults['allowedAddonIds'] as unknown[]).filter(
+          (value): value is string => typeof value === 'string',
+        )
+      : [];
+    const next = checked ? [...new Set([...current, addonId])] : current.filter((id) => id !== addonId);
+
+    if (next.length > 0) {
+      target.providerConfigDefaults['allowedAddonIds'] = next;
+    } else {
+      delete target.providerConfigDefaults['allowedAddonIds'];
+    }
+
+    if (!checked) {
+      this.toggleMandatoryAddon(form, addonId, false);
+    }
+  }
+
+  isAddonMandatoryLocked(form: 'create' | 'edit', addon: AddonResponse): boolean {
+    if (addon.key !== CONTAINER_MANAGER_ADDON_KEY) {
+      return false;
+    }
+
+    return this.isIntegratedProvisioningSelected(form);
+  }
+
+  toggleMandatoryAddon(form: 'create' | 'edit', addonId: string, checked: boolean): void {
+    const target = form === 'create' ? this.createForm : this.editForm;
+    target.providerConfigDefaults = target.providerConfigDefaults ?? {};
+
+    if (checked) {
+      this.toggleAddon(form, addonId, true);
+    } else if (this.isIntegratedProvisioningSelected(form)) {
+      let locked = false;
+
+      this.addonsFacade
+        .getActiveAddons$()
+        .pipe(take(1))
+        .subscribe((addons) => {
+          const addon = (addons ?? []).find((entry) => entry.id === addonId);
+
+          locked = !!addon && this.isAddonMandatoryLocked(form, addon);
+        });
+
+      if (locked) {
+        return;
+      }
+    }
+
+    const current = Array.isArray(target.providerConfigDefaults['mandatoryAddonIds'])
+      ? (target.providerConfigDefaults['mandatoryAddonIds'] as unknown[]).filter(
+          (value): value is string => typeof value === 'string',
+        )
+      : [];
+    const next = checked ? [...new Set([...current, addonId])] : current.filter((id) => id !== addonId);
+
+    if (next.length > 0) {
+      target.providerConfigDefaults['mandatoryAddonIds'] = next;
+    } else {
+      delete target.providerConfigDefaults['mandatoryAddonIds'];
+    }
+  }
+
+  private isIntegratedProvisioningSelected(form: 'create' | 'edit'): boolean {
+    const optionKeys = form === 'create' ? this.createProvisioningOptionKeys : this.editProvisioningOptionKeys;
+
+    return [...optionKeys].some((key) => key.startsWith('integrated:'));
+  }
+
+  private syncContainerManagerMandatoryForIntegrated(form: 'create' | 'edit'): void {
+    const optionKeys = form === 'create' ? this.createProvisioningOptionKeys : this.editProvisioningOptionKeys;
+    const hasIntegrated = [...optionKeys].some((key) => key.startsWith('integrated:'));
+
+    if (!hasIntegrated) {
+      return;
+    }
+
+    this.addonsFacade
+      .getActiveAddons$()
+      .pipe(take(1))
+      .subscribe((addons) => {
+        const containerManager = (addons ?? []).find((addon) => addon.key === CONTAINER_MANAGER_ADDON_KEY);
+
+        if (!containerManager) {
+          return;
+        }
+
+        this.toggleAddon(form, containerManager.id, true);
+        this.toggleMandatoryAddon(form, containerManager.id, true);
+      });
   }
 
   availableAddonsForServiceType(
@@ -383,30 +499,6 @@ export class ServicePlansPageComponent implements OnInit {
     const providerId = this.getProviderId(serviceTypes ?? [], serviceTypeId);
 
     return providerDetails?.find((provider) => provider.id === providerId)?.supportsAddons === true;
-  }
-
-  isAddonSelected(form: 'create' | 'edit', addonId: string): boolean {
-    const defaults = form === 'create' ? this.createForm.providerConfigDefaults : this.editForm.providerConfigDefaults;
-    const selected = defaults?.['allowedAddonIds'];
-
-    return Array.isArray(selected) && selected.includes(addonId);
-  }
-
-  toggleAddon(form: 'create' | 'edit', addonId: string, checked: boolean): void {
-    const target = form === 'create' ? this.createForm : this.editForm;
-    target.providerConfigDefaults = target.providerConfigDefaults ?? {};
-    const current = Array.isArray(target.providerConfigDefaults['allowedAddonIds'])
-      ? (target.providerConfigDefaults['allowedAddonIds'] as unknown[]).filter(
-          (value): value is string => typeof value === 'string',
-        )
-      : [];
-    const next = checked ? [...new Set([...current, addonId])] : current.filter((id) => id !== addonId);
-
-    if (next.length > 0) {
-      target.providerConfigDefaults['allowedAddonIds'] = next;
-    } else {
-      delete target.providerConfigDefaults['allowedAddonIds'];
-    }
   }
 
   attachedMetersFor(mode: string): AttachedMeterResponse[] {
@@ -1040,6 +1132,7 @@ export class ServicePlansPageComponent implements OnInit {
 
     if (!this.providerSupportsAddons(serviceTypes, providerDetails, this.createForm.serviceTypeId)) {
       delete this.createForm.providerConfigDefaults['allowedAddonIds'];
+      delete this.createForm.providerConfigDefaults['mandatoryAddonIds'];
     }
 
     if (schema) {
@@ -1678,6 +1771,14 @@ export class ServicePlansPageComponent implements OnInit {
       }
 
       if (key === 'allowedAddonIds' && Array.isArray(value)) {
+        const ids = value.filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0);
+
+        if (ids.length > 0) result[key] = [...new Set(ids)];
+
+        continue;
+      }
+
+      if (key === 'mandatoryAddonIds' && Array.isArray(value)) {
         const ids = value.filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0);
 
         if (ids.length > 0) result[key] = [...new Set(ids)];

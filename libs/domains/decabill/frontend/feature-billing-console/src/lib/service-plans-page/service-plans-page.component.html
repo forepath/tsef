@@ -871,21 +871,41 @@
                       Choose which addons customers may add when ordering this plan.
                     </p>
                     @for (addon of availableAddons; track addon.id) {
-                      <div class="form-check mb-2">
-                        <input
-                          type="checkbox"
-                          class="form-check-input"
-                          [id]="'createAddon_' + addon.id"
-                          [checked]="isAddonSelected('create', addon.id)"
-                          (change)="toggleAddon('create', addon.id, $any($event.target).checked)"
-                          [disabled]="(creating$ | async) === true"
-                        />
-                        <label class="form-check-label" [for]="'createAddon_' + addon.id">
-                          {{ addon.name }}
-                          @if (addon.description) {
-                            <span class="d-block small text-body-secondary">{{ addon.description }}</span>
-                          }
-                        </label>
+                      <div class="mb-2">
+                        <div class="form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            [id]="'createAddon_' + addon.id"
+                            [checked]="isAddonSelected('create', addon.id)"
+                            (change)="toggleAddon('create', addon.id, $any($event.target).checked)"
+                            [disabled]="(creating$ | async) === true || isAddonMandatory('create', addon.id)"
+                          />
+                          <label class="form-check-label" [for]="'createAddon_' + addon.id">
+                            {{ addon.name }}
+                            @if (addon.description) {
+                              <span class="d-block small text-body-secondary">{{ addon.description }}</span>
+                            }
+                          </label>
+                        </div>
+                        @if (isAddonSelected('create', addon.id)) {
+                          <div class="form-check ms-4 mt-1">
+                            <input
+                              type="checkbox"
+                              class="form-check-input"
+                              [id]="'createAddonMandatory_' + addon.id"
+                              [checked]="isAddonMandatory('create', addon.id)"
+                              (change)="toggleMandatoryAddon('create', addon.id, $any($event.target).checked)"
+                              [disabled]="(creating$ | async) === true || isAddonMandatoryLocked('create', addon)"
+                            />
+                            <label class="form-check-label small" [for]="'createAddonMandatory_' + addon.id">
+                              <span i18n="@@featureServicePlans-mandatoryAddon">Mandatory</span>
+                              <span class="d-block text-body-secondary" i18n="@@featureServicePlans-mandatoryAddonHelp"
+                                >Customers cannot deselect this addon when ordering.</span
+                              >
+                            </label>
+                          </div>
+                        }
                       </div>
                     }
                   </div>
@@ -1789,21 +1809,41 @@
                       Choose which addons customers may add when ordering this plan.
                     </p>
                     @for (addon of availableAddons; track addon.id) {
-                      <div class="form-check mb-2">
-                        <input
-                          type="checkbox"
-                          class="form-check-input"
-                          [id]="'editAddon_' + addon.id"
-                          [checked]="isAddonSelected('edit', addon.id)"
-                          (change)="toggleAddon('edit', addon.id, $any($event.target).checked)"
-                          [disabled]="(updating$ | async) === true"
-                        />
-                        <label class="form-check-label" [for]="'editAddon_' + addon.id">
-                          {{ addon.name }}
-                          @if (addon.description) {
-                            <span class="d-block small text-body-secondary">{{ addon.description }}</span>
-                          }
-                        </label>
+                      <div class="mb-2">
+                        <div class="form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            [id]="'editAddon_' + addon.id"
+                            [checked]="isAddonSelected('edit', addon.id)"
+                            (change)="toggleAddon('edit', addon.id, $any($event.target).checked)"
+                            [disabled]="(updating$ | async) === true || isAddonMandatory('edit', addon.id)"
+                          />
+                          <label class="form-check-label" [for]="'editAddon_' + addon.id">
+                            {{ addon.name }}
+                            @if (addon.description) {
+                              <span class="d-block small text-body-secondary">{{ addon.description }}</span>
+                            }
+                          </label>
+                        </div>
+                        @if (isAddonSelected('edit', addon.id)) {
+                          <div class="form-check ms-4 mt-1">
+                            <input
+                              type="checkbox"
+                              class="form-check-input"
+                              [id]="'editAddonMandatory_' + addon.id"
+                              [checked]="isAddonMandatory('edit', addon.id)"
+                              (change)="toggleMandatoryAddon('edit', addon.id, $any($event.target).checked)"
+                              [disabled]="(updating$ | async) === true || isAddonMandatoryLocked('edit', addon)"
+                            />
+                            <label class="form-check-label small" [for]="'editAddonMandatory_' + addon.id">
+                              <span i18n="@@featureServicePlans-mandatoryAddon">Mandatory</span>
+                              <span class="d-block text-body-secondary" i18n="@@featureServicePlans-mandatoryAddonHelp"
+                                >Customers cannot deselect this addon when ordering.</span
+                              >
+                            </label>
+                          </div>
+                        }
                       </div>
                     }
                   </div>

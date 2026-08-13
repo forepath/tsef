@@ -42,15 +42,29 @@ describe('SubscriptionItemServerService', () => {
   const billingEmailPublisher = {
     publishSshAccessGranted: jest.fn().mockResolvedValue(undefined),
   };
+  const subscriptionAddonsRepository = {
+    findActiveBySubscriptionId: jest.fn().mockResolvedValue([]),
+  };
+  const addonModuleRegistry = {
+    get: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  };
+  const containerManagerService = {
+    getCachedSummary: jest.fn().mockReturnValue(null),
+  };
   const service = new SubscriptionItemServerService(
     subscriptionService as never,
     subscriptionsRepository as never,
     subscriptionItemsRepository as never,
+    subscriptionAddonsRepository as never,
     provisioningService as never,
     cloudflareDnsService as never,
     servicePlansRepository as never,
     billingNotificationPublisher as never,
     billingEmailPublisher as never,
+    addonModuleRegistry as never,
+    containerManagerService as never,
   );
 
   beforeEach(() => {

@@ -25,9 +25,40 @@ export interface SubscriptionItemResponseDto {
   hasProviderReference: boolean;
 }
 
+/** Built-in Details tab plus addon-registered tabs for the service details page. */
+export interface ServiceDetailTabDto {
+  id: string;
+  label: string;
+  order: number;
+  /** Module key that registered the tab; null for the built-in Details tab. */
+  moduleKey: string | null;
+}
+
+export interface ActiveSubscriptionAddonSummaryDto {
+  id: string;
+  addonId: string;
+  key: string;
+  name: string;
+  moduleKey: string | null;
+  status: string;
+}
+
+/** Lightweight Container Manager summary embedded on the item detail profile when the addon is active. */
+export interface ContainerManagerSummaryDto {
+  containerCount: number;
+  healthyCount: number;
+  lastCollectedAt: string | null;
+}
+
 /** Detail view for an active provisioned subscription item, including cached or live server info. */
 export interface SubscriptionItemDetailResponseDto extends SubscriptionItemResponseDto {
   serverInfo?: ServerInfoResponseDto;
+  /** Always includes the Details tab; additional tabs come from active module addons. */
+  tabs: ServiceDetailTabDto[];
+  /** Active (and pending) subscription addons relevant to the UI. */
+  activeAddons: ActiveSubscriptionAddonSummaryDto[];
+  /** Present when Container Manager is active on the subscription. */
+  containerManager?: ContainerManagerSummaryDto;
 }
 
 /** One-time SSH private key response. Never log this payload. */

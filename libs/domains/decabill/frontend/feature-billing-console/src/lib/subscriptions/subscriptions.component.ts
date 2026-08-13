@@ -48,6 +48,7 @@ import {
   isNoneServiceTypeId,
   isSubscriptionItemDetailEligible,
   isSubscriptionItemRemoved,
+  mergeMandatoryOrderAddonIds,
   normalizeAllowedServerTypeIds,
   providerLocationCatalogFromList,
   resolveServiceDisplayLabel,
@@ -829,7 +830,15 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return this.orderAddonIds.has(addonId);
   }
 
+  isOrderAddonMandatory(addonId: string): boolean {
+    return this.orderAddons.find((addon) => addon.id === addonId)?.mandatory === true;
+  }
+
   toggleOrderAddon(addonId: string, checked: boolean): void {
+    if (!checked && this.isOrderAddonMandatory(addonId)) {
+      return;
+    }
+
     if (checked) {
       this.orderAddonIds.add(addonId);
       const addon = this.orderAddons.find((entry) => entry.id === addonId);
@@ -1128,6 +1137,8 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    this.syncMandatoryOrderAddonSelection();
+
     const requestedConfig: Record<string, unknown> = {};
 
     if (this.orderProvisioningServerType?.trim()) {
@@ -1136,7 +1147,9 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
     this.orderPricingLoading = true;
 
-    this.availabilityService.previewPricing({ planId, requestedConfig, addonIds: [...this.orderAddonIds] }).subscribe({
+    const addonIds = mergeMandatoryOrderAddonIds(this.orderAddonIds, this.orderAddons);
+
+    this.availabilityService.previewPricing({ planId, requestedConfig, addonIds }).subscribe({
       next: (response) => {
         if (requestId !== this.orderPricingRequestId) {
           return;
@@ -1180,9 +1193,12 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
           this.orderAddons = addons.map((addon) => ({
             ...addon,
             orderFields: addon.orderFields ?? [],
+            mandatory: addon.mandatory === true,
           }));
+          this.syncMandatoryOrderAddonSelection();
           this.orderAddonsLoading = false;
           this.cdr.detectChanges();
+          this.syncOrderPricingPreview();
         },
         error: () => {
           if (planId !== this.orderPlanId.trim()) return;
@@ -1192,6 +1208,23 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
           this.cdr.detectChanges();
         },
       });
+  }
+
+  private syncMandatoryOrderAddonSelection(): void {
+    const merged = mergeMandatoryOrderAddonIds(this.orderAddonIds, this.orderAddons);
+
+    this.orderAddonIds = new Set(merged);
+
+    for (const addon of this.orderAddons) {
+      if (!addon.mandatory || !addon.orderFields?.length || this.orderAddonConfigs[addon.id]) {
+        continue;
+      }
+
+      this.orderAddonConfigs = {
+        ...this.orderAddonConfigs,
+        [addon.id]: Object.fromEntries(addon.orderFields.map((field) => [field.key, ''])),
+      };
+    }
   }
 
   private areOrderAddonConfigsReady(): boolean {
@@ -1608,6 +1641,8 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   }
 
   onSubmitOrderPlan(): void {
+    this.syncMandatoryOrderAddonSelection();
+
     if (
       !this.orderPlanId?.trim() ||
       !this.areOrderAddonConfigsReady() ||
@@ -1647,7 +1682,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
       const dto: CreateSubscriptionDto = this.withPromotionCode({
         planId: this.orderPlanId.trim(),
-        addonIds: [...this.orderAddonIds],
+        addonIds: mergeMandatoryOrderAddonIds(this.orderAddonIds, this.orderAddons),
         addonConfigs: this.buildOrderAddonConfigs(),
         requestedConfig,
         autoBackorder: this.orderAutoBackorder,
@@ -1731,7 +1766,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
     const dto: CreateSubscriptionDto = this.withPromotionCode({
       planId: this.orderPlanId.trim(),
-      addonIds: [...this.orderAddonIds],
+      addonIds: mergeMandatoryOrderAddonIds(this.orderAddonIds, this.orderAddons),
       addonConfigs: this.buildOrderAddonConfigs(),
       requestedConfig,
       autoBackorder: this.orderAutoBackorder,

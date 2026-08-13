@@ -1,0 +1,188 @@
+<div class="container-manager-tab d-flex flex-column h-100 min-h-0">
+  @if (error(); as err) {
+    <div class="alert alert-danger mb-0 rounded-0" role="alert">{{ err }}</div>
+  }
+
+  <div class="container-manager-tab__body flex-grow-1 min-h-0 overflow-auto p-3">
+    <section class="mb-4" aria-labelledby="containerManagerContainersHeading">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h2
+          class="h6 fw-semibold mb-0"
+          id="containerManagerContainersHeading"
+          i18n="@@featureContainerManager-containersTitle"
+        >
+          Containers
+        </h2>
+        @if (containersCollectedAt(); as collectedAt) {
+          <span class="small text-body-secondary">
+            <span i18n="@@featureContainerManager-collectedAt">Collected</span>
+            {{ collectedAt | date: 'short' }}
+          </span>
+        }
+      </div>
+
+      @if (loadingContainers()) {
+        <div class="d-flex align-items-center gap-2 text-body-secondary">
+          <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+          <span i18n="@@featureContainerManager-loadingContainers">Loading containers…</span>
+        </div>
+      } @else if (containers().length === 0) {
+        <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-noContainers">
+          No containers found on this host.
+        </p>
+      } @else {
+        <div class="list-group list-group-flush border rounded overflow-hidden">
+          @for (container of containers(); track container.id) {
+            <button
+              type="button"
+              class="list-group-item list-group-item-action d-flex flex-wrap justify-content-between align-items-start gap-2"
+              [class.active]="selectedContainerId() === container.id"
+              (click)="selectContainer(container.id)"
+            >
+              <div class="min-w-0">
+                <div class="fw-semibold text-truncate">{{ container.name }}</div>
+                <div class="small text-body-secondary text-truncate">{{ container.image }}</div>
+                <div class="small">{{ container.status || container.state }}</div>
+              </div>
+              <div class="small text-nowrap">{{ statsSummary(container.stats) }}</div>
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="mb-4" aria-labelledby="containerManagerStatsHeading">
+      <h2 class="h6 fw-semibold mb-3" id="containerManagerStatsHeading" i18n="@@featureContainerManager-statsTitle">
+        Resource usage
+      </h2>
+
+      @if (!selectedContainer()) {
+        <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-selectContainerHint">
+          Select a container to view resource history.
+        </p>
+      } @else if (loadingStatsHistory()) {
+        <div class="d-flex align-items-center gap-2 text-body-secondary">
+          <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+          <span i18n="@@featureContainerManager-loadingStats">Loading resource history…</span>
+        </div>
+      } @else if (statsChart(); as chart) {
+        @if (selectedContainer(); as container) {
+          <dl class="row small mb-3">
+            <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-cpu">CPU</dt>
+            <dd class="col-sm-9">{{ formatPercent(container.stats?.cpuPercent) }}</dd>
+            <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-memory">Memory</dt>
+            <dd class="col-sm-9">
+              {{ formatPercent(container.stats?.memoryPercent) }}
+              @if (container.stats?.memoryUsageBytes !== null) {
+                ({{ formatBytes(container.stats?.memoryUsageBytes) }}
+                @if (container.stats?.memoryLimitBytes !== null) {
+                  / {{ formatBytes(container.stats?.memoryLimitBytes) }}
+                }
+                )
+              }
+            </dd>
+            <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-network">Network</dt>
+            <dd class="col-sm-9">
+              ↓ {{ formatBytes(container.stats?.networkRxBytes) }} · ↑
+              {{ formatBytes(container.stats?.networkTxBytes) }}
+            </dd>
+            <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-blockIo">Block I/O</dt>
+            <dd class="col-sm-9">
+              R {{ formatBytes(container.stats?.blockReadBytes) }} · W
+              {{ formatBytes(container.stats?.blockWriteBytes) }}
+            </dd>
+          </dl>
+        }
+        <apx-chart
+          [series]="chart.series"
+          [chart]="chart.chart"
+          [colors]="chart.colors"
+          [stroke]="chart.stroke"
+          [fill]="chart.fill"
+          [dataLabels]="chart.dataLabels"
+          [xaxis]="chart.xaxis"
+          [yaxis]="chart.yaxis"
+          [grid]="chart.grid"
+          [legend]="chart.legend"
+          [title]="chart.title"
+        ></apx-chart>
+      } @else {
+        <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-noStatsHistory">
+          No resource history is available for this container yet.
+        </p>
+      }
+    </section>
+
+    <section aria-labelledby="containerManagerNetworkHeading">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h2
+          class="h6 fw-semibold mb-0"
+          id="containerManagerNetworkHeading"
+          i18n="@@featureContainerManager-networkingTitle"
+        >
+          Networking
+        </h2>
+        @if (networksCollectedAt(); as collectedAt) {
+          <span class="small text-body-secondary">
+            <span i18n="@@featureContainerManager-collectedAt">Collected</span>
+            {{ collectedAt | date: 'short' }}
+          </span>
+        }
+      </div>
+
+      @if (loadingNetworks()) {
+        <div class="d-flex align-items-center gap-2 text-body-secondary">
+          <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+          <span i18n="@@featureContainerManager-loadingNetworks">Loading networks…</span>
+        </div>
+      } @else if (topologyLayout().length === 0) {
+        <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-noNetworks">
+          No Docker networks were reported for this host.
+        </p>
+      } @else {
+        <div class="container-manager-tab__topology border rounded bg-body-tertiary overflow-auto">
+          <svg
+            class="container-manager-tab__topology-svg"
+            viewBox="0 0 640 320"
+            role="img"
+            aria-labelledby="containerManagerTopologyTitle"
+          >
+            <title id="containerManagerTopologyTitle" i18n="@@featureContainerManager-topologyTitle">
+              Container network topology
+            </title>
+            @for (edge of topologyLayoutEdges(); track edge.id) {
+              <line
+                [attr.x1]="edge.x1"
+                [attr.y1]="edge.y1"
+                [attr.x2]="edge.x2"
+                [attr.y2]="edge.y2"
+                class="container-manager-tab__edge"
+              ></line>
+              @if (edge.label) {
+                <text
+                  [attr.x]="(edge.x1 + edge.x2) / 2"
+                  [attr.y]="(edge.y1 + edge.y2) / 2 - 6"
+                  class="container-manager-tab__edge-label"
+                >
+                  {{ edge.label }}
+                </text>
+              }
+            }
+            @for (node of topologyLayout(); track node.id) {
+              <g [attr.transform]="'translate(' + node.x + ' ' + node.y + ')'">
+                <circle
+                  r="18"
+                  class="container-manager-tab__node"
+                  [class.container-manager-tab__node--network]="node.kind === 'network'"
+                  [class.container-manager-tab__node--exit]="node.kind === 'exit'"
+                  [class.container-manager-tab__node--route]="node.kind === 'route'"
+                ></circle>
+                <text y="36" text-anchor="middle" class="container-manager-tab__node-label">{{ node.label }}</text>
+              </g>
+            }
+          </svg>
+        </div>
+      }
+    </section>
+  </div>
+</div>

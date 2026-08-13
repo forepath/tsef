@@ -12,6 +12,11 @@ info:
 
     `subscribeSubscriptionMeters` joins room `subscription:{id}`. Customers must own the subscription.
     ADMIN sockets may join any tenant subscription after an existence check (no ownership required).
+
+    **Container Manager:** Live container/network diagnostics are primarily fetched via REST polling
+    (`GET .../container-manager/containers` and related paths). An optional future push event
+    `billing/containerManagerUpdate` on room `subscription:{id}:container-manager` is documented below
+    so clients can adopt push when the gateway emits it; until then, treat REST as the source of truth.
 servers:
   billing:
     host: localhost:8082
@@ -52,6 +57,11 @@ channels:
     messages:
       meterSummaryEvent:
         $ref: '#/components/messages/MeterSummaryUpdate'
+  billing/containerManagerUpdate:
+    address: billing/containerManagerUpdate
+    messages:
+      containerManagerEvent:
+        $ref: '#/components/messages/ContainerManagerUpdate'
   billing/error:
     address: billing/error
     messages:
@@ -142,6 +152,10 @@ operations:
     action: receive
     channel:
       $ref: '#/channels/billing~1meterSummaryUpdate'
+  serverEmitsContainerManagerUpdate:
+    action: receive
+    channel:
+      $ref: '#/channels/billing~1containerManagerUpdate'
   serverBillingError:
     action: receive
     channel:
@@ -332,6 +346,47 @@ components:
                 entryCount: { type: integer }
                 periodStart: { type: string, format: date-time, nullable: true }
                 periodEnd: { type: string, format: date-time, nullable: true }
+    ContainerManagerUpdate:
+      name: ContainerManagerUpdate
+      summary: Optional push of Container Manager containers summary
+      description: |
+        Room: `subscription:{subscriptionId}:container-manager`.
+
+        Container Manager currently uses REST polling. This message aligns with the containers
+        summary (`ContainerManagerContainersResponse`) for optional future Socket.IO push.
+        Until the gateway emits it, clients should keep calling the REST endpoints.
+      contentType: application/json
+      payload:
+        type: object
+        required: [subscriptionId, itemId, containers, collectedAt]
+        properties:
+          subscriptionId: { type: string, format: uuid }
+          itemId: { type: string, format: uuid }
+          collectedAt: { type: string, format: date-time }
+          containers:
+            type: array
+            items:
+              type: object
+              required: [id, name, image, state, status]
+              properties:
+                id: { type: string }
+                name: { type: string }
+                image: { type: string }
+                state: { type: string }
+                status: { type: string }
+                createdAt: { type: string, nullable: true }
+                stats:
+                  type: object
+                  nullable: true
+                  properties:
+                    cpuPercent: { type: number, nullable: true }
+                    memoryUsageBytes: { type: number, nullable: true }
+                    memoryLimitBytes: { type: number, nullable: true }
+                    memoryPercent: { type: number, nullable: true }
+                    blockReadBytes: { type: number, nullable: true }
+                    blockWriteBytes: { type: number, nullable: true }
+                    networkRxBytes: { type: number, nullable: true }
+                    networkTxBytes: { type: number, nullable: true }
     SetProject:
       name: SetProject
       contentType: application/json

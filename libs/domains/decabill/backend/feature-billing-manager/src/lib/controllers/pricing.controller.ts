@@ -14,7 +14,7 @@ import { TaxCalculationService } from '../services/tax-calculation.service';
 import { TaxPreviewService } from '../services/tax-preview.service';
 import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
 import { getUserFromRequest, type RequestWithUser } from '../utils/billing-access.utils';
-import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
+import { mergeOrderAddonIds, parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
 import { normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
 import { enrichPricingWithTax } from '../utils/pricing-tax.utils';
 import { resolvePlanTaxCategory } from '../utils/plan-tax.utils';
@@ -99,7 +99,7 @@ export class PricingController {
       }
     }
 
-    const selectedAddonIds = [...new Set((dto.addonIds ?? []).filter(Boolean))];
+    const selectedAddonIds = mergeOrderAddonIds(dto.addonIds, plan.providerConfigDefaults);
 
     if (plan.serviceTypeId == null && selectedAddonIds.length > 0) {
       throw new BadRequestException('Addons are not supported for plans without a service type');

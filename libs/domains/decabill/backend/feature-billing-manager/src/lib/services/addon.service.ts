@@ -17,7 +17,7 @@ import {
   type SanitizedAddonConfigResult,
 } from '../utils/addon-config.utils';
 import { assertNonNegativeAddonPrice } from '../utils/addon-pricing.util';
-import { planReferencesAddonId } from '../utils/plan-addons.utils';
+import { parsePlanMandatoryAddonIds, planReferencesAddonId } from '../utils/plan-addons.utils';
 import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { ProviderRegistryService } from './provider-registry.service';
 
@@ -150,8 +150,12 @@ export class AddonService {
     return detail?.supportsAddons === true;
   }
 
-  async assertAllowedAddonIdsForPlan(serviceTypeId: string, allowedAddonIds: string[]): Promise<void> {
-    if (allowedAddonIds.length === 0) {
+  async assertAllowedAddonIdsForPlan(
+    serviceTypeId: string,
+    allowedAddonIds: string[],
+    mandatoryAddonIds: string[] = [],
+  ): Promise<void> {
+    if (allowedAddonIds.length === 0 && mandatoryAddonIds.length === 0) {
       return;
     }
 
@@ -161,6 +165,14 @@ export class AddonService {
       throw new BadRequestException(
         `Provider "${serviceType.provider}" does not support addons; remove allowedAddonIds from the plan`,
       );
+    }
+
+    const allowedSet = new Set(allowedAddonIds);
+
+    for (const mandatoryId of mandatoryAddonIds) {
+      if (!allowedSet.has(mandatoryId)) {
+        throw new BadRequestException('mandatoryAddonIds must be a subset of allowedAddonIds');
+      }
     }
 
     const addons = await this.addonsRepository.findByIds(allowedAddonIds);
@@ -176,6 +188,17 @@ export class AddonService {
 
       if (addon.compatibleProviders.length > 0 && !addon.compatibleProviders.includes(serviceType.provider)) {
         throw new BadRequestException(`Addon "${addon.key}" is not compatible with provider "${serviceType.provider}"`);
+      }
+    }
+  }
+
+  assertMandatoryAddonIdsSubset(providerConfigDefaults: Record<string, unknown> | undefined): void {
+    const allowed = new Set((providerConfigDefaults?.['allowedAddonIds'] as string[] | undefined) ?? []);
+    const mandatory = parsePlanMandatoryAddonIds(providerConfigDefaults);
+
+    for (const id of mandatory) {
+      if (!allowed.has(id)) {
+        throw new BadRequestException('mandatoryAddonIds must be a subset of allowedAddonIds');
       }
     }
   }

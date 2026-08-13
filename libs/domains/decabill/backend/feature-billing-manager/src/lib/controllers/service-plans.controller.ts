@@ -33,6 +33,7 @@ import { ServiceTypesRepository } from '../repositories/service-types.repository
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { AddonService } from '../services/addon.service';
 import { CloudInitConfigService } from '../services/cloud-init-config.service';
+import { ContainerManagerCatalogService } from '../services/container-manager-catalog.service';
 import { MeterService } from '../services/meter.service';
 import { ProviderRegistryService } from '../services/provider-registry.service';
 import { WithdrawalPolicyService } from '../services/withdrawal-policy.service';
@@ -44,7 +45,7 @@ import {
 } from '../queue/plan-price-migrate-enqueue.token';
 import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
 import { normalizePlanProviderConfigDefaults } from '../utils/cloud-init/plan-provisioning-options.utils';
-import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
+import { parsePlanAllowedAddonIds, parsePlanMandatoryAddonIds } from '../utils/plan-addons.utils';
 import { commercialPricingFieldsChanged, snapshotCommercialPricing } from '../utils/plan-commercial-pricing.utils';
 import { isPostgresForeignKeyViolation } from '../utils/postgres-foreign-key-violation.util';
 import { effectiveSchemaSupportsLocationSelection } from '../utils/provider-location.utils';
@@ -67,6 +68,7 @@ export class ServicePlansController {
     private readonly addonsRepository: AddonsRepository,
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly withdrawalPolicyService: WithdrawalPolicyService,
+    private readonly containerManagerCatalogService: ContainerManagerCatalogService,
     @Inject(PLAN_PRICE_MIGRATE_ENQUEUE)
     private readonly planPriceMigrateEnqueue: PlanPriceMigrateEnqueuePort,
   ) {}
@@ -169,6 +171,7 @@ export class ServicePlansController {
     }
 
     const allowedIds = parsePlanAllowedAddonIds(plan.providerConfigDefaults);
+    const mandatoryIds = new Set(parsePlanMandatoryAddonIds(plan.providerConfigDefaults));
 
     if (allowedIds.length === 0) {
       return [];
@@ -195,6 +198,7 @@ export class ServicePlansController {
         periodPrice: convertAddonPriceToPlanPeriod(addon, plan),
         orderFields: this.addonService.getOrderFieldsForAddon(addon),
         meters: await this.meterService.listAddonMeters(addon.id),
+        mandatory: mandatoryIds.has(addon.id),
       })),
     );
   }
@@ -241,7 +245,10 @@ export class ServicePlansController {
       );
     }
 
-    const normalizedDefaults = isNone ? {} : normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
+    const normalizedDefaultsRaw = isNone ? {} : normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
+    const normalizedDefaults = isNone
+      ? {}
+      : await this.containerManagerCatalogService.applyIntegratedPlanDefaults(normalizedDefaultsRaw);
     const allowCustomerServerTypeSelection = isNone ? false : dto.allowCustomerServerTypeSelection === true;
     const allowedServerTypes = allowCustomerServerTypeSelection
       ? normalizeAllowedServerTypes(dto.allowedServerTypes)
@@ -252,6 +259,7 @@ export class ServicePlansController {
       await this.addonService.assertAllowedAddonIdsForPlan(
         dbServiceTypeId,
         parsePlanAllowedAddonIds(normalizedDefaults),
+        parsePlanMandatoryAddonIds(normalizedDefaults),
       );
     }
 
@@ -328,12 +336,15 @@ export class ServicePlansController {
           : [];
 
     if (!isNone && existing.serviceTypeId && dto.providerConfigDefaults !== undefined) {
-      const normalizedDefaults = normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
+      const normalizedDefaultsRaw = normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
+      const normalizedDefaults =
+        await this.containerManagerCatalogService.applyIntegratedPlanDefaults(normalizedDefaultsRaw);
 
       await this.cloudInitConfigService.assertActiveConfigForPlanDefaults(existing.serviceTypeId, normalizedDefaults);
       await this.addonService.assertAllowedAddonIdsForPlan(
         existing.serviceTypeId,
         parsePlanAllowedAddonIds(normalizedDefaults),
+        parsePlanMandatoryAddonIds(normalizedDefaults),
       );
     }
 
@@ -342,6 +353,19 @@ export class ServicePlansController {
 
     // Only assign defined DTO fields — Object.assign + TypeORM save would otherwise persist `undefined` as NULL
     // and wipe commercial pricing on partial admin updates (e.g. marginFixed-only + migrateExistingSubscriptions).
+    let providerConfigDefaultsUpdate: Record<string, unknown> | undefined;
+
+    if (dto.providerConfigDefaults !== undefined) {
+      if (isNone) {
+        providerConfigDefaultsUpdate = {};
+      } else {
+        const normalizedDefaultsRaw = normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
+
+        providerConfigDefaultsUpdate =
+          await this.containerManagerCatalogService.applyIntegratedPlanDefaults(normalizedDefaultsRaw);
+      }
+    }
+
     const row = await this.servicePlansRepository.update(id, {
       ...(dto.name !== undefined ? { name: dto.name } : {}),
       ...(dto.description !== undefined ? { description: dto.description } : {}),
@@ -358,9 +382,9 @@ export class ServicePlansController {
       ...(dto.basePrice !== undefined ? { basePrice: dto.basePrice } : {}),
       ...(dto.marginPercent !== undefined ? { marginPercent: dto.marginPercent } : {}),
       ...(dto.marginFixed !== undefined ? { marginFixed: dto.marginFixed } : {}),
-      ...(dto.providerConfigDefaults !== undefined
+      ...(providerConfigDefaultsUpdate !== undefined
         ? {
-            providerConfigDefaults: isNone ? {} : normalizePlanProviderConfigDefaults(dto.providerConfigDefaults),
+            providerConfigDefaults: providerConfigDefaultsUpdate,
           }
         : {}),
       ...(dto.orderingHighlights !== undefined ? { orderingHighlights: dto.orderingHighlights } : {}),

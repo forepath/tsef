@@ -1,0 +1,56 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.container-manager-tab {
+  min-height: 0;
+}
+
+.container-manager-tab__topology {
+  min-height: 220px;
+}
+
+.container-manager-tab__topology-svg {
+  display: block;
+  width: 100%;
+  min-width: 480px;
+  height: auto;
+}
+
+.container-manager-tab__edge {
+  stroke: var(--bs-border-color-translucent, var(--bs-border-color));
+  stroke-width: 2;
+}
+
+.container-manager-tab__edge-label {
+  fill: var(--bs-secondary-color);
+  font-size: 10px;
+  font-family: var(--bs-body-font-family);
+}
+
+.container-manager-tab__node {
+  fill: var(--bs-primary);
+  stroke: var(--bs-body-bg);
+  stroke-width: 2;
+}
+
+.container-manager-tab__node--network {
+  fill: var(--bs-info);
+}
+
+.container-manager-tab__node--exit {
+  fill: var(--bs-success);
+}
+
+.container-manager-tab__node--route {
+  fill: var(--bs-warning);
+}
+
+.container-manager-tab__node-label {
+  fill: var(--bs-body-color);
+  font-size: 11px;
+  font-family: var(--bs-body-font-family);
+}

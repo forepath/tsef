@@ -15,6 +15,21 @@ export interface AddonLifecycleContext {
   hostname?: string;
 }
 
+/** Tab contributed by an addon module onto the service details page. */
+export interface AddonServiceTabDefinition {
+  /** Stable tab id (also used in routes / frontend registry). */
+  readonly id: string;
+  /** Customer-facing label. */
+  readonly label: string;
+  /** Lower sorts first; Details tab is always 0. */
+  readonly order: number;
+  /**
+   * Optional visibility rule. When omitted, the tab is shown whenever the addon is active.
+   * Returning false hides the tab even if the addon is active.
+   */
+  readonly isVisible?: (ctx: { subscriptionId: string; itemId: string }) => boolean;
+}
+
 export interface BillingAddonModule {
   readonly key: string;
   readonly displayName: string;
@@ -28,6 +43,10 @@ export interface BillingAddonModule {
    * Sideloaded onto the catalog addon as non-removable attachments.
    */
   readonly meters?: DeclaredMeterDefinition[];
+  /**
+   * Additional service-detail tabs registered when a subscription has this module addon active.
+   */
+  readonly serviceTabs?: AddonServiceTabDefinition[];
   provision(ctx: AddonLifecycleContext): Promise<void>;
   teardown(ctx: AddonLifecycleContext): Promise<void>;
   /**
@@ -38,7 +57,7 @@ export interface BillingAddonModule {
 }
 
 /**
- * Registry of dynamically loaded addon modules (DYNAMIC_ADDON_MODULES).
+ * Registry of dynamically loaded addon modules (DYNAMIC_ADDON_MODULES) and builtins.
  */
 @Injectable()
 export class AddonModuleRegistryService {

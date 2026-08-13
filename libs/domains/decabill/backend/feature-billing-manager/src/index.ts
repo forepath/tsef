@@ -70,6 +70,8 @@ export * from './lib/dto/withdraw-subscription.dto';
 export * from './lib/dto/instant-cancel-subscription.dto';
 export * from './lib/dto/withdrawal-policy.dto';
 export * from './lib/dto/server-info-response.dto';
+export * from './lib/dto/subscription-item-response.dto';
+export * from './lib/dto/container-manager.dto';
 export * from './lib/dto/service-plan-response.dto';
 export * from './lib/dto/service-type-response.dto';
 export * from './lib/dto/subscription-response.dto';

@@ -15,6 +15,7 @@ import { WithdrawalPolicyService } from '../services/withdrawal-policy.service';
 import { AddonsRepository } from '../repositories/addons.repository';
 import { PLAN_PRICE_MIGRATE_ENQUEUE } from '../queue/plan-price-migrate-enqueue.token';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
+import { ContainerManagerCatalogService } from '../services/container-manager-catalog.service';
 
 import { ServicePlansController } from './service-plans.controller';
 
@@ -80,6 +81,9 @@ describe('ServicePlansController', () => {
   const subscriptionsRepositoryStub = {
     countByPlanId: jest.fn().mockResolvedValue(0),
   };
+  const containerManagerCatalogServiceStub = {
+    applyIntegratedPlanDefaults: jest.fn(async (defaults: Record<string, unknown> | undefined) => defaults ?? {}),
+  };
 
   beforeEach(() => {
     planPriceMigrateEnqueueStub.enqueueUnit.mockReset();
@@ -103,6 +107,10 @@ describe('ServicePlansController', () => {
     addonsRepositoryStub.findByIds.mockResolvedValue([]);
     subscriptionsRepositoryStub.countByPlanId.mockReset();
     subscriptionsRepositoryStub.countByPlanId.mockResolvedValue(0);
+    containerManagerCatalogServiceStub.applyIntegratedPlanDefaults.mockReset();
+    containerManagerCatalogServiceStub.applyIntegratedPlanDefaults.mockImplementation(
+      async (defaults: Record<string, unknown> | undefined) => defaults ?? {},
+    );
   });
 
   function setupRepositoryMock(mock: Partial<jest.Mocked<ServicePlansRepository>>) {
@@ -128,6 +136,7 @@ describe('ServicePlansController', () => {
         { provide: AddonsRepository, useValue: addonsRepositoryStub },
         { provide: SubscriptionsRepository, useValue: subscriptionsRepositoryStub },
         { provide: WithdrawalPolicyService, useValue: new WithdrawalPolicyService() },
+        { provide: ContainerManagerCatalogService, useValue: containerManagerCatalogServiceStub },
         { provide: PLAN_PRICE_MIGRATE_ENQUEUE, useValue: planPriceMigrateEnqueueStub },
       ],
     }).compile();

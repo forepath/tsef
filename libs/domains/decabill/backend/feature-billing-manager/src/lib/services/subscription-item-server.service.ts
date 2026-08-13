@@ -4,15 +4,19 @@ import {
   SubscriptionItemDetailResponseDto,
   SubscriptionItemResponseDto,
   SubscriptionSshAccessKeyResponseDto,
+  type ActiveSubscriptionAddonSummaryDto,
+  type ServiceDetailTabDto,
 } from '../dto/subscription-item-response.dto';
 import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { ProvisioningStatus } from '../entities/subscription-item.entity';
 import { SubscriptionEntity, SubscriptionStatus } from '../entities/subscription.entity';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
+import { SubscriptionAddonsRepository } from '../repositories/subscription-addons.repository';
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
+import { CONTAINER_MANAGER_MODULE_KEY } from '../utils/plan-addons.utils';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
 import { ServerInfo } from '../utils/provisioning.utils';
 import {
@@ -23,7 +27,9 @@ import {
   serverInfoHasGeography,
 } from '../utils/subscription-item-response.utils';
 
+import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { CloudflareDnsService } from './cloudflare-dns.service';
+import { ContainerManagerService } from './container-manager.service';
 import { ProvisioningService } from './provisioning.service';
 import { SubscriptionService } from './subscription.service';
 
@@ -41,11 +47,14 @@ export class SubscriptionItemServerService {
     private readonly subscriptionService: SubscriptionService,
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly subscriptionItemsRepository: SubscriptionItemsRepository,
+    private readonly subscriptionAddonsRepository: SubscriptionAddonsRepository,
     private readonly provisioningService: ProvisioningService,
     private readonly cloudflareDnsService: CloudflareDnsService,
     private readonly servicePlansRepository: ServicePlansRepository,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
     private readonly billingEmailPublisher: BillingEmailPublisher,
+    private readonly addonModuleRegistry: AddonModuleRegistryService,
+    private readonly containerManagerService: ContainerManagerService,
   ) {}
 
   /**
@@ -275,7 +284,11 @@ export class SubscriptionItemServerService {
       throw new NotFoundException(`Subscription item ${itemId} not found`);
     }
 
-    const response: SubscriptionItemDetailResponseDto = mapSubscriptionItemToResponse(item);
+    const response: SubscriptionItemDetailResponseDto = {
+      ...mapSubscriptionItemToResponse(item),
+      tabs: [{ id: 'details', label: 'Details', order: 0, moduleKey: null }],
+      activeAddons: [],
+    };
     const hostname = item.hostname;
     const hostnameFqdn = hostname ? this.cloudflareDnsService.getFqdn(hostname) : undefined;
     const provider = item.serviceType?.provider ?? null;
@@ -304,6 +317,75 @@ export class SubscriptionItemServerService {
 
     if (serverInfo) {
       response.serverInfo = serverInfo;
+    }
+
+    const activeAddonRows = await this.subscriptionAddonsRepository.findActiveBySubscriptionId(subscriptionId);
+    const activeAddons: ActiveSubscriptionAddonSummaryDto[] = activeAddonRows
+      .filter((row) => row.status === 'active' || row.status === 'pending')
+      .map((row) => ({
+        id: row.id,
+        addonId: row.addonId,
+        key: row.addon?.key ?? row.addonId,
+        name: row.addon?.name ?? row.addonId,
+        moduleKey: row.addon?.moduleKey ?? null,
+        status: row.status,
+      }));
+
+    const tabs: ServiceDetailTabDto[] = [{ id: 'details', label: 'Details', order: 0, moduleKey: null }];
+
+    for (const row of activeAddonRows) {
+      if (row.status !== 'active') {
+        continue;
+      }
+
+      const moduleKey = row.addon?.moduleKey;
+
+      if (!moduleKey || row.addon?.implementationType !== 'module') {
+        continue;
+      }
+
+      const module = this.addonModuleRegistry.get(moduleKey);
+
+      for (const tab of module?.serviceTabs ?? []) {
+        const visible = tab.isVisible?.({ subscriptionId, itemId }) ?? true;
+
+        if (!visible) {
+          continue;
+        }
+
+        if (tabs.some((existing) => existing.id === tab.id)) {
+          continue;
+        }
+
+        tabs.push({
+          id: tab.id,
+          label: tab.label,
+          order: tab.order,
+          moduleKey,
+        });
+      }
+    }
+
+    tabs.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+
+    response.tabs = tabs;
+    response.activeAddons = activeAddons;
+
+    const hasContainerManager = activeAddonRows.some(
+      (row) =>
+        row.status === 'active' &&
+        row.addon?.moduleKey === CONTAINER_MANAGER_MODULE_KEY &&
+        row.addon.implementationType === 'module',
+    );
+
+    if (hasContainerManager) {
+      const cached = this.containerManagerService.getCachedSummary(itemId);
+
+      response.containerManager = {
+        containerCount: cached?.containerCount ?? 0,
+        healthyCount: cached?.healthyCount ?? 0,
+        lastCollectedAt: cached?.lastCollectedAt ?? null,
+      };
     }
 
     return response;

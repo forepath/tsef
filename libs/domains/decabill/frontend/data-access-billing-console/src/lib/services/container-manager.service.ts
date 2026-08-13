@@ -1,0 +1,62 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import type { Environment } from '@forepath/shared/frontend/util-configuration';
+import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
+import { Observable } from 'rxjs';
+
+import type {
+  ContainerManagerContainersResponse,
+  ContainerManagerNetworksResponse,
+  ContainerManagerStatsHistoryResponse,
+} from '../types/billing.types';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ContainerManagerService {
+  private readonly http = inject(HttpClient);
+  private readonly environment = inject<Environment>(ENVIRONMENT);
+
+  private get apiUrl(): string {
+    return this.environment.billing.restApiUrl;
+  }
+
+  private basePath(subscriptionId: string, itemId: string, adminMode: boolean): string {
+    if (adminMode) {
+      return `${this.apiUrl}/admin/billing/subscriptions/${subscriptionId}/items/${itemId}/container-manager`;
+    }
+
+    return `${this.apiUrl}/subscriptions/${subscriptionId}/items/${itemId}/container-manager`;
+  }
+
+  listContainers(
+    subscriptionId: string,
+    itemId: string,
+    adminMode = false,
+  ): Observable<ContainerManagerContainersResponse> {
+    return this.http.get<ContainerManagerContainersResponse>(
+      `${this.basePath(subscriptionId, itemId, adminMode)}/containers`,
+    );
+  }
+
+  getStatsHistory(
+    subscriptionId: string,
+    itemId: string,
+    containerId: string,
+    adminMode = false,
+  ): Observable<ContainerManagerStatsHistoryResponse> {
+    return this.http.get<ContainerManagerStatsHistoryResponse>(
+      `${this.basePath(subscriptionId, itemId, adminMode)}/containers/${encodeURIComponent(containerId)}/stats-history`,
+    );
+  }
+
+  listNetworks(
+    subscriptionId: string,
+    itemId: string,
+    adminMode = false,
+  ): Observable<ContainerManagerNetworksResponse> {
+    return this.http.get<ContainerManagerNetworksResponse>(
+      `${this.basePath(subscriptionId, itemId, adminMode)}/networks`,
+    );
+  }
+}

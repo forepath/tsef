@@ -445,6 +445,8 @@ export interface PlanAddonOptionDto {
   orderFields: AddonConfigOrderField[];
   /** Attached usage meters (read-only on customer order). */
   meters?: AttachedMeterResponse[];
+  /** When true, the addon is required for this plan and cannot be deselected. */
+  mandatory: boolean;
 }
 
 export interface CreateAddonDto {
@@ -692,8 +694,107 @@ export interface SubscriptionItemResponse {
   hasProviderReference?: boolean;
 }
 
+export interface ServiceDetailTabDto {
+  id: string;
+  label: string;
+  order: number;
+  moduleKey: string | null;
+}
+
+export interface ActiveSubscriptionAddonSummaryDto {
+  id: string;
+  addonId: string;
+  key: string;
+  name: string;
+  moduleKey: string | null;
+  status: string;
+}
+
+export interface ContainerManagerSummaryDto {
+  containerCount: number;
+  healthyCount: number;
+  lastCollectedAt: string | null;
+}
+
 export interface SubscriptionItemDetailResponse extends SubscriptionItemResponse {
   serverInfo?: ServerInfoResponse;
+  tabs: ServiceDetailTabDto[];
+  activeAddons: ActiveSubscriptionAddonSummaryDto[];
+  containerManager?: ContainerManagerSummaryDto;
+}
+
+export interface ContainerManagerResourceStats {
+  cpuPercent: number | null;
+  memoryUsageBytes: number | null;
+  memoryLimitBytes: number | null;
+  memoryPercent: number | null;
+  blockReadBytes: number | null;
+  blockWriteBytes: number | null;
+  networkRxBytes: number | null;
+  networkTxBytes: number | null;
+}
+
+export interface ContainerManagerContainer {
+  id: string;
+  name: string;
+  image: string;
+  state: string;
+  status: string;
+  createdAt: string | null;
+  stats: ContainerManagerResourceStats | null;
+}
+
+export interface ContainerManagerContainersResponse {
+  containers: ContainerManagerContainer[];
+  collectedAt: string;
+}
+
+export interface ContainerManagerStatsHistoryPoint {
+  timestamp: string;
+  cpuPercent: number | null;
+  memoryPercent: number | null;
+  blockReadBytes: number | null;
+  blockWriteBytes: number | null;
+  networkRxBytes: number | null;
+  networkTxBytes: number | null;
+}
+
+export interface ContainerManagerStatsHistoryResponse {
+  containerId: string;
+  points: ContainerManagerStatsHistoryPoint[];
+}
+
+export interface ContainerManagerNetworkNode {
+  id: string;
+  label: string;
+  kind: 'container' | 'network' | 'exit' | 'route';
+}
+
+export interface ContainerManagerNetworkEdge {
+  id: string;
+  from: string;
+  to: string;
+  label?: string;
+}
+
+export interface ContainerManagerNetwork {
+  id: string;
+  name: string;
+  driver: string;
+  scope: string;
+  isOverlay: boolean;
+  containers: string[];
+  exitNodes: string[];
+  routes: Array<{ destination: string; gateway?: string }>;
+}
+
+export interface ContainerManagerNetworksResponse {
+  networks: ContainerManagerNetwork[];
+  topology: {
+    nodes: ContainerManagerNetworkNode[];
+    edges: ContainerManagerNetworkEdge[];
+  };
+  collectedAt: string;
 }
 
 export interface SubscriptionSshAccessKeyResponse {

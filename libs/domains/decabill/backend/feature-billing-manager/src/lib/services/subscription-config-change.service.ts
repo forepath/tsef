@@ -33,7 +33,7 @@ import { SubscriptionConfigChangesRepository } from '../repositories/subscriptio
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
-import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
+import { parsePlanAllowedAddonIds, parsePlanMandatoryAddonIds } from '../utils/plan-addons.utils';
 import { roundMoney } from '../utils/promotion-advantage.util';
 import { normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
 import { assertServerTypeAllowed, normalizeAllowedServerTypes } from '../utils/provider-server-type.utils';
@@ -449,9 +449,17 @@ export class SubscriptionConfigChangeService {
   }
 
   private resolveAddonsToRemove(context: ConfigChangeContext, removeAddonIds: string[]): SubscriptionAddonEntity[] {
+    const mandatoryIds = new Set(parsePlanMandatoryAddonIds(context.plan.providerConfigDefaults));
     const resolved: SubscriptionAddonEntity[] = [];
 
     for (const addonId of removeAddonIds) {
+      if (mandatoryIds.has(addonId)) {
+        throwConfigChangeBadRequest(
+          CONFIG_CHANGE_ERROR_CODES.ADDON_INVALID,
+          `Addon ${addonId} is mandatory on this plan and cannot be removed`,
+        );
+      }
+
       const match = context.activeAddons.find((row) => row.addonId === addonId);
 
       if (!match) {

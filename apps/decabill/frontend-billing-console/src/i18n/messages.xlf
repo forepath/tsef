@@ -2640,6 +2640,78 @@
       <trans-unit id="featureServiceDetail-customService" datatype="html">
         <source>Custom application</source>
         </trans-unit>
+      <trans-unit id="featureServiceDetail-tabsAria" datatype="html">
+        <source>Service detail tabs</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-tabDetails" datatype="html">
+        <source>Details</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-tabContainerManager" datatype="html">
+        <source>Container Manager</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-unknownTab" datatype="html">
+        <source>This tab is not available.</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-containersTitle" datatype="html">
+        <source>Containers</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-collectedAt" datatype="html">
+        <source>Collected</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-loadingContainers" datatype="html">
+        <source>Loading containers…</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-noContainers" datatype="html">
+        <source>No containers found on this host.</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-statsTitle" datatype="html">
+        <source>Resource usage</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-selectContainerHint" datatype="html">
+        <source>Select a container to view resource history.</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-loadingStats" datatype="html">
+        <source>Loading resource history…</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-cpu" datatype="html">
+        <source>CPU</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-memory" datatype="html">
+        <source>Memory</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-network" datatype="html">
+        <source>Network</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-blockIo" datatype="html">
+        <source>Block I/O</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-noStatsHistory" datatype="html">
+        <source>No resource history is available for this container yet.</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-networkingTitle" datatype="html">
+        <source>Networking</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-loadingNetworks" datatype="html">
+        <source>Loading networks…</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-noNetworks" datatype="html">
+        <source>No Docker networks were reported for this host.</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyTitle" datatype="html">
+        <source>Container network topology</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-noLiveStats" datatype="html">
+        <source>No live stats</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-cpuSeries" datatype="html">
+        <source>CPU %</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-memorySeries" datatype="html">
+        <source>Memory %</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-resourceHistoryTitle" datatype="html">
+        <source>Resource history</source>
+        </trans-unit>
       <trans-unit id="featureServicePlans-title" datatype="html">
         <source>Service Plans</source>
         </trans-unit>
@@ -2762,6 +2834,12 @@
         </trans-unit>
       <trans-unit id="featureServicePlans-addonsHelp" datatype="html">
         <source> Choose which addons customers may add when ordering this plan. </source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-mandatoryAddon" datatype="html">
+        <source>Mandatory</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-mandatoryAddonHelp" datatype="html">
+        <source>Customers cannot deselect this addon when ordering.</source>
         </trans-unit>
       <trans-unit id="featureServicePlans-cancelAtPeriodEnd" datatype="html">
         <source>Cancel at period end</source>
@@ -3107,6 +3185,12 @@
         </trans-unit>
       <trans-unit id="featureSubscriptions-addons" datatype="html">
         <source>Addons</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-mandatoryAddonBadge" datatype="html">
+        <source>Required</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-mandatoryAddonHint" datatype="html">
+        <source>Included with this plan and cannot be removed.</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-planMeters" datatype="html">
         <source> Plan usage meters </source>
