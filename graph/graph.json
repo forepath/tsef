@@ -7738,6 +7738,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-module-registry.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-module-registry.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloudflare-dns.service.ts",
       "type": "service",
       "attrs": {
@@ -7913,6 +7922,15 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/hostname-reservation.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -25882,6 +25900,16 @@
       }
     },
     {
+      "id": "concept:decabill-service-detail-tabs",
+      "type": "concept",
+      "attrs": {
+        "title": "Service-detail tabs",
+        "docPath": "docs/decabill/features/cloud-init-configs.md",
+        "sectionAnchor": "service-detail-tabs",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-service-plan-product-defaults",
       "type": "concept",
       "attrs": {
@@ -34495,6 +34523,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-module-registry.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloudflare-dns.service.ts",
       "type": "contains"
     },
@@ -34591,6 +34624,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/hostname-reservation.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
       "type": "contains"
     },
     {
@@ -44586,6 +44624,11 @@
     {
       "from": "file:docs/decabill/features/cloud-init-configs.md",
       "to": "concept:decabill-environment-variables",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/cloud-init-configs.md",
+      "to": "concept:decabill-service-detail-tabs",
       "type": "contains"
     },
     {
@@ -55189,6 +55232,21 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-server.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-server.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-module-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-server.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/cloud-init-configs.repository.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-update.job-handler.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
       "type": "injects"
@@ -56886,6 +56944,16 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-module-registry.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-module-registry.service.ts",
       "type": "provides"
     },
     {
@@ -63454,6 +63522,21 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-service-detail-tabs",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-service-detail-tabs",
+      "to": "api:HTTP:GET:/cloud-init-configs",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-service-detail-tabs",
+      "to": "api:HTTP:POST:/cloud-init-configs",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-service-plan-product-defaults",
       "to": "api:HTTP:GET:/cloud-init-configs",
       "type": "documents"
@@ -64836,6 +64919,16 @@
     {
       "from": "concept:decabill-tabs-and-extension-registry",
       "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-tabs-and-extension-registry",
+      "to": "api:HTTP:GET:/cloud-init-configs",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-tabs-and-extension-registry",
+      "to": "api:HTTP:POST:/cloud-init-configs",
       "type": "documents"
     },
     {
@@ -71025,6 +71118,11 @@
     },
     {
       "from": "concept:decabill-environment-variables",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-service-detail-tabs",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

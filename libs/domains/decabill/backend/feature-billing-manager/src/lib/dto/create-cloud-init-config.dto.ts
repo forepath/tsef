@@ -47,6 +47,19 @@ export class CloudInitConfigEnvVariableDefinitionDto {
   randomDefaultSpecialChars?: boolean;
 }
 
+export class CloudInitConfigServiceTabDefinitionDto {
+  @IsNotEmpty({ message: 'Service tab id is required' })
+  @IsString({ message: 'Service tab id must be a string' })
+  id!: string;
+
+  @IsNotEmpty({ message: 'Service tab label is required' })
+  @IsString({ message: 'Service tab label must be a string' })
+  label!: string;
+
+  @IsInt({ message: 'Service tab order must be an integer' })
+  order!: number;
+}
+
 export class CreateCloudInitConfigDto {
   @IsNotEmpty({ message: 'Key is required' })
   @IsString({ message: 'Key must be a string' })
@@ -97,6 +110,12 @@ export class CreateCloudInitConfigDto {
   @ValidateNested({ each: true })
   @Type(() => CloudInitConfigEnvVariableDefinitionDto)
   environmentVariables?: CloudInitConfigEnvVariableDefinitionDto[];
+
+  @IsOptional()
+  @IsArray({ message: 'Service tabs must be an array' })
+  @ValidateNested({ each: true })
+  @Type(() => CloudInitConfigServiceTabDefinitionDto)
+  serviceTabs?: CloudInitConfigServiceTabDefinitionDto[];
 
   @IsOptional()
   @IsObject({ message: 'Default values must be an object' })

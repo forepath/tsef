@@ -148,6 +148,12 @@ export interface CloudInitConfigEnvVariableDefinition {
   randomDefaultSpecialChars?: boolean;
 }
 
+export interface CloudInitConfigServiceTabDefinition {
+  id: string;
+  label: string;
+  order: number;
+}
+
 export interface CloudInitConfigResponse {
   id: string;
   key: string;
@@ -161,6 +167,7 @@ export interface CloudInitConfigResponse {
   dockerComposeTemplate?: string | null;
   userDataTemplate?: string | null;
   environmentVariables: CloudInitConfigEnvVariableDefinition[];
+  serviceTabs?: CloudInitConfigServiceTabDefinition[];
   defaultValues?: Record<string, string>;
   isActive: boolean;
   createdAt: string;
@@ -208,6 +215,7 @@ export interface CreateCloudInitConfigDto {
     randomDefaultLength?: number;
     randomDefaultSpecialChars?: boolean;
   }>;
+  serviceTabs?: CloudInitConfigServiceTabDefinition[];
   defaultValues?: Record<string, string>;
   isActive?: boolean;
 }
@@ -231,6 +239,7 @@ export interface UpdateCloudInitConfigDto {
     randomDefaultLength?: number;
     randomDefaultSpecialChars?: boolean;
   }>;
+  serviceTabs?: CloudInitConfigServiceTabDefinition[];
   defaultValues?: Record<string, string>;
   isActive?: boolean;
 }
@@ -694,11 +703,16 @@ export interface SubscriptionItemResponse {
   hasProviderReference?: boolean;
 }
 
+export type ServiceDetailTabSource = 'details' | 'addon' | 'integrated' | 'cloud-init';
+
 export interface ServiceDetailTabDto {
   id: string;
   label: string;
   order: number;
+  /** Contributor key (addon moduleKey, integrated service id, or CloudInit config key). */
   moduleKey: string | null;
+  /** Contributor kind; optional for backward-compatible clients. */
+  source?: ServiceDetailTabSource;
 }
 
 export interface ActiveSubscriptionAddonSummaryDto {

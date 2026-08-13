@@ -16,6 +16,7 @@ describe('custom-configuration.utils', () => {
     hostPort: 80,
     workDir: '/opt/custom-app',
     environmentVariables: [],
+    serviceTabs: [],
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),

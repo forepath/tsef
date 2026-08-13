@@ -1,6 +1,8 @@
 import { createJsonAes256GcmTransformer } from '@forepath/shared/backend';
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 
+import type { CloudInitConfigServiceTabDefinition } from '../utils/service-detail-tabs.utils';
+
 export type CloudInitProvisioningMode = 'simple' | 'compose-template' | 'user-data-template';
 
 /** Ordered env var metadata for a CloudInit config template (defaults stored separately, encrypted). */
@@ -14,6 +16,8 @@ export interface CloudInitConfigEnvVariableDefinition {
   randomDefaultLength?: number;
   randomDefaultSpecialChars?: boolean;
 }
+
+export type { CloudInitConfigServiceTabDefinition };
 
 @Entity('billing_cloud_init_configs')
 @Unique('uq_billing_cloud_init_configs_tenant_key', ['tenantId', 'key'])
@@ -56,6 +60,13 @@ export class CloudInitConfigEntity {
 
   @Column({ type: 'jsonb', name: 'environment_variables', default: () => "'[]'::jsonb" })
   environmentVariables!: CloudInitConfigEnvVariableDefinition[];
+
+  /**
+   * Declarative service-detail tabs for subscription items provisioned with this template.
+   * Code modules (DYNAMIC_CLOUD_INIT_MODULES) may contribute additional tabs by config key.
+   */
+  @Column({ type: 'jsonb', name: 'service_tabs', default: () => "'[]'::jsonb" })
+  serviceTabs!: CloudInitConfigServiceTabDefinition[];
 
   @Column({
     type: 'text',

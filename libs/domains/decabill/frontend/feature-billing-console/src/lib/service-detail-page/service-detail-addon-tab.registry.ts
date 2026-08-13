@@ -3,16 +3,32 @@ import { CONTAINER_MANAGER_TAB_ID } from '@forepath/decabill/frontend/data-acces
 
 import { ContainerManagerTabComponent } from './tabs/container-manager/container-manager-tab.component';
 
-export type ServiceDetailAddonTabComponent = Type<{
+/** Component contract for any contributor-registered service-detail tab (addon, stack, CloudInit). */
+export type ServiceDetailTabComponent = Type<{
   subscriptionId: string;
   itemId: string;
   adminMode: boolean;
 }>;
 
-export const SERVICE_DETAIL_ADDON_TAB_REGISTRY: Record<string, ServiceDetailAddonTabComponent> = {
+/** @deprecated Prefer ServiceDetailTabComponent */
+export type ServiceDetailAddonTabComponent = ServiceDetailTabComponent;
+
+/**
+ * Frontend registry: tab id → component.
+ * Backed by item-detail `tabs[]` from addons, integrated stacks, and CloudInit configs.
+ */
+export const SERVICE_DETAIL_TAB_REGISTRY: Record<string, ServiceDetailTabComponent> = {
   [CONTAINER_MANAGER_TAB_ID]: ContainerManagerTabComponent,
 };
 
-export function resolveServiceDetailAddonTabComponent(tabId: string): ServiceDetailAddonTabComponent | null {
-  return SERVICE_DETAIL_ADDON_TAB_REGISTRY[tabId] ?? null;
+/** @deprecated Prefer SERVICE_DETAIL_TAB_REGISTRY */
+export const SERVICE_DETAIL_ADDON_TAB_REGISTRY = SERVICE_DETAIL_TAB_REGISTRY;
+
+export function resolveServiceDetailTabComponent(tabId: string): ServiceDetailTabComponent | null {
+  return SERVICE_DETAIL_TAB_REGISTRY[tabId] ?? null;
+}
+
+/** @deprecated Prefer resolveServiceDetailTabComponent */
+export function resolveServiceDetailAddonTabComponent(tabId: string): ServiceDetailTabComponent | null {
+  return resolveServiceDetailTabComponent(tabId);
 }

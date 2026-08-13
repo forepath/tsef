@@ -11,14 +11,26 @@ import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { ProvisioningStatus } from '../entities/subscription-item.entity';
 import { SubscriptionEntity, SubscriptionStatus } from '../entities/subscription.entity';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
+import { CloudInitConfigsRepository } from '../repositories/cloud-init-configs.repository';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
 import { SubscriptionAddonsRepository } from '../repositories/subscription-addons.repository';
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
+import {
+  CloudInitServiceType,
+  canonicalizeIntegratedProvisioningService,
+} from '../utils/cloud-init/integrated-provisioning-service';
 import { CONTAINER_MANAGER_MODULE_KEY } from '../utils/plan-addons.utils';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
 import { ServerInfo } from '../utils/provisioning.utils';
+import {
+  appendServiceTabs,
+  createDetailsTab,
+  sanitizeCloudInitServiceTabs,
+  sortResolvedServiceTabs,
+  type ResolvedServiceDetailTab,
+} from '../utils/service-detail-tabs.utils';
 import {
   mapServerInfoSnapshotToResponse,
   mapServerInfoToResponse,
@@ -29,7 +41,9 @@ import {
 
 import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { CloudflareDnsService } from './cloudflare-dns.service';
+import { CloudInitModuleRegistryService } from './cloud-init-module-registry.service';
 import { ContainerManagerService } from './container-manager.service';
+import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
 import { ProvisioningService } from './provisioning.service';
 import { SubscriptionService } from './subscription.service';
 
@@ -39,6 +53,9 @@ const SERVICE_DETAIL_ACCESSIBLE_SUBSCRIPTION_STATUSES: ReadonlySet<SubscriptionS
   SubscriptionStatus.PENDING_CONFIG_CHANGE,
   SubscriptionStatus.PENDING_BACKORDER,
 ]);
+
+const CLOUD_INIT_CONFIG_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 @Injectable()
 export class SubscriptionItemServerService {
   private readonly logger = new Logger(SubscriptionItemServerService.name);
@@ -55,6 +72,9 @@ export class SubscriptionItemServerService {
     private readonly billingEmailPublisher: BillingEmailPublisher,
     private readonly addonModuleRegistry: AddonModuleRegistryService,
     private readonly containerManagerService: ContainerManagerService,
+    private readonly integratedStackRegistry: IntegratedStackRegistryService,
+    private readonly cloudInitModuleRegistry: CloudInitModuleRegistryService,
+    private readonly cloudInitConfigsRepository: CloudInitConfigsRepository,
   ) {}
 
   /**
@@ -286,7 +306,7 @@ export class SubscriptionItemServerService {
 
     const response: SubscriptionItemDetailResponseDto = {
       ...mapSubscriptionItemToResponse(item),
-      tabs: [{ id: 'details', label: 'Details', order: 0, moduleKey: null }],
+      tabs: [createDetailsTab()],
       activeAddons: [],
     };
     const hostname = item.hostname;
@@ -331,7 +351,8 @@ export class SubscriptionItemServerService {
         status: row.status,
       }));
 
-    const tabs: ServiceDetailTabDto[] = [{ id: 'details', label: 'Details', order: 0, moduleKey: null }];
+    const tabs: ResolvedServiceDetailTab[] = [createDetailsTab()];
+    const tabCtx = { subscriptionId, itemId };
 
     for (const row of activeAddonRows) {
       if (row.status !== 'active') {
@@ -345,30 +366,12 @@ export class SubscriptionItemServerService {
       }
 
       const module = this.addonModuleRegistry.get(moduleKey);
-
-      for (const tab of module?.serviceTabs ?? []) {
-        const visible = tab.isVisible?.({ subscriptionId, itemId }) ?? true;
-
-        if (!visible) {
-          continue;
-        }
-
-        if (tabs.some((existing) => existing.id === tab.id)) {
-          continue;
-        }
-
-        tabs.push({
-          id: tab.id,
-          label: tab.label,
-          order: tab.order,
-          moduleKey,
-        });
-      }
+      appendServiceTabs(tabs, module?.serviceTabs, 'addon', moduleKey, tabCtx);
     }
 
-    tabs.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+    await this.appendProvisioningContributorTabs(tabs, item, tabCtx);
 
-    response.tabs = tabs;
+    response.tabs = sortResolvedServiceTabs(tabs) as ServiceDetailTabDto[];
     response.activeAddons = activeAddons;
 
     const hasContainerManager = activeAddonRows.some(
@@ -542,5 +545,59 @@ export class SubscriptionItemServerService {
         `Service is not active (status: ${status}). Only provisioned services can be queried or controlled.`,
       );
     }
+  }
+
+  /**
+   * Merges tabs from the item's integrated stack or custom CloudInit config (entity + code module).
+   */
+  private async appendProvisioningContributorTabs(
+    tabs: ResolvedServiceDetailTab[],
+    item: { serviceTypeId: string | null; configSnapshot?: Record<string, unknown> },
+    ctx: { subscriptionId: string; itemId: string },
+  ): Promise<void> {
+    if (item.serviceTypeId == null) {
+      return;
+    }
+
+    const service = normalizeCloudInitService(item.configSnapshot?.['service'] as string | undefined);
+
+    if (service === CloudInitServiceType.Custom) {
+      const rawConfigId = item.configSnapshot?.['cloudInitConfigId'];
+      const cloudInitConfigId = typeof rawConfigId === 'string' ? rawConfigId.trim() : '';
+
+      if (!cloudInitConfigId || !CLOUD_INIT_CONFIG_ID_PATTERN.test(cloudInitConfigId)) {
+        return;
+      }
+
+      const config = await this.cloudInitConfigsRepository.findById(cloudInitConfigId);
+
+      if (!config) {
+        return;
+      }
+
+      let declarativeTabs = config.serviceTabs ?? [];
+
+      try {
+        declarativeTabs = sanitizeCloudInitServiceTabs(declarativeTabs);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(
+          `Ignoring invalid CloudInit serviceTabs on config ${config.id} while building item detail: ${message}`,
+        );
+        declarativeTabs = [];
+      }
+
+      appendServiceTabs(tabs, declarativeTabs, 'cloud-init', config.key, ctx);
+
+      const codeModule = this.cloudInitModuleRegistry.get(config.key);
+      appendServiceTabs(tabs, codeModule?.serviceTabs, 'cloud-init', config.key, ctx);
+
+      return;
+    }
+
+    const integratedKey = canonicalizeIntegratedProvisioningService(service) ?? (service as string);
+
+    const stackModule = this.integratedStackRegistry.get(integratedKey);
+    appendServiceTabs(tabs, stackModule?.serviceTabs, 'integrated', integratedKey, ctx);
   }
 }

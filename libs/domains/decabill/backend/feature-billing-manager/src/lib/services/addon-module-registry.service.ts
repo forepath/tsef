@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import type { DeclaredMeterDefinition } from '../dto/declared-meter.dto';
 import type { MeterCollectContext, MeterCollectSample } from '../dto/meter-collect.types';
 import type { AddonConfigFieldDefinition } from '../utils/addon-config.utils';
+import type { ServiceTabDefinition } from '../utils/service-detail-tabs.utils';
 
 export interface AddonLifecycleContext {
   subscriptionId: string;
@@ -15,20 +16,8 @@ export interface AddonLifecycleContext {
   hostname?: string;
 }
 
-/** Tab contributed by an addon module onto the service details page. */
-export interface AddonServiceTabDefinition {
-  /** Stable tab id (also used in routes / frontend registry). */
-  readonly id: string;
-  /** Customer-facing label. */
-  readonly label: string;
-  /** Lower sorts first; Details tab is always 0. */
-  readonly order: number;
-  /**
-   * Optional visibility rule. When omitted, the tab is shown whenever the addon is active.
-   * Returning false hides the tab even if the addon is active.
-   */
-  readonly isVisible?: (ctx: { subscriptionId: string; itemId: string }) => boolean;
-}
+/** @deprecated Prefer ServiceTabDefinition — kept as an alias for addon module typing. */
+export type AddonServiceTabDefinition = ServiceTabDefinition;
 
 export interface BillingAddonModule {
   readonly key: string;

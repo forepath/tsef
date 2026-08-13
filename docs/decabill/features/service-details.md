@@ -1,6 +1,6 @@
 # Service details
 
-Customer and admin views for a provisioned subscription item (cloud service instance), including live status, displayable server metadata, optional rename, usage-meter history charts, and addon-registered tabs (for example Container Manager).
+Customer and admin views for a provisioned subscription item (cloud service instance), including live status, displayable server metadata, optional rename, usage-meter history charts, and contributor-registered tabs from addons, integrated stacks, and CloudInit configs (for example Container Manager).
 
 ## Routes
 
@@ -44,7 +44,7 @@ Inline rename follows the project-ticket pattern: click the title → input → 
 Customer: `GET /subscriptions/{subscriptionId}/items/{itemId}` returns the item plus:
 
 - displayable `serverInfo` (IPs, hostname/FQDN, status, metadata)
-- `tabs` — always includes the built-in Details tab (`id: details`, `order: 0`, `moduleKey: null`); additional tabs come from active module addons that declare `serviceTabs`
+- `tabs` — always includes the built-in Details tab (`id: details`, `order: 0`, `moduleKey: null`, `source: details`); additional tabs come from active module addons, the item's integrated stack, and/or the active CloudInit config
 - `activeAddons` — active/pending subscription addon summaries for the UI
 - optional `containerManager` summary (`containerCount`, `healthyCount`, `lastCollectedAt`) when Container Manager is active
 
@@ -54,17 +54,27 @@ Admin twins live under `/admin/billing/subscriptions/{subscriptionId}/items/...`
 
 ## Tabs and extension registry
 
-Module addons may register service-detail tabs via `BillingAddonModule.serviceTabs` (`id`, `label`, `order`, optional visibility). The backend merges those tabs into the item detail response when the corresponding subscription addon is active.
+Three contributor kinds can register service-detail tabs:
+
+| Source               | Registration                                                                                                                          | When applied                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **Addon**            | `BillingAddonModule.serviceTabs` (builtins / `DYNAMIC_ADDON_MODULES`)                                                                 | Subscription addon is `active` and `implementationType === module` |
+| **Integrated stack** | `IntegratedStackModule.serviceTabs` (builtins / `DYNAMIC_INTEGRATED_STACK_MODULES`)                                                   | Item `configSnapshot.service` is an integrated stack id            |
+| **CloudInit**        | Config entity `serviceTabs` jsonb **and/or** `CloudInitConfigModule.serviceTabs` (`DYNAMIC_CLOUD_INIT_MODULES` keyed by config `key`) | Item service is `custom` and `cloudInitConfigId` resolves          |
+
+Each tab carries `id`, `label`, `order`, `moduleKey` (contributor key), and `source` (`details` \| `addon` \| `integrated` \| `cloud-init`). Duplicate tab ids are skipped (first wins). Optional `isVisible` hooks apply for code modules only.
 
 Frontend mapping:
 
 - Route param `:tab` selects the active tab
 - Built-in Details content is always available
-- Addon tabs resolve through `SERVICE_DETAIL_ADDON_TAB_REGISTRY` (tab id → component); unknown registered tabs without a UI component are omitted from the interactive strip
+- Extension tabs resolve through `SERVICE_DETAIL_TAB_REGISTRY` (tab id → component); unknown registered tabs without a UI component show an unavailable message
 
 ### Container Manager tab
 
-When the `container-manager` module addon is active, the detail page exposes tab `container-manager` (order `100`). That tab loads Docker containers, stats history, and networks via REST (see [Container Manager](./container-manager.md)).
+When the `container-manager` module addon is active, the detail page exposes tab `container-manager` (order `100`, `source: addon`). That tab loads Docker containers, stats history, and networks via REST (see [Container Manager](./container-manager.md)).
+
+Builtin integrated stacks currently declare no tabs; product-specific stack UIs ship via builtin modules or `DYNAMIC_INTEGRATED_STACK_MODULES`. CloudInit declarative tabs are stored on the template and editable via the CloudInit admin API (see [CloudInit Configs](./cloud-init-configs.md)).
 
 ## Meter history
 

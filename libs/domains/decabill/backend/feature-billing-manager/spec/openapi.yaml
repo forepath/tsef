@@ -7195,7 +7195,7 @@ components:
               description: Cached or live server info when the item is active and provisioned
             tabs:
               type: array
-              description: Built-in Details tab plus tabs registered by active module addons
+              description: Built-in Details tab plus tabs from active module addons, the item's integrated stack, and/or the active CloudInit config
               items:
                 $ref: '#/components/schemas/ServiceDetailTab'
             activeAddons:
@@ -7208,22 +7208,23 @@ components:
               description: Present when Container Manager is active on the subscription
     ServiceDetailTab:
       type: object
-      required: [id, label, order, moduleKey]
+      required: [id, label, order, moduleKey, source]
       properties:
         id:
-          {
-            type: string,
-            description: Stable tab id used in routes and the frontend registry,
-          }
+          type: string
+          description: Stable tab id used in routes and the frontend registry
         label: { type: string, description: Customer-facing tab label }
         order:
-          { type: integer, description: Sort order; Details tab is always 0 }
+          type: integer
+          description: Sort order; Details tab is always 0
         moduleKey:
-          {
-            type: string,
-            nullable: true,
-            description: Module key that registered the tab; null for the built-in Details tab,
-          }
+          type: string
+          nullable: true
+          description: Contributor key (addon moduleKey, integrated service id, or CloudInit config key); null for the built-in Details tab
+        source:
+          type: string
+          enum: [details, addon, integrated, cloud-init]
+          description: Contributor kind that registered the tab
     ActiveSubscriptionAddonSummary:
       type: object
       required: [id, addonId, key, name, moduleKey, status]
@@ -8560,6 +8561,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CloudInitConfigEnvVariableDefinition'
+        serviceTabs:
+          type: array
+          description: Declarative service-detail tabs for items provisioned with this template
+          items:
+            $ref: '#/components/schemas/CloudInitConfigServiceTabDefinition'
         defaultValues:
           type: object
           additionalProperties: { type: string }
@@ -8567,6 +8573,19 @@ components:
         isActive: { type: boolean }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+    CloudInitConfigServiceTabDefinition:
+      type: object
+      required: [id, label, order]
+      properties:
+        id:
+          type: string
+          description: Stable tab id (lowercase slug); must not be details or container-manager
+        label: { type: string, description: Customer-facing tab label }
+        order:
+          {
+            type: integer,
+            description: Sort order relative to Details (0) and other tabs,
+          }
     CloudInitConfigOrderField:
       type: object
       required: [key, label, required, hasDefault]
@@ -8610,6 +8629,10 @@ components:
               label: { type: string }
               description: { type: string }
               showInOrderForm: { type: boolean }
+        serviceTabs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudInitConfigServiceTabDefinition'
         defaultValues:
           type: object
           additionalProperties: { type: string }
@@ -8975,6 +8998,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CloudInitConfigEnvVariableDefinition'
+        serviceTabs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudInitConfigServiceTabDefinition'
         defaultValues:
           type: object
           additionalProperties: { type: string }

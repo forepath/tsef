@@ -28,9 +28,13 @@ export function parseServiceDetailTabId(
   return fallback;
 }
 
+export function createDefaultDetailsTab(): ServiceDetailTabDto {
+  return { id: DETAILS_TAB_ID, label: 'Details', order: 0, moduleKey: null, source: 'details' };
+}
+
 export function sortServiceDetailTabs(tabs: ServiceDetailTabDto[] | null | undefined): ServiceDetailTabDto[] {
   if (!tabs?.length) {
-    return [{ id: DETAILS_TAB_ID, label: 'Details', order: 0, moduleKey: null }];
+    return [createDefaultDetailsTab()];
   }
 
   return [...tabs].sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));

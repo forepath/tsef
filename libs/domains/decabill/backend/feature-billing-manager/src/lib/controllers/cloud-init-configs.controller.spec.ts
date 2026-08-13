@@ -18,6 +18,7 @@ describe('CloudInitConfigsController', () => {
     hostPort: 80,
     workDir: '/opt/custom-app',
     environmentVariables: [{ key: 'API_KEY', label: 'API Key', showInOrderForm: true, hasDefault: true }],
+    serviceTabs: [],
     envDefaultValues: { API_KEY: 'secret' },
     isActive: true,
     createdAt: new Date('2026-01-01'),
@@ -79,6 +80,7 @@ describe('CloudInitConfigsController', () => {
           environmentVariables: sampleRow.environmentVariables,
           envDefaultValues: sampleRow.envDefaultValues,
         }),
+        sanitizeServiceTabs: jest.fn().mockReturnValue([]),
         validateProvisioningPayload: jest.fn(),
         getOrderFields: jest.fn(),
       };
@@ -93,6 +95,7 @@ describe('CloudInitConfigsController', () => {
       } as any);
 
       expect(configService.sanitizeEnvironmentVariables).toHaveBeenCalled();
+      expect(configService.sanitizeServiceTabs).toHaveBeenCalled();
       expect(configService.validateProvisioningPayload).toHaveBeenCalledWith(
         expect.objectContaining({ provisioningMode: 'simple', dockerImage: 'nginx:alpine' }),
       );
@@ -101,6 +104,7 @@ describe('CloudInitConfigsController', () => {
           key: 'my-app',
           name: 'My App',
           provisioningMode: 'simple',
+          serviceTabs: [],
           isActive: true,
         }),
       );

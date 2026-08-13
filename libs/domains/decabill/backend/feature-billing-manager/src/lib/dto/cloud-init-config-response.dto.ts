@@ -1,5 +1,6 @@
 import type {
   CloudInitConfigEnvVariableDefinition,
+  CloudInitConfigServiceTabDefinition,
   CloudInitProvisioningMode,
 } from '../entities/cloud-init-config.entity';
 
@@ -16,6 +17,8 @@ export class CloudInitConfigResponseDto {
   dockerComposeTemplate?: string | null;
   userDataTemplate?: string | null;
   environmentVariables!: CloudInitConfigEnvVariableDefinition[];
+  /** Declarative service-detail tabs for items provisioned with this template. */
+  serviceTabs!: CloudInitConfigServiceTabDefinition[];
   /** Decrypted default values; only included on admin GET by id. */
   defaultValues?: Record<string, string>;
   isActive!: boolean;

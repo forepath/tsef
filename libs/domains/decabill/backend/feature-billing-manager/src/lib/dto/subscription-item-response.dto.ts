@@ -25,13 +25,21 @@ export interface SubscriptionItemResponseDto {
   hasProviderReference: boolean;
 }
 
-/** Built-in Details tab plus addon-registered tabs for the service details page. */
+/** Who contributed a service-detail tab. */
+export type ServiceDetailTabSource = 'details' | 'addon' | 'integrated' | 'cloud-init';
+
+/** Built-in Details tab plus contributor-registered tabs for the service details page. */
 export interface ServiceDetailTabDto {
   id: string;
   label: string;
   order: number;
-  /** Module key that registered the tab; null for the built-in Details tab. */
+  /**
+   * Contributor key: addon moduleKey, integrated service id, or CloudInit config key;
+   * null for the built-in Details tab.
+   */
   moduleKey: string | null;
+  /** Contributor kind that registered the tab. */
+  source: ServiceDetailTabSource;
 }
 
 export interface ActiveSubscriptionAddonSummaryDto {
@@ -53,7 +61,10 @@ export interface ContainerManagerSummaryDto {
 /** Detail view for an active provisioned subscription item, including cached or live server info. */
 export interface SubscriptionItemDetailResponseDto extends SubscriptionItemResponseDto {
   serverInfo?: ServerInfoResponseDto;
-  /** Always includes the Details tab; additional tabs come from active module addons. */
+  /**
+   * Always includes the Details tab; additional tabs come from active module addons,
+   * the item's integrated stack, and/or the active CloudInit config.
+   */
   tabs: ServiceDetailTabDto[];
   /** Active (and pending) subscription addons relevant to the UI. */
   activeAddons: ActiveSubscriptionAddonSummaryDto[];
