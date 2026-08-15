@@ -552,15 +552,33 @@
                                       [id]="'orderAddon_' + addon.id"
                                       [checked]="isOrderAddonSelected(addon.id)"
                                       (change)="toggleOrderAddon(addon.id, $any($event.target).checked)"
-                                      [disabled]="(subscriptionsCreating$ | async) === true"
+                                      [disabled]="
+                                        isOrderAddonMandatory(addon.id) || (subscriptionsCreating$ | async) === true
+                                      "
                                     />
                                     <label class="form-check-label w-100" [for]="'orderAddon_' + addon.id">
                                       <span class="d-flex justify-content-between gap-3">
-                                        <span>{{ addon.name }}</span>
+                                        <span>
+                                          {{ addon.name }}
+                                          @if (addon.mandatory) {
+                                            <span
+                                              class="badge text-bg-secondary ms-1"
+                                              i18n="@@featureSubscriptions-mandatoryAddonBadge"
+                                              >Required</span
+                                            >
+                                          }
+                                        </span>
                                         <span class="text-nowrap">{{ formatCurrencyAmount(addon.periodPrice) }}</span>
                                       </span>
                                       @if (addon.description) {
                                         <span class="d-block small text-body-secondary">{{ addon.description }}</span>
+                                      }
+                                      @if (addon.mandatory) {
+                                        <span
+                                          class="d-block small text-body-secondary"
+                                          i18n="@@featureSubscriptions-mandatoryAddonHint"
+                                          >Included with this plan and cannot be removed.</span
+                                        >
                                       }
                                     </label>
                                   </div>
@@ -1700,7 +1718,7 @@
                                   </dd>
                                 </div>
                               }
-                              @if ((pricing.addonsTotal ?? 0) > 0) {
+                              @if ((pricing.addonLines?.length ?? 0) > 0) {
                                 <div class="d-flex justify-content-between gap-3 border-bottom pb-2 mb-2">
                                   <dt class="text-body-secondary fw-semibold" i18n="@@featureSubscriptions-addonsTotal">
                                     Addons total
@@ -1774,7 +1792,7 @@
                                   </dd>
                                 </div>
                               }
-                              @if ((pricing.addonsTotal ?? 0) > 0) {
+                              @if ((pricing.addonLines?.length ?? 0) > 0) {
                                 <div class="d-flex justify-content-between gap-3 border-bottom pb-2 mb-2">
                                   <dt class="text-body-secondary fw-semibold" i18n="@@featureSubscriptions-addonsTotal">
                                     Addons total

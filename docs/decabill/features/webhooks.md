@@ -58,6 +58,7 @@ Events are published from the **billing** service after successful mutations.
 - `subscription.provisioned`, `subscription.provision_failed` (itemId plus hostname/service/providerReference or errorMessage; never secrets)
 - `subscription.ssh_access_granted` (metadata only: subscription/item ids, hostname, grantedAt — never the private key)
 - `addon.activated`, `addon.deactivated`, `addon.provision_failed`, `addon.teardown_failed`
+- `addon.container_manager.collection_failed` (webhook-only; no email — Container Manager SSH/Docker collection failed)
 - `meter.created`, `meter.updated`, `meter.deleted`
 - `service_plan.meter_attached`, `service_plan.meter_updated`, `service_plan.meter_detached`
 - `addon.meter_attached`, `addon.meter_updated`, `addon.meter_detached`
@@ -68,6 +69,8 @@ Events are published from the **billing** service after successful mutations.
 Plans with `serviceTypeId: null` (billing-only, no deployment) do not emit `subscription.provisioned` / `provision_failed`; fulfillment is immediate and silent, same as other non-cloud providers. Plan catalog CRUD does not emit webhooks. Orders still emit `subscription.created`. See [Service Types and Plans](./service-types-and-plans.md#plans-without-a-service-type-null).
 
 Addon payloads include subscription id/number, plan id/name, addon id/key/name, and status timestamps. Config snapshots and secrets are never included. See [Addons](./addons.md).
+
+`addon.container_manager.collection_failed` also includes `itemId` and a generic `errorMessage` (never Docker stdout or SSH material). See [Container Manager](./container-manager.md).
 
 Config-change payloads carry the subscription payload plus `configChangeId`, `appliedSteps` (step keys such as `serverType` or `addonAdd:<addonId>`), `billingOutcome` (`none` | `charged` | `credited` | `deferred`), and `errorCode`. The requested payload is never included because addon configuration can hold credentials.
 

@@ -13,7 +13,10 @@ import {
 } from 'class-validator';
 
 import type { CloudInitProvisioningMode } from '../entities/cloud-init-config.entity';
-import { CloudInitConfigEnvVariableDefinitionDto } from './create-cloud-init-config.dto';
+import {
+  CloudInitConfigEnvVariableDefinitionDto,
+  CloudInitConfigServiceTabDefinitionDto,
+} from './create-cloud-init-config.dto';
 
 const PROVISIONING_MODES: CloudInitProvisioningMode[] = ['simple', 'compose-template', 'user-data-template'];
 
@@ -63,6 +66,12 @@ export class UpdateCloudInitConfigDto {
   @ValidateNested({ each: true })
   @Type(() => CloudInitConfigEnvVariableDefinitionDto)
   environmentVariables?: CloudInitConfigEnvVariableDefinitionDto[];
+
+  @IsOptional()
+  @IsArray({ message: 'Service tabs must be an array' })
+  @ValidateNested({ each: true })
+  @Type(() => CloudInitConfigServiceTabDefinitionDto)
+  serviceTabs?: CloudInitConfigServiceTabDefinitionDto[];
 
   @IsOptional()
   @IsObject({ message: 'Default values must be an object' })

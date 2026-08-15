@@ -4,17 +4,33 @@ import {
   SubscriptionItemDetailResponseDto,
   SubscriptionItemResponseDto,
   SubscriptionSshAccessKeyResponseDto,
+  type ActiveSubscriptionAddonSummaryDto,
+  type ServiceDetailTabDto,
 } from '../dto/subscription-item-response.dto';
 import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { ProvisioningStatus } from '../entities/subscription-item.entity';
 import { SubscriptionEntity, SubscriptionStatus } from '../entities/subscription.entity';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
+import { CloudInitConfigsRepository } from '../repositories/cloud-init-configs.repository';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
+import { SubscriptionAddonsRepository } from '../repositories/subscription-addons.repository';
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
+import {
+  CloudInitServiceType,
+  canonicalizeIntegratedProvisioningService,
+} from '../utils/cloud-init/integrated-provisioning-service';
+import { CONTAINER_MANAGER_MODULE_KEY } from '../utils/plan-addons.utils';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
 import { ServerInfo } from '../utils/provisioning.utils';
+import {
+  appendServiceTabs,
+  createDetailsTab,
+  sanitizeCloudInitServiceTabs,
+  sortResolvedServiceTabs,
+  type ResolvedServiceDetailTab,
+} from '../utils/service-detail-tabs.utils';
 import {
   mapServerInfoSnapshotToResponse,
   mapServerInfoToResponse,
@@ -23,7 +39,11 @@ import {
   serverInfoHasGeography,
 } from '../utils/subscription-item-response.utils';
 
+import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { CloudflareDnsService } from './cloudflare-dns.service';
+import { CloudInitModuleRegistryService } from './cloud-init-module-registry.service';
+import { ContainerManagerService } from './container-manager.service';
+import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
 import { ProvisioningService } from './provisioning.service';
 import { SubscriptionService } from './subscription.service';
 
@@ -33,6 +53,9 @@ const SERVICE_DETAIL_ACCESSIBLE_SUBSCRIPTION_STATUSES: ReadonlySet<SubscriptionS
   SubscriptionStatus.PENDING_CONFIG_CHANGE,
   SubscriptionStatus.PENDING_BACKORDER,
 ]);
+
+const CLOUD_INIT_CONFIG_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 @Injectable()
 export class SubscriptionItemServerService {
   private readonly logger = new Logger(SubscriptionItemServerService.name);
@@ -41,11 +64,17 @@ export class SubscriptionItemServerService {
     private readonly subscriptionService: SubscriptionService,
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly subscriptionItemsRepository: SubscriptionItemsRepository,
+    private readonly subscriptionAddonsRepository: SubscriptionAddonsRepository,
     private readonly provisioningService: ProvisioningService,
     private readonly cloudflareDnsService: CloudflareDnsService,
     private readonly servicePlansRepository: ServicePlansRepository,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
     private readonly billingEmailPublisher: BillingEmailPublisher,
+    private readonly addonModuleRegistry: AddonModuleRegistryService,
+    private readonly containerManagerService: ContainerManagerService,
+    private readonly integratedStackRegistry: IntegratedStackRegistryService,
+    private readonly cloudInitModuleRegistry: CloudInitModuleRegistryService,
+    private readonly cloudInitConfigsRepository: CloudInitConfigsRepository,
   ) {}
 
   /**
@@ -275,7 +304,11 @@ export class SubscriptionItemServerService {
       throw new NotFoundException(`Subscription item ${itemId} not found`);
     }
 
-    const response: SubscriptionItemDetailResponseDto = mapSubscriptionItemToResponse(item);
+    const response: SubscriptionItemDetailResponseDto = {
+      ...mapSubscriptionItemToResponse(item),
+      tabs: [createDetailsTab()],
+      activeAddons: [],
+    };
     const hostname = item.hostname;
     const hostnameFqdn = hostname ? this.cloudflareDnsService.getFqdn(hostname) : undefined;
     const provider = item.serviceType?.provider ?? null;
@@ -304,6 +337,58 @@ export class SubscriptionItemServerService {
 
     if (serverInfo) {
       response.serverInfo = serverInfo;
+    }
+
+    const activeAddonRows = await this.subscriptionAddonsRepository.findActiveBySubscriptionId(subscriptionId);
+    const activeAddons: ActiveSubscriptionAddonSummaryDto[] = activeAddonRows
+      .filter((row) => row.status === 'active' || row.status === 'pending')
+      .map((row) => ({
+        id: row.id,
+        addonId: row.addonId,
+        key: row.addon?.key ?? row.addonId,
+        name: row.addon?.name ?? row.addonId,
+        moduleKey: row.addon?.moduleKey ?? null,
+        status: row.status,
+      }));
+
+    const tabs: ResolvedServiceDetailTab[] = [createDetailsTab()];
+    const tabCtx = { subscriptionId, itemId };
+
+    for (const row of activeAddonRows) {
+      if (row.status !== 'active') {
+        continue;
+      }
+
+      const moduleKey = row.addon?.moduleKey;
+
+      if (!moduleKey || row.addon?.implementationType !== 'module') {
+        continue;
+      }
+
+      const module = this.addonModuleRegistry.get(moduleKey);
+      appendServiceTabs(tabs, module?.serviceTabs, 'addon', moduleKey, tabCtx);
+    }
+
+    await this.appendProvisioningContributorTabs(tabs, item, tabCtx);
+
+    response.tabs = sortResolvedServiceTabs(tabs) as ServiceDetailTabDto[];
+    response.activeAddons = activeAddons;
+
+    const hasContainerManager = activeAddonRows.some(
+      (row) =>
+        row.status === 'active' &&
+        row.addon?.moduleKey === CONTAINER_MANAGER_MODULE_KEY &&
+        row.addon.implementationType === 'module',
+    );
+
+    if (hasContainerManager) {
+      const cached = this.containerManagerService.getCachedSummary(itemId);
+
+      response.containerManager = {
+        containerCount: cached?.containerCount ?? 0,
+        healthyCount: cached?.healthyCount ?? 0,
+        lastCollectedAt: cached?.lastCollectedAt ?? null,
+      };
     }
 
     return response;
@@ -460,5 +545,59 @@ export class SubscriptionItemServerService {
         `Service is not active (status: ${status}). Only provisioned services can be queried or controlled.`,
       );
     }
+  }
+
+  /**
+   * Merges tabs from the item's integrated stack or custom CloudInit config (entity + code module).
+   */
+  private async appendProvisioningContributorTabs(
+    tabs: ResolvedServiceDetailTab[],
+    item: { serviceTypeId: string | null; configSnapshot?: Record<string, unknown> },
+    ctx: { subscriptionId: string; itemId: string },
+  ): Promise<void> {
+    if (item.serviceTypeId == null) {
+      return;
+    }
+
+    const service = normalizeCloudInitService(item.configSnapshot?.['service'] as string | undefined);
+
+    if (service === CloudInitServiceType.Custom) {
+      const rawConfigId = item.configSnapshot?.['cloudInitConfigId'];
+      const cloudInitConfigId = typeof rawConfigId === 'string' ? rawConfigId.trim() : '';
+
+      if (!cloudInitConfigId || !CLOUD_INIT_CONFIG_ID_PATTERN.test(cloudInitConfigId)) {
+        return;
+      }
+
+      const config = await this.cloudInitConfigsRepository.findById(cloudInitConfigId);
+
+      if (!config) {
+        return;
+      }
+
+      let declarativeTabs = config.serviceTabs ?? [];
+
+      try {
+        declarativeTabs = sanitizeCloudInitServiceTabs(declarativeTabs);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(
+          `Ignoring invalid CloudInit serviceTabs on config ${config.id} while building item detail: ${message}`,
+        );
+        declarativeTabs = [];
+      }
+
+      appendServiceTabs(tabs, declarativeTabs, 'cloud-init', config.key, ctx);
+
+      const codeModule = this.cloudInitModuleRegistry.get(config.key);
+      appendServiceTabs(tabs, codeModule?.serviceTabs, 'cloud-init', config.key, ctx);
+
+      return;
+    }
+
+    const integratedKey = canonicalizeIntegratedProvisioningService(service) ?? (service as string);
+
+    const stackModule = this.integratedStackRegistry.get(integratedKey);
+    appendServiceTabs(tabs, stackModule?.serviceTabs, 'integrated', integratedKey, ctx);
   }
 }

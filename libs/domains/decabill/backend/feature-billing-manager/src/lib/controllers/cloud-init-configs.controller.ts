@@ -92,6 +92,7 @@ export class CloudInitConfigsController {
       dockerComposeTemplate: dto.dockerComposeTemplate?.trim() || null,
       userDataTemplate: dto.userDataTemplate?.trim() || null,
       environmentVariables,
+      serviceTabs: this.cloudInitConfigService.sanitizeServiceTabs(dto.serviceTabs),
       envDefaultValues,
       isActive: dto.isActive ?? true,
     });
@@ -174,6 +175,10 @@ export class CloudInitConfigsController {
       updatePayload.envDefaultValues = envDefaultValues;
     }
 
+    if (dto.serviceTabs !== undefined) {
+      updatePayload.serviceTabs = this.cloudInitConfigService.sanitizeServiceTabs(dto.serviceTabs);
+    }
+
     const mergedForValidation: CloudInitConfigEntity = {
       ...existing,
       ...updatePayload,
@@ -219,6 +224,7 @@ export class CloudInitConfigsController {
       dockerComposeTemplate: row.dockerComposeTemplate ?? null,
       userDataTemplate: row.userDataTemplate ?? null,
       environmentVariables: row.environmentVariables ?? [],
+      serviceTabs: row.serviceTabs ?? [],
       ...(includeDefaults && row.envDefaultValues ? { defaultValues: { ...row.envDefaultValues } } : {}),
       isActive: row.isActive,
       createdAt: row.createdAt,

@@ -38,7 +38,7 @@ import {
 import { getProvisioningCredentials, normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
 import { generateSshKeyPair } from '../utils/ssh-key.utils';
 import { assertAddonConfigsMatchSelection } from '../utils/addon-config.utils';
-import { parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
+import { mergeOrderAddonIds, parsePlanAllowedAddonIds } from '../utils/plan-addons.utils';
 import { mapSubscriptionItemToResponse } from '../utils/subscription-item-response.utils';
 
 import { AddonService } from './addon.service';
@@ -144,7 +144,7 @@ export class SubscriptionService {
     }
 
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
-    const selectedAddonIds = [...new Set((addonIds ?? []).filter(Boolean))];
+    const selectedAddonIds = mergeOrderAddonIds(addonIds, plan.providerConfigDefaults);
 
     assertAddonConfigsMatchSelection(selectedAddonIds, addonConfigs);
 

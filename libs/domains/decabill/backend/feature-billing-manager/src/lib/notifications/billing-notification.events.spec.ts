@@ -45,6 +45,7 @@ describe('BILLING_NOTIFICATION_EVENTS', () => {
         'service_plan.price_recalculated',
         'subscription.price_changed',
         'addon.activated',
+        'addon.container_manager.collection_failed',
         'meter.created',
         'meter.updated',
         'meter.deleted',

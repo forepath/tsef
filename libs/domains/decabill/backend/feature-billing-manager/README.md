@@ -102,7 +102,9 @@ samples via provider/addon `collectMeters` into usage history with `usageSource:
 - `DYNAMIC_PAYMENT_PROCESSORS` - Comma-separated extra payment processor packages (critical; use with `DYNAMIC_PROVIDERS_FAIL_FAST=true` in production)
 - `DYNAMIC_BILLING_PROVIDER_METADATA` - Comma-separated packages exporting `providerMetadata` for the billing UI registry
 - `DYNAMIC_BILLING_PROVIDER_MODULES` - Comma-separated runtime provider modules implementing `collectMeters` (optional `meters`)
-- `DYNAMIC_ADDON_MODULES` - Addon lifecycle modules (`provision` / `teardown` / optional `collectMeters`)
+- `DYNAMIC_ADDON_MODULES` - Addon lifecycle modules (`provision` / `teardown` / optional `collectMeters` / optional `serviceTabs`)
+- `DYNAMIC_INTEGRATED_STACK_MODULES` - Integrated stack modules (`serviceTabs` for agenstra-controller / agenstra-manager / decabill-billing)
+- `DYNAMIC_CLOUD_INIT_MODULES` - CloudInit config code modules keyed by template `key` (`serviceTabs`)
 - `BILLING_METER_COLLECT_ENABLED` - When `false`, disables the meter-collect coordinator (default `true`)
 - `BILLING_METER_COLLECT_INTERVAL` - Coordinator interval ms (default `60000`)
 - `DYNAMIC_PROVIDERS_FAIL_FAST` - When `true`, abort startup if critical dynamic providers fail to load

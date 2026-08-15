@@ -47,6 +47,7 @@ export const BILLING_NOTIFICATION_EVENTS = [
   'addon.deactivated',
   'addon.provision_failed',
   'addon.teardown_failed',
+  'addon.container_manager.collection_failed',
   'meter.created',
   'meter.updated',
   'meter.deleted',

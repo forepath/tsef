@@ -42,15 +42,45 @@ describe('SubscriptionItemServerService', () => {
   const billingEmailPublisher = {
     publishSshAccessGranted: jest.fn().mockResolvedValue(undefined),
   };
+  const subscriptionAddonsRepository = {
+    findActiveBySubscriptionId: jest.fn().mockResolvedValue([]),
+  };
+  const addonModuleRegistry = {
+    get: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  };
+  const containerManagerService = {
+    getCachedSummary: jest.fn().mockReturnValue(null),
+  };
+  const integratedStackRegistry = {
+    get: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  };
+  const cloudInitModuleRegistry = {
+    get: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  };
+  const cloudInitConfigsRepository = {
+    findById: jest.fn(),
+  };
   const service = new SubscriptionItemServerService(
     subscriptionService as never,
     subscriptionsRepository as never,
     subscriptionItemsRepository as never,
+    subscriptionAddonsRepository as never,
     provisioningService as never,
     cloudflareDnsService as never,
     servicePlansRepository as never,
     billingNotificationPublisher as never,
     billingEmailPublisher as never,
+    addonModuleRegistry as never,
+    containerManagerService as never,
+    integratedStackRegistry as never,
+    cloudInitModuleRegistry as never,
+    cloudInitConfigsRepository as never,
   );
 
   beforeEach(() => {
@@ -67,6 +97,10 @@ describe('SubscriptionItemServerService', () => {
       planId: 'plan-1',
       number: 'S-1',
     });
+    subscriptionAddonsRepository.findActiveBySubscriptionId.mockResolvedValue([]);
+    integratedStackRegistry.get.mockReturnValue(undefined);
+    cloudInitModuleRegistry.get.mockReturnValue(undefined);
+    cloudInitConfigsRepository.findById.mockResolvedValue(null);
   });
 
   describe('listItems', () => {
@@ -192,6 +226,60 @@ describe('SubscriptionItemServerService', () => {
         }),
       );
       expect(provisioningService.getServerInfo).not.toHaveBeenCalled();
+    });
+
+    it('merges integrated stack tabs into item detail', async () => {
+      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue(activeItem);
+      integratedStackRegistry.get.mockReturnValue({
+        key: 'agenstra-controller',
+        displayName: 'Agenstra Controller',
+        serviceTabs: [{ id: 'controller-ops', label: 'Controller', order: 40 }],
+      });
+
+      const detail = await service.getItemDetail('sub-1', 'item-1', 'user-1');
+
+      expect(detail.tabs).toEqual([
+        { id: 'details', label: 'Details', order: 0, moduleKey: null, source: 'details' },
+        {
+          id: 'controller-ops',
+          label: 'Controller',
+          order: 40,
+          moduleKey: 'agenstra-controller',
+          source: 'integrated',
+        },
+      ]);
+      expect(integratedStackRegistry.get).toHaveBeenCalledWith('agenstra-controller');
+    });
+
+    it('merges CloudInit entity and code-module tabs for custom items', async () => {
+      const configId = '11111111-1111-4111-8111-111111111111';
+      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue({
+        ...activeItem,
+        configSnapshot: { service: 'custom', cloudInitConfigId: configId },
+      });
+      cloudInitConfigsRepository.findById.mockResolvedValue({
+        id: configId,
+        key: 'my-app',
+        serviceTabs: [{ id: 'app-status', label: 'App status', order: 30 }],
+      });
+      cloudInitModuleRegistry.get.mockReturnValue({
+        key: 'my-app',
+        displayName: 'My App',
+        serviceTabs: [{ id: 'app-logs', label: 'Logs', order: 50 }],
+      });
+
+      const detail = await service.getItemDetail('sub-1', 'item-1', 'user-1');
+
+      expect(detail.tabs.map((tab) => tab.id)).toEqual(['details', 'app-status', 'app-logs']);
+      expect(detail.tabs.find((tab) => tab.id === 'app-status')).toEqual({
+        id: 'app-status',
+        label: 'App status',
+        order: 30,
+        moduleKey: 'my-app',
+        source: 'cloud-init',
+      });
+      expect(cloudInitConfigsRepository.findById).toHaveBeenCalledWith(configId);
+      expect(cloudInitModuleRegistry.get).toHaveBeenCalledWith('my-app');
     });
 
     it('enriches location from config snapshot when cached server info omits geography', async () => {

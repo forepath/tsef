@@ -41,4 +41,6 @@ export class PlanAddonOptionDto {
   orderFields!: CloudInitConfigOrderFieldDto[];
   /** Attached usage meters (read-only on customer order). */
   meters!: AttachedMeterResponseDto[];
+  /** When true, the addon is required for this plan and cannot be deselected. */
+  mandatory!: boolean;
 }

@@ -69,7 +69,28 @@ Optional `basePrice` (non-negative) with `priceIntervalType` / `priceIntervalVal
 
 ## Plan linkage
 
-Stored in `providerConfigDefaults.allowedAddonIds` (UUID array). Delete/deactivate of a catalog addon is blocked while active plans reference it, or while any subscription addon rows still reference it (including inactive history).
+Stored in `providerConfigDefaults`:
+
+| Key                 | Meaning                                                                   |
+| ------------------- | ------------------------------------------------------------------------- |
+| `allowedAddonIds`   | UUID array of customer-selectable catalog addons                          |
+| `mandatoryAddonIds` | UUID subset of `allowedAddonIds`; always activated (cannot be deselected) |
+
+Delete/deactivate of a catalog addon is blocked while active plans reference it, or while any subscription addon rows still reference it (including inactive history).
+
+`GET /service-plans/{id}/addons` returns each option with `mandatory: true|false` so the Order Plan UI can lock required addons.
+
+### Order merge
+
+On order create and mid-life addon add, the server merges client `addonIds` with plan `mandatoryAddonIds` (`mergeOrderAddonIds`): mandatory IDs are always included first regardless of the client payload. Clients cannot omit a mandatory addon.
+
+### Integrated stack auto-mandatory
+
+Plans that offer at least one **integrated** (Docker-host) provisioning option automatically ensure the first-party **Container Manager** catalog addon (`key` / `moduleKey`: `container-manager`) is present in both `allowedAddonIds` and `mandatoryAddonIds`. Custom-only plans are left unchanged. See [Container Manager](./container-manager.md).
+
+## First-party module: Container Manager
+
+Builtin module registered with the addon module registry (alongside `DYNAMIC_ADDON_MODULES`). Provision/teardown are readiness no-ops; diagnostics run over SSH when the subscription addon is `active`. Declares a service-details tab (`id: container-manager`, order `100`). Details: [Container Manager](./container-manager.md).
 
 ## Order and lifecycle
 
@@ -117,10 +138,12 @@ Addon responses embed attached meters (optional unit-price override). Module add
 
 ## Notifications
 
-See [Webhooks](./webhooks.md) and [Email notifications](./email-notifications.md) for `addon.*` events.
+See [Webhooks](./webhooks.md) and [Email notifications](./email-notifications.md) for `addon.*` events, including `addon.container_manager.collection_failed` (webhook-only).
 
 ## Related documentation
 
+- [Container Manager](./container-manager.md) Docker host diagnostics addon and service tab
+- [Service details](./service-details.md) Tabs and extension registry
 - [Dynamic provider plugins](./dynamic-provider-plugins.md) `DYNAMIC_ADDON_MODULES` and `configFields`
 - [CloudInit configs](./cloud-init-configs.md) Env var and random default pattern
 - [Service types and plans](./service-types-and-plans.md) Catalog attachment of addons to plans

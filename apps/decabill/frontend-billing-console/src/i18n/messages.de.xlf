@@ -920,10 +920,14 @@
       <trans-unit id="featureContainer-addons" datatype="html"><source>Addons</source><target>Add-ons</target></trans-unit>
       <trans-unit id="featureServicePlans-addons" datatype="html"><source>Customer-selectable addons</source><target>Vom Kunden auswählbare Add-ons</target></trans-unit>
       <trans-unit id="featureServicePlans-addonsHelp" datatype="html"><source>Choose which addons customers may add when ordering this plan.</source><target>Wählen Sie, welche Add-ons Kunden bei der Bestellung dieses Plans hinzufügen dürfen.</target></trans-unit>
+      <trans-unit id="featureServicePlans-mandatoryAddon" datatype="html"><source>Mandatory</source><target>Pflicht</target></trans-unit>
+      <trans-unit id="featureServicePlans-mandatoryAddonHelp" datatype="html"><source>Customers cannot deselect this addon when ordering.</source><target>Kunden können dieses Add-on bei der Bestellung nicht abwählen.</target></trans-unit>
       <trans-unit id="featureSubscriptions-loadingAddons" datatype="html"><source>Loading addons…</source><target>Add-ons werden geladen…</target></trans-unit>
       <trans-unit id="featureSubscriptions-addons" datatype="html"><source>Addons</source><target>Add-ons</target></trans-unit>
       <trans-unit id="featureSubscriptions-addonConfigCardTitle" datatype="html"><source>Addon: <x id="addonName" equiv-text="addonName"/></source><target>Add-on: <x id="addonName" equiv-text="addonName"/></target></trans-unit>
       <trans-unit id="featureSubscriptions-addonsTotal" datatype="html"><source>Addons total</source><target>Add-ons gesamt</target></trans-unit>
+      <trans-unit id="featureSubscriptions-mandatoryAddonBadge" datatype="html"><source>Required</source><target>Erforderlich</target></trans-unit>
+      <trans-unit id="featureSubscriptions-mandatoryAddonHint" datatype="html"><source>Included with this plan and cannot be removed.</source><target>In diesem Plan enthalten und kann nicht entfernt werden.</target></trans-unit>
       <trans-unit id="featureSubscriptions-grandTotal" datatype="html"><source>Plan and addons</source><target>Plan und Add-ons</target></trans-unit>
       <trans-unit id="featureSubscriptions-orderStepPlanAddons" datatype="html"><source>Plan &amp; addons</source><target>Plan &amp; Add-ons</target></trans-unit>
       <trans-unit id="featureCloudInitConfigs-title" datatype="html">
@@ -1413,6 +1417,222 @@
       <trans-unit id="featureServiceDetail-noServerInfo" datatype="html">
         <source>Server details are not available yet.</source>
         <target>Serverdetails sind noch nicht verfügbar.</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-tabsAria" datatype="html">
+        <source>Service detail tabs</source>
+        <target>Dienst-Detailregister</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-tabDetails" datatype="html">
+        <source>Details</source>
+        <target>Details</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-tabContainerManager" datatype="html">
+        <source>Container Manager</source>
+        <target>Container-Manager</target>
+      </trans-unit>
+      <trans-unit id="featureServiceDetail-unknownTab" datatype="html">
+        <source>This tab is not available.</source>
+        <target>Diese Registerkarte ist nicht verfügbar.</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-containersTitle" datatype="html">
+        <source>Containers</source>
+        <target>Container</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-searchPlaceholder" datatype="html">
+        <source>Search containers</source>
+        <target>Container suchen</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-noSearchResults" datatype="html">
+        <source>No containers match your search.</source>
+        <target>Keine Container entsprechen Ihrer Suche.</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-statusRunning" datatype="html">
+        <source>Running</source>
+        <target>Läuft</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-statusRestarting" datatype="html">
+        <source>Restarting</source>
+        <target>Wird neu gestartet</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-statusPaused" datatype="html">
+        <source>Paused</source>
+        <target>Pausiert</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-statusStopped" datatype="html">
+        <source>Stopped</source>
+        <target>Gestoppt</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-statusUnknown" datatype="html">
+        <source>Unknown</source>
+        <target>Unbekannt</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-showSidebar" datatype="html">
+        <source>Containers</source>
+        <target>Container</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-hideSidebar" datatype="html">
+        <source>Hide panel</source>
+        <target>Panel ausblenden</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-closeSidebar" datatype="html">
+        <source>Close containers panel</source>
+        <target>Container-Panel schließen</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-sidebarLabel" datatype="html">
+        <source>Containers and networking</source>
+        <target>Container und Netzwerk</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-collectedAt" datatype="html">
+        <source>Collected</source>
+        <target>Erfasst</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-loadingContainers" datatype="html">
+        <source>Loading containers…</source>
+        <target>Container werden geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-noContainers" datatype="html">
+        <source>No containers found on this host.</source>
+        <target>Auf diesem Host wurden keine Container gefunden.</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-statsTitle" datatype="html">
+        <source>Resource usage</source>
+        <target>Ressourcennutzung</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-selectContainerHint" datatype="html">
+        <source>Select a container to view resource history.</source>
+        <target>Wählen Sie einen Container aus, um den Ressourcenverlauf anzuzeigen.</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-loadingStats" datatype="html">
+        <source>Loading resource history…</source>
+        <target>Ressourcenverlauf wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-cpu" datatype="html">
+        <source>CPU</source>
+        <target>CPU</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-memory" datatype="html">
+        <source>Memory</source>
+        <target>Speicher</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-network" datatype="html">
+        <source>Network</source>
+        <target>Netzwerk</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-blockIo" datatype="html">
+        <source>Block I/O</source>
+        <target>Block-E/A</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-noStatsHistory" datatype="html">
+        <source>No resource history is available for this container yet.</source>
+        <target>Für diesen Container ist noch kein Ressourcenverlauf verfügbar.</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-logsTitle" datatype="html">
+        <source>Container logs</source>
+        <target>Container-Protokolle</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-selectContainerLogsHint" datatype="html">
+        <source>Select a container to stream logs.</source>
+        <target>Wählen Sie einen Container aus, um Protokolle zu streamen.</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-loadingLogs" datatype="html">
+        <source>Loading logs…</source>
+        <target>Protokolle werden geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-noLogs" datatype="html">
+        <source>No log output is available for this container yet.</source>
+        <target>Für diesen Container ist noch keine Protokollausgabe verfügbar.</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-logsTruncated" datatype="html">
+        <source>Showing the most recent log chunk; older lines were truncated.</source>
+        <target>Es wird der neueste Protokollausschnitt angezeigt; ältere Zeilen wurden gekürzt.</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-networkingTitle" datatype="html">
+        <source>Networking</source>
+        <target>Netzwerk</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-networkMapNav" datatype="html">
+        <source>Network map</source>
+        <target>Netzwerkkarte</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-loadingNetworks" datatype="html">
+        <source>Loading networks…</source>
+        <target>Netzwerke werden geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-noNetworks" datatype="html">
+        <source>No Docker networks were reported for this host.</source>
+        <target>Für diesen Host wurden keine Docker-Netzwerke gemeldet.</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyTitle" datatype="html">
+        <source>Container network topology</source>
+        <target>Container-Netzwerktopologie</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyHint" datatype="html">
+        <source>Hover a node for details · scroll to zoom · drag to pan</source>
+        <target>Für Details über einen Knoten fahren · Scrollen zum Zoomen · Ziehen zum Verschieben</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyImage" datatype="html">
+        <source>Image</source>
+        <target>Image</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyStatus" datatype="html">
+        <source>Status</source>
+        <target>Status</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyLinks" datatype="html">
+        <source>Links</source>
+        <target>Verbindungen</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindContainer" datatype="html">
+        <source>Container</source>
+        <target>Container</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindNetwork" datatype="html">
+        <source>Network</source>
+        <target>Netzwerk</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindExit" datatype="html">
+        <source>Exit</source>
+        <target>Ausgang</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindRoute" datatype="html">
+        <source>Route</source>
+        <target>Route</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindHostIface" datatype="html">
+        <source>Host interface</source>
+        <target>Host-Schnittstelle</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindHostGateway" datatype="html">
+        <source>Host gateway</source>
+        <target>Host-Gateway</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindInternet" datatype="html">
+        <source>Internet</source>
+        <target>Internet</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyAddresses" datatype="html">
+        <source>Addresses</source>
+        <target>Adressen</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-topologyRoutes" datatype="html">
+        <source>Routes</source>
+        <target>Routen</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-cpuSeries" datatype="html">
+        <source>CPU %</source>
+        <target>CPU %</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-memorySeries" datatype="html">
+        <source>Memory</source>
+        <target>Speicher</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-cpuHistoryTitle" datatype="html">
+        <source>CPU</source>
+        <target>CPU</target>
+      </trans-unit>
+      <trans-unit id="featureContainerManager-memoryHistoryTitle" datatype="html">
+        <source>Memory</source>
+        <target>Speicher</target>
       </trans-unit>
       <trans-unit id="featureServiceDetail-usageMetersTitle" datatype="html">
         <source>Usage meters</source>

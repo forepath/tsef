@@ -18,9 +18,11 @@ export * from './lib/utils/config-change-error.utils';
 export * from './lib/utils/service-display-label.util';
 export * from './lib/utils/fill-period-series.util';
 export * from './lib/utils/patch-subscription-item-display-name.util';
+export * from './lib/utils/merge-mandatory-order-addon-ids.util';
 // Constants
 export * from './lib/constants/supported-countries';
 export * from './lib/constants/service-type-id.constants';
+export * from './lib/constants/container-manager.constants';
 
 // Services
 export * from './lib/services/service-types.service';
@@ -39,6 +41,7 @@ export * from './lib/services/promotions.service';
 export * from './lib/services/admin-promotions.service';
 export * from './lib/services/usage.service';
 export * from './lib/services/subscription-items.service';
+export * from './lib/services/container-manager.service';
 export * from './lib/services/projects.service';
 export * from './lib/services/admin-projects.service';
 export * from './lib/services/project-tickets.service';
@@ -87,6 +90,14 @@ export * from './lib/state/service-detail/service-detail.effects';
 export * from './lib/state/service-detail/service-detail.facade';
 export * from './lib/state/service-detail/service-detail.reducer';
 export * from './lib/state/service-detail/service-detail.selectors';
+
+// Container Manager State
+export * from './lib/state/container-manager/container-manager.actions';
+export * from './lib/state/container-manager/container-manager.constants';
+export * from './lib/state/container-manager/container-manager.effects';
+export * from './lib/state/container-manager/container-manager.facade';
+export * from './lib/state/container-manager/container-manager.reducer';
+export * from './lib/state/container-manager/container-manager.selectors';
 
 // Service Plans State
 export * from './lib/state/service-plans/service-plans.actions';

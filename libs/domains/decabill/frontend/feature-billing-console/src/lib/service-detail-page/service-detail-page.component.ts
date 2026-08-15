@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterModule } from '@angular/router';
 import {
   AdminBillingService,
   BillingDashboardSocketFacade,
@@ -37,16 +37,30 @@ import {
   type ProviderDetail,
   type ProviderLocationCatalog,
   type ServerInfoResponse,
+  type ServiceDetailTabDto,
   type SubscriptionItemDetailResponse,
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import type { Environment } from '@forepath/shared/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
 import type { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexTitleSubtitle, ApexXAxis } from 'ng-apexcharts';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { catchError, distinctUntilChanged, filter, finalize, map, of, switchMap, take, withLatestFrom } from 'rxjs';
+import {
+  catchError,
+  distinctUntilChanged,
+  filter,
+  finalize,
+  map,
+  of,
+  startWith,
+  switchMap,
+  take,
+  withLatestFrom,
+} from 'rxjs';
 
 import { hideBillingModal, showBillingModal } from '../billing-modal';
 import { getProvisioningStatusBadgeClass, getProvisioningStatusLabel } from '../billing-status-labels';
+import { resolveServiceDetailAddonTabComponent } from './service-detail-addon-tab.registry';
+import { DETAILS_TAB_ID, isDetailsTab, parseServiceDetailTabId, sortServiceDetailTabs } from './service-detail-tabs';
 
 const FILTERS_STORAGE_KEY = 'billing-console-service-detail-filters';
 
@@ -127,6 +141,7 @@ export class ServiceDetailPageComponent implements OnInit {
 
   readonly isAdminView = signal(false);
   readonly backTarget = signal<ServiceDetailBackTarget>('dashboard');
+  readonly activeTabId = signal(DETAILS_TAB_ID);
   readonly mobilePanels: ServiceDetailMobilePanel[] = ['info', 'meters'];
   readonly mobilePanel = signal<ServiceDetailMobilePanel>('info');
   readonly filtersCollapsed = signal(true);
@@ -156,6 +171,24 @@ export class ServiceDetailPageComponent implements OnInit {
   readonly loadingHistory = toSignal(this.facade.loadingHistory$, { initialValue: false });
   readonly detail = toSignal(this.facade.detail$, { initialValue: null as SubscriptionItemDetailResponse | null });
 
+  readonly sortedTabs = computed(() => sortServiceDetailTabs(this.detail()?.tabs));
+  readonly showServiceTabs = computed(() => this.sortedTabs().length > 1);
+  readonly isDetailsTabActive = computed(() => isDetailsTab(this.activeTabId()));
+  readonly addonTabComponent = computed(() => {
+    const tabId = this.activeTabId();
+
+    if (isDetailsTab(tabId)) {
+      return null;
+    }
+
+    return resolveServiceDetailAddonTabComponent(tabId);
+  });
+  readonly addonTabInputs = computed(() => ({
+    subscriptionId: this.subscriptionId,
+    itemId: this.itemId,
+    adminMode: this.isAdminView(),
+  }));
+
   readonly meterCharts = computed(() => {
     const meters = this.history()?.meters ?? [];
 
@@ -167,6 +200,10 @@ export class ServiceDetailPageComponent implements OnInit {
 
   /** True while history is loading, or when at least one meter is attached. Hidden when history confirms zero meters. */
   readonly showUsageMetersSection = computed(() => {
+    if (!this.isDetailsTabActive()) {
+      return false;
+    }
+
     if (this.loadingHistory()) {
       return true;
     }
@@ -196,14 +233,14 @@ export class ServiceDetailPageComponent implements OnInit {
   private socketEnabled = false;
 
   ngOnInit(): void {
-    const viewMode = this.readViewMode();
-    const subscriptionId = this.route.snapshot.paramMap.get('subscriptionId')?.trim() ?? '';
-    const itemId = this.route.snapshot.paramMap.get('itemId')?.trim() ?? '';
+    const context = this.readServiceContext();
+    const { subscriptionId, itemId, viewMode } = context;
 
     this.subscriptionId = subscriptionId;
     this.itemId = itemId;
     this.isAdminView.set(viewMode === 'admin');
     this.backTarget.set(this.resolveBackTarget(viewMode));
+    this.activeTabId.set(context.tabId);
 
     if (!subscriptionId || !itemId) {
       void this.router.navigateByUrl(this.backPath());
@@ -242,6 +279,58 @@ export class ServiceDetailPageComponent implements OnInit {
 
       this.facade.clear();
     });
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        map(() => this.readServiceContext()),
+        startWith(this.readServiceContext()),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((routeContext) => {
+        this.subscriptionId = routeContext.subscriptionId;
+        this.itemId = routeContext.itemId;
+        this.isAdminView.set(routeContext.viewMode === 'admin');
+        this.activeTabId.set(routeContext.tabId);
+
+        if (
+          routeContext.subscriptionId &&
+          routeContext.rawTab &&
+          routeContext.rawTab !== routeContext.tabId &&
+          this.detail()?.tabs?.length
+        ) {
+          void this.router.navigate(
+            this.serviceTabLink(
+              routeContext.subscriptionId,
+              routeContext.itemId,
+              routeContext.viewMode,
+              routeContext.tabId,
+            ),
+            { replaceUrl: true },
+          );
+        }
+      });
+
+    this.facade.detail$
+      .pipe(
+        filter((detail): detail is SubscriptionItemDetailResponse => !!detail),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((detail) => {
+        const rawTab = this.readServiceContext().rawTab;
+        const parsed = parseServiceDetailTabId(rawTab, detail.tabs);
+
+        if (rawTab && rawTab !== parsed) {
+          void this.router.navigate(
+            this.serviceTabLink(this.subscriptionId, this.itemId, this.isAdminView() ? 'admin' : 'customer', parsed),
+            { replaceUrl: true },
+          );
+
+          return;
+        }
+
+        this.activeTabId.set(parsed);
+      });
 
     this.facade.loadingDetail$
       .pipe(
@@ -293,6 +382,28 @@ export class ServiceDetailPageComponent implements OnInit {
       this.toDate.set(filters.to);
       this.groupBy.set(filters.groupBy);
     });
+  }
+
+  setTab(tabId: string): void {
+    if (!this.subscriptionId || !this.itemId || tabId === this.activeTabId()) {
+      return;
+    }
+
+    void this.router.navigate(
+      this.serviceTabLink(this.subscriptionId, this.itemId, this.isAdminView() ? 'admin' : 'customer', tabId),
+    );
+  }
+
+  tabLabel(tab: ServiceDetailTabDto): string {
+    if (tab.id === DETAILS_TAB_ID) {
+      return $localize`:@@featureServiceDetail-tabDetails:Details`;
+    }
+
+    if (tab.id === 'container-manager') {
+      return $localize`:@@featureServiceDetail-tabContainerManager:Container Manager`;
+    }
+
+    return tab.label;
   }
 
   backPath(): string {
@@ -624,18 +735,61 @@ export class ServiceDetailPageComponent implements OnInit {
     return `${meter.totalValue}${unit}`;
   }
 
-  private readViewMode(): ServiceViewMode {
-    const routeViewMode = this.route.snapshot.data['serviceViewMode'];
+  private readServiceContext(): {
+    subscriptionId: string;
+    itemId: string;
+    viewMode: ServiceViewMode;
+    tabId: string;
+    rawTab: string | null;
+  } {
+    let subscriptionId = '';
+    let itemId = '';
+    let viewMode: ServiceViewMode = 'customer';
+    let rawTab: string | null = null;
 
-    if (routeViewMode === 'admin') {
-      return 'admin';
+    for (const route of this.route.pathFromRoot) {
+      const routeSubscriptionId = route.snapshot.paramMap.get('subscriptionId');
+
+      if (routeSubscriptionId) {
+        subscriptionId = routeSubscriptionId.trim();
+      }
+
+      const routeItemId = route.snapshot.paramMap.get('itemId');
+
+      if (routeItemId) {
+        itemId = routeItemId.trim();
+      }
+
+      const routeTab = route.snapshot.paramMap.get('tab');
+
+      if (routeTab) {
+        rawTab = routeTab.trim();
+      }
+
+      const routeViewMode = route.snapshot.data['serviceViewMode'];
+
+      if (routeViewMode === 'admin' || routeViewMode === 'customer') {
+        viewMode = routeViewMode;
+      }
     }
 
-    if (this.router.url.includes('/administration/subscriptions/')) {
-      return 'admin';
+    if (viewMode === 'customer' && this.router.url.includes('/administration/subscriptions/')) {
+      viewMode = 'admin';
     }
 
-    return 'customer';
+    return {
+      subscriptionId,
+      itemId,
+      viewMode,
+      tabId: parseServiceDetailTabId(rawTab, this.detail()?.tabs),
+      rawTab,
+    };
+  }
+
+  private serviceTabLink(subscriptionId: string, itemId: string, viewMode: ServiceViewMode, tabId: string): string[] {
+    const prefix = viewMode === 'admin' ? '/administration/subscriptions' : '/subscriptions';
+
+    return [prefix, subscriptionId, 'services', itemId, tabId];
   }
 
   private restoreFilters(): void {

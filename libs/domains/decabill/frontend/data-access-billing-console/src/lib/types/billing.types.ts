@@ -148,6 +148,12 @@ export interface CloudInitConfigEnvVariableDefinition {
   randomDefaultSpecialChars?: boolean;
 }
 
+export interface CloudInitConfigServiceTabDefinition {
+  id: string;
+  label: string;
+  order: number;
+}
+
 export interface CloudInitConfigResponse {
   id: string;
   key: string;
@@ -161,6 +167,7 @@ export interface CloudInitConfigResponse {
   dockerComposeTemplate?: string | null;
   userDataTemplate?: string | null;
   environmentVariables: CloudInitConfigEnvVariableDefinition[];
+  serviceTabs?: CloudInitConfigServiceTabDefinition[];
   defaultValues?: Record<string, string>;
   isActive: boolean;
   createdAt: string;
@@ -208,6 +215,7 @@ export interface CreateCloudInitConfigDto {
     randomDefaultLength?: number;
     randomDefaultSpecialChars?: boolean;
   }>;
+  serviceTabs?: CloudInitConfigServiceTabDefinition[];
   defaultValues?: Record<string, string>;
   isActive?: boolean;
 }
@@ -231,6 +239,7 @@ export interface UpdateCloudInitConfigDto {
     randomDefaultLength?: number;
     randomDefaultSpecialChars?: boolean;
   }>;
+  serviceTabs?: CloudInitConfigServiceTabDefinition[];
   defaultValues?: Record<string, string>;
   isActive?: boolean;
 }
@@ -445,6 +454,8 @@ export interface PlanAddonOptionDto {
   orderFields: AddonConfigOrderField[];
   /** Attached usage meters (read-only on customer order). */
   meters?: AttachedMeterResponse[];
+  /** When true, the addon is required for this plan and cannot be deselected. */
+  mandatory: boolean;
 }
 
 export interface CreateAddonDto {
@@ -692,8 +703,145 @@ export interface SubscriptionItemResponse {
   hasProviderReference?: boolean;
 }
 
+export type ServiceDetailTabSource = 'details' | 'addon' | 'integrated' | 'cloud-init';
+
+export interface ServiceDetailTabDto {
+  id: string;
+  label: string;
+  order: number;
+  /** Contributor key (addon moduleKey, integrated service id, or CloudInit config key). */
+  moduleKey: string | null;
+  /** Contributor kind; optional for backward-compatible clients. */
+  source?: ServiceDetailTabSource;
+}
+
+export interface ActiveSubscriptionAddonSummaryDto {
+  id: string;
+  addonId: string;
+  key: string;
+  name: string;
+  moduleKey: string | null;
+  status: string;
+}
+
+export interface ContainerManagerSummaryDto {
+  containerCount: number;
+  healthyCount: number;
+  lastCollectedAt: string | null;
+}
+
 export interface SubscriptionItemDetailResponse extends SubscriptionItemResponse {
   serverInfo?: ServerInfoResponse;
+  tabs: ServiceDetailTabDto[];
+  activeAddons: ActiveSubscriptionAddonSummaryDto[];
+  containerManager?: ContainerManagerSummaryDto;
+}
+
+export interface ContainerManagerResourceStats {
+  cpuPercent: number | null;
+  memoryUsageBytes: number | null;
+  memoryLimitBytes: number | null;
+  memoryPercent: number | null;
+  blockReadBytes: number | null;
+  blockWriteBytes: number | null;
+  networkRxBytes: number | null;
+  networkTxBytes: number | null;
+}
+
+export interface ContainerManagerContainer {
+  id: string;
+  name: string;
+  image: string;
+  state: string;
+  status: string;
+  createdAt: string | null;
+  stats: ContainerManagerResourceStats | null;
+}
+
+export interface ContainerManagerContainersResponse {
+  containers: ContainerManagerContainer[];
+  collectedAt: string;
+}
+
+export interface ContainerManagerStatsHistoryPoint {
+  timestamp: string;
+  cpuPercent: number | null;
+  memoryPercent: number | null;
+  memoryUsageBytes: number | null;
+  memoryLimitBytes: number | null;
+  blockReadBytes: number | null;
+  blockWriteBytes: number | null;
+  networkRxBytes: number | null;
+  networkTxBytes: number | null;
+}
+
+export interface ContainerManagerStatsHistoryResponse {
+  containerId: string;
+  points: ContainerManagerStatsHistoryPoint[];
+}
+
+export interface ContainerManagerLogsResponse {
+  containerId: string;
+  lines: string[];
+  collectedAt: string;
+  truncated: boolean;
+  tail: number;
+}
+
+export type ContainerManagerNetworkNodeKind =
+  | 'container'
+  | 'network'
+  | 'exit'
+  | 'route'
+  | 'host_iface'
+  | 'host_gateway'
+  | 'internet';
+
+export interface ContainerManagerNetworkNode {
+  id: string;
+  label: string;
+  kind: ContainerManagerNetworkNodeKind;
+}
+
+export interface ContainerManagerNetworkEdge {
+  id: string;
+  from: string;
+  to: string;
+  label?: string;
+}
+
+export interface ContainerManagerNetwork {
+  id: string;
+  name: string;
+  driver: string;
+  scope: string;
+  isOverlay: boolean;
+  containers: string[];
+  exitNodes: string[];
+  routes: Array<{ destination: string; gateway?: string }>;
+}
+
+export interface ContainerManagerHostInterface {
+  name: string;
+  state: string;
+  addresses: string[];
+}
+
+export interface ContainerManagerHostRoute {
+  destination: string;
+  gateway?: string;
+  device?: string;
+}
+
+export interface ContainerManagerNetworksResponse {
+  networks: ContainerManagerNetwork[];
+  topology: {
+    nodes: ContainerManagerNetworkNode[];
+    edges: ContainerManagerNetworkEdge[];
+  };
+  hostInterfaces: ContainerManagerHostInterface[];
+  hostRoutes: ContainerManagerHostRoute[];
+  collectedAt: string;
 }
 
 export interface SubscriptionSshAccessKeyResponse {

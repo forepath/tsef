@@ -27,6 +27,10 @@ import {
 } from '../utils/cloud-init/template-interpolation.utils';
 import { quoteShellLiteral, validateCloudInitWorkDir } from '../utils/cloud-init/work-dir.utils';
 import { generateSecureRandomString, normalizeRandomDefaultLength } from '../utils/generate-secure-random.utils';
+import {
+  sanitizeCloudInitServiceTabs,
+  type CloudInitConfigServiceTabDefinition,
+} from '../utils/service-detail-tabs.utils';
 
 const ENV_KEY_PATTERN = /^[A-Z][A-Z0-9_]*$/;
 const SERVICE_PLAN_REFERENCE_BATCH_SIZE = 100;
@@ -124,6 +128,10 @@ export class CloudInitConfigService {
     }
 
     return { environmentVariables, envDefaultValues: sanitizedDefaults };
+  }
+
+  sanitizeServiceTabs(tabs: CloudInitConfigServiceTabDefinition[] | undefined): CloudInitConfigServiceTabDefinition[] {
+    return sanitizeCloudInitServiceTabs(tabs);
   }
 
   validateProvisioningPayload(payload: CloudInitProvisioningPayload): void {

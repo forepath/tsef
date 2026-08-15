@@ -83,6 +83,8 @@ import { AddonsController } from './controllers/addons.controller';
 import { CloudInitConfigsController } from './controllers/cloud-init-configs.controller';
 import { ServiceTypesController } from './controllers/service-types.controller';
 import { SubscriptionItemsController } from './controllers/subscription-items.controller';
+import { ContainerManagerController } from './controllers/container-manager.controller';
+import { AdminContainerManagerController } from './controllers/admin-container-manager.controller';
 import { SubscriptionsController } from './controllers/subscriptions.controller';
 import { AdminUsageController } from './controllers/admin-usage.controller';
 import { AdminSubscriptionItemsController } from './controllers/admin-subscription-items.controller';
@@ -195,13 +197,21 @@ import { WithdrawalPolicyService } from './services/withdrawal-policy.service';
 import { WithdrawalRefundService } from './services/withdrawal-refund.service';
 import { SubscriptionTeardownService } from './services/subscription-teardown.service';
 import { AddonModuleRegistryService } from './services/addon-module-registry.service';
+import { createBuiltinAddonModules } from './services/builtin-addon-modules';
+import { createBuiltinIntegratedStackModules } from './services/builtin-integrated-stack-modules';
 import { createBuiltinProviderModules } from './services/builtin-provider-modules';
 import { MeterCollectJobHandler } from './services/meter-collect.job-handler';
 import { ProviderModuleRegistryService } from './services/provider-module-registry.service';
 import { AddonLifecycleService } from './services/addon-lifecycle.service';
 import { AddonService } from './services/addon.service';
 import { CloudInitConfigService } from './services/cloud-init-config.service';
+import type { CloudInitConfigModule } from './services/cloud-init-module-registry.service';
+import { CloudInitModuleRegistryService } from './services/cloud-init-module-registry.service';
+import { ContainerManagerCatalogService } from './services/container-manager-catalog.service';
+import { ContainerManagerService } from './services/container-manager.service';
 import type { BillingAddonModule } from './services/addon-module-registry.service';
+import type { IntegratedStackModule } from './services/integrated-stack-registry.service';
+import { IntegratedStackRegistryService } from './services/integrated-stack-registry.service';
 import type { BillingProviderModule } from './services/provider-module-registry.service';
 import { CloudflareDnsService } from './services/cloudflare-dns.service';
 import { CustomerProfilesService } from './services/customer-profiles.service';
@@ -532,6 +542,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     ServicePlansController,
     AvailabilityController,
     SubscriptionItemsController,
+    ContainerManagerController,
     SubscriptionsController,
     BackordersController,
     PricingController,
@@ -540,6 +551,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     AdminPromotionsController,
     AdminBillingController,
     AdminSubscriptionItemsController,
+    AdminContainerManagerController,
     AdminSubscriptionMetersController,
     AdminCustomerProfilesController,
     AdminCustomerAutoBillingController,
@@ -571,6 +583,10 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     MeterBillingService,
     AddonLifecycleService,
     AddonModuleRegistryService,
+    IntegratedStackRegistryService,
+    CloudInitModuleRegistryService,
+    ContainerManagerCatalogService,
+    ContainerManagerService,
     ProviderModuleRegistryService,
     MeterCollectJobHandler,
     CloudflareDnsService,
@@ -865,6 +881,8 @@ export class BillingModule implements OnModuleInit {
     private readonly trustScoreProviderRegistry: TrustScoreProviderRegistry,
     private readonly internalBillingTrustScoreProvider: InternalBillingTrustScoreProvider,
     private readonly addonModuleRegistry: AddonModuleRegistryService,
+    private readonly integratedStackRegistry: IntegratedStackRegistryService,
+    private readonly cloudInitModuleRegistry: CloudInitModuleRegistryService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -891,6 +909,14 @@ export class BillingModule implements OnModuleInit {
       this.providerModuleRegistry.register(module);
     }
 
+    for (const module of createBuiltinAddonModules()) {
+      this.addonModuleRegistry.register(module);
+    }
+
+    for (const module of createBuiltinIntegratedStackModules()) {
+      this.integratedStackRegistry.register(module);
+    }
+
     await registerDynamicProviderMetadata({
       envKey: 'DYNAMIC_BILLING_PROVIDER_METADATA',
       criticality: 'optional',
@@ -913,6 +939,22 @@ export class BillingModule implements OnModuleInit {
       register: (module) => this.addonModuleRegistry.register(module),
       dynamicLoader: this.dynamicLoader,
       loggerContext: 'AddonModuleRegistryService',
+    });
+
+    await registerDynamicProviders<IntegratedStackModule>({
+      envKey: 'DYNAMIC_INTEGRATED_STACK_MODULES',
+      criticality: 'optional',
+      register: (module) => this.integratedStackRegistry.register(module),
+      dynamicLoader: this.dynamicLoader,
+      loggerContext: 'IntegratedStackRegistryService',
+    });
+
+    await registerDynamicProviders<CloudInitConfigModule>({
+      envKey: 'DYNAMIC_CLOUD_INIT_MODULES',
+      criticality: 'optional',
+      register: (module) => this.cloudInitModuleRegistry.register(module),
+      dynamicLoader: this.dynamicLoader,
+      loggerContext: 'CloudInitModuleRegistryService',
     });
 
     this.trustScoreProviderRegistry.register(this.internalBillingTrustScoreProvider);
