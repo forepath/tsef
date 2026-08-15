@@ -148,6 +148,35 @@ describe('ContainerManagerService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
+  it('collects container logs via docker logs', async () => {
+    sshExecutor.exec.mockResolvedValueOnce({
+      code: 0,
+      stdout: '2026-08-15T10:00:00.000000000Z hello\n2026-08-15T10:00:01.000000000Z world\n',
+      stderr: '',
+    });
+
+    const result = await service.getLogs('sub-1', 'item-1', 'abcdef123456', { userId: 'user-1', tail: 50 });
+
+    expect(result.containerId).toBe('abcdef123456');
+    expect(result.tail).toBe(50);
+    expect(result.lines).toEqual(['2026-08-15T10:00:00.000000000Z hello', '2026-08-15T10:00:01.000000000Z world']);
+    expect(result.truncated).toBe(false);
+    expect(sshExecutor.exec).toHaveBeenCalledWith(
+      '1.2.3.4',
+      22,
+      'root',
+      'KEY',
+      'docker logs --timestamps --tail 50 abcdef123456 2>&1',
+      expect.any(Object),
+    );
+  });
+
+  it('rejects invalid container ids for logs', async () => {
+    await expect(service.getLogs('sub-1', 'item-1', '../etc/passwd', { userId: 'user-1' })).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+  });
+
   it('maps collection failures to BadRequest and publishes notification', async () => {
     sshExecutor.exec.mockRejectedValue(new Error('boom'));
     servicePlansRepository.findByIdOrThrow.mockResolvedValue({ id: 'plan-1', name: 'Plan' });

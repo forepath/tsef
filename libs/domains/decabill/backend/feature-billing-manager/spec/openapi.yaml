@@ -2603,6 +2603,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs:
+    get:
+      summary: Get Container Manager logs for a container
+      operationId: getContainerManagerLogs
+      description: |
+        Returns recent `docker logs` lines (with timestamps) collected over SSH for a container.
+        User must own the subscription. Requires `subscriptions:read`.
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: containerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Docker container id (hex)
+        - name: tail
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 200
+          description: Number of trailing log lines to collect
+      responses:
+        '200':
+          description: Container log snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerManagerLogsResponse'
+        '400':
+          description: SSH unavailable, public IP missing, invalid params, or collection failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription, item, or Container Manager not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /subscriptions/{subscriptionId}/items/{itemId}/container-manager/networks:
     get:
       summary: List Docker networks and topology for Container Manager
@@ -3772,6 +3832,68 @@ paths:
                 $ref: '#/components/schemas/ContainerManagerStatsHistoryResponse'
         '400':
           description: SSH unavailable, public IP missing, or collection failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription, item, or Container Manager not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs:
+    get:
+      tags: [Admin Billing]
+      summary: Get Container Manager logs for a container (admin)
+      operationId: adminGetContainerManagerLogs
+      description: |
+        Returns recent `docker logs` lines collected over SSH. Requires ADMIN role.
+        PAT callers need `billing_admin:read`. Ownership is not required.
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: containerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Docker container id (hex)
+        - name: tail
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 200
+          description: Number of trailing log lines to collect
+      responses:
+        '200':
+          description: Container log snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerManagerLogsResponse'
+        '400':
+          description: SSH unavailable, public IP missing, invalid params, or collection failed
           content:
             application/json:
               schema:
@@ -7305,6 +7427,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContainerManagerStatsHistoryPoint'
+    ContainerManagerLogsResponse:
+      type: object
+      required: [containerId, lines, collectedAt, truncated, tail]
+      properties:
+        containerId: { type: string }
+        lines:
+          type: array
+          items: { type: string }
+        collectedAt: { type: string, format: date-time }
+        truncated: { type: boolean }
+        tail: { type: integer, minimum: 1, maximum: 500 }
     ContainerManagerNetworkNode:
       type: object
       required: [id, label, kind]

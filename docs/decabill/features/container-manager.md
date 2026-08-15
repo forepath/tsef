@@ -23,10 +23,11 @@ Requires an **active** subscription addon with `moduleKey: container-manager`, p
 | -------- | ------ | --------------------------------------------------------------------------------------------------------- | -------------------- |
 | Customer | GET    | `/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers`                             | `subscriptions:read` |
 | Customer | GET    | `/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/stats-history` | `subscriptions:read` |
+| Customer | GET    | `/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs`          | `subscriptions:read` |
 | Customer | GET    | `/subscriptions/{subscriptionId}/items/{itemId}/container-manager/networks`                               | `subscriptions:read` |
 | Admin    | GET    | `/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/...` (same suffixes)      | `billing_admin:read` |
 
-Response shapes match OpenAPI `ContainerManagerContainersResponse`, `ContainerManagerStatsHistoryResponse`, and `ContainerManagerNetworksResponse`.
+Response shapes match OpenAPI `ContainerManagerContainersResponse`, `ContainerManagerStatsHistoryResponse`, `ContainerManagerLogsResponse`, and `ContainerManagerNetworksResponse`.
 
 Item detail may embed a lightweight `containerManager` summary (`containerCount`, `healthyCount`, `lastCollectedAt`) from the last successful collection cache.
 
@@ -35,11 +36,13 @@ Item detail may embed a lightweight `containerManager` summary (`containerCount`
 Collection runs as `root` on port 22 using the provisioning SSH key and the item’s cached public IP:
 
 1. Wait until the host is reachable
-2. Run read-only Docker CLI (`docker ps`, `docker stats --no-stream`, `docker network ls` / `inspect`)
-3. Parse NDJSON / JSON into DTOs; keep a short in-memory stats history (capped) for charts
+2. Run read-only Docker CLI (`docker ps`, `docker stats --no-stream`, `docker logs --timestamps --tail`, `docker network ls` / `inspect`)
+3. Parse NDJSON / JSON / log text into DTOs; keep a short in-memory stats history (capped) for charts; cap log payload size for the UI
 4. On failure, return a generic client error and publish `addon.container_manager.collection_failed`
 
 No mutating Docker commands are issued. Script output and private keys are never included in webhook payloads or customer-facing messages.
+
+The Container Manager tab loads logs when a container is selected and refreshes them on a short REST poll interval (logstream-style without a dedicated websocket).
 
 ## Security
 

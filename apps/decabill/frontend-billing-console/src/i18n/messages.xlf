@@ -2655,6 +2655,24 @@
       <trans-unit id="featureContainerManager-containersTitle" datatype="html">
         <source>Containers</source>
         </trans-unit>
+      <trans-unit id="featureContainerManager-searchPlaceholder" datatype="html">
+        <source>Search containers</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-noSearchResults" datatype="html">
+        <source>No containers match your search.</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-showSidebar" datatype="html">
+        <source>Containers</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-hideSidebar" datatype="html">
+        <source>Hide panel</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-closeSidebar" datatype="html">
+        <source>Close containers panel</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-sidebarLabel" datatype="html">
+        <source>Containers and networking</source>
+        </trans-unit>
       <trans-unit id="featureContainerManager-collectedAt" datatype="html">
         <source>Collected</source>
         </trans-unit>
@@ -2688,8 +2706,26 @@
       <trans-unit id="featureContainerManager-noStatsHistory" datatype="html">
         <source>No resource history is available for this container yet.</source>
         </trans-unit>
+      <trans-unit id="featureContainerManager-logsTitle" datatype="html">
+        <source>Container logs</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-selectContainerLogsHint" datatype="html">
+        <source>Select a container to stream logs.</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-loadingLogs" datatype="html">
+        <source>Loading logs…</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-noLogs" datatype="html">
+        <source>No log output is available for this container yet.</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-logsTruncated" datatype="html">
+        <source>Showing the most recent log chunk; older lines were truncated.</source>
+        </trans-unit>
       <trans-unit id="featureContainerManager-networkingTitle" datatype="html">
         <source>Networking</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-networkMapNav" datatype="html">
+        <source>Network map</source>
         </trans-unit>
       <trans-unit id="featureContainerManager-loadingNetworks" datatype="html">
         <source>Loading networks…</source>

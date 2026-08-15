@@ -13,6 +13,9 @@ import {
   enterContainerManager,
   loadContainersFailure,
   loadContainersSuccess,
+  loadLogs,
+  loadLogsFailure,
+  loadLogsSuccess,
   loadNetworksFailure,
   loadNetworksSuccess,
   loadStatsHistory,
@@ -34,9 +37,14 @@ export interface ContainerManagerState {
   selectedContainerId: string | null;
   statsHistoryContainerId: string | null;
   statsHistoryPoints: ContainerManagerStatsHistoryPoint[];
+  logsContainerId: string | null;
+  logLines: string[];
+  logsCollectedAt: string | null;
+  logsTruncated: boolean;
   loadingContainers: boolean;
   loadingNetworks: boolean;
   loadingStatsHistory: boolean;
+  loadingLogs: boolean;
   error: string | null;
 }
 
@@ -53,9 +61,14 @@ export const initialContainerManagerState: ContainerManagerState = {
   selectedContainerId: null,
   statsHistoryContainerId: null,
   statsHistoryPoints: [],
+  logsContainerId: null,
+  logLines: [],
+  logsCollectedAt: null,
+  logsTruncated: false,
   loadingContainers: false,
   loadingNetworks: false,
   loadingStatsHistory: false,
+  loadingLogs: false,
   error: null,
 };
 
@@ -107,6 +120,9 @@ export const containerManagerReducer = createReducer(
   on(selectContainer, (state, { containerId }) => ({
     ...state,
     selectedContainerId: containerId,
+    logLines: containerId === state.logsContainerId ? state.logLines : [],
+    logsCollectedAt: containerId === state.logsContainerId ? state.logsCollectedAt : null,
+    logsTruncated: containerId === state.logsContainerId ? state.logsTruncated : false,
   })),
   on(loadStatsHistory, (state, { containerId }) => ({
     ...state,
@@ -125,6 +141,26 @@ export const containerManagerReducer = createReducer(
     ...state,
     loadingStatsHistory: false,
     error,
+  })),
+  on(loadLogs, (state, { containerId, silent }) => ({
+    ...state,
+    logsContainerId: containerId,
+    loadingLogs: silent === true ? state.loadingLogs : true,
+    error: silent === true ? state.error : null,
+  })),
+  on(loadLogsSuccess, (state, { response }) => ({
+    ...state,
+    logsContainerId: response.containerId,
+    logLines: response.lines ?? [],
+    logsCollectedAt: response.collectedAt ?? null,
+    logsTruncated: response.truncated === true,
+    loadingLogs: false,
+    error: null,
+  })),
+  on(loadLogsFailure, (state, { error, silent }) => ({
+    ...state,
+    loadingLogs: false,
+    error: silent === true ? state.error : error,
   })),
   on(clearContainerManager, () => initialContainerManagerState),
 );

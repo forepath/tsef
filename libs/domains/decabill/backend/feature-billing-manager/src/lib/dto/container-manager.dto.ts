@@ -39,6 +39,17 @@ export interface ContainerManagerStatsHistoryResponseDto {
   points: ContainerManagerStatsHistoryPointDto[];
 }
 
+export interface ContainerManagerLogsResponseDto {
+  containerId: string;
+  /** Newest-last docker log lines (timestamps included when available). */
+  lines: string[];
+  collectedAt: string;
+  /** True when the response was clipped to the size budget. */
+  truncated: boolean;
+  /** Effective `docker logs --tail` value used for this collection. */
+  tail: number;
+}
+
 export interface ContainerManagerNetworkNodeDto {
   id: string;
   label: string;

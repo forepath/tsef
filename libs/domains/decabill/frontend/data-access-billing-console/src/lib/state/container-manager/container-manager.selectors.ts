@@ -44,6 +44,15 @@ export const selectContainerManagerStatsHistoryPoints = createSelector(
   selectContainerManagerState,
   (state) => state.statsHistoryPoints,
 );
+export const selectContainerManagerLogLines = createSelector(selectContainerManagerState, (state) => state.logLines);
+export const selectContainerManagerLogsCollectedAt = createSelector(
+  selectContainerManagerState,
+  (state) => state.logsCollectedAt,
+);
+export const selectContainerManagerLogsTruncated = createSelector(
+  selectContainerManagerState,
+  (state) => state.logsTruncated,
+);
 export const selectContainerManagerLoadingContainers = createSelector(
   selectContainerManagerState,
   (state) => state.loadingContainers,
@@ -56,8 +65,12 @@ export const selectContainerManagerLoadingStatsHistory = createSelector(
   selectContainerManagerState,
   (state) => state.loadingStatsHistory,
 );
+export const selectContainerManagerLoadingLogs = createSelector(
+  selectContainerManagerState,
+  (state) => state.loadingLogs,
+);
 export const selectContainerManagerError = createSelector(selectContainerManagerState, (state) => state.error);
 export const selectContainerManagerLoadingAny = createSelector(
   selectContainerManagerState,
-  (state) => state.loadingContainers || state.loadingNetworks || state.loadingStatsHistory,
+  (state) => state.loadingContainers || state.loadingNetworks || state.loadingStatsHistory || state.loadingLogs,
 );

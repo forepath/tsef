@@ -3,186 +3,320 @@
     <div class="alert alert-danger mb-0 rounded-0" role="alert">{{ err }}</div>
   }
 
-  <div class="container-manager-tab__body flex-grow-1 min-h-0 overflow-auto p-3">
-    <section class="mb-4" aria-labelledby="containerManagerContainersHeading">
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h2
-          class="h6 fw-semibold mb-0"
-          id="containerManagerContainersHeading"
-          i18n="@@featureContainerManager-containersTitle"
+  <div class="container-manager-tab__layout flex-grow-1 min-h-0">
+    <div class="container-manager-tab__main min-h-0">
+      <div class="container-manager-tab__main-toolbar">
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm d-lg-none"
+          (click)="toggleSidebar()"
+          [attr.aria-expanded]="sidebarOpen()"
+          aria-controls="containerManagerSidebar"
         >
-          Containers
-        </h2>
-        @if (containersCollectedAt(); as collectedAt) {
-          <span class="small text-body-secondary">
-            <span i18n="@@featureContainerManager-collectedAt">Collected</span>
-            {{ collectedAt | date: 'short' }}
-          </span>
-        }
+          @if (sidebarOpen()) {
+            <i class="bi bi-layout-sidebar-reverse me-1" aria-hidden="true"></i>
+            <span i18n="@@featureContainerManager-hideSidebar">Hide panel</span>
+          } @else {
+            <i class="bi bi-layout-sidebar-reverse me-1" aria-hidden="true"></i>
+            <span i18n="@@featureContainerManager-showSidebar">Containers</span>
+          }
+        </button>
       </div>
 
-      @if (loadingContainers()) {
-        <div class="d-flex align-items-center gap-2 text-body-secondary">
-          <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
-          <span i18n="@@featureContainerManager-loadingContainers">Loading containers…</span>
-        </div>
-      } @else if (containers().length === 0) {
-        <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-noContainers">
-          No containers found on this host.
-        </p>
-      } @else {
-        <div class="list-group list-group-flush border rounded overflow-hidden">
-          @for (container of containers(); track container.id) {
-            <button
-              type="button"
-              class="list-group-item list-group-item-action d-flex flex-wrap justify-content-between align-items-start gap-2"
-              [class.active]="selectedContainerId() === container.id"
-              (click)="selectContainer(container.id)"
-            >
-              <div class="min-w-0">
-                <div class="fw-semibold text-truncate">{{ container.name }}</div>
-                <div class="small text-body-secondary text-truncate">{{ container.image }}</div>
-                <div class="small">{{ container.status || container.state }}</div>
+      <div
+        class="container-manager-tab__main-body overflow-auto"
+        [class.container-manager-tab__main-body--network]="contentView() === 'network'"
+      >
+        @if (contentView() === 'network') {
+          <section class="container-manager-tab__network-view bg-body" aria-labelledby="containerManagerNetworkHeading">
+            <div class="container-manager-tab__sidebar-header bg-body-tertiary">
+              <h2
+                class="h6 fw-semibold mb-0"
+                id="containerManagerNetworkHeading"
+                i18n="@@featureContainerManager-networkingTitle"
+              >
+                Networking
+              </h2>
+              @if (networksCollectedAt(); as collectedAt) {
+                <span class="small text-body-secondary">
+                  <span i18n="@@featureContainerManager-collectedAt">Collected</span>
+                  {{ collectedAt | date: 'short' }}
+                </span>
+              }
+            </div>
+
+            @if (loadingNetworks()) {
+              <div class="d-flex align-items-center gap-2 text-body-secondary px-3 pb-3">
+                <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                <span i18n="@@featureContainerManager-loadingNetworks">Loading networks…</span>
               </div>
-              <div class="small text-nowrap">{{ statsSummary(container.stats) }}</div>
-            </button>
+            } @else if (topologyLayout().length === 0) {
+              <p class="text-body-secondary mb-0 px-3 pb-3" i18n="@@featureContainerManager-noNetworks">
+                No Docker networks were reported for this host.
+              </p>
+            } @else {
+              <div class="container-manager-tab__topology bg-body overflow-auto">
+                <svg
+                  class="container-manager-tab__topology-svg"
+                  viewBox="0 0 640 320"
+                  role="img"
+                  aria-labelledby="containerManagerTopologyTitle"
+                >
+                  <title id="containerManagerTopologyTitle" i18n="@@featureContainerManager-topologyTitle">
+                    Container network topology
+                  </title>
+                  @for (edge of topologyLayoutEdges(); track edge.id) {
+                    <line
+                      [attr.x1]="edge.x1"
+                      [attr.y1]="edge.y1"
+                      [attr.x2]="edge.x2"
+                      [attr.y2]="edge.y2"
+                      class="container-manager-tab__edge"
+                    ></line>
+                    @if (edge.label) {
+                      <text
+                        [attr.x]="(edge.x1 + edge.x2) / 2"
+                        [attr.y]="(edge.y1 + edge.y2) / 2 - 6"
+                        class="container-manager-tab__edge-label"
+                      >
+                        {{ edge.label }}
+                      </text>
+                    }
+                  }
+                  @for (node of topologyLayout(); track node.id) {
+                    <g [attr.transform]="'translate(' + node.x + ' ' + node.y + ')'">
+                      <circle
+                        r="18"
+                        class="container-manager-tab__node"
+                        [class.container-manager-tab__node--network]="node.kind === 'network'"
+                        [class.container-manager-tab__node--exit]="node.kind === 'exit'"
+                        [class.container-manager-tab__node--route]="node.kind === 'route'"
+                      ></circle>
+                      <text y="36" text-anchor="middle" class="container-manager-tab__node-label">
+                        {{ node.label }}
+                      </text>
+                    </g>
+                  }
+                </svg>
+              </div>
+            }
+          </section>
+        } @else {
+          <section class="mb-4" aria-labelledby="containerManagerStatsHeading">
+            <h2
+              class="h6 fw-semibold mb-3"
+              id="containerManagerStatsHeading"
+              i18n="@@featureContainerManager-statsTitle"
+            >
+              Resource usage
+            </h2>
+
+            @if (!selectedContainer()) {
+              <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-selectContainerHint">
+                Select a container to view resource history.
+              </p>
+            } @else if (loadingStatsHistory()) {
+              <div class="d-flex align-items-center gap-2 text-body-secondary">
+                <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                <span i18n="@@featureContainerManager-loadingStats">Loading resource history…</span>
+              </div>
+            } @else if (statsChart(); as chart) {
+              @if (selectedContainer(); as container) {
+                <dl class="row small mb-3">
+                  <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-cpu">CPU</dt>
+                  <dd class="col-sm-9">{{ formatPercent(container.stats?.cpuPercent) }}</dd>
+                  <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-memory">Memory</dt>
+                  <dd class="col-sm-9">
+                    {{ formatPercent(container.stats?.memoryPercent) }}
+                    @if (container.stats?.memoryUsageBytes !== null) {
+                      ({{ formatBytes(container.stats?.memoryUsageBytes) }}
+                      @if (container.stats?.memoryLimitBytes !== null) {
+                        / {{ formatBytes(container.stats?.memoryLimitBytes) }}
+                      }
+                      )
+                    }
+                  </dd>
+                  <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-network">Network</dt>
+                  <dd class="col-sm-9">
+                    ↓ {{ formatBytes(container.stats?.networkRxBytes) }} · ↑
+                    {{ formatBytes(container.stats?.networkTxBytes) }}
+                  </dd>
+                  <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-blockIo">Block I/O</dt>
+                  <dd class="col-sm-9">
+                    R {{ formatBytes(container.stats?.blockReadBytes) }} · W
+                    {{ formatBytes(container.stats?.blockWriteBytes) }}
+                  </dd>
+                </dl>
+              }
+              <apx-chart
+                [series]="chart.series"
+                [chart]="chart.chart"
+                [colors]="chart.colors"
+                [stroke]="chart.stroke"
+                [fill]="chart.fill"
+                [dataLabels]="chart.dataLabels"
+                [xaxis]="chart.xaxis"
+                [yaxis]="chart.yaxis"
+                [grid]="chart.grid"
+                [legend]="chart.legend"
+                [title]="chart.title"
+              ></apx-chart>
+            } @else {
+              <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-noStatsHistory">
+                No resource history is available for this container yet.
+              </p>
+            }
+          </section>
+
+          <section aria-labelledby="containerManagerLogsHeading">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+              <h2
+                class="h6 fw-semibold mb-0"
+                id="containerManagerLogsHeading"
+                i18n="@@featureContainerManager-logsTitle"
+              >
+                Container logs
+              </h2>
+              @if (logsCollectedAt(); as collectedAt) {
+                <span class="small text-body-secondary">
+                  <span i18n="@@featureContainerManager-collectedAt">Collected</span>
+                  {{ collectedAt | date: 'short' }}
+                </span>
+              }
+            </div>
+
+            @if (!selectedContainer()) {
+              <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-selectContainerLogsHint">
+                Select a container to stream logs.
+              </p>
+            } @else if (loadingLogs() && logLines().length === 0) {
+              <div class="d-flex align-items-center gap-2 text-body-secondary">
+                <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                <span i18n="@@featureContainerManager-loadingLogs">Loading logs…</span>
+              </div>
+            } @else if (logLines().length === 0) {
+              <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-noLogs">
+                No log output is available for this container yet.
+              </p>
+            } @else {
+              @if (logsTruncated()) {
+                <p class="small text-body-secondary mb-2" i18n="@@featureContainerManager-logsTruncated">
+                  Showing the most recent log chunk; older lines were truncated.
+                </p>
+              }
+              <pre
+                #logsViewport
+                class="container-manager-tab__logs border rounded bg-body-tertiary p-3 mb-0"
+                tabindex="0"
+                role="log"
+                aria-live="polite"
+                aria-relevant="additions"
+                [attr.aria-label]="selectedContainer()?.name + ' logs'"
+                (scroll)="onLogsScroll($event)"
+                >{{ logText() }}</pre
+              >
+            }
+          </section>
+        }
+      </div>
+    </div>
+
+    @if (sidebarOpen()) {
+      <button
+        type="button"
+        class="container-manager-tab__backdrop d-lg-none"
+        (click)="closeSidebar()"
+        i18n-aria-label="@@featureContainerManager-closeSidebar"
+        aria-label="Close containers panel"
+      ></button>
+    }
+
+    <aside
+      id="containerManagerSidebar"
+      class="container-manager-tab__sidebar"
+      [class.container-manager-tab__sidebar--open]="sidebarOpen()"
+      aria-label="Containers and networking"
+      i18n-aria-label="@@featureContainerManager-sidebarLabel"
+    >
+      <div class="container-manager-tab__sidebar-containers min-h-0">
+        <div class="container-manager-tab__sidebar-header bg-body-tertiary">
+          <h2
+            class="h6 fw-semibold mb-0"
+            id="containerManagerContainersHeading"
+            i18n="@@featureContainerManager-containersTitle"
+          >
+            Containers
+          </h2>
+          @if (containersCollectedAt(); as collectedAt) {
+            <span class="small text-body-secondary">
+              <span i18n="@@featureContainerManager-collectedAt">Collected</span>
+              {{ collectedAt | date: 'short' }}
+            </span>
           }
         </div>
-      }
-    </section>
 
-    <section class="mb-4" aria-labelledby="containerManagerStatsHeading">
-      <h2 class="h6 fw-semibold mb-3" id="containerManagerStatsHeading" i18n="@@featureContainerManager-statsTitle">
-        Resource usage
-      </h2>
-
-      @if (!selectedContainer()) {
-        <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-selectContainerHint">
-          Select a container to view resource history.
-        </p>
-      } @else if (loadingStatsHistory()) {
-        <div class="d-flex align-items-center gap-2 text-body-secondary">
-          <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
-          <span i18n="@@featureContainerManager-loadingStats">Loading resource history…</span>
+        <div class="input-group search-input-container border-bottom">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <input
+            type="search"
+            class="form-control border-0 search-input"
+            name="containerSearch"
+            placeholder="Search containers"
+            i18n-placeholder="@@featureContainerManager-searchPlaceholder"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            aria-label="Search containers"
+            i18n-aria-label="@@featureContainerManager-searchPlaceholder"
+          />
         </div>
-      } @else if (statsChart(); as chart) {
-        @if (selectedContainer(); as container) {
-          <dl class="row small mb-3">
-            <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-cpu">CPU</dt>
-            <dd class="col-sm-9">{{ formatPercent(container.stats?.cpuPercent) }}</dd>
-            <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-memory">Memory</dt>
-            <dd class="col-sm-9">
-              {{ formatPercent(container.stats?.memoryPercent) }}
-              @if (container.stats?.memoryUsageBytes !== null) {
-                ({{ formatBytes(container.stats?.memoryUsageBytes) }}
-                @if (container.stats?.memoryLimitBytes !== null) {
-                  / {{ formatBytes(container.stats?.memoryLimitBytes) }}
-                }
-                )
-              }
-            </dd>
-            <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-network">Network</dt>
-            <dd class="col-sm-9">
-              ↓ {{ formatBytes(container.stats?.networkRxBytes) }} · ↑
-              {{ formatBytes(container.stats?.networkTxBytes) }}
-            </dd>
-            <dt class="col-sm-3 text-muted" i18n="@@featureContainerManager-blockIo">Block I/O</dt>
-            <dd class="col-sm-9">
-              R {{ formatBytes(container.stats?.blockReadBytes) }} · W
-              {{ formatBytes(container.stats?.blockWriteBytes) }}
-            </dd>
-          </dl>
-        }
-        <apx-chart
-          [series]="chart.series"
-          [chart]="chart.chart"
-          [colors]="chart.colors"
-          [stroke]="chart.stroke"
-          [fill]="chart.fill"
-          [dataLabels]="chart.dataLabels"
-          [xaxis]="chart.xaxis"
-          [yaxis]="chart.yaxis"
-          [grid]="chart.grid"
-          [legend]="chart.legend"
-          [title]="chart.title"
-        ></apx-chart>
-      } @else {
-        <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-noStatsHistory">
-          No resource history is available for this container yet.
-        </p>
-      }
-    </section>
 
-    <section aria-labelledby="containerManagerNetworkHeading">
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h2
-          class="h6 fw-semibold mb-0"
-          id="containerManagerNetworkHeading"
-          i18n="@@featureContainerManager-networkingTitle"
-        >
-          Networking
-        </h2>
-        @if (networksCollectedAt(); as collectedAt) {
-          <span class="small text-body-secondary">
-            <span i18n="@@featureContainerManager-collectedAt">Collected</span>
-            {{ collectedAt | date: 'short' }}
-          </span>
-        }
+        <div class="container-manager-tab__sidebar-list overflow-auto min-h-0">
+          @if (loadingContainers()) {
+            <div class="d-flex align-items-center gap-2 text-body-secondary p-3">
+              <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+              <span i18n="@@featureContainerManager-loadingContainers">Loading containers…</span>
+            </div>
+          } @else if (containers().length === 0) {
+            <p class="text-body-secondary mb-0 p-3" i18n="@@featureContainerManager-noContainers">
+              No containers found on this host.
+            </p>
+          } @else if (filteredContainers().length === 0) {
+            <p class="text-body-secondary mb-0 p-3" i18n="@@featureContainerManager-noSearchResults">
+              No containers match your search.
+            </p>
+          } @else {
+            <div class="list-group list-group-flush">
+              @for (container of filteredContainers(); track container.id) {
+                <button
+                  type="button"
+                  class="list-group-item list-group-item-action d-flex flex-column align-items-stretch gap-1"
+                  [class.active]="contentView() === 'container' && selectedContainerId() === container.id"
+                  (click)="selectContainer(container.id)"
+                >
+                  <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="fw-semibold text-truncate min-w-0">{{ container.name }}</div>
+                    <div class="small text-nowrap">{{ statsSummary(container.stats) }}</div>
+                  </div>
+                  <div class="small text-body-secondary text-truncate">{{ container.image }}</div>
+                  <div class="small">{{ container.status || container.state }}</div>
+                </button>
+              }
+            </div>
+          }
+        </div>
       </div>
 
-      @if (loadingNetworks()) {
-        <div class="d-flex align-items-center gap-2 text-body-secondary">
-          <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
-          <span i18n="@@featureContainerManager-loadingNetworks">Loading networks…</span>
-        </div>
-      } @else if (topologyLayout().length === 0) {
-        <p class="text-body-secondary mb-0" i18n="@@featureContainerManager-noNetworks">
-          No Docker networks were reported for this host.
-        </p>
-      } @else {
-        <div class="container-manager-tab__topology border rounded bg-body-tertiary overflow-auto">
-          <svg
-            class="container-manager-tab__topology-svg"
-            viewBox="0 0 640 320"
-            role="img"
-            aria-labelledby="containerManagerTopologyTitle"
-          >
-            <title id="containerManagerTopologyTitle" i18n="@@featureContainerManager-topologyTitle">
-              Container network topology
-            </title>
-            @for (edge of topologyLayoutEdges(); track edge.id) {
-              <line
-                [attr.x1]="edge.x1"
-                [attr.y1]="edge.y1"
-                [attr.x2]="edge.x2"
-                [attr.y2]="edge.y2"
-                class="container-manager-tab__edge"
-              ></line>
-              @if (edge.label) {
-                <text
-                  [attr.x]="(edge.x1 + edge.x2) / 2"
-                  [attr.y]="(edge.y1 + edge.y2) / 2 - 6"
-                  class="container-manager-tab__edge-label"
-                >
-                  {{ edge.label }}
-                </text>
-              }
-            }
-            @for (node of topologyLayout(); track node.id) {
-              <g [attr.transform]="'translate(' + node.x + ' ' + node.y + ')'">
-                <circle
-                  r="18"
-                  class="container-manager-tab__node"
-                  [class.container-manager-tab__node--network]="node.kind === 'network'"
-                  [class.container-manager-tab__node--exit]="node.kind === 'exit'"
-                  [class.container-manager-tab__node--route]="node.kind === 'route'"
-                ></circle>
-                <text y="36" text-anchor="middle" class="container-manager-tab__node-label">{{ node.label }}</text>
-              </g>
-            }
-          </svg>
-        </div>
-      }
-    </section>
+      <div class="container-manager-tab__sidebar-footer bg-body-tertiary">
+        <button
+          type="button"
+          class="container-manager-tab__sidebar-nav h6 fw-semibold mb-0 justify-content-between d-flex align-items-center gap-2"
+          [class.container-manager-tab__sidebar-nav--active]="contentView() === 'network'"
+          (click)="openNetworkMap()"
+        >
+          <span i18n="@@featureContainerManager-networkMapNav">Network map</span>
+          <i class="bi bi-diagram-3 me-1" aria-hidden="true"></i>
+        </button>
+      </div>
+    </aside>
   </div>
 </div>

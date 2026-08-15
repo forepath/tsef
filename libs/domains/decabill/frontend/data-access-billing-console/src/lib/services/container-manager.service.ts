@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Environment } from '@forepath/shared/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 
 import type {
   ContainerManagerContainersResponse,
+  ContainerManagerLogsResponse,
   ContainerManagerNetworksResponse,
   ContainerManagerStatsHistoryResponse,
 } from '../types/billing.types';
@@ -47,6 +48,25 @@ export class ContainerManagerService {
   ): Observable<ContainerManagerStatsHistoryResponse> {
     return this.http.get<ContainerManagerStatsHistoryResponse>(
       `${this.basePath(subscriptionId, itemId, adminMode)}/containers/${encodeURIComponent(containerId)}/stats-history`,
+    );
+  }
+
+  getLogs(
+    subscriptionId: string,
+    itemId: string,
+    containerId: string,
+    adminMode = false,
+    tail?: number,
+  ): Observable<ContainerManagerLogsResponse> {
+    let params = new HttpParams();
+
+    if (tail != null) {
+      params = params.set('tail', String(tail));
+    }
+
+    return this.http.get<ContainerManagerLogsResponse>(
+      `${this.basePath(subscriptionId, itemId, adminMode)}/containers/${encodeURIComponent(containerId)}/logs`,
+      { params },
     );
   }
 

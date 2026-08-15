@@ -8,8 +8,12 @@ import {
   selectContainerManagerError,
   selectContainerManagerLoadingAny,
   selectContainerManagerLoadingContainers,
+  selectContainerManagerLoadingLogs,
   selectContainerManagerLoadingNetworks,
   selectContainerManagerLoadingStatsHistory,
+  selectContainerManagerLogLines,
+  selectContainerManagerLogsCollectedAt,
+  selectContainerManagerLogsTruncated,
   selectContainerManagerNetworks,
   selectContainerManagerNetworksCollectedAt,
   selectContainerManagerSelectedContainer,
@@ -34,9 +38,13 @@ export class ContainerManagerFacade {
   readonly selectedContainerId$ = this.store.select(selectContainerManagerSelectedContainerId);
   readonly selectedContainer$ = this.store.select(selectContainerManagerSelectedContainer);
   readonly statsHistoryPoints$ = this.store.select(selectContainerManagerStatsHistoryPoints);
+  readonly logLines$ = this.store.select(selectContainerManagerLogLines);
+  readonly logsCollectedAt$ = this.store.select(selectContainerManagerLogsCollectedAt);
+  readonly logsTruncated$ = this.store.select(selectContainerManagerLogsTruncated);
   readonly loadingContainers$ = this.store.select(selectContainerManagerLoadingContainers);
   readonly loadingNetworks$ = this.store.select(selectContainerManagerLoadingNetworks);
   readonly loadingStatsHistory$ = this.store.select(selectContainerManagerLoadingStatsHistory);
+  readonly loadingLogs$ = this.store.select(selectContainerManagerLoadingLogs);
   readonly loadingAny$ = this.store.select(selectContainerManagerLoadingAny);
   readonly error$ = this.store.select(selectContainerManagerError);
 

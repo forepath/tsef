@@ -1,6 +1,20 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, DestroyRef, Input, OnChanges, OnInit, SimpleChanges, computed, inject } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  afterRenderEffect,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import {
   ContainerManagerFacade,
   type ContainerManagerContainer,
@@ -13,6 +27,8 @@ import type { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexTitleSubtitle,
 import { NgApexchartsModule } from 'ng-apexcharts';
 
 const BS_CHART_COLORS = ['var(--bs-primary)', 'var(--bs-info)', 'var(--bs-success)', 'var(--bs-warning)'] as const;
+/** Pixels from bottom still treated as "pinned" for auto-scroll. */
+const LOGS_STICK_BOTTOM_THRESHOLD_PX = 32;
 
 interface TopologyLayoutNode {
   id: string;
@@ -34,7 +50,7 @@ interface TopologyLayoutEdge {
 @Component({
   selector: 'framework-container-manager-tab',
   standalone: true,
-  imports: [CommonModule, NgApexchartsModule],
+  imports: [CommonModule, FormsModule, NgApexchartsModule],
   providers: [DatePipe],
   templateUrl: './container-manager-tab.component.html',
   styleUrls: ['./container-manager-tab.component.scss'],
@@ -47,8 +63,17 @@ export class ContainerManagerTabComponent implements OnInit, OnChanges {
   private readonly facade = inject(ContainerManagerFacade);
   private readonly datePipe = inject(DatePipe);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly logsViewport = viewChild<ElementRef<HTMLPreElement>>('logsViewport');
 
   private enteredKey = '';
+  private stickLogsToBottom = true;
+  private lastPinnedContainerId: string | null = null;
+
+  /** Mobile drawer; closed by default. Desktop always shows the sidebar via CSS. */
+  readonly sidebarOpen = signal(false);
+  /** Main pane: container detail (stats/logs) or network topology map. */
+  readonly contentView = signal<'container' | 'network'>('container');
+  readonly searchQuery = signal('');
 
   readonly containers = toSignal(this.facade.containers$, { initialValue: [] as ContainerManagerContainer[] });
   readonly selectedContainerId = toSignal(this.facade.selectedContainerId$, { initialValue: null as string | null });
@@ -58,6 +83,9 @@ export class ContainerManagerTabComponent implements OnInit, OnChanges {
   readonly statsHistoryPoints = toSignal(this.facade.statsHistoryPoints$, {
     initialValue: [] as ContainerManagerStatsHistoryPoint[],
   });
+  readonly logLines = toSignal(this.facade.logLines$, { initialValue: [] as string[] });
+  readonly logsCollectedAt = toSignal(this.facade.logsCollectedAt$, { initialValue: null as string | null });
+  readonly logsTruncated = toSignal(this.facade.logsTruncated$, { initialValue: false });
   readonly topologyNodes = toSignal(this.facade.topologyNodes$, {
     initialValue: [] as ContainerManagerNetworkNode[],
   });
@@ -67,6 +95,7 @@ export class ContainerManagerTabComponent implements OnInit, OnChanges {
   readonly loadingContainers = toSignal(this.facade.loadingContainers$, { initialValue: false });
   readonly loadingNetworks = toSignal(this.facade.loadingNetworks$, { initialValue: false });
   readonly loadingStatsHistory = toSignal(this.facade.loadingStatsHistory$, { initialValue: false });
+  readonly loadingLogs = toSignal(this.facade.loadingLogs$, { initialValue: false });
   readonly error = toSignal(this.facade.error$, { initialValue: null as string | null });
   readonly containersCollectedAt = toSignal(this.facade.containersCollectedAt$, {
     initialValue: null as string | null,
@@ -75,12 +104,48 @@ export class ContainerManagerTabComponent implements OnInit, OnChanges {
     initialValue: null as string | null,
   });
 
+  readonly filteredContainers = computed(() => {
+    const term = this.searchQuery().trim().toLowerCase();
+    const containers = this.containers();
+
+    if (!term) {
+      return containers;
+    }
+
+    return containers.filter((container) => {
+      const haystack = [container.name, container.image, container.status, container.state]
+        .filter((value): value is string => typeof value === 'string' && value.length > 0)
+        .join(' ')
+        .toLowerCase();
+
+      return haystack.includes(term);
+    });
+  });
+
   readonly statsChart = computed(() => this.buildStatsChart(this.statsHistoryPoints()));
+  readonly logText = computed(() => this.logLines().join('\n'));
   readonly topologyLayout = computed(() => this.layoutTopology(this.topologyNodes()));
   readonly topologyLayoutEdges = computed(() => this.layoutTopologyEdges(this.topologyLayout(), this.topologyEdges()));
 
   constructor() {
     this.destroyRef.onDestroy(() => this.facade.clear());
+
+    afterRenderEffect(() => {
+      const containerId = this.selectedContainerId();
+      const text = this.logText();
+      const viewport = this.logsViewport()?.nativeElement;
+
+      if (containerId !== this.lastPinnedContainerId) {
+        this.lastPinnedContainerId = containerId;
+        this.stickLogsToBottom = true;
+      }
+
+      if (!this.stickLogsToBottom || !viewport || text.length === 0) {
+        return;
+      }
+
+      viewport.scrollTop = viewport.scrollHeight;
+    });
   }
 
   ngOnInit(): void {
@@ -96,7 +161,34 @@ export class ContainerManagerTabComponent implements OnInit, OnChanges {
   }
 
   selectContainer(containerId: string): void {
+    this.stickLogsToBottom = true;
+    this.contentView.set('container');
     this.facade.selectContainerById(containerId);
+    this.sidebarOpen.set(false);
+  }
+
+  openNetworkMap(): void {
+    this.contentView.set('network');
+    this.sidebarOpen.set(false);
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen.update((open) => !open);
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen.set(false);
+  }
+
+  onLogsScroll(event: Event): void {
+    const target = event.target;
+
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const distanceFromBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+    this.stickLogsToBottom = distanceFromBottom <= LOGS_STICK_BOTTOM_THRESHOLD_PX;
   }
 
   formatBytes(value: number | null | undefined): string {

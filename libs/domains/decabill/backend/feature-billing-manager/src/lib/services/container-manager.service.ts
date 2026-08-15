@@ -3,6 +3,7 @@ import { isIP } from 'node:net';
 
 import type {
   ContainerManagerContainersResponseDto,
+  ContainerManagerLogsResponseDto,
   ContainerManagerNetworkDto,
   ContainerManagerNetworksResponseDto,
   ContainerManagerStatsHistoryPointDto,
@@ -23,6 +24,10 @@ const SSH_USER = 'root';
 const SSH_PORT = 22;
 const DEFAULT_SSH_TIMEOUT_MS = 60_000;
 const HISTORY_MAX_POINTS = 60;
+const DEFAULT_LOG_TAIL = 200;
+const MAX_LOG_TAIL = 500;
+/** Soft cap on combined log payload returned to clients. */
+const MAX_LOG_PAYLOAD_CHARS = 256_000;
 /** Align with service-detail access: live service ownership only. */
 const CONTAINER_MANAGER_ACCESSIBLE_SUBSCRIPTION_STATUSES: ReadonlySet<SubscriptionStatus> = new Set([
   SubscriptionStatus.ACTIVE,
@@ -162,6 +167,49 @@ export class ContainerManagerService {
       containerId: safeContainerId,
       points: bucket?.points ?? [],
     };
+  }
+
+  async getLogs(
+    subscriptionId: string,
+    itemId: string,
+    containerId: string,
+    options?: { userId?: string; asAdmin?: boolean; tail?: number },
+  ): Promise<ContainerManagerLogsResponseDto> {
+    const item = await this.assertContainerManagerAccess(subscriptionId, itemId, options);
+    const safeContainerId = this.assertSafeDockerContainerId(containerId);
+    const tail = this.normalizeLogTail(options?.tail);
+    const host = this.resolvePublicIp(item);
+    const privateKey = item.sshPrivateKey;
+
+    if (!privateKey) {
+      throw new BadRequestException('SSH access is not available for this service');
+    }
+
+    try {
+      await this.sshExecutor.waitUntilReachable(host, SSH_PORT, { timeoutMs: DEFAULT_SSH_TIMEOUT_MS });
+      // Merge stderr into stdout so container stderr lines are included in one stream.
+      const raw = await this.execDockerJson(
+        host,
+        privateKey,
+        `docker logs --timestamps --tail ${tail} ${safeContainerId} 2>&1`,
+      );
+      const { lines, truncated } = this.normalizeLogOutput(raw);
+
+      return {
+        containerId: safeContainerId,
+        lines,
+        collectedAt: new Date().toISOString(),
+        truncated,
+        tail,
+      };
+    } catch (error: unknown) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      await this.publishCollectionFailed(subscriptionId, itemId, error);
+      throw new BadRequestException('Unable to collect container logs');
+    }
   }
 
   async listNetworks(
@@ -359,6 +407,40 @@ export class ContainerManagerService {
     }
 
     return trimmed;
+  }
+
+  private normalizeLogTail(raw: number | undefined): number {
+    if (raw == null || !Number.isFinite(raw)) {
+      return DEFAULT_LOG_TAIL;
+    }
+
+    const rounded = Math.trunc(raw);
+
+    if (rounded < 1) {
+      return DEFAULT_LOG_TAIL;
+    }
+
+    return Math.min(rounded, MAX_LOG_TAIL);
+  }
+
+  private normalizeLogOutput(raw: string): { lines: string[]; truncated: boolean } {
+    const normalized = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    let truncated = false;
+    let payload = normalized;
+
+    if (payload.length > MAX_LOG_PAYLOAD_CHARS) {
+      truncated = true;
+      payload = payload.slice(payload.length - MAX_LOG_PAYLOAD_CHARS);
+      const firstNewline = payload.indexOf('\n');
+
+      if (firstNewline >= 0 && firstNewline < payload.length - 1) {
+        payload = payload.slice(firstNewline + 1);
+      }
+    }
+
+    const lines = payload.split('\n').filter((line, index, all) => !(index === all.length - 1 && line === ''));
+
+    return { lines, truncated };
   }
 
   private async execDockerJson(host: string, privateKey: string, command: string): Promise<string> {

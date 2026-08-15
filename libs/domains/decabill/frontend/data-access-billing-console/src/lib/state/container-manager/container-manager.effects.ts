@@ -1,14 +1,18 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, filter, map, of, switchMap, withLatestFrom } from 'rxjs';
+import { catchError, filter, map, of, switchMap, takeUntil, timer, withLatestFrom } from 'rxjs';
 
 import { ContainerManagerService } from '../../services/container-manager.service';
 
 import {
+  clearContainerManager,
   enterContainerManager,
   loadContainersFailure,
   loadContainersSuccess,
+  loadLogs,
+  loadLogsFailure,
+  loadLogsSuccess,
   loadNetworksFailure,
   loadNetworksSuccess,
   loadStatsHistory,
@@ -19,8 +23,11 @@ import {
 import {
   selectContainerManagerAdminMode,
   selectContainerManagerItemId,
+  selectContainerManagerSelectedContainerId,
   selectContainerManagerSubscriptionId,
 } from './container-manager.selectors';
+
+const LOG_POLL_INTERVAL_MS = 4_000;
 
 function normalizeError(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -69,6 +76,17 @@ export const loadStatsHistoryOnSelect$ = createEffect(
   { functional: true },
 );
 
+export const loadLogsOnSelect$ = createEffect(
+  (actions$ = inject(Actions), store = inject(Store)) =>
+    actions$.pipe(
+      ofType(selectContainer),
+      filter(({ containerId }) => !!containerId),
+      withLatestFrom(store.select(selectContainerManagerAdminMode)),
+      map(([{ containerId }, adminMode]) => loadLogs({ containerId: containerId!, adminMode })),
+    ),
+  { functional: true },
+);
+
 export const loadStatsHistoryAfterContainers$ = createEffect(
   (actions$ = inject(Actions), store = inject(Store)) =>
     actions$.pipe(
@@ -84,6 +102,26 @@ export const loadStatsHistoryAfterContainers$ = createEffect(
   { functional: true },
 );
 
+export const loadLogsAfterContainers$ = createEffect(
+  (actions$ = inject(Actions), store = inject(Store)) =>
+    actions$.pipe(
+      ofType(loadContainersSuccess),
+      withLatestFrom(
+        store.select(selectContainerManagerAdminMode),
+        store.select(selectContainerManagerSelectedContainerId),
+      ),
+      filter(
+        ([{ response }, , selectedContainerId]) => !!selectedContainerId || (response.containers?.length ?? 0) > 0,
+      ),
+      map(([{ response }, adminMode, selectedContainerId]) => {
+        const containerId = selectedContainerId ?? response.containers[0]?.id;
+
+        return loadLogs({ containerId: containerId!, adminMode });
+      }),
+    ),
+  { functional: true },
+);
+
 export const loadContainerManagerStatsHistory$ = createEffect(
   (actions$ = inject(Actions), store = inject(Store), containerManagerService = inject(ContainerManagerService)) =>
     actions$.pipe(
@@ -94,6 +132,41 @@ export const loadContainerManagerStatsHistory$ = createEffect(
         containerManagerService.getStatsHistory(subscriptionId!, itemId!, containerId, adminMode === true).pipe(
           map((response) => loadStatsHistorySuccess({ response })),
           catchError((error) => of(loadStatsHistoryFailure({ error: normalizeError(error) }))),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
+export const loadContainerManagerLogs$ = createEffect(
+  (actions$ = inject(Actions), store = inject(Store), containerManagerService = inject(ContainerManagerService)) =>
+    actions$.pipe(
+      ofType(loadLogs),
+      withLatestFrom(store.select(selectContainerManagerSubscriptionId), store.select(selectContainerManagerItemId)),
+      filter(([, subscriptionId, itemId]) => !!subscriptionId && !!itemId),
+      switchMap(([{ containerId, adminMode, silent }, subscriptionId, itemId]) =>
+        containerManagerService.getLogs(subscriptionId!, itemId!, containerId, adminMode === true).pipe(
+          map((response) => loadLogsSuccess({ response })),
+          catchError((error) => of(loadLogsFailure({ error: normalizeError(error), silent }))),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
+export const pollContainerManagerLogs$ = createEffect(
+  (actions$ = inject(Actions), store = inject(Store)) =>
+    actions$.pipe(
+      ofType(loadLogsSuccess, selectContainer),
+      switchMap(() =>
+        timer(LOG_POLL_INTERVAL_MS, LOG_POLL_INTERVAL_MS).pipe(
+          withLatestFrom(
+            store.select(selectContainerManagerSelectedContainerId),
+            store.select(selectContainerManagerAdminMode),
+          ),
+          filter(([, containerId]) => !!containerId),
+          map(([, containerId, adminMode]) => loadLogs({ containerId: containerId!, adminMode, silent: true })),
+          takeUntil(actions$.pipe(ofType(clearContainerManager, enterContainerManager, selectContainer))),
         ),
       ),
     ),

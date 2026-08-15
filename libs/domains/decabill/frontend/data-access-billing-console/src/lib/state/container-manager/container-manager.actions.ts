@@ -2,6 +2,7 @@ import { createAction, props } from '@ngrx/store';
 
 import type {
   ContainerManagerContainersResponse,
+  ContainerManagerLogsResponse,
   ContainerManagerNetworksResponse,
   ContainerManagerStatsHistoryResponse,
 } from '../../types/billing.types';
@@ -45,6 +46,19 @@ export const loadStatsHistorySuccess = createAction(
 export const loadStatsHistoryFailure = createAction(
   '[Container Manager] Load Stats History Failure',
   props<{ error: string }>(),
+);
+
+export const loadLogs = createAction(
+  '[Container Manager] Load Logs',
+  props<{ containerId: string; adminMode?: boolean; silent?: boolean }>(),
+);
+export const loadLogsSuccess = createAction(
+  '[Container Manager] Load Logs Success',
+  props<{ response: ContainerManagerLogsResponse }>(),
+);
+export const loadLogsFailure = createAction(
+  '[Container Manager] Load Logs Failure',
+  props<{ error: string; silent?: boolean }>(),
 );
 
 export const clearContainerManager = createAction('[Container Manager] Clear');

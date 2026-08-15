@@ -778,6 +778,14 @@ export interface ContainerManagerStatsHistoryResponse {
   points: ContainerManagerStatsHistoryPoint[];
 }
 
+export interface ContainerManagerLogsResponse {
+  containerId: string;
+  lines: string[];
+  collectedAt: string;
+  truncated: boolean;
+  tail: number;
+}
+
 export interface ContainerManagerNetworkNode {
   id: string;
   label: string;

@@ -1,8 +1,9 @@
 import { KeycloakRoles, RequireScopes, UserRole, UsersRoles } from '@forepath/identity/backend';
-import { Controller, Get, Param, ParseUUIDPipe, Req } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Param, ParseUUIDPipe, Query, Req } from '@nestjs/common';
 
 import type {
   ContainerManagerContainersResponseDto,
+  ContainerManagerLogsResponseDto,
   ContainerManagerNetworksResponseDto,
   ContainerManagerStatsHistoryResponseDto,
 } from '../dto/container-manager.dto';
@@ -44,6 +45,24 @@ export class AdminContainerManagerController {
     });
   }
 
+  @Get('containers/:containerId/logs')
+  @RequireScopes('billing_admin:read')
+  async getLogs(
+    @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
+    @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
+    @Param('containerId') containerId: string,
+    @Query('tail') tailRaw?: string,
+    @Req() req?: RequestWithUser,
+  ): Promise<ContainerManagerLogsResponseDto> {
+    const userInfo = getUserFromRequest(req ?? ({} as RequestWithUser));
+    ensureAdmin(userInfo);
+
+    return await this.containerManagerService.getLogs(subscriptionId, itemId, containerId, {
+      asAdmin: true,
+      tail: this.parseOptionalTail(tailRaw),
+    });
+  }
+
   @Get('networks')
   @RequireScopes('billing_admin:read')
   async listNetworks(
@@ -55,5 +74,19 @@ export class AdminContainerManagerController {
     ensureAdmin(userInfo);
 
     return await this.containerManagerService.listNetworks(subscriptionId, itemId, { asAdmin: true });
+  }
+
+  private parseOptionalTail(raw: string | undefined): number | undefined {
+    if (raw == null || raw.trim() === '') {
+      return undefined;
+    }
+
+    const parsed = Number.parseInt(raw, 10);
+
+    if (!Number.isFinite(parsed)) {
+      throw new BadRequestException('Invalid tail parameter');
+    }
+
+    return parsed;
   }
 }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-15T09:55:39.198Z",
+  "generatedAt": "2026-08-15T13:12:31.963Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -15733,6 +15733,17 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+        "operationId": "getContainerManagerLogs",
+        "summary": "Get Container Manager logs for a container",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/container-manager/networks",
       "type": "endpoint",
       "attrs": {
@@ -16180,6 +16191,17 @@
         "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/stats-history",
         "operationId": "adminGetContainerManagerStatsHistory",
         "summary": "Get Container Manager stats history for a container (admin)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+        "operationId": "adminGetContainerManagerLogs",
+        "summary": "Get Container Manager logs for a container (admin)",
         "specKind": "openapi"
       }
     },
@@ -26660,16 +26682,6 @@
       }
     },
     {
-      "id": "concept:decabill-related",
-      "type": "concept",
-      "attrs": {
-        "title": "Related",
-        "docPath": "docs/decabill/features/numbering.md",
-        "sectionAnchor": "related",
-        "domain": "decabill"
-      }
-    },
-    {
       "id": "concept:decabill-application",
       "type": "concept",
       "attrs": {
@@ -27296,16 +27308,6 @@
         "title": "Meter history",
         "docPath": "docs/decabill/features/service-details.md",
         "sectionAnchor": "meter-history",
-        "domain": "decabill"
-      }
-    },
-    {
-      "id": "concept:decabill-realtime",
-      "type": "concept",
-      "attrs": {
-        "title": "Realtime",
-        "docPath": "docs/decabill/features/service-details.md",
-        "sectionAnchor": "realtime",
         "domain": "decabill"
       }
     },
@@ -38123,6 +38125,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/container-manager/networks",
       "type": "contains"
     },
@@ -38324,6 +38331,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/stats-history",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
       "type": "contains"
     },
     {
@@ -48023,6 +48035,16 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
       "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/networks",
       "type": "implements"
     },
@@ -48959,6 +48981,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
       "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/stats-history",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
       "type": "implements"
     },
     {
@@ -49964,6 +49991,16 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/stats-history",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
       "type": "implements"
     },
     {
@@ -63653,6 +63690,11 @@
     },
     {
       "from": "concept:decabill-rest-api",
+      "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-rest-api",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}/items/{itemId}/container-manager/networks",
       "type": "documents"
     },
@@ -64239,16 +64281,6 @@
     {
       "from": "concept:decabill-public-catalog",
       "to": "api:HTTP:GET:/public/service-plan-offerings/cheapest",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:GET:/subscriptions",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:POST:/subscriptions",
       "type": "documents"
     },
     {
@@ -71502,11 +71534,6 @@
       "type": "belongs_to"
     },
     {
-      "from": "concept:decabill-related",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
       "from": "concept:decabill-application",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -71818,11 +71845,6 @@
     },
     {
       "from": "concept:decabill-meter-history",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
-      "from": "concept:decabill-realtime",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

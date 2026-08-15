@@ -1,5 +1,6 @@
 import type {
   ContainerManagerContainersResponse,
+  ContainerManagerLogsResponse,
   ContainerManagerNetworksResponse,
   ContainerManagerStatsHistoryResponse,
 } from '../../types/billing.types';
@@ -9,6 +10,9 @@ import {
   enterContainerManager,
   loadContainersFailure,
   loadContainersSuccess,
+  loadLogs,
+  loadLogsFailure,
+  loadLogsSuccess,
   loadNetworksFailure,
   loadNetworksSuccess,
   loadStatsHistory,
@@ -54,6 +58,13 @@ describe('containerManagerReducer', () => {
         networkTxBytes: null,
       },
     ],
+  };
+  const logsResponse: ContainerManagerLogsResponse = {
+    containerId: 'ctr-1',
+    lines: ['2026-08-13T11:00:00Z ready'],
+    collectedAt: '2026-08-13T12:00:00.000Z',
+    truncated: true,
+    tail: 200,
   };
 
   it('returns the initial state', () => {
@@ -107,5 +118,23 @@ describe('containerManagerReducer', () => {
     expect(loaded.statsHistoryPoints).toHaveLength(1);
     expect(failed.error).toBe('stats failed');
     expect(selected.selectedContainerId).toBe('ctr-2');
+  });
+
+  it('loads logs for selected container', () => {
+    const loading = containerManagerReducer(
+      { ...initialContainerManagerState, subscriptionId: 'sub-1', itemId: 'item-1' },
+      loadLogs({ containerId: 'ctr-1' }),
+    );
+    const loaded = containerManagerReducer(loading, loadLogsSuccess({ response: logsResponse }));
+    const silentFailed = containerManagerReducer(loaded, loadLogsFailure({ error: 'logs failed', silent: true }));
+    const failed = containerManagerReducer(loading, loadLogsFailure({ error: 'logs failed' }));
+    const selectedOther = containerManagerReducer(loaded, selectContainer({ containerId: 'ctr-2' }));
+
+    expect(loading.loadingLogs).toBe(true);
+    expect(loaded.logLines).toEqual(['2026-08-13T11:00:00Z ready']);
+    expect(loaded.logsTruncated).toBe(true);
+    expect(silentFailed.error).toBeNull();
+    expect(failed.error).toBe('logs failed');
+    expect(selectedOther.logLines).toEqual([]);
   });
 });

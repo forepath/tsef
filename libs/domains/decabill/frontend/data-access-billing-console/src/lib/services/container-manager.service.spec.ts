@@ -4,6 +4,7 @@ import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
 
 import type {
   ContainerManagerContainersResponse,
+  ContainerManagerLogsResponse,
   ContainerManagerNetworksResponse,
   ContainerManagerStatsHistoryResponse,
 } from '../types/billing.types';
@@ -22,6 +23,13 @@ describe('ContainerManagerService', () => {
   const statsResponse: ContainerManagerStatsHistoryResponse = {
     containerId: 'ctr-1',
     points: [],
+  };
+  const logsResponse: ContainerManagerLogsResponse = {
+    containerId: 'ctr-1',
+    lines: ['line-1'],
+    collectedAt: '2026-08-13T12:00:00.000Z',
+    truncated: false,
+    tail: 200,
   };
   const networksResponse: ContainerManagerNetworksResponse = {
     networks: [],
@@ -107,6 +115,36 @@ describe('ContainerManagerService', () => {
 
       expect(req.request.method).toBe('GET');
       req.flush(statsResponse);
+    });
+  });
+
+  describe('getLogs', () => {
+    it('should GET customer logs with optional tail', (done) => {
+      service.getLogs('sub-1', 'item-1', 'ctr/1', false, 100).subscribe((response) => {
+        expect(response).toEqual(logsResponse);
+        done();
+      });
+
+      const req = httpMock.expectOne(
+        `${apiUrl}/subscriptions/sub-1/items/item-1/container-manager/containers/ctr%2F1/logs?tail=100`,
+      );
+
+      expect(req.request.method).toBe('GET');
+      req.flush(logsResponse);
+    });
+
+    it('should GET admin logs', (done) => {
+      service.getLogs('sub-1', 'item-1', 'ctr-1', true).subscribe((response) => {
+        expect(response).toEqual(logsResponse);
+        done();
+      });
+
+      const req = httpMock.expectOne(
+        `${apiUrl}/admin/billing/subscriptions/sub-1/items/item-1/container-manager/containers/ctr-1/logs`,
+      );
+
+      expect(req.request.method).toBe('GET');
+      req.flush(logsResponse);
     });
   });
 

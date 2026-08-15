@@ -4,8 +4,8 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * Ensures Container Manager catalog addon exists per tenant and marks it
  * allowed+mandatory on plans that already use integrated Docker stacks.
  */
-export class BackfillContainerManagerMandatoryAddons1776400000000 implements MigrationInterface {
-  name = 'BackfillContainerManagerMandatoryAddons1776400000000';
+export class BackfillContainerManagerMandatoryAddons1776600000000 implements MigrationInterface {
+  name = 'BackfillContainerManagerMandatoryAddons1776600000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`

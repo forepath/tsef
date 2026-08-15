@@ -7,6 +7,7 @@ import { of, throwError } from 'rxjs';
 import { ContainerManagerService } from '../../services/container-manager.service';
 import type {
   ContainerManagerContainersResponse,
+  ContainerManagerLogsResponse,
   ContainerManagerNetworksResponse,
   ContainerManagerStatsHistoryResponse,
 } from '../../types/billing.types';
@@ -15,6 +16,9 @@ import {
   enterContainerManager,
   loadContainersFailure,
   loadContainersSuccess,
+  loadLogs,
+  loadLogsFailure,
+  loadLogsSuccess,
   loadNetworksFailure,
   loadNetworksSuccess,
   loadStatsHistory,
@@ -24,8 +28,11 @@ import {
 } from './container-manager.actions';
 import {
   loadContainerManagerContainers$,
+  loadContainerManagerLogs$,
   loadContainerManagerNetworks$,
   loadContainerManagerStatsHistory$,
+  loadLogsAfterContainers$,
+  loadLogsOnSelect$,
   loadStatsHistoryAfterContainers$,
   loadStatsHistoryOnSelect$,
 } from './container-manager.effects';
@@ -59,12 +66,20 @@ describe('containerManagerEffects', () => {
     containerId: 'ctr-1',
     points: [],
   };
+  const logsResponse: ContainerManagerLogsResponse = {
+    containerId: 'ctr-1',
+    lines: ['hello'],
+    collectedAt: '2026-08-13T12:00:00.000Z',
+    truncated: false,
+    tail: 200,
+  };
 
   beforeEach(() => {
     containerManagerService = {
       listContainers: jest.fn(),
       listNetworks: jest.fn(),
       getStatsHistory: jest.fn(),
+      getLogs: jest.fn(),
     } as never;
     store = {
       select: jest.fn(() =>
@@ -177,6 +192,45 @@ describe('containerManagerEffects', () => {
 
     TestBed.runInInjectionContext(() => loadContainerManagerStatsHistory$(actions$)).subscribe((action) => {
       expect(action).toEqual(loadStatsHistoryFailure({ error: 'stats' }));
+      done();
+    });
+  });
+
+  it('loads logs after containers succeed', (done) => {
+    actions$ = of(loadContainersSuccess({ response: containersResponse }));
+
+    TestBed.runInInjectionContext(() => loadLogsAfterContainers$(actions$)).subscribe((action) => {
+      expect(action).toEqual(loadLogs({ containerId: 'ctr-1', adminMode: false }));
+      done();
+    });
+  });
+
+  it('loads logs on container select', (done) => {
+    actions$ = of(selectContainer({ containerId: 'ctr-1' }));
+
+    TestBed.runInInjectionContext(() => loadLogsOnSelect$(actions$)).subscribe((action) => {
+      expect(action).toEqual(loadLogs({ containerId: 'ctr-1', adminMode: false }));
+      done();
+    });
+  });
+
+  it('loads logs from the API', (done) => {
+    containerManagerService.getLogs.mockReturnValue(of(logsResponse));
+    actions$ = of(loadLogs({ containerId: 'ctr-1' }));
+
+    TestBed.runInInjectionContext(() => loadContainerManagerLogs$(actions$)).subscribe((action) => {
+      expect(action).toEqual(loadLogsSuccess({ response: logsResponse }));
+      expect(containerManagerService.getLogs).toHaveBeenCalledWith('sub-1', 'item-1', 'ctr-1', false);
+      done();
+    });
+  });
+
+  it('maps log load failures', (done) => {
+    containerManagerService.getLogs.mockReturnValue(throwError(() => new Error('logs')));
+    actions$ = of(loadLogs({ containerId: 'ctr-1', silent: true }));
+
+    TestBed.runInInjectionContext(() => loadContainerManagerLogs$(actions$)).subscribe((action) => {
+      expect(action).toEqual(loadLogsFailure({ error: 'logs', silent: true }));
       done();
     });
   });

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddServiceTabsToCloudInitConfigs1776500000000 implements MigrationInterface {
-  name = 'AddServiceTabsToCloudInitConfigs1776500000000';
+export class AddServiceTabsToCloudInitConfigs1776700000000 implements MigrationInterface {
+  name = 'AddServiceTabsToCloudInitConfigs1776700000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
