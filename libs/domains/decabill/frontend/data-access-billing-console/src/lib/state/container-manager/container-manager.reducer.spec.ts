@@ -43,6 +43,8 @@ describe('containerManagerReducer', () => {
       nodes: [{ id: 'n1', label: 'web', kind: 'container' }],
       edges: [],
     },
+    hostInterfaces: [],
+    hostRoutes: [],
     collectedAt: '2026-08-13T12:00:00.000Z',
   };
   const statsResponse: ContainerManagerStatsHistoryResponse = {
@@ -52,6 +54,8 @@ describe('containerManagerReducer', () => {
         timestamp: '2026-08-13T11:00:00.000Z',
         cpuPercent: 10,
         memoryPercent: 20,
+        memoryUsageBytes: 64 * 1024 * 1024,
+        memoryLimitBytes: 512 * 1024 * 1024,
         blockReadBytes: null,
         blockWriteBytes: null,
         networkRxBytes: null,

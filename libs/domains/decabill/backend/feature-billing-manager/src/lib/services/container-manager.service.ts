@@ -11,6 +11,11 @@ import type {
 } from '../dto/container-manager.dto';
 import { ProvisioningStatus } from '../entities/subscription-item.entity';
 import { SubscriptionStatus } from '../entities/subscription.entity';
+import {
+  mergeHostNetworkingIntoTopology,
+  parseIpAddrJson,
+  parseIpRouteJson,
+} from '../utils/container-manager-host-network.utils';
 import { CONTAINER_MANAGER_MODULE_KEY } from '../utils/plan-addons.utils';
 import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { SshExecutorService } from './ssh-executor.service';
@@ -117,6 +122,8 @@ export class ContainerManagerService {
             timestamp: collectedAt,
             cpuPercent: stats.cpuPercent,
             memoryPercent: stats.memoryPercent,
+            memoryUsageBytes: stats.memoryUsageBytes,
+            memoryLimitBytes: stats.memoryLimitBytes,
             blockReadBytes: stats.blockReadBytes,
             blockWriteBytes: stats.blockWriteBytes,
             networkRxBytes: stats.networkRxBytes,
@@ -285,7 +292,11 @@ export class ContainerManagerService {
       const edges: ContainerManagerNetworksResponseDto['topology']['edges'] = [];
       const seenNodes = new Set<string>();
 
-      const ensureNode = (id: string, label: string, kind: 'container' | 'network' | 'exit' | 'route'): void => {
+      const ensureNode = (
+        id: string,
+        label: string,
+        kind: ContainerManagerNetworksResponseDto['topology']['nodes'][number]['kind'],
+      ): void => {
         if (seenNodes.has(id)) {
           return;
         }
@@ -334,9 +345,52 @@ export class ContainerManagerService {
         }
       }
 
+      let hostInterfaces: ContainerManagerNetworksResponseDto['hostInterfaces'] = [];
+      let hostRoutes: ContainerManagerNetworksResponseDto['hostRoutes'] = [];
+      let topologyNodes = nodes;
+      let topologyEdges = edges;
+
+      try {
+        hostInterfaces = parseIpAddrJson(await this.execHostJson(host, privateKey, 'ip -j addr'));
+      } catch (addrError: unknown) {
+        const addrMessage = addrError instanceof Error ? addrError.message : String(addrError);
+
+        this.logger.warn(`Host address collection unavailable for item ${itemId}: ${addrMessage}`);
+      }
+
+      try {
+        // Prefer IPv4 table so default egress is present even when mixed-family JSON omits it.
+        let routeRaw = '';
+
+        try {
+          routeRaw = await this.execHostJson(host, privateKey, 'ip -4 -j route');
+        } catch {
+          routeRaw = await this.execHostJson(host, privateKey, 'ip -j route');
+        }
+
+        hostRoutes = parseIpRouteJson(routeRaw);
+      } catch (routeError: unknown) {
+        const routeMessage = routeError instanceof Error ? routeError.message : String(routeError);
+
+        this.logger.warn(`Host route collection unavailable for item ${itemId}: ${routeMessage}`);
+      }
+
+      if (hostInterfaces.length > 0 || hostRoutes.length > 0) {
+        const merged = mergeHostNetworkingIntoTopology({
+          nodes,
+          edges,
+          hostInterfaces,
+          hostRoutes,
+        });
+        topologyNodes = merged.nodes;
+        topologyEdges = merged.edges;
+      }
+
       return {
         networks,
-        topology: { nodes, edges },
+        topology: { nodes: topologyNodes, edges: topologyEdges },
+        hostInterfaces,
+        hostRoutes,
         collectedAt: new Date().toISOString(),
       };
     } catch (error: unknown) {
@@ -451,6 +505,20 @@ export class ContainerManagerService {
     if (result.code !== 0) {
       this.logger.warn(`Docker command failed on ${host}: exit ${result.code}`);
       throw new Error('Docker command failed');
+    }
+
+    return result.stdout ?? '';
+  }
+
+  /** Read-only host commands (`ip -j …`); same SSH timeout/quoting rules as Docker JSON exec. */
+  private async execHostJson(host: string, privateKey: string, command: string): Promise<string> {
+    const result = await this.sshExecutor.exec(host, SSH_PORT, SSH_USER, privateKey, command, {
+      commandTimeoutMs: DEFAULT_SSH_TIMEOUT_MS,
+    });
+
+    if (result.code !== 0) {
+      this.logger.warn(`Host command failed on ${host}: exit ${result.code}`);
+      throw new Error('Host command failed');
     }
 
     return result.stdout ?? '';

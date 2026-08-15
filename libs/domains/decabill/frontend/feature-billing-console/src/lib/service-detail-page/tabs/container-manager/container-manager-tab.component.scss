@@ -114,6 +114,49 @@
   flex: 1 1 auto;
 }
 
+.container-manager-tab__container-meta {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.container-manager-tab__status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+.list-group-item.active .container-manager-tab__container-meta .text-body-secondary {
+  color: color-mix(in srgb, var(--bs-list-group-active-color, #fff) 75%, transparent) !important;
+}
+
+.container-manager-tab__stat-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  gap: 0.25rem;
+}
+
+.container-manager-tab__stat-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: auto;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.list-group-item.active .container-manager-tab__stat-badge {
+  background-color: color-mix(in srgb, #fff 18%, transparent) !important;
+  color: var(--bs-list-group-active-color, #fff) !important;
+}
+
 .container-manager-tab__sidebar-footer {
   flex-shrink: 0;
   border-top: 1px solid var(--bs-border-color);
@@ -153,57 +196,122 @@
 }
 
 .container-manager-tab__topology {
+  position: relative;
   flex: 1 1 auto;
   min-height: 0;
-  padding: 1rem;
+  overflow: hidden;
+  background-color: var(--bs-body-bg);
 }
 
-.container-manager-tab__topology-svg {
+.container-manager-tab__topology-canvas {
   display: block;
   width: 100%;
-  min-width: 480px;
-  height: auto;
-  margin: 0;
+  height: 100%;
+  min-height: 280px;
+  touch-action: none;
+  cursor: grab;
+
+  &.is-panning {
+    cursor: grabbing;
+  }
+
+  &.is-hovering {
+    cursor: pointer;
+  }
 }
 
-.container-manager-tab__edge {
-  stroke: var(--bs-border-color-translucent, var(--bs-border-color));
-  stroke-width: 2;
+.container-manager-tab__topology-popover {
+  position: absolute;
+  z-index: 2;
+  min-width: 12rem;
+  max-width: 18rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius, 0.375rem);
+  background-color: var(--bs-body-bg);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
+  pointer-events: none;
 }
 
-.container-manager-tab__edge-label {
-  fill: var(--bs-secondary-color);
-  font-size: 10px;
-  font-family: var(--bs-body-font-family);
+.container-manager-tab__topology-popover-kind {
+  margin-bottom: 0.15rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
-.container-manager-tab__node {
-  fill: var(--bs-primary);
-  stroke: var(--bs-body-bg);
-  stroke-width: 2;
+.container-manager-tab__topology-popover-title {
+  margin-bottom: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  word-break: break-word;
 }
 
-.container-manager-tab__node--network {
-  fill: var(--bs-info);
+.container-manager-tab__topology-popover-rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.65rem;
+  font-size: 0.75rem;
+
+  dt {
+    margin: 0;
+    color: var(--bs-secondary-color);
+  }
+
+  dd {
+    margin: 0;
+    word-break: break-word;
+  }
 }
 
-.container-manager-tab__node--exit {
-  fill: var(--bs-success);
+.container-manager-tab__topology-hint {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.5rem;
+  left: 0.75rem;
+  pointer-events: none;
 }
 
-.container-manager-tab__node--route {
-  fill: var(--bs-warning);
+.container-manager-tab__metric-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
 }
 
-.container-manager-tab__node-label {
-  fill: var(--bs-body-color);
-  font-size: 11px;
-  font-family: var(--bs-body-font-family);
+.container-manager-tab__metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.container-manager-tab__metric-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+
+  .bi {
+    font-size: 0.75rem;
+    line-height: 1;
+  }
 }
 
 .container-manager-tab__logs {
   max-height: 28rem;
   overflow: auto;
+  padding: var(--bs-card-spacer-y, 1rem) var(--bs-card-spacer-x, 1rem);
+  background-color: var(--bs-card-bg, var(--bs-body-bg));
   font-family: var(--bs-font-monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
   font-size: 0.8125rem;
   line-height: 1.45;

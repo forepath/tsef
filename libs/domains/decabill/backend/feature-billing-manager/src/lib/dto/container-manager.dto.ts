@@ -28,6 +28,8 @@ export interface ContainerManagerStatsHistoryPointDto {
   timestamp: string;
   cpuPercent: number | null;
   memoryPercent: number | null;
+  memoryUsageBytes: number | null;
+  memoryLimitBytes: number | null;
   blockReadBytes: number | null;
   blockWriteBytes: number | null;
   networkRxBytes: number | null;
@@ -50,10 +52,19 @@ export interface ContainerManagerLogsResponseDto {
   tail: number;
 }
 
+export type ContainerManagerNetworkNodeKind =
+  | 'container'
+  | 'network'
+  | 'exit'
+  | 'route'
+  | 'host_iface'
+  | 'host_gateway'
+  | 'internet';
+
 export interface ContainerManagerNetworkNodeDto {
   id: string;
   label: string;
-  kind: 'container' | 'network' | 'exit' | 'route';
+  kind: ContainerManagerNetworkNodeKind;
 }
 
 export interface ContainerManagerNetworkEdgeDto {
@@ -75,11 +86,27 @@ export interface ContainerManagerNetworkDto {
   routes: Array<{ destination: string; gateway?: string }>;
 }
 
+export interface ContainerManagerHostInterfaceDto {
+  name: string;
+  state: string;
+  addresses: string[];
+}
+
+export interface ContainerManagerHostRouteDto {
+  destination: string;
+  gateway?: string;
+  device?: string;
+}
+
 export interface ContainerManagerNetworksResponseDto {
   networks: ContainerManagerNetworkDto[];
   topology: {
     nodes: ContainerManagerNetworkNodeDto[];
     edges: ContainerManagerNetworkEdgeDto[];
   };
+  /** Host interfaces from `ip -j addr` when available. */
+  hostInterfaces: ContainerManagerHostInterfaceDto[];
+  /** Host routes from `ip -j route` when available. */
+  hostRoutes: ContainerManagerHostRouteDto[];
   collectedAt: string;
 }

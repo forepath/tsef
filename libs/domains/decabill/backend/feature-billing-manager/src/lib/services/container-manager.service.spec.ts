@@ -171,6 +171,99 @@ describe('ContainerManagerService', () => {
     );
   });
 
+  it('merges host interfaces into network topology when ip JSON is available', async () => {
+    sshExecutor.exec
+      .mockResolvedValueOnce({
+        code: 0,
+        stdout: `${JSON.stringify({ ID: 'net1', Name: 'bridge', Driver: 'bridge', Scope: 'local' })}\n`,
+        stderr: '',
+      })
+      .mockResolvedValueOnce({
+        code: 0,
+        stdout: JSON.stringify([
+          {
+            Id: 'net1',
+            Name: 'bridge',
+            Driver: 'bridge',
+            Scope: 'local',
+            Containers: { c1: { Name: 'web' } },
+            IPAM: { Config: [{ Subnet: '172.18.0.0/16', Gateway: '172.18.0.1' }] },
+          },
+        ]),
+        stderr: '',
+      })
+      .mockResolvedValueOnce({
+        code: 0,
+        stdout: JSON.stringify([
+          {
+            ifname: 'br-abc',
+            operstate: 'UP',
+            addr_info: [{ family: 'inet', local: '172.18.0.1', prefixlen: 16 }],
+          },
+          {
+            ifname: 'eth0',
+            operstate: 'UP',
+            addr_info: [{ family: 'inet', local: '203.0.113.10', prefixlen: 24 }],
+          },
+        ]),
+        stderr: '',
+      })
+      .mockResolvedValueOnce({
+        code: 0,
+        stdout: JSON.stringify([{ dst: 'default', gateway: '203.0.113.1', dev: 'eth0' }]),
+        stderr: '',
+      });
+
+    const result = await service.listNetworks('sub-1', 'item-1', { userId: 'user-1' });
+
+    expect(result.hostInterfaces).toHaveLength(2);
+    expect(result.hostRoutes).toEqual([{ destination: 'default', gateway: '203.0.113.1', device: 'eth0' }]);
+    expect(result.topology.nodes.some((node) => node.kind === 'host_iface')).toBe(true);
+    expect(result.topology.nodes.some((node) => node.kind === 'internet')).toBe(true);
+    expect(
+      result.topology.edges.some((edge) => edge.from === 'exit:172.18.0.1' && edge.to === 'host_iface:br-abc'),
+    ).toBe(true);
+    expect(
+      result.topology.edges.some(
+        (edge) => edge.from === 'host_iface:br-abc' && edge.to === 'host_iface:eth0' && edge.label === 'nat',
+      ),
+    ).toBe(true);
+  });
+
+  it('keeps Docker-only topology when host ip commands fail', async () => {
+    sshExecutor.exec
+      .mockResolvedValueOnce({
+        code: 0,
+        stdout: `${JSON.stringify({ ID: 'net1', Name: 'bridge', Driver: 'bridge', Scope: 'local' })}\n`,
+        stderr: '',
+      })
+      .mockResolvedValueOnce({
+        code: 0,
+        stdout: JSON.stringify([
+          {
+            Id: 'net1',
+            Name: 'bridge',
+            Driver: 'bridge',
+            Scope: 'local',
+            Containers: {},
+            IPAM: { Config: [{ Subnet: '172.18.0.0/16', Gateway: '172.18.0.1' }] },
+          },
+        ]),
+        stderr: '',
+      })
+      .mockResolvedValueOnce({ code: 1, stdout: '', stderr: 'ip: not found' })
+      .mockResolvedValueOnce({ code: 1, stdout: '', stderr: 'ip: not found' })
+      .mockResolvedValueOnce({ code: 1, stdout: '', stderr: 'ip: not found' });
+
+    const result = await service.listNetworks('sub-1', 'item-1', { userId: 'user-1' });
+
+    expect(result.hostInterfaces).toEqual([]);
+    expect(result.hostRoutes).toEqual([]);
+    expect(result.topology.nodes.every((node) => ['container', 'network', 'exit', 'route'].includes(node.kind))).toBe(
+      true,
+    );
+  });
+
   it('rejects invalid container ids for logs', async () => {
     await expect(service.getLogs('sub-1', 'item-1', '../etc/passwd', { userId: 'user-1' })).rejects.toBeInstanceOf(
       BadRequestException,

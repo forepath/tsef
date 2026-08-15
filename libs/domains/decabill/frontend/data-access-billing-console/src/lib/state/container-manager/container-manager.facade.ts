@@ -6,6 +6,8 @@ import {
   selectContainerManagerContainers,
   selectContainerManagerContainersCollectedAt,
   selectContainerManagerError,
+  selectContainerManagerHostInterfaces,
+  selectContainerManagerHostRoutes,
   selectContainerManagerLoadingAny,
   selectContainerManagerLoadingContainers,
   selectContainerManagerLoadingLogs,
@@ -34,6 +36,8 @@ export class ContainerManagerFacade {
   readonly networks$ = this.store.select(selectContainerManagerNetworks);
   readonly topologyNodes$ = this.store.select(selectContainerManagerTopologyNodes);
   readonly topologyEdges$ = this.store.select(selectContainerManagerTopologyEdges);
+  readonly hostInterfaces$ = this.store.select(selectContainerManagerHostInterfaces);
+  readonly hostRoutes$ = this.store.select(selectContainerManagerHostRoutes);
   readonly networksCollectedAt$ = this.store.select(selectContainerManagerNetworksCollectedAt);
   readonly selectedContainerId$ = this.store.select(selectContainerManagerSelectedContainerId);
   readonly selectedContainer$ = this.store.select(selectContainerManagerSelectedContainer);

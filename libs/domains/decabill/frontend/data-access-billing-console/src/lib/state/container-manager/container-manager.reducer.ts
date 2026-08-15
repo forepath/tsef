@@ -2,6 +2,8 @@ import { createReducer, on } from '@ngrx/store';
 
 import type {
   ContainerManagerContainer,
+  ContainerManagerHostInterface,
+  ContainerManagerHostRoute,
   ContainerManagerNetwork,
   ContainerManagerNetworkEdge,
   ContainerManagerNetworkNode,
@@ -33,6 +35,8 @@ export interface ContainerManagerState {
   networks: ContainerManagerNetwork[];
   topologyNodes: ContainerManagerNetworkNode[];
   topologyEdges: ContainerManagerNetworkEdge[];
+  hostInterfaces: ContainerManagerHostInterface[];
+  hostRoutes: ContainerManagerHostRoute[];
   networksCollectedAt: string | null;
   selectedContainerId: string | null;
   statsHistoryContainerId: string | null;
@@ -57,6 +61,8 @@ export const initialContainerManagerState: ContainerManagerState = {
   networks: [],
   topologyNodes: [],
   topologyEdges: [],
+  hostInterfaces: [],
+  hostRoutes: [],
   networksCollectedAt: null,
   selectedContainerId: null,
   statsHistoryContainerId: null,
@@ -108,6 +114,8 @@ export const containerManagerReducer = createReducer(
     networks: response.networks ?? [],
     topologyNodes: response.topology?.nodes ?? [],
     topologyEdges: response.topology?.edges ?? [],
+    hostInterfaces: response.hostInterfaces ?? [],
+    hostRoutes: response.hostRoutes ?? [],
     networksCollectedAt: response.collectedAt ?? null,
     loadingNetworks: false,
     error: null,

@@ -2661,6 +2661,21 @@
       <trans-unit id="featureContainerManager-noSearchResults" datatype="html">
         <source>No containers match your search.</source>
         </trans-unit>
+      <trans-unit id="featureContainerManager-statusRunning" datatype="html">
+        <source>Running</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-statusRestarting" datatype="html">
+        <source>Restarting</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-statusPaused" datatype="html">
+        <source>Paused</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-statusStopped" datatype="html">
+        <source>Stopped</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-statusUnknown" datatype="html">
+        <source>Unknown</source>
+        </trans-unit>
       <trans-unit id="featureContainerManager-showSidebar" datatype="html">
         <source>Containers</source>
         </trans-unit>
@@ -2736,17 +2751,56 @@
       <trans-unit id="featureContainerManager-topologyTitle" datatype="html">
         <source>Container network topology</source>
         </trans-unit>
-      <trans-unit id="featureContainerManager-noLiveStats" datatype="html">
-        <source>No live stats</source>
+      <trans-unit id="featureContainerManager-topologyHint" datatype="html">
+        <source>Hover a node for details · scroll to zoom · drag to pan</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyImage" datatype="html">
+        <source>Image</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyStatus" datatype="html">
+        <source>Status</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyLinks" datatype="html">
+        <source>Links</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindContainer" datatype="html">
+        <source>Container</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindNetwork" datatype="html">
+        <source>Network</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindExit" datatype="html">
+        <source>Exit</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindRoute" datatype="html">
+        <source>Route</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindHostIface" datatype="html">
+        <source>Host interface</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindHostGateway" datatype="html">
+        <source>Host gateway</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyKindInternet" datatype="html">
+        <source>Internet</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyAddresses" datatype="html">
+        <source>Addresses</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-topologyRoutes" datatype="html">
+        <source>Routes</source>
         </trans-unit>
       <trans-unit id="featureContainerManager-cpuSeries" datatype="html">
         <source>CPU %</source>
         </trans-unit>
       <trans-unit id="featureContainerManager-memorySeries" datatype="html">
-        <source>Memory %</source>
+        <source>Memory</source>
         </trans-unit>
-      <trans-unit id="featureContainerManager-resourceHistoryTitle" datatype="html">
-        <source>Resource history</source>
+      <trans-unit id="featureContainerManager-cpuHistoryTitle" datatype="html">
+        <source>CPU</source>
+        </trans-unit>
+      <trans-unit id="featureContainerManager-memoryHistoryTitle" datatype="html">
+        <source>Memory</source>
         </trans-unit>
       <trans-unit id="featureServicePlans-title" datatype="html">
         <source>Service Plans</source>

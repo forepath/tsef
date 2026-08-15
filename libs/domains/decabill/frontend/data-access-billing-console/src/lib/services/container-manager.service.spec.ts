@@ -34,6 +34,8 @@ describe('ContainerManagerService', () => {
   const networksResponse: ContainerManagerNetworksResponse = {
     networks: [],
     topology: { nodes: [], edges: [] },
+    hostInterfaces: [],
+    hostRoutes: [],
     collectedAt: '2026-08-13T12:00:00.000Z',
   };
 

@@ -27,6 +27,14 @@ export const selectContainerManagerTopologyEdges = createSelector(
   selectContainerManagerState,
   (state) => state.topologyEdges,
 );
+export const selectContainerManagerHostInterfaces = createSelector(
+  selectContainerManagerState,
+  (state) => state.hostInterfaces,
+);
+export const selectContainerManagerHostRoutes = createSelector(
+  selectContainerManagerState,
+  (state) => state.hostRoutes,
+);
 export const selectContainerManagerNetworksCollectedAt = createSelector(
   selectContainerManagerState,
   (state) => state.networksCollectedAt,

@@ -7405,6 +7405,8 @@ components:
           timestamp,
           cpuPercent,
           memoryPercent,
+          memoryUsageBytes,
+          memoryLimitBytes,
           blockReadBytes,
           blockWriteBytes,
           networkRxBytes,
@@ -7414,6 +7416,8 @@ components:
         timestamp: { type: string, format: date-time }
         cpuPercent: { type: number, nullable: true }
         memoryPercent: { type: number, nullable: true }
+        memoryUsageBytes: { type: number, nullable: true }
+        memoryLimitBytes: { type: number, nullable: true }
         blockReadBytes: { type: number, nullable: true }
         blockWriteBytes: { type: number, nullable: true }
         networkRxBytes: { type: number, nullable: true }
@@ -7444,7 +7448,20 @@ components:
       properties:
         id: { type: string }
         label: { type: string }
-        kind: { type: string, enum: [container, network, exit, route] }
+        kind:
+          {
+            type: string,
+            enum:
+              [
+                container,
+                network,
+                exit,
+                route,
+                host_iface,
+                host_gateway,
+                internet,
+              ],
+          }
     ContainerManagerNetworkEdge:
       type: object
       required: [id, from, to]
@@ -7476,9 +7493,25 @@ components:
             properties:
               destination: { type: string }
               gateway: { type: string }
+    ContainerManagerHostInterface:
+      type: object
+      required: [name, state, addresses]
+      properties:
+        name: { type: string }
+        state: { type: string }
+        addresses:
+          type: array
+          items: { type: string }
+    ContainerManagerHostRoute:
+      type: object
+      required: [destination]
+      properties:
+        destination: { type: string }
+        gateway: { type: string }
+        device: { type: string }
     ContainerManagerNetworksResponse:
       type: object
-      required: [networks, topology, collectedAt]
+      required: [networks, topology, hostInterfaces, hostRoutes, collectedAt]
       properties:
         networks:
           type: array
@@ -7496,6 +7529,14 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/ContainerManagerNetworkEdge'
+        hostInterfaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContainerManagerHostInterface'
+        hostRoutes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContainerManagerHostRoute'
         collectedAt: { type: string, format: date-time }
     UpdateSubscriptionItemDisplayNameDto:
       type: object

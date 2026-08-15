@@ -37,8 +37,9 @@ Collection runs as `root` on port 22 using the provisioning SSH key and the item
 
 1. Wait until the host is reachable
 2. Run read-only Docker CLI (`docker ps`, `docker stats --no-stream`, `docker logs --timestamps --tail`, `docker network ls` / `inspect`)
-3. Parse NDJSON / JSON / log text into DTOs; keep a short in-memory stats history (capped) for charts; cap log payload size for the UI
-4. On failure, return a generic client error and publish `addon.container_manager.collection_failed`
+3. For the network map, also run read-only host networking (`ip -j addr`, `ip -j route`) when available; merge host interfaces, default gateway, and an `internet` egress node into the Docker topology (fail soft to Docker-only if `ip` is unavailable)
+4. Parse NDJSON / JSON / log text into DTOs; keep a short in-memory stats history (capped) for charts with CPU percent plus memory usage/limit bytes; cap log payload size for the UI
+5. On failure, return a generic client error and publish `addon.container_manager.collection_failed`
 
 No mutating Docker commands are issued. Script output and private keys are never included in webhook payloads or customer-facing messages.
 

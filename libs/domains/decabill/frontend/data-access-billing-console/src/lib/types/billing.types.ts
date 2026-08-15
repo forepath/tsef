@@ -767,6 +767,8 @@ export interface ContainerManagerStatsHistoryPoint {
   timestamp: string;
   cpuPercent: number | null;
   memoryPercent: number | null;
+  memoryUsageBytes: number | null;
+  memoryLimitBytes: number | null;
   blockReadBytes: number | null;
   blockWriteBytes: number | null;
   networkRxBytes: number | null;
@@ -786,10 +788,19 @@ export interface ContainerManagerLogsResponse {
   tail: number;
 }
 
+export type ContainerManagerNetworkNodeKind =
+  | 'container'
+  | 'network'
+  | 'exit'
+  | 'route'
+  | 'host_iface'
+  | 'host_gateway'
+  | 'internet';
+
 export interface ContainerManagerNetworkNode {
   id: string;
   label: string;
-  kind: 'container' | 'network' | 'exit' | 'route';
+  kind: ContainerManagerNetworkNodeKind;
 }
 
 export interface ContainerManagerNetworkEdge {
@@ -810,12 +821,26 @@ export interface ContainerManagerNetwork {
   routes: Array<{ destination: string; gateway?: string }>;
 }
 
+export interface ContainerManagerHostInterface {
+  name: string;
+  state: string;
+  addresses: string[];
+}
+
+export interface ContainerManagerHostRoute {
+  destination: string;
+  gateway?: string;
+  device?: string;
+}
+
 export interface ContainerManagerNetworksResponse {
   networks: ContainerManagerNetwork[];
   topology: {
     nodes: ContainerManagerNetworkNode[];
     edges: ContainerManagerNetworkEdge[];
   };
+  hostInterfaces: ContainerManagerHostInterface[];
+  hostRoutes: ContainerManagerHostRoute[];
   collectedAt: string;
 }
 
