@@ -14,11 +14,11 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-import { SubscriptionStatus } from '../entities/subscription.entity';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { SubscriptionItemServerService } from '../services/subscription-item-server.service';
 import { SubscriptionService } from '../services/subscription.service';
 import { getBillingUserIdFromSocketUser } from '../utils/billing-socket-user.utils';
+import { isLiveAccessibleSubscriptionStatus } from '../utils/subscription-live-access.utils';
 import { BillingMeterRealtimeService } from './billing-meter-realtime.service';
 import {
   canonicalizeCloudInitService,
@@ -328,10 +328,10 @@ export class BillingStatusGateway implements OnGatewayInit, OnGatewayConnection,
 
       try {
         const subscriptions = await this.subscriptionService.listSubscriptions(currentUserId, 1000, 0);
-        const active = subscriptions.filter((s) => s.status === SubscriptionStatus.ACTIVE);
+        const accessible = subscriptions.filter((s) => isLiveAccessibleSubscriptionStatus(s.status));
         const items: DashboardStatusItemPayload[] = [];
 
-        for (const sub of active) {
+        for (const sub of accessible) {
           try {
             const subItems = await this.subscriptionItemServerService.listItems(sub.id, currentUserId);
             const activeItem = subItems.find((i) => i.provisioningStatus === 'active');

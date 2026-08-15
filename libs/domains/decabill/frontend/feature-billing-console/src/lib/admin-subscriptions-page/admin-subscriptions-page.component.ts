@@ -8,8 +8,8 @@ import {
   MetersFacade,
   SubscriptionMetersFacade,
   isSubscriptionItemDetailEligible,
-  isSubscriptionItemRemoved,
   resolveServiceDisplayLabel,
+  resolveSubscriptionItemProvisioningDisplayStatus,
   type AdminSubscriptionListItem,
   type CreateUsageMeterEntryDto,
   type MeterResponse,
@@ -181,19 +181,11 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   }
 
   itemProvisioningStatusLabel(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): string {
-    if (isSubscriptionItemRemoved(item, sub.status)) {
-      return getProvisioningStatusLabel('removed');
-    }
-
-    return getProvisioningStatusLabel(item.provisioningStatus);
+    return getProvisioningStatusLabel(resolveSubscriptionItemProvisioningDisplayStatus(item, sub.status));
   }
 
   itemProvisioningStatusBadgeClass(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): string {
-    if (isSubscriptionItemRemoved(item, sub.status)) {
-      return getProvisioningStatusBadgeClass('removed');
-    }
-
-    return getProvisioningStatusBadgeClass(item.provisioningStatus);
+    return getProvisioningStatusBadgeClass(resolveSubscriptionItemProvisioningDisplayStatus(item, sub.status));
   }
 
   serviceDetailLink(sub: AdminSubscriptionListItem, item: SubscriptionItemResponse): string[] {

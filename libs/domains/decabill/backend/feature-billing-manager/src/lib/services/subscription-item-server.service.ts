@@ -46,13 +46,7 @@ import { ContainerManagerService } from './container-manager.service';
 import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
 import { ProvisioningService } from './provisioning.service';
 import { SubscriptionService } from './subscription.service';
-
-const SERVICE_DETAIL_ACCESSIBLE_SUBSCRIPTION_STATUSES: ReadonlySet<SubscriptionStatus> = new Set([
-  SubscriptionStatus.ACTIVE,
-  SubscriptionStatus.PENDING_CANCEL,
-  SubscriptionStatus.PENDING_CONFIG_CHANGE,
-  SubscriptionStatus.PENDING_BACKORDER,
-]);
+import { isLiveAccessibleSubscriptionStatus } from '../utils/subscription-live-access.utils';
 
 const CLOUD_INIT_CONFIG_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -504,7 +498,7 @@ export class SubscriptionItemServerService {
 
   /** Service details / rename / power remain available while the subscription still owns a live service. */
   private isSubscriptionServiceDetailAccessible(status: SubscriptionStatus): boolean {
-    return SERVICE_DETAIL_ACCESSIBLE_SUBSCRIPTION_STATUSES.has(status);
+    return isLiveAccessibleSubscriptionStatus(status);
   }
 
   private async resolveItemForAction(subscriptionId: string, itemId: string, userId: string) {

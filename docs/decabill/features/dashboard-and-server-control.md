@@ -4,7 +4,10 @@ Customer overview of subscriptions with live server status and power actions for
 
 ## Overview
 
-The billing console **Overview** page (`/overview`) lists active subscriptions with provisioned items. For each item, users see hostname, FQDN, IP addresses, provider status, and action buttons to start, stop, or restart the cloud server.
+The billing console **Overview** page (`/overview`) lists live subscriptions with provisioned items
+(`active`, `pending_cancel`, `pending_withdrawal`, `pending_instant_cancel`, and other non-terminal live statuses).
+Instances stay on the dashboard until deprovisioned (`canceled` or provider reference cleared).
+For each item, users see hostname, FQDN, IP addresses, provider status, and action buttons to start, stop, or restart the cloud server.
 
 Status updates come from the [Real-time Status](./real-time-status.md) WebSocket when configured, or from REST polling via `GET .../server-info`.
 

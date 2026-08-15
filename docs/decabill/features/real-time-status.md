@@ -78,7 +78,7 @@ This mirrors REST subscription ownership checks on `GET .../server-info`.
 
 ## Payload Shape
 
-Each `dashboardStatusUpdate` contains items matching the REST server-info response for every active provisioned item across the user's subscriptions: subscription id, item id, hostname, FQDN, IPs, provider status, and metadata.
+Each `dashboardStatusUpdate` contains items matching the REST server-info response for every live provisioned item across the user's accessible subscriptions (`active`, pending cancel/withdrawal/instant cancel, and other non-terminal live statuses): subscription id, item id, hostname, FQDN, IPs, provider status, and metadata.
 
 ## Connection Flow
 

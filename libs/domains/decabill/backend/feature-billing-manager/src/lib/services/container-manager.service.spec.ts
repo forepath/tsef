@@ -114,6 +114,31 @@ describe('ContainerManagerService', () => {
     );
   });
 
+  it('allows pending withdrawal when the item is still provisioned', async () => {
+    subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'sub-1',
+      userId: 'user-1',
+      planId: 'plan-1',
+      status: 'pending_withdrawal',
+    });
+    sshExecutor.exec
+      .mockResolvedValueOnce({
+        code: 0,
+        stdout: `${JSON.stringify({ ID: 'abcdef123456', Names: 'web', Image: 'nginx', State: 'running', Status: 'Up 1 minute' })}\n`,
+        stderr: '',
+      })
+      .mockResolvedValueOnce({
+        code: 0,
+        stdout: `${JSON.stringify({ Name: 'web', CPUPerc: '1.5%', MemPerc: '10%', MemUsage: '10MiB / 100MiB', BlockIO: '1kB / 2kB', NetIO: '3kB / 4kB' })}\n`,
+        stderr: '',
+      });
+
+    const result = await service.listContainers('sub-1', 'item-1', { userId: 'user-1' });
+
+    expect(result.containers).toHaveLength(1);
+    expect(result.containers[0].name).toBe('web');
+  });
+
   it('rejects non-active provisioning items', async () => {
     subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue({
       id: 'item-1',

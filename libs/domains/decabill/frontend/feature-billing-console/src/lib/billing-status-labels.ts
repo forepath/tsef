@@ -79,6 +79,8 @@ export function getProvisioningStatusLabel(status: string | null | undefined): s
       return $localize`:@@featureBilling-provisioningStatusActive:Provisioned`;
     case 'failed':
       return $localize`:@@featureBilling-provisioningStatusFailed:Provisioning failed`;
+    case 'removing':
+      return $localize`:@@featureBilling-provisioningStatusRemoving:Removing`;
     case 'removed':
       return $localize`:@@featureBilling-provisioningStatusRemoved:Removed`;
     default:
@@ -95,6 +97,8 @@ export function getProvisioningStatusBadgeClass(status: string | null | undefine
       return 'billing-admin__chip--status-paid';
     case 'failed':
       return 'billing-admin__chip--status-overdue';
+    case 'removing':
+      return 'billing-admin__chip--status-partially-paid';
     case 'removed':
       return 'billing-admin__chip--status-void';
     default:
