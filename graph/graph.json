@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-11T16:03:38.262Z",
+  "generatedAt": "2026-08-15T09:55:39.198Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -6514,6 +6514,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/customer-number-sequence.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/customer-number-sequence.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/customer-profile.entity.ts",
       "type": "entity",
       "attrs": {
@@ -6752,6 +6761,15 @@
       "type": "entity",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-item.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-number-sequence.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-number-sequence.entity.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -7225,6 +7243,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-number-sequences.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-number-sequences.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-profiles.repository.ts",
       "type": "repository",
       "attrs": {
@@ -7463,6 +7490,15 @@
       "type": "repository",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-number-sequences.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-number-sequences.repository.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -12045,6 +12081,14 @@
       "type": "doc",
       "attrs": {
         "path": "docs/decabill/features/multi-tenancy.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/decabill/features/numbering.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/numbering.md",
         "languageOrKind": "md"
       }
     },
@@ -17276,6 +17320,15 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "datev_export.started",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:datev.debtor_range_exhausted",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "datev.debtor_range_exhausted",
         "projectName": "decabill-backend-feature-billing-manager",
         "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
       }
@@ -26306,6 +26359,66 @@
       }
     },
     {
+      "id": "concept:decabill-numbering",
+      "type": "concept",
+      "attrs": {
+        "title": "Numbering",
+        "docPath": "docs/decabill/features/numbering.md",
+        "sectionAnchor": "numbering",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-formats",
+      "type": "concept",
+      "attrs": {
+        "title": "Formats",
+        "docPath": "docs/decabill/features/numbering.md",
+        "sectionAnchor": "formats",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-storage",
+      "type": "concept",
+      "attrs": {
+        "title": "Storage",
+        "docPath": "docs/decabill/features/numbering.md",
+        "sectionAnchor": "storage",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-datev-ranges-and-unified-export",
+      "type": "concept",
+      "attrs": {
+        "title": "DATEV ranges and unified export",
+        "docPath": "docs/decabill/features/numbering.md",
+        "sectionAnchor": "datev-ranges-and-unified-export",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-operator-guidance",
+      "type": "concept",
+      "attrs": {
+        "title": "Operator guidance",
+        "docPath": "docs/decabill/features/numbering.md",
+        "sectionAnchor": "operator-guidance",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-related",
+      "type": "concept",
+      "attrs": {
+        "title": "Related",
+        "docPath": "docs/decabill/features/numbering.md",
+        "sectionAnchor": "related",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-application",
       "type": "concept",
       "attrs": {
@@ -26932,16 +27045,6 @@
         "title": "Realtime",
         "docPath": "docs/decabill/features/service-details.md",
         "sectionAnchor": "realtime",
-        "domain": "decabill"
-      }
-    },
-    {
-      "id": "concept:decabill-related",
-      "type": "concept",
-      "attrs": {
-        "title": "Related",
-        "docPath": "docs/decabill/features/service-details.md",
-        "sectionAnchor": "related",
         "domain": "decabill"
       }
     },
@@ -33484,6 +33587,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/customer-number-sequence.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/customer-profile.entity.ts",
       "type": "contains"
     },
@@ -33615,6 +33723,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-item.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription-number-sequence.entity.ts",
       "type": "contains"
     },
     {
@@ -33879,6 +33992,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-number-sequences.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-profiles.repository.ts",
       "type": "contains"
     },
@@ -34010,6 +34128,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-number-sequences.repository.ts",
       "type": "contains"
     },
     {
@@ -38480,6 +38603,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:datev_export.started",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:datev.debtor_range_exhausted",
       "type": "contains"
     },
     {
@@ -44550,6 +44678,41 @@
     {
       "from": "file:docs/decabill/features/multi-tenancy.md",
       "to": "concept:decabill-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/numbering.md",
+      "to": "concept:decabill-numbering",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/numbering.md",
+      "to": "concept:decabill-overview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/numbering.md",
+      "to": "concept:decabill-formats",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/numbering.md",
+      "to": "concept:decabill-storage",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/numbering.md",
+      "to": "concept:decabill-datev-ranges-and-unified-export",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/numbering.md",
+      "to": "concept:decabill-operator-guidance",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/numbering.md",
+      "to": "concept:decabill-related",
       "type": "contains"
     },
     {
@@ -53383,8 +53546,18 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/customer-profiles-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-debtor-accounts.repository.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/customer-profiles.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-profiles.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/customer-profiles.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-number-sequences.repository.ts",
       "type": "injects"
     },
     {
@@ -54640,6 +54813,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-number-sequences.repository.ts",
       "type": "injects"
     },
     {
@@ -56700,6 +56878,16 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/invoice-number-sequences.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-number-sequences.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-number-sequences.repository.ts",
       "type": "provides"
     },
     {
@@ -63353,6 +63541,16 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-related",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-related",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-kill-switch",
       "to": "api:HTTP:POST:/auth/register",
       "type": "documents"
@@ -64055,16 +64253,6 @@
     {
       "from": "concept:decabill-meter-history",
       "to": "api:HTTP:GET:/admin/billing/subscriptions",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:GET:/subscriptions",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:POST:/subscriptions",
       "type": "documents"
     },
     {
@@ -66594,6 +66782,11 @@
     },
     {
       "from": "file:docs/decabill/features/multi-tenancy.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/decabill/features/numbering.md",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -70518,6 +70711,36 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:decabill-numbering",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-formats",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-storage",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-datev-ranges-and-unified-export",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-operator-guidance",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-related",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:decabill-application",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -70829,11 +71052,6 @@
     },
     {
       "from": "concept:decabill-realtime",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
-      "from": "concept:decabill-related",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

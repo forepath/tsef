@@ -11,6 +11,8 @@ describe('CustomerProfilesService', () => {
     ({
       id: 'cp-1',
       userId: 'user-1',
+      customerNumber: 'CUS-000001',
+      numberScope: '__shared__',
       firstName: 'John',
       lastName: 'Doe',
       email: 'john@example.com',
@@ -32,10 +34,23 @@ describe('CustomerProfilesService', () => {
     validateAsync: jest.fn(),
   };
 
-  const createService = (repository: any) => new CustomerProfilesService(repository, vatIdValidationService as never);
+  const customerNumberSequencesRepository = {
+    nextCustomerNumber: jest.fn().mockResolvedValue({ number: 'CUS-000001', numberScope: '__shared__' }),
+  };
+
+  const createService = (repository: any) =>
+    new CustomerProfilesService(
+      repository,
+      customerNumberSequencesRepository as never,
+      vatIdValidationService as never,
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();
+    customerNumberSequencesRepository.nextCustomerNumber.mockResolvedValue({
+      number: 'CUS-000001',
+      numberScope: '__shared__',
+    });
     vatIdValidationService.validateOnProfileChange.mockResolvedValue({
       status: VatIdValidationStatus.NONE,
       source: null,
@@ -44,18 +59,49 @@ describe('CustomerProfilesService', () => {
     });
   });
 
-  it('creates profile when missing', async () => {
+  it('creates profile when missing and allocates customer number', async () => {
     const repository = {
       findByUserId: jest.fn().mockResolvedValue(null),
-      create: jest
-        .fn()
-        .mockResolvedValue({ id: 'p1', userId: 'user-1', vatIdValidationStatus: VatIdValidationStatus.NONE }),
+      create: jest.fn().mockResolvedValue({
+        id: 'p1',
+        userId: 'user-1',
+        customerNumber: 'CUS-000001',
+        numberScope: '__shared__',
+        vatIdValidationStatus: VatIdValidationStatus.NONE,
+      }),
       update: jest.fn().mockImplementation((_id, patch) => Promise.resolve({ id: 'p1', userId: 'user-1', ...patch })),
     } as any;
     const service = createService(repository);
     const result = await service.upsert('user-1', { firstName: 'Jane' });
 
     expect(result.id).toBe('p1');
+    expect(customerNumberSequencesRepository.nextCustomerNumber).toHaveBeenCalled();
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customerNumber: 'CUS-000001',
+        numberScope: '__shared__',
+      }),
+    );
+  });
+
+  it('does not reallocate customer number on update', async () => {
+    const existing = createCompleteProfile();
+    const repository = {
+      findByUserId: jest.fn().mockResolvedValue(existing),
+      update: jest.fn().mockResolvedValue({ ...existing, firstName: 'Jane' }),
+    } as any;
+    const service = createService(repository);
+
+    await service.upsert('user-1', { firstName: 'Jane' });
+
+    expect(customerNumberSequencesRepository.nextCustomerNumber).not.toHaveBeenCalled();
+    expect(repository.update).toHaveBeenCalledWith(
+      'cp-1',
+      expect.not.objectContaining({
+        customerNumber: expect.anything(),
+        numberScope: expect.anything(),
+      }),
+    );
   });
 
   it('infers business customer type from company and validates VAT on create', async () => {
@@ -64,6 +110,8 @@ describe('CustomerProfilesService', () => {
       create: jest.fn().mockResolvedValue({
         id: 'p1',
         userId: 'user-1',
+        customerNumber: 'CUS-000001',
+        numberScope: '__shared__',
         company: 'Acme',
         customerType: CustomerType.BUSINESS,
         vatId: 'DE123456789',
@@ -89,6 +137,8 @@ describe('CustomerProfilesService', () => {
       expect.objectContaining({
         customerType: CustomerType.BUSINESS,
         vatId: 'DE123456789',
+        customerNumber: 'CUS-000001',
+        numberScope: '__shared__',
       }),
     );
     expect(vatIdValidationService.validateOnProfileChange).toHaveBeenCalled();

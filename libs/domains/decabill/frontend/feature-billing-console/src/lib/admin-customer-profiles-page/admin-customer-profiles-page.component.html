@@ -46,10 +46,17 @@
           @for (profile of profiles(); track profile.id) {
             <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-3">
               <div class="min-w-0 flex-grow-1">
-                <div class="fw-semibold mb-1">{{ profilePrimaryTitle(profile) }}</div>
-                @if (profileSecondaryName(profile); as contactName) {
-                  <div class="small text-muted mb-1">{{ contactName }}</div>
-                }
+                <div class="fw-semibold mb-1 d-flex align-items-center flex-wrap gap-2">
+                  @if (profile.customerNumber) {
+                    <span
+                      class="info-badge text-muted bg-body-secondary py-1 px-2 rounded fw-normal"
+                      [attr.title]="profile.customerNumber"
+                    >
+                      {{ profile.customerNumber }}
+                    </span>
+                  }
+                  <span class="text-truncate">{{ profilePrimaryTitle(profile) }}</span>
+                </div>
                 <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
                   <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
                     <span
@@ -89,6 +96,9 @@
                     <span class="me-2">
                       <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ profileCountryLabel(profile.country) }}
                     </span>
+                    @if (profileSecondaryName(profile); as contactName) {
+                      <span class="me-2"> <i class="bi bi-person me-1" aria-hidden="true"></i>{{ contactName }} </span>
+                    }
                     <span class="me-2">
                       <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>{{ formatDate(profile.updatedAt) }}
                     </span>
@@ -280,6 +290,34 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="editCustomerNumber" i18n="@@featureAdminProfiles-customerNumber"
+              >Customer number</label
+            >
+            <input
+              id="editCustomerNumber"
+              class="form-control"
+              [value]="editForm.customerNumber || ''"
+              readonly
+              disabled
+              aria-readonly="true"
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="editDatevDebtorNumber" i18n="@@featureAdminProfiles-datevDebtorNumber"
+              >DATEV debtor number</label
+            >
+            <input
+              id="editDatevDebtorNumber"
+              class="form-control"
+              [value]="datevDebtorNumberDisplay(editForm.datevDebtorNumber)"
+              readonly
+              disabled
+              aria-readonly="true"
+            />
+          </div>
+        </div>
         <ng-container *ngTemplateOutlet="profileFields; context: { form: editForm, prefix: 'edit' }"></ng-container>
       </div>
       <div class="modal-footer">
@@ -434,37 +472,63 @@
 </div>
 
 <ng-template #profileFields let-form="form" let-prefix="prefix">
-  <div class="row g-2">
-    <div class="col-md-6">
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label" [attr.for]="prefix + 'FirstName'" i18n="@@featureAdminProfiles-firstName"
+        >First name</label
+      >
       <input
-        class="form-control mb-2"
-        placeholder="First name"
+        type="text"
+        class="form-control"
+        [id]="prefix + 'FirstName'"
         [(ngModel)]="form.firstName"
         [name]="prefix + 'FirstName'"
       />
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 mb-3">
+      <label class="form-label" [attr.for]="prefix + 'LastName'" i18n="@@featureAdminProfiles-lastName"
+        >Last name</label
+      >
       <input
-        class="form-control mb-2"
-        placeholder="Last name"
+        type="text"
+        class="form-control"
+        [id]="prefix + 'LastName'"
         [(ngModel)]="form.lastName"
         [name]="prefix + 'LastName'"
       />
     </div>
   </div>
-  <input class="form-control mb-2" placeholder="Company" [(ngModel)]="form.company" [name]="prefix + 'Company'" />
-  <div class="row g-2">
-    <div class="col-md-6">
-      <select class="form-select mb-2" [(ngModel)]="form.customerType" [name]="prefix + 'CustomerType'">
+  <div class="mb-3">
+    <label class="form-label" [attr.for]="prefix + 'Company'" i18n="@@featureAdminProfiles-company">Company</label>
+    <input
+      type="text"
+      class="form-control"
+      [id]="prefix + 'Company'"
+      [(ngModel)]="form.company"
+      [name]="prefix + 'Company'"
+    />
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label" [attr.for]="prefix + 'CustomerType'" i18n="@@featureAdminProfiles-customerType"
+        >Customer type</label
+      >
+      <select
+        class="form-select"
+        [id]="prefix + 'CustomerType'"
+        [(ngModel)]="form.customerType"
+        [name]="prefix + 'CustomerType'"
+      >
         <option value="consumer" i18n="@@featureBilling-customerTypeConsumer">Consumer</option>
         <option value="business" i18n="@@featureBilling-customerTypeBusiness">Business</option>
       </select>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 mb-3">
+      <label class="form-label" [attr.for]="prefix + 'VatId'" i18n="@@featureAdminProfiles-vatId">VAT ID</label>
       <input
-        class="form-control mb-2"
-        placeholder="VAT ID"
-        i18n-placeholder="@@featureAdminProfiles-vatIdPlaceholder"
+        type="text"
+        class="form-control"
+        [id]="prefix + 'VatId'"
         [(ngModel)]="form.vatId"
         [name]="prefix + 'VatId'"
         autocomplete="off"
@@ -472,54 +536,104 @@
     </div>
   </div>
   @if (prefix === 'edit') {
-    <input
-      class="form-control mb-2"
-      [value]="vatIdValidationStatusLabel(editForm.vatIdValidationStatus)"
-      readonly
-      disabled
-      aria-readonly="true"
-      i18n-aria-label="@@featureAdminProfiles-vatIdValidationStatus"
-      aria-label="VAT ID validation"
-    />
-    @if (editForm.vatIdValidatedAt) {
-      <p class="form-text mb-2">
-        <span i18n="@@featureAdminProfiles-vatIdValidatedAt">Validated at:</span>
-        {{ formatDate(editForm.vatIdValidatedAt) }}
-      </p>
-    }
-  }
-  <input class="form-control mb-2" placeholder="Email" [(ngModel)]="form.email" [name]="prefix + 'Email'" />
-  <input
-    class="form-control mb-2"
-    placeholder="Address line 1"
-    [(ngModel)]="form.addressLine1"
-    [name]="prefix + 'Address1'"
-  />
-  <input
-    class="form-control mb-2"
-    placeholder="Address line 2"
-    [(ngModel)]="form.addressLine2"
-    [name]="prefix + 'Address2'"
-  />
-  <div class="row g-2">
-    <div class="col-md-4">
+    <div class="mb-3">
+      <label class="form-label" i18n="@@featureAdminProfiles-vatIdValidationStatus">VAT ID validation</label>
       <input
-        class="form-control mb-2"
-        placeholder="Postal code"
+        type="text"
+        class="form-control"
+        [value]="vatIdValidationStatusLabel(editForm.vatIdValidationStatus)"
+        readonly
+        disabled
+        aria-readonly="true"
+      />
+      @if (editForm.vatIdValidatedAt) {
+        <div class="form-text">
+          <span i18n="@@featureAdminProfiles-vatIdValidatedAt">Validated at:</span>
+          {{ formatDate(editForm.vatIdValidatedAt) }}
+        </div>
+      }
+    </div>
+  }
+  <div class="mb-3">
+    <label class="form-label" [attr.for]="prefix + 'Email'" i18n="@@featureAdminProfiles-email">Email</label>
+    <input
+      type="email"
+      class="form-control"
+      [id]="prefix + 'Email'"
+      [(ngModel)]="form.email"
+      [name]="prefix + 'Email'"
+    />
+  </div>
+  <div class="mb-3">
+    <label class="form-label" [attr.for]="prefix + 'Address1'" i18n="@@featureAdminProfiles-addressLine1"
+      >Address line 1</label
+    >
+    <input
+      type="text"
+      class="form-control"
+      [id]="prefix + 'Address1'"
+      [(ngModel)]="form.addressLine1"
+      [name]="prefix + 'Address1'"
+    />
+  </div>
+  <div class="mb-3">
+    <label class="form-label" [attr.for]="prefix + 'Address2'" i18n="@@featureAdminProfiles-addressLine2"
+      >Address line 2</label
+    >
+    <input
+      type="text"
+      class="form-control"
+      [id]="prefix + 'Address2'"
+      [(ngModel)]="form.addressLine2"
+      [name]="prefix + 'Address2'"
+    />
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label" [attr.for]="prefix + 'PostalCode'" i18n="@@featureAdminProfiles-postalCode"
+        >Postal code</label
+      >
+      <input
+        type="text"
+        class="form-control"
+        [id]="prefix + 'PostalCode'"
         [(ngModel)]="form.postalCode"
         [name]="prefix + 'PostalCode'"
       />
     </div>
-    <div class="col-md-4">
-      <input class="form-control mb-2" placeholder="City" [(ngModel)]="form.city" [name]="prefix + 'City'" />
+    <div class="col-md-4 mb-3">
+      <label class="form-label" [attr.for]="prefix + 'City'" i18n="@@featureAdminProfiles-city">City</label>
+      <input type="text" class="form-control" [id]="prefix + 'City'" [(ngModel)]="form.city" [name]="prefix + 'City'" />
     </div>
-    <div class="col-md-4">
-      <select class="form-select mb-2" [(ngModel)]="form.country" [name]="prefix + 'Country'">
+    <div class="col-md-4 mb-3">
+      <label class="form-label" [attr.for]="prefix + 'State'" i18n="@@featureAdminProfiles-state">State / Region</label>
+      <input
+        type="text"
+        class="form-control"
+        [id]="prefix + 'State'"
+        [(ngModel)]="form.state"
+        [name]="prefix + 'State'"
+      />
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label" [attr.for]="prefix + 'Country'" i18n="@@featureAdminProfiles-country">Country</label>
+      <select class="form-select" [id]="prefix + 'Country'" [(ngModel)]="form.country" [name]="prefix + 'Country'">
         @for (country of countryOptions; track country.code) {
           <option [value]="country.code">{{ country.name }}</option>
         }
       </select>
     </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label" [attr.for]="prefix + 'Phone'" i18n="@@featureAdminProfiles-phone">Phone</label>
+      <input
+        type="text"
+        class="form-control"
+        [id]="prefix + 'Phone'"
+        [(ngModel)]="form.phone"
+        [name]="prefix + 'Phone'"
+      />
+    </div>
   </div>
-  <input class="form-control mb-2" placeholder="Phone" [(ngModel)]="form.phone" [name]="prefix + 'Phone'" />
 </ng-template>

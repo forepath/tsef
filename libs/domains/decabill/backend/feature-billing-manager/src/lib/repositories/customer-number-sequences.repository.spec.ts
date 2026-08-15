@@ -1,8 +1,8 @@
 import { SHARED_NUMBER_SCOPE, TENANTS_SHARED_NUMBERS_ENV } from '@forepath/shared/backend';
 
-import { InvoiceNumberSequencesRepository } from './invoice-number-sequences.repository';
+import { CustomerNumberSequencesRepository } from './customer-number-sequences.repository';
 
-describe('InvoiceNumberSequencesRepository', () => {
+describe('CustomerNumberSequencesRepository', () => {
   const originalSharedNumbers = process.env[TENANTS_SHARED_NUMBERS_ENV];
 
   afterEach(() => {
@@ -13,37 +13,37 @@ describe('InvoiceNumberSequencesRepository', () => {
     }
   });
 
-  function createRepository(query: jest.Mock): InvoiceNumberSequencesRepository {
+  function createRepository(query: jest.Mock): CustomerNumberSequencesRepository {
     const mockRepository = {
       manager: {
         transaction: jest.fn(async (callback) => callback({ query })),
       },
     };
 
-    return new InvoiceNumberSequencesRepository(mockRepository as never);
+    return new CustomerNumberSequencesRepository(mockRepository as never);
   }
 
-  it('nextInvoiceNumber increments shared sequence by default', async () => {
+  it('allocates next shared customer number by default', async () => {
     delete process.env[TENANTS_SHARED_NUMBERS_ENV];
 
     const query = jest.fn().mockResolvedValue([{ last_value: 1 }]);
     const repository = createRepository(query);
-    const number = await repository.nextInvoiceNumber(2026);
+    const result = await repository.nextCustomerNumber();
 
-    expect(number).toBe('INV-2026-00001');
-    expect(query).toHaveBeenCalledWith(expect.stringContaining('ON CONFLICT (tenant_id, year)'), [
-      SHARED_NUMBER_SCOPE,
-      2026,
-    ]);
+    expect(result).toEqual({ number: 'CUS-000001', numberScope: SHARED_NUMBER_SCOPE });
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('ON CONFLICT (scope_key)'), [SHARED_NUMBER_SCOPE]);
   });
 
-  it('formats padded invoice numbers for existing shared sequence row', async () => {
+  it('increments an existing shared sequence row', async () => {
     delete process.env[TENANTS_SHARED_NUMBERS_ENV];
 
     const query = jest.fn().mockResolvedValue([{ last_value: 42 }]);
     const repository = createRepository(query);
 
-    await expect(repository.nextInvoiceNumber(2026)).resolves.toBe('INV-2026-00042');
+    await expect(repository.nextCustomerNumber()).resolves.toEqual({
+      number: 'CUS-000042',
+      numberScope: SHARED_NUMBER_SCOPE,
+    });
   });
 
   it('uses tenant scope when TENANTS_SHARED_NUMBERS is false', async () => {
@@ -51,9 +51,9 @@ describe('InvoiceNumberSequencesRepository', () => {
 
     const query = jest.fn().mockResolvedValue([{ last_value: 1 }]);
     const repository = createRepository(query);
-    const number = await repository.nextInvoiceNumber(2026);
+    const result = await repository.nextCustomerNumber();
 
-    expect(number).toBe('INV-2026-00001');
-    expect(query).toHaveBeenCalledWith(expect.stringContaining('ON CONFLICT (tenant_id, year)'), ['default', 2026]);
+    expect(result).toEqual({ number: 'CUS-000001', numberScope: 'default' });
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('ON CONFLICT (scope_key)'), ['default']);
   });
 });

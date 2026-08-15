@@ -31,6 +31,7 @@ export class UpdateCustomerProfileCustomDataDto {
 export class AdminCustomerProfileListItemDto {
   id!: string;
   userId!: string;
+  customerNumber!: string;
   userEmail?: string;
   firstName?: string;
   lastName?: string;
@@ -49,6 +50,9 @@ export class AdminCustomerProfileListItemDto {
 export class AdminCustomerProfileDetailDto extends CustomerProfileDto {
   id!: string;
   userId!: string;
+  customerNumber!: string;
+  numberScope!: string;
+  datevDebtorNumber?: number | null;
   userEmail?: string;
   isComplete!: boolean;
   stripeCustomerId?: string;

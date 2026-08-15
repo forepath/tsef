@@ -10,6 +10,7 @@ import { BackordersRepository } from '../repositories/backorders.repository';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
 import { ServiceTypesRepository } from '../repositories/service-types.repository';
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
+import { SubscriptionNumberSequencesRepository } from '../repositories/subscription-number-sequences.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { buildProvisioningUserData, normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
 import { CloudInitServiceType } from '../utils/cloud-init/integrated-provisioning-service';
@@ -82,6 +83,7 @@ export class SubscriptionService {
     private readonly servicePlansRepository: ServicePlansRepository,
     private readonly serviceTypesRepository: ServiceTypesRepository,
     private readonly subscriptionsRepository: SubscriptionsRepository,
+    private readonly subscriptionNumberSequencesRepository: SubscriptionNumberSequencesRepository,
     private readonly subscriptionItemsRepository: SubscriptionItemsRepository,
     private readonly billingScheduleService: BillingScheduleService,
     private readonly cancellationPolicyService: CancellationPolicyService,
@@ -282,9 +284,12 @@ export class SubscriptionService {
       plan.billingIntervalValue,
       plan.billingDayOfMonth,
     );
+    const allocatedNumber = await this.subscriptionNumberSequencesRepository.nextSubscriptionNumber();
     const subscription = await this.subscriptionsRepository.create({
       userId,
       planId,
+      number: allocatedNumber.number,
+      numberScope: allocatedNumber.numberScope,
       status: SubscriptionStatus.ACTIVE,
       autoBackorder,
       currentPeriodStart: schedule.currentPeriodStart,
@@ -323,8 +328,7 @@ export class SubscriptionService {
       }
     }
 
-    // Reload so DB-generated columns (e.g. the sequence-backed `number`) are populated on the
-    // returned entity; save() does not reliably hydrate database defaults.
+    // Reload so relations and any DB-side defaults are fully populated on the returned entity.
     const created = await this.subscriptionsRepository.findByIdOrThrow(subscription.id);
 
     if (plan.billInAdvance === true) {
@@ -383,9 +387,12 @@ export class SubscriptionService {
       plan.billingIntervalValue,
       plan.billingDayOfMonth,
     );
+    const allocatedNumber = await this.subscriptionNumberSequencesRepository.nextSubscriptionNumber();
     const subscription = await this.subscriptionsRepository.create({
       userId,
       planId: plan.id,
+      number: allocatedNumber.number,
+      numberScope: allocatedNumber.numberScope,
       status: SubscriptionStatus.ACTIVE,
       autoBackorder: false,
       currentPeriodStart: schedule.currentPeriodStart,

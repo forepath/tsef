@@ -2,8 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
-import type { DatevTenantExportConfig } from './datev-export-config.service';
+import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { DatevDebtorAccountsRepository } from '../repositories/datev-debtor-accounts.repository';
+import { resolveNumberScopeKey } from '../utils/number-scope.utils';
+
+import type { DatevTenantExportConfig } from './datev-export-config.service';
 
 const MAX_ALLOCATION_ATTEMPTS = 5;
 
@@ -19,7 +22,10 @@ function isUniqueConstraintViolation(error: unknown): boolean {
 
 @Injectable()
 export class DatevDebtorAccountService {
-  constructor(private readonly debtorAccountsRepository: DatevDebtorAccountsRepository) {}
+  constructor(
+    private readonly debtorAccountsRepository: DatevDebtorAccountsRepository,
+    private readonly billingNotificationPublisher: BillingNotificationPublisher,
+  ) {}
 
   async resolveDebtorNumber(tenantId: string, userId: string, config: DatevTenantExportConfig): Promise<number> {
     const existing = await this.debtorAccountsRepository.findByTenantAndUserId(tenantId, userId);
@@ -28,6 +34,8 @@ export class DatevDebtorAccountService {
       return existing.debtorNumber;
     }
 
+    const allocationScope = resolveNumberScopeKey();
+
     for (let attempt = 0; attempt < MAX_ALLOCATION_ATTEMPTS; attempt += 1) {
       const raced = await this.debtorAccountsRepository.findByTenantAndUserId(tenantId, userId);
 
@@ -35,15 +43,22 @@ export class DatevDebtorAccountService {
         return raced.debtorNumber;
       }
 
-      const max = await this.debtorAccountsRepository.findMaxDebtorNumber(tenantId);
+      const max = await this.debtorAccountsRepository.findMaxDebtorNumber(allocationScope);
       const next = max == null ? config.debtorAccountStart : max + 1;
 
       if (next > config.debtorAccountEnd) {
+        this.billingNotificationPublisher.publishDebtorRangeExhausted({
+          tenantId,
+          nextCandidate: next,
+          rangeStart: config.debtorAccountStart,
+          rangeEnd: config.debtorAccountEnd,
+          allocationScope,
+        });
         throw new Error(`Debtor account range exhausted for tenant ${tenantId}`);
       }
 
       try {
-        const created = await this.debtorAccountsRepository.create(tenantId, userId, next);
+        const created = await this.debtorAccountsRepository.create(tenantId, userId, next, allocationScope);
 
         return created.debtorNumber;
       } catch (error) {

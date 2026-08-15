@@ -43,6 +43,8 @@ describe('CustomerProfilesController', () => {
     customerProfilesService.getByUserId.mockResolvedValue({
       id: 'p1',
       userId: 'user-1',
+      customerNumber: 'CUS-000007',
+      numberScope: '__shared__',
       firstName: 'Ada',
       lastName: 'Lovelace',
       company: 'Analytical Engines',
@@ -65,6 +67,7 @@ describe('CustomerProfilesController', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
+        customerNumber: 'CUS-000007',
         customerType: CustomerType.BUSINESS,
         vatId: 'DE123456789',
         vatIdValidationStatus: VatIdValidationStatus.VALID,
@@ -72,12 +75,15 @@ describe('CustomerProfilesController', () => {
         supportsAutoPayment: true,
       }),
     );
+    expect(result).not.toHaveProperty('numberScope');
+    expect(result).not.toHaveProperty('datevDebtorNumber');
   });
 
   it('upserts and maps response', async () => {
     customerProfilesService.upsert.mockResolvedValue({
       id: 'p1',
       userId: 'user-1',
+      customerNumber: 'CUS-000007',
       firstName: 'Ada',
       lastName: 'Lovelace',
       customerType: CustomerType.CONSUMER,
@@ -98,6 +104,7 @@ describe('CustomerProfilesController', () => {
 
     expect(customerProfilesService.upsert).toHaveBeenCalledWith('user-1', expect.any(Object));
     expect(result.id).toBe('p1');
+    expect(result.customerNumber).toBe('CUS-000007');
   });
 
   it('revalidateVatId maps VAT status fields', async () => {

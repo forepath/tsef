@@ -13,9 +13,11 @@ import type { CustomerTrustScoreResponseDto } from '../dto/customer-trust-score.
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { CustomerProfilesRepository } from '../repositories/customer-profiles.repository';
+import { DatevDebtorAccountsRepository } from '../repositories/datev-debtor-accounts.repository';
 import { InvoicesRepository } from '../repositories/invoices.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { CustomerTrustScoreService } from '../trust-score/customer-trust-score.service';
+import { getRequiredTenantId } from '../utils/tenant-query.utils';
 
 import { CustomerProfilesService } from './customer-profiles.service';
 
@@ -29,6 +31,7 @@ export class CustomerProfilesAdminService {
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly customerTrustScoreService: CustomerTrustScoreService,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
+    private readonly datevDebtorAccountsRepository: DatevDebtorAccountsRepository,
   ) {}
 
   async list(limit: number, offset: number): Promise<PaginatedAdminCustomerProfilesResponseDto> {
@@ -62,8 +65,12 @@ export class CustomerProfilesAdminService {
       await this.customerProfilesRepository.findByIdOrThrow(id),
     );
     const user = await this.usersRepository.findByIdForTenant(profile.userId);
+    const debtor = await this.datevDebtorAccountsRepository.findByTenantAndUserId(
+      getRequiredTenantId(),
+      profile.userId,
+    );
 
-    return this.mapDetail(profile, user?.email);
+    return this.mapDetail(profile, user?.email, debtor?.debtorNumber ?? null);
   }
 
   async getTrustScore(id: string): Promise<CustomerTrustScoreResponseDto> {
@@ -153,6 +160,10 @@ export class CustomerProfilesAdminService {
     const next = { ...customData, [key]: value };
     const updated = await this.customerProfilesRepository.update(id, { customData: next });
     const user = await this.usersRepository.findByIdForTenant(updated.userId);
+    const debtor = await this.datevDebtorAccountsRepository.findByTenantAndUserId(
+      getRequiredTenantId(),
+      updated.userId,
+    );
 
     this.billingNotificationPublisher.publish(
       'customer_profile.custom_data_added',
@@ -160,7 +171,7 @@ export class CustomerProfilesAdminService {
       updated.userId,
     );
 
-    return this.mapDetail(updated, user?.email);
+    return this.mapDetail(updated, user?.email, debtor?.debtorNumber ?? null);
   }
 
   async updateCustomData(id: string, key: string, value: string): Promise<AdminCustomerProfileDetailDto> {
@@ -175,6 +186,10 @@ export class CustomerProfilesAdminService {
     const next = { ...customData, [key]: value };
     const updated = await this.customerProfilesRepository.update(id, { customData: next });
     const user = await this.usersRepository.findByIdForTenant(updated.userId);
+    const debtor = await this.datevDebtorAccountsRepository.findByTenantAndUserId(
+      getRequiredTenantId(),
+      updated.userId,
+    );
 
     this.billingNotificationPublisher.publish(
       'customer_profile.custom_data_updated',
@@ -182,7 +197,7 @@ export class CustomerProfilesAdminService {
       updated.userId,
     );
 
-    return this.mapDetail(updated, user?.email);
+    return this.mapDetail(updated, user?.email, debtor?.debtorNumber ?? null);
   }
 
   async deleteCustomData(id: string, key: string): Promise<AdminCustomerProfileDetailDto> {
@@ -200,6 +215,10 @@ export class CustomerProfilesAdminService {
 
     const updated = await this.customerProfilesRepository.update(id, { customData: next });
     const user = await this.usersRepository.findByIdForTenant(updated.userId);
+    const debtor = await this.datevDebtorAccountsRepository.findByTenantAndUserId(
+      getRequiredTenantId(),
+      updated.userId,
+    );
 
     this.billingNotificationPublisher.publish(
       'customer_profile.custom_data_deleted',
@@ -207,7 +226,7 @@ export class CustomerProfilesAdminService {
       updated.userId,
     );
 
-    return this.mapDetail(updated, user?.email);
+    return this.mapDetail(updated, user?.email, debtor?.debtorNumber ?? null);
   }
 
   private assertCustomDataKey(key: string): void {
@@ -244,6 +263,7 @@ export class CustomerProfilesAdminService {
     return {
       id: profile.id,
       userId: profile.userId,
+      customerNumber: profile.customerNumber,
       userEmail,
       firstName: profile.firstName,
       lastName: profile.lastName,
@@ -264,6 +284,7 @@ export class CustomerProfilesAdminService {
     return {
       id: row.id,
       userId: row.userId,
+      customerNumber: row.customerNumber,
       firstName: row.firstName,
       lastName: row.lastName,
       company: row.company,
@@ -288,9 +309,15 @@ export class CustomerProfilesAdminService {
     };
   }
 
-  private mapDetail(profile: CustomerProfileEntity, userEmail?: string): AdminCustomerProfileDetailDto {
+  private mapDetail(
+    profile: CustomerProfileEntity,
+    userEmail?: string,
+    datevDebtorNumber: number | null = null,
+  ): AdminCustomerProfileDetailDto {
     return {
       ...this.mapResponse(profile),
+      numberScope: profile.numberScope,
+      datevDebtorNumber,
       userEmail,
       isComplete: this.customerProfilesService.isProfileComplete(profile),
       trustScore: profile.trustScore,

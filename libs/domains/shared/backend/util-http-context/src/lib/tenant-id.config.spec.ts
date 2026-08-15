@@ -1,6 +1,9 @@
 import {
   DEFAULT_TENANT,
+  SHARED_NUMBER_SCOPE,
   TENANTS_ALLOW_DEFAULT_ENV,
+  TENANTS_SHARED_NUMBERS_ENV,
+  areTenantsNumbersShared,
   isConfiguredTenant,
   isDefaultTenantAllowed,
   isValidTenantIdFormat,
@@ -12,12 +15,19 @@ import {
 
 describe('tenant-id.config', () => {
   const originalAllowDefault = process.env[TENANTS_ALLOW_DEFAULT_ENV];
+  const originalSharedNumbers = process.env[TENANTS_SHARED_NUMBERS_ENV];
 
   afterEach(() => {
     if (originalAllowDefault === undefined) {
       delete process.env[TENANTS_ALLOW_DEFAULT_ENV];
     } else {
       process.env[TENANTS_ALLOW_DEFAULT_ENV] = originalAllowDefault;
+    }
+
+    if (originalSharedNumbers === undefined) {
+      delete process.env[TENANTS_SHARED_NUMBERS_ENV];
+    } else {
+      process.env[TENANTS_SHARED_NUMBERS_ENV] = originalSharedNumbers;
     }
   });
 
@@ -28,6 +38,16 @@ describe('tenant-id.config', () => {
     expect(isDefaultTenantAllowed('')).toBe(true);
     expect(isDefaultTenantAllowed('true')).toBe(true);
     expect(isDefaultTenantAllowed('FALSE')).toBe(false);
+  });
+
+  it('areTenantsNumbersShared defaults to true', () => {
+    delete process.env[TENANTS_SHARED_NUMBERS_ENV];
+
+    expect(areTenantsNumbersShared()).toBe(true);
+    expect(areTenantsNumbersShared('')).toBe(true);
+    expect(areTenantsNumbersShared('true')).toBe(true);
+    expect(areTenantsNumbersShared('FALSE')).toBe(false);
+    expect(SHARED_NUMBER_SCOPE).toBe('__shared__');
   });
 
   it('parseConfiguredTenants includes default by default', () => {

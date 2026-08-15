@@ -331,6 +331,34 @@ describe('BillingNotificationPublisher', () => {
     });
   });
 
+  it('publishes debtor range exhausted without client id', () => {
+    const dispatcher = {
+      publishFireAndForget: jest.fn(),
+    } as unknown as NotificationDispatcherService;
+    const publisher = new BillingNotificationPublisher(dispatcher);
+
+    publisher.publishDebtorRangeExhausted({
+      tenantId: 'default',
+      nextCandidate: 70000,
+      rangeStart: 10000,
+      rangeEnd: 69999,
+      allocationScope: '__shared__',
+    });
+
+    expect(dispatcher.publishFireAndForget).toHaveBeenCalledWith({
+      type: 'datev.debtor_range_exhausted',
+      scopeKey: 'tenant-a',
+      clientId: undefined,
+      data: {
+        tenantId: 'default',
+        nextCandidate: 70000,
+        rangeStart: 10000,
+        rangeEnd: 69999,
+        allocationScope: '__shared__',
+      },
+    });
+  });
+
   it('publishes identity user lifecycle events with tenant scope', () => {
     const dispatcher = {
       publishFireAndForget: jest.fn(),

@@ -1,4 +1,4 @@
-import { DEFAULT_TENANT, envCronOrDefault } from '@forepath/shared/backend';
+import { DEFAULT_TENANT, areTenantsNumbersShared, envCronOrDefault } from '@forepath/shared/backend';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 
 import { parseBooleanEnv, parseCsvTenantIds } from '../utils/datev-format.util';
@@ -241,6 +241,11 @@ export class DatevExportConfigService implements OnModuleInit {
   }
 
   private validateDebtorRanges(): void {
+    // Overlap only matters when numbers are tenant-isolated (unified export can collide).
+    if (areTenantsNumbersShared()) {
+      return;
+    }
+
     const ranges = new Map<string, { start: number; end: number }>();
 
     for (const [tenantId, config] of Object.entries(this.tenantOverrides)) {

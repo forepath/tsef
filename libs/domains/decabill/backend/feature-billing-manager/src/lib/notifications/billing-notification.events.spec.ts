@@ -27,6 +27,7 @@ describe('BILLING_NOTIFICATION_EVENTS', () => {
         'datev_export.started',
         'datev_export.completed',
         'datev_export.failed',
+        'datev.debtor_range_exhausted',
         'auto_billing.enabled',
         'auto_billing.disabled',
         'payment_method.attached',

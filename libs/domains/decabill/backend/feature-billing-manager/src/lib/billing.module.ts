@@ -92,12 +92,14 @@ import { UsageController } from './controllers/usage.controller';
 import { AvailabilitySnapshotEntity } from './entities/availability-snapshot.entity';
 import { BackorderEntity } from './entities/backorder.entity';
 import { BillingAuditLogEntity } from './entities/billing-audit-log.entity';
+import { CustomerNumberSequenceEntity } from './entities/customer-number-sequence.entity';
 import { CustomerProfileEntity } from './entities/customer-profile.entity';
 import { OssThresholdLedgerEntity } from './entities/oss-threshold-ledger.entity';
 import { DatevDebtorAccountEntity } from './entities/datev-debtor-account.entity';
 import { DatevExportEntity } from './entities/datev-export.entity';
 import { InvoiceLineItemEntity } from './entities/invoice-line-item.entity';
 import { InvoiceNumberSequenceEntity } from './entities/invoice-number-sequence.entity';
+import { SubscriptionNumberSequenceEntity } from './entities/subscription-number-sequence.entity';
 import { InvoiceVoidDocumentEntity } from './entities/invoice-void-document.entity';
 import { InvoiceCreditDocumentEntity } from './entities/invoice-credit-document.entity';
 import { InvoiceEntity } from './entities/invoice.entity';
@@ -142,12 +144,14 @@ import { VAT_ID_VALIDATION_ENQUEUE } from './queue/vat-id-validation-enqueue.tok
 import { AvailabilitySnapshotsRepository } from './repositories/availability-snapshots.repository';
 import { BackordersRepository } from './repositories/backorders.repository';
 import { BillingAuditLogsRepository } from './repositories/billing-audit-logs.repository';
+import { CustomerNumberSequencesRepository } from './repositories/customer-number-sequences.repository';
 import { CustomerProfilesRepository } from './repositories/customer-profiles.repository';
 import { OssThresholdLedgersRepository } from './repositories/oss-threshold-ledgers.repository';
 import { DatevDebtorAccountsRepository } from './repositories/datev-debtor-accounts.repository';
 import { DatevExportRepository } from './repositories/datev-export.repository';
 import { InvoiceLineItemsRepository } from './repositories/invoice-line-items.repository';
 import { InvoiceNumberSequencesRepository } from './repositories/invoice-number-sequences.repository';
+import { SubscriptionNumberSequencesRepository } from './repositories/subscription-number-sequences.repository';
 import { InvoiceVoidDocumentsRepository } from './repositories/invoice-void-documents.repository';
 import { InvoiceCreditDocumentsRepository } from './repositories/invoice-credit-documents.repository';
 import { InvoicesRepository } from './repositories/invoices.repository';
@@ -489,6 +493,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
       InvoiceCreditDocumentEntity,
       InvoiceLineItemEntity,
       InvoiceNumberSequenceEntity,
+      SubscriptionNumberSequenceEntity,
+      CustomerNumberSequenceEntity,
       PaymentAttemptEntity,
       PaymentRefundEntity,
       PaymentWebhookEventEntity,
@@ -730,6 +736,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     InvoiceVoidDocumentsRepository,
     InvoiceCreditDocumentsRepository,
     InvoiceNumberSequencesRepository,
+    SubscriptionNumberSequencesRepository,
+    CustomerNumberSequencesRepository,
     PaymentAttemptsRepository,
     PaymentRefundsRepository,
     PaymentWebhookEventsRepository,

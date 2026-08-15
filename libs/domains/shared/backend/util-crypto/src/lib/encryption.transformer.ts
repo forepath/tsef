@@ -126,7 +126,14 @@ export function createJsonAes256GcmTransformer(): ValueTransformer {
     from(stored: string | null | undefined): Record<string, unknown> {
       if (stored == null) return {};
 
-      const dec = gcm.from(stored);
+      let dec: string | null;
+
+      try {
+        dec = gcm.from(stored);
+      } catch {
+        // Undecryptable ciphertext (e.g. ENCRYPTION_KEY rotated) — treat as empty rather than failing reads.
+        return {};
+      }
 
       if (dec == null || dec === '') return {};
 

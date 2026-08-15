@@ -23,6 +23,15 @@
       </div>
     </div>
     <div class="d-flex align-items-center gap-2">
+      @if (headerCustomerNumber(); as customerNumber) {
+        <span
+          class="info-badge text-white-50 border border-secondary border-opacity-50 py-1 px-2 rounded small me-1"
+          [attr.title]="customerNumber"
+          [attr.aria-label]="getCustomerNumberAriaLabel(customerNumber)"
+        >
+          {{ customerNumber }}
+        </span>
+      }
       <!-- Language Switcher -->
       <div class="dropdown me-1">
         <button
@@ -80,6 +89,15 @@
 } @else {
   <!-- Language Switcher and Dark Mode Toggle for Standalone Mode -->
   <section class="d-flex align-items-center justify-content-end gap-2 p-2 bg-dark text-white">
+    @if (headerCustomerNumber(); as customerNumber) {
+      <span
+        class="info-badge text-white-50 border border-secondary border-opacity-50 py-1 px-2 rounded small me-1"
+        [attr.title]="customerNumber"
+        [attr.aria-label]="getCustomerNumberAriaLabel(customerNumber)"
+      >
+        {{ customerNumber }}
+      </span>
+    }
     <div class="dropdown">
       <button
         class="btn btn-link text-white text-decoration-none p-2 dropdown-toggle"

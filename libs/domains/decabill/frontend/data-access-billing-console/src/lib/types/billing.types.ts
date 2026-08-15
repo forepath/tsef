@@ -851,6 +851,7 @@ export type VatIdValidationSource = 'vies_sync' | 'vies_async' | 'admin' | 'form
 export interface CustomerProfileResponse {
   id: string;
   userId: string;
+  customerNumber: string;
   firstName?: string | null;
   lastName?: string | null;
   company?: string | null;
@@ -1248,6 +1249,7 @@ export interface ManualInvoiceDetailResponse extends InvoiceDetailResponse {
 export interface AdminCustomerProfileListItem {
   id: string;
   userId: string;
+  customerNumber: string;
   userEmail?: string;
   firstName?: string;
   lastName?: string;
@@ -1282,6 +1284,8 @@ export interface CreateAdminCustomerProfileDto extends CustomerProfileDto {
 export interface AdminCustomerProfileDetail extends CustomerProfileResponse {
   userEmail?: string;
   isComplete: boolean;
+  numberScope: string;
+  datevDebtorNumber?: number | null;
   trustScore?: number;
   trustLevel?: CustomerTrustLevel;
   trustScoreUpdatedAt?: string;

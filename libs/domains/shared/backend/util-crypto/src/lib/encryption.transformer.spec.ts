@@ -162,6 +162,17 @@ describe('createJsonAes256GcmTransformer', () => {
     expect(transformer.from(undefined)).toEqual({});
   });
 
+  it('should return {} when ciphertext cannot be authenticated', () => {
+    process.env.ENCRYPTION_KEY = Buffer.alloc(32, 0x22).toString('base64');
+    const writer = createJsonAes256GcmTransformer();
+    const stored = writer.to({ erpId: 'ERP-1' }) as string;
+
+    process.env.ENCRYPTION_KEY = Buffer.alloc(32, 0x33).toString('base64');
+    const reader = createJsonAes256GcmTransformer();
+
+    expect(reader.from(stored)).toEqual({});
+  });
+
   it('should return null from to() for null/undefined input', () => {
     const transformer = createJsonAes256GcmTransformer();
 

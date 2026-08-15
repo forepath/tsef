@@ -68,6 +68,7 @@ export class CustomerProfilesController {
     return {
       id: row.id,
       userId: row.userId,
+      customerNumber: row.customerNumber,
       firstName: row.firstName,
       lastName: row.lastName,
       company: row.company,

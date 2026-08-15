@@ -2630,6 +2630,24 @@
           <p class="text-body-secondary small mb-3" i18n="@@featureSubscriptions-editProfileHint">
             First name, last name, email, address line 1, city and country are required for invoicing.
           </p>
+          @if (customerProfile$ | async; as profile) {
+            @if (profile.customerNumber) {
+              <div class="mb-3">
+                <label class="form-label" for="profileCustomerNumber" i18n="@@featureSubscriptions-customerNumber"
+                  >Customer number</label
+                >
+                <input
+                  id="profileCustomerNumber"
+                  type="text"
+                  class="form-control"
+                  [value]="profile.customerNumber"
+                  readonly
+                  disabled
+                  aria-readonly="true"
+                />
+              </div>
+            }
+          }
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="profileFirstName" class="form-label" i18n="@@featureSubscriptions-firstName"

@@ -26,6 +26,7 @@ describe('CustomerProfilesAdminService', () => {
     recomputeForProfileId: jest.fn(),
   };
   const billingNotificationPublisher = { publish: jest.fn() };
+  const datevDebtorAccountsRepository = { findByTenantAndUserId: jest.fn() };
 
   const service = new CustomerProfilesAdminService(
     customerProfilesRepository as never,
@@ -35,11 +36,14 @@ describe('CustomerProfilesAdminService', () => {
     subscriptionsRepository as never,
     customerTrustScoreService as never,
     billingNotificationPublisher as never,
+    datevDebtorAccountsRepository as never,
   );
 
   const profile = {
     id: 'profile-1',
     userId: 'user-1',
+    customerNumber: 'CUS-000001',
+    numberScope: '__shared__',
     firstName: 'Jane',
     lastName: 'Doe',
     email: 'jane@example.com',
@@ -54,6 +58,7 @@ describe('CustomerProfilesAdminService', () => {
     customerProfilesService.isProfileComplete.mockReturnValue(true);
     customerProfilesService.upsert.mockReset();
     customerTrustScoreService.ensureFreshSnapshot.mockImplementation(async (value: unknown) => value);
+    datevDebtorAccountsRepository.findByTenantAndUserId.mockResolvedValue(null);
   });
 
   it('create rejects duplicate profile for user', async () => {
@@ -104,11 +109,13 @@ describe('CustomerProfilesAdminService', () => {
 
     expect(result.items).toHaveLength(1);
     expect(result.items[0].userEmail).toBe('user@example.com');
+    expect(result.items[0].customerNumber).toBe('CUS-000001');
     expect(result.total).toBe(1);
     expect(result.items[0]).not.toHaveProperty('customData');
+    expect(result.items[0]).not.toHaveProperty('datevDebtorNumber');
   });
 
-  it('getById returns profile with completeness and customData', async () => {
+  it('getById returns profile with completeness, customData, and null DATEV debtor', async () => {
     customerProfilesRepository.findByIdOrThrow.mockResolvedValue({
       ...profile,
       customData: { erpId: 'ERP-1' },
@@ -119,7 +126,20 @@ describe('CustomerProfilesAdminService', () => {
     expect(result.id).toBe('profile-1');
     expect(result.isComplete).toBe(true);
     expect(result.userEmail).toBe('user@example.com');
+    expect(result.customerNumber).toBe('CUS-000001');
+    expect(result.numberScope).toBe('__shared__');
+    expect(result.datevDebtorNumber).toBeNull();
     expect(result.customData).toEqual({ erpId: 'ERP-1' });
+  });
+
+  it('getById includes datevDebtorNumber when DATEV debtor account exists', async () => {
+    customerProfilesRepository.findByIdOrThrow.mockResolvedValue(profile);
+    datevDebtorAccountsRepository.findByTenantAndUserId.mockResolvedValue({ debtorNumber: 10001 });
+
+    const result = await service.getById('profile-1');
+
+    expect(result.datevDebtorNumber).toBe(10001);
+    expect(datevDebtorAccountsRepository.findByTenantAndUserId).toHaveBeenCalledWith('default', 'user-1');
   });
 
   it('create persists profile for valid user without customData on customer response', async () => {

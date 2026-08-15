@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -24,12 +25,17 @@ export enum SubscriptionStatus {
 export type WithdrawalTeardownPhase = 'unprovisioned' | 'withdrawal_period';
 
 @Entity('billing_subscriptions')
+@Unique('uq_billing_subscriptions_number_scope_number', ['numberScope', 'number'])
 export class SubscriptionEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id!: string;
 
-  @Column({ type: 'varchar', length: 50, unique: true, name: 'number' })
+  @Column({ type: 'varchar', length: 50, name: 'number' })
   number!: string;
+
+  /** `__shared__` when TENANTS_SHARED_NUMBERS is enabled; otherwise the tenant id. */
+  @Column({ type: 'varchar', length: 64, name: 'number_scope', default: '__shared__' })
+  numberScope!: string;
 
   @Column({ type: 'uuid', name: 'plan_id' })
   planId!: string;

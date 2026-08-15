@@ -6,6 +6,7 @@ import { CustomerProfilesRepository } from './customer-profiles.repository';
 const createMockQueryBuilder = () => ({
   innerJoin: jest.fn().mockReturnThis(),
   leftJoin: jest.fn().mockReturnThis(),
+  select: jest.fn().mockReturnThis(),
   where: jest.fn().mockReturnThis(),
   andWhere: jest.fn().mockReturnThis(),
   orderBy: jest.fn().mockReturnThis(),
@@ -64,6 +65,10 @@ describe('CustomerProfilesRepository', () => {
     const result = await repository.findAll(10, 0);
 
     expect(result).toEqual({ items, total: 1 });
+    expect(mockQueryBuilder.select).toHaveBeenCalled();
+    expect(mockQueryBuilder.select.mock.calls[0][0]).not.toEqual(
+      expect.arrayContaining([expect.stringContaining('customData')]),
+    );
   });
 
   it('create saves profile', async () => {
