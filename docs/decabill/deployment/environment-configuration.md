@@ -41,13 +41,14 @@ Complete reference for environment variables used in Decabill.
 
 Billing data and users are partitioned by **`tenant_id`**. HTTP clients send **`X-Tenant`**; the billing console attaches it via `environment.billing.tenantId` (defaults to `default`).
 
-| Variable                   | Description                                                                                                                                                          |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TENANTS`                  | Comma-separated tenant ids allowed for **`X-Tenant`**. Includes `default` unless disabled below. Unset means only `default` when default is allowed.                 |
-| `TENANTS_ALLOW_DEFAULT`    | When `false`, excludes `default` from the allowlist and rejects missing, blank, or `default` **`X-Tenant`** values. Unset or any other value keeps current behavior. |
-| `STATIC_API_KEY_TENANT_ID` | When set with **`STATIC_API_KEY`**, API key requests are accepted only when **`X-Tenant`** matches.                                                                  |
-| `BILLING_FRONTEND_URL`     | Billing console base URL for the `default` tenant (Stripe return redirects).                                                                                         |
-| `TENANT_FRONTEND_URLS`     | Per-tenant console URLs: `tenantId=https://…` pairs, comma-separated.                                                                                                |
+| Variable                   | Description                                                                                                                                                                                                                             |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TENANTS`                  | Comma-separated tenant ids allowed for **`X-Tenant`**. Includes `default` unless disabled below. Unset means only `default` when default is allowed.                                                                                    |
+| `TENANTS_ALLOW_DEFAULT`    | When `false`, excludes `default` from the allowlist and rejects missing, blank, or `default` **`X-Tenant`** values. Unset or any other value keeps current behavior.                                                                    |
+| `TENANTS_SHARED_NUMBERS`   | When `false`, invoice / subscription / DATEV debtor numbers are allocated per tenant (same literal may exist in different tenants). Unset or any other value uses one shared pool (default). See [Numbering](../features/numbering.md). |
+| `STATIC_API_KEY_TENANT_ID` | When set with **`STATIC_API_KEY`**, API key requests are accepted only when **`X-Tenant`** matches.                                                                                                                                     |
+| `BILLING_FRONTEND_URL`     | Billing console base URL for the `default` tenant (Stripe return redirects).                                                                                                                                                            |
+| `TENANT_FRONTEND_URLS`     | Per-tenant console URLs: `tenantId=https://…` pairs, comma-separated.                                                                                                                                                                   |
 
 **API key scope (accepted risk [DR-002](../security/accepted-risks.md#dr-002-billing-multi-tenant-api-key-scope-static_api_key_tenant_id-unset)):** With **`STATIC_API_KEY`** and **without** **`STATIC_API_KEY_TENANT_ID`**, one deployment key grants **admin access to every tenant** in **`TENANTS`**, selected per request via **`X-Tenant`**. Set **`STATIC_API_KEY_TENANT_ID`** to bind the key to one tenant, or use **keycloak** / **users** for interactive multi-tenant console access.
 
@@ -116,6 +117,8 @@ Monthly DATEV Buchungsstapel exports (category 21) with optional PDF document bu
 | `BILLING_DATEV_UNIFIED_EXPORT_ALLOWED_TENANTS` | Comma-separated tenant ids allowed to list/trigger/download unified exports | `default` when unset  |
 
 Per-tenant exports are scoped to the request **`X-Tenant`**. Unified exports aggregate all configured tenants but are only accessible from allowlisted operator tenants. Validate sample exports with **DatevFormatPruefProgramm** before production handoff.
+
+Debtor account numbers follow **`TENANTS_SHARED_NUMBERS`** (shared by default). With shared numbers, overlapping per-tenant debtor ranges do not create uniqueness collisions; with `TENANTS_SHARED_NUMBERS=false`, overlapping ranges can collide in unified exports (startup warning). See [Numbering](../features/numbering.md).
 
 ### Stripe and Payment Processors
 

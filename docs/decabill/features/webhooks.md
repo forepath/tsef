@@ -105,10 +105,13 @@ Ticket payloads include metadata only; full ticket body content is not included 
 ### DATEV exports
 
 - `datev_export.started`, `datev_export.completed`, `datev_export.failed`
+- `datev.debtor_range_exhausted`
 - `vat_id.validation_succeeded`, `vat_id.validation_failed`, `vat_id.validation_pending`, `vat_id.validation_unavailable`
 - `oss.threshold_exceeded`
 
 DATEV export events are tenant-scoped admin operations; `client_id` is omitted. Export file contents and storage paths are never included in webhook payloads.
+
+`datev.debtor_range_exhausted` fires when DATEV debtor number allocation cannot assign the next account because the configured range (`debtorAccountStart`–`debtorAccountEnd`) is full. Payload fields: `tenantId`, `nextCandidate`, `rangeStart`, `rangeEnd`, `allocationScope` (no customer PII).
 
 ### Application updates
 
@@ -234,6 +237,18 @@ User email is never included.
 ```
 
 `datev_export.failed` uses the same shape with `status: "failed"` and a populated `errorMessage`.
+
+### `datev.debtor_range_exhausted`
+
+```json
+{
+  "tenantId": "default",
+  "nextCandidate": 70000,
+  "rangeStart": 10000,
+  "rangeEnd": 69999,
+  "allocationScope": "__shared__"
+}
+```
 
 ## Delivery and retries
 

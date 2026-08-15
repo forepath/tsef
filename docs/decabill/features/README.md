@@ -8,6 +8,7 @@ Decabill provides a complete set of capabilities for subscription billing, invoi
 
 - **Authentication** Keycloak OAuth2/OIDC, built-in users with JWT, or static API key
 - **Multi-tenancy** Tenant-scoped data with `X-Tenant` header and configurable tenant frontends
+- **Numbering** Shared or tenant-scoped invoice, subscription, and DATEV debtor number pools
 - **Subscriptions** Order, cancel, and resume service plans with optional cloud provisioning
 - **Usage meters** Tenant meter catalog attachable to plans and addons with attachment-scoped usage billing
 - **Advance billing and yearly interval** Prepaid period charges and `year` billing interval
@@ -54,6 +55,16 @@ Isolate billing data per tenant while sharing one billing manager deployment. Sa
 - `TENANTS_ALLOW_DEFAULT=false` to exclude the implicit `default` tenant
 - Per-tenant Stripe return URLs via `TENANT_FRONTEND_URLS`
 - Optional `STATIC_API_KEY_TENANT_ID` to bind API key auth to one tenant
+
+### [Numbering](./numbering.md)
+
+Shared (default) or tenant-scoped pools for invoice, subscription, and DATEV debtor numbers via `TENANTS_SHARED_NUMBERS`. Hostnames stay globally unique.
+
+**Key Capabilities**:
+
+- Default shared pools for simpler authority-facing uniqueness
+- `TENANTS_SHARED_NUMBERS=false` for per-tenant number isolation
+- Webhook `datev.debtor_range_exhausted` when DATEV debtor ranges run out
 
 ### [Subscriptions](./subscriptions.md)
 

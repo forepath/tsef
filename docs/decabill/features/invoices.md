@@ -19,6 +19,8 @@ Decabill stores invoices in PostgreSQL with immutable issued states. PDFs follow
 
 **Immutability:** Only `draft` invoices can be edited or deleted. Issued invoices can be voided (when unpaid) or marked paid or unpaid by admins.
 
+Invoice numbers (`INV-{year}-{nnnnn}`) are allocated from a shared pool by default; see [Numbering](./numbering.md) and `TENANTS_SHARED_NUMBERS`.
+
 ## Open Positions and Billing Day
 
 Recurring and final subscription charges are recorded as **open positions** instead of creating an invoice immediately.

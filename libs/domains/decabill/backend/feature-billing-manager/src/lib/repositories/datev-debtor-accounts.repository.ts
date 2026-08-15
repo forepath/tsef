@@ -16,11 +16,11 @@ export class DatevDebtorAccountsRepository {
     return await this.repository.findOne({ where: { tenantId, userId } });
   }
 
-  async findMaxDebtorNumber(tenantId: string): Promise<number | null> {
+  async findMaxDebtorNumber(allocationScope: string): Promise<number | null> {
     const row = await this.repository
       .createQueryBuilder('debtor')
       .select('MAX(debtor.debtor_number)', 'max')
-      .where('debtor.tenant_id = :tenantId', { tenantId })
+      .where('debtor.allocation_scope = :allocationScope', { allocationScope })
       .getRawOne<{ max: string | null }>();
 
     if (row?.max == null) {
@@ -32,8 +32,13 @@ export class DatevDebtorAccountsRepository {
     return Number.isFinite(parsed) ? parsed : null;
   }
 
-  async create(tenantId: string, userId: string, debtorNumber: number): Promise<DatevDebtorAccountEntity> {
-    const entity = this.repository.create({ tenantId, userId, debtorNumber });
+  async create(
+    tenantId: string,
+    userId: string,
+    debtorNumber: number,
+    allocationScope: string,
+  ): Promise<DatevDebtorAccountEntity> {
+    const entity = this.repository.create({ tenantId, userId, debtorNumber, allocationScope });
 
     return await this.repository.save(entity);
   }

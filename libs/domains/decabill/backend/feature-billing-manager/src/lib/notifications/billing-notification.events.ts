@@ -78,6 +78,7 @@ export const BILLING_NOTIFICATION_EVENTS = [
   'datev_export.started',
   'datev_export.completed',
   'datev_export.failed',
+  'datev.debtor_range_exhausted',
   'application.update_available',
   'application.update_check_failed',
   'application.instance_outdated',

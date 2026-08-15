@@ -5,7 +5,12 @@ import { DatevDebtorAccountService } from './datev-debtor-account.service';
 import { DatevDebtorMapperService } from './datev-debtor-mapper.service';
 
 describe('DatevDebtorMapperService', () => {
-  const debtorAccountService = new DatevDebtorAccountService({} as never);
+  const debtorAccountService = new DatevDebtorAccountService(
+    {} as never,
+    {
+      publishDebtorRangeExhausted: jest.fn(),
+    } as never,
+  );
   const service = new DatevDebtorMapperService(debtorAccountService);
 
   it('maps customer profile to debtor row with 243 fields', () => {

@@ -4,6 +4,12 @@ export const TENANT_ID_HEADER = 'x-tenant';
 
 export const TENANTS_ALLOW_DEFAULT_ENV = 'TENANTS_ALLOW_DEFAULT';
 
+/** When not `false`, invoice / subscription / debtor numbers use one global pool across tenants. */
+export const TENANTS_SHARED_NUMBERS_ENV = 'TENANTS_SHARED_NUMBERS';
+
+/** Scope key stored on number-sequence / debtor allocation rows when numbers are shared. */
+export const SHARED_NUMBER_SCOPE = '__shared__';
+
 const MAX_TENANT_ID_LENGTH = 64;
 
 const TENANT_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*$/i;
@@ -13,6 +19,22 @@ const TENANT_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*$/i;
  * `TENANTS_ALLOW_DEFAULT=false` excludes it; unset or any other value keeps current behavior.
  */
 export function isDefaultTenantAllowed(envValue: string | undefined = process.env[TENANTS_ALLOW_DEFAULT_ENV]): boolean {
+  const trimmed = envValue?.trim();
+
+  if (!trimmed) {
+    return true;
+  }
+
+  return trimmed.toLowerCase() !== 'false';
+}
+
+/**
+ * Whether assigned numbers (invoices, subscriptions, DATEV debtors) share one pool across tenants.
+ * `TENANTS_SHARED_NUMBERS=false` isolates pools per tenant; unset or any other value keeps shared pools.
+ */
+export function areTenantsNumbersShared(
+  envValue: string | undefined = process.env[TENANTS_SHARED_NUMBERS_ENV],
+): boolean {
   const trimmed = envValue?.trim();
 
   if (!trimmed) {

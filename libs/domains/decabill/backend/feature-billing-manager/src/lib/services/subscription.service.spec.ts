@@ -53,6 +53,9 @@ describe('SubscriptionService', () => {
     delete: jest.fn(),
     findAllByUser: jest.fn(),
   } as unknown as SubscriptionsRepository;
+  const subscriptionNumberSequencesRepository = {
+    nextSubscriptionNumber: jest.fn().mockResolvedValue({ number: 'SUB-000087', numberScope: '__shared__' }),
+  };
   const itemsRepository = {
     create: jest.fn(),
     delete: jest.fn(),
@@ -174,6 +177,7 @@ describe('SubscriptionService', () => {
     plansRepository,
     typesRepository,
     subscriptionsRepository,
+    subscriptionNumberSequencesRepository as never,
     itemsRepository,
     scheduleService,
     cancellationPolicyService,
@@ -213,10 +217,11 @@ describe('SubscriptionService', () => {
     });
     (customerProfilesService.getByUserId as jest.Mock).mockResolvedValue(completeProfile);
     (customerProfilesService.isProfileComplete as jest.Mock).mockReturnValue(true);
-    // createSubscription reloads after insert to hydrate DB-generated columns (e.g. `number`).
+    // createSubscription reloads after insert so the returned entity is fully hydrated.
     (subscriptionsRepository.findByIdOrThrow as jest.Mock).mockResolvedValue({
       id: 'sub-1',
       number: 'SUB-000087',
+      numberScope: '__shared__',
       userId: 'user-1',
       planId: 'plan-1',
       status: SubscriptionStatus.ACTIVE,
@@ -297,10 +302,12 @@ describe('SubscriptionService', () => {
     const result = await service.createSubscription('user-1', 'plan-1', { region: 'fsn1' });
 
     expect(result.id).toBe('sub-1');
-    // Reloaded after insert so the sequence-backed `number` is present without a client refresh.
     expect(result.number).toBe('SUB-000087');
     expect(subscriptionsRepository.findByIdOrThrow).toHaveBeenCalledWith('sub-1');
-    expect(subscriptionsRepository.create).toHaveBeenCalled();
+    expect(subscriptionNumberSequencesRepository.nextSubscriptionNumber).toHaveBeenCalled();
+    expect(subscriptionsRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ number: 'SUB-000087', numberScope: '__shared__' }),
+    );
     expect(itemsRepository.create).toHaveBeenCalled();
     // Provisioning is deferred to the job, not run inline by createSubscription.
     expect(provisioningService.provision).not.toHaveBeenCalled();

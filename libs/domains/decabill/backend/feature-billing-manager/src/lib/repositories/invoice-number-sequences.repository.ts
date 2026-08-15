@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { InvoiceNumberSequenceEntity } from '../entities/invoice-number-sequence.entity';
-import { getRequiredTenantId } from '../utils/tenant-query.utils';
+import { resolveNumberScopeKey } from '../utils/number-scope.utils';
 
 @Injectable()
 export class InvoiceNumberSequencesRepository {
@@ -13,20 +13,27 @@ export class InvoiceNumberSequencesRepository {
   ) {}
 
   async nextInvoiceNumber(year: number): Promise<string> {
-    const tenantId = getRequiredTenantId();
+    const tenantId = resolveNumberScopeKey();
 
     return await this.repository.manager.transaction(async (manager) => {
-      const repo = manager.getRepository(InvoiceNumberSequenceEntity);
-      let row = await repo.findOne({ where: { year, tenantId } });
+      const rows = await manager.query(
+        `
+          INSERT INTO billing_invoice_number_sequences (tenant_id, year, last_value)
+          VALUES ($1, $2, 1)
+          ON CONFLICT (tenant_id, year)
+          DO UPDATE SET last_value = billing_invoice_number_sequences.last_value + 1
+          RETURNING last_value
+        `,
+        [tenantId, year],
+      );
 
-      if (!row) {
-        row = repo.create({ year, tenantId, lastValue: 0 });
+      const lastValue = Number(rows?.[0]?.last_value);
+
+      if (!Number.isFinite(lastValue) || lastValue < 1) {
+        throw new Error(`Failed to allocate invoice number for scope ${tenantId} year ${year}`);
       }
 
-      row.lastValue += 1;
-      await repo.save(row);
-
-      return `INV-${year}-${String(row.lastValue).padStart(5, '0')}`;
+      return `INV-${year}-${String(lastValue).padStart(5, '0')}`;
     });
   }
 }

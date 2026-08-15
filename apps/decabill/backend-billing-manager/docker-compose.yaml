@@ -104,6 +104,7 @@ x-backend-billing-manager-environment: &backend-billing-manager-environment
   DNS_BASE_DOMAIN: ${DNS_BASE_DOMAIN:-spirde.com}
   TENANTS: ${TENANTS:-}
   TENANTS_ALLOW_DEFAULT: ${TENANTS_ALLOW_DEFAULT:-true}
+  TENANTS_SHARED_NUMBERS: ${TENANTS_SHARED_NUMBERS:-true}
   OTEL_ENABLED: ${OTEL_ENABLED:-false}
   OTEL_USERNAME: ${OTEL_USERNAME:-}
   OTEL_PASSWORD: ${OTEL_PASSWORD:-}

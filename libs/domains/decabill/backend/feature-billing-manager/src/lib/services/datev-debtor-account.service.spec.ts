@@ -1,3 +1,4 @@
+import { SHARED_NUMBER_SCOPE } from '@forepath/shared/backend';
 import { QueryFailedError } from 'typeorm';
 
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
@@ -11,7 +12,10 @@ describe('DatevDebtorAccountService', () => {
     findMaxDebtorNumber: jest.fn(),
     create: jest.fn(),
   };
-  const service = new DatevDebtorAccountService(repository as never);
+  const billingNotificationPublisher = {
+    publishDebtorRangeExhausted: jest.fn(),
+  };
+  const service = new DatevDebtorAccountService(repository as never, billingNotificationPublisher as never);
   const config: DatevTenantExportConfig = {
     consultantNumber: '1',
     clientNumber: '2',
@@ -55,14 +59,22 @@ describe('DatevDebtorAccountService', () => {
     const number = await service.resolveDebtorNumber('default', 'user-1', config);
 
     expect(number).toBe(10_001);
-    expect(repository.create).toHaveBeenCalledWith('default', 'user-1', 10_001);
+    expect(repository.findMaxDebtorNumber).toHaveBeenCalledWith(SHARED_NUMBER_SCOPE);
+    expect(repository.create).toHaveBeenCalledWith('default', 'user-1', 10_001, SHARED_NUMBER_SCOPE);
   });
 
-  it('throws when debtor range is exhausted', async () => {
+  it('throws and notifies when debtor range is exhausted', async () => {
     repository.findByTenantAndUserId.mockResolvedValue(null);
     repository.findMaxDebtorNumber.mockResolvedValue(10_002);
 
     await expect(service.resolveDebtorNumber('default', 'user-1', config)).rejects.toThrow(/exhausted/);
+    expect(billingNotificationPublisher.publishDebtorRangeExhausted).toHaveBeenCalledWith({
+      tenantId: 'default',
+      nextCandidate: 10_003,
+      rangeStart: 10_000,
+      rangeEnd: 10_002,
+      allocationScope: SHARED_NUMBER_SCOPE,
+    });
   });
 
   it('formats company name as display name', () => {
@@ -85,7 +97,7 @@ describe('DatevDebtorAccountService', () => {
     expect(service.formatDebtorDisplayName({ userId: 'user-1' } as CustomerProfileEntity)).toBe('user-1');
   });
 
-  it('allocates first debtor number when tenant has none', async () => {
+  it('allocates first debtor number when scope has none', async () => {
     repository.findByTenantAndUserId.mockResolvedValue(null);
     repository.findMaxDebtorNumber.mockResolvedValue(null);
     repository.create.mockResolvedValue({ debtorNumber: 10_000 });
@@ -93,7 +105,7 @@ describe('DatevDebtorAccountService', () => {
     const number = await service.resolveDebtorNumber('default', 'user-2', config);
 
     expect(number).toBe(10_000);
-    expect(repository.create).toHaveBeenCalledWith('default', 'user-2', 10_000);
+    expect(repository.create).toHaveBeenCalledWith('default', 'user-2', 10_000, SHARED_NUMBER_SCOPE);
   });
 
   it('retries allocation after a unique-constraint race', async () => {

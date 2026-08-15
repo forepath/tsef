@@ -98,6 +98,7 @@ import { DatevDebtorAccountEntity } from './entities/datev-debtor-account.entity
 import { DatevExportEntity } from './entities/datev-export.entity';
 import { InvoiceLineItemEntity } from './entities/invoice-line-item.entity';
 import { InvoiceNumberSequenceEntity } from './entities/invoice-number-sequence.entity';
+import { SubscriptionNumberSequenceEntity } from './entities/subscription-number-sequence.entity';
 import { InvoiceVoidDocumentEntity } from './entities/invoice-void-document.entity';
 import { InvoiceCreditDocumentEntity } from './entities/invoice-credit-document.entity';
 import { InvoiceEntity } from './entities/invoice.entity';
@@ -148,6 +149,7 @@ import { DatevDebtorAccountsRepository } from './repositories/datev-debtor-accou
 import { DatevExportRepository } from './repositories/datev-export.repository';
 import { InvoiceLineItemsRepository } from './repositories/invoice-line-items.repository';
 import { InvoiceNumberSequencesRepository } from './repositories/invoice-number-sequences.repository';
+import { SubscriptionNumberSequencesRepository } from './repositories/subscription-number-sequences.repository';
 import { InvoiceVoidDocumentsRepository } from './repositories/invoice-void-documents.repository';
 import { InvoiceCreditDocumentsRepository } from './repositories/invoice-credit-documents.repository';
 import { InvoicesRepository } from './repositories/invoices.repository';
@@ -489,6 +491,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
       InvoiceCreditDocumentEntity,
       InvoiceLineItemEntity,
       InvoiceNumberSequenceEntity,
+      SubscriptionNumberSequenceEntity,
       PaymentAttemptEntity,
       PaymentRefundEntity,
       PaymentWebhookEventEntity,
@@ -730,6 +733,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     InvoiceVoidDocumentsRepository,
     InvoiceCreditDocumentsRepository,
     InvoiceNumberSequencesRepository,
+    SubscriptionNumberSequencesRepository,
     PaymentAttemptsRepository,
     PaymentRefundsRepository,
     PaymentWebhookEventsRepository,

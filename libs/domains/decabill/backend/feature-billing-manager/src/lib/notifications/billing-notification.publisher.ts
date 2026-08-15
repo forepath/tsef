@@ -379,6 +379,22 @@ export class BillingNotificationPublisher implements IIdentityNotificationPublis
     this.publish(type, this.toDatevExportPayload(exportRecord));
   }
 
+  publishDebtorRangeExhausted(payload: {
+    tenantId: string;
+    nextCandidate: number;
+    rangeStart: number;
+    rangeEnd: number;
+    allocationScope: string;
+  }): void {
+    this.publish('datev.debtor_range_exhausted', {
+      tenantId: payload.tenantId,
+      nextCandidate: payload.nextCandidate,
+      rangeStart: payload.rangeStart,
+      rangeEnd: payload.rangeEnd,
+      allocationScope: payload.allocationScope,
+    });
+  }
+
   publishServicePlanPriceRecalculated(
     servicePlan: Pick<ServicePlanEntity, 'id' | 'name'>,
     context: {
