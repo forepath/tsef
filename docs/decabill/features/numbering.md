@@ -1,6 +1,6 @@
 # Numbering
 
-How Decabill assigns invoice, subscription, and DATEV debtor numbers across tenants.
+How Decabill assigns invoice, subscription, customer, and DATEV debtor numbers across tenants.
 
 ## Overview
 
@@ -21,12 +21,14 @@ Credit notes and void documents derive their document numbers from the invoice n
 | ------------ | -------------------- | ----------------------------------------------------------------------------- |
 | Invoice      | `INV-{year}-{nnnnn}` | Yearly counter; five-digit pad                                                |
 | Subscription | `SUB-{nnnnnn}`       | Six-digit pad; used in public withdrawal                                      |
+| Customer     | `CUS-{nnnnnn}`       | Six-digit pad; allocated once on billing profile create                       |
 | DATEV debtor | integer              | Allocated within tenant DATEV range (`debtorAccountStart`–`debtorAccountEnd`) |
 
 ## Storage
 
 - Invoice counters: `billing_invoice_number_sequences` keyed by `(scope, year)` (`tenant_id` column holds the scope key)
 - Subscription counters: `billing_subscription_number_sequences` keyed by `scope_key`; subscriptions store `number_scope` with a unique `(number_scope, number)`
+- Customer counters: `billing_customer_number_sequences` keyed by `scope_key`; profiles store `number_scope` with a unique `(number_scope, customer_number)`
 - Debtors: `billing_datev_debtor_accounts.allocation_scope` with unique `(allocation_scope, debtor_number)`
 
 Shared mode uses the sentinel scope `__shared__`. Tenant-scoped mode uses the current `X-Tenant` id as the scope.
@@ -47,4 +49,5 @@ If the configured range is exhausted, allocation fails and emits webhook `datev.
 
 - [Multi-tenancy](./multi-tenancy.md)
 - [Environment configuration](../deployment/environment-configuration.md)
+- [Customer profiles](./customer-profiles.md)
 - [Webhooks](./webhooks.md)

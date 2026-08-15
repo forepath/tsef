@@ -58,7 +58,7 @@ Isolate billing data per tenant while sharing one billing manager deployment. Sa
 
 ### [Numbering](./numbering.md)
 
-Shared (default) or tenant-scoped pools for invoice, subscription, and DATEV debtor numbers via `TENANTS_SHARED_NUMBERS`. Hostnames stay globally unique.
+Shared (default) or tenant-scoped pools for invoice, subscription, customer, and DATEV debtor numbers via `TENANTS_SHARED_NUMBERS`. Hostnames stay globally unique.
 
 **Key Capabilities**:
 

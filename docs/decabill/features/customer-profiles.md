@@ -6,6 +6,8 @@ Billing metadata for invoice issuance and subscription ordering. One profile per
 
 Customer profiles store legal and contact information required for compliant invoices and Stripe customer records. Subscription creation rejects incomplete profiles with 400 Bad Request.
 
+On **first create** (self-service upsert or admin create), the billing manager allocates a read-only **customer number** (`CUS-######`) from the same `TENANTS_SHARED_NUMBERS` pool as subscriptions. Updates never reallocate. See [Numbering](./numbering.md).
+
 Profiles are managed through self-service endpoints for customers and admin CRUD for operators.
 
 ## Required Fields for Ordering
@@ -43,6 +45,13 @@ When the user initiates payment, the billing manager creates or updates a Stripe
 
 Admins manage profiles under `/admin/billing/customer-profiles`. See [Billing Administration](./billing-administration.md).
 The same admin surface also exposes the [Customer Trust Score](./customer-trust-score.md) for operator review.
+
+Admin profile **detail** also returns:
+
+- `numberScope` — the pool key used when the customer number was allocated
+- `datevDebtorNumber` — nullable DATEV debtor account number when one already exists for the user (lazy allocation on DATEV export; not created from this UI)
+
+Neither field is writable. Customer self-service APIs never expose `datevDebtorNumber` or `numberScope`.
 
 Rules:
 
@@ -86,7 +95,7 @@ Project bill-time (`POST /admin/billing/projects/{projectId}/bill-time`) also re
 
 ## Data Storage
 
-Profiles are stored in `billing_customer_profiles` in PostgreSQL, scoped by tenant through the user's `tenant_id`.
+Profiles are stored in `billing_customer_profiles` in PostgreSQL, scoped by tenant through the user's `tenant_id`. Each profile has a unique `(number_scope, customer_number)` within the numbering pool.
 
 Sensitive fields follow standard application encryption and access controls. Stripe customer ids are stored for payment orchestration only. Admin custom data is encrypted at rest with AES-256-GCM and omitted from customer-facing profile responses.
 
@@ -96,6 +105,7 @@ The user's registration date (day of month, capped at 28) defaults as their **bi
 
 ## Related documentation
 
+- **[Numbering](./numbering.md)** Customer numbers (`CUS-######`) and shared vs tenant pools
 - **[Subscriptions](./subscriptions.md)** Profile required at order time
 - **[Invoices](./invoices.md)** Issuer and customer data on PDFs
 - **[Projects](./projects.md)** Profile required for project bill-time

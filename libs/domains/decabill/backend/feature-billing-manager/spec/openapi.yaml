@@ -7213,6 +7213,11 @@ components:
       properties:
         id: { type: string, format: uuid }
         userId: { type: string, format: uuid }
+        customerNumber:
+          {
+            type: string,
+            description: Assigned customer number (CUS-######); allocated on profile create,
+          }
         firstName: { type: string, nullable: true }
         lastName: { type: string, nullable: true }
         company: { type: string, nullable: true }
@@ -7921,6 +7926,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         userId: { type: string, format: uuid }
+        customerNumber: { type: string }
         userEmail: { type: string, format: email, nullable: true }
         firstName: { type: string, nullable: true }
         lastName: { type: string, nullable: true }
@@ -7956,6 +7962,17 @@ components:
         - $ref: '#/components/schemas/CustomerProfileResponse'
         - type: object
           properties:
+            numberScope:
+              {
+                type: string,
+                description: Number pool scope (__shared__ or tenant id); admin only,
+              }
+            datevDebtorNumber:
+              {
+                type: integer,
+                nullable: true,
+                description: DATEV debtor account when allocated; null until first DATEV export assigns one. Admin only.,
+              }
             userEmail: { type: string, format: email, nullable: true }
             isComplete: { type: boolean }
             trustScore: { type: integer, nullable: true }

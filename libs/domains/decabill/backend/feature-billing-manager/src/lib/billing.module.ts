@@ -92,6 +92,7 @@ import { UsageController } from './controllers/usage.controller';
 import { AvailabilitySnapshotEntity } from './entities/availability-snapshot.entity';
 import { BackorderEntity } from './entities/backorder.entity';
 import { BillingAuditLogEntity } from './entities/billing-audit-log.entity';
+import { CustomerNumberSequenceEntity } from './entities/customer-number-sequence.entity';
 import { CustomerProfileEntity } from './entities/customer-profile.entity';
 import { OssThresholdLedgerEntity } from './entities/oss-threshold-ledger.entity';
 import { DatevDebtorAccountEntity } from './entities/datev-debtor-account.entity';
@@ -143,6 +144,7 @@ import { VAT_ID_VALIDATION_ENQUEUE } from './queue/vat-id-validation-enqueue.tok
 import { AvailabilitySnapshotsRepository } from './repositories/availability-snapshots.repository';
 import { BackordersRepository } from './repositories/backorders.repository';
 import { BillingAuditLogsRepository } from './repositories/billing-audit-logs.repository';
+import { CustomerNumberSequencesRepository } from './repositories/customer-number-sequences.repository';
 import { CustomerProfilesRepository } from './repositories/customer-profiles.repository';
 import { OssThresholdLedgersRepository } from './repositories/oss-threshold-ledgers.repository';
 import { DatevDebtorAccountsRepository } from './repositories/datev-debtor-accounts.repository';
@@ -492,6 +494,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
       InvoiceLineItemEntity,
       InvoiceNumberSequenceEntity,
       SubscriptionNumberSequenceEntity,
+      CustomerNumberSequenceEntity,
       PaymentAttemptEntity,
       PaymentRefundEntity,
       PaymentWebhookEventEntity,
@@ -734,6 +737,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     InvoiceCreditDocumentsRepository,
     InvoiceNumberSequencesRepository,
     SubscriptionNumberSequencesRepository,
+    CustomerNumberSequencesRepository,
     PaymentAttemptsRepository,
     PaymentRefundsRepository,
     PaymentWebhookEventsRepository,

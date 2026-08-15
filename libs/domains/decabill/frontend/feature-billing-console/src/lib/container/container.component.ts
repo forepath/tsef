@@ -2,7 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterModule } from '@angular/router';
-import { BillingCapabilitiesFacade } from '@forepath/decabill/frontend/data-access-billing-console';
+import {
+  BillingCapabilitiesFacade,
+  CustomerProfileFacade,
+} from '@forepath/decabill/frontend/data-access-billing-console';
 import {
   AuthenticationFacade,
   IDENTITY_AUTH_ENVIRONMENT,
@@ -11,7 +14,7 @@ import {
 import { StandaloneLoadingService } from '@forepath/shared/frontend';
 import { AdminUpdatesFacade } from '@forepath/shared/frontend/data-access-updates';
 import { ENVIRONMENT, LocaleService } from '@forepath/shared/frontend/util-configuration';
-import { combineLatest, filter, map, startWith } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, startWith } from 'rxjs';
 
 import { ThemeService } from '../theme.service';
 
@@ -48,6 +51,7 @@ function getBootstrapPopover(): BootstrapPopoverConstructor | undefined {
 export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
   private readonly authenticationFacade = inject(AuthenticationFacade);
   private readonly billingCapabilitiesFacade = inject(BillingCapabilitiesFacade);
+  private readonly customerProfileFacade = inject(CustomerProfileFacade);
   private readonly adminUpdatesFacade = inject(AdminUpdatesFacade);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
@@ -109,6 +113,20 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
    * Observable indicating whether the user is authenticated
    */
   readonly isAuthenticated$ = this.authenticationFacade.isAuthenticated$;
+
+  /**
+   * Logged-in user's customer number when a billing profile exists; otherwise null.
+   */
+  readonly headerCustomerNumber = toSignal(
+    this.customerProfileFacade.getCustomerProfile$().pipe(
+      map((profile) => {
+        const customerNumber = profile?.customerNumber?.trim();
+
+        return customerNumber ? customerNumber : null;
+      }),
+    ),
+    { initialValue: null as string | null },
+  );
 
   /**
    * True when the user can access the user manager (admin with users/keycloak auth).
@@ -188,11 +206,25 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
     return $localize`:@@featureContainer-ariaLabelRole:Role ${role}:role:`;
   }
 
+  getCustomerNumberAriaLabel(customerNumber: string): string {
+    return $localize`:@@featureContainer-customerNumberAria:Customer number ${customerNumber}:customerNumber:`;
+  }
+
   /**
    * Initialize component and check authentication status
    */
   ngOnInit(): void {
     this.authenticationFacade.checkAuthentication();
+
+    this.authenticationFacade.isAuthenticated$
+      .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((isAuthenticated) => {
+        if (isAuthenticated) {
+          this.customerProfileFacade.loadCustomerProfile();
+        } else {
+          this.customerProfileFacade.clearCustomerProfile();
+        }
+      });
 
     this.authenticationFacade.canAccessBillingAdministration$
       .pipe(takeUntilDestroyed(this.destroyRef))

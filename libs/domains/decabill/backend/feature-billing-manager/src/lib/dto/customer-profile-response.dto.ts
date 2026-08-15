@@ -4,6 +4,7 @@ import type { VatIdValidationSource, VatIdValidationStatus } from '../constants/
 export class CustomerProfileResponseDto {
   id!: string;
   userId!: string;
+  customerNumber!: string;
   firstName?: string;
   lastName?: string;
   company?: string;

@@ -6,7 +6,7 @@ Tenant-scoped billing data in a shared billing manager deployment. Operators con
 
 Decabill isolates users, subscriptions, invoices, service types, and service plans per tenant. The same email address may exist in different tenants as separate user records.
 
-Assigned **invoice**, **subscription**, and **DATEV debtor** numbers are shared across tenants by default (`TENANTS_SHARED_NUMBERS`). Set `TENANTS_SHARED_NUMBERS=false` for per-tenant number pools. See [Numbering](./numbering.md).
+Assigned **invoice**, **subscription**, **customer**, and **DATEV debtor** numbers are shared across tenants by default (`TENANTS_SHARED_NUMBERS`). Set `TENANTS_SHARED_NUMBERS=false` for per-tenant number pools. See [Numbering](./numbering.md).
 
 Multi-tenancy is enforced on:
 

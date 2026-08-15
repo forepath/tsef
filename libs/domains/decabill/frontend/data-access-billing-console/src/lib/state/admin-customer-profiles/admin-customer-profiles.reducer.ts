@@ -65,6 +65,7 @@ function mapResponseToListItem(profile: CustomerProfileResponse): AdminCustomerP
   return {
     id: profile.id,
     userId: profile.userId,
+    customerNumber: profile.customerNumber,
     firstName: toOptionalString(profile.firstName),
     lastName: toOptionalString(profile.lastName),
     company: toOptionalString(profile.company),

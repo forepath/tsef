@@ -4,6 +4,7 @@ import { CustomerType } from '../constants/customer-type.constants';
 import { VatIdValidationStatus } from '../constants/vat-id-validation.constants';
 import type { CustomerProfileDto } from '../dto/customer-profile.dto';
 import { CustomerProfileEntity } from '../entities/customer-profile.entity';
+import { CustomerNumberSequencesRepository } from '../repositories/customer-number-sequences.repository';
 import { CustomerProfilesRepository } from '../repositories/customer-profiles.repository';
 import { normalizeVatId } from '../utils/vat-id.utils';
 
@@ -43,6 +44,7 @@ function inferCustomerType(dto: Partial<CustomerProfileEntity>): CustomerType | 
 export class CustomerProfilesService {
   constructor(
     private readonly customerProfilesRepository: CustomerProfilesRepository,
+    private readonly customerNumberSequencesRepository: CustomerNumberSequencesRepository,
     private readonly vatIdValidationService: VatIdValidationService,
   ) {}
 
@@ -74,9 +76,12 @@ export class CustomerProfilesService {
       return await this.applyVatValidationIfNeeded(updated, existing, prepared);
     }
 
+    const allocated = await this.customerNumberSequencesRepository.nextCustomerNumber();
     const created = await this.customerProfilesRepository.create({
       userId,
       ...prepared,
+      customerNumber: allocated.number,
+      numberScope: allocated.numberScope,
       vatIdValidationStatus: prepared.vatIdValidationStatus ?? VatIdValidationStatus.NONE,
     });
 

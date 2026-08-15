@@ -90,6 +90,7 @@ export * from './lib/entities/invoice-credit-document.entity';
 export * from './lib/entities/invoice-line-item.entity';
 export * from './lib/entities/invoice-number-sequence.entity';
 export * from './lib/entities/subscription-number-sequence.entity';
+export * from './lib/entities/customer-number-sequence.entity';
 export * from './lib/entities/open-position.entity';
 export * from './lib/entities/payment-attempt.entity';
 export * from './lib/entities/payment-refund.entity';

@@ -92,6 +92,8 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
   createForm: CustomerProfileDto & { userId: string } = this.emptyCreateForm();
   editForm: CustomerProfileDto & {
     id: string;
+    customerNumber?: string;
+    datevDebtorNumber?: number | null;
     vatIdValidationStatus?: VatIdValidationStatus;
     vatIdValidatedAt?: string | null;
   } = this.emptyEditForm();
@@ -120,6 +122,8 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
       next: (full) => {
         this.editForm = {
           id: full.id,
+          customerNumber: full.customerNumber,
+          datevDebtorNumber: full.datevDebtorNumber ?? null,
           firstName: full.firstName ?? '',
           lastName: full.lastName ?? '',
           company: full.company ?? '',
@@ -199,7 +203,14 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
   submitEdit(): void {
     if (!this.editForm.id) return;
 
-    const { id, vatIdValidationStatus: _status, vatIdValidatedAt: _validatedAt, ...dto } = this.editForm;
+    const {
+      id,
+      customerNumber: _customerNumber,
+      datevDebtorNumber: _datevDebtorNumber,
+      vatIdValidationStatus: _status,
+      vatIdValidatedAt: _validatedAt,
+      ...dto
+    } = this.editForm;
 
     this.facade.updateProfile(id, dto);
   }
@@ -240,6 +251,14 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
     if (!value) return '—';
 
     return this.datePipe.transform(value, 'mediumDate') ?? '—';
+  }
+
+  datevDebtorNumberDisplay(value: number | null | undefined): string {
+    if (value == null) {
+      return $localize`:@@featureAdminProfiles-datevDebtorNotAssigned:Not assigned yet`;
+    }
+
+    return String(value);
   }
 
   profilePrimaryTitle(profile: AdminCustomerProfileListItem): string {
@@ -331,11 +350,15 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
 
   private emptyEditForm(): CustomerProfileDto & {
     id: string;
+    customerNumber?: string;
+    datevDebtorNumber?: number | null;
     vatIdValidationStatus?: VatIdValidationStatus;
     vatIdValidatedAt?: string | null;
   } {
     return {
       id: '',
+      customerNumber: '',
+      datevDebtorNumber: null,
       firstName: '',
       lastName: '',
       company: '',

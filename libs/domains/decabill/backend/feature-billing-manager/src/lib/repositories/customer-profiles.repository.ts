@@ -41,6 +41,37 @@ export class CustomerProfilesRepository {
     const qb = this.repository
       .createQueryBuilder('profile')
       .leftJoin(UserEntity, 'user', 'user.id = profile.user_id')
+      // List responses never expose customData; skip hydrate/decrypt for that column.
+      .select([
+        'profile.id',
+        'profile.userId',
+        'profile.customerNumber',
+        'profile.numberScope',
+        'profile.firstName',
+        'profile.lastName',
+        'profile.company',
+        'profile.customerType',
+        'profile.vatId',
+        'profile.vatIdValidationStatus',
+        'profile.vatIdValidatedAt',
+        'profile.vatIdValidationSource',
+        'profile.addressLine1',
+        'profile.addressLine2',
+        'profile.postalCode',
+        'profile.city',
+        'profile.state',
+        'profile.country',
+        'profile.email',
+        'profile.phone',
+        'profile.stripeCustomerId',
+        'profile.autoBillingEnabled',
+        'profile.defaultPaymentMethodExternalId',
+        'profile.trustScore',
+        'profile.trustLevel',
+        'profile.trustScoreUpdatedAt',
+        'profile.createdAt',
+        'profile.updatedAt',
+      ])
       .orderBy('profile.updatedAt', 'DESC');
 
     applyUserTenantFilter(qb, 'user');

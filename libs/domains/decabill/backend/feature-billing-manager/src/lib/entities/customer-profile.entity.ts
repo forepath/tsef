@@ -1,17 +1,25 @@
 import { createJsonAes256GcmTransformer } from '@forepath/shared/backend';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 
 import { CustomerType } from '../constants/customer-type.constants';
-import { CustomerTrustLevel } from '../trust-score/trust-score.types';
 import { VatIdValidationSource, VatIdValidationStatus } from '../constants/vat-id-validation.constants';
+import { CustomerTrustLevel } from '../trust-score/trust-score.types';
 
 @Entity('billing_customer_profiles')
+@Unique('uq_billing_customer_profiles_number_scope_number', ['numberScope', 'customerNumber'])
 export class CustomerProfileEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id!: string;
 
   @Column({ type: 'uuid', name: 'user_id', unique: true })
   userId!: string;
+
+  @Column({ type: 'varchar', length: 50, name: 'customer_number' })
+  customerNumber!: string;
+
+  /** `__shared__` when TENANTS_SHARED_NUMBERS is enabled; otherwise the tenant id. */
+  @Column({ type: 'varchar', length: 64, name: 'number_scope', default: '__shared__' })
+  numberScope!: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true, name: 'first_name' })
   firstName?: string;
