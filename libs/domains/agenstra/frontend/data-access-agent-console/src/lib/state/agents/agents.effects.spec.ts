@@ -149,7 +149,11 @@ describe('AgentsEffects', () => {
 
       loadClientAgents$(actions$, agentsService).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 0 });
+        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, {
+          limit: 10,
+          offset: 0,
+          search: undefined,
+        });
         done();
       });
     });
@@ -218,13 +222,18 @@ describe('AgentsEffects', () => {
           nextOffset: { [clientId]: 10 },
           loading: { [clientId]: false },
           appendLoading: { [clientId]: false },
+          search: {},
         }),
       );
       agentsService.listClientAgents.mockReturnValue(of(agents));
 
       loadMoreClientAgents$(actions$, agentsService, store).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 10 });
+        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, {
+          limit: 10,
+          offset: 10,
+          search: undefined,
+        });
         done();
       });
     });
@@ -241,6 +250,7 @@ describe('AgentsEffects', () => {
           nextOffset: { [clientId]: 10 },
           loading: { [clientId]: false },
           appendLoading: { [clientId]: false },
+          search: {},
         }),
       );
       agentsService.listClientAgents.mockReturnValue(throwError(() => error));

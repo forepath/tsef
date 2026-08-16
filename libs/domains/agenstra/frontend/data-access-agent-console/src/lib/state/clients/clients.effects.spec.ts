@@ -153,7 +153,7 @@ describe('ClientsEffects', () => {
 
       loadClients$(actions$, clientsService).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 0 });
+        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 0, search: undefined });
         done();
       });
     });
@@ -168,7 +168,7 @@ describe('ClientsEffects', () => {
 
       loadClients$(actions$, clientsService).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 0 });
+        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 0, search: undefined });
         done();
       });
     });
@@ -186,12 +186,12 @@ describe('ClientsEffects', () => {
 
       loadClients$(actions$, clientsService).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 0 });
+        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 0, search: undefined });
         done();
       });
     });
 
-    it('should ignore user params and use batch params', (done) => {
+    it('should use provided list params', (done) => {
       const params = { limit: 5, offset: 20 };
       const action = loadClients({ params });
       const clients: ClientResponseDto[] = [mockClient];
@@ -200,7 +200,7 @@ describe('ClientsEffects', () => {
       clientsService.listClients.mockReturnValue(of(clients));
 
       loadClients$(actions$, clientsService).subscribe(() => {
-        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 0 });
+        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 5, offset: 20, search: undefined });
         done();
       });
     });
@@ -233,13 +233,14 @@ describe('ClientsEffects', () => {
           nextOffset: 10,
           loading: false,
           appendLoading: false,
+          search: null,
         }),
       );
       clientsService.listClients.mockReturnValue(of(newClients));
 
       loadMoreClients$(actions$, clientsService, store).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 10 });
+        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 10, search: undefined });
         done();
       });
     });
@@ -256,6 +257,7 @@ describe('ClientsEffects', () => {
           nextOffset: 10,
           loading: false,
           appendLoading: false,
+          search: null,
         }),
       );
       clientsService.listClients.mockReturnValue(throwError(() => error));

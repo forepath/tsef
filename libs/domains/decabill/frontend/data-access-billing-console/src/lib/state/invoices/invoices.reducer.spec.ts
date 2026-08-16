@@ -261,7 +261,7 @@ describe('invoicesReducer', () => {
   describe('loadOpenOverdueInvoices', () => {
     it('should set openOverdueListLoading to true and clear openOverdueListError', () => {
       const state: InvoicesState = { ...initialInvoicesState, openOverdueListError: 'Previous error' };
-      const newState = invoicesReducer(state, loadOpenOverdueInvoices());
+      const newState = invoicesReducer(state, loadOpenOverdueInvoices({}));
 
       expect(newState.openOverdueListLoading).toBe(true);
       expect(newState.openOverdueListError).toBeNull();
@@ -273,7 +273,7 @@ describe('invoicesReducer', () => {
         openOverdueListLoading: false,
         openOverdueListError: 'Previous error',
       };
-      const newState = invoicesReducer(state, loadOpenOverdueInvoices(true));
+      const newState = invoicesReducer(state, loadOpenOverdueInvoices({ silent: true }));
 
       expect(newState.openOverdueListLoading).toBe(false);
       expect(newState.openOverdueListError).toBe('Previous error');
@@ -305,7 +305,7 @@ describe('invoicesReducer', () => {
   describe('loadHistoryInvoices', () => {
     it('should set historyListLoading to true and clear historyListError', () => {
       const state: InvoicesState = { ...initialInvoicesState, historyListError: 'Previous error' };
-      const newState = invoicesReducer(state, loadHistoryInvoices());
+      const newState = invoicesReducer(state, loadHistoryInvoices({}));
 
       expect(newState.historyListLoading).toBe(true);
       expect(newState.historyListError).toBeNull();
@@ -317,7 +317,7 @@ describe('invoicesReducer', () => {
         historyListLoading: false,
         historyListError: 'Previous error',
       };
-      const newState = invoicesReducer(state, loadHistoryInvoices(true));
+      const newState = invoicesReducer(state, loadHistoryInvoices({ silent: true }));
 
       expect(newState.historyListLoading).toBe(false);
       expect(newState.historyListError).toBe('Previous error');

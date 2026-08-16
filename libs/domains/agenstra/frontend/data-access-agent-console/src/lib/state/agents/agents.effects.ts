@@ -107,7 +107,7 @@ export const loadMoreClientAgents$ = createEffect(
         const batchParams = {
           limit: BATCH_SIZE,
           offset,
-          search: state.search[clientId] ?? undefined,
+          search: state.search?.[clientId] ?? undefined,
         };
 
         return agentsService.listClientAgents(clientId, batchParams).pipe(
