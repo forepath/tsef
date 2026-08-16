@@ -133,12 +133,12 @@
         </div>
         @if ((hasMore$ | async) || (appendError$ | async)) {
           <div
-            forepathInfiniteScroll
+            sharedInfiniteScroll
             [paused]="!!(appendError$ | async)"
             [disabled]="!(hasMore$ | async) || !!(appendLoading$ | async) || !!(loading$ | async)"
             (reachedEnd)="onLoadMoreRules()"
           >
-            <forepath-list-append-footer
+            <shared-list-append-footer
               [loading]="!!(appendLoading$ | async)"
               [error]="!!(appendError$ | async)"
               (retry)="onLoadMoreRules()"

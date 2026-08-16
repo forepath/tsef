@@ -55,9 +55,9 @@
 
   <div
     class="flex-grow-1 overflow-auto min-h-0"
-    forepathInfiniteScroll
+    sharedInfiniteScroll
     [paused]="!!(appendError$ | async)"
-    [disabled]="!(hasMore$ | async) || !!(appendLoading$ | async) || !!(loading$ | async)"
+    [disabled]="(hasMore$ | async) === false || !!(appendLoading$ | async) || !!(loading$ | async)"
     (reachedEnd)="facade.loadMore()"
   >
     @if (loading$ | async) {
@@ -239,7 +239,7 @@
           }
         </div>
         @if ((hasMore$ | async) || (appendError$ | async)) {
-          <forepath-list-append-footer
+          <shared-list-append-footer
             [loading]="!!(appendLoading$ | async)"
             [error]="!!(appendError$ | async)"
             (retry)="facade.loadMore()"

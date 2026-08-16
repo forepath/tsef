@@ -5,7 +5,7 @@ import { Directive, ElementRef, EventEmitter, Input, NgZone, OnDestroy, OnInit, 
  * of a scrollable list. Pauses while `paused` is true (e.g. append error until retry).
  */
 @Directive({
-  selector: '[forepathInfiniteScroll]',
+  selector: '[sharedInfiniteScroll]',
   standalone: true,
 })
 export class InfiniteScrollDirective implements OnInit, OnDestroy {

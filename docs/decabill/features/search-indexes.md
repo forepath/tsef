@@ -9,7 +9,7 @@ Search queries always apply tenant/user authorization filters server-side. When 
 
 ## Console list UX
 
-Customer and admin console lists (subscriptions, projects, and related admin tables) use **infinite scroll**: the first page loads immediately; further pages append on scroll via `forepathInfiniteScroll` and `forepath-list-append-footer`. Append failures pause scrolling until the user retries. Lane boards use CDK virtual scroll for card rows.
+Customer and admin console lists (subscriptions, projects, and related admin tables) use **infinite scroll**: the first page loads immediately; further pages append on scroll via `sharedInfiniteScroll` and `shared-list-append-footer`. Append failures pause scrolling until the user retries. Lane boards use CDK virtual scroll for card rows.
 
 Admin subscription search continues to hit the API (`search` query). Customer subscription and project search remain client-side over the pages already loaded when the list API has no `search` parameter.
 

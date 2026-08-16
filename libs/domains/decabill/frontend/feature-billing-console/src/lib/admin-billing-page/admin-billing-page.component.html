@@ -332,10 +332,10 @@
 
           <div
             class="admin-billing__invoices-list list-group list-group-flush flex-grow-1"
-            forepathInfiniteScroll
+            sharedInfiniteScroll
             [paused]="!!(invoicesAppendError$ | async)"
             [disabled]="
-              !(invoicesHasMore$ | async) || !!(invoicesAppendLoading$ | async) || !!(invoicesLoading$ | async)
+              (invoicesHasMore$ | async) === false || !!(invoicesAppendLoading$ | async) || !!(invoicesLoading$ | async)
             "
             (reachedEnd)="invoiceManagerFacade.loadMore()"
           >
@@ -498,7 +498,7 @@
                   </div>
                 }
                 @if ((invoicesHasMore$ | async) || (invoicesAppendError$ | async)) {
-                  <forepath-list-append-footer
+                  <shared-list-append-footer
                     [loading]="!!(invoicesAppendLoading$ | async)"
                     [error]="!!(invoicesAppendError$ | async)"
                     (retry)="invoiceManagerFacade.loadMore()"

@@ -276,14 +276,14 @@
                 </div>
                 @if ((clientsHasMore$ | async) || (clientsAppendError$ | async)) {
                   <div
-                    forepathInfiniteScroll
+                    sharedInfiniteScroll
                     [paused]="!!(clientsAppendError$ | async)"
                     [disabled]="
                       !(clientsHasMore$ | async) || !!(clientsAppendLoading$ | async) || !!(clientsLoading$ | async)
                     "
                     (reachedEnd)="onLoadMoreClients()"
                   >
-                    <forepath-list-append-footer
+                    <shared-list-append-footer
                       [loading]="!!(clientsAppendLoading$ | async)"
                       [error]="!!(clientsAppendError$ | async)"
                       (retry)="onLoadMoreClients()"
@@ -500,14 +500,14 @@
                 </div>
                 @if ((agentsHasMore$ | async) || (agentsAppendError$ | async)) {
                   <div
-                    forepathInfiniteScroll
+                    sharedInfiniteScroll
                     [paused]="!!(agentsAppendError$ | async)"
                     [disabled]="
                       !(agentsHasMore$ | async) || !!(agentsAppendLoading$ | async) || !!(agentsLoading$ | async)
                     "
                     (reachedEnd)="onLoadMoreAgents()"
                   >
-                    <forepath-list-append-footer
+                    <shared-list-append-footer
                       [loading]="!!(agentsAppendLoading$ | async)"
                       [error]="!!(agentsAppendError$ | async)"
                       (retry)="onLoadMoreAgents()"

@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'forepath-list-append-footer',
+  selector: 'shared-list-append-footer',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="forepath-list-append-footer py-3 d-flex justify-content-center align-items-center">
+    <div class="shared-list-append-footer py-3 d-flex justify-content-center align-items-center">
       @if (loading) {
         <div class="spinner-border" role="status" aria-live="polite">
           <span class="visually-hidden">Loading</span>
@@ -26,7 +26,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   `,
   styles: [
     `
-      .forepath-list-append-footer {
+      .shared-list-append-footer {
         min-height: 3rem;
         margin-top: 0.5rem;
         margin-bottom: 0.5rem;

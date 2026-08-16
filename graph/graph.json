@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-16T08:26:01.766Z",
+  "generatedAt": "2026-08-16T10:48:00.359Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -2158,6 +2158,14 @@
       "type": "package",
       "attrs": {
         "name": "@angular/animations",
+        "version": "21.2.6"
+      }
+    },
+    {
+      "id": "package:@angular/cdk",
+      "type": "package",
+      "attrs": {
+        "name": "@angular/cdk",
         "version": "21.2.6"
       }
     },
@@ -29339,6 +29347,11 @@
     },
     {
       "from": "project:decabill-frontend-feature-billing-console",
+      "to": "project:shared-frontend-ui-lists",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-feature-billing-console",
       "to": "project:shared-frontend-util-configuration",
       "type": "depends_on"
     },
@@ -30319,6 +30332,11 @@
     },
     {
       "from": "project:agenstra-frontend-billing-console",
+      "to": "package:@angular/cdk",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-billing-console",
       "to": "package:@angular/common",
       "type": "depends_on"
     },
@@ -30445,6 +30463,11 @@
     {
       "from": "project:decabill-frontend-billing-console",
       "to": "package:@angular/animations",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-billing-console",
+      "to": "package:@angular/cdk",
       "type": "depends_on"
     },
     {
@@ -30575,6 +30598,11 @@
     {
       "from": "project:forepath-frontend-billing-console",
       "to": "package:@angular/animations",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-frontend-billing-console",
+      "to": "package:@angular/cdk",
       "type": "depends_on"
     },
     {
@@ -30970,6 +30998,11 @@
     {
       "from": "project:agenstra-frontend-agent-console",
       "to": "package:@angular/animations",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-agent-console",
+      "to": "package:@angular/cdk",
       "type": "depends_on"
     },
     {

@@ -148,10 +148,10 @@
           </form>
           <div
             class="customer-plans__lane-list list-group list-group-flush flex-grow-1"
-            forepathInfiniteScroll
+            sharedInfiniteScroll
             [paused]="!!(subscriptionsAppendError$ | async)"
             [disabled]="
-              !(subscriptionsHasMore$ | async) ||
+              (subscriptionsHasMore$ | async) === false ||
               !!(subscriptionsAppendLoading$ | async) ||
               !!(subscriptionsLoading$ | async)
             "
@@ -186,7 +186,7 @@
                 }
               }
               @if ((subscriptionsHasMore$ | async) || (subscriptionsAppendError$ | async)) {
-                <forepath-list-append-footer
+                <shared-list-append-footer
                   [loading]="!!(subscriptionsAppendLoading$ | async)"
                   [error]="!!(subscriptionsAppendError$ | async)"
                   (retry)="loadMoreSubscriptions()"

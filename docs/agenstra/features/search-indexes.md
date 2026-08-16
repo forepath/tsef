@@ -6,7 +6,7 @@ Search queries always scope by authenticated client/workspace access. When OpenS
 
 ## Console list UX
 
-Agent console lists (workspaces/clients, environments/agents, filter rules) use **infinite scroll**: first page on entry, then append on scroll with `forepathInfiniteScroll` and `forepath-list-append-footer`. Append errors pause loading until retry. Ticket board lane cards use CDK virtual scroll.
+Agent console lists (workspaces/clients, environments/agents, filter rules) use **infinite scroll**: first page on entry, then append on scroll with `sharedInfiniteScroll` and `shared-list-append-footer`. Append errors pause loading until retry. Ticket board lane cards use CDK virtual scroll.
 
 Audit (and other API-backed search surfaces) keep server-side `search`; local filters on already-loaded pages stay client-side where the list endpoint has no search param.
 
