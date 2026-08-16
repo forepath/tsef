@@ -48,6 +48,9 @@ export const BillingJobName = {
   VAT_ID_VALIDATION_UNIT: VatIdValidationJobName.UNIT,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
   UPDATE_CHECK: UPDATE_CHECK_JOB_NAME,
+  SEARCH_REINDEX_COORDINATOR: 'search-reindex.coordinator',
+  SEARCH_REINDEX_UNIT: 'search-reindex.unit',
+  SEARCH_INDEX_SYNC_UNIT: 'search-index-sync.unit',
 } as const;
 
 export type BillingJobName = (typeof BillingJobName)[keyof typeof BillingJobName];
@@ -61,9 +64,42 @@ export interface BillingRepeatableJobDefinition {
 }
 
 function parseIntervalMs(envKey: string, fallback: number): number {
-  const parsed = parseInt(process.env[envKey] ?? String(fallback), 10);
+  const raw = process.env[envKey]?.trim();
 
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  if (!raw) {
+    return fallback;
+  }
+
+  const normalized = raw.toLowerCase();
+  const match = /^(\d+(?:\.\d+)?)(ms|s|m|h|d)?$/.exec(normalized);
+
+  if (!match) {
+    const parsed = parseInt(raw, 10);
+
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  }
+
+  const value = parseFloat(match[1]);
+  const unit = match[2] ?? 'ms';
+
+  if (!Number.isFinite(value) || value <= 0) {
+    return fallback;
+  }
+
+  switch (unit) {
+    case 'ms':
+      return Math.trunc(value);
+    case 's':
+      return Math.trunc(value * 1000);
+    case 'm':
+      return Math.trunc(value * 60_000);
+    case 'h':
+      return Math.trunc(value * 3_600_000);
+    case 'd':
+      return Math.trunc(value * 86_400_000);
+    default:
+      return fallback;
+  }
 }
 
 function parseBooleanEnv(envKey: string, fallback: boolean): boolean {
@@ -187,6 +223,12 @@ export function getBillingRepeatableJobs(): BillingRepeatableJobDefinition[] {
     coordinatorJobId: buildCoordinatorJobId('update-check'),
     pattern: envCronOrDefault('UPDATE_CHECK_CRON', '0 0 * * *'),
     tz: process.env.UPDATE_CHECK_TIMEZONE ?? 'Europe/Berlin',
+  });
+
+  jobs.push({
+    name: BillingJobName.SEARCH_REINDEX_COORDINATOR,
+    coordinatorJobId: buildCoordinatorJobId('search-reindex'),
+    everyMs: parseIntervalMs('SEARCH_REINDEX_INTERVAL', 900_000),
   });
 
   return jobs;

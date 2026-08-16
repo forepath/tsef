@@ -52,10 +52,13 @@ Registered by the scheduler from `getBillingRepeatableJobs()`:
 | `datev-export.coordinator`                | `BILLING_DATEV_EXPORT_CRON` (cron)         | 1st of month     |
 | `price-recalc.coordinator`                | `BILLING_PRICE_RECALC_CRON` (cron)         | daily 00:00      |
 | `update-check`                            | `UPDATE_CHECK_CRON` (cron)                 | daily 00:00      |
+| `search-reindex.coordinator`              | `SEARCH_REINDEX_INTERVAL`                  | 15m              |
 
 The DATEV coordinator is registered only when `BILLING_DATEV_EXPORT_ENABLED=true`. The price-recalc coordinator is registered only when `BILLING_PRICE_RECALC_ENABLED=true` (default true). See [Automatic daily price recalculation](../features/automatic-price-recalculation.md).
 
 The `update-check` job fetches the latest GitHub release for application update reporting (timezone `UPDATE_CHECK_TIMEZONE`, default `Europe/Berlin`). See [Application updates](../features/application-updates.md).
+
+The `search-reindex` coordinator fans out per-entity `search-reindex.unit` jobs to backfill OpenSearch after upgrades. Live CUD also writes indexes; `search-index-sync.unit` retries failed live syncs. See [Search indexes](../features/search-indexes.md).
 
 Coordinator job IDs use dot separators (for example `coordinator.subscription-billing`) via `buildCoordinatorJobId`.
 
@@ -81,6 +84,7 @@ Coordinators fan out unit jobs such as:
 - `datev-export.coordinator` and `datev-export.unit` (when `BILLING_DATEV_EXPORT_ENABLED=true`)
 - `webhook-deliver`: outbound webhook notification delivery
 - `email-deliver`: transactional email delivery (Handlebars + nodemailer)
+- `search-reindex.unit` / `search-index-sync.unit`: OpenSearch index backfill and live sync retries
 
 BullMQ `jobId` values prevent duplicate active work for the same entity. Custom job IDs use `.` separators and only allowed characters (alphanumeric, `.`, `-`, `_`, `~`).
 

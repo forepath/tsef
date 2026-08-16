@@ -1,5 +1,6 @@
 import {
   AgenstraNotificationsModule,
+  AgenstraSearchModule,
   AgenstraUpdatesModule,
   ClientsModule,
   ContextImportModule,
@@ -19,6 +20,7 @@ import { ControllerJobsProcessor } from './processors/controller-jobs.processor'
     }),
     AgenstraNotificationsModule,
     AgenstraUpdatesModule,
+    AgenstraSearchModule,
     forwardRef(() => ClientsModule),
     forwardRef(() => FilterRulesModule),
     forwardRef(() => ContextImportModule),

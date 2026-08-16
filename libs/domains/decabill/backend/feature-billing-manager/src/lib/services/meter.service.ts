@@ -17,6 +17,8 @@ import { ServiceTypeMetersRepository } from '../repositories/service-type-meters
 import { UsageRecordsRepository } from '../repositories/usage-records.repository';
 import { resolveEffectiveUnitPriceNet } from '../utils/meter-aggregation.util';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
+import { mapMeterToSearchDocument } from '../search/billing-search-document.mapper';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { ProviderRegistryService } from './provider-registry.service';
 
@@ -33,6 +35,7 @@ export class MeterService {
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
     private readonly addonModuleRegistry: AddonModuleRegistryService,
     private readonly providerRegistry: ProviderRegistryService,
+    private readonly billingSearchIndexService: BillingSearchIndexService,
   ) {}
 
   mapMeterToResponse(row: MeterEntity): MeterResponseDto {
@@ -227,6 +230,7 @@ export class MeterService {
       name: row.name,
       aggregator: row.aggregator,
     });
+    this.billingSearchIndexService.scheduleUpsert('meters', mapMeterToSearchDocument(row));
 
     return row;
   }
@@ -267,6 +271,7 @@ export class MeterService {
       aggregator: row.aggregator,
       isActive: row.isActive,
     });
+    this.billingSearchIndexService.scheduleUpsert('meters', mapMeterToSearchDocument(row));
 
     return row;
   }
@@ -290,6 +295,7 @@ export class MeterService {
       meterId: row.id,
       key: row.key,
     });
+    this.billingSearchIndexService.scheduleDelete('meters', id);
   }
 
   async listPlanMeters(servicePlanId: string): Promise<AttachedMeterResponseDto[]> {

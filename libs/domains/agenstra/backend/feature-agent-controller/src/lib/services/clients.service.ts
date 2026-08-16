@@ -21,6 +21,8 @@ import { ClientsRepository } from '../repositories/clients.repository';
 import { ProvisioningReferencesRepository } from '../repositories/provisioning-references.repository';
 
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
+import { mapClientToSearchDocument } from '../search/agenstra-search-document.mapper';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { StatisticsService } from './statistics.service';
 
@@ -41,6 +43,7 @@ export class ClientsService {
     private readonly clientUsersRepository: ClientUsersRepository,
     private readonly statisticsService: StatisticsService,
     private readonly notificationPublisher: AgenstraNotificationPublisher,
+    private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
   /**
@@ -125,6 +128,7 @@ export class ClientsService {
       .recordEntityCreated(StatisticsEntityType.CLIENT, client.id, {}, userId ?? undefined)
       .catch(() => undefined);
     this.notificationPublisher.publishClient('client.created', client);
+    void this.searchIndex.upsertSafe('clients', mapClientToSearchDocument(client));
 
     return {
       ...response,
@@ -379,6 +383,7 @@ export class ClientsService {
       .recordEntityUpdated(StatisticsEntityType.CLIENT, id, {}, userId ?? undefined)
       .catch(() => undefined);
     this.notificationPublisher.publishClient('client.updated', updatedClient);
+    void this.searchIndex.upsertSafe('clients', mapClientToSearchDocument(updatedClient));
     const dto = await this.mapToResponseDto(updatedClient, { userId, userRole, isApiKeyAuth, amr: options?.amr });
 
     // Fetch config from agent-manager, but don't fail if request fails
@@ -428,6 +433,7 @@ export class ClientsService {
       .recordEntityDeleted(StatisticsEntityType.CLIENT, id, userId ?? undefined)
       .catch(() => undefined);
     this.notificationPublisher.publishClient('client.deleted', client);
+    void this.searchIndex.deleteSafe('clients', id);
     await this.clientsRepository.delete(id);
   }
 

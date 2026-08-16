@@ -1,7 +1,7 @@
 import { UserEntity } from '@forepath/identity/backend';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 
 import { AutoPaymentStatus } from '../constants/auto-payment-status.constants';
 import {
@@ -13,6 +13,7 @@ import {
 } from '../constants/invoice-status.constants';
 import { InvoiceEntity } from '../entities/invoice.entity';
 import { OpenPositionEntity } from '../entities/open-position.entity';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
 export interface OpenOverdueSummary {
@@ -51,6 +52,7 @@ export class InvoicesRepository {
   constructor(
     @InjectRepository(InvoiceEntity)
     private readonly repository: Repository<InvoiceEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   async findBySubscription(userId: string, subscriptionId: string): Promise<InvoiceEntity[]> {
@@ -407,6 +409,30 @@ export class InvoicesRepository {
   }
 
   async findAllForAdmin(params: AdminInvoiceListParams): Promise<{ items: InvoiceEntity[]; total: number }> {
+    if (params.search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('invoices', params.search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit: params.limit,
+        offset: params.offset,
+        extraFilters: params.userId ? { userId: params.userId } : undefined,
+      });
+
+      if (lookup) {
+        if (lookup.ids.length === 0) {
+          return { items: [], total: lookup.total };
+        }
+
+        const found = await this.repository.find({
+          where: { id: In(lookup.ids) },
+          relations: ['subscription'],
+        });
+        const byId = new Map(found.map((item) => [item.id, item]));
+        const items = lookup.ids.map((id) => byId.get(id)).filter((item): item is InvoiceEntity => item != null);
+
+        return { items, total: lookup.total };
+      }
+    }
+
     const qb = this.repository
       .createQueryBuilder('inv')
       .leftJoinAndSelect('inv.subscription', 'subscription')

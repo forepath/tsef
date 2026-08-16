@@ -68,6 +68,7 @@ describe('InvoiceIssuanceService', () => {
   const ossThresholdService = {
     recordCrossBorderB2cNet: jest.fn(),
   };
+  const billingSearchIndexService = { scheduleUpsert: jest.fn(), scheduleDelete: jest.fn() };
   const service = new InvoiceIssuanceService(
     invoicesRepository as never,
     invoiceLineItemsRepository as never,
@@ -91,6 +92,7 @@ describe('InvoiceIssuanceService', () => {
     customerTrustScoreService as never,
     invoiceTaxContextService as never,
     ossThresholdService as never,
+    billingSearchIndexService as never,
   );
   const draftInvoice = {
     id: 'inv-1',

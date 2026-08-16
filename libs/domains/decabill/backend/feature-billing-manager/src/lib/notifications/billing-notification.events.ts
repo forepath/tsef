@@ -84,6 +84,10 @@ export const BILLING_NOTIFICATION_EVENTS = [
   'application.update_check_failed',
   'application.instance_outdated',
   'application.dependency_health_changed',
+  'search.reindex.started',
+  'search.reindex.completed',
+  'search.reindex.failed',
+  'search.document.sync_failed',
 ] as const;
 
 export type BillingNotificationEventType = (typeof BILLING_NOTIFICATION_EVENTS)[number];

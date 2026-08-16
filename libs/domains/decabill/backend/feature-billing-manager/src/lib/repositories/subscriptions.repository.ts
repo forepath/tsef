@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { SubscriptionEntity, SubscriptionStatus } from '../entities/subscription.entity';
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
 export interface AdminSubscriptionListParams {
@@ -23,6 +24,7 @@ export class SubscriptionsRepository {
   constructor(
     @InjectRepository(SubscriptionEntity)
     private readonly repository: Repository<SubscriptionEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   async findByIdOrThrow(id: string): Promise<SubscriptionEntity> {
@@ -98,6 +100,27 @@ export class SubscriptionsRepository {
   }
 
   async findAllForAdmin(params: AdminSubscriptionListParams): Promise<{ items: SubscriptionEntity[]; total: number }> {
+    if (params.search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('subscriptions', params.search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit: params.limit,
+        offset: params.offset,
+        extraFilters: params.userId ? { userId: params.userId } : undefined,
+      });
+
+      if (lookup) {
+        if (lookup.ids.length === 0) {
+          return { items: [], total: lookup.total };
+        }
+
+        const found = await this.repository.findBy({ id: In(lookup.ids) });
+        const byId = new Map(found.map((item) => [item.id, item]));
+        const items = lookup.ids.map((id) => byId.get(id)).filter((item): item is SubscriptionEntity => item != null);
+
+        return { items, total: lookup.total };
+      }
+    }
+
     const qb = this.repository
       .createQueryBuilder('subscription')
       .innerJoin('users', 'user', 'user.id = subscription.user_id');

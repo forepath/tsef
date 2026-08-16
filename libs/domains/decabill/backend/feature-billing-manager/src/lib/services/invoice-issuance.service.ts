@@ -13,6 +13,9 @@ import { AutoBillingService } from './auto-billing.service';
 import { BillingAuditLogService } from './billing-audit-log.service';
 import { BillingIssuerConfigService } from './billing-issuer-config.service';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
+import { mapInvoiceToSearchDocument } from '../search/billing-search-document.mapper';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
+import { getRequiredTenantId } from '../utils/tenant-query.utils';
 import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { InvoicePdfService } from './invoice-pdf.service';
 import { InvoiceTaxContextService } from './invoice-tax-context.service';
@@ -45,6 +48,7 @@ export class InvoiceIssuanceService {
     private readonly customerTrustScoreService: CustomerTrustScoreService,
     private readonly invoiceTaxContextService: InvoiceTaxContextService,
     private readonly ossThresholdService: OssThresholdService,
+    private readonly billingSearchIndexService: BillingSearchIndexService,
   ) {}
 
   async issueDraft(invoiceId: string, dueInDays = 14, options?: IssueDraftOptions): Promise<InvoiceEntity> {
@@ -121,6 +125,12 @@ export class InvoiceIssuanceService {
     }
 
     this.billingNotificationPublisher.publishInvoice('invoice.issued', issued);
+    this.billingSearchIndexService.scheduleUpsert(
+      'invoices',
+      mapInvoiceToSearchDocument(issued, getRequiredTenantId(), {
+        subscriptionNumber: subscription?.number,
+      }),
+    );
 
     if (issued.taxMode && issued.taxMode !== TaxMode.DOMESTIC_VAT) {
       this.billingNotificationPublisher.publish(

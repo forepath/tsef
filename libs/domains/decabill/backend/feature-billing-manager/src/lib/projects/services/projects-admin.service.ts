@@ -16,6 +16,9 @@ import type {
 import type { ProjectEntity } from '../entities/project.entity';
 import { ProjectsRepository } from '../repositories/projects.repository';
 import { BillingNotificationPublisher } from '../../notifications/billing-notification.publisher';
+import { mapProjectToSearchDocument } from '../../search/billing-search-document.mapper';
+import { BillingSearchIndexService } from '../../search/billing-search-index.service';
+import { getRequiredTenantId } from '../../utils/tenant-query.utils';
 import { ProjectBillingService } from './project-billing.service';
 import { ProjectTimeReportService } from './project-time-report.service';
 import { ProjectsService } from './projects.service';
@@ -29,6 +32,7 @@ export class ProjectsAdminService {
     private readonly projectBillingService: ProjectBillingService,
     private readonly projectTimeReportService: ProjectTimeReportService,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
+    private readonly billingSearchIndexService: BillingSearchIndexService,
   ) {}
 
   async list(
@@ -94,6 +98,10 @@ export class ProjectsAdminService {
     });
 
     this.billingNotificationPublisher.publishProject('project.created', project);
+    this.billingSearchIndexService.scheduleUpsert(
+      'projects',
+      mapProjectToSearchDocument(project, getRequiredTenantId()),
+    );
 
     return this.mapResponse(project);
   }
@@ -129,6 +137,10 @@ export class ProjectsAdminService {
     });
 
     this.billingNotificationPublisher.publishProject('project.updated', updated);
+    this.billingSearchIndexService.scheduleUpsert(
+      'projects',
+      mapProjectToSearchDocument(updated, getRequiredTenantId()),
+    );
 
     return this.mapResponse(updated);
   }
@@ -143,6 +155,7 @@ export class ProjectsAdminService {
 
     await this.projectsRepository.delete(id);
     this.billingNotificationPublisher.publishProject('project.deleted', project);
+    this.billingSearchIndexService.scheduleDelete('projects', id);
   }
 
   async billTime(projectId: string, adminUserId: string, dto: BillProjectTimeDto): Promise<BillProjectTimeResponseDto> {

@@ -8,6 +8,7 @@ export interface InstanceDependencyHealth {
   redis: DependencyHealthStatus;
   queue: DependencyHealthStatus;
   database: DependencyHealthStatus;
+  opensearch: DependencyHealthStatus;
 }
 
 export interface ServiceInstanceRecord {

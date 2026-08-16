@@ -104,6 +104,7 @@ describe('AgentManagerInstanceScrapeService', () => {
           redis: 'not_applicable',
           queue: 'not_applicable',
           database: 'healthy',
+          opensearch: 'not_applicable',
         },
       },
     });

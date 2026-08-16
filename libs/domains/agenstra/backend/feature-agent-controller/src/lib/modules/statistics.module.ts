@@ -13,6 +13,7 @@ import { StatisticsProvisioningReferenceEntity } from '../entities/statistics-pr
 import { StatisticsUserEntity } from '../entities/statistics-user.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
 import { StatisticsRepository } from '../repositories/statistics.repository';
+import { AgenstraSearchModule } from '../search/agenstra-search.module';
 import { StatisticsClientSyncService } from '../services/statistics-client-sync.service';
 import { StatisticsQueryService } from '../services/statistics-query.service';
 import { StatisticsUserSyncService } from '../services/statistics-user-sync.service';
@@ -25,6 +26,7 @@ import { StatisticsService } from '../services/statistics.service';
  */
 @Module({
   imports: [
+    AgenstraSearchModule,
     TypeOrmModule.forFeature([
       ClientEntity,
       UserEntity,

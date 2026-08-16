@@ -3,6 +3,8 @@ import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { DataSource } from 'typeorm';
 
+import { OpenSearchModule, OpenSearchService } from '@forepath/shared/backend/util-opensearch';
+
 import { UPDATES_MODULE_OPTIONS } from './constants/updates.constants';
 import { createUpdatesController } from './controllers/updates.controller';
 import type { UpdatesModuleOptions } from './interfaces/updates-module.options';
@@ -23,7 +25,7 @@ export class UpdatesModule {
 
     return {
       module: UpdatesModule,
-      imports: [BullModule.registerQueue({ name: options.queueName })],
+      imports: [BullModule.registerQueue({ name: options.queueName }), OpenSearchModule],
       controllers: [createUpdatesController(options.controllerPath)],
       providers: [
         optionsProvider,
@@ -48,12 +50,14 @@ export class UpdatesModule {
             moduleOptions: UpdatesModuleOptions,
             queue: Queue,
             dataSource?: DataSource,
-          ) => new InstanceHeartbeatService(store, moduleOptions, queue, dataSource ?? null),
+            openSearch?: OpenSearchService,
+          ) => new InstanceHeartbeatService(store, moduleOptions, queue, dataSource ?? null, openSearch ?? null),
           inject: [
             UpdatesRedisStore,
             UPDATES_MODULE_OPTIONS,
             getQueueToken(options.queueName),
             { token: DataSource, optional: true },
+            { token: OpenSearchService, optional: true },
           ],
         },
       ],

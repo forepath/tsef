@@ -8,6 +8,13 @@ import { ChatDirection, StatisticsInteractionKind } from '../entities/statistics
 import { StatisticsEntityEventType, StatisticsEntityType } from '../entities/statistics-entity-event.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
 import { StatisticsRepository } from '../repositories/statistics.repository';
+import {
+  mapAgentToSearchDocument,
+  mapChatIoToSearchDocument,
+  mapFilterDropToSearchDocument,
+  mapFilterFlagToSearchDocument,
+} from '../search/agenstra-search-document.mapper';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 import { sanitizeProviderMetadata } from '../utils/statistics-metadata-sanitizer';
 
 /**
@@ -22,6 +29,7 @@ export class StatisticsService {
   constructor(
     private readonly statisticsRepository: StatisticsRepository,
     private readonly clientsRepository: ClientsRepository,
+    private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
   /**
@@ -42,16 +50,20 @@ export class StatisticsService {
         userId,
       );
 
-      await this.statisticsRepository.createStatisticsChatIo({
-        statisticsAgentId,
-        statisticsClientId,
-        statisticsUserId,
-        direction: ChatDirection.INPUT,
-        interactionKind,
-        wordCount,
-        charCount,
-        occurredAt: new Date(),
-      });
+      await this.statisticsRepository
+        .createStatisticsChatIo({
+          statisticsAgentId,
+          statisticsClientId,
+          statisticsUserId,
+          direction: ChatDirection.INPUT,
+          interactionKind,
+          wordCount,
+          charCount,
+          occurredAt: new Date(),
+        })
+        .then((row) => {
+          void this.searchIndex.upsertSafe('chat-io', mapChatIoToSearchDocument(row, clientId));
+        });
       this.recordChatMessageOtel(clientId, agentId, ChatDirection.INPUT, interactionKind);
     } catch (error) {
       this.logger.warn(`Failed to record chat input: ${(error as Error).message}`);
@@ -76,16 +88,20 @@ export class StatisticsService {
         userId,
       );
 
-      await this.statisticsRepository.createStatisticsChatIo({
-        statisticsAgentId,
-        statisticsClientId,
-        statisticsUserId,
-        direction: ChatDirection.OUTPUT,
-        interactionKind,
-        wordCount,
-        charCount,
-        occurredAt: new Date(),
-      });
+      await this.statisticsRepository
+        .createStatisticsChatIo({
+          statisticsAgentId,
+          statisticsClientId,
+          statisticsUserId,
+          direction: ChatDirection.OUTPUT,
+          interactionKind,
+          wordCount,
+          charCount,
+          occurredAt: new Date(),
+        })
+        .then((row) => {
+          void this.searchIndex.upsertSafe('chat-io', mapChatIoToSearchDocument(row, clientId));
+        });
       this.recordChatMessageOtel(clientId, agentId, ChatDirection.OUTPUT, interactionKind);
     } catch (error) {
       this.logger.warn(`Failed to record chat output: ${(error as Error).message}`);
@@ -134,18 +150,22 @@ export class StatisticsService {
         userId,
       );
 
-      await this.statisticsRepository.createStatisticsChatFilterDrop({
-        statisticsAgentId,
-        statisticsClientId,
-        statisticsUserId,
-        filterType,
-        filterDisplayName,
-        filterReason,
-        direction,
-        wordCount,
-        charCount,
-        occurredAt: new Date(),
-      });
+      await this.statisticsRepository
+        .createStatisticsChatFilterDrop({
+          statisticsAgentId,
+          statisticsClientId,
+          statisticsUserId,
+          filterType,
+          filterDisplayName,
+          filterReason,
+          direction,
+          wordCount,
+          charCount,
+          occurredAt: new Date(),
+        })
+        .then((row) => {
+          void this.searchIndex.upsertSafe('filter-drops', mapFilterDropToSearchDocument(row, clientId));
+        });
       incrementCounter(this.otelMeterName, 'agenstra.chat.filter_drops', {
         client_id: clientId,
         agent_id: agentId,
@@ -179,18 +199,22 @@ export class StatisticsService {
         userId,
       );
 
-      await this.statisticsRepository.createStatisticsChatFilterFlag({
-        statisticsAgentId,
-        statisticsClientId,
-        statisticsUserId,
-        filterType,
-        filterDisplayName,
-        filterReason,
-        direction,
-        wordCount,
-        charCount,
-        occurredAt: new Date(),
-      });
+      await this.statisticsRepository
+        .createStatisticsChatFilterFlag({
+          statisticsAgentId,
+          statisticsClientId,
+          statisticsUserId,
+          filterType,
+          filterDisplayName,
+          filterReason,
+          direction,
+          wordCount,
+          charCount,
+          occurredAt: new Date(),
+        })
+        .then((row) => {
+          void this.searchIndex.upsertSafe('filter-flags', mapFilterFlagToSearchDocument(row, clientId));
+        });
       incrementCounter(this.otelMeterName, 'agenstra.chat.filter_flags', {
         client_id: clientId,
         agent_id: agentId,
@@ -298,6 +322,10 @@ export class StatisticsService {
             statisticsAgentsId: shadowAgent.id,
             occurredAt: now,
           });
+          void this.searchIndex.upsertSafe(
+            'agents',
+            mapAgentToSearchDocument(shadowAgent, metadata.clientId as string),
+          );
           break;
         }
 

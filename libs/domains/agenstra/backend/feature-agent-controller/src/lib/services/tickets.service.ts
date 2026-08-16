@@ -48,6 +48,8 @@ import {
 } from '../entities/ticket.enums';
 import { ClientsRepository } from '../repositories/clients.repository';
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
+import { mapTicketToSearchDocument } from '../search/agenstra-search-document.mapper';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 import { buildSpecificationSubtaskSeeds } from '../utils/specification-ticket-subtasks.utils';
 import { derivePatchActionType, type FieldChange } from '../utils/ticket-activity-payload.utils';
 import {
@@ -99,6 +101,7 @@ export class TicketsService {
     @Inject(forwardRef(() => ExternalImportSyncMarkerService))
     private readonly externalImportSyncMarkerService: ExternalImportSyncMarkerService,
     private readonly notificationPublisher: AgenstraNotificationPublisher,
+    private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
   /**
@@ -491,6 +494,7 @@ export class TicketsService {
 
       this.boardEmitTicketUpsert(ticketDto.clientId, ticketDto);
       this.notificationPublisher.publishTicket('ticket.created', ticketDto);
+      void this.searchIndex.upsertSafe('tickets', mapTicketToSearchDocument(allRows[i]));
       const activityRows = await this.activityRepo.find({
         where: { ticketId: allRows[i].id },
         order: { occurredAt: 'DESC' },
@@ -627,6 +631,7 @@ export class TicketsService {
 
     this.boardEmitTicketUpsert(mapped.clientId, mapped);
     this.notificationPublisher.publishTicket('ticket.updated', mapped);
+    void this.searchIndex.upsertSafe('tickets', mapTicketToSearchDocument(refreshed));
     const activityRows = await this.activityRepo.find({
       where: { ticketId: id },
       order: { occurredAt: 'DESC' },
@@ -771,6 +776,7 @@ export class TicketsService {
     });
     this.notificationPublisher.publishTicket('ticket.deleted', mapped);
     this.boardEmitTicketRemoved(clientId, id);
+    void this.searchIndex.deleteSafe('tickets', id);
   }
 
   /**

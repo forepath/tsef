@@ -1,9 +1,9 @@
-import { UserEntity } from '@forepath/identity/backend';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { applyProjectTenantFilter, getRequiredTenantId } from '../../utils/tenant-query.utils';
+import { BillingSearchIndexService } from '../../search/billing-search-index.service';
 import { ProjectEntity } from '../entities/project.entity';
 import { ProjectStatus } from '../entities/project.enums';
 
@@ -12,6 +12,7 @@ export class ProjectsRepository {
   constructor(
     @InjectRepository(ProjectEntity)
     private readonly repository: Repository<ProjectEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   async findByIdOrThrow(id: string): Promise<ProjectEntity> {
@@ -61,6 +62,27 @@ export class ProjectsRepository {
     offset: number,
     options?: { search?: string; userId?: string },
   ): Promise<{ items: ProjectEntity[]; total: number }> {
+    if (options?.search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('projects', options.search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+        extraFilters: options.userId ? { userId: options.userId } : undefined,
+      });
+
+      if (lookup) {
+        if (lookup.ids.length === 0) {
+          return { items: [], total: lookup.total };
+        }
+
+        const found = await this.repository.findBy({ id: In(lookup.ids) });
+        const byId = new Map(found.map((item) => [item.id, item]));
+        const items = lookup.ids.map((id) => byId.get(id)).filter((item): item is ProjectEntity => item != null);
+
+        return { items, total: lookup.total };
+      }
+    }
+
     const qb = this.repository.createQueryBuilder('project').orderBy('project.updatedAt', 'DESC');
 
     applyProjectTenantFilter(qb, 'project');

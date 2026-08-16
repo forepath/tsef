@@ -10,6 +10,8 @@ import { AgentManagerFilterRulesClientService } from '../services/agent-manager-
 import { FilterRulesSyncService } from '../services/filter-rules-sync.service';
 import { FilterRulesService } from '../services/filter-rules.service';
 
+import { AgenstraSearchModule } from '../search/agenstra-search.module';
+
 import { AgenstraNotificationsModule } from './agenstra-notifications.module';
 import { ClientsModule } from './clients.module';
 
@@ -27,6 +29,7 @@ import { ClientsModule } from './clients.module';
       ClientEntity,
     ]),
     AgenstraNotificationsModule,
+    AgenstraSearchModule,
     forwardRef(() => ClientsModule),
   ],
   controllers: [FilterRulesController],

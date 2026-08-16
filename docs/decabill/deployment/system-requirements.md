@@ -4,7 +4,7 @@ Hardware and software requirements for running Decabill components in developmen
 
 ## Overview
 
-Decabill splits backend work across **queue roles** (`api`, `worker`, `scheduler`) from one billing-manager image. The billing console is a lightweight Express SSR server. PostgreSQL and Redis are required for every backend deployment.
+Decabill splits backend work across **queue roles** (`api`, `worker`, `scheduler`) from one billing-manager image. The billing console is a lightweight Express SSR server. PostgreSQL, Redis, and **OpenSearch** are required for every backend deployment.
 
 Typical production layout:
 
@@ -29,13 +29,16 @@ graph TB
     subgraph "Data services"
         PG[(PostgreSQL 16)]
         RD[(Redis 7)]
+        OS[(OpenSearch 2)]
     end
 
     BC --> API
     API --> PG
     API --> RD
+    API --> OS
     WRK --> PG
     WRK --> RD
+    WRK --> OS
     SCH --> RD
 ```
 
@@ -77,6 +80,17 @@ BullMQ backing store for the **`billing`** queue. AOF persistence is enabled in 
 | Production      | 1    | 1-2 GiB | 5 GiB | Jobs are **not** auto-removed; memory grows with history |
 
 Monitor Redis memory when Bull Board retention is long or worker failure rates are high.
+
+### OpenSearch 2
+
+Full-text search indexes for billing console list/search UIs. Default Compose uses `opensearchproject/opensearch:2.19.1` in single-node mode with the security plugin disabled for local development. Production must keep OpenSearch on a private network (not publicly exposed), use TLS and credentials via env/secrets, and size disk for index growth.
+
+| Profile         | vCPU | Memory  | Disk    | Notes                                                                 |
+| --------------- | ---- | ------- | ------- | --------------------------------------------------------------------- |
+| Local / staging | 1    | 1 GiB   | 5 GiB   | JVM heap ~512 MiB (`OPENSEARCH_JAVA_OPTS`); host port often **9201**  |
+| Production      | 2    | 2-4 GiB | 20+ GiB | Reindex jobs increase I/O; memory grows with searchable entity volume |
+
+API and worker containers both read and write indexes. Periodic `search-reindex` BullMQ jobs keep indexes warm after upgrades.
 
 ## Backend Billing Manager (by Queue Role)
 

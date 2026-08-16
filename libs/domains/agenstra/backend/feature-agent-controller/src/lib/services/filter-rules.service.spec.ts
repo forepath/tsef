@@ -9,6 +9,7 @@ import { ClientsRepository } from '../repositories/clients.repository';
 
 import { AgentManagerFilterRulesClientService } from './agent-manager-filter-rules-client.service';
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 import { FilterRulesService } from './filter-rules.service';
 
@@ -53,6 +54,14 @@ describe('FilterRulesService', () => {
             publishClient: jest.fn(),
             publishTicket: jest.fn(),
             publish: jest.fn(),
+          },
+        },
+        {
+          provide: AgenstraSearchIndexService,
+          useValue: {
+            upsertSafe: jest.fn().mockResolvedValue(undefined),
+            deleteSafe: jest.fn().mockResolvedValue(undefined),
+            isEnabled: jest.fn().mockReturnValue(false),
           },
         },
       ],

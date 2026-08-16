@@ -27,6 +27,7 @@ describe('CustomerProfilesAdminService', () => {
   };
   const billingNotificationPublisher = { publish: jest.fn() };
   const datevDebtorAccountsRepository = { findByTenantAndUserId: jest.fn() };
+  const billingSearchIndexService = { scheduleUpsert: jest.fn(), scheduleDelete: jest.fn() };
 
   const service = new CustomerProfilesAdminService(
     customerProfilesRepository as never,
@@ -37,6 +38,7 @@ describe('CustomerProfilesAdminService', () => {
     customerTrustScoreService as never,
     billingNotificationPublisher as never,
     datevDebtorAccountsRepository as never,
+    billingSearchIndexService as never,
   );
 
   const profile = {

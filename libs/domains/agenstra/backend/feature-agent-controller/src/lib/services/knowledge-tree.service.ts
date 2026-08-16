@@ -38,6 +38,8 @@ import {
 import { KnowledgePageActivityEntity } from '../entities/knowledge-page-activity.entity';
 import { KnowledgeRelationEntity } from '../entities/knowledge-relation.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
+import { mapKnowledgeNodeToSearchDocument } from '../search/agenstra-search-document.mapper';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 import { KnowledgeEmbeddingIndexService } from './embeddings/knowledge-embedding-index.service';
 import { ExternalImportSyncMarkerService } from './external-import-sync-marker.service';
@@ -63,6 +65,7 @@ export class KnowledgeTreeService {
     private readonly ticketBoardRealtime: TicketBoardRealtimeService,
     private readonly knowledgeBoardRealtime: KnowledgeBoardRealtimeService,
     private readonly knowledgeEmbeddingIndexService: KnowledgeEmbeddingIndexService,
+    private readonly searchIndex: AgenstraSearchIndexService,
     @Inject(forwardRef(() => ExternalImportSyncMarkerService))
     private readonly externalImportSyncMarkerService: ExternalImportSyncMarkerService,
   ) {}
@@ -301,6 +304,8 @@ export class KnowledgeTreeService {
       await this.appendPageActivity(saved.id, saved.clientId, KnowledgeActionType.CREATED, { title: saved.title }, req);
     }
 
+    void this.searchIndex.upsertSafe('knowledge-nodes', mapKnowledgeNodeToSearchDocument(saved));
+
     return this.mapNode(saved);
   }
 
@@ -414,6 +419,8 @@ export class KnowledgeTreeService {
       }
     }
 
+    void this.searchIndex.upsertSafe('knowledge-nodes', mapKnowledgeNodeToSearchDocument(saved));
+
     return this.mapNode(saved);
   }
 
@@ -459,6 +466,7 @@ export class KnowledgeTreeService {
       await em.getRepository(KnowledgeNodeEntity).delete(node.id);
     });
     await this.knowledgeEmbeddingIndexService.deleteForNode(node.id);
+    void this.searchIndex.deleteSafe('knowledge-nodes', node.id);
     this.emitKnowledgeTreeChanged(node.clientId);
   }
 

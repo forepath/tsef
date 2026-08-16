@@ -1240,6 +1240,7 @@ export interface MessageResponse {
 export interface ListParams {
   limit?: number;
   offset?: number;
+  search?: string;
 }
 
 // Admin Billing

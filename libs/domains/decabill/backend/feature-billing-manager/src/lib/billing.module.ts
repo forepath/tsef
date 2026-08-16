@@ -34,6 +34,8 @@ import { BillingEmailPublisher } from './email/billing-email.publisher';
 import { BillingIdentityEmailBridgeModule } from './modules/billing-identity-email-bridge.module';
 import { BillingIdentityNotificationBridgeModule } from './modules/billing-identity-notification-bridge.module';
 import { BillingUpdatesModule } from './modules/billing-updates.module';
+import { BillingSearchModule } from './search/billing-search.module';
+import { SearchReindexJobHandler } from './search/search-reindex.job-handler';
 import { AdminBillingController } from './controllers/admin-billing.controller';
 import { AdminPromotionsController } from './controllers/admin-promotions.controller';
 import { PromotionsController } from './controllers/promotions.controller';
@@ -480,6 +482,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     BillingIdentityEmailBridgeModule,
     BillingIdentityNotificationBridgeModule,
     BillingUpdatesModule,
+    BillingSearchModule,
     TypeOrmModule.forFeature([
       ServiceTypeEntity,
       ServicePlanEntity,
@@ -589,6 +592,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     ContainerManagerService,
     ProviderModuleRegistryService,
     MeterCollectJobHandler,
+    SearchReindexJobHandler,
     CloudflareDnsService,
     DigitaloceanProvisioningService,
     HostnameReservationService,
@@ -868,6 +872,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     DatevExportConfigService,
     ProviderRegistryService,
     ProviderModuleRegistryService,
+    SearchReindexJobHandler,
+    BillingSearchModule,
     BillingIdentityEmailBridgeModule,
     BillingIdentityNotificationBridgeModule,
     BillingUpdatesModule,

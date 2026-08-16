@@ -1,9 +1,13 @@
 import {
+  AGENSTRA_SEARCH_ENTITY_TYPES,
+  AgenstraNotificationPublisher,
+  AgenstraSearchIndexService,
   AutonomousRunOrchestratorService,
   ContextImportOrchestratorService,
   ExternalImportConfigService,
   FilterRulesService,
   FilterRulesSyncService,
+  isAgenstraSearchEntityType,
   KnowledgeEmbeddingIndexService,
 } from '@forepath/agenstra/backend/feature-agent-controller';
 import {
@@ -33,6 +37,7 @@ import {
   getContextImportItemBudget,
   getFilterRulesSyncBatchSize,
   getKnowledgeEmbeddingPageBatchSize,
+  getSearchReindexBatchSize,
 } from '../job-registry';
 
 @Processor(CONTROLLER_QUEUE_NAME, {
@@ -54,6 +59,8 @@ export class ControllerJobsProcessor extends WorkerHost {
     private readonly webhookDeliveryRetentionService: WebhookDeliveryRetentionService,
     private readonly emailDeliveryService: EmailDeliveryService,
     private readonly updateCheckService: UpdateCheckService,
+    private readonly searchIndex: AgenstraSearchIndexService,
+    private readonly notificationPublisher: AgenstraNotificationPublisher,
   ) {
     super();
   }
@@ -95,6 +102,22 @@ export class ControllerJobsProcessor extends WorkerHost {
       case ControllerJobName.AUTONOMOUS_TICKET_UNIT:
         await this.autonomousOrchestrator.tryStartRunForCandidate(
           job.data as { ticket_id: string; client_id: string; agent_id: string },
+        );
+        break;
+      case ControllerJobName.SEARCH_REINDEX_COORDINATOR:
+        await this.runSearchReindexCoordinator();
+        break;
+      case ControllerJobName.SEARCH_REINDEX_UNIT:
+        await this.runSearchReindexUnit(job.data as { entityType: string; offset: number; limit: number });
+        break;
+      case ControllerJobName.SEARCH_INDEX_SYNC_UNIT:
+        await this.runSearchIndexSyncUnit(
+          job.data as {
+            entityType: string;
+            id: string;
+            action: 'upsert' | 'delete';
+            document?: Record<string, unknown>;
+          },
         );
         break;
       case WEBHOOK_DELIVER_JOB_NAME:
@@ -156,6 +179,112 @@ export class ControllerJobsProcessor extends WorkerHost {
       if (pages.length < batchSize) {
         break;
       }
+    }
+  }
+
+  private async runSearchReindexCoordinator(): Promise<void> {
+    if (!this.searchIndex.isEnabled()) {
+      return;
+    }
+
+    this.notificationPublisher.publish('search.reindex.started', {
+      entityTypes: [...AGENSTRA_SEARCH_ENTITY_TYPES],
+      startedAt: new Date().toISOString(),
+    });
+
+    try {
+      const batchSize = getSearchReindexBatchSize();
+
+      for (const entityType of AGENSTRA_SEARCH_ENTITY_TYPES) {
+        await enqueueUnitJob({
+          queue: this.controllerQueue,
+          jobName: ControllerJobName.SEARCH_REINDEX_UNIT,
+          payload: { entityType, offset: 0, limit: batchSize },
+          jobIdNamespace: 'search-reindex',
+          jobIdParts: [entityType, 0],
+        });
+      }
+
+      this.notificationPublisher.publish('search.reindex.completed', {
+        entityTypes: [...AGENSTRA_SEARCH_ENTITY_TYPES],
+        completedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      this.notificationPublisher.publish('search.reindex.failed', {
+        error: (error as Error).message,
+        failedAt: new Date().toISOString(),
+      });
+      throw error;
+    }
+  }
+
+  private async runSearchReindexUnit(data: { entityType: string; offset: number; limit: number }): Promise<void> {
+    if (!isAgenstraSearchEntityType(data.entityType)) {
+      this.logger.warn(`Unknown search entity type for reindex: ${data.entityType}`);
+
+      return;
+    }
+
+    try {
+      const result = await this.searchIndex.reindexBatch(data.entityType, data.offset, data.limit);
+
+      if (result.hasMore) {
+        const nextOffset = data.offset + data.limit;
+
+        await enqueueUnitJob({
+          queue: this.controllerQueue,
+          jobName: ControllerJobName.SEARCH_REINDEX_UNIT,
+          payload: { entityType: data.entityType, offset: nextOffset, limit: data.limit },
+          jobIdNamespace: 'search-reindex',
+          jobIdParts: [data.entityType, nextOffset],
+        });
+      }
+    } catch (error) {
+      this.notificationPublisher.publish('search.reindex.failed', {
+        entityType: data.entityType,
+        offset: data.offset,
+        error: (error as Error).message,
+        failedAt: new Date().toISOString(),
+      });
+      throw error;
+    }
+  }
+
+  private async runSearchIndexSyncUnit(data: {
+    entityType: string;
+    id: string;
+    action: 'upsert' | 'delete';
+    document?: Record<string, unknown>;
+  }): Promise<void> {
+    if (!isAgenstraSearchEntityType(data.entityType)) {
+      return;
+    }
+
+    try {
+      if (data.action === 'delete') {
+        await this.searchIndex.delete(data.entityType, data.id);
+
+        return;
+      }
+
+      if (!data.document) {
+        throw new Error('Missing document for search index upsert sync');
+      }
+
+      await this.searchIndex.upsert(data.entityType, {
+        ...(data.document as { id: string }),
+        id: data.id,
+        entityType: data.entityType,
+      });
+    } catch (error) {
+      this.notificationPublisher.publish('search.document.sync_failed', {
+        entityType: data.entityType,
+        id: data.id,
+        action: data.action,
+        error: (error as Error).message,
+        failedAt: new Date().toISOString(),
+      });
+      throw error;
     }
   }
 

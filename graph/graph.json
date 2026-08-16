@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-15T13:12:31.963Z",
+  "generatedAt": "2026-08-16T08:24:52.822Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -830,6 +830,27 @@
         "domain": "shared",
         "context": "backend",
         "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:shared-backend-util-opensearch",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-backend-util-opensearch",
+        "root": "libs/domains/shared/backend/util-opensearch",
+        "tags": [
+          "domain:shared",
+          "scope:backend",
+          "type:util"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "backend",
+        "featureGroup": "util"
       }
     },
     {
@@ -1821,6 +1842,14 @@
       "attrs": {
         "name": "@nestjs/websockets",
         "version": "11.1.6"
+      }
+    },
+    {
+      "id": "package:@opensearch-project/opensearch",
+      "type": "package",
+      "attrs": {
+        "name": "@opensearch-project/opensearch",
+        "version": "3.6.0"
       }
     },
     {
@@ -5058,6 +5087,24 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-controller"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-controller"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
       "type": "service",
       "attrs": {
@@ -7580,6 +7627,33 @@
       "type": "repository",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/users-billing-day.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/search-reindex.job-handler.ts",
+      "type": "job",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/search/search-reindex.job-handler.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -10209,6 +10283,33 @@
       }
     },
     {
+      "id": "file:libs/domains/shared/backend/util-opensearch/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-opensearch/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-backend-util-opensearch"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-opensearch/src/lib/opensearch.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-util-opensearch"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-opensearch/src/lib/opensearch.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-util-opensearch"
+      }
+    },
+    {
       "id": "file:libs/domains/identity/backend/feature-auth/README.md",
       "type": "readme",
       "attrs": {
@@ -11679,6 +11780,14 @@
       }
     },
     {
+      "id": "file:docs/agenstra/features/search-indexes.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/agenstra/features/search-indexes.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
       "id": "file:docs/agenstra/features/server-provisioning.md",
       "type": "doc",
       "attrs": {
@@ -12243,6 +12352,14 @@
       "type": "doc",
       "attrs": {
         "path": "docs/decabill/features/real-time-status.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/decabill/features/search-indexes.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/search-indexes.md",
         "languageOrKind": "md"
       }
     },
@@ -14773,6 +14890,42 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "filter_rule.updated",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:search.document.sync_failed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "search.document.sync_failed",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:search.reindex.completed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "search.reindex.completed",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:search.reindex.failed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "search.reindex.failed",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:search.reindex.started",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "search.reindex.started",
         "projectName": "agenstra-backend-feature-agent-controller",
         "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
       }
@@ -17726,6 +17879,42 @@
       }
     },
     {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:search.document.sync_failed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "search.document.sync_failed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:search.reindex.completed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "search.reindex.completed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:search.reindex.failed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "search.reindex.failed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:search.reindex.started",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "search.reindex.started",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
       "id": "webhook-event:decabill-backend-feature-billing-manager:service_plan.meter_attached",
       "type": "webhook-event",
       "attrs": {
@@ -20542,6 +20731,16 @@
       }
     },
     {
+      "id": "concept:agenstra-opensearch-search-indexes",
+      "type": "concept",
+      "attrs": {
+        "title": "OpenSearch (search indexes)",
+        "docPath": "docs/agenstra/deployment/environment-configuration.md",
+        "sectionAnchor": "opensearch-search-indexes",
+        "domain": "agenstra"
+      }
+    },
+    {
       "id": "concept:agenstra-opentelemetry",
       "type": "concept",
       "attrs": {
@@ -21868,6 +22067,36 @@
         "title": "Optional OTLP export",
         "docPath": "docs/agenstra/features/opentelemetry.md",
         "sectionAnchor": "optional-otlp-export",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-search-indexes-agenstra",
+      "type": "concept",
+      "attrs": {
+        "title": "Search indexes (Agenstra)",
+        "docPath": "docs/agenstra/features/search-indexes.md",
+        "sectionAnchor": "search-indexes-agenstra",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-console-list-ux",
+      "type": "concept",
+      "attrs": {
+        "title": "Console list UX",
+        "docPath": "docs/agenstra/features/search-indexes.md",
+        "sectionAnchor": "console-list-ux",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-webhook-events",
+      "type": "concept",
+      "attrs": {
+        "title": "Webhook events",
+        "docPath": "docs/agenstra/features/search-indexes.md",
+        "sectionAnchor": "webhook-events",
         "domain": "agenstra"
       }
     },
@@ -24762,6 +24991,16 @@
       }
     },
     {
+      "id": "concept:decabill-opensearch-search-indexes",
+      "type": "concept",
+      "attrs": {
+        "title": "OpenSearch (Search Indexes)",
+        "docPath": "docs/decabill/deployment/environment-configuration.md",
+        "sectionAnchor": "opensearch-search-indexes",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-opentelemetry",
       "type": "concept",
       "attrs": {
@@ -27132,6 +27371,36 @@
       }
     },
     {
+      "id": "concept:decabill-search-indexes-decabill",
+      "type": "concept",
+      "attrs": {
+        "title": "Search indexes (Decabill)",
+        "docPath": "docs/decabill/features/search-indexes.md",
+        "sectionAnchor": "search-indexes-decabill",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-console-list-ux",
+      "type": "concept",
+      "attrs": {
+        "title": "Console list UX",
+        "docPath": "docs/decabill/features/search-indexes.md",
+        "sectionAnchor": "console-list-ux",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-webhook-events",
+      "type": "concept",
+      "attrs": {
+        "title": "Webhook events",
+        "docPath": "docs/decabill/features/search-indexes.md",
+        "sectionAnchor": "webhook-events",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-server-provisioning",
       "type": "concept",
       "attrs": {
@@ -29000,6 +29269,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "project:shared-backend-util-opensearch",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
       "to": "project:shared-backend-util-http-context",
       "type": "depends_on"
     },
@@ -29086,6 +29360,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "project:shared-backend-util-redis-cache",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "project:shared-backend-util-opensearch",
       "type": "depends_on"
     },
     {
@@ -29316,6 +29595,11 @@
     {
       "from": "project:identity-frontend-feature-auth",
       "to": "project:shared-frontend-util-configuration",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "project:shared-backend-util-opensearch",
       "type": "depends_on"
     },
     {
@@ -29806,6 +30090,11 @@
     {
       "from": "project:agenstra-backend-agent-controller",
       "to": "package:@nestjs/websockets",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@opensearch-project/opensearch",
       "type": "depends_on"
     },
     {
@@ -30436,6 +30725,11 @@
     {
       "from": "project:decabill-backend-billing-manager",
       "to": "package:@nestjs/websockets",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "package:@opensearch-project/opensearch",
       "type": "depends_on"
     },
     {
@@ -33045,6 +33339,16 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
       "type": "contains"
     },
@@ -34436,6 +34740,21 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/users-billing-day.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/search-reindex.job-handler.ts",
       "type": "contains"
     },
     {
@@ -35871,6 +36190,21 @@
     {
       "from": "project:shared-backend-feature-updates",
       "to": "file:libs/domains/shared/backend/feature-updates/src/lib/updates.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-opensearch",
+      "to": "file:libs/domains/shared/backend/util-opensearch/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-opensearch",
+      "to": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-opensearch",
+      "to": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.service.ts",
       "type": "contains"
     },
     {
@@ -37560,6 +37894,26 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:search.document.sync_failed",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:search.reindex.completed",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:search.reindex.failed",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:search.reindex.started",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
       "to": "webhook-event:agenstra-backend-feature-agent-controller:ticket.comment.created",
       "type": "contains"
     },
@@ -39071,6 +39425,26 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:project.updated",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:search.document.sync_failed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:search.reindex.completed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:search.reindex.failed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:search.reindex.started",
       "type": "contains"
     },
     {
@@ -40855,6 +41229,11 @@
     },
     {
       "from": "file:docs/agenstra/deployment/environment-configuration.md",
+      "to": "concept:agenstra-opensearch-search-indexes",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/deployment/environment-configuration.md",
       "to": "concept:agenstra-opentelemetry",
       "type": "contains"
     },
@@ -41801,6 +42180,26 @@
     {
       "from": "file:docs/agenstra/features/opentelemetry.md",
       "to": "concept:agenstra-api-reference",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/search-indexes.md",
+      "to": "concept:agenstra-search-indexes-agenstra",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/search-indexes.md",
+      "to": "concept:agenstra-console-list-ux",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/search-indexes.md",
+      "to": "concept:agenstra-configuration",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/search-indexes.md",
+      "to": "concept:agenstra-webhook-events",
       "type": "contains"
     },
     {
@@ -43865,6 +44264,11 @@
     },
     {
       "from": "file:docs/decabill/deployment/environment-configuration.md",
+      "to": "concept:decabill-opensearch-search-indexes",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/deployment/environment-configuration.md",
       "to": "concept:decabill-opentelemetry",
       "type": "contains"
     },
@@ -45471,6 +45875,26 @@
     {
       "from": "file:docs/decabill/features/real-time-status.md",
       "to": "concept:decabill-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/search-indexes.md",
+      "to": "concept:decabill-search-indexes-decabill",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/search-indexes.md",
+      "to": "concept:decabill-console-list-ux",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/search-indexes.md",
+      "to": "concept:decabill-configuration",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/search-indexes.md",
+      "to": "concept:decabill-webhook-events",
       "type": "contains"
     },
     {
@@ -52579,6 +53003,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+      "to": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agenstra-metrics-collector.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/clients.repository.ts",
       "type": "injects"
@@ -52824,6 +53253,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/clients.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/context-import-orchestrator.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/external-import-config.service.ts",
       "type": "injects"
@@ -52846,6 +53280,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/filter-rules.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-manager-filter-rules-client.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/filter-rules.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
       "type": "injects"
     },
     {
@@ -52881,6 +53320,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/knowledge-tree.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/embeddings/knowledge-embedding-index.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/knowledge-tree.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
       "type": "injects"
     },
     {
@@ -52969,6 +53413,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/statistics.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/ticket-automation-chat-sync.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-automation-chat-realtime.service.ts",
       "type": "injects"
@@ -53041,6 +53490,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/tickets.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/external-import-sync-marker.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/tickets.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
       "type": "injects"
     },
     {
@@ -53664,6 +54118,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/project-tickets.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/project-time-entries.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/repositories/projects.repository.ts",
       "type": "injects"
@@ -53749,6 +54208,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/projects-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/projects.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/repositories/projects.repository.ts",
       "type": "injects"
@@ -53766,6 +54230,16 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/projects.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/repositories/project-time-entries.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "to": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/search-reindex.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
       "type": "injects"
     },
     {
@@ -54124,6 +54598,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/customer-profiles-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/customer-profiles.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-profiles.repository.ts",
       "type": "injects"
@@ -54444,6 +54923,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-issuance.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-overdue.job-handler.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/invoices.repository.ts",
       "type": "injects"
@@ -54576,6 +55060,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/oss-threshold.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
       "type": "injects"
     },
     {
@@ -54751,6 +55240,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/meter.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provider-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/meter.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
       "type": "injects"
     },
     {
@@ -55544,6 +56038,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/tax-calculation.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/tax-rate-config.service.ts",
       "type": "injects"
@@ -56109,6 +56608,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/shared/backend/feature-updates/src/lib/services/instance-heartbeat.service.ts",
+      "to": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/identity/backend/feature-auth/src/lib/controllers/auth.controller.ts",
       "to": "file:libs/domains/identity/backend/feature-auth/src/lib/services/auth.service.ts",
       "type": "injects"
@@ -56229,6 +56733,11 @@
       "type": "injects"
     },
     {
+      "from": "file:apps/agenstra/backend-agent-controller/src/queue/processors/controller-jobs.processor.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-tenant.service.ts",
       "type": "injects"
@@ -56341,6 +56850,11 @@
     {
       "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
       "to": "file:libs/domains/shared/backend/feature-updates/src/lib/services/update-check.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/search-reindex.job-handler.ts",
       "type": "injects"
     },
     {
@@ -56744,6 +57258,16 @@
       "type": "provides"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search.module.ts",
+      "to": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.module.ts",
+      "type": "provides"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/service-types.controller.ts",
       "type": "provides"
@@ -57011,6 +57535,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/meter-collect.job-handler.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/search-reindex.job-handler.ts",
       "type": "provides"
     },
     {
@@ -57740,6 +58269,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search.module.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-identity-email-bridge.module.ts",
       "type": "provides"
     },
@@ -57756,6 +58290,21 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-identity-email-bridge.module.ts",
       "to": "file:libs/domains/shared/backend/feature-notifications/src/lib/services/email-notification-dispatcher.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/search-reindex.job-handler.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search.module.ts",
+      "to": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.module.ts",
       "type": "provides"
     },
     {
@@ -58001,6 +58550,11 @@
     {
       "from": "file:libs/domains/shared/backend/util-redis-cache/src/lib/redis-cache.module.ts",
       "to": "file:libs/domains/shared/backend/util-redis-cache/src/lib/redis-cache.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.module.ts",
+      "to": "file:libs/domains/shared/backend/util-opensearch/src/lib/opensearch.service.ts",
       "type": "provides"
     },
     {
@@ -61106,6 +61660,26 @@
     {
       "from": "concept:agenstra-metrics-overview",
       "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-console-list-ux",
+      "to": "api:HTTP:GET:/clients",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-console-list-ux",
+      "to": "api:HTTP:POST:/clients",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-console-list-ux",
+      "to": "api:HTTP:GET:/agents",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-console-list-ux",
+      "to": "api:HTTP:POST:/agents",
       "type": "documents"
     },
     {
@@ -66614,6 +67188,21 @@
       "type": "belongs_to"
     },
     {
+      "from": "project:shared-backend-util-opensearch",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-util-opensearch",
+      "to": "context:backend",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-util-opensearch",
+      "to": "feature-group:util",
+      "type": "belongs_to"
+    },
+    {
       "from": "project:identity-backend-feature-auth",
       "to": "domain:identity",
       "type": "belongs_to"
@@ -67234,6 +67823,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "file:docs/agenstra/features/search-indexes.md",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
       "from": "file:docs/agenstra/features/server-provisioning.md",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -67585,6 +68179,11 @@
     },
     {
       "from": "file:docs/decabill/features/real-time-status.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/decabill/features/search-indexes.md",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -68464,6 +69063,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:agenstra-opensearch-search-indexes",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:agenstra-opentelemetry",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -69125,6 +69729,21 @@
     },
     {
       "from": "concept:agenstra-optional-otlp-export",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-search-indexes-agenstra",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-console-list-ux",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-webhook-events",
       "to": "domain:agenstra",
       "type": "belongs_to"
     },
@@ -70574,6 +71193,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:decabill-opensearch-search-indexes",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:decabill-opentelemetry",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -71755,6 +72379,21 @@
     },
     {
       "from": "concept:decabill-payload-shape",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-search-indexes-decabill",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-console-list-ux",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-webhook-events",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

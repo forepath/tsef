@@ -1696,6 +1696,7 @@ components:
         redis: { $ref: '#/components/schemas/DependencyHealthStatus' }
         queue: { $ref: '#/components/schemas/DependencyHealthStatus' }
         database: { $ref: '#/components/schemas/DependencyHealthStatus' }
+        opensearch: { $ref: '#/components/schemas/DependencyHealthStatus' }
     InstanceStatusResponseDto:
       type: object
       properties:

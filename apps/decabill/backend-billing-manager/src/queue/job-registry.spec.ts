@@ -70,6 +70,20 @@ describe('billing job-registry', () => {
     expect(updateCheckJob?.tz).toBe('Europe/Berlin');
   });
 
+  it('getBillingRepeatableJobs includes search reindex coordinator', () => {
+    delete process.env.SEARCH_REINDEX_INTERVAL;
+    const jobs = getBillingRepeatableJobs();
+    const searchJob = jobs.find((job) => job.name === BillingJobName.SEARCH_REINDEX_COORDINATOR);
+
+    expect(searchJob).toBeDefined();
+    expect(searchJob?.everyMs).toBe(900_000);
+
+    process.env.SEARCH_REINDEX_INTERVAL = '15m';
+    const custom = getBillingRepeatableJobs().find((job) => job.name === BillingJobName.SEARCH_REINDEX_COORDINATOR);
+    expect(custom?.everyMs).toBe(900_000);
+    delete process.env.SEARCH_REINDEX_INTERVAL;
+  });
+
   it('getBillingRepeatableJobs falls back when *_CRON env vars are empty', () => {
     process.env.UPDATE_CHECK_CRON = '';
     process.env.BILLING_DATEV_EXPORT_CRON = '  ';

@@ -18,6 +18,8 @@ import { AgentConsoleRegexFilterRuleClientEntity } from '../entities/agent-conso
 import { AgentConsoleRegexFilterRuleSyncTargetEntity } from '../entities/agent-console-regex-filter-rule-sync-target.entity';
 import { AgentConsoleRegexFilterRuleEntity } from '../entities/agent-console-regex-filter-rule.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
+import { mapFilterRuleToSearchDocument } from '../search/agenstra-search-document.mapper';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
 import { AgentManagerFilterRulesClientService } from './agent-manager-filter-rules-client.service';
@@ -36,6 +38,7 @@ export class FilterRulesService {
     private readonly clientsRepository: ClientsRepository,
     private readonly agentManagerFilterRulesClient: AgentManagerFilterRulesClientService,
     private readonly notificationPublisher: AgenstraNotificationPublisher,
+    private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
   async findAll(limit = 10, offset = 0): Promise<FilterRuleResponseDto[]> {
@@ -114,6 +117,7 @@ export class FilterRulesService {
     const response = await this.findOne(saved.id);
 
     this.notificationPublisher.publishFilterRule('filter_rule.created', response);
+    void this.indexFilterRule(saved.id);
 
     return response;
   }
@@ -195,6 +199,7 @@ export class FilterRulesService {
     const response = await this.findOne(id);
 
     this.notificationPublisher.publishFilterRule('filter_rule.updated', response);
+    void this.indexFilterRule(id);
 
     return response;
   }
@@ -224,6 +229,26 @@ export class FilterRulesService {
 
     await this.rulesRepo.remove(rule);
     this.notificationPublisher.publishFilterRule('filter_rule.deleted', response);
+    void this.searchIndex.deleteSafe('filter-rules', id);
+  }
+
+  private async indexFilterRule(ruleId: string): Promise<void> {
+    const rule = await this.rulesRepo.findOne({
+      where: { id: ruleId },
+      relations: { clientLinks: true },
+    });
+
+    if (!rule) {
+      return;
+    }
+
+    await this.searchIndex.upsertSafe(
+      'filter-rules',
+      mapFilterRuleToSearchDocument(
+        rule,
+        (rule.clientLinks ?? []).map((link) => link.clientId),
+      ),
+    );
   }
 
   private validateWorkspaceIds(dto: CreateFilterRuleDto): void {

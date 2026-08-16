@@ -49,6 +49,7 @@ describe('UpdatesMetricsCollector', () => {
           redis: 'healthy',
           queue: 'healthy',
           database: 'healthy',
+          opensearch: 'healthy',
         },
       },
       {
@@ -63,6 +64,7 @@ describe('UpdatesMetricsCollector', () => {
           redis: 'healthy',
           queue: 'healthy',
           database: 'healthy',
+          opensearch: 'healthy',
         },
       },
     ],

@@ -4,6 +4,8 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } f
 import { Queue } from 'bullmq';
 import { DataSource } from 'typeorm';
 
+import { OpenSearchService } from '@forepath/shared/backend/util-opensearch';
+
 import { DEFAULT_HEARTBEAT_INTERVAL_MS, UPDATES_MODULE_OPTIONS } from '../constants/updates.constants';
 import type {
   DependencyHealthStatus,
@@ -28,6 +30,7 @@ export class InstanceHeartbeatService implements OnModuleInit, OnModuleDestroy {
     @Inject(UPDATES_MODULE_OPTIONS) private readonly options: UpdatesModuleOptions,
     @Optional() private readonly queue: Queue | null,
     @Optional() private readonly dataSource: DataSource | null,
+    @Optional() private readonly openSearch: OpenSearchService | null = null,
   ) {
     this.role = resolveServiceRole(process.env, options.resolveServiceRole);
     this.instanceId = resolveInstanceId({
@@ -78,17 +81,35 @@ export class InstanceHeartbeatService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async probeDependencies(): Promise<InstanceDependencyHealth> {
-    const [redisHealthy, queueHealthy, databaseHealthy] = await Promise.all([
+    const [redisHealthy, queueHealthy, databaseHealthy, openSearchHealthy] = await Promise.all([
       this.probeRedis(),
       this.probeQueue(),
       this.probeDatabase(),
+      this.probeOpenSearch(),
     ]);
 
     return {
       redis: this.toHealthStatus(redisHealthy, true),
       queue: this.toHealthStatus(queueHealthy, Boolean(this.queue)),
       database: this.toHealthStatus(databaseHealthy, Boolean(this.dataSource)),
+      opensearch: this.toHealthStatus(openSearchHealthy, this.isOpenSearchApplicable()),
     };
+  }
+
+  private isOpenSearchApplicable(): boolean {
+    if (!this.openSearch) {
+      return false;
+    }
+
+    return this.openSearch.isEnabled();
+  }
+
+  private async probeOpenSearch(): Promise<boolean> {
+    if (!this.isOpenSearchApplicable() || !this.openSearch) {
+      return false;
+    }
+
+    return this.openSearch.ping();
   }
 
   private toHealthStatus(isHealthy: boolean, isApplicable: boolean): DependencyHealthStatus {
@@ -152,7 +173,7 @@ export class InstanceHeartbeatService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    for (const dependency of ['redis', 'queue', 'database'] as const) {
+    for (const dependency of ['redis', 'queue', 'database', 'opensearch'] as const) {
       if (previous[dependency] === current[dependency]) {
         continue;
       }
