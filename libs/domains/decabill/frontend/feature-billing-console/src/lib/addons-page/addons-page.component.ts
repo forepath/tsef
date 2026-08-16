@@ -21,7 +21,7 @@ import {
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import { catchError, debounceTime, distinctUntilChanged, forkJoin, map, of, skip, switchMap, take } from 'rxjs';
 
-import { getActiveStatusLabel, getActiveStatusTextClass } from '../billing-status-labels';
+import { getActiveStatusLabel, getActiveStatusTextClass, resolveNamedLabel } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
 import { MonacoEditorWrapperComponent } from '../monaco-editor-wrapper/monaco-editor-wrapper.component';
 import { optionalNumberInputValue } from '../optional-number-input.util';
@@ -557,7 +557,7 @@ export class AddonsPageComponent implements OnInit {
   }
 
   providerOptionLabel(provider: ProviderDetail): string {
-    return provider.displayName?.trim() || provider.id;
+    return resolveNamedLabel(provider.displayName);
   }
 
   private isValid(form: AddonForm): boolean {

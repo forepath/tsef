@@ -153,7 +153,7 @@ export class BillingAdminService {
     return mapped.map((subscription) => ({
       ...subscription,
       userEmail: userEmailById.get(subscription.userId),
-      planName: planNameById.get(subscription.planId) ?? subscription.planId,
+      planName: subscription.planName ?? planNameById.get(subscription.planId),
     }));
   }
 }

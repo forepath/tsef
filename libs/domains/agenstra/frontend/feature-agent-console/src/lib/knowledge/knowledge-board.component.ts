@@ -29,6 +29,7 @@ import {
 } from '@forepath/agenstra/frontend/data-access-agent-console';
 import { EMPTY, catchError, debounceTime, distinctUntilChanged, finalize, of, skip, switchMap } from 'rxjs';
 
+import { resolveNamedDisplayLabel } from '../display-name.util';
 import { KnowledgeEditorComponent } from './knowledge-editor/knowledge-editor.component';
 import { KnowledgeTreeComponent } from './knowledge-tree/knowledge-tree.component';
 
@@ -115,6 +116,14 @@ export class KnowledgeBoardComponent implements OnDestroy {
 
     return id ? (clients.find((c) => c.id === id) ?? null) : null;
   });
+
+  workspaceDisplayName(name: string | null | undefined): string {
+    return resolveNamedDisplayLabel(name);
+  }
+
+  relationKnowledgeTitle(title: string | null | undefined): string {
+    return resolveNamedDisplayLabel(title);
+  }
 
   readonly globalSearchHits = computed(() => {
     const hits: Array<{ node: KnowledgeNodeDto; path: string[] }> = [];

@@ -423,7 +423,7 @@
 <ng-template #backorderListItem let-bo let-plans="plans">
   <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
     <div class="min-w-0 flex-grow-1">
-      <div class="fw-semibold mb-1">{{ planNameByPlanId(plans, bo.planId) }}</div>
+      <div class="fw-semibold mb-1">{{ backorderDisplayTitle(bo, plans) }}</div>
       <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
         <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
           <span

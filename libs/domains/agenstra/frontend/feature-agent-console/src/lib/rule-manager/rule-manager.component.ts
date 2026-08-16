@@ -28,6 +28,7 @@ import {
   filterRuleTypeLabel,
   filterRuleWorkspaceSyncTitle,
 } from './filter-rule-labels';
+import { resolveNamedDisplayLabel } from '../display-name.util';
 
 @Component({
   selector: 'framework-rule-manager',
@@ -128,7 +129,7 @@ export class RuleManagerComponent implements OnInit {
   }
 
   clientName(id: string): string {
-    return this.clients().find((c) => c.id === id)?.name ?? id;
+    return resolveNamedDisplayLabel(this.clients().find((c) => c.id === id)?.name);
   }
 
   workspaceSyncRow(rule: FilterRuleResponseDto, clientId: string): FilterRuleWorkspaceSyncDto | undefined {

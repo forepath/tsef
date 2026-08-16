@@ -64,9 +64,7 @@
                     ><i class="bi bi-cash-stack me-1" aria-hidden="true"></i
                     >{{ openBillableLabel(project.openBillableAmountNet, project.currency) }}</span
                   >
-                  <span
-                    ><i class="bi bi-person me-1" aria-hidden="true"></i>{{ project.userEmail ?? project.userId }}</span
-                  >
+                  <span><i class="bi bi-person me-1" aria-hidden="true"></i>{{ projectOwnerLabel(project) }}</span>
                 </div>
               </a>
               <div class="btn-group btn-group-sm flex-shrink-0" role="group">

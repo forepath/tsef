@@ -89,6 +89,7 @@ import {
 } from 'rxjs';
 
 import { DeploymentManagerComponent } from '../deployment-manager/deployment-manager.component';
+import { resolveNamedDisplayLabel } from '../display-name.util';
 import { ContainerStatsStatusBarComponent } from '../file-editor/container-stats-status-bar/container-stats-status-bar.component';
 import { FileEditorComponent } from '../file-editor/file-editor.component';
 import {
@@ -694,14 +695,14 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       }
 
       const agent = byId.get(id);
-      const name = agent?.name?.trim() ? agent.name.trim() : id;
+      const name = resolveNamedDisplayLabel(agent?.name);
 
       chips.push({
         trackKey: `env:${id}`,
         label: name,
         title: agent
           ? $localize`:@@featureChat-contextToolbarEnvTitle:Environment context: ${agent.name}:agentName:`
-          : $localize`:@@featureChat-contextToolbarEnvUnknownTitle:Environment: ${id}:agentId:`,
+          : $localize`:@@featureChat-contextToolbarEnvUnknownTitle:Environment context unavailable`,
       });
     }
 

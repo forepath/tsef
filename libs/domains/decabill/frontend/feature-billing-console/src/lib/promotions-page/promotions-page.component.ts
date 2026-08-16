@@ -18,6 +18,7 @@ import {
   getPromotionRedemptionStatusLabel,
   getPromotionRedemptionStatusTextClass,
   getSubscriptionStatusLabel,
+  resolveNamedLabel,
 } from '../billing-status-labels';
 import { buildPromotionPeriodPricingPreview } from '../promotion-pricing-preview.util';
 
@@ -216,6 +217,10 @@ export class PromotionsPageComponent implements OnInit {
 
   redemptionStatusLabel(status: PromotionRedemptionResponse['status']): string {
     return getPromotionRedemptionStatusLabel(status);
+  }
+
+  redemptionSubscriptionLabel(item: PromotionRedemptionResponse): string {
+    return resolveNamedLabel(item.subscriptionNumber);
   }
 
   redemptionStatusTextClass(status: PromotionRedemptionResponse['status']): string {

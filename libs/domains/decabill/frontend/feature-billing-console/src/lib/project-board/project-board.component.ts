@@ -48,6 +48,7 @@ import {
   getProjectTimeEntryBillingStatusIconClass,
   getProjectTimeEntryBillingStatusLabel,
   getProjectTimeEntryBillingStatusTextClass,
+  getUnavailableLabel,
   isProjectTimeEntryBilled,
 } from '../billing-status-labels';
 import {
@@ -323,7 +324,11 @@ export class ProjectBoardComponent implements OnInit {
       return $localize`:@@featureProjectBoard-milestoneNone:None`;
     }
 
-    return this.milestones().find((m) => m.id === milestoneId)?.name ?? milestoneId;
+    return (
+      this.milestones()
+        .find((m) => m.id === milestoneId)
+        ?.name?.trim() || getUnavailableLabel()
+    );
   }
 
   priorityLabel(priority: ProjectTicketPriority): string {

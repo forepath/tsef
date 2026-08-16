@@ -276,8 +276,7 @@
                       ><i class="bi bi-clock me-1" aria-hidden="true"></i>{{ formatDateTime(item.redeemedAt) }}</span
                     >
                     <span
-                      ><i class="bi bi-box me-1" aria-hidden="true"></i
-                      >{{ item.subscriptionNumber ?? item.subscriptionId }}</span
+                      ><i class="bi bi-box me-1" aria-hidden="true"></i>{{ redemptionSubscriptionLabel(item) }}</span
                     >
                     @if (item.planName) {
                       <span><i class="bi bi-tag me-1" aria-hidden="true"></i>{{ item.planName }}</span>

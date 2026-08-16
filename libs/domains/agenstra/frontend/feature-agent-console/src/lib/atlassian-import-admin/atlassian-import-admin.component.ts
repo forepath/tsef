@@ -37,6 +37,7 @@ import {
   flattenKnowledgeFolders,
 } from './atlassian-import-parent-suggest.utils';
 import { buildConfluenceImportSearchCql } from './confluence-import-search-cql.util';
+import { resolveNamedDisplayLabel } from '../display-name.util';
 
 export type AtlassianImportAdminLane = 'connections' | 'configs';
 
@@ -229,7 +230,7 @@ export class AtlassianImportAdminComponent implements OnInit {
   }
 
   clientName(id: string): string {
-    return this.clients().find((c) => c.id === id)?.name ?? id;
+    return resolveNamedDisplayLabel(this.clients().find((c) => c.id === id)?.name);
   }
 
   adminLaneLabel(lane: AtlassianImportAdminLane): string {

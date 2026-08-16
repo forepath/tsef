@@ -9,7 +9,10 @@ import {
 import { catchError, debounceTime, distinctUntilChanged, map, of, skip, switchMap, tap } from 'rxjs';
 
 import { getSubscriptionStatusLabel } from '../billing-status-labels';
-import { getBillingAdminSubscriptionPrimaryLabel } from '../billing-subscription-select';
+import {
+  getBillingAdminSubscriptionPlanLabel,
+  getBillingAdminSubscriptionPrimaryLabel,
+} from '../billing-subscription-select';
 
 @Component({
   selector: 'framework-billing-admin-subscription-select',
@@ -96,6 +99,10 @@ export class BillingAdminSubscriptionSelectComponent {
 
   subscriptionPrimaryLabel(subscription: SubscriptionResponse): string {
     return getBillingAdminSubscriptionPrimaryLabel(subscription);
+  }
+
+  subscriptionPlanLabel(subscription: SubscriptionResponse): string {
+    return getBillingAdminSubscriptionPlanLabel(subscription);
   }
 
   subscriptionStatusLabel(status: string | null | undefined): string {

@@ -83,6 +83,7 @@ import {
   getSubscriptionStatusBadgeClass,
   getSubscriptionStatusLabel,
   getVatIdValidationStatusLabel,
+  resolveNamedLabel,
 } from '../billing-status-labels';
 import {
   BILLING_COUNTRY_OPTIONS,
@@ -445,14 +446,18 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
   profileForm: CustomerProfileDto = {};
 
-  planNameByPlanId(plans: ServicePlanResponse[] | null, planId: string): string {
-    const plan = plans?.find((p) => p.id === planId);
+  planNameByPlanId(plans: ServicePlanResponse[] | null, planId: string, apiPlanName?: string | null): string {
+    const catalogName = plans?.find((p) => p.id === planId)?.name;
 
-    return plan?.name ?? planId;
+    return resolveNamedLabel(apiPlanName, catalogName);
   }
 
   subscriptionDisplayTitle(sub: SubscriptionResponse, plans: ServicePlanResponse[] | null): string {
-    return this.planNameByPlanId(plans, sub.planId);
+    return this.planNameByPlanId(plans, sub.planId, sub.planName);
+  }
+
+  backorderDisplayTitle(bo: BackorderResponse, plans: ServicePlanResponse[] | null): string {
+    return this.planNameByPlanId(plans, bo.planId, bo.planName);
   }
 
   subscriptionStatusLabel(status: string | null | undefined): string {

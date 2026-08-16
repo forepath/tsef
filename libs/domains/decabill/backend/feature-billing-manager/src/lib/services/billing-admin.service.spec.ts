@@ -90,6 +90,23 @@ describe('BillingAdminService', () => {
     expect(result.total).toBe(1);
   });
 
+  it('listSubscriptionsForAdmin omits planName when the plan is missing', async () => {
+    subscriptionsRepository.findAllForAdmin.mockResolvedValue({
+      items: [{ id: 'sub-1', userId: 'user-1', planId: 'plan-missing' }],
+      total: 1,
+    });
+    subscriptionService.mapManyToResponses.mockResolvedValue([
+      { id: 'sub-1', userId: 'user-1', planId: 'plan-missing', number: 'SUB-002' },
+    ]);
+    usersRepository.findByIdForTenant.mockResolvedValue({ id: 'user-1', email: 'user@test.local' });
+    servicePlansRepository.findById.mockResolvedValue(null);
+
+    const result = await service.listSubscriptionsForAdmin({ limit: 10, offset: 0 });
+
+    expect(result.items[0].planName).toBeUndefined();
+    expect(result.items[0].planName).not.toBe('plan-missing');
+  });
+
   it('cancelSubscriptionForAdmin cancels on behalf of the subscription owner', async () => {
     subscriptionsRepository.findByIdOrThrow.mockResolvedValue({ id: 'sub-1', userId: 'user-1' });
     subscriptionService.cancelSubscription.mockResolvedValue({ id: 'sub-1', userId: 'user-1', planId: 'plan-1' });

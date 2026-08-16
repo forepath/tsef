@@ -372,6 +372,7 @@ export class BackorderService {
       userId: row.userId,
       serviceTypeId: row.serviceTypeId,
       planId: row.planId,
+      planName: resolvedPlan.name,
       status: row.status,
       failureReason: row.failureReason,
       requestedConfigSnapshot: row.requestedConfigSnapshot ?? {},

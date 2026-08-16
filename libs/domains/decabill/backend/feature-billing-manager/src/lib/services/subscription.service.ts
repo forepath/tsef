@@ -978,6 +978,7 @@ export class SubscriptionService {
       id: subscription.id,
       number: subscription.number,
       planId: subscription.planId,
+      planName: plan?.name,
       userId: subscription.userId,
       status: subscription.status,
       currentPeriodStart: subscription.currentPeriodStart,

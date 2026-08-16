@@ -7062,6 +7062,7 @@ components:
         id: { type: string, format: uuid }
         number: { type: string }
         planId: { type: string, format: uuid }
+        planName: { type: string, nullable: true }
         userId: { type: string, format: uuid }
         status:
           {
@@ -7635,6 +7636,7 @@ components:
         userId: { type: string, format: uuid }
         serviceTypeId: { type: string, format: uuid }
         planId: { type: string, format: uuid }
+        planName: { type: string, nullable: true }
         status:
           {
             type: string,

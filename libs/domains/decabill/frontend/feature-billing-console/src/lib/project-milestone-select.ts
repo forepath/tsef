@@ -1,5 +1,7 @@
 import type { ProjectMilestoneResponse } from '@forepath/decabill/frontend/data-access-billing-console';
 
+import { getUnavailableLabel } from './named-label.util';
+
 export function filterProjectMilestones(
   milestones: ProjectMilestoneResponse[],
   query: string,
@@ -23,5 +25,5 @@ export function resolveProjectMilestoneLabel(
     return $localize`:@@featureProjectBoard-milestoneNone:None`;
   }
 
-  return milestones.find((milestone) => milestone.id === milestoneId)?.name ?? milestoneId;
+  return milestones.find((milestone) => milestone.id === milestoneId)?.name?.trim() || getUnavailableLabel();
 }

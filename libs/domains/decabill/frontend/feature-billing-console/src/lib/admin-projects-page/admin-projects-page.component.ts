@@ -22,6 +22,7 @@ import {
   getProjectStatusIconClass,
   getProjectStatusLabel,
   getProjectStatusTextClass,
+  resolveNamedLabel,
 } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
 
@@ -170,6 +171,10 @@ export class AdminProjectsPageComponent implements OnInit {
 
   openBillableLabel(amount: number, currency: string): string {
     return formatProjectOpenBillableAmount(amount, currency);
+  }
+
+  projectOwnerLabel(project: AdminProjectListItem): string {
+    return resolveNamedLabel(project.userEmail);
   }
 
   private emptyCreateForm(): CreateAdminProjectDto {

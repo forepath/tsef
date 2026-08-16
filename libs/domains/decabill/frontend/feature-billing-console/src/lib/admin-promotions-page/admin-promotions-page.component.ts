@@ -21,6 +21,8 @@ import {
   getPromotionRedemptionStatusIconClass,
   getPromotionRedemptionStatusLabel,
   getPromotionRedemptionStatusTextClass,
+  getUnavailableLabel,
+  resolveNamedLabel,
 } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
 
@@ -236,11 +238,15 @@ export class AdminPromotionsPageComponent implements OnInit {
   ): string {
     const plan = plans.find((item) => item.id === planId);
 
-    if (!plan) return planId;
+    if (!plan) return getUnavailableLabel();
 
     const typeName = plan.serviceTypeId ? (types.find((item) => item.id === plan.serviceTypeId)?.name ?? '') : '';
 
     return typeName ? `${plan.name} (${typeName})` : plan.name;
+  }
+
+  redemptionSubscriptionLabel(item: PromotionRedemptionResponse): string {
+    return resolveNamedLabel(item.subscriptionNumber);
   }
 
   private buildDto(form: CreateAdminPromotionDto): CreateAdminPromotionDto {

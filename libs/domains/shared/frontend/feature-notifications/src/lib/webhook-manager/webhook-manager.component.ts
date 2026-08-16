@@ -264,7 +264,11 @@ export class WebhookManagerComponent implements OnInit {
       return $localize`:@@featureNotifications-allClients:All clients`;
     }
 
-    return this.clients().find((client) => client.id === clientId)?.label ?? clientId;
+    const label = this.clients()
+      .find((client) => client.id === clientId)
+      ?.label?.trim();
+
+    return label || $localize`:@@featureNotifications-clientUnavailable:N/A`;
   }
 
   formatDate(iso: string | undefined): string {

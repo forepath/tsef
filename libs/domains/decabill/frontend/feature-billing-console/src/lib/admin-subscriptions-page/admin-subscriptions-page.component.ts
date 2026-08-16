@@ -28,6 +28,7 @@ import {
   getSubscriptionStatusBadgeClass,
   getSubscriptionStatusLabel,
   getUnavailableLabel,
+  resolveNamedLabel,
 } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
 
@@ -204,7 +205,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   }
 
   meterNameById(meterId: string): string {
-    return this.activeMeters().find((meter) => meter.id === meterId)?.name ?? meterId;
+    return resolveNamedLabel(this.activeMeters().find((meter) => meter.id === meterId)?.name);
   }
 
   formatMeterCharge(amount: number): string {
@@ -309,7 +310,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   }
 
   subscriptionTitle(sub: AdminSubscriptionListItem): string {
-    return sub.planName?.trim() || sub.planId;
+    return resolveNamedLabel(sub.planName);
   }
 
   subscriptionUserLabel(sub: AdminSubscriptionListItem): string {

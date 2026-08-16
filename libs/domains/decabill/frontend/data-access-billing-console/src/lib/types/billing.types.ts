@@ -583,6 +583,8 @@ export interface SubscriptionResponse {
   id: string;
   number: string;
   planId: string;
+  /** Denormalized plan display name when provided by the API. */
+  planName?: string;
   userId: string;
   status: SubscriptionStatus;
   currentPeriodStart?: string | null;
@@ -888,6 +890,8 @@ export interface BackorderResponse {
   userId: string;
   serviceTypeId: string;
   planId: string;
+  /** Denormalized plan display name when provided by the API. */
+  planName?: string;
   status: BackorderStatus;
   failureReason?: string | null;
   requestedConfigSnapshot: Record<string, unknown>;

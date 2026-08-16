@@ -628,7 +628,7 @@
                               <span class="fw-medium text-truncate">{{
                                 relation.targetType === 'ticket'
                                   ? ticketRelationTicketTitle(relation.targetTicketLongSha)
-                                  : (relationNode?.title ?? relation.targetNodeId)
+                                  : relationKnowledgeTitle(relationNode?.title)
                               }}</span>
                             </span>
                           </div>

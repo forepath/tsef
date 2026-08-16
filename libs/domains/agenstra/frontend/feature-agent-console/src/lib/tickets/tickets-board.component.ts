@@ -83,6 +83,7 @@ import {
 } from 'rxjs';
 
 import { getGitRepositoryDisplayLabel, isLocalGitRepository } from '../git-repository-display';
+import { resolveNamedDisplayLabel } from '../display-name.util';
 
 import { storeAgentConsoleChatDraft } from './chat-draft-storage';
 import {
@@ -2471,9 +2472,11 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
   }
 
   effectiveWorkspaceTitle(ew: { id: string; client: ClientResponseDto | null }): string {
-    const name = ew.client?.name?.trim();
+    return resolveNamedDisplayLabel(ew.client?.name);
+  }
 
-    return name && name.length > 0 ? name : ew.id;
+  relationKnowledgeTitle(title: string | null | undefined): string {
+    return resolveNamedDisplayLabel(title);
   }
 
   openWorkspaceSwitchModal(): void {

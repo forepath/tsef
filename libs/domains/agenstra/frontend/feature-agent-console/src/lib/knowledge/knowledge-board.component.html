@@ -12,7 +12,7 @@
         >
           <small class="info-badge text-muted mt-0 bg-body-secondary py-1 px-2 rounded">
             <i class="bi bi-building me-1"></i>
-            <span class="text-truncate">{{ ew.name || ew.id }}</span>
+            <span class="text-truncate">{{ workspaceDisplayName(ew.name) }}</span>
           </small>
         </button>
       }
@@ -151,7 +151,7 @@
                           <span class="fw-medium text-truncate">{{
                             relation.targetType === 'ticket'
                               ? relationTicketDisplay(relation.targetTicketLongSha)
-                              : (relationNode?.title ?? relation.targetNodeId)
+                              : relationKnowledgeTitle(relationNode?.title)
                           }}</span>
                         </span>
                       </div>
@@ -469,7 +469,7 @@
                   [class.active]="c.id === activeClientId()"
                   (click)="onSelectWorkspaceForKnowledge(c)"
                 >
-                  <span class="text-truncate text-start">{{ c.name || c.id }}</span>
+                  <span class="text-truncate text-start">{{ workspaceDisplayName(c.name) }}</span>
                   @if (c.id === activeClientId()) {
                     <span
                       class="badge rounded-pill text-bg-light flex-shrink-0"
