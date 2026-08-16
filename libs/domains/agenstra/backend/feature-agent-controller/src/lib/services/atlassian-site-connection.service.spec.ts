@@ -11,12 +11,20 @@ describe('AtlassianSiteConnectionService', () => {
     save: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
+    createQueryBuilder: jest.fn(),
+  };
+  const searchIndex = {
+    isEnabled: jest.fn().mockReturnValue(false),
+    searchIds: jest.fn(),
   };
   let service: AtlassianSiteConnectionService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new AtlassianSiteConnectionService(mockRepo as unknown as Repository<AtlassianSiteConnectionEntity>);
+    service = new AtlassianSiteConnectionService(
+      mockRepo as unknown as Repository<AtlassianSiteConnectionEntity>,
+      searchIndex as never,
+    );
   });
 
   describe('findAll', () => {

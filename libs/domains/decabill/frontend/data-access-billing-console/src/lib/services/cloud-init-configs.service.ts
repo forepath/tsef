@@ -33,6 +33,10 @@ export class CloudInitConfigsService {
       httpParams = httpParams.set('offset', params.offset.toString());
     }
 
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
     return this.http.get<CloudInitConfigResponse[]>(`${this.apiUrl}/cloud-init-configs`, { params: httpParams });
   }
 

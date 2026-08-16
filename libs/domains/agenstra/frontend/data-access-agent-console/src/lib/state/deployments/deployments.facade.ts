@@ -153,8 +153,8 @@ export class DeploymentsFacade {
   /**
    * Load deployment runs for an agent.
    */
-  loadRuns(clientId: string, agentId: string, limit?: number, offset?: number): void {
-    this.store.dispatch(loadRuns({ clientId, agentId, limit, offset }));
+  loadRuns(clientId: string, agentId: string, limit?: number, offset?: number, search?: string): void {
+    this.store.dispatch(loadRuns({ clientId, agentId, limit, offset, search }));
   }
 
   /**

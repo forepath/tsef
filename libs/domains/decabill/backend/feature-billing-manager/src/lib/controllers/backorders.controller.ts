@@ -33,6 +33,7 @@ export class BackordersController {
   async list(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
     @Req() req?: RequestWithUser,
   ): Promise<BackorderResponseDto[]> {
     const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
@@ -41,7 +42,7 @@ export class BackordersController {
       throw new BadRequestException('User not authenticated');
     }
 
-    const rows = await this.backorderService.listForUser(userInfo.userId, limit ?? 10, offset ?? 0);
+    const rows = await this.backorderService.listForUser(userInfo.userId, limit ?? 10, offset ?? 0, search);
 
     return await this.backorderService.mapManyToResponses(rows);
   }

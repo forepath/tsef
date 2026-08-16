@@ -40,6 +40,14 @@ export class ProjectTicketsService {
       httpParams = httpParams.set('parentId', params.parentId);
     }
 
+    if (params.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
+    if (params.limit != null) {
+      httpParams = httpParams.set('limit', String(params.limit));
+    }
+
     return this.http.get<ProjectTicketResponse[]>(this.ticketsUrl(params.projectId), { params: httpParams });
   }
 

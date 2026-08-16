@@ -2006,14 +2006,13 @@
                   placeholder="Search workspaces"
                 />
               </div>
-              @let filteredClients = filteredClientsForWorkspaceSwitch(clientList);
-              @if (filteredClients.length === 0) {
+              @if (clientList.length === 0) {
                 <p class="text-muted small mb-0 text-center py-3" i18n="@@featureTicketsBoard-workspaceSwitcherNoMatch">
                   No matching workspaces
                 </p>
               } @else {
                 <div class="list-group list-group-flush tickets-board__workspace-switch-list border rounded">
-                  @for (c of filteredClients; track c.id) {
+                  @for (c of clientList; track c.id) {
                     <button
                       type="button"
                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2"

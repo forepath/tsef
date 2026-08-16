@@ -135,8 +135,8 @@ export class PromotionRedemptionService {
     });
   }
 
-  async listForUser(userId: string, limit: number, offset: number) {
-    const { items, total } = await this.promotionRedemptionsRepository.findByUser(userId, limit, offset);
+  async listForUser(userId: string, limit: number, offset: number, search?: string) {
+    const { items, total } = await this.promotionRedemptionsRepository.findByUser(userId, limit, offset, search);
 
     return {
       items: await Promise.all(items.map((item) => this.mapRedemptionEntity(item))),
@@ -146,8 +146,8 @@ export class PromotionRedemptionService {
     };
   }
 
-  async listActiveForUser(userId: string, limit: number, offset: number) {
-    const { items, total } = await this.promotionRedemptionsRepository.findActiveByUser(userId, limit, offset);
+  async listActiveForUser(userId: string, limit: number, offset: number, search?: string) {
+    const { items, total } = await this.promotionRedemptionsRepository.findActiveByUser(userId, limit, offset, search);
 
     return {
       items: await Promise.all(items.map((item) => this.mapRedemptionEntity(item))),

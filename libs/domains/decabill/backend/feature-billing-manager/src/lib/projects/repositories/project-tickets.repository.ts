@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { applyProjectTenantFilter } from '../../utils/tenant-query.utils';
+import { applyProjectTenantFilter, getRequiredTenantId } from '../../utils/tenant-query.utils';
+import { hydrateEntitiesBySearchIds } from '../../search/billing-search-hydrate.util';
+import { applyBillingSearchIlike } from '../../search/billing-search-ilike.util';
+import { BillingSearchIndexService } from '../../search/billing-search-index.service';
 import { ProjectTicketEntity } from '../entities/project-ticket.entity';
 import { ProjectTicketStatus } from '../entities/project.enums';
 
@@ -11,6 +14,7 @@ export class ProjectTicketsRepository {
   constructor(
     @InjectRepository(ProjectTicketEntity)
     private readonly repository: Repository<ProjectTicketEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   private baseQuery(alias = 'ticket') {
@@ -58,8 +62,34 @@ export class ProjectTicketsRepository {
 
   async findAllByProject(
     projectId: string,
-    filters?: { status?: ProjectTicketStatus; parentId?: string | null },
+    filters?: { status?: ProjectTicketStatus; parentId?: string | null; search?: string },
   ): Promise<ProjectTicketEntity[]> {
+    const search = filters?.search?.trim();
+
+    if (search && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('tickets', search, {
+        tenantId: getRequiredTenantId(),
+        extraFilters: { projectId },
+      });
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
+
+      if (hydrated) {
+        let items = hydrated.items;
+
+        if (filters?.status) {
+          items = items.filter((item) => item.status === filters.status);
+        }
+
+        if (filters?.parentId === null) {
+          items = items.filter((item) => item.parentId == null);
+        } else if (filters?.parentId !== undefined) {
+          items = items.filter((item) => item.parentId === filters.parentId);
+        }
+
+        return items;
+      }
+    }
+
     const qb = this.baseQuery('ticket')
       .where('ticket.project_id = :projectId', { projectId })
       .orderBy('ticket.updatedAt', 'DESC');
@@ -74,6 +104,10 @@ export class ProjectTicketsRepository {
       qb.andWhere('ticket.parent_id IS NULL');
     } else if (filters?.parentId !== undefined) {
       qb.andWhere('ticket.parent_id = :parentId', { parentId: filters.parentId });
+    }
+
+    if (search) {
+      applyBillingSearchIlike(qb, 'tickets', 'ticket', search);
     }
 
     return await qb.getMany();

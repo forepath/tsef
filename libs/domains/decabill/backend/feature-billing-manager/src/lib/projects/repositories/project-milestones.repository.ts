@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { applyProjectTenantFilter } from '../../utils/tenant-query.utils';
+import { applyProjectTenantFilter, getRequiredTenantId } from '../../utils/tenant-query.utils';
+import { hydrateEntitiesBySearchIds } from '../../search/billing-search-hydrate.util';
+import { applyBillingSearchIlike } from '../../search/billing-search-ilike.util';
+import { BillingSearchIndexService } from '../../search/billing-search-index.service';
 import { ProjectMilestoneEntity } from '../entities/project-milestone.entity';
 
 @Injectable()
@@ -10,6 +13,7 @@ export class ProjectMilestonesRepository {
   constructor(
     @InjectRepository(ProjectMilestoneEntity)
     private readonly repository: Repository<ProjectMilestoneEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   private baseQuery(alias = 'milestone') {
@@ -32,13 +36,31 @@ export class ProjectMilestonesRepository {
     return entity;
   }
 
-  async findAllByProject(projectId: string): Promise<ProjectMilestoneEntity[]> {
+  async findAllByProject(projectId: string, search?: string): Promise<ProjectMilestoneEntity[]> {
+    const trimmedSearch = search?.trim();
+
+    if (trimmedSearch && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('milestones', trimmedSearch, {
+        tenantId: getRequiredTenantId(),
+        extraFilters: { projectId },
+      });
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
+
+      if (hydrated) {
+        return hydrated.items;
+      }
+    }
+
     const qb = this.baseQuery('milestone')
       .where('milestone.project_id = :projectId', { projectId })
       .orderBy('milestone.sortOrder', 'ASC')
       .addOrderBy('milestone.createdAt', 'ASC');
 
     applyProjectTenantFilter(qb, 'project');
+
+    if (trimmedSearch) {
+      applyBillingSearchIlike(qb, 'milestones', 'milestone', trimmedSearch);
+    }
 
     return await qb.getMany();
   }

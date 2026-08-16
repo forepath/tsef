@@ -45,13 +45,27 @@ export class UsersRepository {
     return this.repository.count({ where: { tenantId } });
   }
 
-  async findAll(limit = 10, offset = 0, tenantId: string = getTenantIdOrDefault()): Promise<UserEntity[]> {
-    return this.repository.find({
-      where: { tenantId },
-      order: { createdAt: 'DESC' },
-      take: limit,
-      skip: offset,
-    });
+  async findAll(
+    limit = 10,
+    offset = 0,
+    search?: string,
+    tenantId: string = getTenantIdOrDefault(),
+  ): Promise<UserEntity[]> {
+    const qb = this.repository
+      .createQueryBuilder('user')
+      .where('user.tenantId = :tenantId', { tenantId })
+      .orderBy('user.createdAt', 'DESC')
+      .take(limit)
+      .skip(offset);
+    const trimmedSearch = search?.trim();
+
+    if (trimmedSearch) {
+      const term = `%${trimmedSearch}%`;
+
+      qb.andWhere('(user.email ILIKE :term OR CAST(user.id AS text) ILIKE :term)', { term });
+    }
+
+    return qb.getMany();
   }
 
   /**

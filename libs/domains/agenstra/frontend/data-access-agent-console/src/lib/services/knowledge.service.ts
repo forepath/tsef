@@ -31,8 +31,12 @@ export class KnowledgeService {
     return this.http.get<KnowledgeNodeDto[]>(`${this.apiUrl}/knowledge`, { params });
   }
 
-  getTree(clientId: string): Observable<KnowledgeNodeDto[]> {
-    const params = new HttpParams().set('clientId', clientId);
+  getTree(clientId: string, search?: string): Observable<KnowledgeNodeDto[]> {
+    let params = new HttpParams().set('clientId', clientId);
+
+    if (search?.trim()) {
+      params = params.set('search', search.trim());
+    }
 
     return this.http.get<KnowledgeNodeDto[]>(`${this.apiUrl}/knowledge/tree`, { params });
   }

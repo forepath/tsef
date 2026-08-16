@@ -74,6 +74,7 @@ export interface ClientsState {
   nextOffset: number;
   appendLoading: boolean;
   appendError: string | null;
+  search: string | null;
   // Provisioning state
   provisioningProviders: ProvisioningProviderInfo[];
   loadingProviders: boolean;
@@ -106,6 +107,7 @@ export const initialClientsState: ClientsState = {
   nextOffset: 0,
   appendLoading: false,
   appendError: null,
+  search: null,
   provisioningProviders: [],
   loadingProviders: false,
   serverTypes: {},
@@ -125,7 +127,7 @@ export const initialClientsState: ClientsState = {
 export const clientsReducer = createReducer(
   initialClientsState,
   // Load Clients
-  on(loadClients, (state) => ({
+  on(loadClients, (state, { params }) => ({
     ...state,
     entities: [],
     loading: true,
@@ -134,6 +136,7 @@ export const clientsReducer = createReducer(
     nextOffset: 0,
     appendLoading: false,
     appendError: null,
+    search: params?.search?.trim() ? params.search.trim() : null,
   })),
   on(loadClientsSuccess, (state, { clients, hasMore, nextOffset }) => ({
     ...state,

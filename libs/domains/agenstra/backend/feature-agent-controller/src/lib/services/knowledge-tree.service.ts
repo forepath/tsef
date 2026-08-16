@@ -12,6 +12,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -40,6 +41,12 @@ import { KnowledgeRelationEntity } from '../entities/knowledge-relation.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
 import { mapKnowledgeNodeToSearchDocument } from '../search/agenstra-search-document.mapper';
 import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
+import {
+  applyAgenstraSearchIlike,
+  hydrateEntitiesBySearchIds,
+  sanitizeListSearch,
+  tryAgenstraSearchIds,
+} from '../search/agenstra-search-list.util';
 
 import { KnowledgeEmbeddingIndexService } from './embeddings/knowledge-embedding-index.service';
 import { ExternalImportSyncMarkerService } from './external-import-sync-marker.service';
@@ -51,6 +58,8 @@ import { TicketsService } from './tickets.service';
 
 @Injectable()
 export class KnowledgeTreeService {
+  private readonly logger = new Logger(KnowledgeTreeService.name);
+
   constructor(
     @InjectRepository(KnowledgeNodeEntity)
     private readonly knowledgeNodeRepo: Repository<KnowledgeNodeEntity>,
@@ -309,18 +318,49 @@ export class KnowledgeTreeService {
     return this.mapNode(saved);
   }
 
-  async listNodes(clientId: string, req?: RequestWithUser): Promise<KnowledgeNodeResponseDto[]> {
+  async listNodes(clientId: string, req?: RequestWithUser, search?: string): Promise<KnowledgeNodeResponseDto[]> {
     await this.assertClientAccess(clientId, req);
-    const rows = await this.knowledgeNodeRepo.find({
-      where: { clientId },
-      order: { sortOrder: 'ASC', createdAt: 'ASC' },
-    });
+    const sanitized = sanitizeListSearch(search);
+    let rows: KnowledgeNodeEntity[];
+
+    if (sanitized) {
+      const openSearchIds = await tryAgenstraSearchIds(
+        this.searchIndex,
+        {
+          entityType: 'knowledge-nodes',
+          query: sanitized,
+          clientIds: [clientId],
+          limit: 10_000,
+          offset: 0,
+        },
+        this.logger,
+      );
+      const hydrated = await hydrateEntitiesBySearchIds(this.knowledgeNodeRepo, openSearchIds);
+
+      if (hydrated) {
+        rows = hydrated.items;
+      } else {
+        const qb = this.knowledgeNodeRepo
+          .createQueryBuilder('n')
+          .where('n.client_id = :clientId', { clientId })
+          .orderBy('n.sort_order', 'ASC')
+          .addOrderBy('n.created_at', 'ASC');
+
+        applyAgenstraSearchIlike(qb, 'knowledge-nodes', 'n', sanitized);
+        rows = await qb.getMany();
+      }
+    } else {
+      rows = await this.knowledgeNodeRepo.find({
+        where: { clientId },
+        order: { sortOrder: 'ASC', createdAt: 'ASC' },
+      });
+    }
 
     return rows.map((row) => this.mapNode(row));
   }
 
-  async getTree(clientId: string, req?: RequestWithUser): Promise<KnowledgeNodeResponseDto[]> {
-    const rows = await this.listNodes(clientId, req);
+  async getTree(clientId: string, req?: RequestWithUser, search?: string): Promise<KnowledgeNodeResponseDto[]> {
+    const rows = await this.listNodes(clientId, req, search);
     const byParent = new Map<string | null, KnowledgeNodeResponseDto[]>();
 
     for (const row of rows) {

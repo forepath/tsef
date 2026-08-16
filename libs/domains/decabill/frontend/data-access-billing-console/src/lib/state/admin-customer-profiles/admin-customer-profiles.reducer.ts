@@ -42,6 +42,7 @@ export interface AdminCustomerProfilesState {
   trustScoreLoading: boolean;
   trustScoreRefreshing: boolean;
   error: string | null;
+  search: string | null;
 }
 
 export const initialAdminCustomerProfilesState: AdminCustomerProfilesState = {
@@ -55,6 +56,7 @@ export const initialAdminCustomerProfilesState: AdminCustomerProfilesState = {
   trustScoreLoading: false,
   trustScoreRefreshing: false,
   error: null,
+  search: null,
 };
 
 function toOptionalString(value: string | null | undefined): string | undefined {

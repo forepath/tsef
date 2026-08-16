@@ -35,8 +35,9 @@ export class AdminCustomerProfilesController {
   async list(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<PaginatedAdminCustomerProfilesResponseDto> {
-    return await this.customerProfilesAdminService.list(limit ?? 10, offset ?? 0);
+    return await this.customerProfilesAdminService.list(limit ?? 10, offset ?? 0, search);
   }
 
   @Get(':id')

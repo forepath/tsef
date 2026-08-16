@@ -79,8 +79,9 @@ export class ServicePlansController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
     @Query('serviceTypeId') serviceTypeId?: string,
+    @Query('search') search?: string,
   ): Promise<ServicePlanResponseDto[]> {
-    let rows = await this.servicePlansRepository.findAll(limit ?? 10, offset ?? 0);
+    let rows = await this.servicePlansRepository.findAll(limit ?? 10, offset ?? 0, search);
 
     if (serviceTypeId !== undefined) {
       const dbTypeId = isNoneServiceTypeId(serviceTypeId) ? null : serviceTypeId.trim();

@@ -74,7 +74,10 @@ describe('AdminBillingController', () => {
   });
 
   it('getSummary delegates to billing admin service', async () => {
-    billingAdminService.getGlobalSummary.mockResolvedValue({ activeSubscriptionsCount: 1 });
+    billingAdminService.getGlobalSummary.mockResolvedValue({
+      subscriptionsCount: 2,
+      activeSubscriptionsCount: 1,
+    });
 
     const result = await controller.getSummary();
 

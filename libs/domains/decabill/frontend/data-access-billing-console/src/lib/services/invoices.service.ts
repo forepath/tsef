@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Environment } from '@forepath/shared/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
@@ -28,12 +28,24 @@ export class InvoicesService {
     return this.http.get<InvoicesSummaryResponse>(`${this.apiUrl}/invoices/summary`);
   }
 
-  getOpenOverdueInvoices(): Observable<InvoiceResponse[]> {
-    return this.http.get<InvoiceResponse[]>(`${this.apiUrl}/invoices/open-overdue`);
+  getOpenOverdueInvoices(search?: string): Observable<InvoiceResponse[]> {
+    let params = new HttpParams();
+
+    if (search?.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    return this.http.get<InvoiceResponse[]>(`${this.apiUrl}/invoices/open-overdue`, { params });
   }
 
-  getHistoryInvoices(): Observable<InvoiceResponse[]> {
-    return this.http.get<InvoiceResponse[]>(`${this.apiUrl}/invoices/history`);
+  getHistoryInvoices(search?: string): Observable<InvoiceResponse[]> {
+    let params = new HttpParams();
+
+    if (search?.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    return this.http.get<InvoiceResponse[]>(`${this.apiUrl}/invoices/history`, { params });
   }
 
   listInvoices(subscriptionId: string): Observable<InvoiceResponse[]> {

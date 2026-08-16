@@ -124,7 +124,8 @@
               type="search"
               class="form-control border-0 search-input"
               name="atlassianImportConnSearch"
-              [(ngModel)]="connectionsSearchQuery"
+              [ngModel]="connectionsSearchQuery()"
+              (ngModelChange)="connectionsSearchQuery.set($event)"
               placeholder="Search connections"
               i18n-placeholder="@@featureAtlassianImportAdmin-searchConnectionsPlaceholder"
             />
@@ -143,13 +144,13 @@
                 <div class="text-center text-muted p-4" i18n="@@featureAtlassianImportAdmin-noConnectionsYet">
                   No connections yet.
                 </div>
-              } @else if (!filteredConnections().length) {
+              } @else if (!connections().length) {
                 <div class="text-center text-muted p-4" i18n="@@featureAtlassianImportAdmin-noConnectionsMatchSearch">
                   No connections match your search.
                 </div>
               } @else {
                 <div class="list-group list-group-flush">
-                  @for (c of filteredConnections(); track c.id) {
+                  @for (c of connections(); track c.id) {
                     <div class="list-group-item border-bottom">
                       <div class="d-flex justify-content-between align-items-center gap-2">
                         <div class="flex-grow-1 min-width-0">
@@ -265,7 +266,8 @@
               type="search"
               class="form-control border-0 search-input"
               name="atlassianImportCfgSearch"
-              [(ngModel)]="configsSearchQuery"
+              [ngModel]="configsSearchQuery()"
+              (ngModelChange)="configsSearchQuery.set($event)"
               placeholder="Search import configs"
               i18n-placeholder="@@featureAtlassianImportAdmin-searchConfigsPlaceholder"
             />
@@ -284,7 +286,7 @@
                 <div class="text-center text-muted p-4" i18n="@@featureAtlassianImportAdmin-noConfigsYet">
                   No import configs yet.
                 </div>
-              } @else if (!filteredConfigs().length) {
+              } @else if (!configs().length) {
                 <div class="text-center text-muted p-4" i18n="@@featureAtlassianImportAdmin-noConfigsMatchSearch">
                   No import configs match your search.
                 </div>
@@ -292,7 +294,7 @@
                 @let runningConfigId = runningConfigId$ | async;
                 @let savingActive = saving$ | async;
                 <div class="list-group list-group-flush">
-                  @for (cfg of filteredConfigs(); track cfg.id) {
+                  @for (cfg of configs(); track cfg.id) {
                     <div class="list-group-item border-bottom">
                       <div class="d-flex justify-content-between align-items-center gap-2">
                         <div class="flex-grow-1 min-width-0">

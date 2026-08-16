@@ -11,10 +11,10 @@
             <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminSubscriptions-summaryTotal">
               Contracts
             </h6>
-            @if (loading$ | async) {
+            @if ((billingSummaryLoading$ | async) && !billingSummary()) {
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             } @else {
-              <p class="card-title mb-0 fs-4 fw-bold">{{ subscriptions().length }}</p>
+              <p class="card-title mb-0 fs-4 fw-bold">{{ billingSummary()?.subscriptionsCount ?? 0 }}</p>
             }
           </div>
         </div>
@@ -23,10 +23,10 @@
         <div class="card h-100 rounded-0 admin-subscriptions__summary-card admin-subscriptions__summary-card--second">
           <div class="card-body">
             <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminSubscriptions-summaryActive">Active</h6>
-            @if (loading$ | async) {
+            @if ((billingSummaryLoading$ | async) && !billingSummary()) {
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             } @else {
-              <p class="card-title mb-0 fs-4 fw-bold">{{ activeCount() }}</p>
+              <p class="card-title mb-0 fs-4 fw-bold">{{ billingSummary()?.activeSubscriptionsCount ?? 0 }}</p>
             }
           </div>
         </div>
@@ -53,13 +53,7 @@
     </div>
   </form>
 
-  <div
-    class="flex-grow-1 overflow-auto min-h-0"
-    sharedInfiniteScroll
-    [paused]="!!(appendError$ | async)"
-    [disabled]="(hasMore$ | async) === false || !!(appendLoading$ | async) || !!(loading$ | async)"
-    (reachedEnd)="facade.loadMore()"
-  >
+  <div #scrollRoot class="flex-grow-1 overflow-auto min-h-0">
     @if (loading$ | async) {
       <div class="d-flex justify-content-center align-items-center p-4">
         <div class="spinner-border text-primary" role="status">
@@ -238,15 +232,24 @@
             </div>
           }
         </div>
-        @if ((hasMore$ | async) || (appendError$ | async)) {
-          <shared-list-append-footer
-            [loading]="!!(appendLoading$ | async)"
-            [error]="!!(appendError$ | async)"
-            (retry)="facade.loadMore()"
-          />
-        }
       }
     }
+    @if ((appendLoading$ | async) || (appendError$ | async)) {
+      <shared-list-append-footer
+        [loading]="!!(appendLoading$ | async)"
+        [error]="!!(appendError$ | async)"
+        (retry)="facade.loadMore()"
+      />
+    }
+    <div
+      sharedInfiniteScroll
+      [root]="scrollRoot"
+      [paused]="!!(appendError$ | async)"
+      [disabled]="(hasMore$ | async) === false || !!(appendLoading$ | async) || !!(loading$ | async)"
+      (reachedEnd)="facade.loadMore()"
+      aria-hidden="true"
+      style="height: 1px; width: 100%; flex-shrink: 0"
+    ></div>
   </div>
 </div>
 

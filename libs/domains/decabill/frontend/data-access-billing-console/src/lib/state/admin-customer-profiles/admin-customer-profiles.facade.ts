@@ -40,8 +40,8 @@ export class AdminCustomerProfilesFacade {
   readonly trustScoreLoading$ = this.store.select(selectAdminCustomerProfileTrustScoreLoading);
   readonly trustScoreRefreshing$ = this.store.select(selectAdminCustomerProfileTrustScoreRefreshing);
 
-  loadProfiles(): void {
-    this.store.dispatch(loadAdminCustomerProfiles());
+  loadProfiles(params?: { search?: string }): void {
+    this.store.dispatch(loadAdminCustomerProfiles({ search: params?.search }));
   }
 
   createProfile(dto: CreateAdminCustomerProfileDto): void {

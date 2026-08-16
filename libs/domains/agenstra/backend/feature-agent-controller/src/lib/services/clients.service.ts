@@ -10,7 +10,7 @@ import {
   KeycloakTokenService,
   UserRole,
 } from '@forepath/identity/backend';
-import { BadRequestException, ForbiddenException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 
 import { ClientResponseDto } from '../dto/client-response.dto';
 import { CreateClientResponseDto } from '../dto/create-client-response.dto';
@@ -23,6 +23,7 @@ import { ProvisioningReferencesRepository } from '../repositories/provisioning-r
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
 import { mapClientToSearchDocument } from '../search/agenstra-search-document.mapper';
 import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
+import { sanitizeListSearch, tryAgenstraSearchIds } from '../search/agenstra-search-list.util';
 import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { StatisticsService } from './statistics.service';
 
@@ -32,6 +33,7 @@ import { StatisticsService } from './statistics.service';
  */
 @Injectable()
 export class ClientsService {
+  private readonly logger = new Logger(ClientsService.name);
   private readonly API_KEY_LENGTH = 32;
 
   constructor(
@@ -151,12 +153,11 @@ export class ClientsService {
     userId?: string,
     userRole?: UserRole,
     isApiKeyAuth = false,
-    options?: { amr?: string[] },
+    options?: { amr?: string[]; search?: string },
   ): Promise<ClientResponseDto[]> {
-    // In api-key mode, return all clients
-    if (isApiKeyAuth || this.isApiKeyMode()) {
-      const clients = await this.clientsRepository.findAll(limit, offset);
-      const viewer = { userId, userRole, isApiKeyAuth: true, amr: options?.amr };
+    const sanitized = sanitizeListSearch(options?.search);
+    const mapClients = async (clients: ClientEntity[]) => {
+      const viewer = { userId, userRole, isApiKeyAuth: isApiKeyAuth || this.isApiKeyMode(), amr: options?.amr };
 
       return Promise.all(
         clients.map(async (client) => {
@@ -171,6 +172,43 @@ export class ClientsService {
           return dto;
         }),
       );
+    };
+
+    const loadWithSearch = async (clientIds?: string[]): Promise<ClientEntity[]> => {
+      const openSearchIds = await tryAgenstraSearchIds(
+        this.searchIndex,
+        {
+          entityType: 'clients',
+          query: sanitized,
+          clientIds,
+          limit,
+          offset,
+        },
+        this.logger,
+      );
+      const hydrated =
+        openSearchIds == null
+          ? null
+          : openSearchIds.ids.length === 0
+            ? openSearchIds.total > 0
+              ? []
+              : null
+            : await this.clientsRepository.findByIdsOrdered(openSearchIds.ids);
+
+      if (hydrated !== null) {
+        return hydrated;
+      }
+
+      return await this.clientsRepository.findAllFiltered(limit, offset, { search: sanitized, clientIds });
+    };
+
+    // In api-key mode, return all clients
+    if (isApiKeyAuth || this.isApiKeyMode()) {
+      if (!sanitized) {
+        return await mapClients(await this.clientsRepository.findAll(limit, offset));
+      }
+
+      return await mapClients(await loadWithSearch(await this.clientsRepository.findAllIds()));
     }
 
     // For non-api-key mode, filter by permissions
@@ -180,52 +218,62 @@ export class ClientsService {
 
     // Global console admin: return all clients (PAT must not inherit this via role alone).
     if (userRole === UserRole.ADMIN && !(options?.amr ?? []).includes('pat')) {
-      const clients = await this.clientsRepository.findAll(limit, offset);
-      const viewer = { userId, userRole, isApiKeyAuth: false, amr: options?.amr };
+      if (!sanitized) {
+        return await mapClients(await this.clientsRepository.findAll(limit, offset));
+      }
 
-      return Promise.all(
-        clients.map(async (client) => {
-          const dto = await this.mapToResponseDto(client, viewer);
-
-          try {
-            dto.config = await this.clientAgentProxyService.getClientConfig(client.id);
-          } catch (error) {
-            // Config is optional, continue without it
-          }
-
-          return dto;
-        }),
-      );
+      return await mapClients(await loadWithSearch(await this.clientsRepository.findAllIds()));
     }
 
     // Get all clients the user has access to
-    // 1. Clients created by the user
-    // 2. Clients where user is in client_users table
     const userClients = await this.clientUsersRepository.findByUserId(userId);
     const clientIds = new Set<string>();
 
     userClients.forEach((cu) => clientIds.add(cu.clientId));
 
-    // Also get clients created by the user
-    const allClients = await this.clientsRepository.findAll(1000, 0); // Get all for filtering
+    const allClients = await this.clientsRepository.findAll(1000, 0);
     const accessibleClients = allClients.filter((client) => client.userId === userId || clientIds.has(client.id));
-    // Apply pagination
-    const paginatedClients = accessibleClients.slice(offset, offset + limit);
-    const viewer = { userId, userRole, isApiKeyAuth: false, amr: options?.amr };
+    const accessibleIds = accessibleClients.map((client) => client.id);
 
-    return Promise.all(
-      paginatedClients.map(async (client) => {
-        const dto = await this.mapToResponseDto(client, viewer);
+    if (sanitized) {
+      const openSearchIds = await tryAgenstraSearchIds(
+        this.searchIndex,
+        {
+          entityType: 'clients',
+          query: sanitized,
+          clientIds: accessibleIds,
+          limit: 10_000,
+          offset: 0,
+        },
+        this.logger,
+      );
+      const hydratedItems =
+        openSearchIds == null
+          ? null
+          : openSearchIds.ids.length === 0
+            ? openSearchIds.total > 0
+              ? []
+              : null
+            : await this.clientsRepository.findByIdsOrdered(openSearchIds.ids);
 
-        try {
-          dto.config = await this.clientAgentProxyService.getClientConfig(client.id);
-        } catch (error) {
-          // Config is optional, continue without it
-        }
+      if (hydratedItems !== null) {
+        const paginated = hydratedItems.slice(offset, offset + limit);
 
-        return dto;
-      }),
-    );
+        return await mapClients(paginated);
+      }
+
+      const filtered = accessibleClients.filter((client) =>
+        [client.id, client.name, client.description, client.endpoint].some((value) =>
+          String(value ?? '')
+            .toLowerCase()
+            .includes(sanitized.toLowerCase()),
+        ),
+      );
+
+      return await mapClients(filtered.slice(offset, offset + limit));
+    }
+
+    return await mapClients(accessibleClients.slice(offset, offset + limit));
   }
 
   /**

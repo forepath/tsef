@@ -16,14 +16,15 @@ import {
   viewChild,
   ViewChild,
 } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   BOARD_LANE_STATUSES,
   ProjectMilestonesFacade,
   ProjectTicketsFacade,
+  ProjectTicketsService,
   ProjectTimeEntriesFacade,
-  filterTicketsForGlobalSearch,
+  buildTicketBreadcrumbTitles,
   type BoardLaneStatus,
   type CreateProjectTicketDto,
   type ProjectMilestoneResponse,
@@ -34,7 +35,7 @@ import {
   type ProjectTicketStatus,
   type ProjectTimeEntryResponse,
 } from '@forepath/decabill/frontend/data-access-billing-console';
-import { filter } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 
 import {
   hideBillingModal,
@@ -104,6 +105,7 @@ export class ProjectBoardComponent implements OnInit {
 
   private readonly detailTitleInputRef = viewChild<ElementRef<HTMLInputElement>>('detailTitleInput');
   private readonly ticketsFacade = inject(ProjectTicketsFacade);
+  private readonly ticketsService = inject(ProjectTicketsService);
   private readonly milestonesFacade = inject(ProjectMilestonesFacade);
   private readonly timeEntriesFacade = inject(ProjectTimeEntriesFacade);
   private readonly destroyRef = inject(DestroyRef);
@@ -134,12 +136,11 @@ export class ProjectBoardComponent implements OnInit {
   readonly draggedTicket = signal<ProjectTicketResponse | null>(null);
   readonly dragOverLane = signal<BoardLaneStatus | null>(null);
   readonly globalSearchQuery = signal('');
+  readonly globalSearchQuery$ = toObservable(this.globalSearchQuery);
+  readonly globalSearchHits = signal<ProjectTicketGlobalSearchHit[]>([]);
   readonly ticketPendingDelete = signal<{ id: string; title: string } | null>(null);
 
   readonly ticketsList = toSignal(this.ticketsFacade.tickets$, { initialValue: [] as ProjectTicketResponse[] });
-  readonly globalSearchHits = computed(() =>
-    filterTicketsForGlobalSearch(this.ticketsList(), this.globalSearchQuery(), this.projectId),
-  );
 
   private lastDetailIdForDraft: string | null = null;
   private detailTitleEditSyncDetailId: string | null = null;
@@ -225,6 +226,33 @@ export class ProjectBoardComponent implements OnInit {
   ngOnInit(): void {
     this.ticketsFacade.loadTickets({ projectId: this.projectId });
     this.milestonesFacade.load(this.projectId);
+
+    this.globalSearchQuery$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((query) => {
+          const trimmed = query.trim();
+
+          if (!trimmed) {
+            return of([] as ProjectTicketGlobalSearchHit[]);
+          }
+
+          return this.ticketsService.list({ projectId: this.projectId, search: trimmed, limit: 50 }).pipe(
+            map((tickets) =>
+              tickets
+                .map((ticket) => ({
+                  ticket,
+                  pathTitles: buildTicketBreadcrumbTitles(this.ticketsList(), ticket.id),
+                }))
+                .sort((a, b) => a.ticket.title.toLowerCase().localeCompare(b.ticket.title.toLowerCase())),
+            ),
+            catchError(() => of([] as ProjectTicketGlobalSearchHit[])),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((hits) => this.globalSearchHits.set(hits));
 
     this.ticketsFacade.selectedTicketId$
       .pipe(

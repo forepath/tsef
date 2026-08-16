@@ -22,6 +22,7 @@ import { SubscriptionMeterSummaryDto } from '../dto/meter-response.dto';
 import { SubscriptionMeterHistoryQueryDto } from '../dto/subscription-meter-history-query.dto';
 import { ResumeSubscriptionDto } from '../dto/resume-subscription.dto';
 import { SubscriptionResponseDto } from '../dto/subscription-response.dto';
+import { SubscriptionsSummaryResponseDto } from '../dto/subscriptions-summary-response.dto';
 import { WithdrawSubscriptionDto } from '../dto/withdraw-subscription.dto';
 import { MeterBillingService } from '../services/meter-billing.service';
 import { SubscriptionConfigChangeService } from '../services/subscription-config-change.service';
@@ -65,6 +66,7 @@ export class SubscriptionsController {
   async list(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
     @Req() req?: RequestWithUser,
   ): Promise<SubscriptionResponseDto[]> {
     const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
@@ -73,9 +75,21 @@ export class SubscriptionsController {
       throw new BadRequestException('User not authenticated');
     }
 
-    const rows = await this.subscriptionService.listSubscriptions(userInfo.userId, limit ?? 10, offset ?? 0);
+    const rows = await this.subscriptionService.listSubscriptions(userInfo.userId, limit ?? 10, offset ?? 0, search);
 
     return await this.subscriptionService.mapManyToResponses(rows);
+  }
+
+  @RequireScopes('subscriptions:read')
+  @Get('summary')
+  async getSummary(@Req() req?: RequestWithUser): Promise<SubscriptionsSummaryResponseDto> {
+    const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.subscriptionService.getSubscriptionsSummary(userInfo.userId);
   }
 
   @RequireScopes('subscriptions:read')

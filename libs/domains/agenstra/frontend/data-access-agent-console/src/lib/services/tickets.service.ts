@@ -51,6 +51,10 @@ export class TicketsService {
       httpParams = httpParams.set('parentId', params.parentId);
     }
 
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
     return this.http.get<TicketResponseDto[]>(`${this.apiUrl}/tickets`, { params: httpParams });
   }
 

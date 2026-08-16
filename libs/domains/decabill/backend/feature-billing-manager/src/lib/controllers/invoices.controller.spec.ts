@@ -162,7 +162,11 @@ describe('InvoicesController', () => {
       const result = await controller.listOpenOverdue(reqWithUser as never);
 
       expect(result).toHaveLength(1);
-      expect(invoicesRepository.findOpenOverdueByUserId).toHaveBeenCalledWith(userId);
+      expect(invoicesRepository.findOpenOverdueByUserId).toHaveBeenCalledWith(userId, {
+        search: undefined,
+        limit: undefined,
+        offset: undefined,
+      });
       expect(invoiceService.mapToResponse).toHaveBeenCalled();
     });
 
@@ -186,7 +190,11 @@ describe('InvoicesController', () => {
       const result = await controller.listHistory(reqWithUser as never);
 
       expect(result).toHaveLength(1);
-      expect(invoicesRepository.findHistoryByUserId).toHaveBeenCalledWith(userId);
+      expect(invoicesRepository.findHistoryByUserId).toHaveBeenCalledWith(userId, {
+        search: undefined,
+        limit: undefined,
+        offset: undefined,
+      });
       expect(invoiceService.mapToResponse).toHaveBeenCalled();
     });
 

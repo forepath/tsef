@@ -52,7 +52,18 @@ import {
   providerLocationCatalogFromList,
   type ProviderLocationCatalog,
 } from '@forepath/shared/frontend/util-provisioning-geography';
-import { combineLatest, catchError, forkJoin, map, of, switchMap, take } from 'rxjs';
+import {
+  combineLatest,
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  forkJoin,
+  map,
+  of,
+  skip,
+  switchMap,
+  take,
+} from 'rxjs';
 
 import {
   getActiveStatusLabel,
@@ -108,23 +119,7 @@ export class ServicePlansPageComponent implements OnInit {
   readonly servicePlans$ = combineLatest([
     this.plansFacade.getServicePlans$(),
     this.typesFacade.getServiceTypes$(),
-    this.searchQuery$,
-  ]).pipe(
-    map(([plans, serviceTypes, searchQuery]) => {
-      const term = searchQuery.trim().toLowerCase();
-      const filteredPlans = !term
-        ? plans
-        : plans.filter((plan) => {
-            const typeName = isNoneServiceTypeId(plan.serviceTypeId)
-              ? this.noneServiceTypeLabel
-              : (serviceTypes.find((type) => type.id === plan.serviceTypeId)?.name ?? '');
-
-            return JSON.stringify(plan).toLowerCase().includes(term) || typeName.toLowerCase().includes(term);
-          });
-
-      return { plans: filteredPlans, serviceTypes };
-    }),
-  );
+  ]).pipe(map(([plans, serviceTypes]) => ({ plans, serviceTypes })));
   readonly serviceTypes$ = this.typesFacade.getServiceTypes$();
   readonly cloudInitConfigs$ = this.cloudInitConfigsFacade.getActiveCloudInitConfigs$();
   readonly activeAddons$ = this.addonsFacade.getActiveAddons$();
@@ -1536,6 +1531,12 @@ export class ServicePlansPageComponent implements OnInit {
     this.metersFacade.loadMeters();
     this.refreshIssuerTaxRates();
     this.registerModalCloseWatchers();
+
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.plansFacade.loadServicePlans({ search: search.trim() || undefined });
+      });
   }
 
   private refreshIssuerTaxRates(): void {

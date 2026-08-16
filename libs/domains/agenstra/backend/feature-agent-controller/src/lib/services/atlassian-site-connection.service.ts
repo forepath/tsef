@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -7,12 +7,22 @@ import { AtlassianSiteConnectionResponseDto } from '../dto/context-import/atlass
 import { CreateAtlassianSiteConnectionDto } from '../dto/context-import/create-atlassian-site-connection.dto';
 import { UpdateAtlassianSiteConnectionDto } from '../dto/context-import/update-atlassian-site-connection.dto';
 import { AtlassianSiteConnectionEntity } from '../entities/atlassian-site-connection.entity';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
+import {
+  applyAgenstraSearchIlike,
+  hydrateEntitiesBySearchIds,
+  sanitizeListSearch,
+  tryAgenstraSearchIds,
+} from '../search/agenstra-search-list.util';
 
 @Injectable()
 export class AtlassianSiteConnectionService {
+  private readonly logger = new Logger(AtlassianSiteConnectionService.name);
+
   constructor(
     @InjectRepository(AtlassianSiteConnectionEntity)
     private readonly repo: Repository<AtlassianSiteConnectionEntity>,
+    private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
   /** Maps entity to API DTO; never includes `apiToken` (decrypted only in-process for import HTTP calls). */
@@ -27,12 +37,40 @@ export class AtlassianSiteConnectionService {
     };
   }
 
-  async findAll(limit = 10, offset = 0): Promise<AtlassianSiteConnectionResponseDto[]> {
-    const rows = await this.repo.find({
-      order: { createdAt: 'DESC' },
-      take: limit,
-      skip: offset,
-    });
+  async findAll(limit = 10, offset = 0, search?: string): Promise<AtlassianSiteConnectionResponseDto[]> {
+    const sanitized = sanitizeListSearch(search);
+    let rows: AtlassianSiteConnectionEntity[];
+
+    if (sanitized) {
+      const openSearchIds = await tryAgenstraSearchIds(
+        this.searchIndex,
+        {
+          entityType: 'atlassian-connections',
+          query: sanitized,
+          instanceScoped: true,
+          limit,
+          offset,
+        },
+        this.logger,
+      );
+      const hydrated = await hydrateEntitiesBySearchIds(this.repo, openSearchIds);
+
+      if (hydrated) {
+        rows = hydrated.items;
+      } else {
+        const qb = this.repo.createQueryBuilder('c').orderBy('c.created_at', 'DESC');
+
+        applyAgenstraSearchIlike(qb, 'atlassian-connections', 'c', sanitized);
+        qb.take(limit).skip(offset);
+        rows = await qb.getMany();
+      }
+    } else {
+      rows = await this.repo.find({
+        order: { createdAt: 'DESC' },
+        take: limit,
+        skip: offset,
+      });
+    }
 
     return rows.map((r) => this.map(r));
   }

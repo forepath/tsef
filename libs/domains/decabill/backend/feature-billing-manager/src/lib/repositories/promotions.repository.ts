@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 
 import { PromotionEntity } from '../entities/promotion.entity';
+import { hydrateEntitiesBySearchIds } from '../search/billing-search-hydrate.util';
+import { applyBillingSearchIlike } from '../search/billing-search-ilike.util';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { applyPromotionTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
 @Injectable()
@@ -10,6 +13,7 @@ export class PromotionsRepository {
   constructor(
     @InjectRepository(PromotionEntity)
     private readonly repository: Repository<PromotionEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   private resolveRepository(manager?: EntityManager): Repository<PromotionEntity> {
@@ -40,7 +44,20 @@ export class PromotionsRepository {
     return await qb.getOne();
   }
 
-  async findAll(limit = 10, offset = 0): Promise<{ items: PromotionEntity[]; total: number }> {
+  async findAll(limit = 10, offset = 0, search?: string): Promise<{ items: PromotionEntity[]; total: number }> {
+    if (search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('promotions', search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+      });
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
+
+      if (hydrated) {
+        return hydrated;
+      }
+    }
+
     const qb = this.repository
       .createQueryBuilder('promotion')
       .orderBy('promotion.createdAt', 'DESC')
@@ -48,6 +65,10 @@ export class PromotionsRepository {
       .skip(offset);
 
     applyPromotionTenantFilter(qb, 'promotion');
+
+    if (search?.trim()) {
+      applyBillingSearchIlike(qb, 'promotions', 'promotion', search);
+    }
 
     const [items, total] = await qb.getManyAndCount();
 

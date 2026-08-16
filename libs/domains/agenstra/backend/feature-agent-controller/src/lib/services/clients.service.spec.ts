@@ -59,6 +59,8 @@ describe('ClientsService', () => {
     findAll: jest.fn(),
     findAllIds: jest.fn(),
     findIdsByCreatorId: jest.fn(),
+    findAllFiltered: jest.fn(),
+    findByIdsOrdered: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),

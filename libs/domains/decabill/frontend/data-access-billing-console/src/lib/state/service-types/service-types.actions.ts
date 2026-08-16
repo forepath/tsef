@@ -36,7 +36,7 @@ export const loadServiceTypesFailure = createAction(
 
 export const loadServiceTypesBatch = createAction(
   '[Service Types] Load Service Types Batch',
-  props<{ offset: number; accumulatedServiceTypes: ServiceTypeResponse[] }>(),
+  props<{ offset: number; accumulatedServiceTypes: ServiceTypeResponse[]; params?: ListParams }>(),
 );
 
 // Get Service Type by ID Actions

@@ -739,8 +739,22 @@ export class SubscriptionService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  async listSubscriptions(userId: string, limit: number, offset: number) {
-    return await this.subscriptionsRepository.findAllByUser(userId, limit, offset);
+  async listSubscriptions(userId: string, limit: number, offset: number, search?: string) {
+    return await this.subscriptionsRepository.findAllByUser(userId, limit, offset, search);
+  }
+
+  async getSubscriptionsSummary(userId: string): Promise<{
+    total: number;
+    active: number;
+    pendingBackorders: number;
+  }> {
+    const [total, active, pendingBackorders] = await Promise.all([
+      this.subscriptionsRepository.countByUserId(userId),
+      this.subscriptionsRepository.countByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE),
+      this.backordersRepository.countOpenByUserId(userId),
+    ]);
+
+    return { total, active, pendingBackorders };
   }
 
   async getSubscription(subscriptionId: string, userId: string) {

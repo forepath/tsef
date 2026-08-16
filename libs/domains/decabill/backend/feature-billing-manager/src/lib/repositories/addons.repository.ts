@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
 import { AddonEntity } from '../entities/addon.entity';
+import { hydrateEntitiesBySearchIds } from '../search/billing-search-hydrate.util';
+import { applyBillingSearchIlike } from '../search/billing-search-ilike.util';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { getRequiredTenantId } from '../utils/tenant-query.utils';
 
 @Injectable()
@@ -10,6 +13,7 @@ export class AddonsRepository {
   constructor(
     @InjectRepository(AddonEntity)
     private readonly repository: Repository<AddonEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   async findByIdOrThrow(id: string): Promise<AddonEntity> {
@@ -40,13 +44,32 @@ export class AddonsRepository {
     return await this.repository.findOne({ where: { key, tenantId: getRequiredTenantId() } });
   }
 
-  async findAll(limit = 10, offset = 0): Promise<AddonEntity[]> {
-    return await this.repository.find({
-      where: { tenantId: getRequiredTenantId() },
-      take: limit,
-      skip: offset,
-      order: { createdAt: 'DESC' },
-    });
+  async findAll(limit = 10, offset = 0, search?: string): Promise<AddonEntity[]> {
+    if (search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('addons', search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+      });
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
+
+      if (hydrated) {
+        return hydrated.items;
+      }
+    }
+
+    const qb = this.repository
+      .createQueryBuilder('addon')
+      .where('addon.tenant_id = :tenantId', { tenantId: getRequiredTenantId() })
+      .orderBy('addon.createdAt', 'DESC')
+      .take(limit)
+      .skip(offset);
+
+    if (search?.trim()) {
+      applyBillingSearchIlike(qb, 'addons', 'addon', search);
+    }
+
+    return await qb.getMany();
   }
 
   async findActive(limit = 100, offset = 0): Promise<AddonEntity[]> {

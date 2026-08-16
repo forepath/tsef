@@ -60,7 +60,7 @@ export class ProjectTicketsService {
   async listTickets(
     projectId: string,
     userInfo: UserInfoFromRequest,
-    filters?: { status?: ProjectTicketStatus; parentId?: string | null },
+    filters?: { status?: ProjectTicketStatus; parentId?: string | null; search?: string },
   ): Promise<ProjectTicketResponseDto[]> {
     const project = await this.projectsRepository.findByIdOrThrow(projectId);
 

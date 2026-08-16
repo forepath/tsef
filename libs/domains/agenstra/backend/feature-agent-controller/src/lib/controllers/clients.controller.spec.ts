@@ -221,10 +221,13 @@ describe('ClientsController', () => {
 
       service.findAll.mockResolvedValue(clients);
 
-      const result = await controller.getClients(10, 0, mockReq);
+      const result = await controller.getClients(10, 0, undefined, mockReq);
 
       expect(result).toEqual(clients);
-      expect(service.findAll).toHaveBeenCalledWith(10, 0, undefined, undefined, true, { amr: undefined });
+      expect(service.findAll).toHaveBeenCalledWith(10, 0, undefined, undefined, true, {
+        amr: undefined,
+        search: undefined,
+      });
     });
 
     it('should use default pagination values', async () => {
@@ -233,10 +236,13 @@ describe('ClientsController', () => {
 
       service.findAll.mockResolvedValue(clients);
 
-      const result = await controller.getClients(undefined, undefined, mockReq);
+      const result = await controller.getClients(undefined, undefined, undefined, mockReq);
 
       expect(result).toEqual(clients);
-      expect(service.findAll).toHaveBeenCalledWith(10, 0, undefined, undefined, true, { amr: undefined });
+      expect(service.findAll).toHaveBeenCalledWith(10, 0, undefined, undefined, true, {
+        amr: undefined,
+        search: undefined,
+      });
     });
   });
 
@@ -343,10 +349,10 @@ describe('ClientsController', () => {
       clientUsersRepository.findUserClientAccess.mockResolvedValue(null);
       proxyService.getClientAgents.mockResolvedValue(agents);
 
-      const result = await controller.getClientAgents('client-uuid', 10, 0, mockReq);
+      const result = await controller.getClientAgents('client-uuid', 10, 0, undefined, mockReq);
 
       expect(result).toEqual(agents);
-      expect(proxyService.getClientAgents).toHaveBeenCalledWith('client-uuid', 10, 0);
+      expect(proxyService.getClientAgents).toHaveBeenCalledWith('client-uuid', 10, 0, undefined);
     });
 
     it('should use default pagination values', async () => {
@@ -357,10 +363,10 @@ describe('ClientsController', () => {
       clientUsersRepository.findUserClientAccess.mockResolvedValue(null);
       proxyService.getClientAgents.mockResolvedValue(agents);
 
-      const result = await controller.getClientAgents('client-uuid', undefined, undefined, mockReq);
+      const result = await controller.getClientAgents('client-uuid', undefined, undefined, undefined, mockReq);
 
       expect(result).toEqual(agents);
-      expect(proxyService.getClientAgents).toHaveBeenCalledWith('client-uuid', 10, 0);
+      expect(proxyService.getClientAgents).toHaveBeenCalledWith('client-uuid', 10, 0, undefined);
     });
   });
 

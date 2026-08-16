@@ -38,6 +38,10 @@ export class ContextImportAdminService {
       httpParams = httpParams.set('offset', params.offset.toString());
     }
 
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
     return this.http.get<AtlassianSiteConnectionDto[]>(`${this.baseUrl}/connections`, { params: httpParams });
   }
 
@@ -70,6 +74,10 @@ export class ContextImportAdminService {
 
     if (params?.offset !== undefined) {
       httpParams = httpParams.set('offset', params.offset.toString());
+    }
+
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
     }
 
     return this.http.get<ExternalImportConfigDto[]>(`${this.baseUrl}/configs`, { params: httpParams });

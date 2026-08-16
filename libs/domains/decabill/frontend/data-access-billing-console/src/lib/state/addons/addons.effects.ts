@@ -44,7 +44,7 @@ export const loadAddons$ = createEffect(
           switchMap((addons) =>
             addons.length < BATCH_SIZE
               ? of(loadAddonsSuccess({ addons }))
-              : of(loadAddonsBatch({ offset: BATCH_SIZE, accumulatedAddons: addons })),
+              : of(loadAddonsBatch({ offset: BATCH_SIZE, accumulatedAddons: addons, params })),
           ),
           catchError((error) => of(loadAddonsFailure({ error: normalizeError(error) }))),
         );
@@ -57,14 +57,14 @@ export const loadAddonsBatch$ = createEffect(
   (actions$ = inject(Actions), addonsService = inject(AddonsService)) =>
     actions$.pipe(
       ofType(loadAddonsBatch),
-      switchMap(({ offset, accumulatedAddons }) =>
-        addonsService.listAddons({ limit: BATCH_SIZE, offset }).pipe(
+      switchMap(({ offset, accumulatedAddons, params }) =>
+        addonsService.listAddons({ limit: BATCH_SIZE, offset, ...params }).pipe(
           switchMap((addons) => {
             const next = [...accumulatedAddons, ...addons];
 
             return addons.length < BATCH_SIZE
               ? of(loadAddonsSuccess({ addons: next }))
-              : of(loadAddonsBatch({ offset: offset + BATCH_SIZE, accumulatedAddons: next }));
+              : of(loadAddonsBatch({ offset: offset + BATCH_SIZE, accumulatedAddons: next, params }));
           }),
           catchError((error) => of(loadAddonsFailure({ error: normalizeError(error) }))),
         ),

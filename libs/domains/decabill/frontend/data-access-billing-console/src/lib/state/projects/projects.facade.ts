@@ -15,6 +15,7 @@ import {
   loadMoreProjects,
   loadProjectDetail,
   loadProjects,
+  loadProjectsCatalogSummary,
   loadProjectSummary,
   updateAdminProject,
 } from './projects.actions';
@@ -28,6 +29,8 @@ import {
   selectProjectsAppendError,
   selectProjectsAppendLoading,
   selectProjectsBilling,
+  selectProjectsCatalogSummary,
+  selectProjectsCatalogSummaryLoading,
   selectProjectsCreating,
   selectProjectsDeleting,
   selectProjectsError,
@@ -48,6 +51,8 @@ export class ProjectsFacade {
   readonly adminProjects$ = this.store.select(selectAdminProjects);
   readonly selectedProject$ = this.store.select(selectSelectedProject);
   readonly summary$ = this.store.select(selectProjectSummary);
+  readonly catalogSummary$ = this.store.select(selectProjectsCatalogSummary);
+  readonly catalogSummaryLoading$ = this.store.select(selectProjectsCatalogSummaryLoading);
   readonly loading$ = this.store.select(selectProjectsLoading);
   readonly loadingDetail$ = this.store.select(selectProjectsLoadingDetail);
   readonly loadingSummary$ = this.store.select(selectProjectsLoadingSummary);
@@ -63,8 +68,12 @@ export class ProjectsFacade {
   readonly adminAppendLoading$ = this.store.select(selectAdminProjectsAppendLoading);
   readonly adminAppendError$ = this.store.select(selectAdminProjectsAppendError);
 
-  loadProjects(): void {
-    this.store.dispatch(loadProjects({}));
+  loadProjects(params?: { search?: string }): void {
+    this.store.dispatch(loadProjects({ search: params?.search }));
+  }
+
+  loadCatalogSummary(): void {
+    this.store.dispatch(loadProjectsCatalogSummary());
   }
 
   loadMore(): void {
@@ -74,7 +83,12 @@ export class ProjectsFacade {
       .subscribe((state) => {
         if (!state.hasMore || state.appendLoading || state.loading) return;
 
-        this.store.dispatch(loadMoreProjects({ offset: state.nextOffset }));
+        this.store.dispatch(
+          loadMoreProjects({
+            offset: state.nextOffset,
+            search: state.customerSearch ?? undefined,
+          }),
+        );
       });
   }
 

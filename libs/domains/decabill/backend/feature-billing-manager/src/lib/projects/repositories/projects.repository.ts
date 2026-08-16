@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { applyProjectTenantFilter, getRequiredTenantId } from '../../utils/tenant-query.utils';
+import { hydrateEntitiesBySearchIds } from '../../search/billing-search-hydrate.util';
+import { applyBillingSearchIlike } from '../../search/billing-search-ilike.util';
 import { BillingSearchIndexService } from '../../search/billing-search-index.service';
 import { ProjectEntity } from '../entities/project.entity';
 import { ProjectStatus } from '../entities/project.enums';
@@ -43,13 +45,32 @@ export class ProjectsRepository {
     userId: string,
     limit: number,
     offset: number,
+    search?: string,
   ): Promise<{ items: ProjectEntity[]; total: number }> {
+    if (search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('projects', search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+        extraFilters: { userId },
+      });
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
+
+      if (hydrated) {
+        return hydrated;
+      }
+    }
+
     const qb = this.repository
       .createQueryBuilder('project')
       .innerJoin('users', 'user', 'user.id = project.user_id')
       .where('project.user_id = :userId', { userId })
       .andWhere('user.tenant_id = :tenantId', { tenantId: getRequiredTenantId() })
       .orderBy('project.updatedAt', 'DESC');
+
+    if (search?.trim()) {
+      applyBillingSearchIlike(qb, 'projects', 'project', search);
+    }
 
     const total = await qb.getCount();
     const items = await qb.take(limit).skip(offset).getMany();
@@ -70,16 +91,10 @@ export class ProjectsRepository {
         extraFilters: options.userId ? { userId: options.userId } : undefined,
       });
 
-      if (lookup) {
-        if (lookup.ids.length === 0) {
-          return { items: [], total: lookup.total };
-        }
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
 
-        const found = await this.repository.findBy({ id: In(lookup.ids) });
-        const byId = new Map(found.map((item) => [item.id, item]));
-        const items = lookup.ids.map((id) => byId.get(id)).filter((item): item is ProjectEntity => item != null);
-
-        return { items, total: lookup.total };
+      if (hydrated) {
+        return hydrated;
       }
     }
 
@@ -92,7 +107,7 @@ export class ProjectsRepository {
     }
 
     if (options?.search?.trim()) {
-      qb.andWhere('project.name ILIKE :search', { search: `%${options.search.trim()}%` });
+      applyBillingSearchIlike(qb, 'projects', 'project', options.search);
     }
 
     const total = await qb.getCount();
@@ -150,5 +165,26 @@ export class ProjectsRepository {
   async delete(id: string): Promise<void> {
     await this.findByIdOrThrow(id);
     await this.repository.delete(id);
+  }
+
+  async countByUserId(userId: string): Promise<number> {
+    const qb = this.repository
+      .createQueryBuilder('project')
+      .innerJoin('users', 'user', 'user.id = project.user_id')
+      .where('project.user_id = :userId', { userId })
+      .andWhere('user.tenant_id = :tenantId', { tenantId: getRequiredTenantId() });
+
+    return await qb.getCount();
+  }
+
+  async countByUserIdAndStatus(userId: string, status: ProjectStatus): Promise<number> {
+    const qb = this.repository
+      .createQueryBuilder('project')
+      .innerJoin('users', 'user', 'user.id = project.user_id')
+      .where('project.user_id = :userId', { userId })
+      .andWhere('project.status = :status', { status })
+      .andWhere('user.tenant_id = :tenantId', { tenantId: getRequiredTenantId() });
+
+    return await qb.getCount();
   }
 }

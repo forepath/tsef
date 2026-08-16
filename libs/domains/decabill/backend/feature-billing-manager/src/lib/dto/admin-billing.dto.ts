@@ -4,6 +4,7 @@ import { InvoiceResponseDto } from './invoice-response.dto';
 import { SubscriptionResponseDto } from './subscription-response.dto';
 
 export class AdminBillingSummaryResponseDto {
+  subscriptionsCount!: number;
   activeSubscriptionsCount!: number;
   openOverdueCount!: number;
   openOverdueTotal!: number;

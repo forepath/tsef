@@ -166,12 +166,12 @@
                 <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                   <p class="mb-0" i18n="@@featureInvoices-noOpenOverdue">No open or overdue invoices.</p>
                 </div>
-              } @else if (filteredOpenOverdueList().length === 0) {
+              } @else if (openOverdueList().length === 0) {
                 <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                   <p class="mb-0" i18n="@@featureInvoices-noSearchResults">No invoices match your search.</p>
                 </div>
               } @else {
-                @for (inv of filteredOpenOverdueList(); track inv.id) {
+                @for (inv of openOverdueList(); track inv.id) {
                   <ng-container
                     *ngTemplateOutlet="invoiceListItem; context: { $implicit: inv, subscriptionId: inv.subscriptionId }"
                   ></ng-container>
@@ -225,12 +225,12 @@
                 <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                   <p class="mb-0" i18n="@@featureInvoices-noHistory">No invoice history.</p>
                 </div>
-              } @else if (filteredHistoryList().length === 0) {
+              } @else if (historyList().length === 0) {
                 <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                   <p class="mb-0" i18n="@@featureInvoices-noSearchResults">No invoices match your search.</p>
                 </div>
               } @else {
-                @for (inv of filteredHistoryList(); track inv.id) {
+                @for (inv of historyList(); track inv.id) {
                   <ng-container
                     *ngTemplateOutlet="
                       invoiceListItem;

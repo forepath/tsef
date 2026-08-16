@@ -58,7 +58,7 @@ export const loadServicePlans$ = createEffect(
               return of(loadServicePlansSuccess({ servicePlans }));
             }
 
-            return of(loadServicePlansBatch({ offset: BATCH_SIZE, accumulatedServicePlans: servicePlans }));
+            return of(loadServicePlansBatch({ offset: BATCH_SIZE, accumulatedServicePlans: servicePlans, params }));
           }),
           catchError((error) => of(loadServicePlansFailure({ error: normalizeError(error) }))),
         );
@@ -72,8 +72,8 @@ export const loadServicePlansBatch$ = createEffect(
   (actions$ = inject(Actions), servicePlansService = inject(ServicePlansService)) => {
     return actions$.pipe(
       ofType(loadServicePlansBatch),
-      switchMap(({ offset, accumulatedServicePlans }) => {
-        const batchParams = { limit: BATCH_SIZE, offset };
+      switchMap(({ offset, accumulatedServicePlans, params }) => {
+        const batchParams = { limit: BATCH_SIZE, offset, ...params };
 
         return servicePlansService.listServicePlans(batchParams).pipe(
           switchMap((servicePlans) => {
@@ -91,6 +91,7 @@ export const loadServicePlansBatch$ = createEffect(
               loadServicePlansBatch({
                 offset: offset + BATCH_SIZE,
                 accumulatedServicePlans: newAccumulated,
+                params,
               }),
             );
           }),

@@ -79,16 +79,16 @@ describe('BackordersController', () => {
       backorderService.mapManyToResponses.mockResolvedValue([
         { ...backorderOwnedByUser, periodTotalPrice: 12.5 },
       ] as never);
-      const result = await controller.list(10, 0, reqWithUser as never);
+      const result = await controller.list(10, 0, undefined, reqWithUser as never);
 
-      expect(backorderService.listForUser).toHaveBeenCalledWith(userId, 10, 0);
+      expect(backorderService.listForUser).toHaveBeenCalledWith(userId, 10, 0, undefined);
       expect(backorderService.mapManyToResponses).toHaveBeenCalledWith([backorderOwnedByUser]);
       expect(result).toHaveLength(1);
       expect(result[0].periodTotalPrice).toBe(12.5);
     });
 
     it('throws BadRequestException when user not authenticated', async () => {
-      await expect(controller.list(10, 0, {} as never)).rejects.toThrow(BadRequestException);
+      await expect(controller.list(10, 0, undefined, {} as never)).rejects.toThrow(BadRequestException);
       expect(backorderService.listForUser).not.toHaveBeenCalled();
     });
   });

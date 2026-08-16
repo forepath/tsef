@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   CloudInitConfigsFacade,
@@ -10,7 +10,7 @@ import {
   type CreateCloudInitConfigDto,
   type UpdateCloudInitConfigDto,
 } from '@forepath/decabill/frontend/data-access-billing-console';
-import { combineLatest, map, take } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, skip, take } from 'rxjs';
 
 import { getActiveStatusLabel, getActiveStatusTextClass, getUnavailableLabel } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
@@ -106,17 +106,7 @@ export class CloudInitConfigsPageComponent implements OnInit {
 
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
-  readonly cloudInitConfigs$ = combineLatest([this.facade.getCloudInitConfigs$(), this.searchQuery$]).pipe(
-    map(([configs, searchQuery]) => {
-      const term = searchQuery.trim().toLowerCase();
-
-      if (!term) {
-        return configs;
-      }
-
-      return configs.filter((item) => JSON.stringify(item).toLowerCase().includes(term));
-    }),
-  );
+  readonly cloudInitConfigs$ = this.facade.getCloudInitConfigs$();
   readonly loading$ = this.facade.getCloudInitConfigsLoading$();
   readonly loadingAny$ = this.facade.getCloudInitConfigsLoadingAny$();
   readonly error$ = this.facade.getCloudInitConfigsError$();
@@ -136,6 +126,12 @@ export class CloudInitConfigsPageComponent implements OnInit {
   ngOnInit(): void {
     this.facade.loadCloudInitConfigs();
     this.registerModalCloseWatchers();
+
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadCloudInitConfigs({ search: search.trim() || undefined });
+      });
   }
 
   openCreateModal(): void {

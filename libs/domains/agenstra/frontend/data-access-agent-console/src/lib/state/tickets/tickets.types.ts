@@ -121,4 +121,5 @@ export interface ListTicketsParams {
   clientId?: string;
   status?: TicketStatus;
   parentId?: string | null;
+  search?: string;
 }

@@ -31,7 +31,7 @@ import {
   ClientsService,
   deleteTicketFailure,
   deleteTicketSuccess,
-  filterTicketsForGlobalSearch,
+  buildTicketBreadcrumbTitles,
   KnowledgeFacade,
   loadTickets,
   loadTicketsFailure,
@@ -77,6 +77,7 @@ import {
   Observable,
   of,
   switchMap,
+  skip,
   take,
   tap,
 } from 'rxjs';
@@ -338,9 +339,29 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
   readonly ticketRelationsLoading = toSignal(this.knowledgeFacade.relationsLoading$, { initialValue: false });
 
   globalSearchQuery = signal('');
-  readonly globalSearchHits = computed(() =>
-    filterTicketsForGlobalSearch(this.ticketsList(), this.globalSearchQuery(), this.effectiveClientId()),
-  );
+  readonly globalSearchQuery$ = toObservable(this.globalSearchQuery);
+  readonly globalSearchResults = signal<TicketResponseDto[]>([]);
+  readonly globalSearchLoading = signal(false);
+  readonly globalSearchHits = computed((): TicketGlobalSearchHit[] => {
+    const list = this.globalSearchResults();
+
+    return list
+      .map((ticket) => ({
+        ticket,
+        pathTitles: buildTicketBreadcrumbTitles(list, ticket.id),
+      }))
+      .sort((a, b) => {
+        const ta = a.ticket.title.toLowerCase();
+        const tb = b.ticket.title.toLowerCase();
+
+        if (ta !== tb) {
+          return ta.localeCompare(tb);
+        }
+
+        return a.ticket.id.localeCompare(b.ticket.id);
+      });
+  });
+  readonly workspaceSwitchSearch$ = toObservable(this.workspaceSwitchSearch);
 
   /** Direct subtasks only (same depth rule as swimlanes; deeper work stays on the subtask’s own detail). */
   readonly detailSubtaskRows = computed((): TicketDetailSubtaskRow[] => {
@@ -865,6 +886,35 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.clientsFacade.loadClients();
 
+    this.workspaceSwitchSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.clientsFacade.loadClients({ search: search.trim() || undefined });
+      });
+
+    this.globalSearchQuery$
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((query) => {
+        const trimmed = query.trim();
+        const clientId = this.effectiveClientId();
+
+        if (!trimmed || !clientId) {
+          this.globalSearchResults.set([]);
+          this.globalSearchLoading.set(false);
+
+          return;
+        }
+
+        this.globalSearchLoading.set(true);
+        this.ticketsService
+          .listTickets({ clientId, search: trimmed })
+          .pipe(
+            catchError(() => of([] as TicketResponseDto[])),
+            finalize(() => this.globalSearchLoading.set(false)),
+          )
+          .subscribe((tickets) => this.globalSearchResults.set(tickets));
+      });
+
     this.effectiveClientId$
       .pipe(
         distinctUntilChanged(),
@@ -1211,6 +1261,7 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
 
   openGlobalSearchModal(): void {
     this.globalSearchQuery.set('');
+    this.globalSearchResults.set([]);
     setTimeout(() => {
       const shell = this.globalSearchModal?.nativeElement;
 
@@ -1227,11 +1278,13 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
   onCloseGlobalSearchModal(): void {
     this.hideGlobalSearchModalEl();
     this.globalSearchQuery.set('');
+    this.globalSearchResults.set([]);
   }
 
   onGlobalSearchResultClick(hit: TicketGlobalSearchHit): void {
     this.hideGlobalSearchModalEl();
     this.globalSearchQuery.set('');
+    this.globalSearchResults.set([]);
     this.openTicketDetailFlow(hit.ticket.id);
   }
 
@@ -2431,16 +2484,6 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
 
   onCloseWorkspaceSwitchModal(): void {
     this.hideWorkspaceSwitchModal();
-  }
-
-  filteredClientsForWorkspaceSwitch(clients: ClientResponseDto[]): ClientResponseDto[] {
-    const q = this.workspaceSwitchSearch().trim().toLowerCase();
-
-    if (!q) {
-      return clients;
-    }
-
-    return clients.filter((client) => JSON.stringify(client).toLowerCase().includes(q));
   }
 
   onSelectWorkspaceForTickets(client: ClientResponseDto): void {

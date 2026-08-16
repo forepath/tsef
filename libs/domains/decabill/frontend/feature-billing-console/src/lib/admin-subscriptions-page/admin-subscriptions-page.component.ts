@@ -4,6 +4,7 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
+  AdminBillingFacade,
   AdminSubscriptionsFacade,
   MetersFacade,
   SubscriptionMetersFacade,
@@ -65,6 +66,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   @ViewChild('deleteEntryModal', { static: false }) private deleteEntryModal!: ElementRef<HTMLDivElement>;
 
   readonly facade = inject(AdminSubscriptionsFacade);
+  private readonly adminBillingFacade = inject(AdminBillingFacade);
   private readonly metersFacade = inject(MetersFacade);
   private readonly subscriptionMetersFacade = inject(SubscriptionMetersFacade);
   private readonly destroyRef = inject(DestroyRef);
@@ -73,6 +75,8 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
   readonly subscriptions = toSignal(this.facade.subscriptions$, { initialValue: [] as AdminSubscriptionListItem[] });
+  readonly billingSummary = toSignal(this.adminBillingFacade.summary$, { initialValue: null });
+  readonly billingSummaryLoading$ = this.adminBillingFacade.summaryLoading$;
   readonly meterSummaries = toSignal(this.subscriptionMetersFacade.summaries$, {
     initialValue: [] as SubscriptionMeterSummary[],
   });
@@ -103,10 +107,9 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   entryForm: MeterEntryForm = this.defaultEntryForm();
   selectedAddonMeterKey = '';
 
-  readonly activeCount = () => this.subscriptions().filter((sub) => sub.status === 'active').length;
-
   ngOnInit(): void {
     this.facade.loadSubscriptions();
+    this.adminBillingFacade.loadSummary();
     this.metersFacade.loadMeters();
     this.registerModalCloseWatchers();
 

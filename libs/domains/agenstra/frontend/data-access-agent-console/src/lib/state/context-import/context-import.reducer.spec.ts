@@ -70,7 +70,7 @@ describe('atlassianContextImportReducer', () => {
       connections: [conn({ id: 'seed-c' })],
       configs: [cfg({ id: 'seed-f' })],
     };
-    let s = atlassianContextImportReducer(seeded, loadAtlassianContextImport());
+    let s = atlassianContextImportReducer(seeded, loadAtlassianContextImport({}));
 
     expect(s.loading).toBe(true);
     expect(s.connections).toEqual([]);

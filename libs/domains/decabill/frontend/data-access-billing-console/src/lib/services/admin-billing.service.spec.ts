@@ -30,7 +30,13 @@ describe('AdminBillingService', () => {
     const req = httpMock.expectOne(`${apiUrl}/admin/billing/summary`);
 
     expect(req.request.method).toBe('GET');
-    req.flush({ activeSubscriptionsCount: 1, openOverdueCount: 0, openOverdueTotal: 0, unbilledTotal: 0 });
+    req.flush({
+      subscriptionsCount: 3,
+      activeSubscriptionsCount: 1,
+      openOverdueCount: 0,
+      openOverdueTotal: 0,
+      unbilledTotal: 0,
+    });
   });
 
   it('posts bill-now', (done) => {

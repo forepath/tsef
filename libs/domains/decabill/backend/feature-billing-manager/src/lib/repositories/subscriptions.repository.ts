@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { SubscriptionEntity, SubscriptionStatus } from '../entities/subscription.entity';
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
+import { hydrateEntitiesBySearchIds } from '../search/billing-search-hydrate.util';
+import { applyBillingSearchIlike } from '../search/billing-search-ilike.util';
 import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
@@ -78,13 +80,40 @@ export class SubscriptionsRepository {
     return { subscription: row, profile };
   }
 
-  async findAllByUser(userId: string, limit = 10, offset = 0): Promise<SubscriptionEntity[]> {
-    return await this.repository.find({
-      where: { userId },
-      take: limit,
-      skip: offset,
-      order: { createdAt: 'DESC' },
-    });
+  async findAllByUser(userId: string, limit = 10, offset = 0, search?: string): Promise<SubscriptionEntity[]> {
+    if (search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('subscriptions', search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+        extraFilters: { userId },
+      });
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
+
+      if (hydrated) {
+        return hydrated.items;
+      }
+    }
+
+    const qb = this.repository
+      .createQueryBuilder('subscription')
+      .innerJoin('users', 'user', 'user.id = subscription.user_id')
+      .where('subscription.user_id = :userId', { userId })
+      .orderBy('subscription.createdAt', 'DESC')
+      .take(limit)
+      .skip(offset);
+
+    applyUserTenantFilter(qb, 'user');
+
+    if (search?.trim()) {
+      qb.leftJoin('billing_service_plans', 'plan', 'plan.id = subscription.plan_id');
+      applyBillingSearchIlike(qb, 'subscriptions', 'subscription', search, {
+        planName: 'plan.name',
+        userEmail: 'user.email',
+      });
+    }
+
+    return await qb.getMany();
   }
 
   async findAllForUserInTenant(userId: string): Promise<SubscriptionEntity[]> {
@@ -108,16 +137,10 @@ export class SubscriptionsRepository {
         extraFilters: params.userId ? { userId: params.userId } : undefined,
       });
 
-      if (lookup) {
-        if (lookup.ids.length === 0) {
-          return { items: [], total: lookup.total };
-        }
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
 
-        const found = await this.repository.findBy({ id: In(lookup.ids) });
-        const byId = new Map(found.map((item) => [item.id, item]));
-        const items = lookup.ids.map((id) => byId.get(id)).filter((item): item is SubscriptionEntity => item != null);
-
-        return { items, total: lookup.total };
+      if (hydrated) {
+        return hydrated;
       }
     }
 
@@ -132,18 +155,11 @@ export class SubscriptionsRepository {
     }
 
     if (params.search?.trim()) {
-      const term = `%${params.search.trim().toLowerCase()}%`;
-
-      qb.leftJoin('billing_service_plans', 'plan', 'plan.id = subscription.plan_id').andWhere(
-        `(LOWER(subscription.number) LIKE :term
-          OR LOWER(user.email) LIKE :term
-          OR LOWER(plan.name) LIKE :term
-          OR LOWER(subscription.status::text) LIKE :term
-          OR CAST(subscription.id AS text) LIKE :term
-          OR CAST(subscription.user_id AS text) LIKE :term
-          OR CAST(user.id AS text) LIKE :term)`,
-        { term },
-      );
+      qb.leftJoin('billing_service_plans', 'plan', 'plan.id = subscription.plan_id');
+      applyBillingSearchIlike(qb, 'subscriptions', 'subscription', params.search, {
+        planName: 'plan.name',
+        userEmail: 'user.email',
+      });
     }
 
     const total = await qb.getCount();
@@ -273,6 +289,39 @@ export class SubscriptionsRepository {
       .createQueryBuilder('subscription')
       .innerJoin('users', 'user', 'user.id = subscription.user_id')
       .where('subscription.status = :status', { status });
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getCount();
+  }
+
+  async countAll(): Promise<number> {
+    const qb = this.repository
+      .createQueryBuilder('subscription')
+      .innerJoin('users', 'user', 'user.id = subscription.user_id');
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getCount();
+  }
+
+  async countByUserId(userId: string): Promise<number> {
+    const qb = this.repository
+      .createQueryBuilder('subscription')
+      .innerJoin('users', 'user', 'user.id = subscription.user_id')
+      .where('subscription.user_id = :userId', { userId });
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getCount();
+  }
+
+  async countByUserIdAndStatus(userId: string, status: string): Promise<number> {
+    const qb = this.repository
+      .createQueryBuilder('subscription')
+      .innerJoin('users', 'user', 'user.id = subscription.user_id')
+      .where('subscription.user_id = :userId', { userId })
+      .andWhere('subscription.status = :status', { status });
 
     applyUserTenantFilter(qb, 'user');
 

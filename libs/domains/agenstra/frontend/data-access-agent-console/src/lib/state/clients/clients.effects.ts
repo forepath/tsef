@@ -82,8 +82,12 @@ export const loadClients$ = createEffect(
   (actions$ = inject(Actions), clientsService = inject(ClientsService)) => {
     return actions$.pipe(
       ofType(loadClients),
-      switchMap(() => {
-        const batchParams = { limit: BATCH_SIZE, offset: 0 };
+      switchMap(({ params }) => {
+        const batchParams = {
+          limit: params?.limit ?? BATCH_SIZE,
+          offset: params?.offset ?? 0,
+          search: params?.search?.trim() || undefined,
+        };
 
         return clientsService.listClients(batchParams).pipe(
           map((clients) =>
@@ -106,9 +110,13 @@ export const loadMoreClients$ = createEffect(
     return actions$.pipe(
       ofType(loadMoreClients),
       withLatestFrom(store.select(selectClientsState)),
-      filter(([, state]) => state.hasMore && !state.loading),
+      filter(([, state]) => state.hasMore && !state.loading && !state.appendLoading),
       exhaustMap(([, state]) => {
-        const batchParams = { limit: BATCH_SIZE, offset: state.nextOffset };
+        const batchParams = {
+          limit: BATCH_SIZE,
+          offset: state.nextOffset,
+          search: state.search ?? undefined,
+        };
 
         return clientsService.listClients(batchParams).pipe(
           map((clients) =>

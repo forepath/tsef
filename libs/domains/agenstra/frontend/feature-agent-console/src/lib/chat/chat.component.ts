@@ -71,6 +71,7 @@ import {
   catchError,
   combineLatest,
   combineLatestWith,
+  debounceTime,
   delay,
   distinctUntilChanged,
   filter,
@@ -264,16 +265,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   // Client list observables
   readonly searchClientQuery$ = toObservable(this.searchClientQuery);
-  readonly clients$: Observable<ClientResponseDto[]> = this.clientsFacade.clients$.pipe(
-    combineLatestWith(this.searchClientQuery$),
-    map(([clients, searchQuery]) => {
-      if (!searchQuery) {
-        return clients;
-      }
-
-      return clients.filter((client) => JSON.stringify(client).toLowerCase().includes(searchQuery.toLowerCase()));
-    }),
-  );
+  readonly clients$: Observable<ClientResponseDto[]> = this.clientsFacade.clients$;
   readonly activeClientId$: Observable<string | null> = this.clientsFacade.activeClientId$;
   readonly activeClient$: Observable<ClientResponseDto | null> = this.clientsFacade.activeClient$;
   readonly clientsLoading$: Observable<boolean> = combineLatest([
@@ -296,16 +288,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         return of([]);
       }
 
-      return this.agentsFacade.getClientAgents$(clientId).pipe(
-        combineLatestWith(this.searchAgentQuery$),
-        map(([agents, searchQuery]) => {
-          if (!searchQuery) {
-            return agents;
-          }
-
-          return agents.filter((agent) => JSON.stringify(agent).toLowerCase().includes(searchQuery.toLowerCase()));
-        }),
-      );
+      return this.agentsFacade.getClientAgents$(clientId);
     }),
   );
   readonly agentsLoading$: Observable<boolean> = this.activeClientId$.pipe(
@@ -1230,6 +1213,22 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         this.clientsFacade.loadClients();
       }
     });
+
+    this.searchClientQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.clientsFacade.loadClients({ search: search.trim() || undefined });
+      });
+
+    this.searchAgentQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        const clientId = this.activeClientId;
+
+        if (clientId) {
+          this.agentsFacade.loadClientAgents(clientId, { search: search.trim() || undefined });
+        }
+      });
 
     // Sync local active client from store when component is recreated
     this.activeClientId$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe((clientId) => {

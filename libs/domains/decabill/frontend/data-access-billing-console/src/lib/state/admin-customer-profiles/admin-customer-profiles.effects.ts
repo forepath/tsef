@@ -76,8 +76,8 @@ export const loadAdminCustomerProfiles$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminCustomerProfilesService)) =>
     actions$.pipe(
       ofType(loadAdminCustomerProfiles),
-      switchMap(() =>
-        service.list({ limit: BATCH_SIZE, offset: 0 }).pipe(
+      switchMap(({ search }) =>
+        service.list({ limit: BATCH_SIZE, offset: 0, search }).pipe(
           switchMap((response) => {
             if (response.items.length === 0) {
               return of(loadAdminCustomerProfilesSuccess({ profiles: [] }));
@@ -87,7 +87,9 @@ export const loadAdminCustomerProfiles$ = createEffect(
               return of(loadAdminCustomerProfilesSuccess({ profiles: response.items }));
             }
 
-            return of(loadAdminCustomerProfilesBatch({ offset: BATCH_SIZE, accumulatedProfiles: response.items }));
+            return of(
+              loadAdminCustomerProfilesBatch({ offset: BATCH_SIZE, accumulatedProfiles: response.items, search }),
+            );
           }),
           catchError((error) => of(loadAdminCustomerProfilesFailure({ error: normalizeError(error) }))),
         ),
@@ -100,8 +102,8 @@ export const loadAdminCustomerProfilesBatch$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminCustomerProfilesService)) =>
     actions$.pipe(
       ofType(loadAdminCustomerProfilesBatch),
-      switchMap(({ offset, accumulatedProfiles }) =>
-        service.list({ limit: BATCH_SIZE, offset }).pipe(
+      switchMap(({ offset, accumulatedProfiles, search }) =>
+        service.list({ limit: BATCH_SIZE, offset, search }).pipe(
           switchMap((response) => {
             const newAccumulated = [...accumulatedProfiles, ...response.items];
 
@@ -113,6 +115,7 @@ export const loadAdminCustomerProfilesBatch$ = createEffect(
               loadAdminCustomerProfilesBatch({
                 offset: offset + BATCH_SIZE,
                 accumulatedProfiles: newAccumulated,
+                search,
               }),
             );
           }),

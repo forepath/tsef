@@ -6,6 +6,7 @@ import type {
   ProjectListItem,
   ProjectResponse,
   ProjectSummaryResponse,
+  ProjectsCatalogSummaryResponse,
 } from '../../types/projects.types';
 
 import {
@@ -35,6 +36,9 @@ import {
   loadProjectDetailFailure,
   loadProjectDetailSuccess,
   loadProjects,
+  loadProjectsCatalogSummary,
+  loadProjectsCatalogSummaryFailure,
+  loadProjectsCatalogSummarySuccess,
   loadProjectsFailure,
   loadProjectsSuccess,
   loadProjectSummary,
@@ -51,6 +55,8 @@ export interface ProjectsState {
   adminProjects: AdminProjectListItem[];
   selectedProject: ProjectResponse | AdminProjectDetailResponse | null;
   summary: ProjectSummaryResponse | null;
+  catalogSummary: ProjectsCatalogSummaryResponse | null;
+  catalogSummaryLoading: boolean;
   loading: boolean;
   loadingDetail: boolean;
   loadingSummary: boolean;
@@ -69,6 +75,7 @@ export interface ProjectsState {
   adminAppendError: string | null;
   adminSearch: string | null;
   adminUserId: string | null;
+  customerSearch: string | null;
 }
 
 export const initialProjectsState: ProjectsState = {
@@ -76,6 +83,8 @@ export const initialProjectsState: ProjectsState = {
   adminProjects: [],
   selectedProject: null,
   summary: null,
+  catalogSummary: null,
+  catalogSummaryLoading: false,
   loading: false,
   loadingDetail: false,
   loadingSummary: false,
@@ -94,6 +103,7 @@ export const initialProjectsState: ProjectsState = {
   adminAppendError: null,
   adminSearch: null,
   adminUserId: null,
+  customerSearch: null,
 };
 
 function mapToAdminListItem(project: ProjectResponse): AdminProjectListItem {
@@ -106,7 +116,21 @@ function mapToAdminListItem(project: ProjectResponse): AdminProjectListItem {
 
 export const projectsReducer = createReducer(
   initialProjectsState,
-  on(loadProjects, (state) => ({
+  on(loadProjectsCatalogSummary, (state) => ({
+    ...state,
+    catalogSummaryLoading: true,
+  })),
+  on(loadProjectsCatalogSummarySuccess, (state, { summary }) => ({
+    ...state,
+    catalogSummary: summary,
+    catalogSummaryLoading: false,
+  })),
+  on(loadProjectsCatalogSummaryFailure, (state, { error }) => ({
+    ...state,
+    catalogSummaryLoading: false,
+    error,
+  })),
+  on(loadProjects, (state, { search }) => ({
     ...state,
     projects: [],
     loading: true,
@@ -115,6 +139,7 @@ export const projectsReducer = createReducer(
     appendLoading: false,
     hasMore: false,
     nextOffset: 0,
+    customerSearch: search?.trim() ? search.trim() : null,
   })),
   on(loadAdminProjects, (state, { search, userId }) => ({
     ...state,

@@ -1,16 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import {
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef,
-  ElementRef,
-  inject,
-  OnInit,
-  signal,
-  ViewChild,
-} from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectorRef, Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationFacade } from '@forepath/identity/frontend';
@@ -22,10 +12,22 @@ import {
   type InvoiceResponse,
   type InvoicesSummaryResponse,
 } from '@forepath/decabill/frontend/data-access-billing-console';
-import { BehaviorSubject, combineLatest, filter, interval, map, Observable, of, switchMap, take } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  interval,
+  map,
+  Observable,
+  of,
+  skip,
+  switchMap,
+  take,
+} from 'rxjs';
 
 import { getInvoiceStatusBadgeClass, getInvoiceStatusLabel } from '../billing-status-labels';
-import { filterItemsBySearch } from '../billing-list-search';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
 import { NextBillingDayPipe } from '../pipes/next-billing-day.pipe';
 
@@ -58,6 +60,8 @@ export class InvoicesComponent implements OnInit {
   readonly mobilePanel = signal<CustomerBillingMobilePanel>('openOverdue');
   readonly openOverdueSearch = signal('');
   readonly historyInvoicesSearch = signal('');
+  readonly openOverdueSearch$ = toObservable(this.openOverdueSearch);
+  readonly historyInvoicesSearch$ = toObservable(this.historyInvoicesSearch);
   paymentReturnFeedback: PaymentReturnFeedback | null = null;
 
   readonly isAdmin$ = this.authFacade.canAccessBillingAdministration$;
@@ -81,18 +85,6 @@ export class InvoicesComponent implements OnInit {
   readonly historyList = toSignal(this.invoicesFacade.getHistoryList$(), {
     initialValue: [] as InvoiceResponse[],
   });
-
-  readonly filteredOpenOverdueList = computed(() =>
-    filterItemsBySearch(this.openOverdueList(), this.openOverdueSearch(), (invoice) =>
-      this.invoiceSearchHaystack(invoice),
-    ),
-  );
-
-  readonly filteredHistoryList = computed(() =>
-    filterItemsBySearch(this.historyList(), this.historyInvoicesSearch(), (invoice) =>
-      this.invoiceSearchHaystack(invoice),
-    ),
-  );
 
   readonly invoicesCreating$ = this.invoicesFacade.getInvoicesCreating$();
   readonly invoicesError$ = this.invoicesFacade.getInvoicesError$();
@@ -128,6 +120,19 @@ export class InvoicesComponent implements OnInit {
     this.invoicesFacade.loadOpenOverdueInvoices();
     this.invoicesFacade.loadHistoryInvoices();
     this.handlePaymentReturnQueryParams();
+
+    this.openOverdueSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.invoicesFacade.loadOpenOverdueInvoices({ search: search.trim() || undefined });
+      });
+
+    this.historyInvoicesSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.invoicesFacade.loadHistoryInvoices({ search: search.trim() || undefined });
+      });
+
     watchBillingMutationModalClose({
       loading$: this.invoicesCreating$,
       error$: this.invoicesError$,
@@ -374,21 +379,6 @@ export class InvoicesComponent implements OnInit {
     }
 
     return Number(amount);
-  }
-
-  invoiceSearchHaystack(invoice: InvoiceResponse): string {
-    return [
-      invoice.invoiceNumber,
-      invoice.subscriptionNumber,
-      invoice.status,
-      getInvoiceStatusLabel(invoice.status),
-      invoice.balance,
-      invoice.totalGross,
-      invoice.createdAt,
-      invoice.dueDate,
-    ]
-      .filter((value) => value !== null && value !== undefined && value !== '')
-      .join(' ');
   }
 
   formatDate(value?: string | null): string {

@@ -37,8 +37,8 @@ export class CustomerProfilesAdminService {
     private readonly billingSearchIndexService: BillingSearchIndexService,
   ) {}
 
-  async list(limit: number, offset: number): Promise<PaginatedAdminCustomerProfilesResponseDto> {
-    const { items, total } = await this.customerProfilesRepository.findAll(limit, offset);
+  async list(limit: number, offset: number, search?: string): Promise<PaginatedAdminCustomerProfilesResponseDto> {
+    const { items, total } = await this.customerProfilesRepository.findAll(limit, offset, search);
     const profiles = await Promise.all(
       items.map((profile) => this.customerTrustScoreService.ensureFreshSnapshot(profile)),
     );

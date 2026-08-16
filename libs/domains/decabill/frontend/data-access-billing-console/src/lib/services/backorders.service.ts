@@ -34,6 +34,10 @@ export class BackordersService {
       httpParams = httpParams.set('offset', params.offset.toString());
     }
 
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
     return this.http.get<BackorderResponse[]>(`${this.apiUrl}/backorders`, {
       params: httpParams,
     });

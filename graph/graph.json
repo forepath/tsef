@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-16T10:48:00.359Z",
+  "generatedAt": "2026-08-16T12:35:30.760Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -6495,6 +6495,15 @@
       "type": "dto",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/subscription-response.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/subscriptions-summary-response.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/subscriptions-summary-response.dto.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -15748,6 +15757,17 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/subscriptions/summary",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/subscriptions/summary",
+        "operationId": "getSubscriptionsSummary",
+        "summary": "Subscription and backorder catalog counts for the current user",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "api:HTTP:GET:/subscriptions/{subscriptionId}",
       "type": "endpoint",
       "attrs": {
@@ -17097,6 +17117,17 @@
         "pathOrChannel": "/projects",
         "operationId": "listCustomerProjects",
         "summary": "List projects assigned to the authenticated customer",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/projects/summary",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/projects/summary",
+        "operationId": "getProjectsCatalogSummary",
+        "summary": "Project catalog counts for the authenticated customer",
         "specKind": "openapi"
       }
     },
@@ -29462,6 +29493,11 @@
     },
     {
       "from": "project:agenstra-frontend-feature-agent-console",
+      "to": "project:shared-frontend-ui-lists",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-feature-agent-console",
       "to": "project:shared-frontend-util-configuration",
       "type": "depends_on"
     },
@@ -34172,6 +34208,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/subscriptions-summary-response.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/tax-preview.dto.ts",
       "type": "contains"
     },
@@ -38477,6 +38518,11 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/subscriptions/summary",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
       "type": "contains"
     },
@@ -39088,6 +39134,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
       "to": "api:HTTP:GET:/projects",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/projects/summary",
       "type": "contains"
     },
     {
@@ -50337,6 +50388,16 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
+      "to": "api:HTTP:GET:/subscriptions/summary",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/subscriptions/summary",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
       "to": "api:HTTP:GET:/subscriptions/{subscriptionId}",
       "type": "implements"
     },
@@ -50608,6 +50669,16 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "api:HTTP:GET:/projects",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/controllers/projects.controller.ts",
+      "to": "api:HTTP:GET:/projects/summary",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/projects/summary",
       "type": "implements"
     },
     {
@@ -53161,6 +53232,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/atlassian-site-connection.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/auto-context-resolver.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/tickets.service.ts",
       "type": "injects"
@@ -53231,6 +53307,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-deployments-proxy.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-environment-variables-proxy.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/clients.service.ts",
       "type": "injects"
@@ -53273,6 +53354,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-proxy.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/statistics.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-proxy.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
       "type": "injects"
     },
     {
@@ -53343,6 +53429,16 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/embeddings/knowledge-embedding-index.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/embeddings/local-embedding.provider.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/external-import-config.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/clients.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/external-import-config.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/search/agenstra-search-index.service.ts",
       "type": "injects"
     },
     {
@@ -59232,6 +59328,11 @@
     },
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/projects.service.ts",
+      "to": "api:HTTP:GET:/projects/summary",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/projects.service.ts",
       "to": "api:HTTP:GET:/projects/{projectId}/summary",
       "type": "calls"
     },
@@ -59428,6 +59529,11 @@
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscriptions.service.ts",
       "to": "api:HTTP:GET:/subscriptions",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/subscriptions.service.ts",
+      "to": "api:HTTP:GET:/subscriptions/summary",
       "type": "calls"
     },
     {
@@ -65408,6 +65514,36 @@
     {
       "from": "concept:decabill-public-api",
       "to": "api:HTTP:POST:/public/withdrawal/confirm",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-console-list-ux",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-console-list-ux",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-console-list-ux",
+      "to": "api:HTTP:GET:/subscriptions/summary",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-console-list-ux",
+      "to": "api:HTTP:GET:/admin/billing/summary",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-console-list-ux",
+      "to": "api:HTTP:GET:/projects",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-console-list-ux",
+      "to": "api:HTTP:GET:/projects/summary",
       "type": "documents"
     },
     {

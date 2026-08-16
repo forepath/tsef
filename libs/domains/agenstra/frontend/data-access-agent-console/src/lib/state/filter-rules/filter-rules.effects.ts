@@ -47,8 +47,12 @@ export const loadFilterRules$ = createEffect(
   (actions$ = inject(Actions), svc = inject(FilterRulesService)) => {
     return actions$.pipe(
       ofType(loadFilterRules),
-      switchMap(() => {
-        const batchParams = { limit: FILTER_RULES_BATCH_SIZE, offset: 0 };
+      switchMap(({ params }) => {
+        const batchParams = {
+          limit: FILTER_RULES_BATCH_SIZE,
+          offset: 0,
+          search: params?.search?.trim() || undefined,
+        };
 
         return svc.list(batchParams).pipe(
           map((rules) =>
@@ -71,9 +75,13 @@ export const loadMoreFilterRules$ = createEffect(
     return actions$.pipe(
       ofType(loadMoreFilterRules),
       withLatestFrom(store.select(selectFilterRulesState)),
-      filter(([, state]) => state.hasMore && !state.loading),
+      filter(([, state]) => state.hasMore && !state.loading && !state.appendLoading),
       exhaustMap(([, state]) => {
-        const batchParams = { limit: FILTER_RULES_BATCH_SIZE, offset: state.nextOffset };
+        const batchParams = {
+          limit: FILTER_RULES_BATCH_SIZE,
+          offset: state.nextOffset,
+          search: state.search ?? undefined,
+        };
 
         return svc.list(batchParams).pipe(
           map((rules) =>

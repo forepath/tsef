@@ -31,6 +31,9 @@ import {
   loadProjectDetailFailure,
   loadProjectDetailSuccess,
   loadProjects,
+  loadProjectsCatalogSummary,
+  loadProjectsCatalogSummaryFailure,
+  loadProjectsCatalogSummarySuccess,
   loadProjectsFailure,
   loadProjectsSuccess,
   loadProjectSummary,
@@ -57,8 +60,8 @@ export const loadProjects$ = createEffect(
   (actions$ = inject(Actions), service = inject(ProjectsService)) =>
     actions$.pipe(
       ofType(loadProjects),
-      switchMap(() =>
-        service.list({ limit: BATCH_SIZE, offset: 0 }).pipe(
+      switchMap(({ search }) =>
+        service.list({ limit: BATCH_SIZE, offset: 0, search }).pipe(
           map((response) => {
             const nextOffset = response.items.length;
 
@@ -75,12 +78,26 @@ export const loadProjects$ = createEffect(
   { functional: true },
 );
 
+export const loadProjectsCatalogSummary$ = createEffect(
+  (actions$ = inject(Actions), service = inject(ProjectsService)) =>
+    actions$.pipe(
+      ofType(loadProjectsCatalogSummary),
+      switchMap(() =>
+        service.getCatalogSummary().pipe(
+          map((summary) => loadProjectsCatalogSummarySuccess({ summary })),
+          catchError((error) => of(loadProjectsCatalogSummaryFailure({ error: normalizeError(error) }))),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
 export const loadMoreProjects$ = createEffect(
   (actions$ = inject(Actions), service = inject(ProjectsService)) =>
     actions$.pipe(
       ofType(loadMoreProjects),
-      switchMap(({ offset }) =>
-        service.list({ limit: BATCH_SIZE, offset }).pipe(
+      switchMap(({ offset, search }) =>
+        service.list({ limit: BATCH_SIZE, offset, search }).pipe(
           map((response) => {
             const nextOffset = offset + response.items.length;
 

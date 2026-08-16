@@ -35,7 +35,7 @@ describe('AdminCustomerProfilesController', () => {
     const result = await controller.list(25, 5);
 
     expect(result.total).toBe(0);
-    expect(customerProfilesAdminService.list).toHaveBeenCalledWith(25, 5);
+    expect(customerProfilesAdminService.list).toHaveBeenCalledWith(25, 5, undefined);
   });
 
   it('get delegates to admin service', async () => {

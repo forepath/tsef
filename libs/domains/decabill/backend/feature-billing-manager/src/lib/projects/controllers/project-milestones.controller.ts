@@ -1,5 +1,17 @@
 import { RequireScopes } from '@forepath/identity/backend';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 
 import type { RequestWithUser } from '../../utils/billing-access.utils';
 import { getAuthenticatedUserFromRequest, getUserFromRequest } from '../../utils/billing-access.utils';
@@ -19,8 +31,9 @@ export class ProjectMilestonesController {
   async list(
     @Param('projectId', new ParseUUIDPipe({ version: '4' })) projectId: string,
     @Req() req: RequestWithUser,
+    @Query('search') search?: string,
   ): Promise<ProjectMilestoneResponseDto[]> {
-    return await this.milestonesService.list(projectId, getAuthenticatedUserFromRequest(req));
+    return await this.milestonesService.list(projectId, getAuthenticatedUserFromRequest(req), search);
   }
 
   @RequireScopes('milestones:write')

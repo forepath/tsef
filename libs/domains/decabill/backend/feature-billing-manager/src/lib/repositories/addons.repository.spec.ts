@@ -2,19 +2,31 @@ import { NotFoundException } from '@nestjs/common';
 
 import { AddonsRepository } from './addons.repository';
 
+const createMockQueryBuilder = () => ({
+  where: jest.fn().mockReturnThis(),
+  andWhere: jest.fn().mockReturnThis(),
+  orderBy: jest.fn().mockReturnThis(),
+  take: jest.fn().mockReturnThis(),
+  skip: jest.fn().mockReturnThis(),
+  getMany: jest.fn(),
+});
+
 describe('AddonsRepository', () => {
+  const mockQueryBuilder = createMockQueryBuilder();
   const typeorm = {
     findOne: jest.fn(),
     find: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     remove: jest.fn(),
+    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
   const repository = new AddonsRepository(typeorm as never);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    typeorm.createQueryBuilder.mockReturnValue(mockQueryBuilder);
   });
 
   it('findByIdOrThrow returns entity or throws', async () => {
@@ -48,12 +60,12 @@ describe('AddonsRepository', () => {
   });
 
   it('findAll and findActive apply pagination', async () => {
-    typeorm.find.mockResolvedValue([]);
+    mockQueryBuilder.getMany.mockResolvedValue([]);
     await repository.findAll(5, 10);
-    expect(typeorm.find).toHaveBeenCalledWith(
-      expect.objectContaining({ take: 5, skip: 10, order: { createdAt: 'DESC' } }),
-    );
+    expect(mockQueryBuilder.take).toHaveBeenCalledWith(5);
+    expect(mockQueryBuilder.skip).toHaveBeenCalledWith(10);
 
+    typeorm.find.mockResolvedValue([]);
     await repository.findActive(20, 0);
     expect(typeorm.find).toHaveBeenCalledWith(
       expect.objectContaining({

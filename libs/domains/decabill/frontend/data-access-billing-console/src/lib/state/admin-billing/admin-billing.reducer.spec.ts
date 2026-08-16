@@ -50,6 +50,7 @@ describe('adminBillingReducer', () => {
 
   it('stores summary on success', () => {
     const summary = {
+      subscriptionsCount: 5,
       activeSubscriptionsCount: 2,
       openOverdueCount: 1,
       openOverdueTotal: 10,

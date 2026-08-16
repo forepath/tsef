@@ -330,15 +330,7 @@
             </div>
           </form>
 
-          <div
-            class="admin-billing__invoices-list list-group list-group-flush flex-grow-1"
-            sharedInfiniteScroll
-            [paused]="!!(invoicesAppendError$ | async)"
-            [disabled]="
-              (invoicesHasMore$ | async) === false || !!(invoicesAppendLoading$ | async) || !!(invoicesLoading$ | async)
-            "
-            (reachedEnd)="invoiceManagerFacade.loadMore()"
-          >
+          <div #invoicesScrollRoot class="admin-billing__invoices-list list-group list-group-flush flex-grow-1">
             @if (invoicesLoading$ | async) {
               <div class="d-flex justify-content-center align-items-center p-4">
                 <div class="spinner-border text-primary" role="status">
@@ -497,15 +489,28 @@
                     </div>
                   </div>
                 }
-                @if ((invoicesHasMore$ | async) || (invoicesAppendError$ | async)) {
-                  <shared-list-append-footer
-                    [loading]="!!(invoicesAppendLoading$ | async)"
-                    [error]="!!(invoicesAppendError$ | async)"
-                    (retry)="invoiceManagerFacade.loadMore()"
-                  />
-                }
               }
             }
+            @if ((invoicesAppendLoading$ | async) || (invoicesAppendError$ | async)) {
+              <shared-list-append-footer
+                [loading]="!!(invoicesAppendLoading$ | async)"
+                [error]="!!(invoicesAppendError$ | async)"
+                (retry)="invoiceManagerFacade.loadMore()"
+              />
+            }
+            <div
+              sharedInfiniteScroll
+              [root]="invoicesScrollRoot"
+              [paused]="!!(invoicesAppendError$ | async)"
+              [disabled]="
+                (invoicesHasMore$ | async) === false ||
+                !!(invoicesAppendLoading$ | async) ||
+                !!(invoicesLoading$ | async)
+              "
+              (reachedEnd)="invoiceManagerFacade.loadMore()"
+              aria-hidden="true"
+              style="height: 1px; width: 100%; flex-shrink: 0"
+            ></div>
           </div>
         </div>
       </div>

@@ -10,7 +10,7 @@ import type {
   UpdateKnowledgeNodeDto,
 } from './knowledge.types';
 
-export const loadKnowledgeTree = createAction('[Knowledge] Load Tree', props<{ clientId: string }>());
+export const loadKnowledgeTree = createAction('[Knowledge] Load Tree', props<{ clientId: string; search?: string }>());
 export const loadKnowledgeTreeSuccess = createAction(
   '[Knowledge] Load Tree Success',
   props<{ clientId: string; tree: KnowledgeNodeDto[] }>(),

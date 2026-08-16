@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {
@@ -17,7 +17,7 @@ import {
 } from '@forepath/agenstra/frontend/data-access-agent-console';
 import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import { Actions, ofType } from '@ngrx/effects';
-import { combineLatest, filter } from 'rxjs';
+import { combineLatest, debounceTime, distinctUntilChanged, filter, skip } from 'rxjs';
 
 import {
   filterRuleDirectionLabel,
@@ -63,7 +63,8 @@ export class RuleManagerComponent implements OnInit {
 
   readonly clients = toSignal(this.clientsFacade.clients$, { initialValue: [] as ClientResponseDto[] });
 
-  searchQuery = '';
+  readonly searchQuery = signal('');
+  readonly searchQuery$ = toObservable(this.searchQuery);
 
   ruleToDelete: FilterRuleResponseDto | null = null;
   ruleToTest: FilterRuleResponseDto | null = null;
@@ -90,6 +91,11 @@ export class RuleManagerComponent implements OnInit {
   ngOnInit(): void {
     this.filterRulesFacade.load();
     this.clientsFacade.loadClients();
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.filterRulesFacade.load({ search: search.trim() || undefined });
+      });
     // Workspace pickers need the full client list; drain pages without a search API.
     combineLatest([
       this.clientsFacade.hasMore$,
@@ -119,17 +125,6 @@ export class RuleManagerComponent implements OnInit {
 
   onLoadMoreRules(): void {
     this.filterRulesFacade.loadMore();
-  }
-
-  filteredRules(): FilterRuleResponseDto[] {
-    const q = this.searchQuery.trim().toLowerCase();
-    const list = this.rules();
-
-    if (!q) {
-      return list;
-    }
-
-    return list.filter((r) => JSON.stringify(r).toLowerCase().includes(q));
   }
 
   clientName(id: string): string {

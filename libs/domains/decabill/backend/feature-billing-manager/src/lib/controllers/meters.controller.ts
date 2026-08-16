@@ -33,8 +33,9 @@ export class MetersController {
   async list(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<MeterResponseDto[]> {
-    const rows = await this.metersRepository.findAll(limit ?? 10, offset ?? 0);
+    const rows = await this.metersRepository.findAll(limit ?? 10, offset ?? 0, search);
 
     return rows.map((row) => this.meterService.mapMeterToResponse(row));
   }

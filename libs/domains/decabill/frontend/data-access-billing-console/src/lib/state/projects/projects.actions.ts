@@ -9,6 +9,7 @@ import type {
   ProjectListItem,
   ProjectResponse,
   ProjectSummaryResponse,
+  ProjectsCatalogSummaryResponse,
   UpdateAdminProjectDto,
 } from '../../types/projects.types';
 
@@ -21,7 +22,19 @@ export const loadProjectsFailure = createAction(
   '[Projects] Load Customer Projects Failure',
   props<{ error: string }>(),
 );
-export const loadMoreProjects = createAction('[Projects] Load More Customer Projects', props<{ offset: number }>());
+export const loadProjectsCatalogSummary = createAction('[Projects] Load Catalog Summary');
+export const loadProjectsCatalogSummarySuccess = createAction(
+  '[Projects] Load Catalog Summary Success',
+  props<{ summary: ProjectsCatalogSummaryResponse }>(),
+);
+export const loadProjectsCatalogSummaryFailure = createAction(
+  '[Projects] Load Catalog Summary Failure',
+  props<{ error: string }>(),
+);
+export const loadMoreProjects = createAction(
+  '[Projects] Load More Customer Projects',
+  props<{ offset: number; search?: string }>(),
+);
 export const loadMoreProjectsSuccess = createAction(
   '[Projects] Load More Customer Projects Success',
   props<{ projects: ProjectListItem[]; hasMore: boolean; nextOffset: number }>(),

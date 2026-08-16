@@ -20,7 +20,12 @@ import {
   selectFilterRulesLoading,
   selectFilterRulesSaving,
 } from './filter-rules.selectors';
-import type { CreateFilterRuleDto, FilterRuleResponseDto, UpdateFilterRuleDto } from './filter-rules.types';
+import type {
+  ListFilterRulesParams,
+  CreateFilterRuleDto,
+  FilterRuleResponseDto,
+  UpdateFilterRuleDto,
+} from './filter-rules.types';
 
 @Injectable({
   providedIn: 'root',
@@ -37,8 +42,8 @@ export class FilterRulesFacade {
   readonly appendLoading$: Observable<boolean> = this.store.select(selectFilterRulesAppendLoading);
   readonly appendError$: Observable<string | null> = this.store.select(selectFilterRulesAppendError);
 
-  load(): void {
-    this.store.dispatch(loadFilterRules());
+  load(params?: ListFilterRulesParams): void {
+    this.store.dispatch(loadFilterRules({ params }));
   }
 
   loadMore(): void {

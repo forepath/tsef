@@ -114,7 +114,7 @@ export const loadWorkflowsFailure = createAction('[Deployments] Load Workflows F
 // Run Actions
 export const loadRuns = createAction(
   '[Deployments] Load Runs',
-  props<{ clientId: string; agentId: string; limit?: number; offset?: number }>(),
+  props<{ clientId: string; agentId: string; limit?: number; offset?: number; search?: string }>(),
 );
 
 export const loadRunsSuccess = createAction('[Deployments] Load Runs Success', props<{ runs: DeploymentRun[] }>());

@@ -3,6 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap } from 'rxjs';
 
 import { SubscriptionsService } from '../../services/subscriptions.service';
+import { cancelBackorderSuccess, retryBackorderSuccess } from '../backorders/backorders.actions';
 
 import {
   cancelSubscription,
@@ -17,6 +18,9 @@ import {
   loadSubscriptionsFailure,
   loadSubscriptionsSuccess,
   loadSubscriptionSuccess,
+  loadSubscriptionsSummary,
+  loadSubscriptionsSummaryFailure,
+  loadSubscriptionsSummarySuccess,
   loadMoreSubscriptions,
   loadMoreSubscriptionsFailure,
   loadMoreSubscriptionsSuccess,
@@ -45,6 +49,21 @@ function normalizeError(error: unknown): string {
 }
 
 const BATCH_SIZE = 10;
+
+export const loadSubscriptionsSummary$ = createEffect(
+  (actions$ = inject(Actions), subscriptionsService = inject(SubscriptionsService)) => {
+    return actions$.pipe(
+      ofType(loadSubscriptionsSummary),
+      switchMap(() =>
+        subscriptionsService.getSubscriptionsSummary().pipe(
+          map((summary) => loadSubscriptionsSummarySuccess({ summary })),
+          catchError((error) => of(loadSubscriptionsSummaryFailure({ error: normalizeError(error) }))),
+        ),
+      ),
+    );
+  },
+  { functional: true },
+);
 
 export const loadSubscriptions$ = createEffect(
   (actions$ = inject(Actions), subscriptionsService = inject(SubscriptionsService)) => {
@@ -117,6 +136,23 @@ export const createSubscription$ = createEffect(
           catchError((error) => of(createSubscriptionFailure({ error: normalizeError(error) }))),
         ),
       ),
+    );
+  },
+  { functional: true },
+);
+
+export const reloadSubscriptionsSummaryAfterMutation$ = createEffect(
+  (actions$ = inject(Actions)) => {
+    return actions$.pipe(
+      ofType(
+        createSubscriptionSuccess,
+        cancelSubscriptionSuccess,
+        withdrawSubscriptionSuccess,
+        resumeSubscriptionSuccess,
+        retryBackorderSuccess,
+        cancelBackorderSuccess,
+      ),
+      map(() => loadSubscriptionsSummary()),
     );
   },
   { functional: true },

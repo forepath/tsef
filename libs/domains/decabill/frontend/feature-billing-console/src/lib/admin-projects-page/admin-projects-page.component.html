@@ -28,13 +28,7 @@
     />
   </div>
 
-  <div
-    class="flex-grow-1 overflow-auto"
-    sharedInfiniteScroll
-    [paused]="!!(appendError$ | async)"
-    [disabled]="(hasMore$ | async) === false || !!(appendLoading$ | async) || !!(loading$ | async)"
-    (reachedEnd)="facade.loadMoreAdminProjects()"
-  >
+  <div #scrollRoot class="flex-grow-1 overflow-auto">
     @if (loading$ | async) {
       <div class="d-flex justify-content-center p-4"><div class="spinner-border text-primary" role="status"></div></div>
     } @else {
@@ -98,15 +92,24 @@
             </div>
           }
         </div>
-        @if ((hasMore$ | async) || (appendError$ | async)) {
-          <shared-list-append-footer
-            [loading]="!!(appendLoading$ | async)"
-            [error]="!!(appendError$ | async)"
-            (retry)="facade.loadMoreAdminProjects()"
-          />
-        }
       }
     }
+    @if ((appendLoading$ | async) || (appendError$ | async)) {
+      <shared-list-append-footer
+        [loading]="!!(appendLoading$ | async)"
+        [error]="!!(appendError$ | async)"
+        (retry)="facade.loadMoreAdminProjects()"
+      />
+    }
+    <div
+      sharedInfiniteScroll
+      [root]="scrollRoot"
+      [paused]="!!(appendError$ | async)"
+      [disabled]="(hasMore$ | async) === false || !!(appendLoading$ | async) || !!(loading$ | async)"
+      (reachedEnd)="facade.loadMoreAdminProjects()"
+      aria-hidden="true"
+      style="height: 1px; width: 100%; flex-shrink: 0"
+    ></div>
   </div>
 </div>
 

@@ -71,12 +71,12 @@ export class PromotionsFacade {
     return this.store.select(selectCanRedeemPromotion(request));
   }
 
-  loadActivePromotions(): void {
-    this.store.dispatch(loadActivePromotions());
+  loadActivePromotions(params?: { search?: string }): void {
+    this.store.dispatch(loadActivePromotions({ search: params?.search }));
   }
 
-  loadRedemptions(): void {
-    this.store.dispatch(loadPromotionRedemptions());
+  loadRedemptions(params?: { search?: string }): void {
+    this.store.dispatch(loadPromotionRedemptions({ search: params?.search }));
   }
 
   validatePromotion(request: ValidatePromotionRequest): void {

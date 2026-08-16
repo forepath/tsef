@@ -353,6 +353,7 @@
                   @if (isAdmin && !d.locked) {
                     <framework-project-milestone-select
                       inputId="detailTicketMilestone"
+                      [projectId]="projectId"
                       [milestones]="milestones()"
                       [selectedMilestoneId]="d.milestoneId ?? null"
                       (selectedMilestoneIdChange)="onDetailMilestoneChange(d.id, $event)"
@@ -786,6 +787,7 @@
             >
             <framework-project-milestone-select
               inputId="createTicketMilestone"
+              [projectId]="projectId"
               [milestones]="milestones()"
               [selectedMilestoneId]="createForm.milestoneId ?? null"
               (selectedMilestoneIdChange)="onCreateMilestoneChange($event)"

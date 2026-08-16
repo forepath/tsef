@@ -29,5 +29,36 @@ describe('opensearch-query.util', () => {
         },
       },
     });
+
+    const must = (body as { query: { bool: { must: unknown[] } } }).query.bool.must;
+    expect(must).toHaveLength(1);
+    expect(must[0]).toMatchObject({
+      bool: {
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('buildScopedSearchBody_IncludesWildcardShouldClauses', () => {
+    const body = buildScopedSearchBody({
+      query: '42',
+      fields: ['number', 'id'],
+      from: 0,
+      size: 10,
+    });
+    const should = (
+      body as {
+        query: { bool: { must: Array<{ bool: { should: unknown[] } }> } };
+      }
+    ).query.bool.must[0].bool.should;
+
+    expect(should.some((clause) => 'simple_query_string' in (clause as object))).toBe(true);
+    expect(
+      should.some(
+        (clause) =>
+          'wildcard' in (clause as object) &&
+          'number.keyword' in (clause as { wildcard: Record<string, unknown> }).wildcard,
+      ),
+    ).toBe(true);
   });
 });

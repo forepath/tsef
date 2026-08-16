@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   AdminCustomerProfilesFacade,
@@ -12,7 +12,7 @@ import {
   type VatIdValidationStatus,
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import { AuthenticationFacade, type UserResponseDto } from '@forepath/identity/frontend';
-import { combineLatestWith, map } from 'rxjs';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { BILLING_COUNTRY_OPTIONS, DEFAULT_BILLING_COUNTRY_CODE } from '../billing-country-options';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
@@ -53,16 +53,7 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
   readonly countryOptions = BILLING_COUNTRY_OPTIONS;
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
-  readonly profiles$ = this.facade.profiles$.pipe(
-    combineLatestWith(this.searchQuery$),
-    map(([profiles, searchQuery]) => {
-      if (!searchQuery.trim()) return profiles;
-
-      const term = searchQuery.trim().toLowerCase();
-
-      return profiles.filter((profile) => JSON.stringify(profile).toLowerCase().includes(term));
-    }),
-  );
+  readonly profiles$ = this.facade.profiles$;
 
   readonly loading$ = this.facade.loading$;
   readonly creating$ = this.facade.creating$;
@@ -74,7 +65,7 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
   readonly trustScoreLoading$ = this.facade.trustScoreLoading$;
   readonly trustScoreRefreshing$ = this.facade.trustScoreRefreshing$;
 
-  readonly profiles = toSignal(this.profiles$, { initialValue: [] as AdminCustomerProfileListItem[] });
+  readonly profiles = toSignal(this.facade.profiles$, { initialValue: [] as AdminCustomerProfileListItem[] });
   readonly users = toSignal(this.authFacade.users$, { initialValue: [] as UserResponseDto[] });
   readonly trustScoreDetail = toSignal(this.trustScoreDetail$, {
     initialValue: null as CustomerTrustScoreDetail | null,
@@ -109,6 +100,12 @@ export class AdminCustomerProfilesPageComponent implements OnInit {
     this.facade.loadProfiles();
     this.authFacade.loadUsers();
     this.registerModalCloseWatchers();
+
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadProfiles({ search: search.trim() || undefined });
+      });
   }
 
   openCreateModal(): void {

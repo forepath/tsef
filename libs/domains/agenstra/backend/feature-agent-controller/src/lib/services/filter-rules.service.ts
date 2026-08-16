@@ -5,7 +5,7 @@ import {
 } from '@forepath/agenstra/backend/feature-agent-manager';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { CreateFilterRuleDto } from '../dto/filter-rules/create-filter-rule.dto';
 import {
@@ -20,6 +20,11 @@ import { AgentConsoleRegexFilterRuleEntity } from '../entities/agent-console-reg
 import { ClientsRepository } from '../repositories/clients.repository';
 import { mapFilterRuleToSearchDocument } from '../search/agenstra-search-document.mapper';
 import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
+import {
+  applyAgenstraSearchIlike,
+  sanitizeListSearch,
+  tryAgenstraSearchIds,
+} from '../search/agenstra-search-list.util';
 
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
 import { AgentManagerFilterRulesClientService } from './agent-manager-filter-rules-client.service';
@@ -41,13 +46,66 @@ export class FilterRulesService {
     private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
-  async findAll(limit = 10, offset = 0): Promise<FilterRuleResponseDto[]> {
-    const rules = await this.rulesRepo.find({
-      order: { priority: 'ASC', createdAt: 'ASC' },
-      relations: { clientLinks: true },
-      take: limit,
-      skip: offset,
-    });
+  async findAll(limit = 10, offset = 0, search?: string): Promise<FilterRuleResponseDto[]> {
+    const sanitized = sanitizeListSearch(search);
+    let rules: AgentConsoleRegexFilterRuleEntity[];
+
+    if (sanitized) {
+      const allClientIds = await this.clientsRepository.findAllIds();
+      const [workspaceLookup, globalLookup] = await Promise.all([
+        tryAgenstraSearchIds(
+          this.searchIndex,
+          {
+            entityType: 'filter-rules',
+            query: sanitized,
+            clientIds: allClientIds,
+            limit: 10_000,
+            offset: 0,
+          },
+          this.logger,
+        ),
+        tryAgenstraSearchIds(
+          this.searchIndex,
+          {
+            entityType: 'filter-rules',
+            query: sanitized,
+            instanceScoped: true,
+            limit: 10_000,
+            offset: 0,
+          },
+          this.logger,
+        ),
+      ]);
+
+      if (workspaceLookup !== null || globalLookup !== null) {
+        const mergedIds = [...new Set([...(workspaceLookup?.ids ?? []), ...(globalLookup?.ids ?? [])])];
+        const paginatedIds = mergedIds.slice(offset, offset + limit);
+
+        if (paginatedIds.length === 0) {
+          return [];
+        }
+
+        const found = await this.rulesRepo.find({
+          where: { id: In(paginatedIds) },
+          relations: { clientLinks: true },
+        });
+        const byId = new Map(found.map((rule) => [rule.id, rule]));
+
+        rules = paginatedIds
+          .map((id) => byId.get(id))
+          .filter((rule): rule is AgentConsoleRegexFilterRuleEntity => rule != null);
+      } else {
+        rules = await this.loadFilterRulesWithSqlSearch(limit, offset, sanitized);
+      }
+    } else {
+      rules = await this.rulesRepo.find({
+        order: { priority: 'ASC', createdAt: 'ASC' },
+        relations: { clientLinks: true },
+        take: limit,
+        skip: offset,
+      });
+    }
+
     const out: FilterRuleResponseDto[] = [];
 
     for (const r of rules) {
@@ -55,6 +113,23 @@ export class FilterRulesService {
     }
 
     return out;
+  }
+
+  private async loadFilterRulesWithSqlSearch(
+    limit: number,
+    offset: number,
+    search: string,
+  ): Promise<AgentConsoleRegexFilterRuleEntity[]> {
+    const qb = this.rulesRepo
+      .createQueryBuilder('r')
+      .leftJoinAndSelect('r.clientLinks', 'clientLinks')
+      .orderBy('r.priority', 'ASC')
+      .addOrderBy('r.created_at', 'ASC');
+
+    applyAgenstraSearchIlike(qb, 'filter-rules', 'r', search);
+    qb.take(limit).skip(offset);
+
+    return await qb.getMany();
   }
 
   /** Counts for OTEL gauges: rules by enabled flag and sync targets by status. */

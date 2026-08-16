@@ -25,8 +25,8 @@ export class PromotionAdminService {
     private readonly promotionRedemptionService: PromotionRedemptionService,
   ) {}
 
-  async list(limit: number, offset: number): Promise<PaginatedAdminPromotionsResponseDto> {
-    const { items, total } = await this.promotionsRepository.findAll(limit, offset);
+  async list(limit: number, offset: number, search?: string): Promise<PaginatedAdminPromotionsResponseDto> {
+    const { items, total } = await this.promotionsRepository.findAll(limit, offset, search);
 
     return {
       items: await Promise.all(items.map((item) => this.mapPromotion(item))),

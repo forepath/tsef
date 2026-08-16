@@ -44,6 +44,7 @@ export class DatevExportAdminService {
     limit: number,
     offset: number,
     year?: number,
+    search?: string,
   ): Promise<PaginatedAdminDatevExportsResponseDto> {
     if (scope === DatevExportScope.UNIFIED) {
       this.assertUnifiedAccessAllowed();
@@ -56,6 +57,7 @@ export class DatevExportAdminService {
       year,
       limit,
       offset,
+      search,
     });
 
     return {

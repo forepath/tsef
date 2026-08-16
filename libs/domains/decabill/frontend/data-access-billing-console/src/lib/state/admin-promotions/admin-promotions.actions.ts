@@ -7,10 +7,10 @@ import type {
   UpdateAdminPromotionDto,
 } from '../../types/promotions.types';
 
-export const loadAdminPromotions = createAction('[AdminPromotions] Load Promotions');
+export const loadAdminPromotions = createAction('[AdminPromotions] Load Promotions', props<{ search?: string }>());
 export const loadAdminPromotionsBatch = createAction(
   '[AdminPromotions] Load Promotions Batch',
-  props<{ offset: number; accumulated: AdminPromotionResponse[] }>(),
+  props<{ offset: number; accumulated: AdminPromotionResponse[]; search?: string }>(),
 );
 export const loadAdminPromotionsSuccess = createAction(
   '[AdminPromotions] Load Promotions Success',

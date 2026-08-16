@@ -62,7 +62,7 @@ describe('AddonsController', () => {
 
       expect(result[0].defaultValues).toBeUndefined();
       expect(result[0].key).toBe('av');
-      expect(repository.findAll).toHaveBeenCalledWith(10, 0);
+      expect(repository.findAll).toHaveBeenCalledWith(10, 0, undefined);
     });
 
     it('passes pagination to repository', async () => {
@@ -71,7 +71,7 @@ describe('AddonsController', () => {
 
       await controller.list(25, 50);
 
-      expect(repository.findAll).toHaveBeenCalledWith(25, 50);
+      expect(repository.findAll).toHaveBeenCalledWith(25, 50, undefined);
     });
   });
 

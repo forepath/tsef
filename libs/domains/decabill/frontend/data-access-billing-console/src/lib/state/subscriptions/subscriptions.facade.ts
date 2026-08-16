@@ -17,6 +17,7 @@ import {
   createSubscription,
   loadSubscription,
   loadSubscriptions,
+  loadSubscriptionsSummary,
   loadMoreSubscriptions,
   resumeSubscription,
   withdrawSubscription,
@@ -42,6 +43,8 @@ import {
   selectSubscriptionsLoadingAny,
   selectSubscriptionsResuming,
   selectSubscriptionsState,
+  selectSubscriptionsSummary,
+  selectSubscriptionsSummaryLoading,
   selectSubscriptionsWithdrawing,
 } from './subscriptions.selectors';
 
@@ -91,6 +94,14 @@ export class SubscriptionsFacade {
     return this.store.select(selectSubscriptionsError);
   }
 
+  getSubscriptionsSummary$() {
+    return this.store.select(selectSubscriptionsSummary);
+  }
+
+  getSubscriptionsSummaryLoading$(): Observable<boolean> {
+    return this.store.select(selectSubscriptionsSummaryLoading);
+  }
+
   getHasMore$(): Observable<boolean> {
     return this.store.select(selectSubscriptionsHasMore);
   }
@@ -133,6 +144,10 @@ export class SubscriptionsFacade {
 
   loadSubscriptions(params?: ListParams): void {
     this.store.dispatch(loadSubscriptions({ params }));
+  }
+
+  loadSubscriptionsSummary(): void {
+    this.store.dispatch(loadSubscriptionsSummary());
   }
 
   loadMore(): void {

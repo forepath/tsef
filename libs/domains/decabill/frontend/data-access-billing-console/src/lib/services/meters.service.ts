@@ -28,6 +28,10 @@ export class MetersService {
       httpParams = httpParams.set('offset', params.offset.toString());
     }
 
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
     return this.http.get<MeterResponse[]>(`${this.apiUrl}/meters`, { params: httpParams });
   }
 

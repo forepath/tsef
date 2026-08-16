@@ -25,6 +25,12 @@ import {
   loadAtlassianContextImport,
   loadAtlassianContextImportFailure,
   loadAtlassianContextImportSuccess,
+  loadAtlassianConnections,
+  loadAtlassianConnectionsFailure,
+  loadAtlassianConnectionsSuccess,
+  loadExternalImportConfigsList,
+  loadExternalImportConfigsListFailure,
+  loadExternalImportConfigsListSuccess,
   runExternalImportConfig,
   runExternalImportConfigFailure,
   runExternalImportConfigSuccess,
@@ -61,15 +67,17 @@ export const loadAtlassianContextImport$ = createEffect(
   (actions$ = inject(Actions), svc = inject(ContextImportAdminService)) => {
     return actions$.pipe(
       ofType(loadAtlassianContextImport),
-      switchMap(() =>
+      switchMap(({ connectionsSearch, configsSearch }) =>
         forkJoin({
           configs: svc.listConfigs({
             limit: ATLASSIAN_CONTEXT_IMPORT_BATCH_SIZE,
             offset: 0,
+            search: configsSearch?.trim() || undefined,
           }),
           connections: svc.listConnections({
             limit: ATLASSIAN_CONTEXT_IMPORT_BATCH_SIZE,
             offset: 0,
+            search: connectionsSearch?.trim() || undefined,
           }),
         }).pipe(
           switchMap(({ configs, connections }) => {
@@ -164,6 +172,48 @@ export const loadAtlassianContextImportBatch$ = createEffect(
             );
           }),
           catchError((error) => of(loadAtlassianContextImportFailure({ error: normalizeError(error) }))),
+        );
+      }),
+    );
+  },
+  { functional: true },
+);
+
+export const loadAtlassianConnections$ = createEffect(
+  (actions$ = inject(Actions), svc = inject(ContextImportAdminService)) => {
+    return actions$.pipe(
+      ofType(loadAtlassianConnections),
+      switchMap(({ search }) => {
+        const listParams = {
+          limit: 500,
+          offset: 0,
+          search: search?.trim() || undefined,
+        };
+
+        return svc.listConnections(listParams).pipe(
+          map((connections) => loadAtlassianConnectionsSuccess({ connections })),
+          catchError((error) => of(loadAtlassianConnectionsFailure({ error: normalizeError(error) }))),
+        );
+      }),
+    );
+  },
+  { functional: true },
+);
+
+export const loadExternalImportConfigsList$ = createEffect(
+  (actions$ = inject(Actions), svc = inject(ContextImportAdminService)) => {
+    return actions$.pipe(
+      ofType(loadExternalImportConfigsList),
+      switchMap(({ search }) => {
+        const listParams = {
+          limit: 500,
+          offset: 0,
+          search: search?.trim() || undefined,
+        };
+
+        return svc.listConfigs(listParams).pipe(
+          map((configs) => loadExternalImportConfigsListSuccess({ configs })),
+          catchError((error) => of(loadExternalImportConfigsListFailure({ error: normalizeError(error) }))),
         );
       }),
     );
@@ -282,7 +332,7 @@ export const runExternalImportConfig$ = createEffect(
       ofType(runExternalImportConfig),
       switchMap(({ id }) =>
         svc.runConfig(id).pipe(
-          mergeMap(() => [runExternalImportConfigSuccess({ id }), loadAtlassianContextImport()]),
+          mergeMap(() => [runExternalImportConfigSuccess({ id }), loadAtlassianContextImport({})]),
           catchError((error) => of(runExternalImportConfigFailure({ error: normalizeError(error) }))),
         ),
       ),

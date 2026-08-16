@@ -22,7 +22,7 @@ export const loadServicePlansFailure = createAction(
 
 export const loadServicePlansBatch = createAction(
   '[Service Plans] Load Service Plans Batch',
-  props<{ offset: number; accumulatedServicePlans: ServicePlanResponse[] }>(),
+  props<{ offset: number; accumulatedServicePlans: ServicePlanResponse[]; params?: ListParams }>(),
 );
 
 // Get Service Plan by ID Actions

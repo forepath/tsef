@@ -38,6 +38,8 @@ export interface PromotionsState {
   redeeming: boolean;
   redeemError: string | null;
   error: string | null;
+  activeSearch: string | null;
+  redemptionsSearch: string | null;
 }
 
 export const initialPromotionsState: PromotionsState = {
@@ -53,6 +55,8 @@ export const initialPromotionsState: PromotionsState = {
   redeeming: false,
   redeemError: null,
   error: null,
+  activeSearch: null,
+  redemptionsSearch: null,
 };
 
 export function buildPromotionTargetKey(request: ValidatePromotionRequest): string {
@@ -61,11 +65,12 @@ export function buildPromotionTargetKey(request: ValidatePromotionRequest): stri
 
 export const promotionsReducer = createReducer(
   initialPromotionsState,
-  on(loadActivePromotions, (state) => ({
+  on(loadActivePromotions, (state, { search }) => ({
     ...state,
     activePromotions: [],
     loadingActive: true,
     error: null,
+    activeSearch: search?.trim() ? search.trim() : null,
   })),
   on(loadActivePromotionsBatch, (state, { accumulated }) => ({
     ...state,
@@ -83,11 +88,12 @@ export const promotionsReducer = createReducer(
     loadingActive: false,
     error,
   })),
-  on(loadPromotionRedemptions, (state) => ({
+  on(loadPromotionRedemptions, (state, { search }) => ({
     ...state,
     redemptions: [],
     loadingRedemptions: true,
     error: null,
+    redemptionsSearch: search?.trim() ? search.trim() : null,
   })),
   on(loadPromotionRedemptionsBatch, (state, { accumulated }) => ({
     ...state,

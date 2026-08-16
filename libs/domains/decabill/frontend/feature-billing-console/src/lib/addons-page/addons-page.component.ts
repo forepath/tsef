@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   AddonsFacade,
@@ -19,7 +19,7 @@ import {
   type ProviderDetail,
   type UpdateAddonDto,
 } from '@forepath/decabill/frontend/data-access-billing-console';
-import { combineLatest, catchError, forkJoin, map, of, switchMap, take } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, forkJoin, map, of, skip, switchMap, take } from 'rxjs';
 
 import { getActiveStatusLabel, getActiveStatusTextClass } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
@@ -77,13 +77,7 @@ export class AddonsPageComponent implements OnInit {
 
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
-  readonly addons$ = combineLatest([this.facade.getAddons$(), this.searchQuery$]).pipe(
-    map(([addons, query]) => {
-      const term = query.trim().toLowerCase();
-
-      return term ? addons.filter((addon) => JSON.stringify(addon).toLowerCase().includes(term)) : addons;
-    }),
-  );
+  readonly addons$ = this.facade.getAddons$();
   readonly providerOptions$ = this.serviceTypesFacade
     .getProviderDetails$()
     .pipe(map((providers) => providers.filter((provider) => provider.supportsAddons === true)));
@@ -114,6 +108,12 @@ export class AddonsPageComponent implements OnInit {
   addonMeterAttachError: string | null = null;
 
   ngOnInit(): void {
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadAddons({ search: search.trim() || undefined });
+      });
+
     this.facade.loadAddons();
     this.metersFacade.loadMeters();
     this.serviceTypesFacade.loadProviderDetails();

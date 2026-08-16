@@ -1,9 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { isNoneServiceTypeId } from '../constants/service-type-id.constants';
 import { ServicePlanEntity } from '../entities/service-plan.entity';
+import { hydrateEntitiesBySearchIds } from '../search/billing-search-hydrate.util';
+import { applyBillingSearchIlike } from '../search/billing-search-ilike.util';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { applyServicePlanTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
 @Injectable()
@@ -11,6 +14,7 @@ export class ServicePlansRepository {
   constructor(
     @InjectRepository(ServicePlanEntity)
     private readonly repository: Repository<ServicePlanEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   async findByIdOrThrow(id: string): Promise<ServicePlanEntity> {
@@ -37,7 +41,20 @@ export class ServicePlansRepository {
       .getOne();
   }
 
-  async findAll(limit = 10, offset = 0): Promise<ServicePlanEntity[]> {
+  async findAll(limit = 10, offset = 0, search?: string): Promise<ServicePlanEntity[]> {
+    if (search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('service-plans', search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+      });
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
+
+      if (hydrated) {
+        return hydrated.items;
+      }
+    }
+
     const qb = this.repository
       .createQueryBuilder('plan')
       .leftJoinAndSelect('plan.serviceType', 'st')
@@ -46,6 +63,10 @@ export class ServicePlansRepository {
       .skip(offset);
 
     applyServicePlanTenantFilter(qb, 'plan');
+
+    if (search?.trim()) {
+      applyBillingSearchIlike(qb, 'service-plans', 'plan', search);
+    }
 
     return await qb.getMany();
   }

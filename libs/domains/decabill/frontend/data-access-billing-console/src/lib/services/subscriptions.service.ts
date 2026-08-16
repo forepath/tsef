@@ -10,6 +10,7 @@ import type {
   ListParams,
   ResumeSubscriptionDto,
   SubscriptionResponse,
+  SubscriptionsSummaryResponse,
   WithdrawSubscriptionDto,
 } from '../types/billing.types';
 import type {
@@ -47,9 +48,17 @@ export class SubscriptionsService {
       httpParams = httpParams.set('offset', params.offset.toString());
     }
 
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
     return this.http.get<SubscriptionResponse[]>(`${this.apiUrl}/subscriptions`, {
       params: httpParams,
     });
+  }
+
+  getSubscriptionsSummary(): Observable<SubscriptionsSummaryResponse> {
+    return this.http.get<SubscriptionsSummaryResponse>(`${this.apiUrl}/subscriptions/summary`);
   }
 
   /**

@@ -30,6 +30,7 @@ export interface FilterRulesState {
   nextOffset: number;
   appendLoading: boolean;
   appendError: string | null;
+  search: string | null;
 }
 
 export const initialFilterRulesState: FilterRulesState = {
@@ -42,11 +43,12 @@ export const initialFilterRulesState: FilterRulesState = {
   nextOffset: 0,
   appendLoading: false,
   appendError: null,
+  search: null,
 };
 
 export const filterRulesReducer = createReducer(
   initialFilterRulesState,
-  on(loadFilterRules, (state) => ({
+  on(loadFilterRules, (state, { params }) => ({
     ...state,
     rules: [],
     loading: true,
@@ -55,6 +57,7 @@ export const filterRulesReducer = createReducer(
     nextOffset: 0,
     appendLoading: false,
     appendError: null,
+    search: params?.search?.trim() ? params.search.trim() : null,
   })),
   on(loadFilterRulesSuccess, (state, { rules, hasMore, nextOffset }) => ({
     ...state,

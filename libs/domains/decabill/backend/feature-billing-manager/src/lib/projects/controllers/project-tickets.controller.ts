@@ -41,6 +41,7 @@ export class ProjectTicketsController {
     @Req() req: RequestWithUser,
     @Query('status') status?: ProjectTicketStatus,
     @Query('parentId') parentIdRaw?: string,
+    @Query('search') search?: string,
   ): Promise<ProjectTicketResponseDto[]> {
     let parentId: string | null | undefined;
 
@@ -57,6 +58,7 @@ export class ProjectTicketsController {
     return await this.ticketsService.listTickets(projectId, getAuthenticatedUserFromRequest(req), {
       status,
       parentId,
+      search,
     });
   }
 

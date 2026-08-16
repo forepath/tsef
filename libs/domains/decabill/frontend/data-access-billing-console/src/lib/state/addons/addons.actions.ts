@@ -7,7 +7,7 @@ export const loadAddonsSuccess = createAction('[Addons] Load Addons Success', pr
 export const loadAddonsFailure = createAction('[Addons] Load Addons Failure', props<{ error: string }>());
 export const loadAddonsBatch = createAction(
   '[Addons] Load Addons Batch',
-  props<{ offset: number; accumulatedAddons: AddonResponse[] }>(),
+  props<{ offset: number; accumulatedAddons: AddonResponse[]; params?: ListParams }>(),
 );
 export const loadAddon = createAction('[Addons] Load Addon', props<{ id: string }>());
 export const loadAddonSuccess = createAction('[Addons] Load Addon Success', props<{ addon: AddonResponse }>());

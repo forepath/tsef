@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   PromotionsFacade,
@@ -9,7 +9,7 @@ import {
   type PromotionRedemptionResponse,
   type ValidatePromotionRequest,
 } from '@forepath/decabill/frontend/data-access-billing-console';
-import { map, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, skip, switchMap } from 'rxjs';
 
 import {
   getBillingIntervalLabel,
@@ -19,7 +19,6 @@ import {
   getPromotionRedemptionStatusTextClass,
   getSubscriptionStatusLabel,
 } from '../billing-status-labels';
-import { filterItemsBySearch } from '../billing-list-search';
 import { buildPromotionPeriodPricingPreview } from '../promotion-pricing-preview.util';
 
 const PROMOTION_ELIGIBLE_SUBSCRIPTION_STATUSES = new Set(['active', 'pending_backorder', 'pending_cancel']);
@@ -41,40 +40,19 @@ export class PromotionsPageComponent implements OnInit {
   private readonly subscriptionsFacade = inject(SubscriptionsFacade);
   private readonly servicePlansFacade = inject(ServicePlansFacade);
   private readonly datePipe = inject(DatePipe);
+  private readonly destroyRef = inject(DestroyRef);
 
   promoCode = signal('');
   selectedSubscriptionId = signal('');
   readonly activeSearch = signal('');
   readonly historySearch = signal('');
+  readonly activeSearch$ = toObservable(this.activeSearch);
+  readonly historySearch$ = toObservable(this.historySearch);
   readonly mobilePanel = signal<PromotionsMobilePanel>('active');
   readonly mobilePanels = PROMOTIONS_MOBILE_PANELS;
 
   readonly activePromotions = toSignal(this.promotionsFacade.getActivePromotions$(), { initialValue: [] });
   readonly redemptions = toSignal(this.promotionsFacade.getRedemptions$(), { initialValue: [] });
-  readonly filteredActivePromotions = computed(() =>
-    filterItemsBySearch(this.activePromotions(), this.activeSearch(), (item) =>
-      [item.promotionName, item.code, item.advantageSummary, item.planName, item.validFrom, item.validTo]
-        .filter(Boolean)
-        .join(' '),
-    ),
-  );
-  readonly filteredRedemptions = computed(() =>
-    filterItemsBySearch(this.redemptions(), this.historySearch(), (item) =>
-      [
-        item.code,
-        item.promotionName,
-        item.advantageSummary,
-        item.subscriptionNumber,
-        item.subscriptionId,
-        item.planName,
-        this.redemptionContextLabel(item.redemptionContext),
-        this.redemptionStatusLabel(item.status),
-        item.redeemedAt,
-      ]
-        .filter(Boolean)
-        .join(' '),
-    ),
-  );
   readonly loadingActive$ = this.promotionsFacade.getActiveLoading$();
   readonly loadingRedemptions$ = this.promotionsFacade.getRedemptionsLoading$();
   readonly validationPreview = toSignal(this.promotionsFacade.getValidationPreview$('existing'), {
@@ -169,6 +147,18 @@ export class PromotionsPageComponent implements OnInit {
     this.promotionsFacade.loadRedemptions();
     this.subscriptionsFacade.loadSubscriptions();
     this.servicePlansFacade.loadServicePlans();
+
+    this.activeSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.promotionsFacade.loadActivePromotions({ search: search.trim() || undefined });
+      });
+
+    this.historySearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.promotionsFacade.loadRedemptions({ search: search.trim() || undefined });
+      });
   }
 
   onPromoInputChange(): void {

@@ -1,7 +1,12 @@
 import { BillingAdminService } from './billing-admin.service';
 
 describe('BillingAdminService', () => {
-  const subscriptionsRepository = { countByStatus: jest.fn(), findAllForAdmin: jest.fn(), findByIdOrThrow: jest.fn() };
+  const subscriptionsRepository = {
+    countAll: jest.fn(),
+    countByStatus: jest.fn(),
+    findAllForAdmin: jest.fn(),
+    findByIdOrThrow: jest.fn(),
+  };
   const invoicesRepository = { findGlobalOpenOverdueSummary: jest.fn() };
   const openPositionsRepository = { findDistinctUserIdsWithUnbilled: jest.fn() };
   const invoiceCreationService = { getUnbilledTotalForUser: jest.fn() };
@@ -27,6 +32,7 @@ describe('BillingAdminService', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    subscriptionsRepository.countAll.mockResolvedValue(12);
     subscriptionsRepository.countByStatus.mockResolvedValue(5);
     invoicesRepository.findGlobalOpenOverdueSummary.mockResolvedValue({ count: 2, totalBalance: 100 });
     openPositionsRepository.findDistinctUserIdsWithUnbilled.mockResolvedValue(['user-1', 'user-2']);
@@ -37,6 +43,7 @@ describe('BillingAdminService', () => {
     const result = await service.getGlobalSummary();
 
     expect(result).toEqual({
+      subscriptionsCount: 12,
       activeSubscriptionsCount: 5,
       openOverdueCount: 2,
       openOverdueTotal: 100,

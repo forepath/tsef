@@ -74,6 +74,7 @@ export interface CreateClientResponseDto extends ClientResponseDto {
 export interface ListClientsParams {
   limit?: number;
   offset?: number;
+  search?: string;
 }
 
 // Provisioning types

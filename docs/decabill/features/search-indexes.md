@@ -5,13 +5,19 @@ Decabill Manager uses **OpenSearch** for list and typeahead search across billin
 1. **Live sync** on create/update/delete of searchable entities.
 2. **Periodic BullMQ reindex** (`search-reindex.coordinator` / `.unit`) so upgrades from older versions fill indexes without manual steps.
 
-Search queries always apply tenant/user authorization filters server-side. When OpenSearch is disabled or unreachable, list endpoints that previously used SQL `ILIKE` fall back to that path.
+Search queries always apply tenant/user authorization filters server-side. When OpenSearch is disabled, unreachable, or returns zero hits (empty/unindexed data, numeric/substring gaps), list endpoints fall back to SQL `ILIKE` on allowlisted fields. Queries combine `simple_query_string` with case-insensitive wildcards (including `.keyword` multi-fields) so partial numbers and codes match.
 
 ## Console list UX
 
-Customer and admin console lists (subscriptions, projects, and related admin tables) use **infinite scroll**: the first page loads immediately; further pages append on scroll via `sharedInfiniteScroll` and `shared-list-append-footer`. Append failures pause scrolling until the user retries. Lane boards use CDK virtual scroll for card rows.
+Customer and admin console lists use **infinite scroll** where applicable: the first page loads immediately; further pages append on scroll via `sharedInfiniteScroll` and `shared-list-append-footer`. Append failures pause scrolling until the user retries. Lane boards use CDK virtual scroll for card rows.
 
-Admin subscription search continues to hit the API (`search` query). Customer subscription and project search remain client-side over the pages already loaded when the list API has no `search` parameter.
+### Search pattern
+
+List and typeahead search boxes debounce (~300ms) and call list APIs with a `search` query parameter. NgRx keeps `search` in list params so infinite-scroll `loadMore` reuses it. Results come from OpenSearch (`searchIds` + entity hydrate) with `ILIKE` fallback. Typeaheads use `limit=20`. Board global ticket search queries the tickets list with `search` (and `projectId`); per-lane board filters may still filter already-loaded rows locally.
+
+Summary KPI bars (subscriptions, overview, admin contracts) use dedicated summary/count endpoints (`GET /subscriptions/summary`, `GET /projects/summary`, `GET /admin/billing/summary`) so totals are not derived from the currently loaded list page.
+
+Customer promotions active/history lists use `search` with SQL `ILIKE` on joined promotion fields (redemptions are not a separate OpenSearch entity).
 
 ## Configuration
 

@@ -88,6 +88,10 @@ export class ServiceTypesService {
       httpParams = httpParams.set('offset', params.offset.toString());
     }
 
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
     return this.http.get<ServiceTypeResponse[]>(`${this.apiUrl}/service-types`, {
       params: httpParams,
     });

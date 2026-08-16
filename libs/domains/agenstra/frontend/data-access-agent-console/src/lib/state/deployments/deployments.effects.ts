@@ -185,8 +185,8 @@ export const loadRuns$ = createEffect(
   (actions$ = inject(Actions), deploymentsService = inject(DeploymentsService)) => {
     return actions$.pipe(
       ofType(loadRuns),
-      switchMap(({ clientId, agentId, limit, offset }) =>
-        deploymentsService.listRuns(clientId, agentId, limit, offset).pipe(
+      switchMap(({ clientId, agentId, limit, offset, search }) =>
+        deploymentsService.listRuns(clientId, agentId, limit, offset, search?.trim() || undefined).pipe(
           map((runs) => loadRunsSuccess({ runs })),
           catchError((error) => of(loadRunsFailure({ error: normalizeError(error) }))),
         ),

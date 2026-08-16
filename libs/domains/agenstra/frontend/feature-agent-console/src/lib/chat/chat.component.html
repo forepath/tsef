@@ -150,12 +150,13 @@
               placeholder="Search workspaces"
               i18n-placeholder="@@featureChat-searchWorkspacesPlaceholder"
               name="search"
-              [(ngModel)]="searchClientQuery"
+              [ngModel]="searchClientQuery()"
+              (ngModelChange)="searchClientQuery.set($event)"
               required
             />
           </div>
         </form>
-        <div class="flex-grow-1 overflow-auto">
+        <div #clientsScrollRoot class="flex-grow-1 overflow-auto">
           @if (clientsLoading$ | async) {
             <div class="d-flex justify-content-center align-items-center p-4">
               <div class="spinner-border text-primary" role="status">
@@ -274,24 +275,26 @@
                     </div>
                   }
                 </div>
-                @if ((clientsHasMore$ | async) || (clientsAppendError$ | async)) {
-                  <div
-                    sharedInfiniteScroll
-                    [paused]="!!(clientsAppendError$ | async)"
-                    [disabled]="
-                      !(clientsHasMore$ | async) || !!(clientsAppendLoading$ | async) || !!(clientsLoading$ | async)
-                    "
-                    (reachedEnd)="onLoadMoreClients()"
-                  >
-                    <shared-list-append-footer
-                      [loading]="!!(clientsAppendLoading$ | async)"
-                      [error]="!!(clientsAppendError$ | async)"
-                      (retry)="onLoadMoreClients()"
-                    />
-                  </div>
-                }
               }
             }
+            @if ((clientsAppendLoading$ | async) || (clientsAppendError$ | async)) {
+              <shared-list-append-footer
+                [loading]="!!(clientsAppendLoading$ | async)"
+                [error]="!!(clientsAppendError$ | async)"
+                (retry)="onLoadMoreClients()"
+              />
+            }
+            <div
+              sharedInfiniteScroll
+              [root]="clientsScrollRoot"
+              [paused]="!!(clientsAppendError$ | async)"
+              [disabled]="
+                !(clientsHasMore$ | async) || !!(clientsAppendLoading$ | async) || !!(clientsLoading$ | async)
+              "
+              (reachedEnd)="onLoadMoreClients()"
+              aria-hidden="true"
+              style="height: 1px; width: 100%; flex-shrink: 0"
+            ></div>
           }
         </div>
       </div>
@@ -344,12 +347,13 @@
               placeholder="Search environments"
               i18n-placeholder="@@featureChat-searchEnvironmentsPlaceholder"
               name="search"
-              [(ngModel)]="searchAgentQuery"
+              [ngModel]="searchAgentQuery()"
+              (ngModelChange)="searchAgentQuery.set($event)"
               required
             />
           </div>
         </form>
-        <div class="flex-grow-1 overflow-auto">
+        <div #agentsScrollRoot class="flex-grow-1 overflow-auto">
           @if (agentsLoading$ | async) {
             <div class="d-flex justify-content-center align-items-center p-4">
               <div class="spinner-border text-primary" role="status">
@@ -498,24 +502,24 @@
                     </div>
                   }
                 </div>
-                @if ((agentsHasMore$ | async) || (agentsAppendError$ | async)) {
-                  <div
-                    sharedInfiniteScroll
-                    [paused]="!!(agentsAppendError$ | async)"
-                    [disabled]="
-                      !(agentsHasMore$ | async) || !!(agentsAppendLoading$ | async) || !!(agentsLoading$ | async)
-                    "
-                    (reachedEnd)="onLoadMoreAgents()"
-                  >
-                    <shared-list-append-footer
-                      [loading]="!!(agentsAppendLoading$ | async)"
-                      [error]="!!(agentsAppendError$ | async)"
-                      (retry)="onLoadMoreAgents()"
-                    />
-                  </div>
-                }
               }
             }
+            @if ((agentsAppendLoading$ | async) || (agentsAppendError$ | async)) {
+              <shared-list-append-footer
+                [loading]="!!(agentsAppendLoading$ | async)"
+                [error]="!!(agentsAppendError$ | async)"
+                (retry)="onLoadMoreAgents()"
+              />
+            }
+            <div
+              sharedInfiniteScroll
+              [root]="agentsScrollRoot"
+              [paused]="!!(agentsAppendError$ | async)"
+              [disabled]="!(agentsHasMore$ | async) || !!(agentsAppendLoading$ | async) || !!(agentsLoading$ | async)"
+              (reachedEnd)="onLoadMoreAgents()"
+              aria-hidden="true"
+              style="height: 1px; width: 100%; flex-shrink: 0"
+            ></div>
           }
         </div>
       </div>

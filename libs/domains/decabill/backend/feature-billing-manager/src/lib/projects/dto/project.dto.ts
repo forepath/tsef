@@ -127,6 +127,12 @@ export class PaginatedAdminProjectsResponseDto {
   offset!: number;
 }
 
+/** Catalog counts for the customer projects overview KPI (not a single-project detail summary). */
+export class ProjectsCatalogSummaryResponseDto {
+  total!: number;
+  active!: number;
+}
+
 export class ProjectSummaryResponseDto {
   projectId!: string;
   totalTrackedMinutes!: number;

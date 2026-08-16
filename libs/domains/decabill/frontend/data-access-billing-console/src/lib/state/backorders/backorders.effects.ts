@@ -42,7 +42,7 @@ export const loadBackorders$ = createEffect(
 
             if (backorders.length < BATCH_SIZE) return of(loadBackordersSuccess({ backorders }));
 
-            return of(loadBackordersBatch({ offset: BATCH_SIZE, accumulatedBackorders: backorders }));
+            return of(loadBackordersBatch({ offset: BATCH_SIZE, accumulatedBackorders: backorders, params }));
           }),
           catchError((error) => of(loadBackordersFailure({ error: normalizeError(error) }))),
         );
@@ -56,8 +56,8 @@ export const loadBackordersBatch$ = createEffect(
   (actions$ = inject(Actions), backordersService = inject(BackordersService)) => {
     return actions$.pipe(
       ofType(loadBackordersBatch),
-      switchMap(({ offset, accumulatedBackorders }) => {
-        const batchParams = { limit: BATCH_SIZE, offset };
+      switchMap(({ offset, accumulatedBackorders, params }) => {
+        const batchParams = { limit: BATCH_SIZE, offset, ...params };
 
         return backordersService.listBackorders(batchParams).pipe(
           switchMap((backorders) => {
@@ -67,7 +67,9 @@ export const loadBackordersBatch$ = createEffect(
               return of(loadBackordersSuccess({ backorders: newAccumulated }));
             }
 
-            return of(loadBackordersBatch({ offset: offset + BATCH_SIZE, accumulatedBackorders: newAccumulated }));
+            return of(
+              loadBackordersBatch({ offset: offset + BATCH_SIZE, accumulatedBackorders: newAccumulated, params }),
+            );
           }),
           catchError((error) => of(loadBackordersFailure({ error: normalizeError(error) }))),
         );

@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 
-import type { ListParams, SubscriptionResponse } from '../../types/billing.types';
+import type { ListParams, SubscriptionResponse, SubscriptionsSummaryResponse } from '../../types/billing.types';
 import { patchSubscriptionItemDisplayName } from '../../utils/patch-subscription-item-display-name.util';
 import { updateDisplayNameSuccess } from '../service-detail/service-detail.actions';
 
@@ -18,6 +18,9 @@ import {
   loadSubscriptionsFailure,
   loadSubscriptionsSuccess,
   loadSubscriptionSuccess,
+  loadSubscriptionsSummary,
+  loadSubscriptionsSummaryFailure,
+  loadSubscriptionsSummarySuccess,
   loadMoreSubscriptions,
   loadMoreSubscriptionsFailure,
   loadMoreSubscriptionsSuccess,
@@ -32,6 +35,9 @@ import {
 export interface SubscriptionsState {
   entities: SubscriptionResponse[];
   selectedSubscription: SubscriptionResponse | null;
+  summary: SubscriptionsSummaryResponse | null;
+  summaryLoading: boolean;
+  summaryError: string | null;
   loading: boolean;
   loadingSubscription: boolean;
   creating: boolean;
@@ -49,6 +55,9 @@ export interface SubscriptionsState {
 export const initialSubscriptionsState: SubscriptionsState = {
   entities: [],
   selectedSubscription: null,
+  summary: null,
+  summaryLoading: false,
+  summaryError: null,
   loading: false,
   loadingSubscription: false,
   creating: false,
@@ -65,6 +74,22 @@ export const initialSubscriptionsState: SubscriptionsState = {
 
 export const subscriptionsReducer = createReducer(
   initialSubscriptionsState,
+  on(loadSubscriptionsSummary, (state) => ({
+    ...state,
+    summaryLoading: true,
+    summaryError: null,
+  })),
+  on(loadSubscriptionsSummarySuccess, (state, { summary }) => ({
+    ...state,
+    summary,
+    summaryLoading: false,
+    summaryError: null,
+  })),
+  on(loadSubscriptionsSummaryFailure, (state, { error }) => ({
+    ...state,
+    summaryLoading: false,
+    summaryError: error,
+  })),
   on(loadSubscriptions, (state, { params }) => ({
     ...state,
     entities: [],

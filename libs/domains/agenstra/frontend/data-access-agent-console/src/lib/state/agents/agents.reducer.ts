@@ -59,6 +59,7 @@ export interface AgentsState {
   errors: Record<string, string | null>;
   hasMore: Record<string, boolean>;
   nextOffset: Record<string, number>;
+  search: Record<string, string | null>;
   appendLoading: Record<string, boolean>;
   appendError: Record<string, string | null>;
   /** Models per `clientId:agentId` (from list models endpoint). */
@@ -83,6 +84,7 @@ export const initialAgentsState: AgentsState = {
   errors: {},
   hasMore: {},
   nextOffset: {},
+  search: {},
   appendLoading: {},
   appendError: {},
   agentModels: {},
@@ -190,7 +192,7 @@ function updateClientState(
 export const agentsReducer = createReducer(
   initialAgentsState,
   // Load Client Agents
-  on(loadClientAgents, (state, { clientId }) => ({
+  on(loadClientAgents, (state, { clientId, params }) => ({
     ...updateClientState(state, clientId, (clientState) => ({
       ...clientState,
       agents: [],
@@ -199,6 +201,7 @@ export const agentsReducer = createReducer(
     })),
     hasMore: { ...state.hasMore, [clientId]: false },
     nextOffset: { ...state.nextOffset, [clientId]: 0 },
+    search: { ...state.search, [clientId]: params?.search?.trim() ? params.search.trim() : null },
     appendLoading: { ...state.appendLoading, [clientId]: false },
     appendError: { ...state.appendError, [clientId]: null },
   })),

@@ -1128,6 +1128,13 @@ export interface InvoicesSummaryResponse {
   minCheckoutPaymentAmount?: number;
 }
 
+/** Catalog counts for the current user (independent of list pagination / search). */
+export interface SubscriptionsSummaryResponse {
+  total: number;
+  active: number;
+  pendingBackorders: number;
+}
+
 // Usage
 export interface UsageSummary {
   subscriptionId: string;
@@ -1245,6 +1252,7 @@ export interface ListParams {
 
 // Admin Billing
 export interface AdminBillingSummaryResponse {
+  subscriptionsCount: number;
   activeSubscriptionsCount: number;
   openOverdueCount: number;
   openOverdueTotal: number;
@@ -1535,6 +1543,7 @@ export interface AdminDatevExportListParams {
   offset?: number;
   year?: number;
   scope?: DatevExportScope;
+  search?: string;
 }
 
 export interface TriggerDatevExportDto {

@@ -82,10 +82,11 @@ export class PromotionsController {
     @Req() req: RequestWithUser,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<PaginatedPromotionRedemptionsResponseDto> {
     const user = getUserFromRequest(req);
 
-    return await this.promotionRedemptionService.listForUser(user.userId!, limit ?? 10, offset ?? 0);
+    return await this.promotionRedemptionService.listForUser(user.userId!, limit ?? 10, offset ?? 0, search);
   }
 
   @Get('active')
@@ -93,9 +94,10 @@ export class PromotionsController {
     @Req() req: RequestWithUser,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<PaginatedPromotionRedemptionsResponseDto> {
     const user = getUserFromRequest(req);
 
-    return await this.promotionRedemptionService.listActiveForUser(user.userId!, limit ?? 10, offset ?? 0);
+    return await this.promotionRedemptionService.listActiveForUser(user.userId!, limit ?? 10, offset ?? 0, search);
   }
 }

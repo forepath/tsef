@@ -1,7 +1,9 @@
 import { AuthenticationType, ClientEntity } from '@forepath/identity/backend';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+
+import { applyAgenstraSearchIlike } from '../search/agenstra-search-list.util';
 
 /**
  * Repository for client database operations.
@@ -60,6 +62,37 @@ export class ClientsRepository {
       skip: offset,
       order: { createdAt: 'DESC' },
     });
+  }
+
+  async findByIdsOrdered(ids: string[]): Promise<ClientEntity[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const rows = await this.repository.findBy({ id: In(ids) });
+    const byId = new Map(rows.map((row) => [row.id, row]));
+
+    return ids.map((id) => byId.get(id)).filter((row): row is ClientEntity => row != null);
+  }
+
+  async findAllFiltered(
+    limit: number,
+    offset: number,
+    options?: { search?: string; clientIds?: string[] },
+  ): Promise<ClientEntity[]> {
+    const qb = this.repository.createQueryBuilder('c').orderBy('c.createdAt', 'DESC');
+
+    if (options?.clientIds?.length) {
+      qb.andWhere('c.id IN (:...clientIds)', { clientIds: options.clientIds });
+    }
+
+    if (options?.search) {
+      applyAgenstraSearchIlike(qb, 'clients', 'c', options.search);
+    }
+
+    qb.take(limit).skip(offset);
+
+    return await qb.getMany();
   }
 
   /**

@@ -54,6 +54,7 @@ export interface CreateAgentResponseDto extends AgentResponseDto {
 export interface ListClientAgentsParams {
   limit?: number;
   offset?: number;
+  search?: string;
 }
 
 /** Model id → display name, as returned by GET .../agents/:agentId/models (proxied agent-manager). */

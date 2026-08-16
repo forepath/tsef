@@ -57,12 +57,44 @@ export function buildScopedSearchBody(params: {
   const sanitized = sanitizeSearchQuery(params.query);
 
   if (sanitized) {
+    const fields = params.fields.length > 0 ? params.fields : ['*'];
+    const wildcardValue = `*${sanitized}*`;
+    const should: Record<string, unknown>[] = [
+      {
+        simple_query_string: {
+          query: sanitized,
+          fields,
+          default_operator: 'and',
+          lenient: true,
+        },
+      },
+    ];
+
+    for (const field of fields) {
+      if (field === '*') {
+        continue;
+      }
+
+      // Prefer keyword multi-fields for substring/numeric matches; also try the base field
+      // (already-keyword mappings like id/status have no .keyword subfield).
+      const wildcardFields = field.includes('.') ? [field] : [field, `${field}.keyword`];
+
+      for (const wildcardField of wildcardFields) {
+        should.push({
+          wildcard: {
+            [wildcardField]: {
+              value: wildcardValue,
+              case_insensitive: true,
+            },
+          },
+        });
+      }
+    }
+
     must.push({
-      simple_query_string: {
-        query: sanitized,
-        fields: params.fields.length > 0 ? params.fields : ['*'],
-        default_operator: 'and',
-        lenient: true,
+      bool: {
+        should,
+        minimum_should_match: 1,
       },
     });
   } else {

@@ -8,6 +8,8 @@ export const selectCustomerProjects = createSelector(selectProjectsState, (s) =>
 export const selectAdminProjects = createSelector(selectProjectsState, (s) => s.adminProjects);
 export const selectSelectedProject = createSelector(selectProjectsState, (s) => s.selectedProject);
 export const selectProjectSummary = createSelector(selectProjectsState, (s) => s.summary);
+export const selectProjectsCatalogSummary = createSelector(selectProjectsState, (s) => s.catalogSummary);
+export const selectProjectsCatalogSummaryLoading = createSelector(selectProjectsState, (s) => s.catalogSummaryLoading);
 export const selectProjectsLoading = createSelector(selectProjectsState, (s) => s.loading);
 export const selectProjectsLoadingDetail = createSelector(selectProjectsState, (s) => s.loadingDetail);
 export const selectProjectsLoadingSummary = createSelector(selectProjectsState, (s) => s.loadingSummary);

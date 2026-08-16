@@ -198,6 +198,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Array of service types
@@ -585,6 +586,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Array of service plans
@@ -769,12 +771,9 @@ paths:
       summary: List CloudInit configs (admin only)
       operationId: listCloudInitConfigs
       parameters:
-        - name: limit
-          in: query
-          schema: { type: integer, default: 10 }
-        - name: offset
-          in: query
-          schema: { type: integer, default: 0 }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: CloudInit configs (default values masked in list)
@@ -949,12 +948,9 @@ paths:
       summary: List usage meters (admin only)
       operationId: listMeters
       parameters:
-        - name: limit
-          in: query
-          schema: { type: integer, default: 10 }
-        - name: offset
-          in: query
-          schema: { type: integer, default: 0 }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Meters
@@ -1034,12 +1030,9 @@ paths:
       summary: List addons (admin only)
       operationId: listAddons
       parameters:
-        - name: limit
-          in: query
-          schema: { type: integer, default: 10 }
-        - name: offset
-          in: query
-          schema: { type: integer, default: 0 }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Addons
@@ -1947,6 +1940,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Array of subscriptions
@@ -1986,6 +1980,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/summary:
+    get:
+      summary: Subscription and backorder catalog counts for the current user
+      operationId: getSubscriptionsSummary
+      responses:
+        '200':
+          description: True totals independent of list pagination
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionsSummaryResponse'
         '401':
           description: Unauthorized
           content:
@@ -2842,6 +2853,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Array of backorders
@@ -3128,6 +3140,10 @@ paths:
       summary: List open and overdue invoices
       operationId: listOpenOverdueInvoices
       description: Returns all open and overdue invoices for the current user across subscriptions, with balance and optional subscription number.
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
       responses:
         '200':
           description: Array of open and overdue invoices
@@ -3150,6 +3166,10 @@ paths:
       description: |
         Returns paid and void invoices for the current user.
         Draft invoices are never included in customer-facing lists.
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
       responses:
         '200':
           description: Array of history invoices
@@ -4598,6 +4618,7 @@ paths:
         - name: offset
           in: query
           schema: { type: integer, default: 0 }
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Paginated redemptions
@@ -4617,6 +4638,7 @@ paths:
         - name: offset
           in: query
           schema: { type: integer, default: 0 }
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Paginated active benefits
@@ -4630,12 +4652,9 @@ paths:
       summary: List promotions (admin)
       operationId: listAdminPromotions
       parameters:
-        - name: limit
-          in: query
-          schema: { type: integer, default: 10 }
-        - name: offset
-          in: query
-          schema: { type: integer, default: 0 }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Paginated promotions
@@ -4744,12 +4763,9 @@ paths:
       summary: List customer billing profiles (admin only)
       operationId: listAdminCustomerProfiles
       parameters:
-        - name: limit
-          in: query
-          schema: { type: integer, default: 10 }
-        - name: offset
-          in: query
-          schema: { type: integer, default: 0 }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Paginated profiles
@@ -5212,12 +5228,9 @@ paths:
       summary: List DATEV EXTF exports (admin only; requires BILLING_DATEV_EXPORT_ENABLED)
       operationId: listAdminDatevExports
       parameters:
-        - name: limit
-          in: query
-          schema: { type: integer, default: 20 }
-        - name: offset
-          in: query
-          schema: { type: integer, default: 0 }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
         - name: year
           in: query
           schema: { type: integer }
@@ -5311,6 +5324,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Paginated customer projects
@@ -5318,6 +5332,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedProjectsResponse'
+  /projects/summary:
+    get:
+      tags: [Projects]
+      summary: Project catalog counts for the authenticated customer
+      operationId: getProjectsCatalogSummary
+      responses:
+        '200':
+          description: True totals independent of list pagination
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsCatalogSummaryResponse'
   /projects/{projectId}:
     get:
       tags: [Projects]
@@ -5354,9 +5380,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
-        - name: search
-          in: query
-          schema: { type: string }
+        - $ref: '#/components/parameters/Search'
         - name: userId
           in: query
           schema: { type: string, format: uuid }
@@ -5502,6 +5526,7 @@ paths:
       operationId: listProjectTickets
       parameters:
         - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/Search'
         - name: status
           in: query
           schema:
@@ -5652,6 +5677,7 @@ paths:
       operationId: listProjectMilestones
       parameters:
         - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Milestones
@@ -6034,6 +6060,12 @@ components:
         type: integer
         minimum: 0
       description: Number of results to skip (default 0)
+    Search:
+      in: query
+      name: search
+      schema:
+        type: string
+      description: Free-text search across indexed entity fields (OpenSearch with SQL ILIKE fallback)
     ServiceTypeId:
       in: path
       name: id
@@ -8311,10 +8343,32 @@ components:
     AdminBillingSummaryResponse:
       type: object
       properties:
+        subscriptionsCount: { type: integer, minimum: 0 }
         activeSubscriptionsCount: { type: integer, minimum: 0 }
         openOverdueCount: { type: integer, minimum: 0 }
         openOverdueTotal: { type: number, minimum: 0 }
         unbilledTotal: { type: number, minimum: 0 }
+      required:
+        - subscriptionsCount
+        - activeSubscriptionsCount
+        - openOverdueCount
+        - openOverdueTotal
+        - unbilledTotal
+    SubscriptionsSummaryResponse:
+      type: object
+      description: Catalog counts for the current user (not limited to the loaded list page)
+      properties:
+        total: { type: integer, minimum: 0 }
+        active: { type: integer, minimum: 0 }
+        pendingBackorders: { type: integer, minimum: 0 }
+      required: [total, active, pendingBackorders]
+    ProjectsCatalogSummaryResponse:
+      type: object
+      description: Project catalog counts for the current user
+      properties:
+        total: { type: integer, minimum: 0 }
+        active: { type: integer, minimum: 0 }
+      required: [total, active]
     AdminBillNowDto:
       type: object
       properties:

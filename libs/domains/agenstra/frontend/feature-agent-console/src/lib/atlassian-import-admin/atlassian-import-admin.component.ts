@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {
@@ -28,6 +28,7 @@ import {
   type UpdateExternalImportConfigDto,
 } from '@forepath/agenstra/frontend/data-access-agent-console';
 import { Actions, ofType } from '@ngrx/effects';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { DEFAULT_ATLASSIAN_CONFLUENCE_CQL, DEFAULT_ATLASSIAN_JIRA_JQL } from './atlassian-import-defaults';
 import {
@@ -92,8 +93,10 @@ export class AtlassianImportAdminComponent implements OnInit {
   readonly adminLanes: AtlassianImportAdminLane[] = ['connections', 'configs'];
   readonly selectedLane = signal<AtlassianImportAdminLane>('connections');
 
-  connectionsSearchQuery = '';
-  configsSearchQuery = '';
+  readonly connectionsSearchQuery = signal('');
+  readonly configsSearchQuery = signal('');
+  readonly connectionsSearchQuery$ = toObservable(this.connectionsSearchQuery);
+  readonly configsSearchQuery$ = toObservable(this.configsSearchQuery);
 
   readonly jiraSwimlaneOptions: { value: TicketStatus; label: string }[] = [
     { value: 'draft', label: $localize`:@@featureAtlassianImportAdmin-swimlaneDraft:Draft` },
@@ -157,28 +160,6 @@ export class AtlassianImportAdminComponent implements OnInit {
     return c ? this.connectionLabel(c) : cfg.atlassianConnectionId;
   }
 
-  filteredConnections(): AtlassianSiteConnectionDto[] {
-    const q = this.connectionsSearchQuery.trim().toLowerCase();
-    const list = this.connections();
-
-    if (!q) {
-      return list;
-    }
-
-    return list.filter((c) => this.connectionSearchHaystack(c).includes(q));
-  }
-
-  filteredConfigs(): ExternalImportConfigDto[] {
-    const q = this.configsSearchQuery.trim().toLowerCase();
-    const list = this.configs();
-
-    if (!q) {
-      return list;
-    }
-
-    return list.filter((cfg) => this.configSearchHaystack(cfg).includes(q));
-  }
-
   jiraImportTargetLabel(status: TicketStatus | null | undefined): string {
     return this.jiraSwimlaneOptions.find((o) => o.value === status)?.label ?? status ?? '';
   }
@@ -186,6 +167,18 @@ export class AtlassianImportAdminComponent implements OnInit {
   ngOnInit(): void {
     this.facade.load();
     this.clientsFacade.loadClients({ limit: 500, offset: 0 });
+
+    this.connectionsSearchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadConnections(search.trim() || undefined);
+      });
+
+    this.configsSearchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadConfigs(search.trim() || undefined);
+      });
 
     this.actions$
       .pipe(
@@ -785,53 +778,6 @@ export class AtlassianImportAdminComponent implements OnInit {
         modal.hide();
       }
     }
-  }
-
-  private connectionSearchHaystack(c: AtlassianSiteConnectionDto): string {
-    return [
-      c.id,
-      c.label ?? '',
-      c.baseUrl,
-      this.hostnameFromBaseUrl(c.baseUrl),
-      c.accountEmail,
-      c.createdAt,
-      c.updatedAt,
-    ]
-      .join(' ')
-      .toLowerCase();
-  }
-
-  private configSearchHaystack(cfg: ExternalImportConfigDto): string {
-    return [
-      cfg.id,
-      cfg.provider,
-      cfg.importKind,
-      cfg.atlassianConnectionId,
-      cfg.clientId,
-      this.clientName(cfg.clientId),
-      this.connectionNameForConfig(cfg),
-      cfg.enabled
-        ? $localize`:@@featureAtlassianImportAdmin-badgeOn:On`
-        : $localize`:@@featureAtlassianImportAdmin-badgeOff:Off`,
-      cfg.jiraBoardId != null ? String(cfg.jiraBoardId) : '',
-      cfg.jql ?? '',
-      cfg.importTargetTicketStatus ?? '',
-      this.jiraImportTargetLabel(cfg.importTargetTicketStatus),
-      cfg.confluenceSpaceKey ?? '',
-      cfg.confluenceRootPageId ?? '',
-      cfg.cql ?? '',
-      cfg.importKind === 'confluence'
-        ? buildConfluenceImportSearchCql(cfg.cql ?? '', cfg.confluenceSpaceKey, cfg.confluenceRootPageId)
-        : '',
-      cfg.agenstraParentTicketId ?? '',
-      cfg.agenstraParentFolderId ?? '',
-      cfg.lastRunAt ?? '',
-      cfg.lastError ?? '',
-      cfg.createdAt,
-      cfg.updatedAt,
-    ]
-      .join(' ')
-      .toLowerCase();
   }
 
   private hostnameFromBaseUrl(baseUrl: string): string {
