@@ -15,7 +15,9 @@ import {
   type FilterRuleWorkspaceSyncDto,
   type UpdateFilterRuleDto,
 } from '@forepath/agenstra/frontend/data-access-agent-console';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import { Actions, ofType } from '@ngrx/effects';
+import { combineLatest, filter } from 'rxjs';
 
 import {
   filterRuleDirectionLabel,
@@ -29,7 +31,7 @@ import {
 
 @Component({
   selector: 'framework-rule-manager',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, InfiniteScrollDirective, ListAppendFooterComponent],
   templateUrl: './rule-manager.component.html',
   styleUrls: ['./rule-manager.component.scss'],
   standalone: true,
@@ -55,6 +57,9 @@ export class RuleManagerComponent implements OnInit {
   readonly error$ = this.filterRulesFacade.error$;
   readonly saving$ = this.filterRulesFacade.saving$;
   readonly deleting$ = this.filterRulesFacade.deleting$;
+  readonly hasMore$ = this.filterRulesFacade.hasMore$;
+  readonly appendLoading$ = this.filterRulesFacade.appendLoading$;
+  readonly appendError$ = this.filterRulesFacade.appendError$;
 
   readonly clients = toSignal(this.clientsFacade.clients$, { initialValue: [] as ClientResponseDto[] });
 
@@ -84,7 +89,21 @@ export class RuleManagerComponent implements OnInit {
 
   ngOnInit(): void {
     this.filterRulesFacade.load();
-    this.clientsFacade.loadClients({ limit: 500, offset: 0 });
+    this.clientsFacade.loadClients();
+    // Workspace pickers need the full client list; drain pages without a search API.
+    combineLatest([
+      this.clientsFacade.hasMore$,
+      this.clientsFacade.appendLoading$,
+      this.clientsFacade.loading$,
+      this.clientsFacade.appendError$,
+    ])
+      .pipe(
+        filter(
+          ([hasMore, appendLoading, loading, appendError]) => hasMore && !appendLoading && !loading && !appendError,
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.clientsFacade.loadMoreClients());
     this.actions$
       .pipe(ofType(createFilterRuleSuccess, updateFilterRuleSuccess), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
@@ -96,6 +115,10 @@ export class RuleManagerComponent implements OnInit {
       this.hideModal(this.deleteModal);
       this.ruleToDelete = null;
     });
+  }
+
+  onLoadMoreRules(): void {
+    this.filterRulesFacade.loadMore();
   }
 
   filteredRules(): FilterRuleResponseDto[] {

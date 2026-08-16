@@ -1,6 +1,6 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
@@ -11,7 +11,8 @@ import {
   type UpdateAdminProjectDto,
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import { AuthenticationFacade, type UserResponseDto } from '@forepath/identity/frontend';
-import { combineLatestWith, map } from 'rxjs';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { BillingAdminUserSelectComponent } from '../billing-admin-user-select/billing-admin-user-select.component';
 import {
@@ -27,7 +28,14 @@ import { showBillingModal, watchBillingMutationModalClose } from '../billing-mod
 @Component({
   selector: 'framework-admin-projects-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BillingAdminUserSelectComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    BillingAdminUserSelectComponent,
+    InfiniteScrollDirective,
+    ListAppendFooterComponent,
+  ],
   providers: [DecimalPipe],
   templateUrl: './admin-projects-page.component.html',
   styleUrls: ['./admin-projects-page.component.scss'],
@@ -38,7 +46,7 @@ export class AdminProjectsPageComponent implements OnInit {
   @ViewChild('deleteModal', { static: false }) private deleteModal!: ElementRef<HTMLDivElement>;
   @ViewChild('createUserSelect') private createUserSelect?: BillingAdminUserSelectComponent;
 
-  private readonly facade = inject(ProjectsFacade);
+  readonly facade = inject(ProjectsFacade);
   private readonly adminService = inject(AdminProjectsService);
   private readonly authFacade = inject(AuthenticationFacade);
   private readonly destroyRef = inject(DestroyRef);
@@ -46,24 +54,17 @@ export class AdminProjectsPageComponent implements OnInit {
 
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
-  readonly projects$ = this.facade.adminProjects$.pipe(
-    combineLatestWith(this.searchQuery$),
-    map(([projects, q]) => {
-      const term = q.trim().toLowerCase();
-
-      if (!term) return projects;
-
-      return projects.filter((p) => JSON.stringify(p).toLowerCase().includes(term));
-    }),
-  );
 
   readonly loading$ = this.facade.loading$;
   readonly creating$ = this.facade.creating$;
   readonly updating$ = this.facade.updating$;
   readonly deleting$ = this.facade.deleting$;
   readonly error$ = this.facade.error$;
+  readonly hasMore$ = this.facade.adminHasMore$;
+  readonly appendLoading$ = this.facade.adminAppendLoading$;
+  readonly appendError$ = this.facade.adminAppendError$;
 
-  readonly projects = toSignal(this.projects$, { initialValue: [] as AdminProjectListItem[] });
+  readonly projects = toSignal(this.facade.adminProjects$, { initialValue: [] as AdminProjectListItem[] });
   readonly users = toSignal(this.authFacade.users$, { initialValue: [] as UserResponseDto[] });
 
   readonly usersWithoutProject = computed(() => this.users());
@@ -78,6 +79,16 @@ export class AdminProjectsPageComponent implements OnInit {
     this.facade.loadAdminProjects();
     this.authFacade.loadUsers();
     this.registerModalCloseWatchers();
+
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadAdminProjects({ search: search.trim() || undefined });
+      });
+  }
+
+  onSearchChange(value: string): void {
+    this.searchQuery.set(value);
   }
 
   openCreateModal(): void {
@@ -174,7 +185,7 @@ export class AdminProjectsPageComponent implements OnInit {
   }
 
   private registerModalCloseWatchers(): void {
-    const reload = (): void => this.facade.loadAdminProjects();
+    const reload = (): void => this.facade.loadAdminProjects({ search: this.searchQuery().trim() || undefined });
 
     watchBillingMutationModalClose({
       loading$: this.creating$,

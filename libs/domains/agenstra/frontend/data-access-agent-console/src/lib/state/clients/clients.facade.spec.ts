@@ -10,6 +10,7 @@ import {
   loadClient,
   loadClientUsers,
   loadClients,
+  loadMoreClients,
   removeClientUser,
   setActiveClient,
   updateClient,
@@ -263,6 +264,12 @@ describe('ClientsFacade', () => {
       facade.loadClients();
 
       expect(store.dispatch).toHaveBeenCalledWith(loadClients({ params: undefined }));
+    });
+
+    it('should dispatch loadMoreClients action', () => {
+      facade.loadMoreClients();
+
+      expect(store.dispatch).toHaveBeenCalledWith(loadMoreClients());
     });
 
     it('should dispatch loadClient action', () => {

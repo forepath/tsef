@@ -28,6 +28,7 @@ import {
   type TaxPreviewRates,
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import { AuthenticationFacade, type UserResponseDto } from '@forepath/identity/frontend';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import type {
   ApexAxisChartSeries,
   ApexChart,
@@ -38,7 +39,17 @@ import type {
   ApexXAxis,
 } from 'ng-apexcharts';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { combineLatestWith, filter, finalize, map, Observable, pairwise, Subscription } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  finalize,
+  map,
+  Observable,
+  pairwise,
+  skip,
+  Subscription,
+} from 'rxjs';
 
 import { BillingAdminSubscriptionSelectComponent } from '../billing-admin-subscription-select/billing-admin-subscription-select.component';
 import { BillingAdminUserSelectComponent } from '../billing-admin-user-select/billing-admin-user-select.component';
@@ -79,6 +90,8 @@ type AdminBillingMobilePanel = 'overview' | 'invoices';
     NgApexchartsModule,
     BillingAdminUserSelectComponent,
     BillingAdminSubscriptionSelectComponent,
+    InfiniteScrollDirective,
+    ListAppendFooterComponent,
   ],
   providers: [DatePipe],
   templateUrl: './admin-billing-page.component.html',
@@ -100,7 +113,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   private createInvoiceSubscriptionsRequest?: Subscription;
 
   private readonly adminBillingFacade = inject(AdminBillingFacade);
-  private readonly invoiceManagerFacade = inject(AdminInvoiceManagerFacade);
+  readonly invoiceManagerFacade = inject(AdminInvoiceManagerFacade);
   private readonly adminBillingService = inject(AdminBillingService);
   private readonly invoicesFacade = inject(InvoicesFacade);
   private readonly authFacade = inject(AuthenticationFacade);
@@ -159,17 +172,11 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   readonly invoicesIssuing$ = this.invoiceManagerFacade.issuing$;
   readonly invoicesDeleting$ = this.invoiceManagerFacade.deleting$;
   readonly invoicesError$ = this.invoiceManagerFacade.error$;
+  readonly invoicesHasMore$ = this.invoiceManagerFacade.hasMore$;
+  readonly invoicesAppendLoading$ = this.invoiceManagerFacade.appendLoading$;
+  readonly invoicesAppendError$ = this.invoiceManagerFacade.appendError$;
 
-  readonly invoices$ = this.invoiceManagerFacade.invoices$.pipe(
-    combineLatestWith(this.invoiceSearch$),
-    map(([invoices, searchQuery]) => {
-      if (!searchQuery.trim()) return invoices;
-
-      const term = searchQuery.trim().toLowerCase();
-
-      return invoices.filter((invoice) => JSON.stringify(invoice).toLowerCase().includes(term));
-    }),
-  );
+  readonly invoices$ = this.invoiceManagerFacade.invoices$;
 
   readonly users = toSignal(this.authFacade.users$, { initialValue: [] as UserResponseDto[] });
   readonly statisticsSummary = toSignal(this.statisticsSummary$, { initialValue: null });
@@ -214,6 +221,12 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     this.loadStatistics();
     this.authFacade.loadUsers();
     this.refreshTaxRates();
+
+    this.invoiceSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.invoiceManagerFacade.loadInvoices({ search: search.trim() || undefined });
+      });
 
     this.billNowResult$
       .pipe(
@@ -479,7 +492,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
 
   private refreshDashboard(): void {
     this.adminBillingFacade.loadSummary();
-    this.invoiceManagerFacade.loadInvoices();
+    this.invoiceManagerFacade.loadInvoices({ search: this.invoiceSearch().trim() || undefined });
   }
 
   private loadStatistics(): void {

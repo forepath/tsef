@@ -29,7 +29,7 @@ describe('AdminInvoiceManagerFacade', () => {
   it('loadInvoices dispatches loadAdminInvoiceManager', () => {
     facade.loadInvoices();
 
-    expect(store.dispatch).toHaveBeenCalledWith(loadAdminInvoiceManager());
+    expect(store.dispatch).toHaveBeenCalledWith(loadAdminInvoiceManager({}));
   });
 
   it('createManualInvoice dispatches action', () => {

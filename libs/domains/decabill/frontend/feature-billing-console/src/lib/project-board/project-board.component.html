@@ -94,59 +94,6 @@
               (dragleave)="onLaneDragLeave($event, status)"
               (drop)="onLaneDrop($event, status)"
             >
-              @for (row of laneRows; track row.ticket.id) {
-                <div
-                  class="list-group-item project-board__card border-bottom"
-                  [class.project-board__card--nested]="row.depth > 0"
-                  [class.project-board__card--draggable]="isTicketDraggable(row.ticket)"
-                  [class.project-board__card--dragging]="draggedTicket()?.id === row.ticket.id"
-                  [style.--project-board-nest-depth]="row.depth"
-                  [attr.draggable]="isTicketDraggable(row.ticket) ? 'true' : null"
-                  (dragstart)="onTicketDragStart($event, row.ticket)"
-                  (dragend)="onTicketDragEnd()"
-                  (dragover)="onCardDragOver($event)"
-                  (drop)="onLaneDrop($event, status)"
-                  (click)="onTicketCardClick(row.ticket)"
-                  (keyup.enter)="onTicketCardClick(row.ticket)"
-                  tabindex="0"
-                  role="button"
-                >
-                  <div class="project-board__card-content">
-                    <div class="d-flex align-items-center gap-2 min-width-0 w-100">
-                      <div class="fw-medium text-truncate flex-grow-1 min-width-0" [title]="row.ticket.title">
-                        @if (row.ticket.shas.short) {
-                          <small class="text-muted small">{{ row.ticket.shas.short }}</small>
-                        }
-                        {{ row.ticket.title }}
-                      </div>
-                    </div>
-                    <div class="project-board__meta-chips d-flex flex-wrap align-items-center gap-1 mt-1">
-                      <small
-                        class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
-                        [ngClass]="ticketPriorityBadgeClass(row.ticket.priority)"
-                        [attr.title]="row.ticket.priority"
-                        >{{ priorityLabel(row.ticket.priority) }}</small
-                      >
-                      <small
-                        class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
-                        [ngClass]="ticketStatusBadgeClass(row.ticket.status)"
-                        [attr.title]="row.ticket.status"
-                        >{{ laneLabel(row.ticket.status) }}</small
-                      >
-                      @if (row.ticket.subtaskCounts; as sc) {
-                        @if (sc.open + sc.done > 0) {
-                          <small
-                            class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
-                            i18n-title="@@featureProjectBoard-subtaskCountTitle"
-                            title="Direct subtasks (done / total)"
-                            >{{ sc.done }}/{{ sc.open + sc.done }}</small
-                          >
-                        }
-                      }
-                    </div>
-                  </div>
-                </div>
-              }
               @if (byStatus[status].length === 0) {
                 <div
                   class="list-group-item text-muted small py-3 text-center project-board__empty-lane"
@@ -161,6 +108,66 @@
                 >
                   No matching tickets
                 </div>
+              } @else {
+                <cdk-virtual-scroll-viewport
+                  class="project-board__viewport"
+                  [itemSize]="laneVirtualItemSize"
+                  [minBufferPx]="laneVirtualItemSize * 4"
+                  [maxBufferPx]="laneVirtualItemSize * 8"
+                >
+                  <div
+                    *cdkVirtualFor="let row of laneRows; trackBy: trackLaneRowByTicketId"
+                    class="list-group-item project-board__card border-bottom"
+                    [class.project-board__card--nested]="row.depth > 0"
+                    [class.project-board__card--draggable]="isTicketDraggable(row.ticket)"
+                    [class.project-board__card--dragging]="draggedTicket()?.id === row.ticket.id"
+                    [style.--project-board-nest-depth]="row.depth"
+                    [attr.draggable]="isTicketDraggable(row.ticket) ? 'true' : null"
+                    (dragstart)="onTicketDragStart($event, row.ticket)"
+                    (dragend)="onTicketDragEnd()"
+                    (dragover)="onCardDragOver($event)"
+                    (drop)="onLaneDrop($event, status)"
+                    (click)="onTicketCardClick(row.ticket)"
+                    (keyup.enter)="onTicketCardClick(row.ticket)"
+                    tabindex="0"
+                    role="button"
+                  >
+                    <div class="project-board__card-content">
+                      <div class="d-flex align-items-center gap-2 min-width-0 w-100">
+                        <div class="fw-medium text-truncate flex-grow-1 min-width-0" [title]="row.ticket.title">
+                          @if (row.ticket.shas.short) {
+                            <small class="text-muted small">{{ row.ticket.shas.short }}</small>
+                          }
+                          {{ row.ticket.title }}
+                        </div>
+                      </div>
+                      <div class="project-board__meta-chips d-flex flex-wrap align-items-center gap-1 mt-1">
+                        <small
+                          class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                          [ngClass]="ticketPriorityBadgeClass(row.ticket.priority)"
+                          [attr.title]="row.ticket.priority"
+                          >{{ priorityLabel(row.ticket.priority) }}</small
+                        >
+                        <small
+                          class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                          [ngClass]="ticketStatusBadgeClass(row.ticket.status)"
+                          [attr.title]="row.ticket.status"
+                          >{{ laneLabel(row.ticket.status) }}</small
+                        >
+                        @if (row.ticket.subtaskCounts; as sc) {
+                          @if (sc.open + sc.done > 0) {
+                            <small
+                              class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                              i18n-title="@@featureProjectBoard-subtaskCountTitle"
+                              title="Direct subtasks (done / total)"
+                              >{{ sc.done }}/{{ sc.open + sc.done }}</small
+                            >
+                          }
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </cdk-virtual-scroll-viewport>
               }
             </div>
           </div>

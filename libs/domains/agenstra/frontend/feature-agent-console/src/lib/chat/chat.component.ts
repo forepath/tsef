@@ -64,6 +64,7 @@ import {
   type WorkspaceConfigurationSettingKey,
   type WorkspaceConfigurationSettingResponseDto,
 } from '@forepath/agenstra/frontend/data-access-agent-console';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import { ENVIRONMENT, type Environment } from '@forepath/shared/frontend/util-configuration';
 import { StandaloneLoadingService } from '@forepath/shared/frontend';
 import {
@@ -148,6 +149,8 @@ type ChatMessageWithFilter = {
     DeploymentManagerComponent,
     ContainerStatsStatusBarComponent,
     AgentChatEventRowComponent,
+    InfiniteScrollDirective,
+    ListAppendFooterComponent,
   ],
   styleUrls: ['./chat.component.scss'],
   templateUrl: './chat.component.html',
@@ -278,6 +281,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.clientsFacade.clients$,
   ]).pipe(map(([loading, clients]) => loading && clients.length === 0));
   readonly clientsError$: Observable<string | null> = this.clientsFacade.error$;
+  readonly clientsHasMore$: Observable<boolean> = this.clientsFacade.hasMore$;
+  readonly clientsAppendLoading$: Observable<boolean> = this.clientsFacade.appendLoading$;
+  readonly clientsAppendError$: Observable<string | null> = this.clientsFacade.appendError$;
   readonly clientsDeleting$: Observable<boolean> = this.clientsFacade.deleting$;
   readonly clientsCreating$: Observable<boolean> = this.clientsFacade.creating$;
   readonly clientsUpdating$: Observable<boolean> = this.clientsFacade.updating$;
@@ -312,6 +318,33 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         this.agentsFacade.getClientAgentsLoading$(clientId),
         this.agentsFacade.getClientAgents$(clientId),
       ]).pipe(map(([loading, agents]) => loading && agents.length === 0));
+    }),
+  );
+  readonly agentsHasMore$: Observable<boolean> = this.activeClientId$.pipe(
+    switchMap((clientId) => {
+      if (!clientId) {
+        return of(false);
+      }
+
+      return this.agentsFacade.getClientAgentsHasMore$(clientId);
+    }),
+  );
+  readonly agentsAppendLoading$: Observable<boolean> = this.activeClientId$.pipe(
+    switchMap((clientId) => {
+      if (!clientId) {
+        return of(false);
+      }
+
+      return this.agentsFacade.getClientAgentsAppendLoading$(clientId);
+    }),
+  );
+  readonly agentsAppendError$: Observable<string | null> = this.activeClientId$.pipe(
+    switchMap((clientId) => {
+      if (!clientId) {
+        return of(null);
+      }
+
+      return this.agentsFacade.getClientAgentsAppendError$(clientId);
     }),
   );
   readonly agentsDeleting$: Observable<boolean> = this.activeClientId$.pipe(
@@ -1973,6 +2006,18 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           this.agentsFacade.loadClientAgents(clientId);
         }
       });
+  }
+
+  onLoadMoreClients(): void {
+    this.clientsFacade.loadMoreClients();
+  }
+
+  onLoadMoreAgents(): void {
+    const clientId = this.activeClientIdSignal();
+
+    if (clientId) {
+      this.agentsFacade.loadMoreClientAgents(clientId);
+    }
   }
 
   onClientSelect(clientId: string, navigate = true): void {

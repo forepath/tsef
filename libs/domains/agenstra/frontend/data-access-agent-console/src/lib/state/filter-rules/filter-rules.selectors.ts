@@ -13,3 +13,9 @@ export const selectFilterRulesError = createSelector(selectFilterRulesState, (s)
 export const selectFilterRulesSaving = createSelector(selectFilterRulesState, (s) => s.saving);
 
 export const selectFilterRulesDeleting = createSelector(selectFilterRulesState, (s) => s.deleting);
+
+export const selectFilterRulesHasMore = createSelector(selectFilterRulesState, (s) => s.hasMore);
+
+export const selectFilterRulesAppendLoading = createSelector(selectFilterRulesState, (s) => s.appendLoading);
+
+export const selectFilterRulesAppendError = createSelector(selectFilterRulesState, (s) => s.appendError);

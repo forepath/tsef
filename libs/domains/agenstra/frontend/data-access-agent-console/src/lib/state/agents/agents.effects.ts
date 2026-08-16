@@ -23,10 +23,12 @@ import {
   loadClientAgentModelsFailure,
   loadClientAgentModelsSuccess,
   loadClientAgents,
-  loadClientAgentsBatch,
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
+  loadMoreClientAgents,
+  loadMoreClientAgentsFailure,
+  loadMoreClientAgentsSuccess,
   restartClientAgent,
   restartClientAgentFailure,
   restartClientAgentSuccess,
@@ -40,7 +42,7 @@ import {
   updateClientAgentFailure,
   updateClientAgentSuccess,
 } from './agents.actions';
-import { selectAgentsEntities } from './agents.selectors';
+import { selectAgentsEntities, selectAgentsState } from './agents.selectors';
 
 /**
  * Normalizes error messages from HTTP errors.
@@ -68,25 +70,17 @@ export const loadClientAgents$ = createEffect(
     return actions$.pipe(
       ofType(loadClientAgents),
       switchMap(({ clientId }) => {
-        // Start with offset 0, limit 10, ignore user params for batch loading
         const batchParams = { limit: BATCH_SIZE, offset: 0 };
 
         return agentsService.listClientAgents(clientId, batchParams).pipe(
-          switchMap((agents) => {
-            if (agents.length === 0) {
-              // No entries, dispatch success with empty array
-              return of(loadClientAgentsSuccess({ clientId, agents: [] }));
-            }
-
-            // Has entries, check if we got a full batch (might be more)
-            if (agents.length < BATCH_SIZE) {
-              // Partial batch, we're done
-              return of(loadClientAgentsSuccess({ clientId, agents }));
-            }
-
-            // Full batch, load next batch
-            return of(loadClientAgentsBatch({ clientId, offset: BATCH_SIZE, accumulatedAgents: agents }));
-          }),
+          map((agents) =>
+            loadClientAgentsSuccess({
+              clientId,
+              agents,
+              hasMore: agents.length === BATCH_SIZE,
+              nextOffset: agents.length,
+            }),
+          ),
           catchError((error) => of(loadClientAgentsFailure({ clientId, error: normalizeError(error) }))),
         );
       }),
@@ -95,34 +89,26 @@ export const loadClientAgents$ = createEffect(
   { functional: true },
 );
 
-export const loadClientAgentsBatch$ = createEffect(
-  (actions$ = inject(Actions), agentsService = inject(AgentsService)) => {
+export const loadMoreClientAgents$ = createEffect(
+  (actions$ = inject(Actions), agentsService = inject(AgentsService), store = inject(Store)) => {
     return actions$.pipe(
-      ofType(loadClientAgentsBatch),
-      switchMap(({ clientId, offset, accumulatedAgents }) => {
+      ofType(loadMoreClientAgents),
+      withLatestFrom(store.select(selectAgentsState)),
+      filter(([{ clientId }, state]) => Boolean(state.hasMore[clientId]) && !state.loading[clientId]),
+      exhaustMap(([{ clientId }, state]) => {
+        const offset = state.nextOffset[clientId] ?? 0;
         const batchParams = { limit: BATCH_SIZE, offset };
 
         return agentsService.listClientAgents(clientId, batchParams).pipe(
-          switchMap((agents) => {
-            const newAccumulated = [...accumulatedAgents, ...agents];
-
-            if (agents.length === 0) {
-              // No more entries, dispatch success with all accumulated
-              return of(loadClientAgentsSuccess({ clientId, agents: newAccumulated }));
-            }
-
-            // Has entries, check if we got a full batch (might be more)
-            if (agents.length < BATCH_SIZE) {
-              // Partial batch, we're done
-              return of(loadClientAgentsSuccess({ clientId, agents: newAccumulated }));
-            }
-
-            // Full batch, load next batch
-            return of(
-              loadClientAgentsBatch({ clientId, offset: offset + BATCH_SIZE, accumulatedAgents: newAccumulated }),
-            );
-          }),
-          catchError((error) => of(loadClientAgentsFailure({ clientId, error: normalizeError(error) }))),
+          map((agents) =>
+            loadMoreClientAgentsSuccess({
+              clientId,
+              agents,
+              hasMore: agents.length === BATCH_SIZE,
+              nextOffset: offset + agents.length,
+            }),
+          ),
+          catchError((error) => of(loadMoreClientAgentsFailure({ clientId, error: normalizeError(error) }))),
         );
       }),
     );

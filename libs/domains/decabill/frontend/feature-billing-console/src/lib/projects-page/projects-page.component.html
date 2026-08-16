@@ -16,7 +16,13 @@
     />
   </div>
 
-  <div class="flex-grow-1 overflow-auto">
+  <div
+    class="flex-grow-1 overflow-auto"
+    forepathInfiniteScroll
+    [paused]="!!(appendError$ | async)"
+    [disabled]="!(hasMore$ | async) || !!(appendLoading$ | async) || !!(loading$ | async)"
+    (reachedEnd)="facade.loadMore()"
+  >
     @if (loading$ | async) {
       <div class="d-flex justify-content-center p-4">
         <div class="spinner-border text-primary" role="status"></div>
@@ -38,8 +44,8 @@
               <div class="small text-muted d-flex align-items-center gap-3 flex-wrap">
                 <span [ngClass]="projectStatusTextClass(project.status)">
                   <i class="bi me-1" [ngClass]="projectStatusIconClass(project.status)" aria-hidden="true"></i
-                  >{{ projectStatusLabel(project.status) }}
-                </span>
+                  >{{ projectStatusLabel(project.status) }}</span
+                >
                 <span
                   ><i class="bi bi-cash me-1" aria-hidden="true"></i
                   >{{ hourlyRateLabel(project.hourlyRateNet, project.currency) }}</span
@@ -56,6 +62,13 @@
             </a>
           }
         </div>
+        @if ((hasMore$ | async) || (appendError$ | async)) {
+          <forepath-list-append-footer
+            [loading]="!!(appendLoading$ | async)"
+            [error]="!!(appendError$ | async)"
+            (retry)="facade.loadMore()"
+          />
+        }
       }
     }
   </div>

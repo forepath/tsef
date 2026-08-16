@@ -40,3 +40,18 @@ export const selectAdminInvoiceManagerActionLoading = createSelector(
 );
 
 export const selectAdminInvoiceManagerError = createSelector(selectAdminInvoiceManagerState, (state) => state.error);
+
+export const selectAdminInvoiceManagerHasMore = createSelector(
+  selectAdminInvoiceManagerState,
+  (state) => state.hasMore,
+);
+
+export const selectAdminInvoiceManagerAppendLoading = createSelector(
+  selectAdminInvoiceManagerState,
+  (state) => state.appendLoading,
+);
+
+export const selectAdminInvoiceManagerAppendError = createSelector(
+  selectAdminInvoiceManagerState,
+  (state) => state.appendError,
+);

@@ -1,3 +1,4 @@
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import {
   afterNextRender,
@@ -60,6 +61,9 @@ const ALL_TICKET_STATUSES: ProjectTicketStatus[] = ['draft', 'todo', 'in_progres
 
 const PRIORITY_OPTIONS: ProjectTicketPriority[] = ['low', 'medium', 'high', 'critical'];
 
+/** Fixed row height for CDK virtual scroll (title + meta chips + list-group padding). */
+const PROJECT_BOARD_VIRTUAL_ITEM_SIZE_PX = 88;
+
 interface ProjectTicketDetailSubtaskRow {
   ticket: ProjectTicketResponse;
   depth: number;
@@ -82,7 +86,7 @@ function isEditableDomTarget(target: EventTarget | null): boolean {
 @Component({
   selector: 'framework-project-board',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProjectMilestoneSelectComponent, ProjectTicketEditorComponent],
+  imports: [CommonModule, FormsModule, ScrollingModule, ProjectMilestoneSelectComponent, ProjectTicketEditorComponent],
   templateUrl: './project-board.component.html',
   styleUrls: ['./project-board.component.scss'],
 })
@@ -105,6 +109,7 @@ export class ProjectBoardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
+  readonly laneVirtualItemSize = PROJECT_BOARD_VIRTUAL_ITEM_SIZE_PX;
   readonly lanes = BOARD_LANE_STATUSES;
   readonly statusOptions = ALL_TICKET_STATUSES;
   readonly priorityOptions = PRIORITY_OPTIONS;
@@ -275,6 +280,10 @@ export class ProjectBoardComponent implements OnInit {
     const needle = query.toLowerCase();
 
     return list.filter((row) => JSON.stringify(row.ticket).toLowerCase().includes(needle));
+  }
+
+  trackLaneRowByTicketId(_index: number, row: ProjectTicketBoardRow): string {
+    return row.ticket.id;
   }
 
   laneLabel(status: string): string {

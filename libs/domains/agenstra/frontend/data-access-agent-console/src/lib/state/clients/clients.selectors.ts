@@ -40,6 +40,14 @@ export const selectClientsLoadingAny = createSelector(
 // Error selector
 export const selectClientsError = createSelector(selectClientsState, (state) => state.error);
 
+export const selectClientsHasMore = createSelector(selectClientsState, (state) => state.hasMore);
+
+export const selectClientsNextOffset = createSelector(selectClientsState, (state) => state.nextOffset);
+
+export const selectClientsAppendLoading = createSelector(selectClientsState, (state) => state.appendLoading);
+
+export const selectClientsAppendError = createSelector(selectClientsState, (state) => state.appendError);
+
 // Derived selectors
 export const selectClientsCount = createSelector(selectClients, (clients) => clients.length);
 

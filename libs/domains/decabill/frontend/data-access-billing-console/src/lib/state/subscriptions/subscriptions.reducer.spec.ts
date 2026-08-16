@@ -12,7 +12,9 @@ import {
   loadSubscription,
   loadSubscriptionFailure,
   loadSubscriptions,
-  loadSubscriptionsBatch,
+  loadMoreSubscriptions,
+  loadMoreSubscriptionsSuccess,
+  loadMoreSubscriptionsFailure,
   loadSubscriptionsFailure,
   loadSubscriptionsSuccess,
   loadSubscriptionSuccess,
@@ -69,20 +71,39 @@ describe('subscriptionsReducer', () => {
     });
   });
 
-  describe('loadSubscriptionsBatch', () => {
-    it('should set accumulated subscriptions and keep loading true', () => {
+  describe('loadMoreSubscriptions', () => {
+    it('should set appendLoading', () => {
       const state: SubscriptionsState = {
         ...initialSubscriptionsState,
-        loading: true,
+        hasMore: true,
+        nextOffset: 10,
+      };
+      const newState = subscriptionsReducer(state, loadMoreSubscriptions({ offset: 10 }));
+
+      expect(newState.appendLoading).toBe(true);
+      expect(newState.appendError).toBeNull();
+    });
+  });
+
+  describe('loadMoreSubscriptionsSuccess', () => {
+    it('should append subscriptions', () => {
+      const state: SubscriptionsState = {
+        ...initialSubscriptionsState,
+        entities: [mockSubscription],
+        appendLoading: true,
       };
       const newState = subscriptionsReducer(
         state,
-        loadSubscriptionsBatch({ offset: 10, accumulatedSubscriptions: [mockSubscription, mockSubscription2] }),
+        loadMoreSubscriptionsSuccess({
+          subscriptions: [mockSubscription2],
+          hasMore: false,
+          nextOffset: 2,
+        }),
       );
 
       expect(newState.entities).toEqual([mockSubscription, mockSubscription2]);
-      expect(newState.loading).toBe(true);
-      expect(newState.error).toBeNull();
+      expect(newState.appendLoading).toBe(false);
+      expect(newState.hasMore).toBe(false);
     });
   });
 
@@ -94,7 +115,11 @@ describe('subscriptionsReducer', () => {
       };
       const newState = subscriptionsReducer(
         state,
-        loadSubscriptionsSuccess({ subscriptions: [mockSubscription, mockSubscription2] }),
+        loadSubscriptionsSuccess({
+          subscriptions: [mockSubscription, mockSubscription2],
+          hasMore: false,
+          nextOffset: 2,
+        }),
       );
 
       expect(newState.entities).toEqual([mockSubscription, mockSubscription2]);

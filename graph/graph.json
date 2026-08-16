@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-16T08:24:52.822Z",
+  "generatedAt": "2026-08-16T08:26:01.766Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -1228,6 +1228,27 @@
         "domain": "shared",
         "context": "backend",
         "featureGroup": "util"
+      }
+    },
+    {
+      "id": "project:shared-frontend-ui-lists",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-frontend-ui-lists",
+        "root": "libs/domains/shared/frontend/ui-lists",
+        "tags": [
+          "domain:shared",
+          "scope:frontend",
+          "type:ui"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "frontend",
+        "featureGroup": "ui"
       }
     },
     {
@@ -10991,6 +11012,15 @@
         "path": "libs/domains/shared/backend/util-otel/src/lib/otel.module.ts",
         "languageOrKind": "ts",
         "projectName": "shared-backend-util-otel"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/frontend/ui-lists/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/frontend/ui-lists/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-frontend-ui-lists"
       }
     },
     {
@@ -29201,6 +29231,16 @@
       }
     },
     {
+      "id": "feature-group:ui",
+      "type": "feature-group",
+      "attrs": {
+        "name": "ui",
+        "kind": "feature-group",
+        "label": "feature group",
+        "source": "tag"
+      }
+    },
+    {
       "id": "context:native",
       "type": "context",
       "attrs": {
@@ -36585,6 +36625,11 @@
     {
       "from": "project:shared-backend-util-otel",
       "to": "file:libs/domains/shared/backend/util-otel/src/lib/otel.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-frontend-ui-lists",
+      "to": "file:libs/domains/shared/frontend/ui-lists/README.md",
       "type": "contains"
     },
     {
@@ -67425,6 +67470,21 @@
     {
       "from": "project:shared-backend-util-otel",
       "to": "feature-group:util",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-frontend-ui-lists",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-frontend-ui-lists",
+      "to": "context:frontend",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-frontend-ui-lists",
+      "to": "feature-group:ui",
       "type": "belongs_to"
     },
     {

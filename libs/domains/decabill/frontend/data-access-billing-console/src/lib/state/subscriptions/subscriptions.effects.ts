@@ -14,10 +14,12 @@ import {
   loadSubscription,
   loadSubscriptionFailure,
   loadSubscriptions,
-  loadSubscriptionsBatch,
   loadSubscriptionsFailure,
   loadSubscriptionsSuccess,
   loadSubscriptionSuccess,
+  loadMoreSubscriptions,
+  loadMoreSubscriptionsFailure,
+  loadMoreSubscriptionsSuccess,
   resumeSubscription,
   resumeSubscriptionFailure,
   resumeSubscriptionSuccess,
@@ -52,17 +54,13 @@ export const loadSubscriptions$ = createEffect(
         const batchParams = { limit: BATCH_SIZE, offset: 0, ...params };
 
         return subscriptionsService.listSubscriptions(batchParams).pipe(
-          switchMap((subscriptions) => {
-            if (subscriptions.length === 0) {
-              return of(loadSubscriptionsSuccess({ subscriptions: [] }));
-            }
-
-            if (subscriptions.length < BATCH_SIZE) {
-              return of(loadSubscriptionsSuccess({ subscriptions }));
-            }
-
-            return of(loadSubscriptionsBatch({ offset: BATCH_SIZE, accumulatedSubscriptions: subscriptions }));
-          }),
+          map((subscriptions) =>
+            loadSubscriptionsSuccess({
+              subscriptions,
+              hasMore: subscriptions.length === BATCH_SIZE,
+              nextOffset: subscriptions.length,
+            }),
+          ),
           catchError((error) => of(loadSubscriptionsFailure({ error: normalizeError(error) }))),
         );
       }),
@@ -71,33 +69,22 @@ export const loadSubscriptions$ = createEffect(
   { functional: true },
 );
 
-export const loadSubscriptionsBatch$ = createEffect(
+export const loadMoreSubscriptions$ = createEffect(
   (actions$ = inject(Actions), subscriptionsService = inject(SubscriptionsService)) => {
     return actions$.pipe(
-      ofType(loadSubscriptionsBatch),
-      switchMap(({ offset, accumulatedSubscriptions }) => {
-        const batchParams = { limit: BATCH_SIZE, offset };
+      ofType(loadMoreSubscriptions),
+      switchMap(({ offset, params }) => {
+        const batchParams = { limit: BATCH_SIZE, offset, ...params };
 
         return subscriptionsService.listSubscriptions(batchParams).pipe(
-          switchMap((subscriptions) => {
-            const newAccumulated = [...accumulatedSubscriptions, ...subscriptions];
-
-            if (subscriptions.length === 0) {
-              return of(loadSubscriptionsSuccess({ subscriptions: newAccumulated }));
-            }
-
-            if (subscriptions.length < BATCH_SIZE) {
-              return of(loadSubscriptionsSuccess({ subscriptions: newAccumulated }));
-            }
-
-            return of(
-              loadSubscriptionsBatch({
-                offset: offset + BATCH_SIZE,
-                accumulatedSubscriptions: newAccumulated,
-              }),
-            );
-          }),
-          catchError((error) => of(loadSubscriptionsFailure({ error: normalizeError(error) }))),
+          map((subscriptions) =>
+            loadMoreSubscriptionsSuccess({
+              subscriptions,
+              hasMore: subscriptions.length === BATCH_SIZE,
+              nextOffset: offset + subscriptions.length,
+            }),
+          ),
+          catchError((error) => of(loadMoreSubscriptionsFailure({ error: normalizeError(error) }))),
         );
       }),
     );

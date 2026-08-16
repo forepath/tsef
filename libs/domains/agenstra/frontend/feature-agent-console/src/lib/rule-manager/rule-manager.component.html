@@ -131,6 +131,20 @@
             </div>
           }
         </div>
+        @if ((hasMore$ | async) || (appendError$ | async)) {
+          <div
+            forepathInfiniteScroll
+            [paused]="!!(appendError$ | async)"
+            [disabled]="!(hasMore$ | async) || !!(appendLoading$ | async) || !!(loading$ | async)"
+            (reachedEnd)="onLoadMoreRules()"
+          >
+            <forepath-list-append-footer
+              [loading]="!!(appendLoading$ | async)"
+              [error]="!!(appendError$ | async)"
+              (retry)="onLoadMoreRules()"
+            />
+          </div>
+        }
       }
     }
   </div>

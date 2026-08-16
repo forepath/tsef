@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { Store } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
 import { of, throwError } from 'rxjs';
 
@@ -23,7 +24,9 @@ import {
   loadClientAgentModelsFailure,
   loadClientAgentModelsSuccess,
   loadClientAgents,
-  loadClientAgentsBatch,
+  loadMoreClientAgents,
+  loadMoreClientAgentsFailure,
+  loadMoreClientAgentsSuccess,
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
@@ -48,7 +51,7 @@ import {
   loadClientAgentCommandsFromFiles$,
   loadClientAgentCommandsLoading$,
   loadClientAgents$,
-  loadClientAgentsBatch$,
+  loadMoreClientAgents$,
   restartClientAgent$,
   startClientAgent$,
   stopClientAgent$,
@@ -66,6 +69,7 @@ import type {
 describe('AgentsEffects', () => {
   let actions$: Actions;
   let agentsService: jest.Mocked<AgentsService>;
+  let store: jest.Mocked<Store>;
   const clientId = 'client-1';
   const mockAgent: AgentResponseDto = {
     id: 'agent-1',
@@ -75,6 +79,11 @@ describe('AgentsEffects', () => {
     containerType: 'generic' as ContainerType,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+  };
+  const mockAgent2: AgentResponseDto = {
+    ...mockAgent,
+    id: 'agent-2',
+    name: 'Test Agent 2',
   };
   const mockCreateAgentResponse: CreateAgentResponseDto = {
     ...mockAgent,
@@ -94,6 +103,14 @@ describe('AgentsEffects', () => {
       restartClientAgent: jest.fn(),
     } as any;
 
+    store = {
+      select: jest.fn().mockReturnValue(
+        of({
+          [clientId]: [mockAgent],
+        }),
+      ),
+    } as any;
+
     TestBed.configureTestingModule({
       providers: [
         provideMockActions(() => actions$),
@@ -111,6 +128,10 @@ describe('AgentsEffects', () => {
           provide: AgentsService,
           useValue: agentsService,
         },
+        {
+          provide: Store,
+          useValue: store,
+        },
       ],
     });
 
@@ -118,10 +139,10 @@ describe('AgentsEffects', () => {
   });
 
   describe('loadClientAgents$', () => {
-    it('should return loadClientAgentsSuccess when batch is empty', (done) => {
+    it('should return loadClientAgentsSuccess when page is empty', (done) => {
       const agents: AgentResponseDto[] = [];
       const action = loadClientAgents({ clientId });
-      const outcome = loadClientAgentsSuccess({ clientId, agents: [] });
+      const outcome = loadClientAgentsSuccess({ clientId, agents: [], hasMore: false, nextOffset: 0 });
 
       actions$ = of(action);
       agentsService.listClientAgents.mockReturnValue(of(agents));
@@ -133,49 +154,33 @@ describe('AgentsEffects', () => {
       });
     });
 
-    it('should return loadClientAgentsSuccess when batch is partial (< 10)', (done) => {
+    it('should return loadClientAgentsSuccess when page is partial', (done) => {
       const agents: AgentResponseDto[] = [mockAgent];
       const action = loadClientAgents({ clientId });
-      const outcome = loadClientAgentsSuccess({ clientId, agents });
+      const outcome = loadClientAgentsSuccess({ clientId, agents, hasMore: false, nextOffset: 1 });
 
       actions$ = of(action);
       agentsService.listClientAgents.mockReturnValue(of(agents));
 
       loadClientAgents$(actions$, agentsService).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 0 });
         done();
       });
     });
 
-    it('should return loadClientAgentsBatch when batch is full (10 entries)', (done) => {
+    it('should set hasMore when page is full', (done) => {
       const agents: AgentResponseDto[] = Array.from({ length: 10 }, (_, i) => ({
         ...mockAgent,
         id: `agent-${i}`,
       }));
       const action = loadClientAgents({ clientId });
-      const outcome = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents: agents });
+      const outcome = loadClientAgentsSuccess({ clientId, agents, hasMore: true, nextOffset: 10 });
 
       actions$ = of(action);
       agentsService.listClientAgents.mockReturnValue(of(agents));
 
       loadClientAgents$(actions$, agentsService).subscribe((result) => {
         expect(result).toEqual(outcome);
-        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 0 });
-        done();
-      });
-    });
-
-    it('should ignore user params and use batch params', (done) => {
-      const params = { limit: 5, offset: 20 };
-      const action = loadClientAgents({ clientId, params });
-      const agents: AgentResponseDto[] = [mockAgent];
-
-      actions$ = of(action);
-      agentsService.listClientAgents.mockReturnValue(of(agents));
-
-      loadClientAgents$(actions$, agentsService).subscribe(() => {
-        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 0 });
         done();
       });
     });
@@ -195,75 +200,52 @@ describe('AgentsEffects', () => {
     });
   });
 
-  describe('loadClientAgentsBatch$', () => {
-    it('should return loadClientAgentsSuccess when batch is empty', (done) => {
-      const accumulatedAgents: AgentResponseDto[] = [mockAgent];
-      const newAgents: AgentResponseDto[] = [];
-      const action = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents });
-      const outcome = loadClientAgentsSuccess({ clientId, agents: accumulatedAgents });
-
-      actions$ = of(action);
-      agentsService.listClientAgents.mockReturnValue(of(newAgents));
-
-      loadClientAgentsBatch$(actions$, agentsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
-        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 10 });
-        done();
-      });
-    });
-
-    it('should return loadClientAgentsSuccess when batch is partial (< 10)', (done) => {
-      const accumulatedAgents: AgentResponseDto[] = [mockAgent];
-      const newAgents: AgentResponseDto[] = [{ ...mockAgent, id: 'agent-2' }];
-      const action = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents });
-      const outcome = loadClientAgentsSuccess({ clientId, agents: [...accumulatedAgents, ...newAgents] });
-
-      actions$ = of(action);
-      agentsService.listClientAgents.mockReturnValue(of(newAgents));
-
-      loadClientAgentsBatch$(actions$, agentsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
-        expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 10 });
-        done();
-      });
-    });
-
-    it('should return loadClientAgentsBatch when batch is full (10 entries)', (done) => {
-      const accumulatedAgents: AgentResponseDto[] = Array.from({ length: 10 }, (_, i) => ({
-        ...mockAgent,
-        id: `agent-${i}`,
-      }));
-      const newAgents: AgentResponseDto[] = Array.from({ length: 10 }, (_, i) => ({
-        ...mockAgent,
-        id: `agent-${i + 10}`,
-      }));
-      const action = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents });
-      const outcome = loadClientAgentsBatch({
+  describe('loadMoreClientAgents$', () => {
+    it('should append next page', (done) => {
+      const agents: AgentResponseDto[] = [mockAgent2];
+      const action = loadMoreClientAgents({ clientId });
+      const outcome = loadMoreClientAgentsSuccess({
         clientId,
-        offset: 20,
-        accumulatedAgents: [...accumulatedAgents, ...newAgents],
+        agents,
+        hasMore: false,
+        nextOffset: 11,
       });
 
       actions$ = of(action);
-      agentsService.listClientAgents.mockReturnValue(of(newAgents));
+      store.select.mockReturnValue(
+        of({
+          hasMore: { [clientId]: true },
+          nextOffset: { [clientId]: 10 },
+          loading: { [clientId]: false },
+          appendLoading: { [clientId]: false },
+        }),
+      );
+      agentsService.listClientAgents.mockReturnValue(of(agents));
 
-      loadClientAgentsBatch$(actions$, agentsService).subscribe((result) => {
+      loadMoreClientAgents$(actions$, agentsService, store).subscribe((result) => {
         expect(result).toEqual(outcome);
         expect(agentsService.listClientAgents).toHaveBeenCalledWith(clientId, { limit: 10, offset: 10 });
         done();
       });
     });
 
-    it('should return loadClientAgentsFailure on error', (done) => {
-      const accumulatedAgents: AgentResponseDto[] = [mockAgent];
-      const action = loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents });
-      const error = new Error('Load failed');
-      const outcome = loadClientAgentsFailure({ clientId, error: 'Load failed' });
+    it('should return loadMoreClientAgentsFailure on error', (done) => {
+      const action = loadMoreClientAgents({ clientId });
+      const error = new Error('Append failed');
+      const outcome = loadMoreClientAgentsFailure({ clientId, error: 'Append failed' });
 
       actions$ = of(action);
+      store.select.mockReturnValue(
+        of({
+          hasMore: { [clientId]: true },
+          nextOffset: { [clientId]: 10 },
+          loading: { [clientId]: false },
+          appendLoading: { [clientId]: false },
+        }),
+      );
       agentsService.listClientAgents.mockReturnValue(throwError(() => error));
 
-      loadClientAgentsBatch$(actions$, agentsService).subscribe((result) => {
+      loadMoreClientAgents$(actions$, agentsService, store).subscribe((result) => {
         expect(result).toEqual(outcome);
         done();
       });

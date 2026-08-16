@@ -9,9 +9,11 @@ import {
   deleteFilterRuleFailure,
   deleteFilterRuleSuccess,
   loadFilterRules,
-  loadFilterRulesBatch,
   loadFilterRulesFailure,
   loadFilterRulesSuccess,
+  loadMoreFilterRules,
+  loadMoreFilterRulesFailure,
+  loadMoreFilterRulesSuccess,
   updateFilterRule,
   updateFilterRuleFailure,
   updateFilterRuleSuccess,
@@ -24,6 +26,10 @@ export interface FilterRulesState {
   saving: boolean;
   deleting: boolean;
   error: string | null;
+  hasMore: boolean;
+  nextOffset: number;
+  appendLoading: boolean;
+  appendError: string | null;
 }
 
 export const initialFilterRulesState: FilterRulesState = {
@@ -32,6 +38,10 @@ export const initialFilterRulesState: FilterRulesState = {
   saving: false,
   deleting: false,
   error: null,
+  hasMore: false,
+  nextOffset: 0,
+  appendLoading: false,
+  appendError: null,
 };
 
 export const filterRulesReducer = createReducer(
@@ -41,15 +51,46 @@ export const filterRulesReducer = createReducer(
     rules: [],
     loading: true,
     error: null,
+    hasMore: false,
+    nextOffset: 0,
+    appendLoading: false,
+    appendError: null,
   })),
-  on(loadFilterRulesBatch, (state, { accumulatedRules }) => ({
+  on(loadFilterRulesSuccess, (state, { rules, hasMore, nextOffset }) => ({
     ...state,
-    rules: accumulatedRules,
-    loading: true,
+    loading: false,
+    rules,
     error: null,
+    hasMore,
+    nextOffset,
+    appendLoading: false,
+    appendError: null,
   })),
-  on(loadFilterRulesSuccess, (state, { rules }) => ({ ...state, loading: false, rules, error: null })),
-  on(loadFilterRulesFailure, (state, { error }) => ({ ...state, loading: false, error })),
+  on(loadFilterRulesFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
+    hasMore: false,
+    appendLoading: false,
+  })),
+  on(loadMoreFilterRules, (state) => ({
+    ...state,
+    appendLoading: true,
+    appendError: null,
+  })),
+  on(loadMoreFilterRulesSuccess, (state, { rules, hasMore, nextOffset }) => ({
+    ...state,
+    rules: [...state.rules, ...rules],
+    hasMore,
+    nextOffset,
+    appendLoading: false,
+    appendError: null,
+  })),
+  on(loadMoreFilterRulesFailure, (state, { error }) => ({
+    ...state,
+    appendLoading: false,
+    appendError: error,
+  })),
   on(createFilterRule, (state) => ({ ...state, saving: true, error: null })),
   on(createFilterRuleSuccess, (state, { rule }) => ({
     ...state,

@@ -23,7 +23,9 @@ import {
   loadClientUsersFailure,
   loadClientUsersSuccess,
   loadClients,
-  loadClientsBatch,
+  loadMoreClients,
+  loadMoreClientsFailure,
+  loadMoreClientsSuccess,
   loadClientsFailure,
   loadClientsSuccess,
   loadClientSuccess,
@@ -49,7 +51,7 @@ import {
   loadClient$,
   loadClientUsers$,
   loadClients$,
-  loadClientsBatch$,
+  loadMoreClients$,
   loadServerInfo$,
   loadLocations$,
   removeClientUser$,
@@ -141,10 +143,10 @@ describe('ClientsEffects', () => {
   });
 
   describe('loadClients$', () => {
-    it('should return loadClientsSuccess when batch is empty', (done) => {
+    it('should return loadClientsSuccess when page is empty', (done) => {
       const clients: ClientResponseDto[] = [];
       const action = loadClients({});
-      const outcome = loadClientsSuccess({ clients: [] });
+      const outcome = loadClientsSuccess({ clients: [], hasMore: false, nextOffset: 0 });
 
       actions$ = of(action);
       clientsService.listClients.mockReturnValue(of(clients));
@@ -156,10 +158,10 @@ describe('ClientsEffects', () => {
       });
     });
 
-    it('should return loadClientsSuccess when batch is partial (< 10)', (done) => {
+    it('should return loadClientsSuccess when page is partial (< 10)', (done) => {
       const clients: ClientResponseDto[] = [mockClient];
       const action = loadClients({});
-      const outcome = loadClientsSuccess({ clients });
+      const outcome = loadClientsSuccess({ clients, hasMore: false, nextOffset: 1 });
 
       actions$ = of(action);
       clientsService.listClients.mockReturnValue(of(clients));
@@ -171,13 +173,13 @@ describe('ClientsEffects', () => {
       });
     });
 
-    it('should return loadClientsBatch when batch is full (10 entries)', (done) => {
+    it('should set hasMore when page is full (10 entries)', (done) => {
       const clients: ClientResponseDto[] = Array.from({ length: 10 }, (_, i) => ({
         ...mockClient,
         id: `client-${i}`,
       }));
       const action = loadClients({});
-      const outcome = loadClientsBatch({ offset: 10, accumulatedClients: clients });
+      const outcome = loadClientsSuccess({ clients, hasMore: true, nextOffset: 10 });
 
       actions$ = of(action);
       clientsService.listClients.mockReturnValue(of(clients));
@@ -218,74 +220,47 @@ describe('ClientsEffects', () => {
     });
   });
 
-  describe('loadClientsBatch$', () => {
-    it('should return loadClientsSuccess when batch is empty', (done) => {
-      const accumulatedClients: ClientResponseDto[] = [mockClient];
-      const newClients: ClientResponseDto[] = [];
-      const action = loadClientsBatch({ offset: 10, accumulatedClients });
-      const outcome = loadClientsSuccess({ clients: accumulatedClients });
-
-      actions$ = of(action);
-      clientsService.listClients.mockReturnValue(of(newClients));
-
-      loadClientsBatch$(actions$, clientsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
-        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 10 });
-        done();
-      });
-    });
-
-    it('should return loadClientsSuccess when batch is partial (< 10)', (done) => {
-      const accumulatedClients: ClientResponseDto[] = [mockClient];
+  describe('loadMoreClients$', () => {
+    it('should append next page and update hasMore', (done) => {
       const newClients: ClientResponseDto[] = [{ ...mockClient, id: 'client-2' }];
-      const action = loadClientsBatch({ offset: 10, accumulatedClients });
-      const outcome = loadClientsSuccess({ clients: [...accumulatedClients, ...newClients] });
+      const action = loadMoreClients();
+      const outcome = loadMoreClientsSuccess({ clients: newClients, hasMore: false, nextOffset: 11 });
 
       actions$ = of(action);
+      store.select.mockReturnValue(
+        of({
+          hasMore: true,
+          nextOffset: 10,
+          loading: false,
+          appendLoading: false,
+        }),
+      );
       clientsService.listClients.mockReturnValue(of(newClients));
 
-      loadClientsBatch$(actions$, clientsService).subscribe((result) => {
+      loadMoreClients$(actions$, clientsService, store).subscribe((result) => {
         expect(result).toEqual(outcome);
         expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 10 });
         done();
       });
     });
 
-    it('should return loadClientsBatch when batch is full (10 entries)', (done) => {
-      const accumulatedClients: ClientResponseDto[] = Array.from({ length: 10 }, (_, i) => ({
-        ...mockClient,
-        id: `client-${i}`,
-      }));
-      const newClients: ClientResponseDto[] = Array.from({ length: 10 }, (_, i) => ({
-        ...mockClient,
-        id: `client-${i + 10}`,
-      }));
-      const action = loadClientsBatch({ offset: 10, accumulatedClients });
-      const outcome = loadClientsBatch({
-        offset: 20,
-        accumulatedClients: [...accumulatedClients, ...newClients],
-      });
+    it('should return loadMoreClientsFailure on error', (done) => {
+      const action = loadMoreClients();
+      const error = new Error('Append failed');
+      const outcome = loadMoreClientsFailure({ error: 'Append failed' });
 
       actions$ = of(action);
-      clientsService.listClients.mockReturnValue(of(newClients));
-
-      loadClientsBatch$(actions$, clientsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
-        expect(clientsService.listClients).toHaveBeenCalledWith({ limit: 10, offset: 10 });
-        done();
-      });
-    });
-
-    it('should return loadClientsFailure on error', (done) => {
-      const accumulatedClients: ClientResponseDto[] = [mockClient];
-      const action = loadClientsBatch({ offset: 10, accumulatedClients });
-      const error = new Error('Load failed');
-      const outcome = loadClientsFailure({ error: 'Load failed' });
-
-      actions$ = of(action);
+      store.select.mockReturnValue(
+        of({
+          hasMore: true,
+          nextOffset: 10,
+          loading: false,
+          appendLoading: false,
+        }),
+      );
       clientsService.listClients.mockReturnValue(throwError(() => error));
 
-      loadClientsBatch$(actions$, clientsService).subscribe((result) => {
+      loadMoreClients$(actions$, clientsService, store).subscribe((result) => {
         expect(result).toEqual(outcome);
         done();
       });

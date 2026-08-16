@@ -105,10 +105,13 @@
     }
 
     @if (ticketsBoardRowsByStatus$ | async; as byStatus) {
-      <section class="section__row flex-grow-1">
+      <section class="section__row flex-grow-1 min-h-0">
         @for (status of lanes; track status) {
           @let laneRows = filteredLaneRows(status, byStatus[status]);
-          <div class="section__column d-md-flex flex-column border-end" [class.d-none]="selectedLane() !== status">
+          <div
+            class="section__column d-md-flex flex-column border-end min-h-0"
+            [class.d-none]="selectedLane() !== status"
+          >
             <div class="tickets-board__lane card h-100 border-0">
               <div class="card-header py-2 small fw-semibold d-none d-md-block">{{ laneLabel(status) }}</div>
               <form class="tickets-board__lane-search">
@@ -140,65 +143,6 @@
                 (dragleave)="onLaneDragLeave($event, status)"
                 (drop)="onLaneDrop($event, status)"
               >
-                @for (row of laneRows; track row.ticket.id) {
-                  <div
-                    class="list-group-item tickets-board__card border-bottom"
-                    [class.tickets-board__card--nested]="row.depth > 0"
-                    [style.--tickets-board-nest-depth]="row.depth"
-                    draggable="true"
-                    [class.tickets-board__card--dragging]="draggedTicket()?.id === row.ticket.id"
-                    (dragstart)="onTicketDragStart($event, row.ticket)"
-                    (dragend)="onTicketDragEnd()"
-                    (click)="onTicketCardClick(row.ticket)"
-                    (keyup.enter)="onTicketCardClick(row.ticket)"
-                    tabindex="0"
-                    role="button"
-                  >
-                    <div class="tickets-board__card-content">
-                      <div class="d-flex align-items-center gap-2 min-width-0 w-100">
-                        <div class="fw-medium text-truncate flex-grow-1 min-width-0" [title]="row.ticket.title">
-                          @if (row.ticket.shas.short) {
-                            <small class="text-muted small">{{ row.ticket.shas.short }}</small>
-                          }
-                          {{ row.ticket.title }}
-                        </div>
-                        @if (row.ticket.automationEligible) {
-                          <small class="flex-shrink-0">
-                            <i
-                              class="bi bi-lightning-charge-fill d-flex align-items-center justify-content-center text-bg-primary status-badge"
-                              i18n-title="@@featureTicketsBoard-automationEligibleTitle"
-                              title="Autonomous prototyping enabled"
-                            ></i>
-                          </small>
-                        }
-                      </div>
-                      <div class="tickets-board__meta-chips d-flex flex-wrap align-items-center gap-1 mt-1">
-                        <small
-                          class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
-                          [ngClass]="ticketPriorityBadgeClass(row.ticket.priority)"
-                          [attr.title]="row.ticket.priority"
-                          >{{ priorityLabel(row.ticket.priority) }}</small
-                        >
-                        <small
-                          class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
-                          [ngClass]="ticketStatusBadgeClass(row.ticket.status)"
-                          [attr.title]="row.ticket.status"
-                          >{{ laneLabel(row.ticket.status) }}</small
-                        >
-                        @if (row.ticket.subtaskCounts; as sc) {
-                          @if (sc.open + sc.done > 0) {
-                            <small
-                              class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
-                              i18n-title="@@featureTicketsBoard-subtaskCountTitle"
-                              title="Direct subtasks (done / total)"
-                              >{{ sc.done }}/{{ sc.open + sc.done }}</small
-                            >
-                          }
-                        }
-                      </div>
-                    </div>
-                  </div>
-                }
                 @if (byStatus[status].length === 0) {
                   <div
                     class="list-group-item text-muted small py-3 text-center tickets-board__empty-lane"
@@ -213,6 +157,72 @@
                   >
                     No matching tickets
                   </div>
+                } @else {
+                  <cdk-virtual-scroll-viewport
+                    class="tickets-board__viewport"
+                    [itemSize]="laneVirtualItemSize"
+                    [minBufferPx]="laneVirtualItemSize * 4"
+                    [maxBufferPx]="laneVirtualItemSize * 8"
+                  >
+                    <div
+                      *cdkVirtualFor="let row of laneRows; trackBy: trackLaneRowByTicketId"
+                      class="list-group-item tickets-board__card border-bottom"
+                      [class.tickets-board__card--nested]="row.depth > 0"
+                      [style.--tickets-board-nest-depth]="row.depth"
+                      draggable="true"
+                      [class.tickets-board__card--dragging]="draggedTicket()?.id === row.ticket.id"
+                      (dragstart)="onTicketDragStart($event, row.ticket)"
+                      (dragend)="onTicketDragEnd()"
+                      (click)="onTicketCardClick(row.ticket)"
+                      (keyup.enter)="onTicketCardClick(row.ticket)"
+                      tabindex="0"
+                      role="button"
+                    >
+                      <div class="tickets-board__card-content">
+                        <div class="d-flex align-items-center gap-2 min-width-0 w-100">
+                          <div class="fw-medium text-truncate flex-grow-1 min-width-0" [title]="row.ticket.title">
+                            @if (row.ticket.shas.short) {
+                              <small class="text-muted small">{{ row.ticket.shas.short }}</small>
+                            }
+                            {{ row.ticket.title }}
+                          </div>
+                          @if (row.ticket.automationEligible) {
+                            <small class="flex-shrink-0">
+                              <i
+                                class="bi bi-lightning-charge-fill d-flex align-items-center justify-content-center text-bg-primary status-badge"
+                                i18n-title="@@featureTicketsBoard-automationEligibleTitle"
+                                title="Autonomous prototyping enabled"
+                              ></i>
+                            </small>
+                          }
+                        </div>
+                        <div class="tickets-board__meta-chips d-flex flex-wrap align-items-center gap-1 mt-1">
+                          <small
+                            class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                            [ngClass]="ticketPriorityBadgeClass(row.ticket.priority)"
+                            [attr.title]="row.ticket.priority"
+                            >{{ priorityLabel(row.ticket.priority) }}</small
+                          >
+                          <small
+                            class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                            [ngClass]="ticketStatusBadgeClass(row.ticket.status)"
+                            [attr.title]="row.ticket.status"
+                            >{{ laneLabel(row.ticket.status) }}</small
+                          >
+                          @if (row.ticket.subtaskCounts; as sc) {
+                            @if (sc.open + sc.done > 0) {
+                              <small
+                                class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                                i18n-title="@@featureTicketsBoard-subtaskCountTitle"
+                                title="Direct subtasks (done / total)"
+                                >{{ sc.done }}/{{ sc.open + sc.done }}</small
+                              >
+                            }
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </cdk-virtual-scroll-viewport>
                 }
               </div>
             </div>

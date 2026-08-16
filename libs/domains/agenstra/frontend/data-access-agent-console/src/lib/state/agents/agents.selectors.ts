@@ -27,6 +27,14 @@ export const selectAgentsRestarting = createSelector(selectAgentsState, (state) 
 
 export const selectAgentsErrors = createSelector(selectAgentsState, (state) => state.errors);
 
+export const selectAgentsHasMore = createSelector(selectAgentsState, (state) => state.hasMore);
+
+export const selectAgentsNextOffset = createSelector(selectAgentsState, (state) => state.nextOffset);
+
+export const selectAgentsAppendLoading = createSelector(selectAgentsState, (state) => state.appendLoading);
+
+export const selectAgentsAppendError = createSelector(selectAgentsState, (state) => state.appendError);
+
 export const selectAgentsCommands = createSelector(selectAgentsState, (state) => state.commands);
 
 export const selectAgentsLoadingCommands = createSelector(selectAgentsState, (state) => state.loadingCommands);
@@ -70,6 +78,15 @@ export const selectClientAgentsRestarting = (clientId: string) =>
 
 export const selectClientAgentsError = (clientId: string) =>
   createSelector(selectAgentsErrors, (errors) => errors[clientId] ?? null);
+
+export const selectClientAgentsHasMore = (clientId: string) =>
+  createSelector(selectAgentsHasMore, (hasMore) => hasMore[clientId] ?? false);
+
+export const selectClientAgentsAppendLoading = (clientId: string) =>
+  createSelector(selectAgentsAppendLoading, (appendLoading) => appendLoading[clientId] ?? false);
+
+export const selectClientAgentsAppendError = (clientId: string) =>
+  createSelector(selectAgentsAppendError, (appendError) => appendError[clientId] ?? null);
 
 // Combined loading selector for a specific client (true if any operation is loading)
 export const selectClientAgentsLoadingAny = (clientId: string) =>

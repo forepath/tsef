@@ -1,3 +1,4 @@
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
@@ -183,14 +184,18 @@ interface TicketDetailSubtaskRow {
   depth: number;
 }
 
+/** Fixed row height for CDK virtual scroll (title + meta chips + list-group padding). */
+const TICKETS_BOARD_VIRTUAL_ITEM_SIZE_PX = 88;
+
 @Component({
   selector: 'framework-tickets-board',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, TicketEditorComponent],
+  imports: [CommonModule, RouterModule, FormsModule, ScrollingModule, TicketEditorComponent],
   templateUrl: './tickets-board.component.html',
   styleUrls: ['./tickets-board.component.scss'],
 })
 export class TicketsBoardComponent implements OnInit, AfterViewInit {
+  readonly laneVirtualItemSize = TICKETS_BOARD_VIRTUAL_ITEM_SIZE_PX;
   private readonly RELATION_TARGET_KIND_KNOWLEDGE = 'knowledge';
   private readonly RELATION_TARGET_KIND_TICKET = 'ticket';
   private readonly clientsFacade = inject(ClientsFacade);
@@ -1010,6 +1015,10 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
     const needle = query.toLowerCase();
 
     return list.filter((row) => JSON.stringify(row.ticket).toLowerCase().includes(needle));
+  }
+
+  trackLaneRowByTicketId(_index: number, row: TicketBoardRow): string {
+    return row.ticket.id;
   }
 
   laneLabel(status: TicketStatus): string {

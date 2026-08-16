@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, exhaustMap, map, mergeMap, of, switchMap } from 'rxjs';
+import { catchError, exhaustMap, filter, map, mergeMap, of, switchMap, withLatestFrom } from 'rxjs';
 
 import { ClientsService } from '../../services/clients.service';
 
@@ -25,10 +25,12 @@ import {
   loadClientUsersFailure,
   loadClientUsersSuccess,
   loadClients,
-  loadClientsBatch,
   loadClientsFailure,
   loadClientsSuccess,
   loadClientSuccess,
+  loadMoreClients,
+  loadMoreClientsFailure,
+  loadMoreClientsSuccess,
   loadProvisioningProviders,
   loadProvisioningProvidersFailure,
   loadProvisioningProvidersSuccess,
@@ -53,7 +55,7 @@ import {
   updateClientFailure,
   updateClientSuccess,
 } from './clients.actions';
-import { selectClientById } from './clients.selectors';
+import { selectClientById, selectClientsState } from './clients.selectors';
 
 /**
  * Normalizes error messages from HTTP errors.
@@ -81,25 +83,16 @@ export const loadClients$ = createEffect(
     return actions$.pipe(
       ofType(loadClients),
       switchMap(() => {
-        // Start with offset 0, limit 10, ignore user params for batch loading
         const batchParams = { limit: BATCH_SIZE, offset: 0 };
 
         return clientsService.listClients(batchParams).pipe(
-          switchMap((clients) => {
-            if (clients.length === 0) {
-              // No entries, dispatch success with empty array
-              return of(loadClientsSuccess({ clients: [] }));
-            }
-
-            // Has entries, check if we got a full batch (might be more)
-            if (clients.length < BATCH_SIZE) {
-              // Partial batch, we're done
-              return of(loadClientsSuccess({ clients }));
-            }
-
-            // Full batch, load next batch
-            return of(loadClientsBatch({ offset: BATCH_SIZE, accumulatedClients: clients }));
-          }),
+          map((clients) =>
+            loadClientsSuccess({
+              clients,
+              hasMore: clients.length === BATCH_SIZE,
+              nextOffset: clients.length,
+            }),
+          ),
           catchError((error) => of(loadClientsFailure({ error: normalizeError(error) }))),
         );
       }),
@@ -108,32 +101,24 @@ export const loadClients$ = createEffect(
   { functional: true },
 );
 
-export const loadClientsBatch$ = createEffect(
-  (actions$ = inject(Actions), clientsService = inject(ClientsService)) => {
+export const loadMoreClients$ = createEffect(
+  (actions$ = inject(Actions), clientsService = inject(ClientsService), store = inject(Store)) => {
     return actions$.pipe(
-      ofType(loadClientsBatch),
-      switchMap(({ offset, accumulatedClients }) => {
-        const batchParams = { limit: BATCH_SIZE, offset };
+      ofType(loadMoreClients),
+      withLatestFrom(store.select(selectClientsState)),
+      filter(([, state]) => state.hasMore && !state.loading),
+      exhaustMap(([, state]) => {
+        const batchParams = { limit: BATCH_SIZE, offset: state.nextOffset };
 
         return clientsService.listClients(batchParams).pipe(
-          switchMap((clients) => {
-            const newAccumulated = [...accumulatedClients, ...clients];
-
-            if (clients.length === 0) {
-              // No more entries, dispatch success with all accumulated
-              return of(loadClientsSuccess({ clients: newAccumulated }));
-            }
-
-            // Has entries, check if we got a full batch (might be more)
-            if (clients.length < BATCH_SIZE) {
-              // Partial batch, we're done
-              return of(loadClientsSuccess({ clients: newAccumulated }));
-            }
-
-            // Full batch, load next batch
-            return of(loadClientsBatch({ offset: offset + BATCH_SIZE, accumulatedClients: newAccumulated }));
-          }),
-          catchError((error) => of(loadClientsFailure({ error: normalizeError(error) }))),
+          map((clients) =>
+            loadMoreClientsSuccess({
+              clients,
+              hasMore: clients.length === BATCH_SIZE,
+              nextOffset: state.nextOffset + clients.length,
+            }),
+          ),
+          catchError((error) => of(loadMoreClientsFailure({ error: normalizeError(error) }))),
         );
       }),
     );

@@ -10,7 +10,9 @@ import {
   loadClient,
   loadClientFailure,
   loadClients,
-  loadClientsBatch,
+  loadMoreClients,
+  loadMoreClientsFailure,
+  loadMoreClientsSuccess,
   loadClientsFailure,
   loadClientsSuccess,
   loadClientSuccess,
@@ -98,47 +100,96 @@ describe('clientsReducer', () => {
   });
 
   describe('loadClients', () => {
-    it('should set loading to true, preserve existing clients, and clear error', () => {
+    it('should reset list, set loading, and clear append state', () => {
       const state: ClientsState = {
         ...initialClientsState,
         entities: [mockClient],
         error: 'Previous error',
+        hasMore: true,
+        nextOffset: 10,
+        appendError: 'Append error',
       };
       const newState = clientsReducer(state, loadClients({}));
 
       expect(newState.loading).toBe(true);
-      expect(newState.entities).toEqual([mockClient]);
+      expect(newState.entities).toEqual([]);
       expect(newState.error).toBeNull();
-    });
-  });
-
-  describe('loadClientsBatch', () => {
-    it('should accumulate clients and keep loading true', () => {
-      const state: ClientsState = {
-        ...initialClientsState,
-        loading: true,
-        entities: [mockClient],
-      };
-      const accumulatedClients = [mockClient, mockClient2];
-      const newState = clientsReducer(state, loadClientsBatch({ offset: 10, accumulatedClients }));
-
-      expect(newState.entities).toEqual(accumulatedClients);
-      expect(newState.loading).toBe(true);
-      expect(newState.error).toBeNull();
+      expect(newState.hasMore).toBe(false);
+      expect(newState.nextOffset).toBe(0);
+      expect(newState.appendLoading).toBe(false);
+      expect(newState.appendError).toBeNull();
     });
   });
 
   describe('loadClientsSuccess', () => {
-    it('should set entities and set loading to false', () => {
+    it('should set entities, pagination, and set loading to false', () => {
       const state: ClientsState = {
         ...initialClientsState,
         loading: true,
       };
-      const newState = clientsReducer(state, loadClientsSuccess({ clients: [mockClient, mockClient2] }));
+      const newState = clientsReducer(
+        state,
+        loadClientsSuccess({ clients: [mockClient, mockClient2], hasMore: false, nextOffset: 2 }),
+      );
 
       expect(newState.entities).toEqual([mockClient, mockClient2]);
       expect(newState.loading).toBe(false);
       expect(newState.error).toBeNull();
+      expect(newState.hasMore).toBe(false);
+      expect(newState.nextOffset).toBe(2);
+    });
+  });
+
+  describe('loadMoreClients', () => {
+    it('should set appendLoading and clear appendError', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        entities: [mockClient],
+        hasMore: true,
+        nextOffset: 10,
+        appendError: 'prev',
+      };
+      const newState = clientsReducer(state, loadMoreClients());
+
+      expect(newState.appendLoading).toBe(true);
+      expect(newState.appendError).toBeNull();
+      expect(newState.entities).toEqual([mockClient]);
+    });
+  });
+
+  describe('loadMoreClientsSuccess', () => {
+    it('should append clients and update pagination', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        entities: [mockClient],
+        hasMore: true,
+        nextOffset: 1,
+        appendLoading: true,
+      };
+      const newState = clientsReducer(
+        state,
+        loadMoreClientsSuccess({ clients: [mockClient2], hasMore: false, nextOffset: 2 }),
+      );
+
+      expect(newState.entities).toEqual([mockClient, mockClient2]);
+      expect(newState.hasMore).toBe(false);
+      expect(newState.nextOffset).toBe(2);
+      expect(newState.appendLoading).toBe(false);
+    });
+  });
+
+  describe('loadMoreClientsFailure', () => {
+    it('should set appendError and clear appendLoading', () => {
+      const state: ClientsState = {
+        ...initialClientsState,
+        entities: [mockClient],
+        appendLoading: true,
+      };
+      const newState = clientsReducer(state, loadMoreClientsFailure({ error: 'Append failed' }));
+
+      expect(newState.appendLoading).toBe(false);
+      expect(newState.appendError).toBe('Append failed');
+      expect(newState.entities).toEqual([mockClient]);
     });
   });
 

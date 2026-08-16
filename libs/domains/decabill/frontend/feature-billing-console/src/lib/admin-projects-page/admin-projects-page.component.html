@@ -23,12 +23,18 @@
       placeholder="Search projects"
       i18n-placeholder="@@featureAdminProjects-searchPlaceholder"
       [ngModel]="searchQuery()"
-      (ngModelChange)="searchQuery.set($event)"
+      (ngModelChange)="onSearchChange($event)"
       name="search"
     />
   </div>
 
-  <div class="flex-grow-1 overflow-auto">
+  <div
+    class="flex-grow-1 overflow-auto"
+    forepathInfiniteScroll
+    [paused]="!!(appendError$ | async)"
+    [disabled]="!(hasMore$ | async) || !!(appendLoading$ | async) || !!(loading$ | async)"
+    (reachedEnd)="facade.loadMoreAdminProjects()"
+  >
     @if (loading$ | async) {
       <div class="d-flex justify-content-center p-4"><div class="spinner-border text-primary" role="status"></div></div>
     } @else {
@@ -92,6 +98,13 @@
             </div>
           }
         </div>
+        @if ((hasMore$ | async) || (appendError$ | async)) {
+          <forepath-list-append-footer
+            [loading]="!!(appendLoading$ | async)"
+            [error]="!!(appendError$ | async)"
+            (retry)="facade.loadMoreAdminProjects()"
+          />
+        }
       }
     }
   </div>

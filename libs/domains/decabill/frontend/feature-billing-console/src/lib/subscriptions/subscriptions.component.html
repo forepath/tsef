@@ -146,7 +146,17 @@
               />
             </div>
           </form>
-          <div class="customer-plans__lane-list list-group list-group-flush flex-grow-1">
+          <div
+            class="customer-plans__lane-list list-group list-group-flush flex-grow-1"
+            forepathInfiniteScroll
+            [paused]="!!(subscriptionsAppendError$ | async)"
+            [disabled]="
+              !(subscriptionsHasMore$ | async) ||
+              !!(subscriptionsAppendLoading$ | async) ||
+              !!(subscriptionsLoading$ | async)
+            "
+            (reachedEnd)="loadMoreSubscriptions()"
+          >
             @if (subscriptionsLoading$ | async) {
               <div class="d-flex justify-content-center align-items-center p-4">
                 <div class="spinner-border text-primary" role="status">
@@ -174,6 +184,13 @@
                     *ngTemplateOutlet="subscriptionListItem; context: { $implicit: sub, plans: null }"
                   ></ng-container>
                 }
+              }
+              @if ((subscriptionsHasMore$ | async) || (subscriptionsAppendError$ | async)) {
+                <forepath-list-append-footer
+                  [loading]="!!(subscriptionsAppendLoading$ | async)"
+                  [error]="!!(subscriptionsAppendError$ | async)"
+                  (retry)="loadMoreSubscriptions()"
+                />
               }
             }
           </div>

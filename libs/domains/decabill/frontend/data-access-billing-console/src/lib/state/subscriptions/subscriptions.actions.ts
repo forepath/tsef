@@ -14,7 +14,7 @@ export const loadSubscriptions = createAction('[Subscriptions] Load Subscription
 
 export const loadSubscriptionsSuccess = createAction(
   '[Subscriptions] Load Subscriptions Success',
-  props<{ subscriptions: SubscriptionResponse[] }>(),
+  props<{ subscriptions: SubscriptionResponse[]; hasMore: boolean; nextOffset: number }>(),
 );
 
 export const loadSubscriptionsFailure = createAction(
@@ -22,9 +22,19 @@ export const loadSubscriptionsFailure = createAction(
   props<{ error: string }>(),
 );
 
-export const loadSubscriptionsBatch = createAction(
-  '[Subscriptions] Load Subscriptions Batch',
-  props<{ offset: number; accumulatedSubscriptions: SubscriptionResponse[] }>(),
+export const loadMoreSubscriptions = createAction(
+  '[Subscriptions] Load More Subscriptions',
+  props<{ offset: number; params?: ListParams }>(),
+);
+
+export const loadMoreSubscriptionsSuccess = createAction(
+  '[Subscriptions] Load More Subscriptions Success',
+  props<{ subscriptions: SubscriptionResponse[]; hasMore: boolean; nextOffset: number }>(),
+);
+
+export const loadMoreSubscriptionsFailure = createAction(
+  '[Subscriptions] Load More Subscriptions Failure',
+  props<{ error: string }>(),
 );
 
 // Get Subscription by ID Actions

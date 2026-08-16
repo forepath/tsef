@@ -4,6 +4,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ProjectsFacade, type ProjectListItem } from '@forepath/decabill/frontend/data-access-billing-console';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import { combineLatestWith, map } from 'rxjs';
 
 import {
@@ -18,12 +19,12 @@ import {
 @Component({
   selector: 'framework-projects-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, InfiniteScrollDirective, ListAppendFooterComponent],
   templateUrl: './projects-page.component.html',
   styleUrls: ['./projects-page.component.scss'],
 })
 export class ProjectsPageComponent implements OnInit {
-  private readonly facade = inject(ProjectsFacade);
+  readonly facade = inject(ProjectsFacade);
 
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
@@ -40,6 +41,9 @@ export class ProjectsPageComponent implements OnInit {
 
   readonly loading$ = this.facade.loading$;
   readonly error$ = this.facade.error$;
+  readonly hasMore$ = this.facade.hasMore$;
+  readonly appendLoading$ = this.facade.appendLoading$;
+  readonly appendError$ = this.facade.appendError$;
   readonly projects = toSignal(this.projects$, { initialValue: [] as ProjectListItem[] });
 
   ngOnInit(): void {

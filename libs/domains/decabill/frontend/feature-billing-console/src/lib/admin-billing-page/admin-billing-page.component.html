@@ -330,7 +330,15 @@
             </div>
           </form>
 
-          <div class="admin-billing__invoices-list list-group list-group-flush flex-grow-1">
+          <div
+            class="admin-billing__invoices-list list-group list-group-flush flex-grow-1"
+            forepathInfiniteScroll
+            [paused]="!!(invoicesAppendError$ | async)"
+            [disabled]="
+              !(invoicesHasMore$ | async) || !!(invoicesAppendLoading$ | async) || !!(invoicesLoading$ | async)
+            "
+            (reachedEnd)="invoiceManagerFacade.loadMore()"
+          >
             @if (invoicesLoading$ | async) {
               <div class="d-flex justify-content-center align-items-center p-4">
                 <div class="spinner-border text-primary" role="status">
@@ -488,6 +496,13 @@
                       }
                     </div>
                   </div>
+                }
+                @if ((invoicesHasMore$ | async) || (invoicesAppendError$ | async)) {
+                  <forepath-list-append-footer
+                    [loading]="!!(invoicesAppendLoading$ | async)"
+                    [error]="!!(invoicesAppendError$ | async)"
+                    (retry)="invoiceManagerFacade.loadMore()"
+                  />
                 }
               }
             }

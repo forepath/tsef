@@ -9,6 +9,7 @@ import {
   loadClientAgent,
   loadClientAgentModels,
   loadClientAgents,
+  loadMoreClientAgents,
   restartClientAgent,
   startClientAgent,
   stopClientAgent,
@@ -23,10 +24,13 @@ import {
   selectClientAgentModelsError,
   selectClientAgentModelsLoading,
   selectClientAgents,
+  selectClientAgentsAppendError,
+  selectClientAgentsAppendLoading,
   selectClientAgentsCount,
   selectClientAgentsCreating,
   selectClientAgentsDeleting,
   selectClientAgentsError,
+  selectClientAgentsHasMore,
   selectClientAgentsLoading,
   selectClientAgentsLoadingAny,
   selectClientAgentsRestarting,
@@ -81,6 +85,18 @@ export class AgentsFacade {
    */
   getClientAgentsLoading$(clientId: string): Observable<boolean> {
     return this.store.select(selectClientAgentsLoading(clientId));
+  }
+
+  getClientAgentsHasMore$(clientId: string): Observable<boolean> {
+    return this.store.select(selectClientAgentsHasMore(clientId));
+  }
+
+  getClientAgentsAppendLoading$(clientId: string): Observable<boolean> {
+    return this.store.select(selectClientAgentsAppendLoading(clientId));
+  }
+
+  getClientAgentsAppendError$(clientId: string): Observable<string | null> {
+    return this.store.select(selectClientAgentsAppendError(clientId));
   }
 
   /**
@@ -199,6 +215,13 @@ export class AgentsFacade {
    */
   loadClientAgents(clientId: string, params?: ListClientAgentsParams): void {
     this.store.dispatch(loadClientAgents({ clientId, params }));
+  }
+
+  /**
+   * Append the next page of agents for a client when hasMore is true.
+   */
+  loadMoreClientAgents(clientId: string): void {
+    this.store.dispatch(loadMoreClientAgents({ clientId }));
   }
 
   /**

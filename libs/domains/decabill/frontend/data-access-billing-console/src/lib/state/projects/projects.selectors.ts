@@ -16,3 +16,9 @@ export const selectProjectsUpdating = createSelector(selectProjectsState, (s) =>
 export const selectProjectsDeleting = createSelector(selectProjectsState, (s) => s.deleting);
 export const selectProjectsBilling = createSelector(selectProjectsState, (s) => s.billing);
 export const selectProjectsError = createSelector(selectProjectsState, (s) => s.error);
+export const selectProjectsHasMore = createSelector(selectProjectsState, (s) => s.hasMore);
+export const selectProjectsAppendLoading = createSelector(selectProjectsState, (s) => s.appendLoading);
+export const selectProjectsAppendError = createSelector(selectProjectsState, (s) => s.appendError);
+export const selectAdminProjectsHasMore = createSelector(selectProjectsState, (s) => s.adminHasMore);
+export const selectAdminProjectsAppendLoading = createSelector(selectProjectsState, (s) => s.adminAppendLoading);
+export const selectAdminProjectsAppendError = createSelector(selectProjectsState, (s) => s.adminAppendError);

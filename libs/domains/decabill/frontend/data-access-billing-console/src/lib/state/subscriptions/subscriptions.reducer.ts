@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 
-import type { SubscriptionResponse } from '../../types/billing.types';
+import type { ListParams, SubscriptionResponse } from '../../types/billing.types';
 import { patchSubscriptionItemDisplayName } from '../../utils/patch-subscription-item-display-name.util';
 import { updateDisplayNameSuccess } from '../service-detail/service-detail.actions';
 
@@ -15,10 +15,12 @@ import {
   loadSubscription,
   loadSubscriptionFailure,
   loadSubscriptions,
-  loadSubscriptionsBatch,
   loadSubscriptionsFailure,
   loadSubscriptionsSuccess,
   loadSubscriptionSuccess,
+  loadMoreSubscriptions,
+  loadMoreSubscriptionsFailure,
+  loadMoreSubscriptionsSuccess,
   resumeSubscription,
   resumeSubscriptionFailure,
   resumeSubscriptionSuccess,
@@ -37,6 +39,11 @@ export interface SubscriptionsState {
   withdrawing: boolean;
   resuming: boolean;
   error: string | null;
+  hasMore: boolean;
+  nextOffset: number;
+  appendLoading: boolean;
+  appendError: string | null;
+  listParams: ListParams | null;
 }
 
 export const initialSubscriptionsState: SubscriptionsState = {
@@ -49,26 +56,31 @@ export const initialSubscriptionsState: SubscriptionsState = {
   withdrawing: false,
   resuming: false,
   error: null,
+  hasMore: false,
+  nextOffset: 0,
+  appendLoading: false,
+  appendError: null,
+  listParams: null,
 };
 
 export const subscriptionsReducer = createReducer(
   initialSubscriptionsState,
-  // Load Subscriptions
-  on(loadSubscriptions, (state) => ({
+  on(loadSubscriptions, (state, { params }) => ({
     ...state,
     entities: [],
     loading: true,
     error: null,
+    appendError: null,
+    appendLoading: false,
+    hasMore: false,
+    nextOffset: 0,
+    listParams: params ?? null,
   })),
-  on(loadSubscriptionsBatch, (state, { accumulatedSubscriptions }) => ({
-    ...state,
-    entities: accumulatedSubscriptions,
-    loading: true,
-    error: null,
-  })),
-  on(loadSubscriptionsSuccess, (state, { subscriptions }) => ({
+  on(loadSubscriptionsSuccess, (state, { subscriptions, hasMore, nextOffset }) => ({
     ...state,
     entities: subscriptions,
+    hasMore,
+    nextOffset,
     loading: false,
     error: null,
   })),
@@ -76,8 +88,26 @@ export const subscriptionsReducer = createReducer(
     ...state,
     loading: false,
     error,
+    hasMore: false,
   })),
-  // Load Subscription by ID
+  on(loadMoreSubscriptions, (state) => ({
+    ...state,
+    appendLoading: true,
+    appendError: null,
+  })),
+  on(loadMoreSubscriptionsSuccess, (state, { subscriptions, hasMore, nextOffset }) => ({
+    ...state,
+    entities: [...state.entities, ...subscriptions],
+    hasMore,
+    nextOffset,
+    appendLoading: false,
+    appendError: null,
+  })),
+  on(loadMoreSubscriptionsFailure, (state, { error }) => ({
+    ...state,
+    appendLoading: false,
+    appendError: error,
+  })),
   on(loadSubscription, (state) => ({
     ...state,
     loadingSubscription: true,
@@ -103,7 +133,6 @@ export const subscriptionsReducer = createReducer(
     loadingSubscription: false,
     error,
   })),
-  // Create Subscription
   on(createSubscription, (state) => ({
     ...state,
     creating: true,
@@ -121,7 +150,6 @@ export const subscriptionsReducer = createReducer(
     creating: false,
     error,
   })),
-  // Cancel Subscription
   on(cancelSubscription, (state) => ({
     ...state,
     canceling: true,
@@ -140,7 +168,6 @@ export const subscriptionsReducer = createReducer(
     canceling: false,
     error,
   })),
-  // Withdraw Subscription
   on(withdrawSubscription, (state) => ({
     ...state,
     withdrawing: true,
@@ -159,7 +186,6 @@ export const subscriptionsReducer = createReducer(
     withdrawing: false,
     error,
   })),
-  // Resume Subscription
   on(resumeSubscription, (state) => ({
     ...state,
     resuming: true,
@@ -192,7 +218,6 @@ export const subscriptionsReducer = createReducer(
         : state.selectedSubscription,
     };
   }),
-  // Clear Selected Subscription
   on(clearSelectedSubscription, (state) => ({
     ...state,
     selectedSubscription: null,

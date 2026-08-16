@@ -6,21 +6,25 @@ export const loadAdminSubscriptions = createAction(
   '[AdminSubscriptions] Load Subscriptions',
   props<{ search?: string; userId?: string }>(),
 );
-export const loadAdminSubscriptionsBatch = createAction(
-  '[AdminSubscriptions] Load Subscriptions Batch',
-  props<{
-    offset: number;
-    accumulatedSubscriptions: AdminSubscriptionListItem[];
-    search?: string;
-    userId?: string;
-  }>(),
-);
 export const loadAdminSubscriptionsSuccess = createAction(
   '[AdminSubscriptions] Load Subscriptions Success',
-  props<{ subscriptions: AdminSubscriptionListItem[] }>(),
+  props<{ subscriptions: AdminSubscriptionListItem[]; hasMore: boolean; nextOffset: number }>(),
 );
 export const loadAdminSubscriptionsFailure = createAction(
   '[AdminSubscriptions] Load Subscriptions Failure',
+  props<{ error: string }>(),
+);
+
+export const loadMoreAdminSubscriptions = createAction(
+  '[AdminSubscriptions] Load More Subscriptions',
+  props<{ offset: number; search?: string; userId?: string }>(),
+);
+export const loadMoreAdminSubscriptionsSuccess = createAction(
+  '[AdminSubscriptions] Load More Subscriptions Success',
+  props<{ subscriptions: AdminSubscriptionListItem[]; hasMore: boolean; nextOffset: number }>(),
+);
+export const loadMoreAdminSubscriptionsFailure = createAction(
+  '[AdminSubscriptions] Load More Subscriptions Failure',
   props<{ error: string }>(),
 );
 

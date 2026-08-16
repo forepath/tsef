@@ -18,9 +18,11 @@ import {
   adminInstantCancelSubscriptionFailure,
   adminInstantCancelSubscriptionSuccess,
   loadAdminSubscriptions,
-  loadAdminSubscriptionsBatch,
   loadAdminSubscriptionsFailure,
   loadAdminSubscriptionsSuccess,
+  loadMoreAdminSubscriptions,
+  loadMoreAdminSubscriptionsFailure,
+  loadMoreAdminSubscriptionsSuccess,
 } from './admin-subscriptions.actions';
 
 export interface AdminSubscriptionsState {
@@ -31,6 +33,12 @@ export interface AdminSubscriptionsState {
   instantCanceling: boolean;
   resuming: boolean;
   error: string | null;
+  hasMore: boolean;
+  nextOffset: number;
+  appendLoading: boolean;
+  appendError: string | null;
+  search: string | null;
+  userId: string | null;
 }
 
 export const initialAdminSubscriptionsState: AdminSubscriptionsState = {
@@ -41,6 +49,12 @@ export const initialAdminSubscriptionsState: AdminSubscriptionsState = {
   instantCanceling: false,
   resuming: false,
   error: null,
+  hasMore: false,
+  nextOffset: 0,
+  appendLoading: false,
+  appendError: null,
+  search: null,
+  userId: null,
 };
 
 function upsertSubscription(
@@ -58,20 +72,23 @@ function upsertSubscription(
 
 export const adminSubscriptionsReducer = createReducer(
   initialAdminSubscriptionsState,
-  on(loadAdminSubscriptions, (state) => ({
+  on(loadAdminSubscriptions, (state, { search, userId }) => ({
     ...state,
     subscriptions: [],
     loading: true,
     error: null,
+    appendError: null,
+    appendLoading: false,
+    hasMore: false,
+    nextOffset: 0,
+    search: search?.trim() ? search.trim() : null,
+    userId: userId ?? null,
   })),
-  on(loadAdminSubscriptionsBatch, (state, { accumulatedSubscriptions }) => ({
-    ...state,
-    subscriptions: accumulatedSubscriptions,
-    loading: true,
-  })),
-  on(loadAdminSubscriptionsSuccess, (state, { subscriptions }) => ({
+  on(loadAdminSubscriptionsSuccess, (state, { subscriptions, hasMore, nextOffset }) => ({
     ...state,
     subscriptions,
+    hasMore,
+    nextOffset,
     loading: false,
     error: null,
   })),
@@ -79,6 +96,25 @@ export const adminSubscriptionsReducer = createReducer(
     ...state,
     loading: false,
     error,
+    hasMore: false,
+  })),
+  on(loadMoreAdminSubscriptions, (state) => ({
+    ...state,
+    appendLoading: true,
+    appendError: null,
+  })),
+  on(loadMoreAdminSubscriptionsSuccess, (state, { subscriptions, hasMore, nextOffset }) => ({
+    ...state,
+    subscriptions: [...state.subscriptions, ...subscriptions],
+    hasMore,
+    nextOffset,
+    appendLoading: false,
+    appendError: null,
+  })),
+  on(loadMoreAdminSubscriptionsFailure, (state, { error }) => ({
+    ...state,
+    appendLoading: false,
+    appendError: error,
   })),
   on(adminCancelSubscription, (state) => ({
     ...state,

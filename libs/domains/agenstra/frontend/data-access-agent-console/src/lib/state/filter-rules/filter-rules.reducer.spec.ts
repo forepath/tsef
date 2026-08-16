@@ -6,7 +6,9 @@ import {
   deleteFilterRuleFailure,
   deleteFilterRuleSuccess,
   loadFilterRules,
-  loadFilterRulesBatch,
+  loadMoreFilterRules,
+  loadMoreFilterRulesFailure,
+  loadMoreFilterRulesSuccess,
   loadFilterRulesFailure,
   loadFilterRulesSuccess,
   updateFilterRuleFailure,
@@ -46,20 +48,34 @@ describe('filterRulesReducer', () => {
     expect(s.error).toBeNull();
     const rules = [baseRule({ id: 'a', priority: 1 }), baseRule({ id: 'b', priority: 0 })];
 
-    s = filterRulesReducer(s, loadFilterRulesSuccess({ rules }));
+    s = filterRulesReducer(s, loadFilterRulesSuccess({ rules, hasMore: false, nextOffset: 2 }));
     expect(s.loading).toBe(false);
     expect(s.rules).toEqual(rules);
+    expect(s.hasMore).toBe(false);
+    expect(s.nextOffset).toBe(2);
     s = filterRulesReducer(s, loadFilterRulesFailure({ error: 'x' }));
     expect(s.loading).toBe(false);
     expect(s.error).toBe('x');
   });
 
-  it('loadFilterRulesBatch stores accumulated rules while loading', () => {
-    const acc = [baseRule({ id: '1' }), baseRule({ id: '2' })];
-    const s = filterRulesReducer(initialFilterRulesState, loadFilterRulesBatch({ offset: 10, accumulatedRules: acc }));
+  it('appends rules on loadMore success and sets appendError on failure', () => {
+    const existing = [baseRule({ id: '1' })];
+    let s = filterRulesReducer(
+      { ...initialFilterRulesState, rules: existing, hasMore: true, nextOffset: 1 },
+      loadMoreFilterRules(),
+    );
 
-    expect(s.rules).toEqual(acc);
-    expect(s.loading).toBe(true);
+    expect(s.appendLoading).toBe(true);
+    s = filterRulesReducer(
+      s,
+      loadMoreFilterRulesSuccess({ rules: [baseRule({ id: '2' })], hasMore: false, nextOffset: 2 }),
+    );
+    expect(s.rules.map((r) => r.id)).toEqual(['1', '2']);
+    expect(s.appendLoading).toBe(false);
+    expect(s.hasMore).toBe(false);
+    s = filterRulesReducer({ ...s, appendLoading: true }, loadMoreFilterRulesFailure({ error: 'append' }));
+    expect(s.appendLoading).toBe(false);
+    expect(s.appendError).toBe('append');
   });
 
   it('inserts created rule sorted by priority then createdAt', () => {

@@ -53,7 +53,13 @@
     </div>
   </form>
 
-  <div class="flex-grow-1 overflow-auto min-h-0">
+  <div
+    class="flex-grow-1 overflow-auto min-h-0"
+    forepathInfiniteScroll
+    [paused]="!!(appendError$ | async)"
+    [disabled]="!(hasMore$ | async) || !!(appendLoading$ | async) || !!(loading$ | async)"
+    (reachedEnd)="facade.loadMore()"
+  >
     @if (loading$ | async) {
       <div class="d-flex justify-content-center align-items-center p-4">
         <div class="spinner-border text-primary" role="status">
@@ -232,6 +238,13 @@
             </div>
           }
         </div>
+        @if ((hasMore$ | async) || (appendError$ | async)) {
+          <forepath-list-append-footer
+            [loading]="!!(appendLoading$ | async)"
+            [error]="!!(appendError$ | async)"
+            (retry)="facade.loadMore()"
+          />
+        }
       }
     }
   </div>

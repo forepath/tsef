@@ -23,14 +23,18 @@ import {
   loadAdminProjectDetailFailure,
   loadAdminProjectDetailSuccess,
   loadAdminProjects,
-  loadAdminProjectsBatch,
   loadAdminProjectsFailure,
   loadAdminProjectsSuccess,
+  loadMoreAdminProjects,
+  loadMoreAdminProjectsFailure,
+  loadMoreAdminProjectsSuccess,
+  loadMoreProjects,
+  loadMoreProjectsFailure,
+  loadMoreProjectsSuccess,
   loadProjectDetail,
   loadProjectDetailFailure,
   loadProjectDetailSuccess,
   loadProjects,
-  loadProjectsBatch,
   loadProjectsFailure,
   loadProjectsSuccess,
   loadProjectSummary,
@@ -55,6 +59,16 @@ export interface ProjectsState {
   deleting: boolean;
   billing: boolean;
   error: string | null;
+  hasMore: boolean;
+  nextOffset: number;
+  appendLoading: boolean;
+  appendError: string | null;
+  adminHasMore: boolean;
+  adminNextOffset: number;
+  adminAppendLoading: boolean;
+  adminAppendError: string | null;
+  adminSearch: string | null;
+  adminUserId: string | null;
 }
 
 export const initialProjectsState: ProjectsState = {
@@ -70,6 +84,16 @@ export const initialProjectsState: ProjectsState = {
   deleting: false,
   billing: false,
   error: null,
+  hasMore: false,
+  nextOffset: 0,
+  appendLoading: false,
+  appendError: null,
+  adminHasMore: false,
+  adminNextOffset: 0,
+  adminAppendLoading: false,
+  adminAppendError: null,
+  adminSearch: null,
+  adminUserId: null,
 };
 
 function mapToAdminListItem(project: ProjectResponse): AdminProjectListItem {
@@ -82,24 +106,84 @@ function mapToAdminListItem(project: ProjectResponse): AdminProjectListItem {
 
 export const projectsReducer = createReducer(
   initialProjectsState,
-  on(loadProjects, (state) => ({ ...state, projects: [], loading: true, error: null })),
-  on(loadAdminProjects, (state) => ({ ...state, adminProjects: [], loading: true, error: null })),
-  on(loadProjectsBatch, (state, { accumulatedProjects }) => ({
+  on(loadProjects, (state) => ({
     ...state,
-    projects: accumulatedProjects,
+    projects: [],
     loading: true,
+    error: null,
+    appendError: null,
+    appendLoading: false,
+    hasMore: false,
+    nextOffset: 0,
   })),
-  on(loadAdminProjectsBatch, (state, { accumulatedProjects }) => ({
+  on(loadAdminProjects, (state, { search, userId }) => ({
     ...state,
-    adminProjects: accumulatedProjects,
+    adminProjects: [],
     loading: true,
+    error: null,
+    adminAppendError: null,
+    adminAppendLoading: false,
+    adminHasMore: false,
+    adminNextOffset: 0,
+    adminSearch: search?.trim() ? search.trim() : null,
+    adminUserId: userId ?? null,
   })),
-  on(loadProjectsSuccess, (state, { projects }) => ({ ...state, projects, loading: false })),
-  on(loadAdminProjectsSuccess, (state, { adminProjects }) => ({ ...state, adminProjects, loading: false })),
+  on(loadProjectsSuccess, (state, { projects, hasMore, nextOffset }) => ({
+    ...state,
+    projects,
+    hasMore,
+    nextOffset,
+    loading: false,
+  })),
+  on(loadAdminProjectsSuccess, (state, { adminProjects, hasMore, nextOffset }) => ({
+    ...state,
+    adminProjects,
+    adminHasMore: hasMore,
+    adminNextOffset: nextOffset,
+    loading: false,
+  })),
   on(loadProjectsFailure, loadAdminProjectsFailure, (state, { error }) => ({
     ...state,
     loading: false,
     error,
+    hasMore: false,
+    adminHasMore: false,
+  })),
+  on(loadMoreProjects, (state) => ({
+    ...state,
+    appendLoading: true,
+    appendError: null,
+  })),
+  on(loadMoreProjectsSuccess, (state, { projects, hasMore, nextOffset }) => ({
+    ...state,
+    projects: [...state.projects, ...projects],
+    hasMore,
+    nextOffset,
+    appendLoading: false,
+    appendError: null,
+  })),
+  on(loadMoreProjectsFailure, (state, { error }) => ({
+    ...state,
+    appendLoading: false,
+    appendError: error,
+  })),
+  on(loadMoreAdminProjects, (state) => ({
+    ...state,
+    adminAppendLoading: true,
+    adminAppendError: null,
+  })),
+  on(loadMoreAdminProjectsSuccess, (state, { adminProjects, hasMore, nextOffset }) => ({
+    ...state,
+    adminProjects: [...state.adminProjects, ...adminProjects],
+    adminHasMore: hasMore,
+    adminNextOffset: nextOffset,
+    adminAppendLoading: false,
+    adminAppendError: null,
+  })),
+  on(loadMoreAdminProjectsFailure, (state, { error }) => ({
+    ...state,
+    adminAppendLoading: false,
+    adminAppendError: error,
   })),
   on(loadProjectDetail, loadAdminProjectDetail, (state) => ({
     ...state,

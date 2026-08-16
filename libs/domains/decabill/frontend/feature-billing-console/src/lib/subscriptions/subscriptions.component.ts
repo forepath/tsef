@@ -56,6 +56,7 @@ import {
   type ValidatePromotionRequest,
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import { ENVIRONMENT, type Environment } from '@forepath/shared/frontend/util-configuration';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import { combineLatest, filter, interval, map, of, pairwise, switchMap, take, withLatestFrom } from 'rxjs';
 
 import {
@@ -100,7 +101,7 @@ type ConfigChangeWizardStep = {
 @Component({
   selector: 'framework-billing-subscriptions',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, InfiniteScrollDirective, ListAppendFooterComponent],
   providers: [DatePipe],
   templateUrl: './subscriptions.component.html',
   styleUrls: ['./subscriptions.component.scss'],
@@ -140,6 +141,9 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   });
   readonly subscriptionsLoading$ = this.subscriptionsFacade.getSubscriptionsLoading$();
   readonly subscriptionsError$ = this.subscriptionsFacade.getSubscriptionsError$();
+  readonly subscriptionsHasMore$ = this.subscriptionsFacade.getHasMore$();
+  readonly subscriptionsAppendLoading$ = this.subscriptionsFacade.getAppendLoading$();
+  readonly subscriptionsAppendError$ = this.subscriptionsFacade.getAppendError$();
   readonly subscriptionsCreating$ = this.subscriptionsFacade.getSubscriptionsCreating$();
   readonly subscriptionsCreating = toSignal(this.subscriptionsFacade.getSubscriptionsCreating$(), {
     initialValue: false,
@@ -536,6 +540,10 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
   onSubscriptionsSearchChange(value: string): void {
     this.subscriptionsSearch.set(value);
+  }
+
+  loadMoreSubscriptions(): void {
+    this.subscriptionsFacade.loadMore();
   }
 
   onBackordersSearchChange(value: string): void {

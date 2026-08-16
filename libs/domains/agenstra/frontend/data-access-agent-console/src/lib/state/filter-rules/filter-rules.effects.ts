@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { catchError, exhaustMap, filter, map, of, switchMap, withLatestFrom } from 'rxjs';
 
 import { FilterRulesService } from '../../services/filter-rules.service';
 
@@ -13,13 +14,16 @@ import {
   deleteFilterRuleFailure,
   deleteFilterRuleSuccess,
   loadFilterRules,
-  loadFilterRulesBatch,
   loadFilterRulesFailure,
   loadFilterRulesSuccess,
+  loadMoreFilterRules,
+  loadMoreFilterRulesFailure,
+  loadMoreFilterRulesSuccess,
   updateFilterRule,
   updateFilterRuleFailure,
   updateFilterRuleSuccess,
 } from './filter-rules.actions';
+import { selectFilterRulesState } from './filter-rules.selectors';
 
 function normalizeError(error: unknown): string {
   if (error instanceof HttpErrorResponse) {
@@ -47,17 +51,13 @@ export const loadFilterRules$ = createEffect(
         const batchParams = { limit: FILTER_RULES_BATCH_SIZE, offset: 0 };
 
         return svc.list(batchParams).pipe(
-          switchMap((rules) => {
-            if (rules.length === 0) {
-              return of(loadFilterRulesSuccess({ rules: [] }));
-            }
-
-            if (rules.length < FILTER_RULES_BATCH_SIZE) {
-              return of(loadFilterRulesSuccess({ rules }));
-            }
-
-            return of(loadFilterRulesBatch({ offset: FILTER_RULES_BATCH_SIZE, accumulatedRules: rules }));
-          }),
+          map((rules) =>
+            loadFilterRulesSuccess({
+              rules,
+              hasMore: rules.length === FILTER_RULES_BATCH_SIZE,
+              nextOffset: rules.length,
+            }),
+          ),
           catchError((error) => of(loadFilterRulesFailure({ error: normalizeError(error) }))),
         );
       }),
@@ -66,33 +66,24 @@ export const loadFilterRules$ = createEffect(
   { functional: true },
 );
 
-export const loadFilterRulesBatch$ = createEffect(
-  (actions$ = inject(Actions), svc = inject(FilterRulesService)) => {
+export const loadMoreFilterRules$ = createEffect(
+  (actions$ = inject(Actions), svc = inject(FilterRulesService), store = inject(Store)) => {
     return actions$.pipe(
-      ofType(loadFilterRulesBatch),
-      switchMap(({ offset, accumulatedRules }) => {
-        const batchParams = { limit: FILTER_RULES_BATCH_SIZE, offset };
+      ofType(loadMoreFilterRules),
+      withLatestFrom(store.select(selectFilterRulesState)),
+      filter(([, state]) => state.hasMore && !state.loading),
+      exhaustMap(([, state]) => {
+        const batchParams = { limit: FILTER_RULES_BATCH_SIZE, offset: state.nextOffset };
 
         return svc.list(batchParams).pipe(
-          switchMap((rules) => {
-            const newAccumulated = [...accumulatedRules, ...rules];
-
-            if (rules.length === 0) {
-              return of(loadFilterRulesSuccess({ rules: newAccumulated }));
-            }
-
-            if (rules.length < FILTER_RULES_BATCH_SIZE) {
-              return of(loadFilterRulesSuccess({ rules: newAccumulated }));
-            }
-
-            return of(
-              loadFilterRulesBatch({
-                offset: offset + FILTER_RULES_BATCH_SIZE,
-                accumulatedRules: newAccumulated,
-              }),
-            );
-          }),
-          catchError((error) => of(loadFilterRulesFailure({ error: normalizeError(error) }))),
+          map((rules) =>
+            loadMoreFilterRulesSuccess({
+              rules,
+              hasMore: rules.length === FILTER_RULES_BATCH_SIZE,
+              nextOffset: state.nextOffset + rules.length,
+            }),
+          ),
+          catchError((error) => of(loadMoreFilterRulesFailure({ error: normalizeError(error) }))),
         );
       }),
     );

@@ -18,6 +18,7 @@ import {
   type UsageAttachmentType,
   type UsageMeterEntryResponse,
 } from '@forepath/decabill/frontend/data-access-billing-console';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import { debounceTime, distinctUntilChanged, filter, pairwise, skip } from 'rxjs';
 
 import {
@@ -48,7 +49,7 @@ interface AddonMeterOption {
 @Component({
   selector: 'framework-admin-subscriptions-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, InfiniteScrollDirective, ListAppendFooterComponent],
   providers: [DatePipe],
   templateUrl: './admin-subscriptions-page.component.html',
   styleUrls: ['./admin-subscriptions-page.component.scss'],
@@ -63,7 +64,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   @ViewChild('metersModal', { static: false }) private metersModal!: ElementRef<HTMLDivElement>;
   @ViewChild('deleteEntryModal', { static: false }) private deleteEntryModal!: ElementRef<HTMLDivElement>;
 
-  private readonly facade = inject(AdminSubscriptionsFacade);
+  readonly facade = inject(AdminSubscriptionsFacade);
   private readonly metersFacade = inject(MetersFacade);
   private readonly subscriptionMetersFacade = inject(SubscriptionMetersFacade);
   private readonly destroyRef = inject(DestroyRef);
@@ -80,6 +81,9 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   });
   readonly activeMeters = toSignal(this.metersFacade.getActiveMeters$(), { initialValue: [] as MeterResponse[] });
   readonly loading$ = this.facade.loading$;
+  readonly hasMore$ = this.facade.hasMore$;
+  readonly appendLoading$ = this.facade.appendLoading$;
+  readonly appendError$ = this.facade.appendError$;
   readonly canceling$ = this.facade.canceling$;
   readonly withdrawing$ = this.facade.withdrawing$;
   readonly instantCanceling$ = this.facade.instantCanceling$;

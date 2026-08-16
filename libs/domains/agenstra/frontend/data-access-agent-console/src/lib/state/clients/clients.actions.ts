@@ -21,15 +21,19 @@ export const loadClients = createAction('[Clients] Load Clients', props<{ params
 
 export const loadClientsSuccess = createAction(
   '[Clients] Load Clients Success',
-  props<{ clients: ClientResponseDto[] }>(),
+  props<{ clients: ClientResponseDto[]; hasMore: boolean; nextOffset: number }>(),
 );
 
 export const loadClientsFailure = createAction('[Clients] Load Clients Failure', props<{ error: string }>());
 
-export const loadClientsBatch = createAction(
-  '[Clients] Load Clients Batch',
-  props<{ offset: number; accumulatedClients: ClientResponseDto[] }>(),
+export const loadMoreClients = createAction('[Clients] Load More Clients');
+
+export const loadMoreClientsSuccess = createAction(
+  '[Clients] Load More Clients Success',
+  props<{ clients: ClientResponseDto[]; hasMore: boolean; nextOffset: number }>(),
 );
+
+export const loadMoreClientsFailure = createAction('[Clients] Load More Clients Failure', props<{ error: string }>());
 
 // Get Client by ID Actions
 export const loadClient = createAction('[Clients] Load Client', props<{ id: string }>());
