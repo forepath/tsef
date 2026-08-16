@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.24.0](https://github.com/forepath/one/compare/v2.23.0...v2.24.0) (2026-08-16)
+
+
+### Features
+
+* decabill service administration ([#559](https://github.com/forepath/one/issues/559)) ([99f5dcb](https://github.com/forepath/one/commit/99f5dcbc8dd6cde658d9985910a95222449c107b))
+* **decabill:** globally unique number generation ([#561](https://github.com/forepath/one/issues/561)) ([8d6a47a](https://github.com/forepath/one/commit/8d6a47aa63df4156accbb133de7b940c85122892))
+* **decabill:** service addon tabs ([#560](https://github.com/forepath/one/issues/560)) ([735da4c](https://github.com/forepath/one/commit/735da4cbe424163c4105805ca9e3b754ac466bcd))
+
+
+### Bug Fixes
+
+* **decabill:** service accessibility checks ([#562](https://github.com/forepath/one/issues/562)) ([e38dd3c](https://github.com/forepath/one/commit/e38dd3c5fe0579753b6d21c06e53a79c4e72cc6c))
+
 ## [2.23.0](https://github.com/forepath/one/compare/v2.22.0...v2.23.0) (2026-08-10)
 
 
