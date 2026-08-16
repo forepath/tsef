@@ -1121,6 +1121,9 @@
       <trans-unit id="featureBilling-provisioningStatusFailed" datatype="html">
         <source>Provisioning failed</source>
         </trans-unit>
+      <trans-unit id="featureBilling-provisioningStatusRemoving" datatype="html">
+        <source>Removing</source>
+        </trans-unit>
       <trans-unit id="featureBilling-provisioningStatusRemoved" datatype="html">
         <source>Removed</source>
         </trans-unit>

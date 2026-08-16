@@ -341,6 +341,35 @@ describe('SubscriptionItemServerService', () => {
       await expect(service.getItemDetail('sub-1', 'item-1', 'user-1')).rejects.toBeInstanceOf(NotFoundException);
     });
 
+    it('returns detail while pending withdrawal when the item is still provisioned', async () => {
+      subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'sub-1',
+        userId: 'user-1',
+        planId: 'plan-1',
+        status: SubscriptionStatus.PENDING_WITHDRAWAL,
+      });
+      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue(activeItem);
+
+      const detail = await service.getItemDetail('sub-1', 'item-1', 'user-1');
+
+      expect(detail.id).toBe('item-1');
+      expect(detail.hasProviderReference).toBe(true);
+    });
+
+    it('returns detail while pending instant cancel when the item is still provisioned', async () => {
+      subscriptionsRepository.findByIdOrThrow.mockResolvedValue({
+        id: 'sub-1',
+        userId: 'user-1',
+        planId: 'plan-1',
+        status: SubscriptionStatus.PENDING_INSTANT_CANCEL,
+      });
+      subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue(activeItem);
+
+      const detail = await service.getItemDetail('sub-1', 'item-1', 'user-1');
+
+      expect(detail.id).toBe('item-1');
+    });
+
     it('rejects removed items without provider reference', async () => {
       subscriptionItemsRepository.findByIdAndSubscriptionId.mockResolvedValue({
         ...activeItem,

@@ -6,6 +6,7 @@ import type {
   ServerInfoResponse,
   SubscriptionResponse,
 } from '../../types/billing.types';
+import { isLiveAccessibleSubscriptionStatus } from '../../utils/service-display-label.util';
 import { selectSubscriptionsEntities } from '../subscriptions/subscriptions.selectors';
 
 import type { ServerActionType, SubscriptionServerInfoState } from './subscription-server-info.reducer';
@@ -105,7 +106,7 @@ export const selectSubscriptionsWithServerInfo = createSelector(
     displayNameBySubscriptionId,
   ): SubscriptionWithServerInfo[] =>
     subscriptions
-      .filter((sub) => sub.status === 'active' && activeItemIdBySubscriptionId[sub.id] != null)
+      .filter((sub) => isLiveAccessibleSubscriptionStatus(sub.status) && activeItemIdBySubscriptionId[sub.id] != null)
       .map((subscription) => ({
         subscription,
         serverInfo: serverInfoBySubscriptionId[subscription.id],

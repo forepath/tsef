@@ -10,13 +10,13 @@ import type {
   ContainerManagerStatsHistoryResponseDto,
 } from '../dto/container-manager.dto';
 import { ProvisioningStatus } from '../entities/subscription-item.entity';
-import { SubscriptionStatus } from '../entities/subscription.entity';
 import {
   mergeHostNetworkingIntoTopology,
   parseIpAddrJson,
   parseIpRouteJson,
 } from '../utils/container-manager-host-network.utils';
 import { CONTAINER_MANAGER_MODULE_KEY } from '../utils/plan-addons.utils';
+import { isLiveAccessibleSubscriptionStatus } from '../utils/subscription-live-access.utils';
 import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { SshExecutorService } from './ssh-executor.service';
 import { SubscriptionAddonsRepository } from '../repositories/subscription-addons.repository';
@@ -33,13 +33,6 @@ const DEFAULT_LOG_TAIL = 200;
 const MAX_LOG_TAIL = 500;
 /** Soft cap on combined log payload returned to clients. */
 const MAX_LOG_PAYLOAD_CHARS = 256_000;
-/** Align with service-detail access: live service ownership only. */
-const CONTAINER_MANAGER_ACCESSIBLE_SUBSCRIPTION_STATUSES: ReadonlySet<SubscriptionStatus> = new Set([
-  SubscriptionStatus.ACTIVE,
-  SubscriptionStatus.PENDING_CANCEL,
-  SubscriptionStatus.PENDING_CONFIG_CHANGE,
-  SubscriptionStatus.PENDING_BACKORDER,
-]);
 /** Docker container IDs from `docker ps` are hex (short or full). */
 const DOCKER_CONTAINER_ID_PATTERN = /^[a-f0-9]{6,64}$/i;
 
@@ -412,7 +405,7 @@ export class ContainerManagerService {
       }
     }
 
-    if (!CONTAINER_MANAGER_ACCESSIBLE_SUBSCRIPTION_STATUSES.has(subscription.status)) {
+    if (!isLiveAccessibleSubscriptionStatus(subscription.status)) {
       throw new NotFoundException(`Subscription item ${itemId} not found`);
     }
 

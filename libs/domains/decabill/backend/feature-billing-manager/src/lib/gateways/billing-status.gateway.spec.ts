@@ -217,6 +217,62 @@ describe('BillingStatusGateway', () => {
       expect(otherSocket.emit).not.toHaveBeenCalled();
     });
 
+    it('includes pending_withdrawal subscriptions until the instance is deprovisioned', async () => {
+      const socket = createMockSocket({ data: { userInfo: userSocketInfo } });
+      const sub = {
+        id: 'sub-w',
+        status: SubscriptionStatus.PENDING_WITHDRAWAL,
+      } as Awaited<ReturnType<SubscriptionService['listSubscriptions']>>[number];
+
+      subscriptionService.listSubscriptions.mockResolvedValue([sub]);
+      itemServerService.listItems.mockResolvedValue([
+        {
+          id: 'item-1',
+          subscriptionId: 'sub-w',
+          serviceTypeId: 'st',
+          serviceTypeName: 'Hetzner',
+          provisioningStatus: 'active',
+          hostname: 'h1',
+          displayName: null,
+          service: 'agenstra-controller' as const,
+          sshAccessGranted: false,
+          hasProviderReference: true,
+        },
+      ]);
+      itemServerService.getServerInfo.mockResolvedValue({
+        serverId: 'srv-1',
+        name: 'srv',
+        publicIp: '1.1.1.1',
+        status: 'running',
+        metadata: {},
+      });
+
+      await gateway.handleSubscribe({}, socket);
+
+      expect(itemServerService.listItems).toHaveBeenCalledWith('sub-w', 'user-1');
+      expect(socket.emit).toHaveBeenCalledWith(
+        'dashboardStatusUpdate',
+        expect.objectContaining({
+          items: [expect.objectContaining({ subscriptionId: 'sub-w', itemId: 'item-1' })],
+        }),
+      );
+    });
+
+    it('skips canceled subscriptions in dashboard status ticks', async () => {
+      const socket = createMockSocket({ data: { userInfo: userSocketInfo } });
+      const sub = {
+        id: 'sub-canceled',
+        status: SubscriptionStatus.CANCELED,
+      } as Awaited<ReturnType<SubscriptionService['listSubscriptions']>>[number];
+
+      subscriptionService.listSubscriptions.mockResolvedValue([sub]);
+
+      await gateway.handleSubscribe({}, socket);
+
+      expect(itemServerService.listItems).not.toHaveBeenCalled();
+      expect(socket.emit).toHaveBeenCalledWith('dashboardStatusUpdate', expect.objectContaining({ items: [] }));
+    });
+
     it('includes null displayName when the item has no label', async () => {
       const socket = createMockSocket({ data: { userInfo: userSocketInfo } });
       const sub = {

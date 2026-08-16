@@ -670,6 +670,10 @@
         <source>Provisioned</source>
         <target>Bereitgestellt</target>
       </trans-unit>
+      <trans-unit id="featureBilling-provisioningStatusRemoving" datatype="html">
+        <source>Removing</source>
+        <target>Wird entfernt</target>
+      </trans-unit>
       <trans-unit id="featureBilling-provisioningStatusRemoved" datatype="html">
         <source>Removed</source>
         <target>Entfernt</target>

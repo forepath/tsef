@@ -14,6 +14,7 @@ import type {
   SubscriptionItemResponse,
   SubscriptionResponse,
 } from '../../types/billing.types';
+import { isLiveAccessibleSubscriptionStatus } from '../../utils/service-display-label.util';
 import { createSubscriptionSuccess } from '../subscriptions/subscriptions.actions';
 import { selectSubscriptionsEntities } from '../subscriptions/subscriptions.selectors';
 
@@ -62,9 +63,9 @@ export function loadOverviewServerInfoEffect(
     ofType(loadOverviewServerInfo),
     switchMap(() => store.select(selectSubscriptionsEntities).pipe(take(1))),
     switchMap((subscriptions: SubscriptionResponse[]) => {
-      const activeSubscriptions = subscriptions.filter((sub) => sub.status === 'active');
+      const accessibleSubscriptions = subscriptions.filter((sub) => isLiveAccessibleSubscriptionStatus(sub.status));
 
-      if (activeSubscriptions.length === 0) {
+      if (accessibleSubscriptions.length === 0) {
         return of(
           loadOverviewServerInfoSuccess({
             serverInfoBySubscriptionId: {},
@@ -79,7 +80,7 @@ export function loadOverviewServerInfoEffect(
       }
 
       return forkJoin(
-        activeSubscriptions.map((sub) =>
+        accessibleSubscriptions.map((sub) =>
           subscriptionItemsService.listSubscriptionItems(sub.id).pipe(map((items) => ({ sub, items }))),
         ),
       ).pipe(

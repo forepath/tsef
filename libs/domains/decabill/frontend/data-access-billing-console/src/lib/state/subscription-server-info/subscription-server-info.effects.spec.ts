@@ -137,6 +137,54 @@ describe('Subscription Server Info Effects', () => {
     });
   });
 
+  it('should include pending_withdrawal subscriptions while the instance is still live', (done) => {
+    const pendingWithdrawal = { ...mockSubscription, status: 'pending_withdrawal' as const };
+    const store = createMockStore([pendingWithdrawal]);
+
+    subscriptionItemsService.listSubscriptionItems.mockReturnValue(of([mockItem]));
+    subscriptionItemsService.getServerInfo.mockReturnValue(of(mockServerInfo));
+    actions$ = of(loadOverviewServerInfo());
+
+    loadOverviewServerInfoEffect(actions$, store as never, subscriptionItemsService).subscribe((result) => {
+      expect(result).toEqual(
+        loadOverviewServerInfoSuccess({
+          serverInfoBySubscriptionId: { 'sub-1': mockServerInfo },
+          activeItemIdBySubscriptionId: { 'sub-1': 'item-1' },
+          serviceBySubscriptionId: { 'sub-1': 'agenstra-controller' },
+          provisioningStatusBySubscriptionId: { 'sub-1': 'active' },
+          sshAccessGrantedBySubscriptionId: { 'sub-1': false },
+          serviceTypeNameBySubscriptionId: { 'sub-1': 'Hetzner' },
+          displayNameBySubscriptionId: {},
+        }),
+      );
+      expect(subscriptionItemsService.listSubscriptionItems).toHaveBeenCalledWith('sub-1');
+      done();
+    });
+  });
+
+  it('should skip canceled subscriptions when loading overview server info', (done) => {
+    const canceled = { ...mockSubscription, status: 'canceled' as const };
+    const store = createMockStore([canceled]);
+
+    actions$ = of(loadOverviewServerInfo());
+
+    loadOverviewServerInfoEffect(actions$, store as never, subscriptionItemsService).subscribe((result) => {
+      expect(result).toEqual(
+        loadOverviewServerInfoSuccess({
+          serverInfoBySubscriptionId: {},
+          activeItemIdBySubscriptionId: {},
+          serviceBySubscriptionId: {},
+          provisioningStatusBySubscriptionId: {},
+          sshAccessGrantedBySubscriptionId: {},
+          serviceTypeNameBySubscriptionId: {},
+          displayNameBySubscriptionId: {},
+        }),
+      );
+      expect(subscriptionItemsService.listSubscriptionItems).not.toHaveBeenCalled();
+      done();
+    });
+  });
+
   it('should return loadOverviewServerInfoSuccess with tracked pending item without server info', (done) => {
     const store = createMockStore([mockSubscription]);
 

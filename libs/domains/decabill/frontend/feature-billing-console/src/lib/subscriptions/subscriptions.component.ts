@@ -47,11 +47,11 @@ import {
   formatServerTypeOption,
   isNoneServiceTypeId,
   isSubscriptionItemDetailEligible,
-  isSubscriptionItemRemoved,
   mergeMandatoryOrderAddonIds,
   normalizeAllowedServerTypeIds,
   providerLocationCatalogFromList,
   resolveServiceDisplayLabel,
+  resolveSubscriptionItemProvisioningDisplayStatus,
   type ProviderLocationCatalog,
   type ValidatePromotionRequest,
 } from '@forepath/decabill/frontend/data-access-billing-console';
@@ -647,19 +647,11 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   }
 
   itemProvisioningStatusLabel(sub: SubscriptionResponse, item: SubscriptionItemResponse): string {
-    if (isSubscriptionItemRemoved(item, sub.status)) {
-      return getProvisioningStatusLabel('removed');
-    }
-
-    return getProvisioningStatusLabel(item.provisioningStatus);
+    return getProvisioningStatusLabel(resolveSubscriptionItemProvisioningDisplayStatus(item, sub.status));
   }
 
   itemProvisioningStatusBadgeClass(sub: SubscriptionResponse, item: SubscriptionItemResponse): string {
-    if (isSubscriptionItemRemoved(item, sub.status)) {
-      return getProvisioningStatusBadgeClass('removed');
-    }
-
-    return getProvisioningStatusBadgeClass(item.provisioningStatus);
+    return getProvisioningStatusBadgeClass(resolveSubscriptionItemProvisioningDisplayStatus(item, sub.status));
   }
 
   serviceDetailLink(sub: SubscriptionResponse, item: SubscriptionItemResponse): string[] {

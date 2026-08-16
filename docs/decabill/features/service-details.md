@@ -13,7 +13,7 @@ Customer and admin views for a provisioned subscription item (cloud service inst
 
 Empty tab path redirects to `details`. Valid `:tab` values come from the item detail `tabs[].id` (built-in `details` plus addon-registered ids such as `container-manager`). Unknown tabs fall back to `details`.
 
-Customer deep links also come from the dashboard cloud-instances lane. Admin entry is from the Contracts list (`/administration/subscriptions`) nested services subsection (there is no admin dashboard). Items on terminal subscriptions (`canceled`, `pending_withdrawal`, `pending_instant_cancel`), failed items, and active items without a live provider show as **Removed** in the list and **cannot** open this page (UI hides the action; API returns 404). Dashboard continues to list only active provisioned items.
+Customer deep links also come from the dashboard cloud-instances lane. Admin entry is from the Contracts list (`/administration/subscriptions`) nested services subsection (there is no admin dashboard). Live provisioned items remain open while removal is only planned (`pending_cancel`, `pending_withdrawal`, `pending_instant_cancel`, and other non-terminal live statuses). Items on **canceled** subscriptions, failed items, and active items without a live provider show as **Removed** (or **Removing** while teardown is queued but the provider reference still exists) and **cannot** open this page once the instance is gone (UI hides the action; API returns 404). The customer dashboard keeps listing the same live instances until deprovisioned.
 
 ## Display name
 

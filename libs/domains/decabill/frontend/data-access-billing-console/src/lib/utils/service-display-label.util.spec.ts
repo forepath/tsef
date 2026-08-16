@@ -2,6 +2,7 @@ import {
   isSubscriptionItemDetailEligible,
   isSubscriptionItemRemoved,
   resolveServiceDisplayLabel,
+  resolveSubscriptionItemProvisioningDisplayStatus,
 } from './service-display-label.util';
 
 describe('resolveServiceDisplayLabel', () => {
@@ -74,11 +75,77 @@ describe('isSubscriptionItemDetailEligible', () => {
         'active',
       ),
     ).toBe(false);
+    expect(
+      isSubscriptionItemDetailEligible(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'pending_withdrawal',
+      ),
+    ).toBe(true);
+    expect(
+      isSubscriptionItemDetailEligible(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'pending_instant_cancel',
+      ),
+    ).toBe(true);
+  });
+});
+
+describe('resolveSubscriptionItemProvisioningDisplayStatus', () => {
+  it('shows removing while pending teardown still has a live provider', () => {
+    expect(
+      resolveSubscriptionItemProvisioningDisplayStatus(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'pending_withdrawal',
+      ),
+    ).toBe('removing');
+    expect(
+      resolveSubscriptionItemProvisioningDisplayStatus(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'pending_instant_cancel',
+      ),
+    ).toBe('removing');
+  });
+
+  it('shows removed for canceled subscriptions and torn-down items', () => {
+    expect(
+      resolveSubscriptionItemProvisioningDisplayStatus(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'canceled',
+      ),
+    ).toBe('removed');
+    expect(
+      resolveSubscriptionItemProvisioningDisplayStatus(
+        { provisioningStatus: 'active', hasProviderReference: false, hostname: 'host1' },
+        'active',
+      ),
+    ).toBe('removed');
+    expect(
+      resolveSubscriptionItemProvisioningDisplayStatus(
+        { provisioningStatus: 'active', hasProviderReference: false },
+        'pending_withdrawal',
+      ),
+    ).toBe('removed');
+  });
+
+  it('keeps failed as failed instead of removed', () => {
+    expect(resolveSubscriptionItemProvisioningDisplayStatus({ provisioningStatus: 'failed' }, 'active')).toBe('failed');
+  });
+
+  it('returns the real provisioning status otherwise', () => {
+    expect(
+      resolveSubscriptionItemProvisioningDisplayStatus(
+        { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
+        'active',
+      ),
+    ).toBe('active');
+    expect(resolveSubscriptionItemProvisioningDisplayStatus({ provisioningStatus: 'pending' }, 'active')).toBe(
+      'pending',
+    );
   });
 });
 
 describe('isSubscriptionItemRemoved', () => {
-  it('treats terminal subscriptions, failed items, and torn-down active items as removed', () => {
+  it('is true only for terminal/torn-down cases', () => {
     expect(
       isSubscriptionItemRemoved(
         { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
@@ -90,8 +157,8 @@ describe('isSubscriptionItemRemoved', () => {
         { provisioningStatus: 'active', hasProviderReference: true, hostname: 'host1' },
         'pending_withdrawal',
       ),
-    ).toBe(true);
-    expect(isSubscriptionItemRemoved({ provisioningStatus: 'failed' }, 'active')).toBe(true);
+    ).toBe(false);
+    expect(isSubscriptionItemRemoved({ provisioningStatus: 'failed' }, 'active')).toBe(false);
     expect(
       isSubscriptionItemRemoved(
         { provisioningStatus: 'active', hasProviderReference: false, hostname: 'host1' },

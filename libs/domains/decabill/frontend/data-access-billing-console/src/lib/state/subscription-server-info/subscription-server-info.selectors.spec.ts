@@ -224,7 +224,7 @@ describe('Subscription Server Info Selectors', () => {
       expect(result).toHaveLength(0);
     });
 
-    it('should exclude non-active subscriptions (e.g. canceled) even when they have server info', () => {
+    it('should exclude canceled subscriptions even when they have server info', () => {
       const canceledSubscription = { ...mockSubscription, id: 'sub-canceled', status: 'canceled' as const };
       const subscriptionsState = {
         entities: [mockSubscription, canceledSubscription],
@@ -252,6 +252,45 @@ describe('Subscription Server Info Selectors', () => {
       expect(result).toHaveLength(1);
       expect(result[0].subscription.id).toBe('sub-1');
       expect(result[0].subscription.status).toBe('active');
+    });
+
+    it('should include pending teardown subscriptions until deprovisioned', () => {
+      const pendingWithdrawal = {
+        ...mockSubscription,
+        id: 'sub-withdraw',
+        status: 'pending_withdrawal' as const,
+      };
+      const pendingInstantCancel = {
+        ...mockSubscription,
+        id: 'sub-instant',
+        status: 'pending_instant_cancel' as const,
+      };
+      const subscriptionsState = {
+        entities: [pendingWithdrawal, pendingInstantCancel],
+        selectedSubscription: null,
+        loading: false,
+        loadingSubscription: false,
+        creating: false,
+        canceling: false,
+        resuming: false,
+        error: null,
+      };
+      const serverInfoState = createServerInfoState({
+        serverInfoBySubscriptionId: {
+          'sub-withdraw': mockServerInfo,
+          'sub-instant': mockServerInfo,
+        },
+        activeItemIdBySubscriptionId: { 'sub-withdraw': 'item-w', 'sub-instant': 'item-i' },
+        provisioningStatusBySubscriptionId: { 'sub-withdraw': 'active', 'sub-instant': 'active' },
+      });
+      const rootState = {
+        subscriptions: subscriptionsState,
+        subscriptionServerInfo: serverInfoState,
+      };
+      const result = selectSubscriptionsWithServerInfo(rootState as never);
+
+      expect(result).toHaveLength(2);
+      expect(result.map((row) => row.subscription.id).sort()).toEqual(['sub-instant', 'sub-withdraw']);
     });
   });
 });
