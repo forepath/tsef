@@ -14,10 +14,14 @@ describe('CloudInitConfigService', () => {
   const serviceTypesRepository = {
     findByIdOrThrow: jest.fn().mockResolvedValue({ id: 'st-1', provider: 'hetzner' }),
   };
+  const providerCatalogDispatchService = {
+    requiresProvisioning: jest.fn((provider: string) => provider === 'hetzner' || provider === 'digital-ocean'),
+  };
   const service = new CloudInitConfigService(
     cloudInitConfigsRepository as any,
     servicePlansRepository as any,
     serviceTypesRepository as any,
+    providerCatalogDispatchService as any,
   );
 
   beforeEach(() => {

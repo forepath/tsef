@@ -19,6 +19,7 @@ export const CONTRIBUTOR_NEST_ENV_REGISTRIES: ReadonlyArray<{
   envKey: string;
   source: ContributorNestSource;
 }> = [
+  { envKey: 'DYNAMIC_BILLING_PROVIDER_MODULES', source: 'provider' },
   { envKey: 'DYNAMIC_ADDON_MODULES', source: 'addon' },
   { envKey: 'DYNAMIC_INTEGRATED_STACK_MODULES', source: 'integrated' },
   { envKey: 'DYNAMIC_CLOUD_INIT_MODULES', source: 'cloud-init' },

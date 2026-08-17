@@ -95,13 +95,13 @@ samples via provider/addon `collectMeters` into usage history with `usageSource:
 
 ## Provider details
 
-`GET /service-types/providers` returns all registered provisioning providers with id, display name, and optional config schema. This is used by the billing console to show a provider dropdown when creating service types and to render provider default config fields when creating/editing service plans. Providers are registered at startup (e.g. Hetzner, DigitalOcean) via `ProviderRegistryService`; additional metadata can be loaded from `DYNAMIC_BILLING_PROVIDER_METADATA`.
+`GET /service-types/providers` returns all registered provisioning providers with id, display name, and optional config schema. This is used by the billing console to show a provider dropdown when creating service types and to render provider default config fields when creating/editing service plans. First-party Hetzner and DigitalOcean register via contributor Nest modules (`HetznerContributorModule`, `DigitalOceanContributorModule`); additional metadata-only plugins load from `DYNAMIC_BILLING_PROVIDER_METADATA`; full runtime modules from `DYNAMIC_BILLING_PROVIDER_MODULES` (optional `nestModule`, `contributor/provider/{key}` path allowlist).
 
 **Dynamic provider plugins:**
 
 - `DYNAMIC_PAYMENT_PROCESSORS` - Comma-separated extra payment processor packages (critical; use with `DYNAMIC_PROVIDERS_FAIL_FAST=true` in production)
 - `DYNAMIC_BILLING_PROVIDER_METADATA` - Comma-separated packages exporting `providerMetadata` for the billing UI registry
-- `DYNAMIC_BILLING_PROVIDER_MODULES` - Comma-separated runtime provider modules implementing `collectMeters` (optional `meters`)
+- `DYNAMIC_BILLING_PROVIDER_MODULES` - Comma-separated runtime provider modules (`collectMeters`, optional `provision` / lifecycle / catalog hooks, optional `jobs` / `migrations` / `nestModule`)
 - `DYNAMIC_ADDON_MODULES` - Addon lifecycle modules (`provision` / `teardown` / optional `collectMeters` / optional `serviceTabs` / optional `jobs` / optional `migrations` / optional `nestModule`)
 - `DYNAMIC_INTEGRATED_STACK_MODULES` - Integrated stack modules (`buildUserData` / `buildUpdateCommand` / `serviceTabs` / `jobs` / `migrations` / optional `nestModule`)
 - `DYNAMIC_CLOUD_INIT_MODULES` - CloudInit config code modules keyed by template `key` (`serviceTabs` / `jobs` / `migrations` / optional `nestModule`)

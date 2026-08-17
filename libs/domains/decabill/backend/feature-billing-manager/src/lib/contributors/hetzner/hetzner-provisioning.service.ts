@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
 import { resolveHetznerLocationNameFromMetadata } from '@forepath/shared/backend/util-provisioning-geography';
 
-import { ServerInfo } from '../utils/provisioning.utils';
-import { waitForTcpPort } from '../utils/wait-for-tcp-port.util';
+import { ServerInfo } from '../../utils/provisioning.utils';
+import { waitForTcpPort } from '../../utils/wait-for-tcp-port.util';
 
 const HETZNER_STATUS_POLL_INTERVAL_MS = 3000;
 const HETZNER_POWEROFF_TIMEOUT_MS = 5 * 60 * 1000;

@@ -80,6 +80,9 @@ describe('SubscriptionService', () => {
     getServerInfo: jest.fn().mockResolvedValue({ publicIp: '1.2.3.4' }),
     ensurePublicIpForDns: jest.fn(),
   } as any;
+  const providerCatalogDispatchService = {
+    requiresProvisioning: jest.fn((provider: string) => provider === 'hetzner' || provider === 'digital-ocean'),
+  } as any;
   const hostnameReservationService = {
     reserveHostname: jest.fn().mockResolvedValue('awesome-armadillo-abc12'),
     releaseHostname: jest.fn().mockResolvedValue(undefined),
@@ -186,6 +189,7 @@ describe('SubscriptionService', () => {
     backorderService,
     availabilityService,
     provisioningService,
+    providerCatalogDispatchService,
     hostnameReservationService,
     cloudflareDnsService,
     customerProfilesService,

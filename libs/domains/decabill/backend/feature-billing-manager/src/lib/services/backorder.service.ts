@@ -41,7 +41,7 @@ import { CloudflareDnsService } from './cloudflare-dns.service';
 import { HostnameReservationService } from './hostname-reservation.service';
 import { ProviderServerTypesService } from './provider-server-types.service';
 import { PricingService } from './pricing.service';
-import { ProvisioningService } from './provisioning.service';
+import { ProvisioningDispatchService } from './provisioning-dispatch.service';
 import { TaxCalculationService } from './tax-calculation.service';
 import { InvoiceTaxContextService } from './invoice-tax-context.service';
 import { SubscriptionPeriodChargeService } from './subscription-period-charge.service';
@@ -58,7 +58,7 @@ export class BackorderService {
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly subscriptionItemsRepository: SubscriptionItemsRepository,
     private readonly billingScheduleService: BillingScheduleService,
-    private readonly provisioningService: ProvisioningService,
+    private readonly provisioningDispatchService: ProvisioningDispatchService,
     private readonly hostnameReservationService: HostnameReservationService,
     private readonly cloudflareDnsService: CloudflareDnsService,
     private readonly cloudInitConfigService: CloudInitConfigService,
@@ -281,7 +281,7 @@ export class BackorderService {
           firewallId: effectiveConfig.firewallId as number | undefined,
           userData,
         };
-        const provisioned = await this.provisioningService.provision(
+        const provisioned = await this.provisioningDispatchService.provision(
           serviceType.provider,
           provisioningConfig,
           credentials,
@@ -290,12 +290,12 @@ export class BackorderService {
         if (provisioned?.serverId) {
           await this.subscriptionItemsRepository.updateProviderReference(baseItem.id, provisioned.serverId);
           await this.subscriptionItemsRepository.updateProvisioningStatus(baseItem.id, 'active');
-          const serverInfo = await this.provisioningService.getServerInfo(
+          const serverInfo = await this.provisioningDispatchService.getServerInfo(
             serviceType.provider,
             provisioned.serverId,
             credentials,
           );
-          const publicIp = await this.provisioningService.ensurePublicIpForDns(
+          const publicIp = await this.provisioningDispatchService.ensurePublicIpForDns(
             serviceType.provider,
             provisioned.serverId,
             serverInfo,

@@ -7,6 +7,7 @@ import type { ContributorJobSource } from '../utils/contributor-job.types';
 import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { CloudInitModuleRegistryService } from './cloud-init-module-registry.service';
 import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
+import { ProviderModuleRegistryService } from './provider-module-registry.service';
 
 export interface RegisteredPluginMigration {
   name: string;
@@ -39,12 +40,14 @@ export class ContributorMigrationService {
     private readonly addonModuleRegistry: AddonModuleRegistryService,
     private readonly integratedStackRegistry: IntegratedStackRegistryService,
     private readonly cloudInitModuleRegistry: CloudInitModuleRegistryService,
+    private readonly providerModuleRegistry: ProviderModuleRegistryService,
   ) {}
 
   listRegistered(): RegisteredPluginMigration[] {
     const listed: RegisteredPluginMigration[] = [];
     const seen = new Set<string>();
 
+    this.append(listed, seen, 'provider', this.providerModuleRegistry.list());
     this.append(listed, seen, 'addon', this.addonModuleRegistry.list());
     this.append(listed, seen, 'integrated', this.integratedStackRegistry.list());
     this.append(listed, seen, 'cloud-init', this.cloudInitModuleRegistry.list());
@@ -68,11 +71,13 @@ export class ContributorMigrationService {
     target: RegisteredPluginMigration[],
     seen: Set<string>,
     source: ContributorJobSource,
-    modules: ReadonlyArray<{ key: string; migrations?: Array<new () => MigrationInterface> }>,
+    modules: ReadonlyArray<{ key?: string; id?: string; migrations?: Array<new () => MigrationInterface> }>,
   ): void {
     for (const module of modules) {
+      const sourceKey = module.key ?? module.id ?? '';
+
       for (const factory of module.migrations ?? []) {
-        const name = buildPluginMigrationName(source, module.key, factory.name);
+        const name = buildPluginMigrationName(source, sourceKey, factory.name);
 
         if (seen.has(name)) {
           throw new Error('Duplicate plugin migration registration');

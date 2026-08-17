@@ -44,7 +44,7 @@ import { CloudflareDnsService } from './cloudflare-dns.service';
 import { CloudInitModuleRegistryService } from './cloud-init-module-registry.service';
 import { ContainerManagerService } from '../contributors/container-manager/services/container-manager.service';
 import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
-import { ProvisioningService } from './provisioning.service';
+import { ProvisioningDispatchService } from './provisioning-dispatch.service';
 import { SubscriptionService } from './subscription.service';
 import { isLiveAccessibleSubscriptionStatus } from '../utils/subscription-live-access.utils';
 
@@ -59,7 +59,7 @@ export class SubscriptionItemServerService {
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly subscriptionItemsRepository: SubscriptionItemsRepository,
     private readonly subscriptionAddonsRepository: SubscriptionAddonsRepository,
-    private readonly provisioningService: ProvisioningService,
+    private readonly provisioningDispatchService: ProvisioningDispatchService,
     private readonly cloudflareDnsService: CloudflareDnsService,
     private readonly servicePlansRepository: ServicePlansRepository,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
@@ -222,7 +222,11 @@ export class SubscriptionItemServerService {
     const item = await this.resolveItemForAction(subscriptionId, itemId, userId);
     const credentials = getProvisioningCredentials(item.serviceType!.provider!, item.serviceType!.providerDefaults);
 
-    await this.provisioningService.startServer(item.serviceType!.provider!, item.providerReference!, credentials);
+    await this.provisioningDispatchService.startServer(
+      item.serviceType!.provider!,
+      item.providerReference!,
+      credentials,
+    );
 
     this.billingNotificationPublisher.publish('subscription.service.started', { subscriptionId, itemId }, userId);
   }
@@ -231,7 +235,11 @@ export class SubscriptionItemServerService {
     const item = await this.resolveItemForAction(subscriptionId, itemId, userId);
     const credentials = getProvisioningCredentials(item.serviceType!.provider!, item.serviceType!.providerDefaults);
 
-    await this.provisioningService.stopServer(item.serviceType!.provider!, item.providerReference!, credentials);
+    await this.provisioningDispatchService.stopServer(
+      item.serviceType!.provider!,
+      item.providerReference!,
+      credentials,
+    );
 
     this.billingNotificationPublisher.publish('subscription.service.stopped', { subscriptionId, itemId }, userId);
   }
@@ -240,7 +248,11 @@ export class SubscriptionItemServerService {
     const item = await this.resolveItemForAction(subscriptionId, itemId, userId);
     const credentials = getProvisioningCredentials(item.serviceType!.provider!, item.serviceType!.providerDefaults);
 
-    await this.provisioningService.restartServer(item.serviceType!.provider!, item.providerReference!, credentials);
+    await this.provisioningDispatchService.restartServer(
+      item.serviceType!.provider!,
+      item.providerReference!,
+      credentials,
+    );
 
     this.billingNotificationPublisher.publish('subscription.service.restarted', { subscriptionId, itemId }, userId);
   }
@@ -248,7 +260,7 @@ export class SubscriptionItemServerService {
   async startServerAsAdmin(subscriptionId: string, itemId: string, adminUserId: string): Promise<void> {
     const item = await this.resolveItemForAdminAction(subscriptionId, itemId);
 
-    await this.provisioningService.startServer(
+    await this.provisioningDispatchService.startServer(
       item.serviceType!.provider!,
       item.providerReference!,
       getProvisioningCredentials(item.serviceType!.provider!, item.serviceType!.providerDefaults),
@@ -260,7 +272,7 @@ export class SubscriptionItemServerService {
   async stopServerAsAdmin(subscriptionId: string, itemId: string, adminUserId: string): Promise<void> {
     const item = await this.resolveItemForAdminAction(subscriptionId, itemId);
 
-    await this.provisioningService.stopServer(
+    await this.provisioningDispatchService.stopServer(
       item.serviceType!.provider!,
       item.providerReference!,
       getProvisioningCredentials(item.serviceType!.provider!, item.serviceType!.providerDefaults),
@@ -272,7 +284,7 @@ export class SubscriptionItemServerService {
   async restartServerAsAdmin(subscriptionId: string, itemId: string, adminUserId: string): Promise<void> {
     const item = await this.resolveItemForAdminAction(subscriptionId, itemId);
 
-    await this.provisioningService.restartServer(
+    await this.provisioningDispatchService.restartServer(
       item.serviceType!.provider!,
       item.providerReference!,
       getProvisioningCredentials(item.serviceType!.provider!, item.serviceType!.providerDefaults),
@@ -452,7 +464,7 @@ export class SubscriptionItemServerService {
     }
 
     const credentials = getProvisioningCredentials(provider, item.serviceType?.providerDefaults);
-    const info = await this.provisioningService.getServerInfo(provider, item.providerReference, credentials);
+    const info = await this.provisioningDispatchService.getServerInfo(provider, item.providerReference, credentials);
 
     if (!info) {
       return undefined;

@@ -12,7 +12,7 @@ import { BillingNotificationPublisher } from '../notifications/billing-notificat
 import { CloudflareDnsService } from './cloudflare-dns.service';
 import { HostnameReservationService } from './hostname-reservation.service';
 import { AddonLifecycleService } from './addon-lifecycle.service';
-import { ProvisioningService } from './provisioning.service';
+import { ProvisioningDispatchService } from './provisioning-dispatch.service';
 import { WithdrawalRefundService } from './withdrawal-refund.service';
 
 export interface TeardownOptions {
@@ -29,7 +29,7 @@ export class SubscriptionTeardownService {
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly subscriptionItemsRepository: SubscriptionItemsRepository,
     private readonly servicePlansRepository: ServicePlansRepository,
-    private readonly provisioningService: ProvisioningService,
+    private readonly provisioningDispatchService: ProvisioningDispatchService,
     private readonly openPositionsRepository: OpenPositionsRepository,
     private readonly hostnameReservationService: HostnameReservationService,
     private readonly cloudflareDnsService: CloudflareDnsService,
@@ -152,7 +152,11 @@ export class SubscriptionTeardownService {
       if (item.providerReference && item.serviceType?.provider) {
         try {
           const credentials = getProvisioningCredentials(item.serviceType.provider, item.serviceType.providerDefaults);
-          await this.provisioningService.deprovision(item.serviceType.provider, item.providerReference, credentials);
+          await this.provisioningDispatchService.deprovision(
+            item.serviceType.provider,
+            item.providerReference,
+            credentials,
+          );
           await this.subscriptionItemsRepository.clearProviderReference(item.id);
           this.billingNotificationPublisher.publish(
             'subscription.service.removed',

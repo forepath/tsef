@@ -4,6 +4,8 @@ import {
   BillingModule,
   ContainerManagerContributorModule,
   DecabillBillingContributorModule,
+  DigitalOceanContributorModule,
+  HetznerContributorModule,
 } from '@forepath/decabill/backend';
 
 import { BillingQueueModule } from '../queue/billing-queue.module';
@@ -26,12 +28,14 @@ describe('AppModule.register', () => {
     BillingModule.withContributors([]);
   });
 
-  it('includes first-party Container Manager and integrated stack modules for API and worker registrations', () => {
+  it('includes first-party provider, Container Manager, and integrated stack modules for API and worker registrations', () => {
     const app = AppModule.register([]);
     const billing = findBillingDynamicModule(app.imports);
 
     expect(billing?.imports).toEqual(
       expect.arrayContaining([
+        HetznerContributorModule,
+        DigitalOceanContributorModule,
         ContainerManagerContributorModule,
         AgenstraControllerContributorModule,
         AgenstraManagerContributorModule,
@@ -44,6 +48,8 @@ describe('AppModule.register', () => {
 
     expect(queueBilling?.imports).toEqual(
       expect.arrayContaining([
+        HetznerContributorModule,
+        DigitalOceanContributorModule,
         ContainerManagerContributorModule,
         AgenstraControllerContributorModule,
         AgenstraManagerContributorModule,

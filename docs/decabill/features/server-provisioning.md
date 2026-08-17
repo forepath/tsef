@@ -15,7 +15,7 @@ When a [Subscription](./subscriptions.md) order includes a provisioning-enabled 
 
 ## Supported Providers
 
-Built-in providers register at startup when API tokens are configured:
+First-party Hetzner and DigitalOcean are **contributor Nest modules** under `contributors/hetzner` and `contributors/digital-ocean`. Each registers provider metadata and runtime hooks (`provision`, lifecycle, catalog) in `onModuleInit`. Host code dispatches through `ProvisioningDispatchService` and `ProviderCatalogDispatchService` (unknown provider ids or missing hooks **fail closed**).
 
 #### Hetzner Cloud
 
@@ -31,7 +31,7 @@ Built-in providers register at startup when API tokens are configured:
 - **Config keys:** `region` (required), `serverType` (required)
 - **Server types:** Loaded live from `GET /service-types/providers/digital-ocean/server-types`
 
-Additional cloud backends can be added via [Dynamic Provider Plugins](./dynamic-provider-plugins.md) (`DYNAMIC_BILLING_PROVIDER_METADATA` and custom provisioning packages where supported).
+Additional cloud backends can be added via [Dynamic Provider Plugins](./dynamic-provider-plugins.md) (`DYNAMIC_BILLING_PROVIDER_METADATA` for admin-only metadata, or `DYNAMIC_BILLING_PROVIDER_MODULES` with full `provision` hooks and optional `nestModule`).
 
 ## Provisioning Process
 

@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, Logger, Optional } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
 
-import { ServerInfo } from '../utils/provisioning.utils';
-import { waitForTcpPort } from '../utils/wait-for-tcp-port.util';
-import { SshExecutorService } from './ssh-executor.service';
+import { ServerInfo } from '../../utils/provisioning.utils';
+import { waitForTcpPort } from '../../utils/wait-for-tcp-port.util';
+import { SshExecutorService } from '../../services/ssh-executor.service';
 
 /** DigitalOcean caps user_data at 64KiB (plain text UTF-8). */
 const MAX_USER_DATA_BYTES = 64 * 1024;

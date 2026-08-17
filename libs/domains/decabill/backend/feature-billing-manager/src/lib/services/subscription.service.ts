@@ -56,7 +56,8 @@ import { CustomerProfilesService } from './customer-profiles.service';
 import { HostnameReservationService } from './hostname-reservation.service';
 import { ProviderServerTypesService } from './provider-server-types.service';
 import { PricingService } from './pricing.service';
-import { ProvisioningService } from './provisioning.service';
+import { ProviderCatalogDispatchService } from './provider-catalog-dispatch.service';
+import { ProvisioningDispatchService } from './provisioning-dispatch.service';
 import { PromotionRedemptionService } from './promotion-redemption.service';
 import { SshExecutorService } from './ssh-executor.service';
 import { TaxCalculationService } from './tax-calculation.service';
@@ -93,7 +94,8 @@ export class SubscriptionService {
     private readonly cancellationPolicyService: CancellationPolicyService,
     private readonly backorderService: BackorderService,
     private readonly availabilityService: AvailabilityService,
-    private readonly provisioningService: ProvisioningService,
+    private readonly provisioningDispatchService: ProvisioningDispatchService,
+    private readonly providerCatalogDispatchService: ProviderCatalogDispatchService,
     private readonly hostnameReservationService: HostnameReservationService,
     private readonly cloudflareDnsService: CloudflareDnsService,
     private readonly customerProfilesService: CustomerProfilesService,
@@ -183,7 +185,7 @@ export class SubscriptionService {
 
     const provider = serviceType.provider;
 
-    if (provider === 'hetzner' || provider === 'digital-ocean') {
+    if (this.providerCatalogDispatchService.requiresProvisioning(provider)) {
       const regionResolved = resolveProvisioningRegion(effectiveConfig, provider);
 
       mirrorGeographyInConfig(effectiveConfig, regionResolved);
@@ -195,7 +197,7 @@ export class SubscriptionService {
       throw new BadRequestException(validationErrors.join('; '));
     }
 
-    if (provider === 'hetzner' || provider === 'digital-ocean') {
+    if (this.providerCatalogDispatchService.requiresProvisioning(provider)) {
       if (allowCustomerServerTypeSelection) {
         const allowed = normalizeAllowedServerTypes(plan.allowedServerTypes);
         const resolvedServerType = String(
@@ -248,7 +250,7 @@ export class SubscriptionService {
       (effectiveConfig.serverType as string | undefined) ?? (provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11');
     const providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
 
-    if (provider === 'hetzner' || provider === 'digital-ocean') {
+    if (this.providerCatalogDispatchService.requiresProvisioning(provider)) {
       if (allowCustomerServerTypeSelection) {
         const billingBasePrice = await resolveServerTypePriceMonthly(
           this.providerServerTypesService,
@@ -486,7 +488,7 @@ export class SubscriptionService {
       return;
     }
 
-    if (provider !== 'hetzner' && provider !== 'digital-ocean') {
+    if (!this.providerCatalogDispatchService.requiresProvisioning(provider)) {
       // Nothing to provision for non-server providers; treat the item as fulfilled.
       await this.subscriptionItemsRepository.updateProvisioningStatus(itemId, 'active');
 
@@ -542,7 +544,7 @@ export class SubscriptionService {
 
       userData = this.addonLifecycleService.appendScriptsToUserData(userData, scripts);
 
-      const provisioned = await this.provisioningService.provision(
+      const provisioned = await this.provisioningDispatchService.provision(
         provider,
         {
           name: hostname,
@@ -558,8 +560,12 @@ export class SubscriptionService {
 
       if (provisioned?.serverId) {
         await this.subscriptionItemsRepository.updateProviderReference(itemId, provisioned.serverId);
-        const serverInfo = await this.provisioningService.getServerInfo(provider, provisioned.serverId, credentials);
-        const publicIp = await this.provisioningService.ensurePublicIpForDns(
+        const serverInfo = await this.provisioningDispatchService.getServerInfo(
+          provider,
+          provisioned.serverId,
+          credentials,
+        );
+        const publicIp = await this.provisioningDispatchService.ensurePublicIpForDns(
           provider,
           provisioned.serverId,
           serverInfo,

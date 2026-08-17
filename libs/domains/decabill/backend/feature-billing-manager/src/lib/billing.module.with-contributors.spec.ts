@@ -5,17 +5,21 @@ import { AgenstraManagerContributorModule } from './contributors/agenstra-manage
 import { CONTAINER_MANAGER_NEST_REGISTRATION } from './contributors/container-manager/container-manager.contributor.module';
 import { ContainerManagerContributorModule } from './contributors/container-manager/container-manager.contributor.module';
 import { DecabillBillingContributorModule } from './contributors/decabill-billing/decabill-billing.contributor.module';
+import { DigitalOceanContributorModule } from './contributors/digital-ocean/digital-ocean.contributor.module';
+import { HetznerContributorModule } from './contributors/hetzner/hetzner.contributor.module';
 import { resolveContributorNestImports } from './utils/contributor-nest-registration';
 
 @Module({})
 class ExtraContributorNestModule {}
 
 describe('resolveContributorNestImports', () => {
-  it('includes the first-party Container Manager and integrated stack modules', () => {
+  it('includes the first-party provider, Container Manager, and integrated stack modules', () => {
     const modules = resolveContributorNestImports([]);
 
     expect(modules).toEqual(
       expect.arrayContaining([
+        HetznerContributorModule,
+        DigitalOceanContributorModule,
         ContainerManagerContributorModule,
         AgenstraControllerContributorModule,
         AgenstraManagerContributorModule,
@@ -34,6 +38,8 @@ describe('resolveContributorNestImports', () => {
     const modules = resolveContributorNestImports([extra]);
 
     expect(modules).toContain(ExtraContributorNestModule);
+    expect(modules).toContain(HetznerContributorModule);
+    expect(modules).toContain(DigitalOceanContributorModule);
     expect(modules).toContain(ContainerManagerContributorModule);
     expect(modules).toContain(AgenstraControllerContributorModule);
     expect(modules).toContain(AgenstraManagerContributorModule);
