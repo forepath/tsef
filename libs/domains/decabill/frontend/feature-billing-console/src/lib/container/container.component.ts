@@ -17,6 +17,9 @@ import { ENVIRONMENT, LocaleService } from '@forepath/shared/frontend/util-confi
 import { combineLatest, distinctUntilChanged, filter, map, startWith } from 'rxjs';
 
 import { ThemeService } from '../theme.service';
+import { collectContributorNavItems } from '../contributors/contributor-ui.registry';
+import type { ContributorNavItem } from '../contributors/contributor-ui.types';
+import { FIRST_PARTY_CONTRIBUTOR_UI_MODULES } from '../contributors/first-party-contributor-ui.modules';
 
 interface BootstrapPopoverInstance {
   dispose(): void;
@@ -26,15 +29,6 @@ interface BootstrapPopoverInstance {
 
 interface BootstrapPopoverConstructor {
   getOrCreateInstance(element: Element, options?: Record<string, unknown>): BootstrapPopoverInstance;
-}
-
-interface AdminNavItem {
-  activePaths: string[];
-  icon: string;
-  label: string;
-  navKey?: 'updates';
-  routerLink: string[];
-  title: string;
 }
 
 function getBootstrapPopover(): BootstrapPopoverConstructor | undefined {
@@ -68,6 +62,8 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
   /** True when Personal Access Tokens UI is available (users or keycloak; not api-key). */
   readonly isPatUiEnabled =
     this.authEnvironment.authentication.type === 'users' || this.authEnvironment.authentication.type === 'keycloak';
+
+  readonly contributorCustomerNavItems = collectContributorNavItems(FIRST_PARTY_CONTRIBUTOR_UI_MODULES).customer;
 
   /**
    * True when on the main clients mask (not editor, deployments, etc.)
@@ -371,8 +367,8 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
     return grid;
   }
 
-  private getAdminNavItems(): AdminNavItem[] {
-    const items: AdminNavItem[] = [
+  private getAdminNavItems(): ContributorNavItem[] {
+    const items: ContributorNavItem[] = [
       {
         routerLink: ['/administration/service-types'],
         activePaths: ['/administration/service-types'],
@@ -477,10 +473,12 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
       });
     }
 
+    items.push(...collectContributorNavItems(FIRST_PARTY_CONTRIBUTOR_UI_MODULES).admin);
+
     return items;
   }
 
-  private isAdminNavItemActive(item: AdminNavItem): boolean {
+  private isAdminNavItemActive(item: ContributorNavItem): boolean {
     const url = this.router.url;
 
     return item.activePaths.some((path) => url.includes(path));

@@ -1,4 +1,4 @@
-import { KeycloakRoles, RequireScopes, UserRole, UsersRoles } from '@forepath/identity/backend';
+import { RequireScopes } from '@forepath/identity/backend';
 import { BadRequestException, Controller, Get, Param, ParseUUIDPipe, Query, Req } from '@nestjs/common';
 
 import type {
@@ -8,29 +8,32 @@ import type {
   ContainerManagerStatsHistoryResponseDto,
 } from '../dto/container-manager.dto';
 import { ContainerManagerService } from '../services/container-manager.service';
-import { ensureAdmin, getUserFromRequest, type RequestWithUser } from '../utils/billing-access.utils';
+import { getUserFromRequest, type RequestWithUser } from '../../../utils/billing-access.utils';
 
-@Controller('admin/billing/subscriptions/:subscriptionId/items/:itemId/container-manager')
-@KeycloakRoles(UserRole.ADMIN)
-@UsersRoles(UserRole.ADMIN)
-export class AdminContainerManagerController {
+@Controller('subscriptions/:subscriptionId/items/:itemId/container-manager')
+export class ContainerManagerController {
   constructor(private readonly containerManagerService: ContainerManagerService) {}
 
+  @RequireScopes('subscriptions:read')
   @Get('containers')
-  @RequireScopes('billing_admin:read')
   async listContainers(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
     @Req() req?: RequestWithUser,
   ): Promise<ContainerManagerContainersResponseDto> {
     const userInfo = getUserFromRequest(req ?? ({} as RequestWithUser));
-    ensureAdmin(userInfo);
 
-    return await this.containerManagerService.listContainers(subscriptionId, itemId, { asAdmin: true });
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.containerManagerService.listContainers(subscriptionId, itemId, {
+      userId: userInfo.userId,
+    });
   }
 
+  @RequireScopes('subscriptions:read')
   @Get('containers/:containerId/stats-history')
-  @RequireScopes('billing_admin:read')
   async getStatsHistory(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
@@ -38,15 +41,18 @@ export class AdminContainerManagerController {
     @Req() req?: RequestWithUser,
   ): Promise<ContainerManagerStatsHistoryResponseDto> {
     const userInfo = getUserFromRequest(req ?? ({} as RequestWithUser));
-    ensureAdmin(userInfo);
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
 
     return await this.containerManagerService.getStatsHistory(subscriptionId, itemId, containerId, {
-      asAdmin: true,
+      userId: userInfo.userId,
     });
   }
 
+  @RequireScopes('subscriptions:read')
   @Get('containers/:containerId/logs')
-  @RequireScopes('billing_admin:read')
   async getLogs(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
@@ -55,25 +61,33 @@ export class AdminContainerManagerController {
     @Req() req?: RequestWithUser,
   ): Promise<ContainerManagerLogsResponseDto> {
     const userInfo = getUserFromRequest(req ?? ({} as RequestWithUser));
-    ensureAdmin(userInfo);
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
 
     return await this.containerManagerService.getLogs(subscriptionId, itemId, containerId, {
-      asAdmin: true,
+      userId: userInfo.userId,
       tail: this.parseOptionalTail(tailRaw),
     });
   }
 
+  @RequireScopes('subscriptions:read')
   @Get('networks')
-  @RequireScopes('billing_admin:read')
   async listNetworks(
     @Param('subscriptionId', new ParseUUIDPipe({ version: '4' })) subscriptionId: string,
     @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
     @Req() req?: RequestWithUser,
   ): Promise<ContainerManagerNetworksResponseDto> {
     const userInfo = getUserFromRequest(req ?? ({} as RequestWithUser));
-    ensureAdmin(userInfo);
 
-    return await this.containerManagerService.listNetworks(subscriptionId, itemId, { asAdmin: true });
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.containerManagerService.listNetworks(subscriptionId, itemId, {
+      userId: userInfo.userId,
+    });
   }
 
   private parseOptionalTail(raw: string | undefined): number | undefined {

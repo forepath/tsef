@@ -1,53 +1,46 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { isIP } from 'node:net';
 
+import {
+  CONTAINER_MANAGER_HISTORY_MAX_POINTS,
+  DOCKER_CONTAINER_ID_PATTERN,
+} from '../constants/container-manager.constants';
 import type {
   ContainerManagerContainersResponseDto,
   ContainerManagerLogsResponseDto,
   ContainerManagerNetworkDto,
   ContainerManagerNetworksResponseDto,
-  ContainerManagerStatsHistoryPointDto,
   ContainerManagerStatsHistoryResponseDto,
 } from '../dto/container-manager.dto';
-import { ProvisioningStatus } from '../entities/subscription-item.entity';
+import { ProvisioningStatus, type SubscriptionItemEntity } from '../../../entities/subscription-item.entity';
+import { ContainerStatsSamplesRepository } from '../../../repositories/container-stats-samples.repository';
+import { ContainerStatsSummariesRepository } from '../../../repositories/container-stats-summaries.repository';
 import {
   mergeHostNetworkingIntoTopology,
   parseIpAddrJson,
   parseIpRouteJson,
-} from '../utils/container-manager-host-network.utils';
-import { CONTAINER_MANAGER_MODULE_KEY } from '../utils/plan-addons.utils';
-import { isLiveAccessibleSubscriptionStatus } from '../utils/subscription-live-access.utils';
-import { AddonModuleRegistryService } from './addon-module-registry.service';
-import { SshExecutorService } from './ssh-executor.service';
-import { SubscriptionAddonsRepository } from '../repositories/subscription-addons.repository';
-import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
-import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
-import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
-import { ServicePlansRepository } from '../repositories/service-plans.repository';
+} from '../../../utils/container-manager-host-network.utils';
+import { CONTAINER_MANAGER_MODULE_KEY } from '../../../utils/plan-addons.utils';
+import { isLiveAccessibleSubscriptionStatus } from '../../../utils/subscription-live-access.utils';
+import { AddonModuleRegistryService } from '../../../services/addon-module-registry.service';
+import { SshExecutorService } from '../../../services/ssh-executor.service';
+import { SubscriptionAddonsRepository } from '../../../repositories/subscription-addons.repository';
+import { SubscriptionItemsRepository } from '../../../repositories/subscription-items.repository';
+import { SubscriptionsRepository } from '../../../repositories/subscriptions.repository';
+import { BillingNotificationPublisher } from '../../../notifications/billing-notification.publisher';
+import { ServicePlansRepository } from '../../../repositories/service-plans.repository';
 
 const SSH_USER = 'root';
 const SSH_PORT = 22;
 const DEFAULT_SSH_TIMEOUT_MS = 60_000;
-const HISTORY_MAX_POINTS = 60;
 const DEFAULT_LOG_TAIL = 200;
 const MAX_LOG_TAIL = 500;
 /** Soft cap on combined log payload returned to clients. */
 const MAX_LOG_PAYLOAD_CHARS = 256_000;
-/** Docker container IDs from `docker ps` are hex (short or full). */
-const DOCKER_CONTAINER_ID_PATTERN = /^[a-f0-9]{6,64}$/i;
-
-interface HistoryBucket {
-  points: ContainerManagerStatsHistoryPointDto[];
-}
 
 @Injectable()
 export class ContainerManagerService {
   private readonly logger = new Logger(ContainerManagerService.name);
-  private readonly historyByKey = new Map<string, HistoryBucket>();
-  private readonly lastSummaryByItem = new Map<
-    string,
-    { containerCount: number; healthyCount: number; lastCollectedAt: string }
-  >();
 
   constructor(
     private readonly subscriptionsRepository: SubscriptionsRepository,
@@ -57,20 +50,16 @@ export class ContainerManagerService {
     private readonly sshExecutor: SshExecutorService,
     private readonly addonModuleRegistry: AddonModuleRegistryService,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
+    private readonly samplesRepository: ContainerStatsSamplesRepository,
+    private readonly summariesRepository: ContainerStatsSummariesRepository,
   ) {}
 
-  getCachedSummary(itemId: string): {
+  async getCachedSummary(itemId: string): Promise<{
     containerCount: number;
     healthyCount: number;
     lastCollectedAt: string | null;
-  } | null {
-    const cached = this.lastSummaryByItem.get(itemId);
-
-    if (!cached) {
-      return null;
-    }
-
-    return cached;
+  } | null> {
+    return await this.summariesRepository.findByItemId(itemId);
   }
 
   async listContainers(
@@ -79,6 +68,24 @@ export class ContainerManagerService {
     options?: { userId?: string; asAdmin?: boolean },
   ): Promise<ContainerManagerContainersResponseDto> {
     const item = await this.assertContainerManagerAccess(subscriptionId, itemId, options);
+
+    try {
+      return await this.collectLiveContainersForItem(item);
+    } catch (error: unknown) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      await this.notifyCollectionFailed(subscriptionId, itemId, error);
+      throw new BadRequestException('Unable to collect container information');
+    }
+  }
+
+  /**
+   * Live SSH docker ps + stats for a provisioned item. Does not persist graph history.
+   * Callers must enforce eligibility/authz before invoking.
+   */
+  async collectLiveContainersForItem(item: SubscriptionItemEntity): Promise<ContainerManagerContainersResponseDto> {
     const host = this.resolvePublicIp(item);
     const privateKey = item.sshPrivateKey;
 
@@ -86,68 +93,41 @@ export class ContainerManagerService {
       throw new BadRequestException('SSH access is not available for this service');
     }
 
-    try {
-      await this.sshExecutor.waitUntilReachable(host, SSH_PORT, { timeoutMs: DEFAULT_SSH_TIMEOUT_MS });
-      const listRaw = await this.execDockerJson(host, privateKey, `docker ps -a --format '{{json .}}'`);
-      const containersMeta = this.parseNdjson(listRaw);
-      const statsRaw = await this.execDockerJson(host, privateKey, `docker stats --no-stream --format '{{json .}}'`);
-      const statsByName = new Map<string, Record<string, unknown>>();
+    await this.sshExecutor.waitUntilReachable(host, SSH_PORT, { timeoutMs: DEFAULT_SSH_TIMEOUT_MS });
+    const listRaw = await this.execDockerJson(host, privateKey, `docker ps -a --format '{{json .}}'`);
+    const containersMeta = this.parseNdjson(listRaw);
+    const statsRaw = await this.execDockerJson(host, privateKey, `docker stats --no-stream --format '{{json .}}'`);
+    const statsByName = new Map<string, Record<string, unknown>>();
 
-      for (const row of this.parseNdjson(statsRaw)) {
-        const name = typeof row['Name'] === 'string' ? row['Name'] : null;
+    for (const row of this.parseNdjson(statsRaw)) {
+      const name = typeof row['Name'] === 'string' ? row['Name'] : null;
 
-        if (name) {
-          statsByName.set(name.replace(/^\//, ''), row);
-        }
+      if (name) {
+        statsByName.set(name.replace(/^\//, ''), row);
       }
-
-      const collectedAt = new Date().toISOString();
-      const containers = containersMeta.map((row) => {
-        const id = String(row['ID'] ?? row['Id'] ?? '');
-        const name = String(row['Names'] ?? row['Name'] ?? '').replace(/^\//, '');
-        const state = String(row['State'] ?? '');
-        const status = String(row['Status'] ?? '');
-        const statsRow = statsByName.get(name) ?? null;
-        const stats = statsRow ? this.mapStatsRow(statsRow) : null;
-
-        if (id && DOCKER_CONTAINER_ID_PATTERN.test(id) && stats) {
-          this.pushHistory(subscriptionId, itemId, id, {
-            timestamp: collectedAt,
-            cpuPercent: stats.cpuPercent,
-            memoryPercent: stats.memoryPercent,
-            memoryUsageBytes: stats.memoryUsageBytes,
-            memoryLimitBytes: stats.memoryLimitBytes,
-            blockReadBytes: stats.blockReadBytes,
-            blockWriteBytes: stats.blockWriteBytes,
-            networkRxBytes: stats.networkRxBytes,
-            networkTxBytes: stats.networkTxBytes,
-          });
-        }
-
-        return {
-          id,
-          name,
-          image: String(row['Image'] ?? ''),
-          state,
-          status,
-          createdAt: typeof row['CreatedAt'] === 'string' ? row['CreatedAt'] : null,
-          stats,
-        };
-      });
-
-      const healthyCount = containers.filter((c) => /running/i.test(c.state) || /up /i.test(c.status)).length;
-
-      this.lastSummaryByItem.set(itemId, {
-        containerCount: containers.length,
-        healthyCount,
-        lastCollectedAt: collectedAt,
-      });
-
-      return { containers, collectedAt };
-    } catch (error: unknown) {
-      await this.publishCollectionFailed(subscriptionId, itemId, error);
-      throw new BadRequestException('Unable to collect container information');
     }
+
+    const collectedAt = new Date().toISOString();
+    const containers = containersMeta.map((row) => {
+      const id = String(row['ID'] ?? row['Id'] ?? '');
+      const name = String(row['Names'] ?? row['Name'] ?? '').replace(/^\//, '');
+      const state = String(row['State'] ?? '');
+      const status = String(row['Status'] ?? '');
+      const statsRow = statsByName.get(name) ?? null;
+      const stats = statsRow ? this.mapStatsRow(statsRow) : null;
+
+      return {
+        id,
+        name,
+        image: String(row['Image'] ?? ''),
+        state,
+        status,
+        createdAt: typeof row['CreatedAt'] === 'string' ? row['CreatedAt'] : null,
+        stats,
+      };
+    });
+
+    return { containers, collectedAt };
   }
 
   async getStatsHistory(
@@ -158,14 +138,15 @@ export class ContainerManagerService {
   ): Promise<ContainerManagerStatsHistoryResponseDto> {
     await this.assertContainerManagerAccess(subscriptionId, itemId, options);
     const safeContainerId = this.assertSafeDockerContainerId(containerId);
-    // Refresh latest sample so charts have something to show
-    await this.listContainers(subscriptionId, itemId, options);
-    const key = this.historyKey(subscriptionId, itemId, safeContainerId);
-    const bucket = this.historyByKey.get(key);
+    const points = await this.samplesRepository.findLatestPoints(
+      itemId,
+      safeContainerId,
+      CONTAINER_MANAGER_HISTORY_MAX_POINTS,
+    );
 
     return {
       containerId: safeContainerId,
-      points: bucket?.points ?? [],
+      points,
     };
   }
 
@@ -210,6 +191,10 @@ export class ContainerManagerService {
       await this.publishCollectionFailed(subscriptionId, itemId, error);
       throw new BadRequestException('Unable to collect container logs');
     }
+  }
+
+  async notifyCollectionFailed(subscriptionId: string, itemId: string, error: unknown): Promise<void> {
+    await this.publishCollectionFailed(subscriptionId, itemId, error);
   }
 
   async listNetworks(
@@ -629,28 +614,6 @@ export class ContainerManagerService {
     }
 
     return `'${value.replace(/'/g, `'\\''`)}'`;
-  }
-
-  private historyKey(subscriptionId: string, itemId: string, containerId: string): string {
-    return `${subscriptionId}:${itemId}:${containerId}`;
-  }
-
-  private pushHistory(
-    subscriptionId: string,
-    itemId: string,
-    containerId: string,
-    point: ContainerManagerStatsHistoryPointDto,
-  ): void {
-    const key = this.historyKey(subscriptionId, itemId, containerId);
-    const bucket = this.historyByKey.get(key) ?? { points: [] };
-
-    bucket.points.push(point);
-
-    if (bucket.points.length > HISTORY_MAX_POINTS) {
-      bucket.points = bucket.points.slice(-HISTORY_MAX_POINTS);
-    }
-
-    this.historyByKey.set(key, bucket);
   }
 
   private async publishCollectionFailed(subscriptionId: string, itemId: string, error: unknown): Promise<void> {

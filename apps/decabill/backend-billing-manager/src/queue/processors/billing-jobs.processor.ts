@@ -11,6 +11,7 @@ import {
   OpenPositionInvoiceJobHandler,
   PriceRecalcJobHandler,
   MeterCollectJobHandler,
+  ContributorCollectJobHandler,
   type PlanPriceMigrateUnitPayload,
   SearchReindexJobHandler,
   type SearchIndexSyncUnitPayload,
@@ -79,6 +80,7 @@ export class BillingJobsProcessor extends WorkerHost {
     private readonly datevExportJobHandler: DatevExportJobHandler,
     private readonly priceRecalc: PriceRecalcJobHandler,
     private readonly meterCollect: MeterCollectJobHandler,
+    private readonly contributorCollect: ContributorCollectJobHandler,
     private readonly vatIdValidationJobHandler: VatIdValidationJobHandler,
     private readonly webhookDeliveryService: WebhookDeliveryService,
     private readonly webhookDeliveryRetentionService: WebhookDeliveryRetentionService,
@@ -144,6 +146,9 @@ export class BillingJobsProcessor extends WorkerHost {
         break;
       case BillingJobName.METER_COLLECT_COORDINATOR:
         await this.runMeterCollectCoordinator();
+        break;
+      case BillingJobName.CONTRIBUTOR_COLLECT_COORDINATOR:
+        await this.runContributorCollectCoordinator();
         break;
       case BillingJobName.SEARCH_REINDEX_COORDINATOR:
         await this.runSearchReindexCoordinator();
@@ -242,6 +247,9 @@ export class BillingJobsProcessor extends WorkerHost {
               break;
             case BillingJobName.METER_COLLECT_UNIT:
               await this.runMeterCollectUnit(job.data as { tenantId: string });
+              break;
+            case BillingJobName.CONTRIBUTOR_COLLECT_UNIT:
+              await this.runContributorCollectUnit(job.data as { tenantId: string });
               break;
             case BillingJobName.PLAN_PRICE_MIGRATE_UNIT:
               await this.priceRecalc.processPlanCommercialMigrate(job.data as PlanPriceMigrateUnitPayload);
@@ -719,6 +727,54 @@ export class BillingJobsProcessor extends WorkerHost {
     }
 
     await this.meterCollect.processTenant(data.tenantId);
+  }
+
+  private isContributorCollectEnabled(): boolean {
+    const raw = process.env.BILLING_CONTRIBUTOR_COLLECT_ENABLED;
+
+    if (raw === undefined || raw.trim() === '') {
+      return true;
+    }
+
+    const normalized = raw.trim().toLowerCase();
+
+    if (normalized === 'true' || normalized === '1') {
+      return true;
+    }
+
+    if (normalized === 'false' || normalized === '0') {
+      return false;
+    }
+
+    return true;
+  }
+
+  private async runContributorCollectCoordinator(): Promise<void> {
+    if (!this.isContributorCollectEnabled()) {
+      this.logger.debug('Contributor collect disabled — skipping coordinator');
+
+      return;
+    }
+
+    await this.forEachConfiguredTenant(async (tenantId) => {
+      await this.enqueueBillingUnitJob({
+        queue: this.billingQueue,
+        jobName: BillingJobName.CONTRIBUTOR_COLLECT_UNIT,
+        payload: { tenantId },
+        jobIdNamespace: 'contributor-collect',
+        jobIdParts: ['tenant', tenantId],
+      });
+    });
+  }
+
+  private async runContributorCollectUnit(data: { tenantId: string }): Promise<void> {
+    if (!this.isContributorCollectEnabled()) {
+      this.logger.debug('Contributor collect disabled — skipping unit job');
+
+      return;
+    }
+
+    await this.contributorCollect.processTenant(data.tenantId);
   }
 
   private async runSearchReindexCoordinator(): Promise<void> {

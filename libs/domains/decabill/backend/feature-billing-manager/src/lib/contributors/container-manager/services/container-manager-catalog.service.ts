@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
-import { AddonEntity } from '../entities/addon.entity';
-import { BillingIntervalType } from '../entities/service-plan.entity';
-import { AddonsRepository } from '../repositories/addons.repository';
+import { AddonEntity } from '../../../entities/addon.entity';
+import { BillingIntervalType } from '../../../entities/service-plan.entity';
+import { AddonsRepository } from '../../../repositories/addons.repository';
 import {
   CONTAINER_MANAGER_ADDON_KEY,
   CONTAINER_MANAGER_MODULE_KEY,
   ensureAddonIdInPlanLists,
   planHasIntegratedProvisioning,
   reconcilePlanAddonIdLists,
-} from '../utils/plan-addons.utils';
+} from '../../../utils/plan-addons.utils';
 
 /**
  * Ensures the first-party Container Manager catalog addon exists and can be

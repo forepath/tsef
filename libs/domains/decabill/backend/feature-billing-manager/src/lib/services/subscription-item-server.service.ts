@@ -42,7 +42,7 @@ import {
 import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { CloudflareDnsService } from './cloudflare-dns.service';
 import { CloudInitModuleRegistryService } from './cloud-init-module-registry.service';
-import { ContainerManagerService } from './container-manager.service';
+import { ContainerManagerService } from '../contributors/container-manager/services/container-manager.service';
 import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
 import { ProvisioningService } from './provisioning.service';
 import { SubscriptionService } from './subscription.service';
@@ -376,7 +376,7 @@ export class SubscriptionItemServerService {
     );
 
     if (hasContainerManager) {
-      const cached = this.containerManagerService.getCachedSummary(itemId);
+      const cached = await this.containerManagerService.getCachedSummary(itemId);
 
       response.containerManager = {
         containerCount: cached?.containerCount ?? 0,

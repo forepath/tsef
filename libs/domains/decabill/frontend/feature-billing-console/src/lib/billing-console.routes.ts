@@ -22,17 +22,6 @@ import {
   updateServiceDetailDisplayName$,
   clearServiceDetail$,
   restoreServiceDetailMetersSubscription$,
-  ContainerManagerFacade,
-  containerManagerReducer,
-  loadContainerManagerContainers$,
-  loadContainerManagerNetworks$,
-  loadStatsHistoryOnSelect$,
-  loadStatsHistoryAfterContainers$,
-  loadContainerManagerStatsHistory$,
-  loadLogsOnSelect$,
-  loadLogsAfterContainers$,
-  loadContainerManagerLogs$,
-  pollContainerManagerLogs$,
   subscribeBillingSubscriptionMeters$,
   unsubscribeBillingSubscriptionMeters$,
   adminCustomerProfilesReducer,
@@ -285,6 +274,11 @@ import { ProjectsPageComponent } from './projects-page/projects-page.component';
 import { ProjectDetailPageComponent } from './project-detail-page/project-detail-page.component';
 import { ServiceDetailPageComponent } from './service-detail-page/service-detail-page.component';
 import { PublicWithdrawalComponent } from './public-withdrawal/public-withdrawal.component';
+import { collectContributorNgrx, collectContributorRoutes } from './contributors/contributor-ui.registry';
+import { FIRST_PARTY_CONTRIBUTOR_UI_MODULES } from './contributors/first-party-contributor-ui.modules';
+
+const contributorNgrx = collectContributorNgrx(FIRST_PARTY_CONTRIBUTOR_UI_MODULES);
+const contributorRoutes = collectContributorRoutes(FIRST_PARTY_CONTRIBUTOR_UI_MODULES);
 
 export const billingConsoleRoutes: Route[] = [
   {
@@ -381,6 +375,7 @@ export const billingConsoleRoutes: Route[] = [
           },
         ],
       },
+      ...contributorRoutes.customer,
       {
         path: 'administration',
         children: [
@@ -484,6 +479,7 @@ export const billingConsoleRoutes: Route[] = [
             component: AdminDatevExportsPageComponent,
             title: () => buildPageTitle($localize`:@@featureContainer-adminDatevExportsPage:DATEV Exports`),
           },
+          ...contributorRoutes.admin,
         ],
       },
       {
@@ -500,7 +496,7 @@ export const billingConsoleRoutes: Route[] = [
       MetersFacade,
       SubscriptionMetersFacade,
       ServiceDetailFacade,
-      ContainerManagerFacade,
+      ...contributorNgrx.facades,
       SubscriptionsFacade,
       SubscriptionConfigChangeFacade,
       SubscriptionServerInfoFacade,
@@ -533,7 +529,7 @@ export const billingConsoleRoutes: Route[] = [
       provideState('meters', metersReducer),
       provideState('subscriptionMeters', subscriptionMetersReducer),
       provideState('serviceDetail', serviceDetailReducer),
-      provideState('containerManager', containerManagerReducer),
+      ...contributorNgrx.states.map((state) => provideState(state.name, state.reducer)),
       provideState('invoices', invoicesReducer),
       provideState('adminBilling', adminBillingReducer),
       provideState('billingCapabilities', billingCapabilitiesReducer),
@@ -604,15 +600,7 @@ export const billingConsoleRoutes: Route[] = [
         updateServiceDetailDisplayName$,
         clearServiceDetail$,
         restoreServiceDetailMetersSubscription$,
-        loadContainerManagerContainers$,
-        loadContainerManagerNetworks$,
-        loadStatsHistoryOnSelect$,
-        loadStatsHistoryAfterContainers$,
-        loadContainerManagerStatsHistory$,
-        loadLogsOnSelect$,
-        loadLogsAfterContainers$,
-        loadContainerManagerLogs$,
-        pollContainerManagerLogs$,
+        ...contributorNgrx.effects,
         subscribeBillingSubscriptionMeters$,
         unsubscribeBillingSubscriptionMeters$,
         loadServicePlans$,

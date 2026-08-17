@@ -60,7 +60,13 @@ import {
 import { hideBillingModal, showBillingModal } from '../billing-modal';
 import { getProvisioningStatusBadgeClass, getProvisioningStatusLabel } from '../billing-status-labels';
 import { resolveServiceDetailAddonTabComponent } from './service-detail-addon-tab.registry';
-import { DETAILS_TAB_ID, isDetailsTab, parseServiceDetailTabId, sortServiceDetailTabs } from './service-detail-tabs';
+import {
+  DETAILS_TAB_ID,
+  isDetailsTab,
+  parseServiceDetailTabId,
+  resolveServiceDetailTabLabel,
+  sortServiceDetailTabs,
+} from './service-detail-tabs';
 
 const FILTERS_STORAGE_KEY = 'billing-console-service-detail-filters';
 
@@ -395,15 +401,7 @@ export class ServiceDetailPageComponent implements OnInit {
   }
 
   tabLabel(tab: ServiceDetailTabDto): string {
-    if (tab.id === DETAILS_TAB_ID) {
-      return $localize`:@@featureServiceDetail-tabDetails:Details`;
-    }
-
-    if (tab.id === 'container-manager') {
-      return $localize`:@@featureServiceDetail-tabContainerManager:Container Manager`;
-    }
-
-    return tab.label;
+    return resolveServiceDetailTabLabel(tab, $localize`:@@featureServiceDetail-tabDetails:Details`);
   }
 
   backPath(): string {

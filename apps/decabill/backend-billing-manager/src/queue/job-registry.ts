@@ -45,6 +45,8 @@ export const BillingJobName = {
   PLAN_PRICE_MIGRATE_UNIT: 'plan-price-migrate.unit',
   METER_COLLECT_COORDINATOR: 'meter-collect.coordinator',
   METER_COLLECT_UNIT: 'meter-collect.unit',
+  CONTRIBUTOR_COLLECT_COORDINATOR: 'contributor-collect.coordinator',
+  CONTRIBUTOR_COLLECT_UNIT: 'contributor-collect.unit',
   VAT_ID_VALIDATION_UNIT: VatIdValidationJobName.UNIT,
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
   UPDATE_CHECK: UPDATE_CHECK_JOB_NAME,
@@ -215,6 +217,14 @@ export function getBillingRepeatableJobs(): BillingRepeatableJobDefinition[] {
       name: BillingJobName.METER_COLLECT_COORDINATOR,
       coordinatorJobId: buildCoordinatorJobId('meter-collect'),
       everyMs: parseIntervalMs('BILLING_METER_COLLECT_INTERVAL', 60_000),
+    });
+  }
+
+  if (parseBooleanEnv('BILLING_CONTRIBUTOR_COLLECT_ENABLED', true)) {
+    jobs.push({
+      name: BillingJobName.CONTRIBUTOR_COLLECT_COORDINATOR,
+      coordinatorJobId: buildCoordinatorJobId('contributor-collect'),
+      everyMs: parseIntervalMs('BILLING_CONTRIBUTOR_COLLECT_INTERVAL', 30_000),
     });
   }
 

@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import type { MigrationInterface } from 'typeorm';
 
 import type { DeclaredMeterDefinition } from '../dto/declared-meter.dto';
 import type { MeterCollectContext, MeterCollectSample } from '../dto/meter-collect.types';
 import type { AddonConfigFieldDefinition } from '../utils/addon-config.utils';
+import type { ContributorJobDefinition } from '../utils/contributor-job.types';
 import type { ServiceTabDefinition } from '../utils/service-detail-tabs.utils';
 
 export interface AddonLifecycleContext {
@@ -36,6 +38,15 @@ export interface BillingAddonModule {
    * Additional service-detail tabs registered when a subscription has this module addon active.
    */
   readonly serviceTabs?: AddonServiceTabDefinition[];
+  /**
+   * Periodic worker jobs for this module. Code modules only (not declarative CloudInit jsonb).
+   */
+  readonly jobs?: ContributorJobDefinition[];
+  /**
+   * Extra SQL migrations applied after host TypeORM migrations.
+   * Plugin entity classes are not injected into TypeORM `forRoot`.
+   */
+  readonly migrations?: Array<new () => MigrationInterface>;
   provision(ctx: AddonLifecycleContext): Promise<void>;
   teardown(ctx: AddonLifecycleContext): Promise<void>;
   /**

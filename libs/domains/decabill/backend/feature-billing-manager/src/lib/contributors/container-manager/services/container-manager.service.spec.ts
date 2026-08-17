@@ -25,6 +25,12 @@ describe('ContainerManagerService', () => {
   const billingNotificationPublisher = {
     publish: jest.fn(),
   };
+  const samplesRepository = {
+    findLatestPoints: jest.fn().mockResolvedValue([]),
+  };
+  const summariesRepository = {
+    findByItemId: jest.fn().mockResolvedValue(null),
+  };
 
   const service = new ContainerManagerService(
     subscriptionsRepository as never,
@@ -34,6 +40,8 @@ describe('ContainerManagerService', () => {
     sshExecutor as never,
     addonModuleRegistry as never,
     billingNotificationPublisher as never,
+    samplesRepository as never,
+    summariesRepository as never,
   );
 
   beforeEach(() => {
@@ -84,7 +92,7 @@ describe('ContainerManagerService', () => {
     expect(result.containers).toHaveLength(1);
     expect(result.containers[0].name).toBe('web');
     expect(result.containers[0].stats?.cpuPercent).toBe(1.5);
-    expect(service.getCachedSummary('item-1')?.containerCount).toBe(1);
+    expect(summariesRepository.findByItemId).not.toHaveBeenCalled();
   });
 
   it('rejects when Container Manager addon is not active', async () => {
@@ -171,6 +179,31 @@ describe('ContainerManagerService', () => {
     await expect(
       service.getStatsHistory('sub-1', 'item-1', 'web;rm -rf /', { userId: 'user-1' }),
     ).rejects.toBeInstanceOf(BadRequestException);
+    expect(sshExecutor.exec).not.toHaveBeenCalled();
+  });
+
+  it('reads stats history from postgres without listing containers', async () => {
+    const points = [
+      {
+        timestamp: '2026-08-17T12:00:00.000Z',
+        cpuPercent: 1,
+        memoryPercent: 2,
+        memoryUsageBytes: 3,
+        memoryLimitBytes: 4,
+        blockReadBytes: 5,
+        blockWriteBytes: 6,
+        networkRxBytes: 7,
+        networkTxBytes: 8,
+      },
+    ];
+    samplesRepository.findLatestPoints.mockResolvedValue(points);
+
+    const result = await service.getStatsHistory('sub-1', 'item-1', 'abcdef123456', { userId: 'user-1' });
+
+    expect(result).toEqual({ containerId: 'abcdef123456', points });
+    expect(samplesRepository.findLatestPoints).toHaveBeenCalledWith('item-1', 'abcdef123456', 60);
+    expect(sshExecutor.exec).not.toHaveBeenCalled();
+    expect(sshExecutor.waitUntilReachable).not.toHaveBeenCalled();
   });
 
   it('collects container logs via docker logs', async () => {

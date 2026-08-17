@@ -68,11 +68,20 @@ Frontend mapping:
 
 - Route param `:tab` selects the active tab
 - Built-in Details content is always available
-- Extension tabs resolve through `SERVICE_DETAIL_TAB_REGISTRY` (tab id → component); unknown registered tabs without a UI component show an unavailable message
+- Extension tabs resolve through `SERVICE_DETAIL_TAB_REGISTRY`, merged from compile-time `FIRST_PARTY_CONTRIBUTOR_UI_MODULES` (`tabComponents`); unknown registered tabs without a UI component show an unavailable message
+- Contributor tab labels use the API `tab.label` (only the built-in `details` tab is i18n in the host)
+- Extra Angular `routes.customer` / `routes.admin` and `navItems` from those modules are spread into the console shell (Container Manager ships none; service detail `/:tab` already exists)
+- There is no runtime `DYNAMIC_FRONTEND_*` (this repo has no Module Federation)
 
 ### Container Manager tab
 
-When the `container-manager` module addon is active, the detail page exposes tab `container-manager` (order `100`, `source: addon`). That tab loads Docker containers, stats history, and networks via REST (see [Container Manager](./container-manager.md)).
+When the `container-manager` module addon is active, the detail page exposes tab `container-manager` (order `100`, `source: addon`). That tab loads Docker containers and networks via on-demand SSH REST, and stats history from persisted worker samples (see [Container Manager](./container-manager.md)).
+
+## Contributor jobs
+
+The same code modules that register `serviceTabs` may also register `jobs` (`ContributorJobDefinition`: slug `key`, `intervalMs` clamped 15s–24h, optional `isEnabled`, `run(ctx)`). Declarative CloudInit `serviceTabs` jsonb cannot carry functions — jobs attach only to `BillingAddonModule`, `IntegratedStackModule`, and `CloudInitConfigModule`.
+
+`contributor-collect.coordinator` (default every 30s) fans out per-tenant `contributor-collect.unit` jobs. Each unit runs due contributor jobs for that tenant, isolating failures. Run timestamps live in `billing_contributor_job_runs`. See [Dynamic provider plugins](./dynamic-provider-plugins.md).
 
 Builtin integrated stacks currently declare no tabs; product-specific stack UIs ship via builtin modules or `DYNAMIC_INTEGRATED_STACK_MODULES`. CloudInit declarative tabs are stored on the template and editable via the CloudInit admin API (see [CloudInit Configs](./cloud-init-configs.md)).
 

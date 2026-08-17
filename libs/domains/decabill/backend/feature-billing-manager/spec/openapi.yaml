@@ -5,6 +5,9 @@ info:
   description: |
     HTTP API for billing, subscriptions, and provisioning.
 
+    Operator plugin `nestModule` routes are **not** merged into this first-party OpenAPI document.
+    Container Manager paths and operationIds stay first-party and unchanged.
+
     **Open positions and user billing day:** Recurring and final subscription charges are recorded as "open positions"
     instead of creating invoices immediately. A scheduler runs on each user's billing day (stored on the user;
     default is the registration day capped at 28) and creates one accumulated invoice per user containing all of that
@@ -2568,8 +2571,9 @@ paths:
       summary: Get Container Manager stats history for a container
       operationId: getContainerManagerStatsHistory
       description: |
-        Returns in-memory stats history points for a container (refreshed by listing containers).
-        User must own the subscription. Requires `subscriptions:read`.
+        Returns persisted stats-history samples written by the contributor-collect worker.
+        This endpoint does not collect live SSH stats. Empty `points` is valid when the job
+        has not stored samples yet. User must own the subscription. Requires `subscriptions:read`.
       parameters:
         - name: subscriptionId
           in: path
@@ -2597,7 +2601,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContainerManagerStatsHistoryResponse'
         '400':
-          description: SSH unavailable, public IP missing, or collection failed
+          description: Invalid container id
           content:
             application/json:
               schema:
@@ -3827,7 +3831,9 @@ paths:
       summary: Get Container Manager stats history for a container (admin)
       operationId: adminGetContainerManagerStatsHistory
       description: |
-        Returns in-memory stats history points for a container. Requires ADMIN role.
+        Returns persisted stats-history samples written by the contributor-collect worker.
+        This endpoint does not collect live SSH stats. Empty `points` is valid when the job
+        has not stored samples yet. Requires ADMIN role.
         PAT callers need `billing_admin:read`. Ownership is not required.
       parameters:
         - $ref: '#/components/parameters/SubscriptionId'
@@ -3851,7 +3857,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContainerManagerStatsHistoryResponse'
         '400':
-          description: SSH unavailable, public IP missing, or collection failed
+          description: Invalid container id
           content:
             application/json:
               schema:

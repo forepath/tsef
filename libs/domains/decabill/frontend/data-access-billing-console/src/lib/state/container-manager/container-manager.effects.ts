@@ -28,6 +28,7 @@ import {
 } from './container-manager.selectors';
 
 const LOG_POLL_INTERVAL_MS = 4_000;
+const STATS_HISTORY_POLL_INTERVAL_MS = 30_000;
 
 function normalizeError(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -166,6 +167,25 @@ export const pollContainerManagerLogs$ = createEffect(
           ),
           filter(([, containerId]) => !!containerId),
           map(([, containerId, adminMode]) => loadLogs({ containerId: containerId!, adminMode, silent: true })),
+          takeUntil(actions$.pipe(ofType(clearContainerManager, enterContainerManager, selectContainer))),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
+export const pollContainerManagerStatsHistory$ = createEffect(
+  (actions$ = inject(Actions), store = inject(Store)) =>
+    actions$.pipe(
+      ofType(loadStatsHistorySuccess, selectContainer),
+      switchMap(() =>
+        timer(STATS_HISTORY_POLL_INTERVAL_MS, STATS_HISTORY_POLL_INTERVAL_MS).pipe(
+          withLatestFrom(
+            store.select(selectContainerManagerSelectedContainerId),
+            store.select(selectContainerManagerAdminMode),
+          ),
+          filter(([, containerId]) => !!containerId),
+          map(([, containerId, adminMode]) => loadStatsHistory({ containerId: containerId!, adminMode })),
           takeUntil(actions$.pipe(ofType(clearContainerManager, enterContainerManager, selectContainer))),
         ),
       ),

@@ -15,7 +15,7 @@ import { WithdrawalPolicyService } from '../services/withdrawal-policy.service';
 import { AddonsRepository } from '../repositories/addons.repository';
 import { PLAN_PRICE_MIGRATE_ENQUEUE } from '../queue/plan-price-migrate-enqueue.token';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
-import { ContainerManagerCatalogService } from '../services/container-manager-catalog.service';
+import { ContainerManagerCatalogService } from '../contributors/container-manager/services/container-manager-catalog.service';
 
 import { ServicePlansController } from './service-plans.controller';
 

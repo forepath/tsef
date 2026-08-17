@@ -51,7 +51,7 @@ describe('SubscriptionItemServerService', () => {
     list: jest.fn().mockReturnValue([]),
   };
   const containerManagerService = {
-    getCachedSummary: jest.fn().mockReturnValue(null),
+    getCachedSummary: jest.fn().mockResolvedValue(null),
   };
   const integratedStackRegistry = {
     get: jest.fn(),

@@ -126,6 +126,27 @@ describe('SubscriptionItemsRepository', () => {
     expect(result).toEqual(items);
   });
 
+  it('findLiveProvisionedWithSshKey filters live subscription statuses', async () => {
+    const items = [{ id: 'item-1' }];
+
+    mockGetMany.mockResolvedValue(items);
+
+    const result = await runWithTenantId('acme', () => repository.findLiveProvisionedWithSshKey());
+
+    expect(mockAndWhere).toHaveBeenCalledWith('sub.status IN (:...liveStatuses)', {
+      liveStatuses: [
+        'active',
+        'pending_cancel',
+        'pending_withdrawal',
+        'pending_instant_cancel',
+        'pending_config_change',
+        'pending_backorder',
+      ],
+    });
+    expect(mockAndWhere).toHaveBeenCalledWith('user.tenant_id = :tenantId', { tenantId: 'acme' });
+    expect(result).toEqual(items);
+  });
+
   it('findPendingProvisioningIds returns ids of pending server items', async () => {
     mockGetRawMany.mockResolvedValue([{ id: 'item-1' }, { id: 'item-2' }]);
 
