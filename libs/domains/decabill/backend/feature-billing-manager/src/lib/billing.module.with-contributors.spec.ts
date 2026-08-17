@@ -1,18 +1,28 @@
 import { Module } from '@nestjs/common';
 
+import { AgenstraControllerContributorModule } from './contributors/agenstra-controller/agenstra-controller.contributor.module';
+import { AgenstraManagerContributorModule } from './contributors/agenstra-manager/agenstra-manager.contributor.module';
 import { CONTAINER_MANAGER_NEST_REGISTRATION } from './contributors/container-manager/container-manager.contributor.module';
 import { ContainerManagerContributorModule } from './contributors/container-manager/container-manager.contributor.module';
+import { DecabillBillingContributorModule } from './contributors/decabill-billing/decabill-billing.contributor.module';
 import { resolveContributorNestImports } from './utils/contributor-nest-registration';
 
 @Module({})
 class ExtraContributorNestModule {}
 
 describe('resolveContributorNestImports', () => {
-  it('includes the first-party Container Manager module', () => {
+  it('includes the first-party Container Manager and integrated stack modules', () => {
     const modules = resolveContributorNestImports([]);
 
-    expect(modules).toContain(ContainerManagerContributorModule);
-    expect(modules).toContain(CONTAINER_MANAGER_NEST_REGISTRATION.nestModule);
+    expect(modules).toEqual(
+      expect.arrayContaining([
+        ContainerManagerContributorModule,
+        AgenstraControllerContributorModule,
+        AgenstraManagerContributorModule,
+        DecabillBillingContributorModule,
+        CONTAINER_MANAGER_NEST_REGISTRATION.nestModule,
+      ]),
+    );
   });
 
   it('includes extra contributor nest modules', () => {
@@ -25,6 +35,9 @@ describe('resolveContributorNestImports', () => {
 
     expect(modules).toContain(ExtraContributorNestModule);
     expect(modules).toContain(ContainerManagerContributorModule);
+    expect(modules).toContain(AgenstraControllerContributorModule);
+    expect(modules).toContain(AgenstraManagerContributorModule);
+    expect(modules).toContain(DecabillBillingContributorModule);
   });
 
   it('rejects a duplicate Container Manager nestModule from extras', () => {

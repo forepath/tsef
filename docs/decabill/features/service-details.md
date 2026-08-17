@@ -59,7 +59,7 @@ Three contributor kinds can register service-detail tabs:
 | Source               | Registration                                                                                                                          | When applied                                                       |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | **Addon**            | `BillingAddonModule.serviceTabs` (builtins / `DYNAMIC_ADDON_MODULES`)                                                                 | Subscription addon is `active` and `implementationType === module` |
-| **Integrated stack** | `IntegratedStackModule.serviceTabs` (builtins / `DYNAMIC_INTEGRATED_STACK_MODULES`)                                                   | Item `configSnapshot.service` is an integrated stack id            |
+| **Integrated stack** | `IntegratedStackModule.serviceTabs` (first-party contributor Nest modules / `DYNAMIC_INTEGRATED_STACK_MODULES`)                       | Item `configSnapshot.service` is an integrated stack id            |
 | **CloudInit**        | Config entity `serviceTabs` jsonb **and/or** `CloudInitConfigModule.serviceTabs` (`DYNAMIC_CLOUD_INIT_MODULES` keyed by config `key`) | Item service is `custom` and `cloudInitConfigId` resolves          |
 
 Each tab carries `id`, `label`, `order`, `moduleKey` (contributor key), and `source` (`details` \| `addon` \| `integrated` \| `cloud-init`). Duplicate tab ids are skipped (first wins). Optional `isVisible` hooks apply for code modules only.
@@ -70,7 +70,7 @@ Frontend mapping:
 - Built-in Details content is always available
 - Extension tabs resolve through `SERVICE_DETAIL_TAB_REGISTRY`, merged from compile-time `FIRST_PARTY_CONTRIBUTOR_UI_MODULES` (`tabComponents`); unknown registered tabs without a UI component show an unavailable message
 - Contributor tab labels use the API `tab.label` (only the built-in `details` tab is i18n in the host)
-- Extra Angular `routes.customer` / `routes.admin` and `navItems` from those modules are spread into the console shell (Container Manager ships none; service detail `/:tab` already exists)
+- Extra Angular `routes.customer` / `routes.admin` and `navItems` from those modules are spread into the console shell (Container Manager and first-party stacks ship none; service detail `/:tab` already exists)
 - There is no runtime `DYNAMIC_FRONTEND_*` (this repo has no Module Federation)
 
 ### Container Manager tab
@@ -83,7 +83,7 @@ The same code modules that register `serviceTabs` may also register `jobs` (`Con
 
 `contributor-collect.coordinator` (default every 30s) fans out per-tenant `contributor-collect.unit` jobs. Each unit runs due contributor jobs for that tenant, isolating failures. Run timestamps live in `billing_contributor_job_runs`. See [Dynamic provider plugins](./dynamic-provider-plugins.md).
 
-Builtin integrated stacks currently declare no tabs; product-specific stack UIs ship via builtin modules or `DYNAMIC_INTEGRATED_STACK_MODULES`. CloudInit declarative tabs are stored on the template and editable via the CloudInit admin API (see [CloudInit Configs](./cloud-init-configs.md)).
+First-party integrated stacks currently declare no extra tabs; product-specific stack UIs ship as compile-time `ContributorUiModule` entries (empty today) or via `DYNAMIC_INTEGRATED_STACK_MODULES`. CloudInit declarative tabs are stored on the template and editable via the CloudInit admin API (see [CloudInit Configs](./cloud-init-configs.md)).
 
 ## Meter history
 

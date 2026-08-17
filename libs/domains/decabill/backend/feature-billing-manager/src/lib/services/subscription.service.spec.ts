@@ -6,7 +6,7 @@ import { ServicePlansRepository } from '../repositories/service-plans.repository
 import { ServiceTypesRepository } from '../repositories/service-types.repository';
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
-import { buildProvisioningUserData, normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
+import { normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
 import { validateConfigSchema } from '../utils/config-validation.utils';
 
 import { AvailabilityService } from './availability.service';
@@ -26,7 +26,6 @@ jest.mock('../utils/config-validation.utils', () => ({
 }));
 
 jest.mock('../utils/cloud-init/cloud-init-dispatch.utils', () => ({
-  buildProvisioningUserData: jest.fn().mockReturnValue('mock-user-data'),
   normalizeCloudInitService: jest.fn().mockImplementation((service?: string) => {
     if (service === 'agenstra-manager' || service === 'custom') {
       return service;
@@ -173,6 +172,9 @@ describe('SubscriptionService', () => {
     waitUntilReachable: jest.fn().mockResolvedValue(undefined),
     exec: jest.fn().mockResolvedValue({ stdout: '', stderr: '', code: 0 }),
   };
+  const cloudInitDispatchService = {
+    buildUserData: jest.fn().mockReturnValue('mock-user-data'),
+  };
   const service = new SubscriptionService(
     plansRepository,
     typesRepository,
@@ -205,6 +207,7 @@ describe('SubscriptionService', () => {
     sshExecutor as never,
     { buildSubscriptionMeterSummaries: jest.fn().mockResolvedValue([]) } as never,
     { scheduleUpsert: jest.fn(), scheduleDelete: jest.fn() } as never,
+    cloudInitDispatchService as never,
   );
 
   beforeEach(() => {
@@ -228,7 +231,7 @@ describe('SubscriptionService', () => {
       status: SubscriptionStatus.ACTIVE,
     });
     (validateConfigSchema as jest.Mock).mockReturnValue([]);
-    (buildProvisioningUserData as jest.Mock).mockReturnValue('mock-user-data');
+    cloudInitDispatchService.buildUserData.mockReturnValue('mock-user-data');
     hostnameReservationService.reserveHostname.mockResolvedValue('awesome-armadillo-abc12');
     provisioningService.getServerInfo.mockResolvedValue({ publicIp: '1.2.3.4' });
     provisioningService.ensurePublicIpForDns.mockImplementation(
@@ -389,7 +392,7 @@ describe('SubscriptionService', () => {
     );
     expect(itemsRepository.updateSshPrivateKey).toHaveBeenCalledWith('item-1', expect.any(String));
     expect((itemsRepository.updateSshPrivateKey as jest.Mock).mock.calls[0][1].length).toBeGreaterThan(0);
-    expect(buildProvisioningUserData).toHaveBeenCalledWith(
+    expect(cloudInitDispatchService.buildUserData).toHaveBeenCalledWith(
       expect.objectContaining({
         service: 'agenstra-controller',
         hostname: 'awesome-armadillo-abc12',
@@ -436,7 +439,7 @@ describe('SubscriptionService', () => {
     await provisionCreatedItem();
 
     expect(itemsRepository.updateSshPrivateKey).toHaveBeenCalledWith('item-1', expect.any(String));
-    expect(buildProvisioningUserData).toHaveBeenCalledWith(
+    expect(cloudInitDispatchService.buildUserData).toHaveBeenCalledWith(
       expect.objectContaining({
         service: 'agenstra-manager',
         hostname: 'awesome-armadillo-abc12',
@@ -491,7 +494,7 @@ describe('SubscriptionService', () => {
 
     expect(cloudInitConfigService.findByIdForProvisioning).toHaveBeenCalledWith('cfg-1');
     expect(cloudInitConfigService.resolveEnvironmentVariables).toHaveBeenCalled();
-    expect(buildProvisioningUserData).toHaveBeenCalledWith(
+    expect(cloudInitDispatchService.buildUserData).toHaveBeenCalledWith(
       expect.objectContaining({
         service: 'custom',
         customTemplate,
@@ -571,7 +574,9 @@ describe('SubscriptionService', () => {
     await service.createSubscription('user-1', 'plan-1', { service: 'agenstra-manager', region: 'fsn1' });
     await provisionCreatedItem();
 
-    expect(buildProvisioningUserData).toHaveBeenCalledWith(expect.objectContaining({ service: 'agenstra-manager' }));
+    expect(cloudInitDispatchService.buildUserData).toHaveBeenCalledWith(
+      expect.objectContaining({ service: 'agenstra-manager' }),
+    );
   });
 
   it('rejects invalid provisioning selections', async () => {

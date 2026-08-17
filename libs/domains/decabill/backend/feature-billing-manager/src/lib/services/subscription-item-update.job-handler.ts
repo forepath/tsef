@@ -2,11 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { CloudInitServiceType, normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
-import { buildAgentControllerUpdateCommand } from '../utils/cloud-init/agent-controller.utils';
-import { buildAgentManagerUpdateCommand } from '../utils/cloud-init/agent-manager.utils';
-import { buildDecabillBillingUpdateCommand } from '../utils/cloud-init/decabill-billing.utils';
+import { canonicalizeIntegratedProvisioningService } from '../utils/cloud-init/integrated-provisioning-service';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
 
+import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
 import { ProvisioningService } from './provisioning.service';
 import { SshExecutorService } from './ssh-executor.service';
 
@@ -21,6 +20,7 @@ export class SubscriptionItemUpdateJobHandler {
     private readonly subscriptionItemsRepository: SubscriptionItemsRepository,
     private readonly provisioningService: ProvisioningService,
     private readonly sshExecutor: SshExecutorService,
+    private readonly integratedStackRegistry: IntegratedStackRegistryService,
   ) {}
 
   async findProvisionedItemIds(): Promise<string[]> {
@@ -51,7 +51,8 @@ export class SubscriptionItemUpdateJobHandler {
       return;
     }
 
-    const service = normalizeCloudInitService(item.configSnapshot?.service as string | undefined);
+    const rawService = item.configSnapshot?.service as string | undefined;
+    const service = normalizeCloudInitService(rawService);
 
     if (service === CloudInitServiceType.Custom) {
       this.logger.log(`Skipping update for custom subscription item ${item.id}`);
@@ -59,16 +60,16 @@ export class SubscriptionItemUpdateJobHandler {
       return;
     }
 
-    let command: string;
+    const stackKey = canonicalizeIntegratedProvisioningService(rawService ?? '');
+    const stack = stackKey ? this.integratedStackRegistry.get(stackKey) : undefined;
 
-    if (service === CloudInitServiceType.AgenstraManager) {
-      command = buildAgentManagerUpdateCommand();
-    } else if (service === CloudInitServiceType.DecabillBilling) {
-      command = buildDecabillBillingUpdateCommand();
-    } else {
-      command = buildAgentControllerUpdateCommand();
+    if (!stack?.buildUpdateCommand) {
+      this.logger.warn(`Skipping update; integrated stack is not updatable for item ${item.id}`);
+
+      return;
     }
 
+    const command = stack.buildUpdateCommand();
     const result = await this.sshExecutor.exec(serverInfo.publicIp, SSH_PORT, SSH_USER, item.sshPrivateKey, command);
 
     if (result.code !== 0) {

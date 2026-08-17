@@ -136,13 +136,13 @@ Integrated and custom fieldsets are shown based on the selected option. When onl
 
 ## Provisioning
 
-Custom cloud-init is built by `custom-configuration.utils` and dispatched through `buildProvisioningUserData` alongside agenstra-controller and agenstra-manager paths.
+Custom cloud-init is built by `custom-configuration.utils`. Integrated stacks (Agenstra Controller, Agenstra Manager, Decabill Billing) are first-party **contributor modules**: each owns its user-data builder and registers with `IntegratedStackRegistryService` at Nest init. `CloudInitDispatchService` sends `custom` templates through the jsonb path and integrated keys through the registry. Unknown integrated keys fail closed (no silent fallback to agenstra-controller).
 
 Integrated service ids are `agenstra-controller` and `agenstra-manager` (option keys `integrated:agenstra-controller` / `integrated:agenstra-manager`). Legacy `controller` / `manager` values are accepted when reading older plan defaults, service-type schemas, or client requests; persisted data (including `billing_service_types.config_schema` enums/`productServices`) is rewritten by migration `1775500000000_RenameIntegratedProvisioningServiceIds`.
 
 ### Automated image updates
 
-The **subscription-item-update** background job SSHes to provisioned hosts and runs `docker compose up -d --pull=always` for integrated agenstra-controller and agenstra-manager stacks. **Custom service items are skipped** because their runtime layout is defined per CloudInit template (single compose service, optional user-data-only mode) and is not compatible with the bundled stack update command. Operators must roll out template or image changes to custom instances manually (re-provision, SSH, or a future template-specific update path).
+The **subscription-item-update** background job SSHes to provisioned hosts and runs the stack module’s `buildUpdateCommand` (`docker compose up -d --pull=always` for first-party stacks). **Custom service items are skipped** because their runtime layout is defined per CloudInit template (single compose service, optional user-data-only mode) and is not compatible with the bundled stack update command. Operators must roll out template or image changes to custom instances manually (re-provision, SSH, or a future template-specific update path). Unknown or tab-only integrated modules are skipped.
 
 `workDir` must match `/opt/<segment>` with alphanumeric path segments; values are validated on admin save and quoted in generated bootstrap scripts.
 

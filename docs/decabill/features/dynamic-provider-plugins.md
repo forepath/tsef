@@ -16,7 +16,7 @@ This page covers **Decabill billing manager** registries only.
 | `DYNAMIC_BILLING_PROVIDER_METADATA` | optional    | Admin UI provider metadata (`providerMetadata` export)                                                                                                     |
 | `DYNAMIC_BILLING_PROVIDER_MODULES`  | optional    | Runtime provider modules (`collectMeters`, optional `meters`) — distinct from metadata                                                                     |
 | `DYNAMIC_ADDON_MODULES`             | optional    | Addon lifecycle modules (`provision` / `teardown` / optional `collectMeters`, `configFields`, `meters`, `serviceTabs`, `jobs`, `migrations`, `nestModule`) |
-| `DYNAMIC_INTEGRATED_STACK_MODULES`  | optional    | Integrated stack modules (`serviceTabs`, `jobs`, `migrations`, optional `nestModule`)                                                                      |
+| `DYNAMIC_INTEGRATED_STACK_MODULES`  | optional    | Integrated stack modules (`buildUserData` / `buildUpdateCommand` / `serviceTabs` / `jobs` / `migrations` / optional `nestModule`)                          |
 | `DYNAMIC_CLOUD_INIT_MODULES`        | optional    | CloudInit config code modules keyed by template `key` (`serviceTabs`, `jobs`, `migrations`, optional `nestModule`)                                         |
 
 Provider metadata capability flags (all **fail closed** when omitted, treated as `false`):
@@ -52,6 +52,8 @@ Plugin **entity classes** are not injected into TypeORM `forRoot` (frozen before
 Addon, integrated-stack, and CloudInit **code** packages may also export a Nest `@Module` class as **`nestModule`**, plus **`contributorKey`** (or an env alias such as `acme-ops=@pkg`). The API and worker load those classes **before** `NestFactory.create` (`AppModule.register` / `BillingModule.withContributors`) so controllers and `@WebSocketGateway()` providers register like first-party code.
 
 Packages that only export `createProvider` still work (HTTP is skipped). Packages that export both get HTTP from Nest and jobs/tabs from the addon object.
+
+First-party integrated stacks (Agenstra Controller, Agenstra Manager, Decabill Billing) are contributor Nest modules. Each registers an `IntegratedStackModule` with **`buildUserData`** (and optional **`buildUpdateCommand`**) at `onModuleInit`. `CloudInitDispatchService` looks the stack up by canonical key at provision time; missing `buildUserData` fails closed. Operator `DYNAMIC_INTEGRATED_STACK_MODULES` packages can ship a full product the same way (`createProvider` with `buildUserData`, optional `nestModule`). Tab-only DYNAMIC modules may omit `buildUserData` and cannot be provisioned.
 
 **Fail closed path allowlist** (normalized, no leading slash). Only these prefixes are accepted, with `{sourceKey}` matching the contributor key slug:
 
