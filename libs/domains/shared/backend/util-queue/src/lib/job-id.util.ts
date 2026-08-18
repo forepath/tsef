@@ -40,7 +40,7 @@ export function assertValidBullMqJobId(jobId: string): void {
   }
 }
 
-/** Builds a stable BullMQ jobId for deduplication (only one active/waiting job per id). */
+/** Builds a stable BullMQ jobId for in-flight deduplication (only one active/waiting job per id). */
 export function buildJobId(namespace: string, ...parts: Array<string | number | undefined>): string {
   const segments = [
     sanitizeJobIdSegment(namespace),
