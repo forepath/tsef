@@ -48,7 +48,7 @@ Graph samples are **not** collected when the Container Manager tab or stats-hist
 
 Eligibility (fail closed): live subscription status, `provisioningStatus === active`, provider reference, literal public IPv4/IPv6, SSH key, and an **active** `container-manager` module addon. Custom CloudInit hosts are included only when that addon is on the subscription.
 
-`GET .../stats-history` reads cached samples (authz + hex container id only). Empty `points` is valid before the first successful job. Live table/topology/logs still use on-demand SSH (`listContainers` / `listNetworks` / `getLogs`) and do **not** append graph history.
+`GET .../stats-history` reads cached samples (authz + hex container id only). Empty `points` is valid before the first successful job (including the window after create, before the host is provisioned). Live table/topology/logs still use on-demand SSH (`listContainers` / `listNetworks` / `getLogs`) and do **not** append graph history.
 
 The Container Manager tab polls stats-history about every 30s while open (same cancel pattern as log polling).
 

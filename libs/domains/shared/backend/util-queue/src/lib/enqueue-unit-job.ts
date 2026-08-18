@@ -13,19 +13,51 @@ export interface EnqueueUnitJobOptions<T> {
   opts?: Omit<JobsOptions, 'jobId'>;
 }
 
-/** Enqueues a unit job with a stable jobId to prevent duplicate processing. */
+const TERMINAL_JOB_STATES = new Set(['completed', 'failed']);
+
+/**
+ * Enqueues a unit job with a stable jobId to prevent duplicate in-flight processing.
+ * BullMQ 5 returns an existing custom jobId as a successful no-op (no throw), so finished
+ * jobs must be removed before add or coordinators never recur.
+ */
 export async function enqueueUnitJob<T>(options: EnqueueUnitJobOptions<T>): Promise<void> {
   const jobId = buildJobId(options.jobIdNamespace, ...options.jobIdParts);
+  const addOptions: JobsOptions = {
+    jobId,
+    removeOnComplete: defaultRemoveOnComplete,
+    removeOnFail: defaultRemoveOnFail,
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 5000 },
+    ...options.opts,
+  };
 
+  const existing = typeof options.queue.getJob === 'function' ? await options.queue.getJob(jobId) : undefined;
+
+  if (existing) {
+    const state = await existing.getState();
+
+    if (!TERMINAL_JOB_STATES.has(state)) {
+      return;
+    }
+
+    try {
+      await existing.remove();
+    } catch {
+      return;
+    }
+  }
+
+  await addIgnoringDuplicate(options.queue, options.jobName, options.payload, addOptions);
+}
+
+async function addIgnoringDuplicate<T>(
+  queue: Queue,
+  jobName: string,
+  payload: T,
+  addOptions: JobsOptions,
+): Promise<void> {
   try {
-    await options.queue.add(options.jobName, options.payload, {
-      jobId,
-      removeOnComplete: defaultRemoveOnComplete,
-      removeOnFail: defaultRemoveOnFail,
-      attempts: 3,
-      backoff: { type: 'exponential', delay: 5000 },
-      ...options.opts,
-    });
+    await queue.add(jobName, payload, addOptions);
   } catch (error) {
     if (isDuplicateJobEnqueueError(error)) {
       return;

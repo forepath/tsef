@@ -138,6 +138,8 @@ Startup fails in production if the board is enabled without a password.
 
 Completed and failed jobs are **not auto-removed** (`removeOnComplete: false`, `removeOnFail: false`) so run history remains visible. Treat the **last three runs** and **48 hours** as minimum retention before manual cleanup.
 
+Unit jobs use a **stable jobId** as an in-flight lock: enqueue is skipped while a job with that id is waiting or active. Before add, `enqueueUnitJob` removes a completed or failed record with the same id and enqueues the next run. BullMQ 5 treats a second add with that id as a successful no-op, so coordinators (for example `contributor-collect`) would otherwise stay stuck behind Bull Board retention.
+
 Bull Board routes bypass the API origin allowlist and HybridAuthGuard so dashboard actions (retry, delete, clean) work with browser Basic auth.
 
 Worker and scheduler containers set `QUEUE_BULL_BOARD_ENABLED=false` so they do not start an HTTP server solely for Bull Board.
