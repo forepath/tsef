@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.25.1](https://github.com/forepath/one/compare/v2.25.0...v2.25.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **shared:** requeue finished stable unit jobs ([#571](https://github.com/forepath/one/issues/571)) ([738236f](https://github.com/forepath/one/commit/738236f67cfb14c55595096e7609043352ccdf21))
+
+
+### Code Refactoring
+
+* **decabill:** unified built-in docker compose service generation ([#570](https://github.com/forepath/one/issues/570)) ([44cb7ac](https://github.com/forepath/one/commit/44cb7acd795b9b9734823ca602e1c3e049828e65))
+
 ## [2.25.0](https://github.com/forepath/one/compare/v2.24.0...v2.25.0) (2026-08-18)
 
 
