@@ -137,6 +137,25 @@ describe('HetznerProvisioningService', () => {
   });
 
   describe('getServerInfo', () => {
+    it('reads top-level location when Hetzner omits nested datacenter', async () => {
+      mockedAxios.get.mockResolvedValueOnce({
+        data: {
+          server: {
+            id: 162542626,
+            name: 'jolly-lion-b6flm',
+            status: 'running',
+            public_net: { ipv4: { ip: '91.99.115.6' } },
+            location: { name: 'fsn1', city: 'Falkenstein' },
+          },
+        },
+      });
+
+      const service = new HetznerProvisioningService();
+      const result = await service.getServerInfo('162542626');
+
+      expect(result.metadata).toEqual({ location: 'fsn1', locationName: 'Falkenstein' });
+    });
+
     it('returns server info when API returns valid server', async () => {
       mockedAxios.get.mockResolvedValueOnce({
         data: {
