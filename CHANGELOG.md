@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.25.0](https://github.com/forepath/one/compare/v2.24.0...v2.25.0) (2026-08-18)
+
+
+### Features
+
+* **decabill:** addon module extension ([#566](https://github.com/forepath/one/issues/566)) ([ee825ca](https://github.com/forepath/one/commit/ee825ca2f1a66e5f6c2a83d11a10f7b39c748b9b))
+* **decabill:** cloud-init module extension ([#568](https://github.com/forepath/one/issues/568)) ([ad312aa](https://github.com/forepath/one/commit/ad312aa7741f3cba9dbdd03d2aa9fd9ad75aedc5))
+* **decabill:** service provider module extension ([#569](https://github.com/forepath/one/issues/569)) ([debe266](https://github.com/forepath/one/commit/debe26642bf4b90f1b2b29a5cad7256020dff1ca))
+* **shared:** performance improvements ([#564](https://github.com/forepath/one/issues/564)) ([6e72147](https://github.com/forepath/one/commit/6e7214769a85c80b455f3cb65c154cbe2c9b5cb8))
+
 ## [2.24.0](https://github.com/forepath/one/compare/v2.23.0...v2.24.0) (2026-08-16)
 
 
