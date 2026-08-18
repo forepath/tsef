@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import type { MigrationInterface } from 'typeorm';
 
 import type { IntegratedProvisioningService } from '../utils/cloud-init/integrated-provisioning-service';
+import type { ContributorJobDefinition } from '../utils/contributor-job.types';
 import type { ServiceTabDefinition } from '../utils/service-detail-tabs.utils';
 
 /**
@@ -14,6 +16,8 @@ export interface IntegratedStackModule {
    * Additional service-detail tabs when the item's configSnapshot.service matches this key.
    */
   readonly serviceTabs?: ServiceTabDefinition[];
+  readonly jobs?: ContributorJobDefinition[];
+  readonly migrations?: Array<new () => MigrationInterface>;
 }
 
 /**

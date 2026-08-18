@@ -24,10 +24,10 @@ When `supportsAddons` is false for a plan's service-type provider:
 
 ## Implementation types
 
-| Type                | Behavior                                                                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `module`            | Node submodule loaded via `DYNAMIC_ADDON_MODULES`; must implement `provision` / `teardown` and may declare `configFields` |
-| `cloud_init_script` | Script template interpolated then appended after the primary cloud-init user-data at provision time                       |
+| Type                | Behavior                                                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `module`            | Node submodule loaded via `DYNAMIC_ADDON_MODULES`; must implement `provision` / `teardown` and may declare `configFields` and optional `nestModule` HTTP |
+| `cloud_init_script` | Script template interpolated then appended after the primary cloud-init user-data at provision time                                                      |
 
 ## Configuration
 
@@ -90,7 +90,7 @@ Plans that offer at least one **integrated** (Docker-host) provisioning option a
 
 ## First-party module: Container Manager
 
-Builtin module registered with the addon module registry (alongside `DYNAMIC_ADDON_MODULES`). Provision/teardown are readiness no-ops; diagnostics run over SSH when the subscription addon is `active`. Declares a service-details tab (`id: container-manager`, order `100`). Details: [Container Manager](./container-manager.md).
+Builtin first-party contributor module (`ContainerManagerContributorModule` + compile-time UI module). Registered with the addon module registry (alongside `DYNAMIC_ADDON_MODULES`). Provision/teardown are readiness no-ops; diagnostics run over SSH when the subscription addon is `active`. Declares a service-details tab (`id: container-manager`, order `100`). Code modules may also export `nestModule` to ship HTTP. Details: [Container Manager](./container-manager.md).
 
 ## Order and lifecycle
 

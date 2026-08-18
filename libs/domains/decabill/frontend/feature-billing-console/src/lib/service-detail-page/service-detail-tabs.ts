@@ -2,6 +2,14 @@ import type { ServiceDetailTabDto } from '@forepath/decabill/frontend/data-acces
 
 export const DETAILS_TAB_ID = 'details';
 
+export function resolveServiceDetailTabLabel(tab: { id: string; label: string }, detailsLabel: string): string {
+  if (tab.id === DETAILS_TAB_ID) {
+    return detailsLabel;
+  }
+
+  return tab.label;
+}
+
 export function isDetailsTab(tabId: string | null | undefined): boolean {
   return !tabId || tabId === DETAILS_TAB_ID;
 }

@@ -1,25 +1,19 @@
-import type { Type } from '@angular/core';
-import { CONTAINER_MANAGER_TAB_ID } from '@forepath/decabill/frontend/data-access-billing-console';
+import type { ServiceDetailTabComponent } from '../contributors/contributor-ui.types';
+import { collectContributorTabComponents } from '../contributors/contributor-ui.registry';
+import { FIRST_PARTY_CONTRIBUTOR_UI_MODULES } from '../contributors/first-party-contributor-ui.modules';
 
-import { ContainerManagerTabComponent } from './tabs/container-manager/container-manager-tab.component';
-
-/** Component contract for any contributor-registered service-detail tab (addon, stack, CloudInit). */
-export type ServiceDetailTabComponent = Type<{
-  subscriptionId: string;
-  itemId: string;
-  adminMode: boolean;
-}>;
+export type { ServiceDetailTabComponent } from '../contributors/contributor-ui.types';
 
 /** @deprecated Prefer ServiceDetailTabComponent */
 export type ServiceDetailAddonTabComponent = ServiceDetailTabComponent;
 
 /**
  * Frontend registry: tab id → component.
- * Backed by item-detail `tabs[]` from addons, integrated stacks, and CloudInit configs.
+ * Merged from compile-time first-party contributor UI modules.
  */
-export const SERVICE_DETAIL_TAB_REGISTRY: Record<string, ServiceDetailTabComponent> = {
-  [CONTAINER_MANAGER_TAB_ID]: ContainerManagerTabComponent,
-};
+export const SERVICE_DETAIL_TAB_REGISTRY: Record<string, ServiceDetailTabComponent> = collectContributorTabComponents(
+  FIRST_PARTY_CONTRIBUTOR_UI_MODULES,
+);
 
 /** @deprecated Prefer SERVICE_DETAIL_TAB_REGISTRY */
 export const SERVICE_DETAIL_ADDON_TAB_REGISTRY = SERVICE_DETAIL_TAB_REGISTRY;

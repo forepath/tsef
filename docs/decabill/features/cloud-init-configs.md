@@ -69,7 +69,7 @@ When `useRandomDefault` is enabled for a variable, the static default input is o
 CloudInit configs can contribute tabs on the service details page for provisioned `custom` items (same extension model as addons and integrated stacks; see [Service details](./service-details.md)):
 
 1. **Declarative** — `serviceTabs` jsonb on the config (`id`, `label`, `order`). Validated as lowercase slugs; `details` is reserved. Returned on admin CloudInit API responses and merged into item detail `tabs` with `source: cloud-init` and `moduleKey` set to the config `key`.
-2. **Code modules** — `DYNAMIC_CLOUD_INIT_MODULES` packages implementing `CloudInitConfigModule` (`key` must match the config key) may declare `serviceTabs` with optional `isVisible` hooks.
+2. **Code modules** — `DYNAMIC_CLOUD_INIT_MODULES` packages implementing `CloudInitConfigModule` (`key` must match the config key) may declare `serviceTabs` with optional `isVisible` hooks, plus optional `jobs`, `migrations`, and `nestModule` HTTP (code modules only; declarative jsonb cannot carry functions). See [Dynamic provider plugins](./dynamic-provider-plugins.md).
 
 Frontend components still register by tab id in `SERVICE_DETAIL_TAB_REGISTRY`.
 

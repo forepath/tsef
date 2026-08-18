@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 
 import { SubscriptionItemEntity } from '../entities/subscription-item.entity';
 import { SubscriptionStatus } from '../entities/subscription.entity';
+import { LIVE_ACCESSIBLE_SUBSCRIPTION_STATUSES } from '../utils/subscription-live-access.utils';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
 @Injectable()
@@ -181,6 +182,29 @@ export class SubscriptionItemsRepository {
       .andWhere('item.provider_reference IS NOT NULL')
       .andWhere('item.ssh_private_key IS NOT NULL')
       .andWhere('sub.status = :subStatus', { subStatus: SubscriptionStatus.ACTIVE });
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getMany();
+  }
+
+  /**
+   * Provisioned items with an SSH key on a live (not yet deprovisioned) subscription.
+   * Used by contributor collect jobs such as Container Manager stats.
+   */
+  async findLiveProvisionedWithSshKey(): Promise<SubscriptionItemEntity[]> {
+    const qb = this.repository
+      .createQueryBuilder('item')
+      .innerJoinAndSelect('item.subscription', 'sub')
+      .innerJoin('users', 'user', 'user.id = sub.user_id')
+      .leftJoinAndSelect('item.serviceType', 'st')
+      .where('item.provisioning_status = :status', { status: 'active' })
+      .andWhere('item.provider_reference IS NOT NULL')
+      .andWhere("item.provider_reference <> ''")
+      .andWhere('item.ssh_private_key IS NOT NULL')
+      .andWhere('sub.status IN (:...liveStatuses)', {
+        liveStatuses: [...LIVE_ACCESSIBLE_SUBSCRIPTION_STATUSES],
+      });
 
     applyUserTenantFilter(qb, 'user');
 

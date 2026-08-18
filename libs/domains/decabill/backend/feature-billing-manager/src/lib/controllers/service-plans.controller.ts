@@ -33,7 +33,7 @@ import { ServiceTypesRepository } from '../repositories/service-types.repository
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { AddonService } from '../services/addon.service';
 import { CloudInitConfigService } from '../services/cloud-init-config.service';
-import { ContainerManagerCatalogService } from '../services/container-manager-catalog.service';
+import { ContainerManagerCatalogService } from '../contributors/container-manager/services/container-manager-catalog.service';
 import { MeterService } from '../services/meter.service';
 import { ProviderRegistryService } from '../services/provider-registry.service';
 import { WithdrawalPolicyService } from '../services/withdrawal-policy.service';

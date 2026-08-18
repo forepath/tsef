@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import type { MigrationInterface } from 'typeorm';
 
+import type { ContributorJobDefinition } from '../utils/contributor-job.types';
 import type { ServiceTabDefinition } from '../utils/service-detail-tabs.utils';
 
 /**
@@ -11,6 +13,8 @@ export interface CloudInitConfigModule {
   readonly key: string;
   readonly displayName: string;
   readonly serviceTabs?: ServiceTabDefinition[];
+  readonly jobs?: ContributorJobDefinition[];
+  readonly migrations?: Array<new () => MigrationInterface>;
 }
 
 /**

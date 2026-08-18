@@ -23,7 +23,7 @@ import {
   registerDynamicProviders,
 } from '@forepath/shared/backend/util-dynamic-provider-registry';
 import { RedisCacheModule } from '@forepath/shared/backend/util-redis-cache';
-import { Module, OnModuleInit } from '@nestjs/common';
+import { DynamicModule, Module, OnModuleInit } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { KeycloakConnectModule } from 'nest-keycloak-connect';
@@ -85,8 +85,8 @@ import { AddonsController } from './controllers/addons.controller';
 import { CloudInitConfigsController } from './controllers/cloud-init-configs.controller';
 import { ServiceTypesController } from './controllers/service-types.controller';
 import { SubscriptionItemsController } from './controllers/subscription-items.controller';
-import { ContainerManagerController } from './controllers/container-manager.controller';
-import { AdminContainerManagerController } from './controllers/admin-container-manager.controller';
+import { BillingContributorHostModule } from './contributors/billing-contributor-host.module';
+import { ContainerManagerContributorModule } from './contributors/container-manager/container-manager.contributor.module';
 import { SubscriptionsController } from './controllers/subscriptions.controller';
 import { AdminUsageController } from './controllers/admin-usage.controller';
 import { AdminSubscriptionItemsController } from './controllers/admin-subscription-items.controller';
@@ -120,6 +120,9 @@ import { ReservedHostnameEntity } from './entities/reserved-hostname.entity';
 import { AddonEntity } from './entities/addon.entity';
 import { AddonMeterEntity } from './entities/addon-meter.entity';
 import { CloudInitConfigEntity } from './entities/cloud-init-config.entity';
+import { ContributorJobRunEntity } from './entities/contributor-job-run.entity';
+import { ContainerStatsSampleEntity } from './entities/container-stats-sample.entity';
+import { ContainerStatsSummaryEntity } from './entities/container-stats-summary.entity';
 import { SubscriptionAddonEntity } from './entities/subscription-addon.entity';
 import { SubscriptionConfigChangeEntity } from './entities/subscription-config-change.entity';
 import { ServicePlanEntity } from './entities/service-plan.entity';
@@ -171,6 +174,9 @@ import { ReservedHostnamesRepository } from './repositories/reserved-hostnames.r
 import { AddonsRepository } from './repositories/addons.repository';
 import { AddonMetersRepository } from './repositories/addon-meters.repository';
 import { CloudInitConfigsRepository } from './repositories/cloud-init-configs.repository';
+import { ContributorJobRunsRepository } from './repositories/contributor-job-runs.repository';
+import { ContainerStatsSamplesRepository } from './repositories/container-stats-samples.repository';
+import { ContainerStatsSummariesRepository } from './repositories/container-stats-summaries.repository';
 import { SubscriptionAddonsRepository } from './repositories/subscription-addons.repository';
 import { SubscriptionConfigChangesRepository } from './repositories/subscription-config-changes.repository';
 import { ServicePlansRepository } from './repositories/service-plans.repository';
@@ -199,7 +205,8 @@ import { WithdrawalPolicyService } from './services/withdrawal-policy.service';
 import { WithdrawalRefundService } from './services/withdrawal-refund.service';
 import { SubscriptionTeardownService } from './services/subscription-teardown.service';
 import { AddonModuleRegistryService } from './services/addon-module-registry.service';
-import { createBuiltinAddonModules } from './services/builtin-addon-modules';
+import { resolveContributorNestImports } from './utils/contributor-nest-registration';
+import type { RegisteredContributorNestModule } from './utils/contributor-nest.types';
 import { createBuiltinIntegratedStackModules } from './services/builtin-integrated-stack-modules';
 import { createBuiltinProviderModules } from './services/builtin-provider-modules';
 import { MeterCollectJobHandler } from './services/meter-collect.job-handler';
@@ -209,8 +216,9 @@ import { AddonService } from './services/addon.service';
 import { CloudInitConfigService } from './services/cloud-init-config.service';
 import type { CloudInitConfigModule } from './services/cloud-init-module-registry.service';
 import { CloudInitModuleRegistryService } from './services/cloud-init-module-registry.service';
-import { ContainerManagerCatalogService } from './services/container-manager-catalog.service';
-import { ContainerManagerService } from './services/container-manager.service';
+import { ContributorCollectJobHandler } from './services/contributor-collect.job-handler';
+import { ContributorJobRegistryService } from './services/contributor-job-registry.service';
+import { ContributorMigrationService } from './services/contributor-migration.service';
 import type { BillingAddonModule } from './services/addon-module-registry.service';
 import type { IntegratedStackModule } from './services/integrated-stack-registry.service';
 import { IntegratedStackRegistryService } from './services/integrated-stack-registry.service';
@@ -257,7 +265,6 @@ import { ProviderRegistryService } from './services/provider-registry.service';
 import { ProviderLocationsService } from './services/provider-locations.service';
 import { ProviderServerTypesService } from './services/provider-server-types.service';
 import { ProvisioningService } from './services/provisioning.service';
-import { SshExecutorService } from './services/ssh-executor.service';
 import { SubscriptionBillingJobHandler } from './services/subscription-billing.job-handler';
 import { SubscriptionExpirationJobHandler } from './services/subscription-expiration.job-handler';
 import { SubscriptionPeriodChargeService } from './services/subscription-period-charge.service';
@@ -479,6 +486,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
 
 @Module({
   imports: [
+    BillingContributorHostModule,
+    ContainerManagerContributorModule,
     BillingIdentityEmailBridgeModule,
     BillingIdentityNotificationBridgeModule,
     BillingUpdatesModule,
@@ -489,6 +498,9 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
       ServicePlanMeterEntity,
       ServiceTypeMeterEntity,
       CloudInitConfigEntity,
+      ContributorJobRunEntity,
+      ContainerStatsSampleEntity,
+      ContainerStatsSummaryEntity,
       AddonEntity,
       AddonMeterEntity,
       SubscriptionAddonEntity,
@@ -545,7 +557,6 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     ServicePlansController,
     AvailabilityController,
     SubscriptionItemsController,
-    ContainerManagerController,
     SubscriptionsController,
     BackordersController,
     PricingController,
@@ -554,7 +565,6 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     AdminPromotionsController,
     AdminBillingController,
     AdminSubscriptionItemsController,
-    AdminContainerManagerController,
     AdminSubscriptionMetersController,
     AdminCustomerProfilesController,
     AdminCustomerAutoBillingController,
@@ -585,11 +595,11 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     MeterService,
     MeterBillingService,
     AddonLifecycleService,
-    AddonModuleRegistryService,
     IntegratedStackRegistryService,
     CloudInitModuleRegistryService,
-    ContainerManagerCatalogService,
-    ContainerManagerService,
+    ContributorJobRegistryService,
+    ContributorMigrationService,
+    ContributorCollectJobHandler,
     ProviderModuleRegistryService,
     MeterCollectJobHandler,
     SearchReindexJobHandler,
@@ -766,6 +776,9 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     UsersBillingDayRepository,
     ProviderPriceSnapshotsRepository,
     CloudInitConfigsRepository,
+    ContributorJobRunsRepository,
+    ContainerStatsSamplesRepository,
+    ContainerStatsSummariesRepository,
     AddonsRepository,
     AddonMetersRepository,
     SubscriptionAddonsRepository,
@@ -795,7 +808,6 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     DatevExportAdminService,
     DatevExportEnabledGuard,
     InvoiceOverdueJobHandler,
-    SshExecutorService,
     UsersRepository,
     RevokedUserTokensRepository,
     SocketAuthService,
@@ -847,6 +859,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     SubscriptionConfigChangeJobHandler,
     PriceRecalcJobHandler,
     MeterCollectJobHandler,
+    ContributorCollectJobHandler,
+    ContributorMigrationService,
     SubscriptionRenewalReminderJobHandler,
     OpenPositionInvoiceJobHandler,
     SubscriptionItemUpdateJobHandler,
@@ -877,9 +891,26 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     BillingIdentityEmailBridgeModule,
     BillingIdentityNotificationBridgeModule,
     BillingUpdatesModule,
+    ContainerManagerContributorModule,
   ],
 })
 export class BillingModule implements OnModuleInit {
+  private static extraContributorModules: RegisteredContributorNestModule[] = [];
+
+  static withContributors(extra?: RegisteredContributorNestModule[]): DynamicModule {
+    if (extra !== undefined) {
+      BillingModule.extraContributorModules = extra;
+    }
+
+    const nestModules = resolveContributorNestImports(BillingModule.extraContributorModules);
+
+    return {
+      module: BillingModule,
+      imports: nestModules,
+      exports: [ContainerManagerContributorModule],
+    };
+  }
+
   constructor(
     private readonly providerRegistry: ProviderRegistryService,
     private readonly providerModuleRegistry: ProviderModuleRegistryService,
@@ -889,6 +920,7 @@ export class BillingModule implements OnModuleInit {
     private readonly addonModuleRegistry: AddonModuleRegistryService,
     private readonly integratedStackRegistry: IntegratedStackRegistryService,
     private readonly cloudInitModuleRegistry: CloudInitModuleRegistryService,
+    private readonly contributorJobRegistry: ContributorJobRegistryService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -913,10 +945,6 @@ export class BillingModule implements OnModuleInit {
 
     for (const module of createBuiltinProviderModules()) {
       this.providerModuleRegistry.register(module);
-    }
-
-    for (const module of createBuiltinAddonModules()) {
-      this.addonModuleRegistry.register(module);
     }
 
     for (const module of createBuiltinIntegratedStackModules()) {
@@ -962,6 +990,8 @@ export class BillingModule implements OnModuleInit {
       dynamicLoader: this.dynamicLoader,
       loggerContext: 'CloudInitModuleRegistryService',
     });
+
+    this.contributorJobRegistry.rebuild();
 
     this.trustScoreProviderRegistry.register(this.internalBillingTrustScoreProvider);
   }

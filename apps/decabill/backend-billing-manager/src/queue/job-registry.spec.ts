@@ -61,6 +61,32 @@ describe('billing job-registry', () => {
     delete process.env.BILLING_METER_COLLECT_ENABLED;
   });
 
+  it('getBillingRepeatableJobs includes optional contributor-collect coordinator every 30s', () => {
+    delete process.env.BILLING_CONTRIBUTOR_COLLECT_ENABLED;
+    delete process.env.BILLING_CONTRIBUTOR_COLLECT_INTERVAL;
+    const withContributorCollect = getBillingRepeatableJobs();
+    expect(withContributorCollect.map((job) => job.name)).toContain(BillingJobName.CONTRIBUTOR_COLLECT_COORDINATOR);
+
+    const contributorCollectJob = withContributorCollect.find(
+      (job) => job.name === BillingJobName.CONTRIBUTOR_COLLECT_COORDINATOR,
+    );
+    expect(contributorCollectJob?.everyMs).toBe(30_000);
+
+    process.env.BILLING_CONTRIBUTOR_COLLECT_INTERVAL = '45000';
+    const customInterval = getBillingRepeatableJobs().find(
+      (job) => job.name === BillingJobName.CONTRIBUTOR_COLLECT_COORDINATOR,
+    );
+    expect(customInterval?.everyMs).toBe(45_000);
+    delete process.env.BILLING_CONTRIBUTOR_COLLECT_INTERVAL;
+
+    process.env.BILLING_CONTRIBUTOR_COLLECT_ENABLED = 'false';
+    const withoutContributorCollect = getBillingRepeatableJobs();
+    expect(withoutContributorCollect.map((job) => job.name)).not.toContain(
+      BillingJobName.CONTRIBUTOR_COLLECT_COORDINATOR,
+    );
+    delete process.env.BILLING_CONTRIBUTOR_COLLECT_ENABLED;
+  });
+
   it('getBillingRepeatableJobs includes update check coordinator', () => {
     const jobs = getBillingRepeatableJobs();
     const updateCheckJob = jobs.find((job) => job.name === BillingJobName.UPDATE_CHECK);

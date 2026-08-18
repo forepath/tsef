@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-16T12:35:30.760Z",
+  "generatedAt": "2026-08-17T20:28:40.847Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -5789,6 +5789,78 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/billing-contributor-host.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/billing-contributor-host.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/admin-container-manager.controller.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/admin-container-manager.controller.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/container-manager.controller.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/container-manager.controller.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/dto/container-manager.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/dto/container-manager.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-catalog.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-catalog.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-collect.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-collect.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/addons.controller.ts",
       "type": "controller",
       "attrs": {
@@ -5802,15 +5874,6 @@
       "type": "controller",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
-        "languageOrKind": "ts",
-        "projectName": "decabill-backend-feature-billing-manager"
-      }
-    },
-    {
-      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-container-manager.controller.ts",
-      "type": "controller",
-      "attrs": {
-        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-container-manager.controller.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -5901,15 +5964,6 @@
       "type": "controller",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/cloud-init-configs.controller.ts",
-        "languageOrKind": "ts",
-        "projectName": "decabill-backend-feature-billing-manager"
-      }
-    },
-    {
-      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/container-manager.controller.ts",
-      "type": "controller",
-      "attrs": {
-        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/container-manager.controller.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -6171,15 +6225,6 @@
       "type": "dto",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/confirm-public-withdrawal.dto.ts",
-        "languageOrKind": "ts",
-        "projectName": "decabill-backend-feature-billing-manager"
-      }
-    },
-    {
-      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/container-manager.dto.ts",
-      "type": "dto",
-      "attrs": {
-        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/container-manager.dto.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -6648,6 +6693,33 @@
       "type": "entity",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/cloud-init-config.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/container-stats-sample.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/container-stats-sample.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/container-stats-summary.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/container-stats-summary.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/contributor-job-run.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/contributor-job-run.entity.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -7382,6 +7454,33 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-samples.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-samples.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-summaries.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-summaries.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/contributor-job-runs.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/contributor-job-runs.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-number-sequences.repository.ts",
       "type": "repository",
       "attrs": {
@@ -7868,19 +7967,28 @@
       }
     },
     {
-      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager-catalog.service.ts",
-      "type": "service",
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-collect.job-handler.ts",
+      "type": "job",
       "attrs": {
-        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager-catalog.service.ts",
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-collect.job-handler.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
     },
     {
-      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-job-registry.service.ts",
       "type": "service",
       "attrs": {
-        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-job-registry.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-migration.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-migration.service.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -26300,6 +26408,16 @@
       }
     },
     {
+      "id": "concept:decabill-periodic-collection",
+      "type": "concept",
+      "attrs": {
+        "title": "Periodic collection",
+        "docPath": "docs/decabill/features/container-manager.md",
+        "sectionAnchor": "periodic-collection",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-ssh-collection",
       "type": "concept",
       "attrs": {
@@ -27636,6 +27754,16 @@
         "title": "Tabs and extension registry",
         "docPath": "docs/decabill/features/service-details.md",
         "sectionAnchor": "tabs-and-extension-registry",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-contributor-jobs",
+      "type": "concept",
+      "attrs": {
+        "title": "Contributor jobs",
+        "docPath": "docs/decabill/features/service-details.md",
+        "sectionAnchor": "contributor-jobs",
         "domain": "decabill"
       }
     },
@@ -33813,17 +33941,52 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/billing-contributor-host.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/admin-container-manager.controller.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/container-manager.controller.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/dto/container-manager.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-catalog.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-collect.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/addons.controller.ts",
       "type": "contains"
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
-      "type": "contains"
-    },
-    {
-      "from": "project:decabill-backend-feature-billing-manager",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-container-manager.controller.ts",
       "type": "contains"
     },
     {
@@ -33874,11 +34037,6 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/cloud-init-configs.controller.ts",
-      "type": "contains"
-    },
-    {
-      "from": "project:decabill-backend-feature-billing-manager",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/container-manager.controller.ts",
       "type": "contains"
     },
     {
@@ -34024,11 +34182,6 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/confirm-public-withdrawal.dto.ts",
-      "type": "contains"
-    },
-    {
-      "from": "project:decabill-backend-feature-billing-manager",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/container-manager.dto.ts",
       "type": "contains"
     },
     {
@@ -34289,6 +34442,21 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/cloud-init-config.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/container-stats-sample.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/container-stats-summary.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/contributor-job-run.entity.ts",
       "type": "contains"
     },
     {
@@ -34698,6 +34866,21 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-samples.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-summaries.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/contributor-job-runs.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/customer-number-sequences.repository.ts",
       "type": "contains"
     },
@@ -34968,12 +35151,17 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager-catalog.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-collect.job-handler.ts",
       "type": "contains"
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-job-registry.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-migration.service.ts",
       "type": "contains"
     },
     {
@@ -45228,6 +45416,11 @@
     },
     {
       "from": "file:docs/decabill/features/container-manager.md",
+      "to": "concept:decabill-periodic-collection",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/container-manager.md",
       "to": "concept:decabill-ssh-collection",
       "type": "contains"
     },
@@ -46124,6 +46317,11 @@
     {
       "from": "file:docs/decabill/features/service-details.md",
       "to": "concept:decabill-tabs-and-extension-registry",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/service-details.md",
+      "to": "concept:decabill-contributor-jobs",
       "type": "contains"
     },
     {
@@ -53672,6 +53870,86 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/admin-container-manager.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/container-manager.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-catalog.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/addons.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-collect.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-collect.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-addons.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-collect.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-samples.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-collect.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-summaries.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-collect.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-addons.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/service-plans.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/ssh-executor.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-module-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-samples.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-summaries.repository.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/addons.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/addons.repository.ts",
       "type": "injects"
@@ -53734,11 +54012,6 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/tax-preview.service.ts",
-      "type": "injects"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-container-manager.controller.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
       "type": "injects"
     },
     {
@@ -53819,11 +54092,6 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/cloud-init-configs.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-config.service.ts",
-      "type": "injects"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/container-manager.controller.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
       "type": "injects"
     },
     {
@@ -54018,7 +54286,7 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/service-plans.controller.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager-catalog.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-catalog.service.ts",
       "type": "injects"
     },
     {
@@ -54702,38 +54970,43 @@
       "type": "injects"
     },
     {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager-catalog.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/addons.repository.ts",
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-collect.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-job-registry.service.ts",
       "type": "injects"
     },
     {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-collect.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/contributor-job-runs.repository.ts",
       "type": "injects"
     },
     {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
-      "type": "injects"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-addons.repository.ts",
-      "type": "injects"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/service-plans.repository.ts",
-      "type": "injects"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/ssh-executor.service.ts",
-      "type": "injects"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-job-registry.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-module-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-job-registry.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-job-registry.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-module-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-migration.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-module-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-migration.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-migration.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-module-registry.service.ts",
       "type": "injects"
     },
     {
@@ -55933,7 +56206,7 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-server.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
       "type": "injects"
     },
     {
@@ -57003,6 +57276,11 @@
     },
     {
       "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-collect.job-handler.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/vat-id-validation.job-handler.ts",
       "type": "injects"
     },
@@ -57488,11 +57766,6 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/container-manager.controller.ts",
-      "type": "provides"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/subscriptions.controller.ts",
       "type": "provides"
     },
@@ -57529,11 +57802,6 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-items.controller.ts",
-      "type": "provides"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-container-manager.controller.ts",
       "type": "provides"
     },
     {
@@ -57678,11 +57946,6 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-module-registry.service.ts",
-      "type": "provides"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
       "type": "provides"
     },
@@ -57693,12 +57956,17 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager-catalog.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-job-registry.service.ts",
       "type": "provides"
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/container-manager.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-migration.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/contributor-collect.job-handler.ts",
       "type": "provides"
     },
     {
@@ -58268,6 +58536,21 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/contributor-job-runs.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-samples.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-summaries.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/addons.repository.ts",
       "type": "provides"
     },
@@ -58413,11 +58696,6 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/ssh-executor.service.ts",
-      "type": "provides"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/identity/backend/feature-auth/src/lib/repositories/users.repository.ts",
       "type": "provides"
     },
@@ -58459,6 +58737,81 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/modules/billing-updates.module.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/billing-contributor-host.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-module-registry.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/billing-contributor-host.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/ssh-executor.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/container-manager.controller.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/admin-container-manager.controller.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-items.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscription-addons.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/service-plans.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/addons.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-samples.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/container-stats-summaries.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-collect.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/container-manager.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager-catalog.service.ts",
       "type": "provides"
     },
     {
@@ -58779,21 +59132,6 @@
     {
       "from": "file:apps/agenstra/backend-agent-controller/src/queue/controller-queue.module.ts",
       "to": "file:apps/agenstra/backend-agent-controller/src/queue/controller-queue-registrar.service.ts",
-      "type": "provides"
-    },
-    {
-      "from": "file:apps/decabill/backend-billing-manager/src/app/app.module.ts",
-      "to": "file:libs/domains/identity/backend/util-auth/src/lib/bull-board-throttler.guard.ts",
-      "type": "provides"
-    },
-    {
-      "from": "file:apps/decabill/backend-billing-manager/src/queue/billing-queue.module.ts",
-      "to": "file:apps/decabill/backend-billing-manager/src/queue/processors/billing-jobs.processor.ts",
-      "type": "provides"
-    },
-    {
-      "from": "file:apps/decabill/backend-billing-manager/src/queue/billing-queue.module.ts",
-      "to": "file:apps/decabill/backend-billing-manager/src/queue/billing-queue-registrar.service.ts",
       "type": "provides"
     },
     {
@@ -64797,6 +65135,16 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-registries",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-registries",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-resolution-order",
       "to": "api:HTTP:POST:/auth/register",
       "type": "documents"
@@ -65742,12 +66090,17 @@
       "type": "documents"
     },
     {
-      "from": "concept:decabill-tabs-and-extension-registry",
+      "from": "concept:decabill-contributor-jobs",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-contributor-jobs",
       "to": "api:HTTP:GET:/cloud-init-configs",
       "type": "documents"
     },
     {
-      "from": "concept:decabill-tabs-and-extension-registry",
+      "from": "concept:decabill-contributor-jobs",
       "to": "api:HTTP:POST:/cloud-init-configs",
       "type": "documents"
     },
@@ -72042,6 +72395,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:decabill-periodic-collection",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:decabill-ssh-collection",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -72708,6 +73066,11 @@
     },
     {
       "from": "concept:decabill-tabs-and-extension-registry",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-contributor-jobs",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

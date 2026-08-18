@@ -17,6 +17,7 @@ import {
   shouldEnableBullBoard,
   runPendingMigrationsIfRoleAllows,
   shouldRunApiHttp,
+  shouldRunMigrations,
 } from '@forepath/shared/backend';
 import {
   getOtelMetricsGlobalPrefixExcludes,
@@ -26,6 +27,7 @@ import {
   shutdownOtelSdk,
   startOtelSdk,
 } from '@forepath/shared/backend/util-otel';
+import { ContributorMigrationService, loadContributorNestModulesFromEnv } from '@forepath/decabill/backend';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import axios from 'axios';
@@ -59,8 +61,11 @@ export async function bootstrap(): Promise<void> {
 
   const runHttp = shouldRunApiHttp(role) || shouldEnableBullBoard(role);
 
+  const extra = await loadContributorNestModulesFromEnv();
+  const appModule = AppModule.register(extra);
+
   if (!runHttp) {
-    const context = await NestFactory.createApplicationContext(AppModule, { logger: appLogger });
+    const context = await NestFactory.createApplicationContext(appModule, { logger: appLogger });
 
     Logger.log(`Billing queue process started (QUEUE_ROLE=${role})`);
     await context.init();
@@ -68,7 +73,7 @@ export async function bootstrap(): Promise<void> {
     return;
   }
 
-  const app = await NestFactory.create(AppModule, { logger: appLogger, rawBody: true });
+  const app = await NestFactory.create(appModule, { logger: appLogger, rawBody: true });
   const httpLogger = new Logger('HTTP');
 
   app.use('/api/webhooks/payments/stripe', express.raw({ type: 'application/json' }), (req, _res, next) => {
@@ -107,6 +112,10 @@ export async function bootstrap(): Promise<void> {
   app.useWebSocketAdapter(new TenantAwareSocketIoAdapter(app));
 
   await runPendingMigrationsIfRoleAllows(app, role, typeormConfig);
+
+  if (shouldRunMigrations(role)) {
+    await app.get(ContributorMigrationService).runPending();
+  }
 
   app.useGlobalPipes(
     new ValidationPipe({

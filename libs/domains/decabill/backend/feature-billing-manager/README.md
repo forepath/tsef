@@ -102,11 +102,15 @@ samples via provider/addon `collectMeters` into usage history with `usageSource:
 - `DYNAMIC_PAYMENT_PROCESSORS` - Comma-separated extra payment processor packages (critical; use with `DYNAMIC_PROVIDERS_FAIL_FAST=true` in production)
 - `DYNAMIC_BILLING_PROVIDER_METADATA` - Comma-separated packages exporting `providerMetadata` for the billing UI registry
 - `DYNAMIC_BILLING_PROVIDER_MODULES` - Comma-separated runtime provider modules implementing `collectMeters` (optional `meters`)
-- `DYNAMIC_ADDON_MODULES` - Addon lifecycle modules (`provision` / `teardown` / optional `collectMeters` / optional `serviceTabs`)
-- `DYNAMIC_INTEGRATED_STACK_MODULES` - Integrated stack modules (`serviceTabs` for agenstra-controller / agenstra-manager / decabill-billing)
-- `DYNAMIC_CLOUD_INIT_MODULES` - CloudInit config code modules keyed by template `key` (`serviceTabs`)
+- `DYNAMIC_ADDON_MODULES` - Addon lifecycle modules (`provision` / `teardown` / optional `collectMeters` / optional `serviceTabs` / optional `jobs` / optional `migrations` / optional `nestModule`)
+- `DYNAMIC_INTEGRATED_STACK_MODULES` - Integrated stack modules (`serviceTabs` / `jobs` / `migrations` / optional `nestModule` for agenstra-controller / agenstra-manager / decabill-billing)
+- `DYNAMIC_CLOUD_INIT_MODULES` - CloudInit config code modules keyed by template `key` (`serviceTabs` / `jobs` / `migrations` / optional `nestModule`)
 - `BILLING_METER_COLLECT_ENABLED` - When `false`, disables the meter-collect coordinator (default `true`)
 - `BILLING_METER_COLLECT_INTERVAL` - Coordinator interval ms (default `60000`)
+- `BILLING_CONTRIBUTOR_COLLECT_ENABLED` - When `false`, disables the contributor-collect coordinator (default `true`)
+- `BILLING_CONTRIBUTOR_COLLECT_INTERVAL` - Contributor-collect coordinator tick ms (default `30000`)
+- `BILLING_CONTAINER_MANAGER_COLLECT_INTERVAL` - Container Manager `collect-stats` job interval ms (default `60000`, clamped 15s–24h)
+- `BILLING_CONTAINER_MANAGER_COLLECT_CONCURRENCY` - Max concurrent SSH collects per tenant (default `3`)
 - `DYNAMIC_PROVIDERS_FAIL_FAST` - When `true`, abort startup if critical dynamic providers fail to load
 - `DYNAMIC_PROVIDER_PLUGIN_PATH` - Plugin root for post-build loading (compose default: `/var/lib/forepath/provider-plugins`)
 - `DYNAMIC_PROVIDER_PLUGIN_INSTALL` - Startup `npm install` targets into the plugin path
