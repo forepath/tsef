@@ -4,6 +4,7 @@ import { AddonModuleRegistryService, type BillingAddonModule } from './addon-mod
 import { CloudInitModuleRegistryService } from './cloud-init-module-registry.service';
 import { buildPluginMigrationName, ContributorMigrationService } from './contributor-migration.service';
 import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
+import { ProviderModuleRegistryService } from './provider-module-registry.service';
 
 class SamplePluginMigration implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
@@ -25,6 +26,7 @@ describe('ContributorMigrationService', () => {
   });
 
   function createService(appliedNames: string[] = []) {
+    const providers = new ProviderModuleRegistryService();
     const addons = new AddonModuleRegistryService();
     const stacks = new IntegratedStackRegistryService();
     const cloudInit = new CloudInitModuleRegistryService();
@@ -49,7 +51,7 @@ describe('ContributorMigrationService', () => {
       createQueryRunner: jest.fn(() => queryRunner),
     };
 
-    const service = new ContributorMigrationService(dataSource as never, addons, stacks, cloudInit);
+    const service = new ContributorMigrationService(dataSource as never, addons, stacks, cloudInit, providers);
 
     return { service, query, queryRunner };
   }
@@ -85,6 +87,7 @@ describe('ContributorMigrationService', () => {
   });
 
   it('fails closed when up throws', async () => {
+    const providers = new ProviderModuleRegistryService();
     const addons = new AddonModuleRegistryService();
     const stacks = new IntegratedStackRegistryService();
     const cloudInit = new CloudInitModuleRegistryService();
@@ -114,6 +117,7 @@ describe('ContributorMigrationService', () => {
       addons,
       stacks,
       cloudInit,
+      providers,
     );
 
     await expect(service.runPending()).rejects.toThrow('boom');

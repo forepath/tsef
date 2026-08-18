@@ -1,11 +1,11 @@
 import { BadRequestException } from '@nestjs/common';
 import axios from 'axios';
 
-import { waitForTcpPort } from '../utils/wait-for-tcp-port.util';
+import { waitForTcpPort } from '../../utils/wait-for-tcp-port.util';
 import { HetznerProvisioningService } from './hetzner-provisioning.service';
 
 jest.mock('axios');
-jest.mock('../utils/wait-for-tcp-port.util', () => ({
+jest.mock('../../utils/wait-for-tcp-port.util', () => ({
   waitForTcpPort: jest.fn().mockResolvedValue(undefined),
   isTcpPortOpen: jest.fn(),
 }));
@@ -137,6 +137,25 @@ describe('HetznerProvisioningService', () => {
   });
 
   describe('getServerInfo', () => {
+    it('reads top-level location when Hetzner omits nested datacenter', async () => {
+      mockedAxios.get.mockResolvedValueOnce({
+        data: {
+          server: {
+            id: 162542626,
+            name: 'jolly-lion-b6flm',
+            status: 'running',
+            public_net: { ipv4: { ip: '91.99.115.6' } },
+            location: { name: 'fsn1', city: 'Falkenstein' },
+          },
+        },
+      });
+
+      const service = new HetznerProvisioningService();
+      const result = await service.getServerInfo('162542626');
+
+      expect(result.metadata).toEqual({ location: 'fsn1', locationName: 'Falkenstein' });
+    });
+
     it('returns server info when API returns valid server', async () => {
       mockedAxios.get.mockResolvedValueOnce({
         data: {

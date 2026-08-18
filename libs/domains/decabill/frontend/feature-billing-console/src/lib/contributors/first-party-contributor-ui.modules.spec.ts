@@ -24,7 +24,7 @@ describe('FIRST_PARTY_CONTRIBUTOR_UI_MODULES', () => {
   });
 
   it('includes empty first-party stack UI modules without extra routes', () => {
-    expect(FIRST_PARTY_CONTRIBUTOR_UI_MODULES).toHaveLength(4);
+    expect(FIRST_PARTY_CONTRIBUTOR_UI_MODULES).toHaveLength(6);
     const routes = collectContributorRoutes(FIRST_PARTY_CONTRIBUTOR_UI_MODULES);
     expect(routes.customer).toEqual([]);
     expect(routes.admin).toEqual([]);

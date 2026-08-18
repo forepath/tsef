@@ -10,14 +10,14 @@ This page covers **Decabill billing manager** registries only.
 
 ## Registries
 
-| Env var                             | Criticality | Registers                                                                                                                                                  |
-| ----------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DYNAMIC_PAYMENT_PROCESSORS`        | critical    | Payment processor implementations                                                                                                                          |
-| `DYNAMIC_BILLING_PROVIDER_METADATA` | optional    | Admin UI provider metadata (`providerMetadata` export)                                                                                                     |
-| `DYNAMIC_BILLING_PROVIDER_MODULES`  | optional    | Runtime provider modules (`collectMeters`, optional `meters`) — distinct from metadata                                                                     |
-| `DYNAMIC_ADDON_MODULES`             | optional    | Addon lifecycle modules (`provision` / `teardown` / optional `collectMeters`, `configFields`, `meters`, `serviceTabs`, `jobs`, `migrations`, `nestModule`) |
-| `DYNAMIC_INTEGRATED_STACK_MODULES`  | optional    | Integrated stack modules (`buildUserData` / `buildUpdateCommand` / `serviceTabs` / `jobs` / `migrations` / optional `nestModule`)                          |
-| `DYNAMIC_CLOUD_INIT_MODULES`        | optional    | CloudInit config code modules keyed by template `key` (`serviceTabs`, `jobs`, `migrations`, optional `nestModule`)                                         |
+| Env var                             | Criticality | Registers                                                                                                                                                                       |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DYNAMIC_PAYMENT_PROCESSORS`        | critical    | Payment processor implementations                                                                                                                                               |
+| `DYNAMIC_BILLING_PROVIDER_METADATA` | optional    | Admin UI provider metadata (`providerMetadata` export)                                                                                                                          |
+| `DYNAMIC_BILLING_PROVIDER_MODULES`  | optional    | Runtime provider modules (`collectMeters`, optional `provision` / lifecycle / catalog hooks, `jobs`, `migrations`, optional `nestModule`) — distinct from metadata-only plugins |
+| `DYNAMIC_ADDON_MODULES`             | optional    | Addon lifecycle modules (`provision` / `teardown` / optional `collectMeters`, `configFields`, `meters`, `serviceTabs`, `jobs`, `migrations`, `nestModule`)                      |
+| `DYNAMIC_INTEGRATED_STACK_MODULES`  | optional    | Integrated stack modules (`buildUserData` / `buildUpdateCommand` / `serviceTabs` / `jobs` / `migrations` / optional `nestModule`)                                               |
+| `DYNAMIC_CLOUD_INIT_MODULES`        | optional    | CloudInit config code modules keyed by template `key` (`serviceTabs`, `jobs`, `migrations`, optional `nestModule`)                                                              |
 
 Provider metadata capability flags (all **fail closed** when omitted, treated as `false`):
 
@@ -34,13 +34,13 @@ Addon modules may declare `configFields` (CloudInit-style env metadata). Decabil
 ### Declared meters and collection
 
 - Metadata packages (`DYNAMIC_BILLING_PROVIDER_METADATA`) and addon modules may declare `meters` (including optional `collectionIntervalMs`) for catalog sync.
-- Runtime **provider modules** (`DYNAMIC_BILLING_PROVIDER_MODULES`, plus built-in Hetzner/DigitalOcean stubs) implement `collectMeters(ctx)` and may also declare `meters` (runtime overrides metadata for the same key when resolving intervals).
+- Runtime **provider modules** (`DYNAMIC_BILLING_PROVIDER_MODULES`, plus first-party Hetzner/DigitalOcean contributor modules) implement `collectMeters(ctx)` and may also declare `meters` (runtime overrides metadata for the same key when resolving intervals). Modules with `provision` are routed through `ProvisioningDispatchService`.
 - Addon modules may implement optional `collectMeters` for meters with `collectionIntervalMs`.
 - See [Usage meters](./usage-meters.md) for the meter-collect BullMQ job.
 
 ### Contributor jobs and plugin migrations
 
-Addon, integrated-stack, and CloudInit **code** modules may declare:
+Addon, integrated-stack, CloudInit, and **provider** **code** modules may declare:
 
 - `jobs?: ContributorJobDefinition[]` — periodic worker work (`key` slug, `intervalMs` 15s–24h, optional `isEnabled`, `run({ tenantId, now, source, sourceKey })`). Duplicate `(source, sourceKey, key)` and reserved keys (`coordinator`, `unit`) are rejected at register time.
 - `migrations?: Array<new () => MigrationInterface>` — extra SQL applied **after** host TypeORM migrations on `QUEUE_ROLE=api|all`. Recorded in TypeORM’s `migrations` table as `plugin__{source}__{sourceKey}__{ClassName}`. Fail closed on error; SQL is never logged.
@@ -49,17 +49,15 @@ Plugin **entity classes** are not injected into TypeORM `forRoot` (frozen before
 
 ### Contributor Nest modules (`nestModule`)
 
-Addon, integrated-stack, and CloudInit **code** packages may also export a Nest `@Module` class as **`nestModule`**, plus **`contributorKey`** (or an env alias such as `acme-ops=@pkg`). The API and worker load those classes **before** `NestFactory.create` (`AppModule.register` / `BillingModule.withContributors`) so controllers and `@WebSocketGateway()` providers register like first-party code.
+Addon, integrated-stack, CloudInit, and **provider** **code** packages may also export a Nest `@Module` class as **`nestModule`**, plus **`contributorKey`** (or an env alias such as `acme-ops=@pkg`). The API and worker load those classes **before** `NestFactory.create` (`AppModule.register` / `BillingModule.withContributors`) so controllers and `@WebSocketGateway()` providers register like first-party code.
 
-Packages that only export `createProvider` still work (HTTP is skipped). Packages that export both get HTTP from Nest and jobs/tabs from the addon object.
-
-First-party integrated stacks (Agenstra Controller, Agenstra Manager, Decabill Billing) are contributor Nest modules. Each registers an `IntegratedStackModule` with **`buildUserData`** (and optional **`buildUpdateCommand`**) at `onModuleInit`. `CloudInitDispatchService` looks the stack up by canonical key at provision time; missing `buildUserData` fails closed. Operator `DYNAMIC_INTEGRATED_STACK_MODULES` packages can ship a full product the same way (`createProvider` with `buildUserData`, optional `nestModule`). Tab-only DYNAMIC modules may omit `buildUserData` and cannot be provisioned.
+First-party **provisioning providers** (Hetzner, DigitalOcean) and **integrated stacks** (Agenstra Controller, Agenstra Manager, Decabill Billing) are contributor Nest modules. Providers register metadata and runtime hooks at `onModuleInit`; stacks register `IntegratedStackModule` with **`buildUserData`**. `ProvisioningDispatchService` and `CloudInitDispatchService` resolve registered modules by id/key at runtime; missing hooks fail closed. Operator `DYNAMIC_BILLING_PROVIDER_MODULES` / `DYNAMIC_INTEGRATED_STACK_MODULES` packages can ship full products the same way (`createProvider` with hooks, optional `nestModule`).
 
 **Fail closed path allowlist** (normalized, no leading slash). Only these prefixes are accepted, with `{sourceKey}` matching the contributor key slug:
 
 - `subscriptions/:subscriptionId/items/:itemId/{sourceKey}`
 - `admin/billing/subscriptions/:subscriptionId/items/:itemId/{sourceKey}`
-- `contributor/{source}/{sourceKey}`
+- `contributor/{source}/{sourceKey}` where `{source}` is `addon`, `integrated`, `cloud-init`, or `provider`
 - `admin/billing/contributor/{source}/{sourceKey}`
 
 Duplicate `(source, sourceKey)` or duplicate controller paths are rejected at register time. Plugin routes are **not** auto-merged into first-party `openapi.yaml`. Global `TenantUserGuard` still applies; plugin controllers must declare `@RequireScopes` and admin role decorators.

@@ -1,132 +1,18 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import axios, { AxiosError } from 'axios';
+import { Injectable } from '@nestjs/common';
 
 import { ServerTypeDto } from '../dto/server-type.dto';
-import { resolveProviderApiToken } from '../utils/provider-env-defaults.utils';
 
-const HETZNER_API_BASE = 'https://api.hetzner.cloud/v1';
-const DIGITALOCEAN_API_BASE = 'https://api.digitalocean.com/v2';
-
-function parseProviderPrice(value: number | string | null | undefined): number | undefined {
-  if (value == null) {
-    return undefined;
-  }
-
-  const parsed = typeof value === 'number' ? value : Number(value);
-
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
-interface HetznerServerType {
-  id: number;
-  name: string;
-  description: string;
-  cores: number;
-  memory: number;
-  disk: number;
-  deprecated: boolean;
-  prices: Array<{
-    location: string;
-    price_hourly?: { gross: number };
-    price_monthly?: { gross: number };
-  }>;
-}
-
-interface DigitalOceanSize {
-  slug: string;
-  memory: number;
-  vcpus: number;
-  disk: number;
-  price_monthly: number;
-  price_hourly: number;
-  available: boolean;
-  description?: string;
-  deprecated?: boolean;
-}
+import { ProviderCatalogDispatchService } from './provider-catalog-dispatch.service';
 
 /**
- * Fetches server types with pricing from provisioning providers (e.g. Hetzner).
+ * Fetches server types with pricing from provisioning providers.
  * Used by the billing console to show server type dropdowns with price and to auto-set base price.
  */
 @Injectable()
 export class ProviderServerTypesService {
+  constructor(private readonly catalogDispatch: ProviderCatalogDispatchService) {}
+
   async getServerTypes(providerId: string, providerDefaults?: Record<string, string>): Promise<ServerTypeDto[]> {
-    if (providerId === 'hetzner') {
-      return this.getHetznerServerTypes(providerDefaults);
-    }
-
-    if (providerId === 'digital-ocean') {
-      return this.getDigitaloceanServerTypes(providerDefaults);
-    }
-
-    return [];
-  }
-
-  private async getHetznerServerTypes(providerDefaults?: Record<string, string>): Promise<ServerTypeDto[]> {
-    const apiToken = resolveProviderApiToken('hetzner', providerDefaults);
-
-    if (!apiToken) {
-      throw new BadRequestException('HETZNER_API_TOKEN environment variable is not set');
-    }
-
-    try {
-      const response = await axios.get<{ server_types: HetznerServerType[] }>(`${HETZNER_API_BASE}/server_types`, {
-        headers: { Authorization: `Bearer ${apiToken}` },
-      });
-      const serverTypes = response.data.server_types ?? [];
-
-      return serverTypes
-        .filter((st) => !st.deprecated)
-        .map((st) => {
-          const priceFsn1 = st.prices.find((p) => p.location === 'fsn1');
-
-          return {
-            id: st.name,
-            name: st.description || st.name,
-            cores: st.cores,
-            memory: st.memory,
-            disk: st.disk,
-            priceMonthly: parseProviderPrice(priceFsn1?.price_monthly?.gross),
-            priceHourly: parseProviderPrice(priceFsn1?.price_hourly?.gross),
-            description: st.description,
-          };
-        });
-    } catch (error) {
-      const axiosError = error as AxiosError;
-
-      throw new BadRequestException(`Failed to fetch server types: ${axiosError.message}`);
-    }
-  }
-
-  private async getDigitaloceanServerTypes(providerDefaults?: Record<string, string>): Promise<ServerTypeDto[]> {
-    const apiToken = resolveProviderApiToken('digital-ocean', providerDefaults);
-
-    if (!apiToken) {
-      throw new BadRequestException('DIGITALOCEAN_API_TOKEN environment variable is not set');
-    }
-
-    try {
-      const response = await axios.get<{ sizes: DigitalOceanSize[] }>(`${DIGITALOCEAN_API_BASE}/sizes`, {
-        headers: { Authorization: `Bearer ${apiToken}` },
-      });
-      const sizes = response.data.sizes ?? [];
-
-      return sizes
-        .filter((size) => size.available && !size.deprecated)
-        .map((size) => ({
-          id: size.slug,
-          name: size.slug.toUpperCase(),
-          cores: size.vcpus,
-          memory: size.memory / 1024,
-          disk: size.disk,
-          priceMonthly: parseProviderPrice(size.price_monthly),
-          priceHourly: parseProviderPrice(size.price_hourly),
-          description: size.description || size.slug,
-        }));
-    } catch (error) {
-      const axiosError = error as AxiosError;
-
-      throw new BadRequestException(`Failed to fetch server types: ${axiosError.message}`);
-    }
+    return this.catalogDispatch.getServerTypes(providerId, providerDefaults);
   }
 }

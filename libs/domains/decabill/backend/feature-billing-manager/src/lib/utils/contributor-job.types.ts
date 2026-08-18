@@ -1,4 +1,4 @@
-export type ContributorJobSource = 'addon' | 'integrated' | 'cloud-init';
+export type ContributorJobSource = 'addon' | 'integrated' | 'cloud-init' | 'provider';
 
 export interface ContributorJobContext {
   tenantId: string;

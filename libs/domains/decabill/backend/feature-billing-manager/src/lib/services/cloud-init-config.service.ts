@@ -32,6 +32,8 @@ import {
   type CloudInitConfigServiceTabDefinition,
 } from '../utils/service-detail-tabs.utils';
 
+import { ProviderCatalogDispatchService } from './provider-catalog-dispatch.service';
+
 const ENV_KEY_PATTERN = /^[A-Z][A-Z0-9_]*$/;
 const SERVICE_PLAN_REFERENCE_BATCH_SIZE = 100;
 
@@ -68,6 +70,7 @@ export class CloudInitConfigService {
     private readonly cloudInitConfigsRepository: CloudInitConfigsRepository,
     private readonly servicePlansRepository: ServicePlansRepository,
     private readonly serviceTypesRepository: ServiceTypesRepository,
+    private readonly providerCatalogDispatchService: ProviderCatalogDispatchService,
   ) {}
 
   sanitizeEnvironmentVariables(
@@ -392,7 +395,7 @@ export class CloudInitConfigService {
   ): Promise<void> {
     const options = parsePlanProvisioningOptions(providerConfigDefaults);
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
-    const requiresProvisioning = serviceType.provider === 'hetzner' || serviceType.provider === 'digital-ocean';
+    const requiresProvisioning = this.providerCatalogDispatchService.requiresProvisioning(serviceType.provider);
 
     if (requiresProvisioning && options.length === 0) {
       throw new BadRequestException('At least one provisioning option is required for this service type');

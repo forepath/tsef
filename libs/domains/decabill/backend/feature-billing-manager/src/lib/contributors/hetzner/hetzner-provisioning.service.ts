@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
 import { resolveHetznerLocationNameFromMetadata } from '@forepath/shared/backend/util-provisioning-geography';
 
-import { ServerInfo } from '../utils/provisioning.utils';
-import { waitForTcpPort } from '../utils/wait-for-tcp-port.util';
+import { ServerInfo } from '../../utils/provisioning.utils';
+import { waitForTcpPort } from '../../utils/wait-for-tcp-port.util';
 
 const HETZNER_STATUS_POLL_INTERVAL_MS = 3000;
 const HETZNER_POWEROFF_TIMEOUT_MS = 5 * 60 * 1000;
@@ -243,8 +243,6 @@ export class HetznerProvisioningService {
 
       const publicIp = server.public_net?.ipv4?.ip ?? '';
       const privateIp = server.private_net?.[0]?.ip;
-      const locationSlug = server.datacenter?.location?.name;
-      const locationName = resolveHetznerLocationNameFromMetadata(locationSlug, server.datacenter?.location?.city);
 
       return {
         serverId: server.id.toString(),
@@ -252,11 +250,7 @@ export class HetznerProvisioningService {
         publicIp,
         privateIp,
         status: server.status,
-        metadata: {
-          location: locationSlug,
-          locationName,
-          datacenter: server.datacenter?.name,
-        },
+        metadata: hetznerServerGeographyMetadata(server),
       };
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -426,7 +420,12 @@ interface HetznerErrorResponse {
   };
 }
 
-/** Hetzner Cloud API server object (GET /servers/:id) */
+interface HetznerLocationRef {
+  name: string;
+  city?: string;
+}
+
+/** Hetzner Cloud API server object (GET /servers/:id). Current payloads use top-level `location`. */
 interface HetznerServerResponse {
   id: number;
   name: string;
@@ -436,8 +435,31 @@ interface HetznerServerResponse {
     ipv6?: { ip: string };
   };
   private_net?: Array<{ ip: string; network: number }>;
+  location?: HetznerLocationRef;
   datacenter?: {
     name: string;
-    location?: { name: string; city?: string };
+    location?: HetznerLocationRef;
   };
+}
+
+function hetznerServerGeographyMetadata(server: HetznerServerResponse): Record<string, string> {
+  const location = server.location ?? server.datacenter?.location;
+  const locationSlug = location?.name?.trim();
+  const locationName = resolveHetznerLocationNameFromMetadata(locationSlug, location?.city);
+  const datacenter = server.datacenter?.name?.trim();
+  const metadata: Record<string, string> = {};
+
+  if (locationSlug) {
+    metadata.location = locationSlug;
+  }
+
+  if (locationName) {
+    metadata.locationName = locationName;
+  }
+
+  if (datacenter) {
+    metadata.datacenter = datacenter;
+  }
+
+  return metadata;
 }

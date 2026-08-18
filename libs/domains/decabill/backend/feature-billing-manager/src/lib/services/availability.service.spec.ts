@@ -1,191 +1,50 @@
-import axios from 'axios';
-
 import { AvailabilityService } from './availability.service';
 
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-
 describe('AvailabilityService', () => {
-  const originalEnv = process.env;
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-    process.env = { ...originalEnv, HETZNER_API_TOKEN: 'test-token' };
-  });
-
-  afterAll(() => {
-    process.env = originalEnv;
-  });
-
-  it('stores snapshot and returns response for non-hetzner provider', async () => {
+  it('stores snapshot and returns catalog dispatch result', async () => {
     const repository = { create: jest.fn().mockResolvedValue({}) } as any;
-    const service = new AvailabilityService(repository);
-    const result = await service.checkAvailability('other', 'region', 'type');
-
-    expect(result.isAvailable).toBe(true);
-    expect(repository.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        provider: 'other',
-        region: 'region',
-        serverType: 'type',
+    const catalogDispatch = {
+      checkAvailability: jest.fn().mockResolvedValue({
         isAvailable: true,
+        rawResponse: { source: 'catalog' },
       }),
-    );
-  });
-
-  it('returns available when Hetzner server type exists and account has capacity', async () => {
-    const repository = { create: jest.fn().mockResolvedValue({}) } as any;
-    const service = new AvailabilityService(repository);
-
-    mockedAxios.get
-      // server_types
-      .mockResolvedValueOnce({
-        data: {
-          server_types: [
-            {
-              id: 1,
-              name: 'cx23',
-              deprecated: false,
-              prices: [{ location: 'fsn1' }],
-            },
-          ],
-        },
-      } as any)
-      // limits
-      .mockResolvedValueOnce({
-        data: {
-          limits: {
-            max_servers: 10,
-            server_count: 1,
-          },
-        },
-      } as any);
+    } as any;
+    const service = new AvailabilityService(repository, catalogDispatch);
 
     const result = await service.checkAvailability('hetzner', 'fsn1', 'cx23');
 
     expect(result.isAvailable).toBe(true);
-    expect(result.reason).toBeUndefined();
+    expect(catalogDispatch.checkAvailability).toHaveBeenCalledWith('hetzner', 'fsn1', 'cx23', undefined);
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         provider: 'hetzner',
         region: 'fsn1',
         serverType: 'cx23',
         isAvailable: true,
-        rawResponse: expect.objectContaining({
-          serverTypes: expect.any(Object),
-          limits: expect.any(Object),
-        }),
+        rawResponse: { source: 'catalog' },
       }),
     );
   });
 
-  it('returns not available when Hetzner account server limit is reached', async () => {
+  it('forwards providerDefaults to catalog dispatch', async () => {
     const repository = { create: jest.fn().mockResolvedValue({}) } as any;
-    const service = new AvailabilityService(repository);
+    const catalogDispatch = {
+      checkAvailability: jest.fn().mockResolvedValue({
+        isAvailable: false,
+        reason: 'Server type not found',
+        alternatives: { availableTypes: ['cx23'] },
+      }),
+    } as any;
+    const service = new AvailabilityService(repository, catalogDispatch);
 
-    mockedAxios.get
-      // server_types
-      .mockResolvedValueOnce({
-        data: {
-          server_types: [
-            {
-              id: 1,
-              name: 'cx23',
-              deprecated: false,
-              prices: [{ location: 'fsn1' }],
-            },
-          ],
-        },
-      } as any)
-      // limits
-      .mockResolvedValueOnce({
-        data: {
-          limits: {
-            max_servers: 1,
-            server_count: 1,
-          },
-        },
-      } as any);
-
-    const result = await service.checkAvailability('hetzner', 'fsn1', 'cx23');
+    const result = await service.checkAvailability('hetzner', 'fsn1', 'missing', {
+      HETZNER_API_TOKEN: 'tenant-token',
+    });
 
     expect(result.isAvailable).toBe(false);
-    expect(result.reason).toBe('Provider account limit reached');
-    expect(result.alternatives).toEqual({
-      availableTypes: ['cx23'],
+    expect(result.reason).toBe('Server type not found');
+    expect(catalogDispatch.checkAvailability).toHaveBeenCalledWith('hetzner', 'fsn1', 'missing', {
+      HETZNER_API_TOKEN: 'tenant-token',
     });
-  });
-
-  it('skips limits check when Hetzner /limits endpoint returns 404', async () => {
-    const repository = { create: jest.fn().mockResolvedValue({}) } as any;
-    const service = new AvailabilityService(repository);
-
-    mockedAxios.get
-      // server_types
-      .mockResolvedValueOnce({
-        data: {
-          server_types: [
-            {
-              id: 1,
-              name: 'cx23',
-              deprecated: false,
-              prices: [{ location: 'fsn1' }],
-            },
-          ],
-        },
-      } as any)
-      // limits -> 404
-      .mockRejectedValueOnce({
-        response: { status: 404 },
-      } as any);
-
-    const result = await service.checkAvailability('hetzner', 'fsn1', 'cx23');
-
-    expect(result.isAvailable).toBe(true);
-    // rawResponse.limits should be null in this case
-    expect(repository.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        rawResponse: expect.objectContaining({
-          limits: null,
-        }),
-      }),
-    );
-  });
-
-  it('uses tenant providerDefaults token when env token is unset', async () => {
-    delete process.env.HETZNER_API_TOKEN;
-    const repository = { create: jest.fn().mockResolvedValue({}) } as any;
-    const service = new AvailabilityService(repository);
-
-    mockedAxios.get
-      .mockResolvedValueOnce({
-        data: {
-          server_types: [
-            {
-              id: 1,
-              name: 'cx23',
-              deprecated: false,
-              prices: [{ location: 'fsn1' }],
-            },
-          ],
-        },
-      } as any)
-      .mockResolvedValueOnce({
-        data: {
-          limits: {
-            max_servers: 10,
-            server_count: 1,
-          },
-        },
-      } as any);
-
-    await service.checkAvailability('hetzner', 'fsn1', 'cx23', { HETZNER_API_TOKEN: 'tenant-token' });
-
-    expect(mockedAxios.get).toHaveBeenCalledWith(
-      'https://api.hetzner.cloud/v1/server_types',
-      expect.objectContaining({
-        headers: { Authorization: 'Bearer tenant-token' },
-      }),
-    );
   });
 });

@@ -32,6 +32,9 @@ describe('SubscriptionConfigChangeService', () => {
   const promotionRedemptionsRepository = { findActiveBySubscription: jest.fn() };
   const openPositionsRepository = { hasUnbilledPeriodChargeForSubscription: jest.fn() };
   const providerRegistry = { getProvider: jest.fn() };
+  const providerCatalogDispatchService = {
+    requiresProvisioning: jest.fn((provider: string) => provider === 'hetzner' || provider === 'digital-ocean'),
+  };
   const providerServerTypesService = { getServerTypes: jest.fn() };
   const addonService = { providerSupportsAddons: jest.fn() };
   const billingNotificationPublisher = { publishConfigChangeRequested: jest.fn() };
@@ -47,6 +50,7 @@ describe('SubscriptionConfigChangeService', () => {
     promotionRedemptionsRepository as never,
     openPositionsRepository as never,
     providerRegistry as never,
+    providerCatalogDispatchService as never,
     providerServerTypesService as never,
     new PricingService(),
     addonService as never,

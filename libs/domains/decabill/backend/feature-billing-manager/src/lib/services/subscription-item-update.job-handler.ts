@@ -6,7 +6,7 @@ import { canonicalizeIntegratedProvisioningService } from '../utils/cloud-init/i
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
 
 import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
-import { ProvisioningService } from './provisioning.service';
+import { ProvisioningDispatchService } from './provisioning-dispatch.service';
 import { SshExecutorService } from './ssh-executor.service';
 
 const SSH_USER = 'root';
@@ -18,7 +18,7 @@ export class SubscriptionItemUpdateJobHandler {
 
   constructor(
     private readonly subscriptionItemsRepository: SubscriptionItemsRepository,
-    private readonly provisioningService: ProvisioningService,
+    private readonly provisioningDispatchService: ProvisioningDispatchService,
     private readonly sshExecutor: SshExecutorService,
     private readonly integratedStackRegistry: IntegratedStackRegistryService,
   ) {}
@@ -43,7 +43,11 @@ export class SubscriptionItemUpdateJobHandler {
     }
 
     const credentials = getProvisioningCredentials(provider, item.serviceType?.providerDefaults);
-    const serverInfo = await this.provisioningService.getServerInfo(provider, item.providerReference, credentials);
+    const serverInfo = await this.provisioningDispatchService.getServerInfo(
+      provider,
+      item.providerReference,
+      credentials,
+    );
 
     if (!serverInfo?.publicIp) {
       this.logger.warn(`No public IP for item ${item.id}, skipping update`);

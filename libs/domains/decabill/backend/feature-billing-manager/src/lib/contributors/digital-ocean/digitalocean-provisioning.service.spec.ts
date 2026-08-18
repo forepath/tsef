@@ -1,11 +1,11 @@
 import { BadRequestException } from '@nestjs/common';
 import axios from 'axios';
 
-import { waitForTcpPort } from '../utils/wait-for-tcp-port.util';
+import { waitForTcpPort } from '../../utils/wait-for-tcp-port.util';
 import { DigitaloceanProvisioningService } from './digitalocean-provisioning.service';
 
 jest.mock('axios');
-jest.mock('../utils/wait-for-tcp-port.util', () => ({
+jest.mock('../../utils/wait-for-tcp-port.util', () => ({
   waitForTcpPort: jest.fn().mockResolvedValue(undefined),
   isTcpPortOpen: jest.fn(),
 }));

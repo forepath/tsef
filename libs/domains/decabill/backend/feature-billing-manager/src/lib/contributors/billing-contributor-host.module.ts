@@ -2,6 +2,8 @@ import { Global, Module } from '@nestjs/common';
 
 import { AddonModuleRegistryService } from '../services/addon-module-registry.service';
 import { IntegratedStackRegistryService } from '../services/integrated-stack-registry.service';
+import { ProviderModuleRegistryService } from '../services/provider-module-registry.service';
+import { ProviderRegistryService } from '../services/provider-registry.service';
 import { SshExecutorService } from '../services/ssh-executor.service';
 
 /**
@@ -10,7 +12,19 @@ import { SshExecutorService } from '../services/ssh-executor.service';
  */
 @Global()
 @Module({
-  providers: [AddonModuleRegistryService, IntegratedStackRegistryService, SshExecutorService],
-  exports: [AddonModuleRegistryService, IntegratedStackRegistryService, SshExecutorService],
+  providers: [
+    AddonModuleRegistryService,
+    IntegratedStackRegistryService,
+    ProviderRegistryService,
+    ProviderModuleRegistryService,
+    SshExecutorService,
+  ],
+  exports: [
+    AddonModuleRegistryService,
+    IntegratedStackRegistryService,
+    ProviderRegistryService,
+    ProviderModuleRegistryService,
+    SshExecutorService,
+  ],
 })
 export class BillingContributorHostModule {}

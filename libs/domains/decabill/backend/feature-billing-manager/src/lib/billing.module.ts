@@ -90,6 +90,8 @@ import { AgenstraControllerContributorModule } from './contributors/agenstra-con
 import { AgenstraManagerContributorModule } from './contributors/agenstra-manager/agenstra-manager.contributor.module';
 import { ContainerManagerContributorModule } from './contributors/container-manager/container-manager.contributor.module';
 import { DecabillBillingContributorModule } from './contributors/decabill-billing/decabill-billing.contributor.module';
+import { DigitalOceanContributorModule } from './contributors/digital-ocean/digital-ocean.contributor.module';
+import { HetznerContributorModule } from './contributors/hetzner/hetzner.contributor.module';
 import { SubscriptionsController } from './controllers/subscriptions.controller';
 import { AdminUsageController } from './controllers/admin-usage.controller';
 import { AdminSubscriptionItemsController } from './controllers/admin-subscription-items.controller';
@@ -210,7 +212,6 @@ import { SubscriptionTeardownService } from './services/subscription-teardown.se
 import { AddonModuleRegistryService } from './services/addon-module-registry.service';
 import { resolveContributorNestImports } from './utils/contributor-nest-registration';
 import type { RegisteredContributorNestModule } from './utils/contributor-nest.types';
-import { createBuiltinProviderModules } from './services/builtin-provider-modules';
 import { CloudInitDispatchService } from './services/cloud-init-dispatch.service';
 import { MeterCollectJobHandler } from './services/meter-collect.job-handler';
 import { ProviderModuleRegistryService } from './services/provider-module-registry.service';
@@ -239,10 +240,8 @@ import { DatevExportJobHandler } from './services/datev-export.job-handler';
 import { DatevExportService } from './services/datev-export.service';
 import { DatevExportStorageService } from './services/datev-export-storage.service';
 import { DatevExtfCsvService } from './services/datev-extf-csv.service';
-import { DigitaloceanProvisioningService } from './services/digitalocean-provisioning.service';
 import { EInvoiceEmbedService } from './services/e-invoice-embed.service';
 import { EInvoiceXmlService } from './services/e-invoice-xml.service';
-import { HetznerProvisioningService } from './services/hetzner-provisioning.service';
 import { HostnameReservationService } from './services/hostname-reservation.service';
 import { InvoiceAdminService } from './services/invoice-admin.service';
 import { InvoiceCreationService } from './services/invoice-creation.service';
@@ -267,7 +266,8 @@ import { ProviderPricingService } from './services/provider-pricing.service';
 import { ProviderRegistryService } from './services/provider-registry.service';
 import { ProviderLocationsService } from './services/provider-locations.service';
 import { ProviderServerTypesService } from './services/provider-server-types.service';
-import { ProvisioningService } from './services/provisioning.service';
+import { ProvisioningDispatchService } from './services/provisioning-dispatch.service';
+import { ProviderCatalogDispatchService } from './services/provider-catalog-dispatch.service';
 import { SubscriptionBillingJobHandler } from './services/subscription-billing.job-handler';
 import { SubscriptionExpirationJobHandler } from './services/subscription-expiration.job-handler';
 import { SubscriptionPeriodChargeService } from './services/subscription-period-charge.service';
@@ -295,201 +295,17 @@ import { TaxPreviewService } from './services/tax-preview.service';
 import { UsageService } from './services/usage.service';
 import { MeterService } from './services/meter.service';
 import { MeterBillingService } from './services/meter-billing.service';
-import { applyProviderConfigFieldScopes } from './utils/provider-config-schema.utils';
-import { DIGITALOCEAN_ENV_DEFAULT_FIELDS, HETZNER_ENV_DEFAULT_FIELDS } from './utils/provider-env-defaults.utils';
 import { CustomerTrustScoreService } from './trust-score/customer-trust-score.service';
 import { InternalBillingTrustScoreProvider } from './trust-score/internal-billing-trust-score.provider';
 import { TrustScoreProviderRegistry } from './trust-score/trust-score-provider.registry';
 
 const authMethod = getAuthenticationMethod();
-/**
- * Default config schema for Hetzner provisioning (serverType, location, optional firewallId).
- * Matches the shape expected by HetznerProvisioningService.provisionServer.
- * - basePriceFromField: when set, the UI fetches options from GET .../server-types and uses the selected option's price as plan base price.
- * - properties may include optional `enum` arrays for static options, or the field named in basePriceFromField gets options from the server-types API.
- */
-const HETZNER_CONFIG_PROPERTIES: Record<string, Record<string, unknown>> = {
-  service: {
-    type: 'string',
-    description:
-      'Product service: agenstra-controller (full stack), agenstra-manager (agent manager only), decabill-billing (Decabill stack), or custom (admin CloudInit template)',
-    enum: ['agenstra-controller', 'agenstra-manager', 'decabill-billing', 'custom'],
-  },
-  cloudInitConfigId: {
-    type: 'string',
-    description: 'CloudInit config template id (required when service is custom)',
-  },
-  serverType: {
-    type: 'string',
-    description: 'Hetzner server type (options and price from API)',
-  },
-  location: {
-    type: 'string',
-    description: 'Hetzner location',
-    enum: ['fsn1', 'nbg1', 'hel1', 'ash', 'hil', 'sgp'],
-  },
-  firewallId: { type: 'number', description: 'Optional firewall ID to attach to server' },
-  authenticationMethod: {
-    type: 'string',
-    description: 'Authentication method for the agent (users, api-key, keycloak)',
-  },
-  staticApiKey: {
-    type: 'string',
-    description: 'Static API key (required when authenticationMethod is api-key)',
-  },
-  disableSignup: { type: 'boolean', description: 'Whether to disable user signup' },
-  smtp: {
-    type: 'object',
-    description: 'SMTP configuration for email',
-    properties: {
-      host: { type: 'string' },
-      port: { type: 'number' },
-      user: { type: 'string' },
-      password: { type: 'string' },
-      from: { type: 'string' },
-    },
-  },
-  keycloak: {
-    type: 'object',
-    description: 'Keycloak configuration (when authenticationMethod is keycloak)',
-    properties: {
-      serverUrl: { type: 'string' },
-      authServerUrl: { type: 'string' },
-      realm: { type: 'string' },
-      clientId: { type: 'string' },
-      clientSecret: { type: 'string' },
-    },
-  },
-  hetznerApiToken: {
-    type: 'string',
-    description: 'Optional Hetzner API token for nested provisioning from the instance',
-  },
-  digitaloceanApiToken: {
-    type: 'string',
-    description: 'Optional DigitalOcean API token for nested provisioning from the instance',
-  },
-  git: {
-    type: 'object',
-    description: 'Optional Git configuration for manager instances (GIT_* env vars)',
-    properties: {
-      setupMode: {
-        type: 'string',
-        description: 'Repository setup mode: clone from remote or empty local repository (git init)',
-        enum: ['clone', 'empty'],
-      },
-      repositoryUrl: { type: 'string', description: 'Git repository URL' },
-      username: { type: 'string', description: 'Git username (HTTPS)' },
-      token: { type: 'string', description: 'Git token (e.g. PAT)' },
-      password: { type: 'string', description: 'Git password (alternative to token)' },
-      privateKey: { type: 'string', description: 'SSH private key for git@ URLs' },
-      commitAuthorName: { type: 'string', description: 'Default commit author name' },
-      commitAuthorEmail: { type: 'string', description: 'Default commit author email' },
-    },
-  },
-  cursorApiKey: {
-    type: 'string',
-    description: 'Optional Cursor API key for manager instances (CURSOR_API_KEY env var). Sensitive.',
-  },
-};
-
-const HETZNER_CONFIG_SCHEMA: Record<string, unknown> = {
-  required: ['serverType', 'location', 'service'],
-  basePriceFromField: 'serverType',
-  properties: applyProviderConfigFieldScopes(HETZNER_CONFIG_PROPERTIES, ['serverType', 'location', 'firewallId']),
-};
-
-const DIGITALOCEAN_CONFIG_PROPERTIES: Record<string, Record<string, unknown>> = {
-  service: {
-    type: 'string',
-    description:
-      'Product service: agenstra-controller (full stack), agenstra-manager (agent manager only), decabill-billing (Decabill stack), or custom (admin CloudInit template)',
-    enum: ['agenstra-controller', 'agenstra-manager', 'decabill-billing', 'custom'],
-  },
-  cloudInitConfigId: {
-    type: 'string',
-    description: 'CloudInit config template id (required when service is custom)',
-  },
-  serverType: {
-    type: 'string',
-    description: 'DigitalOcean droplet size (options and price from API)',
-  },
-  region: {
-    type: 'string',
-    description: 'DigitalOcean region',
-    enum: ['ams3', 'blr1', 'fra1', 'lon1', 'nyc1', 'nyc3', 'sfo2', 'sfo3', 'sgp1', 'syd1', 'tor1'],
-  },
-  authenticationMethod: {
-    type: 'string',
-    description: 'Authentication method for the agent (users, api-key, keycloak)',
-  },
-  staticApiKey: {
-    type: 'string',
-    description: 'Static API key (required when authenticationMethod is api-key)',
-  },
-  disableSignup: { type: 'boolean', description: 'Whether to disable user signup' },
-  smtp: {
-    type: 'object',
-    description: 'SMTP configuration for email',
-    properties: {
-      host: { type: 'string' },
-      port: { type: 'number' },
-      user: { type: 'string' },
-      password: { type: 'string' },
-      from: { type: 'string' },
-    },
-  },
-  keycloak: {
-    type: 'object',
-    description: 'Keycloak configuration (when authenticationMethod is keycloak)',
-    properties: {
-      serverUrl: { type: 'string' },
-      authServerUrl: { type: 'string' },
-      realm: { type: 'string' },
-      clientId: { type: 'string' },
-      clientSecret: { type: 'string' },
-    },
-  },
-  hetznerApiToken: {
-    type: 'string',
-    description: 'Optional Hetzner API token for nested provisioning from the instance',
-  },
-  digitaloceanApiToken: {
-    type: 'string',
-    description: 'Optional DigitalOcean API token for nested provisioning from the instance',
-  },
-  git: {
-    type: 'object',
-    description: 'Optional Git configuration for manager instances (GIT_* env vars)',
-    properties: {
-      setupMode: {
-        type: 'string',
-        description: 'Repository setup mode: clone from remote or empty local repository (git init)',
-        enum: ['clone', 'empty'],
-      },
-      repositoryUrl: { type: 'string', description: 'Git repository URL' },
-      username: { type: 'string', description: 'Git username (HTTPS)' },
-      token: { type: 'string', description: 'Git token (e.g. PAT)' },
-      password: { type: 'string', description: 'Git password (alternative to token)' },
-      privateKey: { type: 'string', description: 'SSH private key for git@ URLs' },
-      commitAuthorName: { type: 'string', description: 'Default commit author name' },
-      commitAuthorEmail: { type: 'string', description: 'Default commit author email' },
-    },
-  },
-  cursorApiKey: {
-    type: 'string',
-    description: 'Optional Cursor API key for manager instances (CURSOR_API_KEY env var). Sensitive.',
-  },
-};
-
-const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
-  required: ['serverType', 'region', 'service'],
-  basePriceFromField: 'serverType',
-  properties: applyProviderConfigFieldScopes(DIGITALOCEAN_CONFIG_PROPERTIES, ['serverType', 'region']),
-};
 
 @Module({
   imports: [
     BillingContributorHostModule,
+    HetznerContributorModule,
+    DigitalOceanContributorModule,
     ContainerManagerContributorModule,
     AgenstraControllerContributorModule,
     AgenstraManagerContributorModule,
@@ -606,14 +422,12 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     ContributorJobRegistryService,
     ContributorMigrationService,
     ContributorCollectJobHandler,
-    ProviderModuleRegistryService,
+    ProvisioningDispatchService,
+    ProviderCatalogDispatchService,
     MeterCollectJobHandler,
     SearchReindexJobHandler,
     CloudflareDnsService,
-    DigitaloceanProvisioningService,
     HostnameReservationService,
-    HetznerProvisioningService,
-    ProviderRegistryService,
     ProviderServerTypesService,
     ProviderLocationsService,
     TaxRateConfigService,
@@ -720,7 +534,8 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
       },
       inject: [PaymentProcessorFactory, StripePaymentProcessor, DynamicProviderLoaderService],
     },
-    ProvisioningService,
+    ProvisioningDispatchService,
+    ProviderCatalogDispatchService,
     SubscriptionItemServerService,
     PricingService,
     ProviderPricingService,
@@ -836,16 +651,15 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     EmailDeliveryService,
     CancellationPolicyService,
     CloudflareDnsService,
-    DigitaloceanProvisioningService,
     HostnameReservationService,
-    HetznerProvisioningService,
     InvoiceCreationService,
     InvoiceService,
     InvoiceOverdueJobHandler,
     InvoiceAutoPaymentJobHandler,
     AutoBillingService,
     PaymentOrchestrationService,
-    ProvisioningService,
+    ProvisioningDispatchService,
+    ProviderCatalogDispatchService,
     SubscriptionItemServerService,
     PricingService,
     ProviderPricingService,
@@ -890,8 +704,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     DatevExportJobHandler,
     VatIdValidationJobHandler,
     DatevExportConfigService,
-    ProviderRegistryService,
-    ProviderModuleRegistryService,
+    BillingContributorHostModule,
     SearchReindexJobHandler,
     BillingSearchModule,
     BillingIdentityEmailBridgeModule,
@@ -930,29 +743,6 @@ export class BillingModule implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    this.providerRegistry.register({
-      id: 'hetzner',
-      displayName: 'Hetzner Cloud-Init',
-      configSchema: HETZNER_CONFIG_SCHEMA,
-      envDefaultFields: HETZNER_ENV_DEFAULT_FIELDS,
-      supportsAddons: true,
-      supportsServerTypeUpgrade: true,
-      supportsServerTypeDowngrade: true,
-    });
-    this.providerRegistry.register({
-      id: 'digital-ocean',
-      displayName: 'DigitalOcean Cloud-Init',
-      configSchema: DIGITALOCEAN_CONFIG_SCHEMA,
-      envDefaultFields: DIGITALOCEAN_ENV_DEFAULT_FIELDS,
-      supportsAddons: true,
-      supportsServerTypeUpgrade: true,
-      supportsServerTypeDowngrade: true,
-    });
-
-    for (const module of createBuiltinProviderModules()) {
-      this.providerModuleRegistry.register(module);
-    }
-
     await registerDynamicProviderMetadata({
       envKey: 'DYNAMIC_BILLING_PROVIDER_METADATA',
       criticality: 'optional',

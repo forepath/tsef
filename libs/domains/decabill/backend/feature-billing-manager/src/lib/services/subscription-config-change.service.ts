@@ -43,6 +43,7 @@ import {
 } from '../utils/server-type-billing.utils';
 import { AddonService } from './addon.service';
 import { PricingService } from './pricing.service';
+import { ProviderCatalogDispatchService } from './provider-catalog-dispatch.service';
 import { ProviderRegistryService } from './provider-registry.service';
 import { ProviderServerTypesService } from './provider-server-types.service';
 
@@ -90,6 +91,7 @@ export class SubscriptionConfigChangeService {
     private readonly promotionRedemptionsRepository: PromotionRedemptionsRepository,
     private readonly openPositionsRepository: OpenPositionsRepository,
     private readonly providerRegistry: ProviderRegistryService,
+    private readonly providerCatalogDispatchService: ProviderCatalogDispatchService,
     private readonly providerServerTypesService: ProviderServerTypesService,
     private readonly pricingService: PricingService,
     private readonly addonService: AddonService,
@@ -260,7 +262,7 @@ export class SubscriptionConfigChangeService {
     return items.some((item) => {
       const provider = item.serviceType?.provider?.trim();
 
-      if (provider !== 'hetzner' && provider !== 'digital-ocean') {
+      if (!this.providerCatalogDispatchService.requiresProvisioning(provider)) {
         return false;
       }
 

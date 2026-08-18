@@ -16,7 +16,7 @@ import { BILLING_BASE_PRICE_CONFIG_KEY, resolveServerTypePriceMonthly } from '..
 
 import { AddonLifecycleService } from './addon-lifecycle.service';
 import { ProviderServerTypesService } from './provider-server-types.service';
-import { ProvisioningService } from './provisioning.service';
+import { ProvisioningDispatchService } from './provisioning-dispatch.service';
 import { SubscriptionConfigChangeBillingService } from './subscription-config-change-billing.service';
 
 /** Step keys recorded in `applied_steps`; retries skip everything already listed there. */
@@ -56,7 +56,7 @@ export class SubscriptionConfigChangeJobHandler {
     private readonly servicePlansRepository: ServicePlansRepository,
     private readonly subscriptionItemsRepository: SubscriptionItemsRepository,
     private readonly providerServerTypesService: ProviderServerTypesService,
-    private readonly provisioningService: ProvisioningService,
+    private readonly provisioningDispatchService: ProvisioningDispatchService,
     private readonly addonLifecycleService: AddonLifecycleService,
     private readonly configChangeBillingService: SubscriptionConfigChangeBillingService,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
@@ -307,7 +307,7 @@ export class SubscriptionConfigChangeJobHandler {
 
     await this.assertOwnsProcessingClaim(change.id, claimGeneration);
 
-    await this.provisioningService.changeServerType(provider, item.providerReference, targetServerType, {
+    await this.provisioningDispatchService.changeServerType(provider, item.providerReference, targetServerType, {
       isUpgrade: currentPrice == null || newPrice > currentPrice,
       credentials: getProvisioningCredentials(provider, item.serviceType?.providerDefaults),
       sshPrivateKey: item.sshPrivateKey,

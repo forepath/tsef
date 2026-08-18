@@ -18,7 +18,7 @@ import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
 
 import { AddonModuleRegistryService, type AddonLifecycleContext } from './addon-module-registry.service';
-import { ProvisioningService } from './provisioning.service';
+import { ProvisioningDispatchService } from './provisioning-dispatch.service';
 import { SshExecutorService } from './ssh-executor.service';
 
 const SSH_USER = 'root';
@@ -60,7 +60,7 @@ export class AddonLifecycleService {
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
     private readonly billingEmailPublisher: BillingEmailPublisher,
     private readonly addonsRepository: AddonsRepository,
-    private readonly provisioningService: ProvisioningService,
+    private readonly provisioningDispatchService: ProvisioningDispatchService,
     private readonly sshExecutor: SshExecutorService,
   ) {}
 
@@ -598,7 +598,7 @@ export class AddonLifecycleService {
     }
 
     const credentials = getProvisioningCredentials(provider, item.serviceType?.providerDefaults);
-    const info = await this.provisioningService.getServerInfo(provider, item.providerReference, credentials);
+    const info = await this.provisioningDispatchService.getServerInfo(provider, item.providerReference, credentials);
 
     return info?.publicIp?.trim() || undefined;
   }
