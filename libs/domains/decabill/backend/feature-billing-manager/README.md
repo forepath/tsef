@@ -103,7 +103,7 @@ samples via provider/addon `collectMeters` into usage history with `usageSource:
 - `DYNAMIC_BILLING_PROVIDER_METADATA` - Comma-separated packages exporting `providerMetadata` for the billing UI registry
 - `DYNAMIC_BILLING_PROVIDER_MODULES` - Comma-separated runtime provider modules implementing `collectMeters` (optional `meters`)
 - `DYNAMIC_ADDON_MODULES` - Addon lifecycle modules (`provision` / `teardown` / optional `collectMeters` / optional `serviceTabs` / optional `jobs` / optional `migrations` / optional `nestModule`)
-- `DYNAMIC_INTEGRATED_STACK_MODULES` - Integrated stack modules (`serviceTabs` / `jobs` / `migrations` / optional `nestModule` for agenstra-controller / agenstra-manager / decabill-billing)
+- `DYNAMIC_INTEGRATED_STACK_MODULES` - Integrated stack modules (`buildUserData` / `buildUpdateCommand` / `serviceTabs` / `jobs` / `migrations` / optional `nestModule`)
 - `DYNAMIC_CLOUD_INIT_MODULES` - CloudInit config code modules keyed by template `key` (`serviceTabs` / `jobs` / `migrations` / optional `nestModule`)
 - `BILLING_METER_COLLECT_ENABLED` - When `false`, disables the meter-collect coordinator (default `true`)
 - `BILLING_METER_COLLECT_INTERVAL` - Coordinator interval ms (default `60000`)

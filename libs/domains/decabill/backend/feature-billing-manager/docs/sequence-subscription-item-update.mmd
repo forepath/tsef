@@ -13,7 +13,7 @@ sequenceDiagram
         Scheduler->>Prov: getServerInfo(provider, providerReference)
         Prov-->>Scheduler: publicIp
 
-        Scheduler->>Scheduler: buildAgentControllerUpdateCommand() or buildAgentManagerUpdateCommand()
+        Scheduler->>Scheduler: stack.buildUpdateCommand() from IntegratedStackRegistry
         Note right of Scheduler: Command logs to /var/log/*-update.log on host
 
         Scheduler->>SSH: exec(host, 22, root, privateKey, command)

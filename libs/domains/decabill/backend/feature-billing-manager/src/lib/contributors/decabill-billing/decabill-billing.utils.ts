@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 
-import { buildCertbotBootstrapScript } from './certbot-bootstrap.script';
-import { formatEnvLines as formatEnv, quoteYamlScalar } from './env.utils';
+import { buildCertbotBootstrapScript } from '../../utils/cloud-init/certbot-bootstrap.script';
+import { formatEnvLines as formatEnv, quoteYamlScalar } from '../../utils/cloud-init/env.utils';
 
 export const DECABILL_BILLING_STACK_DIR = '/opt/decabill-billing';
 

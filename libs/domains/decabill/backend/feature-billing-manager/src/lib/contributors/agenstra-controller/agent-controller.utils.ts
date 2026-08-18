@@ -2,8 +2,8 @@ import { randomBytes } from 'crypto';
 
 import { parseAllowedHosts } from '@forepath/shared/shared/util-network-address';
 
-import { buildCertbotBootstrapScript } from './certbot-bootstrap.script';
-import { formatEnvLines as formatEnv, quoteYamlScalar } from './env.utils';
+import { buildCertbotBootstrapScript } from '../../utils/cloud-init/certbot-bootstrap.script';
+import { formatEnvLines as formatEnv, quoteYamlScalar } from '../../utils/cloud-init/env.utils';
 
 export interface AgentControllerCloudInitConfig {
   ssh: {

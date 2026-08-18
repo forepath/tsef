@@ -86,7 +86,10 @@ import { CloudInitConfigsController } from './controllers/cloud-init-configs.con
 import { ServiceTypesController } from './controllers/service-types.controller';
 import { SubscriptionItemsController } from './controllers/subscription-items.controller';
 import { BillingContributorHostModule } from './contributors/billing-contributor-host.module';
+import { AgenstraControllerContributorModule } from './contributors/agenstra-controller/agenstra-controller.contributor.module';
+import { AgenstraManagerContributorModule } from './contributors/agenstra-manager/agenstra-manager.contributor.module';
 import { ContainerManagerContributorModule } from './contributors/container-manager/container-manager.contributor.module';
+import { DecabillBillingContributorModule } from './contributors/decabill-billing/decabill-billing.contributor.module';
 import { SubscriptionsController } from './controllers/subscriptions.controller';
 import { AdminUsageController } from './controllers/admin-usage.controller';
 import { AdminSubscriptionItemsController } from './controllers/admin-subscription-items.controller';
@@ -207,8 +210,8 @@ import { SubscriptionTeardownService } from './services/subscription-teardown.se
 import { AddonModuleRegistryService } from './services/addon-module-registry.service';
 import { resolveContributorNestImports } from './utils/contributor-nest-registration';
 import type { RegisteredContributorNestModule } from './utils/contributor-nest.types';
-import { createBuiltinIntegratedStackModules } from './services/builtin-integrated-stack-modules';
 import { createBuiltinProviderModules } from './services/builtin-provider-modules';
+import { CloudInitDispatchService } from './services/cloud-init-dispatch.service';
 import { MeterCollectJobHandler } from './services/meter-collect.job-handler';
 import { ProviderModuleRegistryService } from './services/provider-module-registry.service';
 import { AddonLifecycleService } from './services/addon-lifecycle.service';
@@ -488,6 +491,9 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
   imports: [
     BillingContributorHostModule,
     ContainerManagerContributorModule,
+    AgenstraControllerContributorModule,
+    AgenstraManagerContributorModule,
+    DecabillBillingContributorModule,
     BillingIdentityEmailBridgeModule,
     BillingIdentityNotificationBridgeModule,
     BillingUpdatesModule,
@@ -595,7 +601,7 @@ const DIGITALOCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
     MeterService,
     MeterBillingService,
     AddonLifecycleService,
-    IntegratedStackRegistryService,
+    CloudInitDispatchService,
     CloudInitModuleRegistryService,
     ContributorJobRegistryService,
     ContributorMigrationService,
@@ -945,10 +951,6 @@ export class BillingModule implements OnModuleInit {
 
     for (const module of createBuiltinProviderModules()) {
       this.providerModuleRegistry.register(module);
-    }
-
-    for (const module of createBuiltinIntegratedStackModules()) {
-      this.integratedStackRegistry.register(module);
     }
 
     await registerDynamicProviderMetadata({

@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 
-import { buildCertbotBootstrapScript } from './certbot-bootstrap.script';
-import { formatEnvLines, quoteYamlScalar } from './env.utils';
+import { buildCertbotBootstrapScript } from '../../utils/cloud-init/certbot-bootstrap.script';
+import { formatEnvLines, quoteYamlScalar } from '../../utils/cloud-init/env.utils';
 
 export interface AgentManagerCloudInitConfig {
   ssh: {

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-17T20:28:40.847Z",
+  "generatedAt": "2026-08-17T21:26:48.982Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -5485,6 +5485,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/frontend/feature-billing-console/src/lib/contributors/agenstra-controller.contributor-ui.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/decabill/frontend/feature-billing-console/src/lib/contributors/agenstra-controller.contributor-ui.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-frontend-feature-billing-console"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/frontend/feature-billing-console/src/lib/guards/billing-admin.guard.ts",
       "type": "guard",
       "attrs": {
@@ -5789,6 +5798,33 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-controller/agenstra-controller.contributor.module.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-controller/agenstra-controller.contributor.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-controller/agent-controller.utils.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-controller/agent-controller.utils.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-manager/agenstra-manager.contributor.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-manager/agenstra-manager.contributor.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/billing-contributor-host.module.ts",
       "type": "module",
       "attrs": {
@@ -5856,6 +5892,15 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/decabill-billing/decabill-billing.contributor.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/decabill-billing/decabill-billing.contributor.module.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -7949,6 +7994,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-dispatch.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-dispatch.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-module-registry.service.ts",
       "type": "service",
       "attrs": {
@@ -8673,15 +8727,6 @@
       "type": "provider",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/trust-score/internal-billing-trust-score.provider.ts",
-        "languageOrKind": "ts",
-        "projectName": "decabill-backend-feature-billing-manager"
-      }
-    },
-    {
-      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/utils/cloud-init/agent-controller.utils.ts",
-      "type": "controller",
-      "attrs": {
-        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/utils/cloud-init/agent-controller.utils.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -29586,6 +29631,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "project:shared-shared-util-network-address",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "project:shared-backend-util-otel",
       "type": "depends_on"
     },
@@ -29597,11 +29647,6 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "project:shared-backend-util-queue",
-      "type": "depends_on"
-    },
-    {
-      "from": "project:decabill-backend-feature-billing-manager",
-      "to": "project:shared-shared-util-network-address",
       "type": "depends_on"
     },
     {
@@ -33781,6 +33826,11 @@
     },
     {
       "from": "project:decabill-frontend-feature-billing-console",
+      "to": "file:libs/domains/decabill/frontend/feature-billing-console/src/lib/contributors/agenstra-controller.contributor-ui.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-frontend-feature-billing-console",
       "to": "file:libs/domains/decabill/frontend/feature-billing-console/src/lib/guards/billing-admin.guard.ts",
       "type": "contains"
     },
@@ -33941,6 +33991,21 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-controller/agenstra-controller.contributor.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-controller/agent-controller.utils.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-manager/agenstra-manager.contributor.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/billing-contributor-host.module.ts",
       "type": "contains"
     },
@@ -33977,6 +34042,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/decabill-billing/decabill-billing.contributor.module.ts",
       "type": "contains"
     },
     {
@@ -35141,6 +35211,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-dispatch.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-module-registry.service.ts",
       "type": "contains"
     },
@@ -35542,11 +35617,6 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/trust-score/internal-billing-trust-score.provider.ts",
-      "type": "contains"
-    },
-    {
-      "from": "project:decabill-backend-feature-billing-manager",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/utils/cloud-init/agent-controller.utils.ts",
       "type": "contains"
     },
     {
@@ -53870,6 +53940,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/agenstra-controller/agenstra-controller.contributor.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/controllers/admin-container-manager.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/container-manager/services/container-manager.service.ts",
       "type": "injects"
@@ -54875,6 +54950,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/backorder.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-dispatch.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-admin.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
       "type": "injects"
@@ -54967,6 +55047,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-config.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/service-types.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-dispatch.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
       "type": "injects"
     },
     {
@@ -56240,6 +56325,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-item-update.job-handler.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription-period-charge.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/open-positions.repository.ts",
       "type": "injects"
@@ -56487,6 +56577,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/search/billing-search-index.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-dispatch.service.ts",
       "type": "injects"
     },
     {
@@ -57946,7 +58041,7 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-dispatch.service.ts",
       "type": "provides"
     },
     {
@@ -58747,6 +58842,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/billing-contributor-host.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/addon-module-registry.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/contributors/billing-contributor-host.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/integrated-stack-registry.service.ts",
       "type": "provides"
     },
     {
@@ -64737,6 +64837,11 @@
     {
       "from": "concept:decabill-customer-order-flow",
       "to": "api:HTTP:POST:/cloud-init-configs",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-provisioning",
+      "to": "api:HTTP:POST:/auth/register",
       "type": "documents"
     },
     {

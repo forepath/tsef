@@ -12,7 +12,8 @@ import { ServiceTypesRepository } from '../repositories/service-types.repository
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionNumberSequencesRepository } from '../repositories/subscription-number-sequences.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
-import { buildProvisioningUserData, normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
+import { CloudInitDispatchService } from './cloud-init-dispatch.service';
+import { normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
 import { CloudInitServiceType } from '../utils/cloud-init/integrated-provisioning-service';
 import {
   applyResolvedProvisioningSelectionToConfig,
@@ -114,6 +115,7 @@ export class SubscriptionService {
     private readonly sshExecutor: SshExecutorService,
     private readonly meterBillingService: MeterBillingService,
     private readonly billingSearchIndexService: BillingSearchIndexService,
+    private readonly cloudInitDispatchService: CloudInitDispatchService,
   ) {}
 
   async createSubscription(
@@ -526,8 +528,8 @@ export class SubscriptionService {
       await this.subscriptionItemsRepository.updateSshPrivateKey(itemId, privateKey);
       effectiveConfig.sshPublicKey = publicKey;
       const baseDomain = process.env.DNS_BASE_DOMAIN ?? 'spirde.com';
-      let userData = buildProvisioningUserData({
-        service,
+      let userData = this.cloudInitDispatchService.buildUserData({
+        service: effectiveConfig.service as string | undefined,
         effectiveConfig,
         hostname,
         baseDomain,

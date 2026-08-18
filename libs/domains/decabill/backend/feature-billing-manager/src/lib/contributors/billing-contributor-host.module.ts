@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 
 import { AddonModuleRegistryService } from '../services/addon-module-registry.service';
+import { IntegratedStackRegistryService } from '../services/integrated-stack-registry.service';
 import { SshExecutorService } from '../services/ssh-executor.service';
 
 /**
@@ -9,7 +10,7 @@ import { SshExecutorService } from '../services/ssh-executor.service';
  */
 @Global()
 @Module({
-  providers: [AddonModuleRegistryService, SshExecutorService],
-  exports: [AddonModuleRegistryService, SshExecutorService],
+  providers: [AddonModuleRegistryService, IntegratedStackRegistryService, SshExecutorService],
+  exports: [AddonModuleRegistryService, IntegratedStackRegistryService, SshExecutorService],
 })
 export class BillingContributorHostModule {}
