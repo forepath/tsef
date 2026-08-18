@@ -37,6 +37,7 @@ See [Email notifications](../features/email-notifications.md).
 Application update check (same queue):
 
 - `update-check`: daily GitHub Releases fetch + Redis state refresh (`UPDATE_CHECK_CRON`, timezone `UPDATE_CHECK_TIMEZONE`)
+- `search-reindex.coordinator` / `search-reindex.unit` / `search-index-sync.unit`: OpenSearch index backfill and live sync retries (`SEARCH_REINDEX_INTERVAL`, default 15m). See [Search indexes](../features/search-indexes.md).
 
 See [Application updates](../features/application-updates.md).
 

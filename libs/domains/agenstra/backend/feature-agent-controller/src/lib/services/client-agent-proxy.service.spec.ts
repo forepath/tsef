@@ -13,6 +13,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import axios, { AxiosError } from 'axios';
 
 import { ClientsRepository } from '../repositories/clients.repository';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { ClientsService } from './clients.service';
@@ -77,6 +78,10 @@ describe('ClientAgentProxyService', () => {
     recordEntityUpdated: jest.fn().mockResolvedValue(undefined),
     recordEntityDeleted: jest.fn().mockResolvedValue(undefined),
   };
+  const mockSearchIndex = {
+    isEnabled: jest.fn().mockReturnValue(false),
+    searchIds: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -97,6 +102,10 @@ describe('ClientAgentProxyService', () => {
         {
           provide: StatisticsService,
           useValue: mockStatisticsService,
+        },
+        {
+          provide: AgenstraSearchIndexService,
+          useValue: mockSearchIndex,
         },
       ],
     }).compile();

@@ -110,8 +110,9 @@ export class ServiceTypesController {
   async list(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<ServiceTypeResponseDto[]> {
-    const rows = await this.serviceTypesRepository.findAll(limit ?? 10, offset ?? 0);
+    const rows = await this.serviceTypesRepository.findAll(limit ?? 10, offset ?? 0, search);
 
     return rows.map((row) => this.mapToResponse(row));
   }

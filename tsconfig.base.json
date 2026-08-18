@@ -201,6 +201,12 @@
       ],
       "@forepath/shared/frontend/feature-updates": [
         "libs/domains/shared/frontend/feature-updates/src/index.ts"
+      ],
+      "@forepath/shared/backend/util-opensearch": [
+        "libs/domains/shared/backend/util-opensearch/src/index.ts"
+      ],
+      "@forepath/shared/frontend/ui-lists": [
+        "libs/domains/shared/frontend/ui-lists/src/index.ts"
       ]
     }
   },

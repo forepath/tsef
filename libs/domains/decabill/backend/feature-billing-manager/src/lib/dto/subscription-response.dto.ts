@@ -8,6 +8,8 @@ export class SubscriptionResponseDto {
   id!: string;
   number!: string;
   planId!: string;
+  /** Denormalized plan display name when the plan row is available. */
+  planName?: string;
   userId!: string;
   status!: SubscriptionStatus;
   currentPeriodStart?: Date;

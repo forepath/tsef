@@ -17,6 +17,7 @@ import { AtlassianSiteConnectionService } from '../services/atlassian-site-conne
 import { ContextImportOrchestratorService } from '../services/context-import-orchestrator.service';
 import { ExternalImportConfigService } from '../services/external-import-config.service';
 import { ExternalImportSyncMarkerService } from '../services/external-import-sync-marker.service';
+import { AgenstraSearchModule } from '../search/agenstra-search.module';
 
 import { ClientsModule } from './clients.module';
 
@@ -28,6 +29,7 @@ import { ClientsModule } from './clients.module';
       ExternalImportSyncMarkerEntity,
     ]),
     forwardRef(() => ClientsModule),
+    AgenstraSearchModule,
   ],
   controllers: [ContextImportController],
   providers: [

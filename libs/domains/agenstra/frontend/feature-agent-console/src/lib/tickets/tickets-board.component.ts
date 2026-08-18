@@ -1,3 +1,4 @@
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
@@ -30,7 +31,7 @@ import {
   ClientsService,
   deleteTicketFailure,
   deleteTicketSuccess,
-  filterTicketsForGlobalSearch,
+  buildTicketBreadcrumbTitles,
   KnowledgeFacade,
   loadTickets,
   loadTicketsFailure,
@@ -76,11 +77,13 @@ import {
   Observable,
   of,
   switchMap,
+  skip,
   take,
   tap,
 } from 'rxjs';
 
 import { getGitRepositoryDisplayLabel, isLocalGitRepository } from '../git-repository-display';
+import { resolveNamedDisplayLabel } from '../display-name.util';
 
 import { storeAgentConsoleChatDraft } from './chat-draft-storage';
 import {
@@ -183,14 +186,18 @@ interface TicketDetailSubtaskRow {
   depth: number;
 }
 
+/** Fixed row height for CDK virtual scroll (title + meta chips + list-group padding). */
+const TICKETS_BOARD_VIRTUAL_ITEM_SIZE_PX = 88;
+
 @Component({
   selector: 'framework-tickets-board',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, TicketEditorComponent],
+  imports: [CommonModule, RouterModule, FormsModule, ScrollingModule, TicketEditorComponent],
   templateUrl: './tickets-board.component.html',
   styleUrls: ['./tickets-board.component.scss'],
 })
 export class TicketsBoardComponent implements OnInit, AfterViewInit {
+  readonly laneVirtualItemSize = TICKETS_BOARD_VIRTUAL_ITEM_SIZE_PX;
   private readonly RELATION_TARGET_KIND_KNOWLEDGE = 'knowledge';
   private readonly RELATION_TARGET_KIND_TICKET = 'ticket';
   private readonly clientsFacade = inject(ClientsFacade);
@@ -333,9 +340,29 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
   readonly ticketRelationsLoading = toSignal(this.knowledgeFacade.relationsLoading$, { initialValue: false });
 
   globalSearchQuery = signal('');
-  readonly globalSearchHits = computed(() =>
-    filterTicketsForGlobalSearch(this.ticketsList(), this.globalSearchQuery(), this.effectiveClientId()),
-  );
+  readonly globalSearchQuery$ = toObservable(this.globalSearchQuery);
+  readonly globalSearchResults = signal<TicketResponseDto[]>([]);
+  readonly globalSearchLoading = signal(false);
+  readonly globalSearchHits = computed((): TicketGlobalSearchHit[] => {
+    const list = this.globalSearchResults();
+
+    return list
+      .map((ticket) => ({
+        ticket,
+        pathTitles: buildTicketBreadcrumbTitles(list, ticket.id),
+      }))
+      .sort((a, b) => {
+        const ta = a.ticket.title.toLowerCase();
+        const tb = b.ticket.title.toLowerCase();
+
+        if (ta !== tb) {
+          return ta.localeCompare(tb);
+        }
+
+        return a.ticket.id.localeCompare(b.ticket.id);
+      });
+  });
+  readonly workspaceSwitchSearch$ = toObservable(this.workspaceSwitchSearch);
 
   /** Direct subtasks only (same depth rule as swimlanes; deeper work stays on the subtask’s own detail). */
   readonly detailSubtaskRows = computed((): TicketDetailSubtaskRow[] => {
@@ -860,6 +887,35 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.clientsFacade.loadClients();
 
+    this.workspaceSwitchSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.clientsFacade.loadClients({ search: search.trim() || undefined });
+      });
+
+    this.globalSearchQuery$
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((query) => {
+        const trimmed = query.trim();
+        const clientId = this.effectiveClientId();
+
+        if (!trimmed || !clientId) {
+          this.globalSearchResults.set([]);
+          this.globalSearchLoading.set(false);
+
+          return;
+        }
+
+        this.globalSearchLoading.set(true);
+        this.ticketsService
+          .listTickets({ clientId, search: trimmed })
+          .pipe(
+            catchError(() => of([] as TicketResponseDto[])),
+            finalize(() => this.globalSearchLoading.set(false)),
+          )
+          .subscribe((tickets) => this.globalSearchResults.set(tickets));
+      });
+
     this.effectiveClientId$
       .pipe(
         distinctUntilChanged(),
@@ -1010,6 +1066,10 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
     const needle = query.toLowerCase();
 
     return list.filter((row) => JSON.stringify(row.ticket).toLowerCase().includes(needle));
+  }
+
+  trackLaneRowByTicketId(_index: number, row: TicketBoardRow): string {
+    return row.ticket.id;
   }
 
   laneLabel(status: TicketStatus): string {
@@ -1202,6 +1262,7 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
 
   openGlobalSearchModal(): void {
     this.globalSearchQuery.set('');
+    this.globalSearchResults.set([]);
     setTimeout(() => {
       const shell = this.globalSearchModal?.nativeElement;
 
@@ -1218,11 +1279,13 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
   onCloseGlobalSearchModal(): void {
     this.hideGlobalSearchModalEl();
     this.globalSearchQuery.set('');
+    this.globalSearchResults.set([]);
   }
 
   onGlobalSearchResultClick(hit: TicketGlobalSearchHit): void {
     this.hideGlobalSearchModalEl();
     this.globalSearchQuery.set('');
+    this.globalSearchResults.set([]);
     this.openTicketDetailFlow(hit.ticket.id);
   }
 
@@ -2409,9 +2472,11 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
   }
 
   effectiveWorkspaceTitle(ew: { id: string; client: ClientResponseDto | null }): string {
-    const name = ew.client?.name?.trim();
+    return resolveNamedDisplayLabel(ew.client?.name);
+  }
 
-    return name && name.length > 0 ? name : ew.id;
+  relationKnowledgeTitle(title: string | null | undefined): string {
+    return resolveNamedDisplayLabel(title);
   }
 
   openWorkspaceSwitchModal(): void {
@@ -2422,16 +2487,6 @@ export class TicketsBoardComponent implements OnInit, AfterViewInit {
 
   onCloseWorkspaceSwitchModal(): void {
     this.hideWorkspaceSwitchModal();
-  }
-
-  filteredClientsForWorkspaceSwitch(clients: ClientResponseDto[]): ClientResponseDto[] {
-    const q = this.workspaceSwitchSearch().trim().toLowerCase();
-
-    if (!q) {
-      return clients;
-    }
-
-    return clients.filter((client) => JSON.stringify(client).toLowerCase().includes(q));
   }
 
   onSelectWorkspaceForTickets(client: ClientResponseDto): void {

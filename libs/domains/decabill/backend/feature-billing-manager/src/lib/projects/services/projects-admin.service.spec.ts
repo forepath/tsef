@@ -29,6 +29,7 @@ describe('ProjectsAdminService', () => {
   const billingNotificationPublisher = {
     publishProject: jest.fn(),
   };
+  const billingSearchIndexService = { scheduleUpsert: jest.fn(), scheduleDelete: jest.fn() };
 
   let service: ProjectsAdminService;
 
@@ -41,6 +42,7 @@ describe('ProjectsAdminService', () => {
       projectBillingService as never,
       projectTimeReportService as never,
       billingNotificationPublisher as never,
+      billingSearchIndexService as never,
     );
   });
 

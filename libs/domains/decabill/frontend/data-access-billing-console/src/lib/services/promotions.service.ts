@@ -51,6 +51,8 @@ export class PromotionsService {
 
     if (params?.offset != null) httpParams = httpParams.set('offset', String(params.offset));
 
+    if (params?.search?.trim()) httpParams = httpParams.set('search', params.search.trim());
+
     return httpParams;
   }
 }

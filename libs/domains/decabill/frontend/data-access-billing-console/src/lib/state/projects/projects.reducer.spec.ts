@@ -13,14 +13,16 @@ import {
   loadAdminProjectDetailFailure,
   loadAdminProjectDetailSuccess,
   loadAdminProjects,
-  loadAdminProjectsBatch,
   loadAdminProjectsFailure,
   loadAdminProjectsSuccess,
+  loadMoreAdminProjects,
+  loadMoreAdminProjectsSuccess,
+  loadMoreProjects,
+  loadMoreProjectsSuccess,
   loadProjectDetail,
   loadProjectDetailFailure,
   loadProjectDetailSuccess,
   loadProjects,
-  loadProjectsBatch,
   loadProjectsFailure,
   loadProjectsSuccess,
   loadProjectSummary,
@@ -46,7 +48,7 @@ describe('projectsReducer', () => {
   };
 
   it('sets loading on loadProjects', () => {
-    const state = projectsReducer(initialProjectsState, loadProjects());
+    const state = projectsReducer(initialProjectsState, loadProjects({}));
 
     expect(state.loading).toBe(true);
     expect(state.projects).toEqual([]);
@@ -55,21 +57,12 @@ describe('projectsReducer', () => {
   it('stores projects on success', () => {
     const state = projectsReducer(
       { ...initialProjectsState, loading: true },
-      loadProjectsSuccess({ projects: [project] }),
+      loadProjectsSuccess({ projects: [project], hasMore: false, nextOffset: 1 }),
     );
 
     expect(state.projects).toEqual([project]);
     expect(state.loading).toBe(false);
-  });
-
-  it('stores admin projects on batch', () => {
-    const state = projectsReducer(
-      initialProjectsState,
-      loadAdminProjectsBatch({ offset: 10, accumulatedProjects: [project] }),
-    );
-
-    expect(state.adminProjects).toEqual([project]);
-    expect(state.loading).toBe(true);
+    expect(state.hasMore).toBe(false);
   });
 
   it('stores summary on success', () => {
@@ -153,23 +146,42 @@ describe('projectsReducer', () => {
     expect(done.billing).toBe(false);
   });
 
-  it('stores projects batch and admin batch', () => {
-    const projectsBatch = projectsReducer(
-      initialProjectsState,
-      loadProjectsBatch({ offset: 10, accumulatedProjects: [project] }),
+  it('appends on load more success', () => {
+    const more = projectsReducer(
+      { ...initialProjectsState, projects: [project], appendLoading: true },
+      loadMoreProjectsSuccess({ projects: [project], hasMore: false, nextOffset: 2 }),
     );
-    const adminBatch = projectsReducer(
-      initialProjectsState,
-      loadAdminProjectsBatch({ offset: 10, accumulatedProjects: [project] }),
+    const adminMore = projectsReducer(
+      { ...initialProjectsState, adminProjects: [project], adminAppendLoading: true },
+      loadMoreAdminProjectsSuccess({ adminProjects: [project], hasMore: false, nextOffset: 2 }),
     );
 
-    expect(projectsBatch.projects).toEqual([project]);
-    expect(adminBatch.adminProjects).toEqual([project]);
+    expect(more.projects).toEqual([project, project]);
+    expect(more.appendLoading).toBe(false);
+    expect(adminMore.adminProjects).toEqual([project, project]);
+    expect(adminMore.adminAppendLoading).toBe(false);
+  });
+
+  it('sets appendLoading on loadMoreProjects and loadMoreAdminProjects', () => {
+    const customer = projectsReducer(
+      { ...initialProjectsState, projects: [project], hasMore: true, nextOffset: 10 },
+      loadMoreProjects({ offset: 10 }),
+    );
+    const admin = projectsReducer(
+      { ...initialProjectsState, adminProjects: [project], adminHasMore: true, adminNextOffset: 10 },
+      loadMoreAdminProjects({ offset: 10 }),
+    );
+
+    expect(customer.appendLoading).toBe(true);
+    expect(admin.adminAppendLoading).toBe(true);
   });
 
   it('loads admin projects and detail', () => {
-    const loadingAdmin = projectsReducer(initialProjectsState, loadAdminProjects());
-    const adminSuccess = projectsReducer(loadingAdmin, loadAdminProjectsSuccess({ adminProjects: [project] }));
+    const loadingAdmin = projectsReducer(initialProjectsState, loadAdminProjects({}));
+    const adminSuccess = projectsReducer(
+      loadingAdmin,
+      loadAdminProjectsSuccess({ adminProjects: [project], hasMore: false, nextOffset: 1 }),
+    );
     const loadingDetail = projectsReducer(adminSuccess, loadAdminProjectDetail({ projectId: 'p-1' }));
     const detailSuccess = projectsReducer(
       loadingDetail,

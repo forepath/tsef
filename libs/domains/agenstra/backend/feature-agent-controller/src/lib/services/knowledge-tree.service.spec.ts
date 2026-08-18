@@ -60,6 +60,10 @@ describe('KnowledgeTreeService', () => {
     reindexPage: jest.fn(),
     deleteForNode: jest.fn(),
   };
+  const searchIndex: any = {
+    upsertSafe: jest.fn().mockResolvedValue(undefined),
+    deleteSafe: jest.fn().mockResolvedValue(undefined),
+  };
   const externalImportSyncMarkerService: Partial<ExternalImportSyncMarkerService> = {
     applyKnowledgeNodeDeleteInTransaction: jest.fn().mockResolvedValue(undefined),
   };
@@ -74,6 +78,7 @@ describe('KnowledgeTreeService', () => {
     ticketBoardRealtime,
     knowledgeBoardRealtime,
     knowledgeEmbeddingIndexService,
+    searchIndex,
     externalImportSyncMarkerService as ExternalImportSyncMarkerService,
   );
 

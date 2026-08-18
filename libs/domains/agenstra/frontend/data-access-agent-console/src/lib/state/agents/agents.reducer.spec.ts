@@ -15,7 +15,9 @@ import {
   loadClientAgentModelsFailure,
   loadClientAgentModelsSuccess,
   loadClientAgents,
-  loadClientAgentsBatch,
+  loadMoreClientAgents,
+  loadMoreClientAgentsFailure,
+  loadMoreClientAgentsSuccess,
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
@@ -75,38 +77,90 @@ describe('agentsReducer', () => {
       const newState = agentsReducer(state, loadClientAgents({ clientId, params: {} }));
 
       expect(newState.loading[clientId]).toBe(true);
-      expect(newState.entities[clientId]).toEqual([mockAgent]);
+      expect(newState.entities[clientId]).toEqual([]);
       expect(newState.errors[clientId]).toBeNull();
-    });
-  });
-
-  describe('loadClientAgentsBatch', () => {
-    it('should accumulate agents and keep loading true', () => {
-      const state: AgentsState = {
-        ...initialAgentsState,
-        loading: { [clientId]: true },
-        entities: { [clientId]: [mockAgent] },
-      };
-      const accumulatedAgents = [mockAgent, mockAgent2];
-      const newState = agentsReducer(state, loadClientAgentsBatch({ clientId, offset: 10, accumulatedAgents }));
-
-      expect(newState.entities[clientId]).toEqual(accumulatedAgents);
-      expect(newState.loading[clientId]).toBe(true);
-      expect(newState.errors[clientId]).toBeNull();
+      expect(newState.hasMore[clientId]).toBe(false);
+      expect(newState.nextOffset[clientId]).toBe(0);
     });
   });
 
   describe('loadClientAgentsSuccess', () => {
-    it('should set agents for the client and set loading to false', () => {
+    it('should set agents for the client, pagination, and set loading to false', () => {
       const state: AgentsState = {
         ...initialAgentsState,
         loading: { [clientId]: true },
       };
-      const newState = agentsReducer(state, loadClientAgentsSuccess({ clientId, agents: [mockAgent, mockAgent2] }));
+      const newState = agentsReducer(
+        state,
+        loadClientAgentsSuccess({
+          clientId,
+          agents: [mockAgent, mockAgent2],
+          hasMore: false,
+          nextOffset: 2,
+        }),
+      );
 
       expect(newState.entities[clientId]).toEqual([mockAgent, mockAgent2]);
       expect(newState.loading[clientId]).toBe(false);
       expect(newState.errors[clientId]).toBeNull();
+      expect(newState.hasMore[clientId]).toBe(false);
+      expect(newState.nextOffset[clientId]).toBe(2);
+    });
+  });
+
+  describe('loadMoreClientAgents', () => {
+    it('should set appendLoading for the client', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        entities: { [clientId]: [mockAgent] },
+        hasMore: { [clientId]: true },
+        appendError: { [clientId]: 'prev' },
+      };
+      const newState = agentsReducer(state, loadMoreClientAgents({ clientId }));
+
+      expect(newState.appendLoading[clientId]).toBe(true);
+      expect(newState.appendError[clientId]).toBeNull();
+    });
+  });
+
+  describe('loadMoreClientAgentsSuccess', () => {
+    it('should append agents and update pagination', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        entities: { [clientId]: [mockAgent] },
+        hasMore: { [clientId]: true },
+        nextOffset: { [clientId]: 1 },
+        appendLoading: { [clientId]: true },
+      };
+      const newState = agentsReducer(
+        state,
+        loadMoreClientAgentsSuccess({
+          clientId,
+          agents: [mockAgent2],
+          hasMore: false,
+          nextOffset: 2,
+        }),
+      );
+
+      expect(newState.entities[clientId]).toEqual([mockAgent, mockAgent2]);
+      expect(newState.hasMore[clientId]).toBe(false);
+      expect(newState.nextOffset[clientId]).toBe(2);
+      expect(newState.appendLoading[clientId]).toBe(false);
+    });
+  });
+
+  describe('loadMoreClientAgentsFailure', () => {
+    it('should set appendError for the client', () => {
+      const state: AgentsState = {
+        ...initialAgentsState,
+        entities: { [clientId]: [mockAgent] },
+        appendLoading: { [clientId]: true },
+      };
+      const newState = agentsReducer(state, loadMoreClientAgentsFailure({ clientId, error: 'Append failed' }));
+
+      expect(newState.appendLoading[clientId]).toBe(false);
+      expect(newState.appendError[clientId]).toBe('Append failed');
+      expect(newState.entities[clientId]).toEqual([mockAgent]);
     });
   });
 
@@ -587,10 +641,26 @@ describe('agentsReducer', () => {
       let state: AgentsState = initialAgentsState;
 
       // Load agents for client 1
-      state = agentsReducer(state, loadClientAgentsSuccess({ clientId, agents: [mockAgent] }));
+      state = agentsReducer(
+        state,
+        loadClientAgentsSuccess({
+          clientId,
+          agents: [mockAgent],
+          hasMore: false,
+          nextOffset: 1,
+        }),
+      );
 
       // Load agents for client 2
-      state = agentsReducer(state, loadClientAgentsSuccess({ clientId: clientId2, agents: [mockAgent2] }));
+      state = agentsReducer(
+        state,
+        loadClientAgentsSuccess({
+          clientId: clientId2,
+          agents: [mockAgent2],
+          hasMore: false,
+          nextOffset: 1,
+        }),
+      );
 
       expect(state.entities[clientId]).toEqual([mockAgent]);
       expect(state.entities[clientId2]).toEqual([mockAgent2]);

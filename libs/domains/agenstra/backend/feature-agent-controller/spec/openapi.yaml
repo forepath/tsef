@@ -506,6 +506,11 @@ paths:
             minimum: 0
             default: 0
           description: Number of rules to skip (pagination)
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Case-insensitive search across pattern, filterType, direction, replaceContent, id
       responses:
         '200':
           description: Rules with per-workspace sync summary
@@ -626,6 +631,11 @@ paths:
             minimum: 0
             default: 0
           description: Number of connections to skip (pagination)
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Case-insensitive search across label, baseUrl, accountEmail, id
       responses:
         '200':
           description: Connections (API tokens never returned)
@@ -750,6 +760,11 @@ paths:
             minimum: 0
             default: 0
           description: Number of configs to skip (pagination)
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Case-insensitive search across provider, importKind, jql, cql, confluenceSpaceKey, id
       responses:
         '200':
           description: Configs
@@ -877,6 +892,11 @@ paths:
           name: clientId
           required: true
           schema: { type: string, format: uuid }
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Case-insensitive search across title, content, nodeType, id
       responses:
         '200':
           description: Knowledge nodes
@@ -1173,6 +1193,11 @@ paths:
           schema:
             type: string
           description: Use literal `null` for root tickets only
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Case-insensitive search across title, content, status, priority, id
       responses:
         '200':
           description: Ticket list
@@ -1683,6 +1708,11 @@ paths:
             type: integer
             minimum: 0
           description: Number of clients to skip (default 0)
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Case-insensitive search across name, description, id
       responses:
         '200':
           description: Array of clients
@@ -1908,6 +1938,11 @@ paths:
             type: integer
             minimum: 0
           description: Number of agents to skip (default 0)
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Case-insensitive search across name, description, agentType, containerType, id
       responses:
         '200':
           description: Array of agents
@@ -3611,6 +3646,11 @@ paths:
             type: integer
             minimum: 0
           description: Number of runs to skip (default 0)
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Case-insensitive search across run id, status, name, description, agentId
       responses:
         '200':
           description: Array of deployment runs
@@ -6897,6 +6937,7 @@ components:
         redis: { $ref: '#/components/schemas/DependencyHealthStatus' }
         queue: { $ref: '#/components/schemas/DependencyHealthStatus' }
         database: { $ref: '#/components/schemas/DependencyHealthStatus' }
+        opensearch: { $ref: '#/components/schemas/DependencyHealthStatus' }
     ChangelogEntryDto:
       type: object
       properties:

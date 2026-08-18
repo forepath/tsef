@@ -1,3 +1,4 @@
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import {
   afterNextRender,
@@ -15,14 +16,15 @@ import {
   viewChild,
   ViewChild,
 } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   BOARD_LANE_STATUSES,
   ProjectMilestonesFacade,
   ProjectTicketsFacade,
+  ProjectTicketsService,
   ProjectTimeEntriesFacade,
-  filterTicketsForGlobalSearch,
+  buildTicketBreadcrumbTitles,
   type BoardLaneStatus,
   type CreateProjectTicketDto,
   type ProjectMilestoneResponse,
@@ -33,7 +35,7 @@ import {
   type ProjectTicketStatus,
   type ProjectTimeEntryResponse,
 } from '@forepath/decabill/frontend/data-access-billing-console';
-import { filter } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 
 import {
   hideBillingModal,
@@ -46,6 +48,7 @@ import {
   getProjectTimeEntryBillingStatusIconClass,
   getProjectTimeEntryBillingStatusLabel,
   getProjectTimeEntryBillingStatusTextClass,
+  getUnavailableLabel,
   isProjectTimeEntryBilled,
 } from '../billing-status-labels';
 import {
@@ -59,6 +62,9 @@ import { projectTicketLaneStatusLabel } from '../project-ticket-lane-status-labe
 const ALL_TICKET_STATUSES: ProjectTicketStatus[] = ['draft', 'todo', 'in_progress', 'prototype', 'done', 'closed'];
 
 const PRIORITY_OPTIONS: ProjectTicketPriority[] = ['low', 'medium', 'high', 'critical'];
+
+/** Fixed row height for CDK virtual scroll (title + meta chips + list-group padding). */
+const PROJECT_BOARD_VIRTUAL_ITEM_SIZE_PX = 88;
 
 interface ProjectTicketDetailSubtaskRow {
   ticket: ProjectTicketResponse;
@@ -82,7 +88,7 @@ function isEditableDomTarget(target: EventTarget | null): boolean {
 @Component({
   selector: 'framework-project-board',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProjectMilestoneSelectComponent, ProjectTicketEditorComponent],
+  imports: [CommonModule, FormsModule, ScrollingModule, ProjectMilestoneSelectComponent, ProjectTicketEditorComponent],
   templateUrl: './project-board.component.html',
   styleUrls: ['./project-board.component.scss'],
 })
@@ -100,11 +106,13 @@ export class ProjectBoardComponent implements OnInit {
 
   private readonly detailTitleInputRef = viewChild<ElementRef<HTMLInputElement>>('detailTitleInput');
   private readonly ticketsFacade = inject(ProjectTicketsFacade);
+  private readonly ticketsService = inject(ProjectTicketsService);
   private readonly milestonesFacade = inject(ProjectMilestonesFacade);
   private readonly timeEntriesFacade = inject(ProjectTimeEntriesFacade);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
+  readonly laneVirtualItemSize = PROJECT_BOARD_VIRTUAL_ITEM_SIZE_PX;
   readonly lanes = BOARD_LANE_STATUSES;
   readonly statusOptions = ALL_TICKET_STATUSES;
   readonly priorityOptions = PRIORITY_OPTIONS;
@@ -129,12 +137,11 @@ export class ProjectBoardComponent implements OnInit {
   readonly draggedTicket = signal<ProjectTicketResponse | null>(null);
   readonly dragOverLane = signal<BoardLaneStatus | null>(null);
   readonly globalSearchQuery = signal('');
+  readonly globalSearchQuery$ = toObservable(this.globalSearchQuery);
+  readonly globalSearchHits = signal<ProjectTicketGlobalSearchHit[]>([]);
   readonly ticketPendingDelete = signal<{ id: string; title: string } | null>(null);
 
   readonly ticketsList = toSignal(this.ticketsFacade.tickets$, { initialValue: [] as ProjectTicketResponse[] });
-  readonly globalSearchHits = computed(() =>
-    filterTicketsForGlobalSearch(this.ticketsList(), this.globalSearchQuery(), this.projectId),
-  );
 
   private lastDetailIdForDraft: string | null = null;
   private detailTitleEditSyncDetailId: string | null = null;
@@ -221,6 +228,33 @@ export class ProjectBoardComponent implements OnInit {
     this.ticketsFacade.loadTickets({ projectId: this.projectId });
     this.milestonesFacade.load(this.projectId);
 
+    this.globalSearchQuery$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((query) => {
+          const trimmed = query.trim();
+
+          if (!trimmed) {
+            return of([] as ProjectTicketGlobalSearchHit[]);
+          }
+
+          return this.ticketsService.list({ projectId: this.projectId, search: trimmed, limit: 50 }).pipe(
+            map((tickets) =>
+              tickets
+                .map((ticket) => ({
+                  ticket,
+                  pathTitles: buildTicketBreadcrumbTitles(this.ticketsList(), ticket.id),
+                }))
+                .sort((a, b) => a.ticket.title.toLowerCase().localeCompare(b.ticket.title.toLowerCase())),
+            ),
+            catchError(() => of([] as ProjectTicketGlobalSearchHit[])),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((hits) => this.globalSearchHits.set(hits));
+
     this.ticketsFacade.selectedTicketId$
       .pipe(
         filter((id): id is string => !!id),
@@ -277,6 +311,10 @@ export class ProjectBoardComponent implements OnInit {
     return list.filter((row) => JSON.stringify(row.ticket).toLowerCase().includes(needle));
   }
 
+  trackLaneRowByTicketId(_index: number, row: ProjectTicketBoardRow): string {
+    return row.ticket.id;
+  }
+
   laneLabel(status: string): string {
     return projectTicketLaneStatusLabel(status);
   }
@@ -286,7 +324,11 @@ export class ProjectBoardComponent implements OnInit {
       return $localize`:@@featureProjectBoard-milestoneNone:None`;
     }
 
-    return this.milestones().find((m) => m.id === milestoneId)?.name ?? milestoneId;
+    return (
+      this.milestones()
+        .find((m) => m.id === milestoneId)
+        ?.name?.trim() || getUnavailableLabel()
+    );
   }
 
   priorityLabel(priority: ProjectTicketPriority): string {

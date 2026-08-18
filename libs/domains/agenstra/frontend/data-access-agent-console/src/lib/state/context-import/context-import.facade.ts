@@ -11,6 +11,8 @@ import {
   deleteAtlassianConnection,
   deleteExternalImportConfig,
   loadAtlassianContextImport,
+  loadAtlassianConnections,
+  loadExternalImportConfigsList,
   runExternalImportConfig,
   testAtlassianConnection,
   updateAtlassianConnection,
@@ -54,8 +56,16 @@ export class AtlassianContextImportFacade {
   readonly lastConnectionTest$: Observable<{ connectionId: string; result: AtlassianConnectionTestResultDto } | null> =
     this.store.select(selectAtlassianLastConnectionTest);
 
-  load(): void {
-    this.store.dispatch(loadAtlassianContextImport());
+  load(params?: { connectionsSearch?: string; configsSearch?: string }): void {
+    this.store.dispatch(loadAtlassianContextImport(params ?? {}));
+  }
+
+  loadConnections(search?: string): void {
+    this.store.dispatch(loadAtlassianConnections({ search: search?.trim() || undefined }));
+  }
+
+  loadConfigs(search?: string): void {
+    this.store.dispatch(loadExternalImportConfigsList({ search: search?.trim() || undefined }));
   }
 
   createConnection(dto: CreateAtlassianSiteConnectionDto): void {

@@ -31,7 +31,7 @@ describe('AdminDatevExportsController', () => {
     const result = await controller.listExports();
 
     expect(result.total).toBe(0);
-    expect(adminService.listExports).toHaveBeenCalledWith(DatevExportScope.TENANT, 20, 0, undefined);
+    expect(adminService.listExports).toHaveBeenCalledWith(DatevExportScope.TENANT, 20, 0, undefined, undefined);
   });
 
   it('returns streamable file on download', async () => {

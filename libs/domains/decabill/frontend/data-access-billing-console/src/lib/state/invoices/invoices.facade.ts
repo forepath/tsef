@@ -109,8 +109,8 @@ export class InvoicesFacade {
     return this.store.select(selectOpenOverdueListError);
   }
 
-  loadOpenOverdueInvoices(options?: { silent?: boolean }): void {
-    this.store.dispatch(loadOpenOverdueInvoices(options?.silent === true));
+  loadOpenOverdueInvoices(options?: { silent?: boolean; search?: string }): void {
+    this.store.dispatch(loadOpenOverdueInvoices({ silent: options?.silent === true, search: options?.search }));
   }
 
   getHistoryList$(): Observable<InvoiceResponse[]> {
@@ -125,8 +125,8 @@ export class InvoicesFacade {
     return this.store.select(selectHistoryListError);
   }
 
-  loadHistoryInvoices(options?: { silent?: boolean }): void {
-    this.store.dispatch(loadHistoryInvoices(options?.silent === true));
+  loadHistoryInvoices(options?: { silent?: boolean; search?: string }): void {
+    this.store.dispatch(loadHistoryInvoices({ silent: options?.silent === true, search: options?.search }));
   }
 
   getInvoicesCountBySubscriptionId$(subscriptionId: string): Observable<number> {

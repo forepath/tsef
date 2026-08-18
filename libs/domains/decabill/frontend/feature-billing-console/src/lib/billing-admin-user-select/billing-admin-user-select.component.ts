@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, input, model, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, input, model, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import type { UserResponseDto } from '@forepath/identity/frontend';
-
-import { filterBillingAdminUsers } from '../billing-user-select';
+import { AuthService, type UserResponseDto } from '@forepath/identity/frontend';
+import { catchError, debounceTime, distinctUntilChanged, of, skip, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'framework-billing-admin-user-select',
@@ -13,7 +13,8 @@ import { filterBillingAdminUsers } from '../billing-user-select';
   styleUrls: ['./billing-admin-user-select.component.scss'],
 })
 export class BillingAdminUserSelectComponent {
-  readonly users = input.required<UserResponseDto[]>();
+  /** Optional cache for resolving the selected user label (e.g. full user list on parent page). */
+  readonly users = input<UserResponseDto[]>([]);
   readonly selectedUserId = model<string>('');
   readonly disabled = input(false);
   readonly required = input(false);
@@ -22,17 +23,53 @@ export class BillingAdminUserSelectComponent {
   readonly showSuggestionsOnFocus = input(false);
   readonly suggestionLimit = input(20);
 
-  readonly searchQuery = signal('');
-  readonly suggestionsOpen = signal(false);
+  private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly filteredUsers = computed(() =>
-    filterBillingAdminUsers(this.users(), this.searchQuery(), this.suggestionLimit()),
+  readonly searchQuery = signal('');
+  readonly searchQuery$ = toObservable(this.searchQuery);
+  readonly suggestionsOpen = signal(false);
+  readonly searchResults = signal<UserResponseDto[]>([]);
+  readonly loading = signal(false);
+
+  readonly filteredUsers = computed(() => this.searchResults());
+
+  readonly selectedUser = computed(
+    () =>
+      this.users().find((user) => user.id === this.selectedUserId()) ??
+      this.searchResults().find((user) => user.id === this.selectedUserId()) ??
+      null,
   );
 
-  readonly selectedUser = computed(() => this.users().find((user) => user.id === this.selectedUserId()) ?? null);
+  constructor() {
+    this.searchQuery$
+      .pipe(
+        skip(1),
+        debounceTime(300),
+        distinctUntilChanged(),
+        tap(() => this.loading.set(true)),
+        switchMap((query) => {
+          const term = query.trim();
+
+          if (!term) {
+            return of([] as UserResponseDto[]);
+          }
+
+          return this.authService
+            .listUsers({ search: term, limit: this.suggestionLimit() })
+            .pipe(catchError(() => of([] as UserResponseDto[])));
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((users) => {
+        this.searchResults.set(users);
+        this.loading.set(false);
+      });
+  }
 
   reset(): void {
     this.searchQuery.set('');
+    this.searchResults.set([]);
     this.suggestionsOpen.set(false);
   }
 

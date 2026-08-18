@@ -7,8 +7,10 @@ import {
   Header,
   NotFoundException,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   Res,
   StreamableFile,
@@ -74,28 +76,46 @@ export class InvoicesController {
 
   @RequireScopes('invoices:read')
   @Get('open-overdue')
-  async listOpenOverdue(@Req() req?: RequestWithUser): Promise<InvoiceResponseDto[]> {
+  async listOpenOverdue(
+    @Req() req?: RequestWithUser,
+    @Query('search') search?: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+  ): Promise<InvoiceResponseDto[]> {
     const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
 
     if (!userInfo.userId) {
       throw new BadRequestException('User not authenticated');
     }
 
-    const rows = await this.invoicesRepository.findOpenOverdueByUserId(userInfo.userId);
+    const rows = await this.invoicesRepository.findOpenOverdueByUserId(userInfo.userId, {
+      search,
+      limit,
+      offset,
+    });
 
     return rows.map((row) => this.invoiceService.mapToResponse(row, row.subscription?.number));
   }
 
   @RequireScopes('invoices:read')
   @Get('history')
-  async listHistory(@Req() req?: RequestWithUser): Promise<InvoiceResponseDto[]> {
+  async listHistory(
+    @Req() req?: RequestWithUser,
+    @Query('search') search?: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+  ): Promise<InvoiceResponseDto[]> {
     const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
 
     if (!userInfo.userId) {
       throw new BadRequestException('User not authenticated');
     }
 
-    const rows = await this.invoicesRepository.findHistoryByUserId(userInfo.userId);
+    const rows = await this.invoicesRepository.findHistoryByUserId(userInfo.userId, {
+      search,
+      limit,
+      offset,
+    });
 
     return rows.map((row) => this.invoiceService.mapToResponse(row, row.subscription?.number));
   }

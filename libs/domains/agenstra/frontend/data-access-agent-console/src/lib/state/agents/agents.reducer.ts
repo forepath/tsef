@@ -17,10 +17,12 @@ import {
   loadClientAgentModelsFailure,
   loadClientAgentModelsSuccess,
   loadClientAgents,
-  loadClientAgentsBatch,
   loadClientAgentsFailure,
   loadClientAgentsSuccess,
   loadClientAgentSuccess,
+  loadMoreClientAgents,
+  loadMoreClientAgentsFailure,
+  loadMoreClientAgentsSuccess,
   restartClientAgent,
   restartClientAgentFailure,
   restartClientAgentSuccess,
@@ -55,6 +57,11 @@ export interface AgentsState {
   restarting: Record<string, boolean>;
   // Errors per client
   errors: Record<string, string | null>;
+  hasMore: Record<string, boolean>;
+  nextOffset: Record<string, number>;
+  search: Record<string, string | null>;
+  appendLoading: Record<string, boolean>;
+  appendError: Record<string, string | null>;
   /** Models per `clientId:agentId` (from list models endpoint). */
   agentModels: Record<string, AgentModelsMap>;
   loadingAgentModels: Record<string, boolean>;
@@ -75,6 +82,11 @@ export const initialAgentsState: AgentsState = {
   stopping: {},
   restarting: {},
   errors: {},
+  hasMore: {},
+  nextOffset: {},
+  search: {},
+  appendLoading: {},
+  appendError: {},
   agentModels: {},
   loadingAgentModels: {},
   agentModelsErrors: {},
@@ -180,33 +192,57 @@ function updateClientState(
 export const agentsReducer = createReducer(
   initialAgentsState,
   // Load Client Agents
-  on(loadClientAgents, (state, { clientId }) =>
-    updateClientState(state, clientId, (clientState) => ({
+  on(loadClientAgents, (state, { clientId, params }) => ({
+    ...updateClientState(state, clientId, (clientState) => ({
       ...clientState,
+      agents: [],
       loading: true,
       error: null,
     })),
-  ),
-  on(loadClientAgentsBatch, (state, { clientId, accumulatedAgents }) =>
-    updateClientState(state, clientId, () => ({
-      agents: accumulatedAgents,
-      loading: true, // Keep loading true during batch loading
-      error: null,
-    })),
-  ),
-  on(loadClientAgentsSuccess, (state, { clientId, agents }) =>
-    updateClientState(state, clientId, () => ({
+    hasMore: { ...state.hasMore, [clientId]: false },
+    nextOffset: { ...state.nextOffset, [clientId]: 0 },
+    search: { ...state.search, [clientId]: params?.search?.trim() ? params.search.trim() : null },
+    appendLoading: { ...state.appendLoading, [clientId]: false },
+    appendError: { ...state.appendError, [clientId]: null },
+  })),
+  on(loadClientAgentsSuccess, (state, { clientId, agents, hasMore, nextOffset }) => ({
+    ...updateClientState(state, clientId, () => ({
       agents,
       loading: false,
       error: null,
     })),
-  ),
-  on(loadClientAgentsFailure, (state, { clientId, error }) =>
-    updateClientState(state, clientId, () => ({
+    hasMore: { ...state.hasMore, [clientId]: hasMore },
+    nextOffset: { ...state.nextOffset, [clientId]: nextOffset },
+    appendLoading: { ...state.appendLoading, [clientId]: false },
+    appendError: { ...state.appendError, [clientId]: null },
+  })),
+  on(loadClientAgentsFailure, (state, { clientId, error }) => ({
+    ...updateClientState(state, clientId, () => ({
       loading: false,
       error,
     })),
-  ),
+    hasMore: { ...state.hasMore, [clientId]: false },
+    appendLoading: { ...state.appendLoading, [clientId]: false },
+  })),
+  on(loadMoreClientAgents, (state, { clientId }) => ({
+    ...state,
+    appendLoading: { ...state.appendLoading, [clientId]: true },
+    appendError: { ...state.appendError, [clientId]: null },
+  })),
+  on(loadMoreClientAgentsSuccess, (state, { clientId, agents, hasMore, nextOffset }) => ({
+    ...updateClientState(state, clientId, (clientState) => ({
+      agents: [...clientState.agents, ...agents],
+    })),
+    hasMore: { ...state.hasMore, [clientId]: hasMore },
+    nextOffset: { ...state.nextOffset, [clientId]: nextOffset },
+    appendLoading: { ...state.appendLoading, [clientId]: false },
+    appendError: { ...state.appendError, [clientId]: null },
+  })),
+  on(loadMoreClientAgentsFailure, (state, { clientId, error }) => ({
+    ...state,
+    appendLoading: { ...state.appendLoading, [clientId]: false },
+    appendError: { ...state.appendError, [clientId]: error },
+  })),
   // Load Client Agent by ID
   on(loadClientAgent, (state, { clientId }) =>
     updateClientState(state, clientId, (clientState) => ({

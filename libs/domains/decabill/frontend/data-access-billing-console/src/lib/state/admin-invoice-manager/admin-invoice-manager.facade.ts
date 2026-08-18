@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { take } from 'rxjs';
 
 import type {
   CreateManualInvoiceDto,
@@ -16,16 +17,21 @@ import {
   deleteManualInvoice,
   issueManualInvoice,
   loadAdminInvoiceManager,
+  loadMoreAdminInvoiceManager,
   updateManualInvoice,
 } from './admin-invoice-manager.actions';
 import {
   selectAdminInvoiceManagerActionLoading,
+  selectAdminInvoiceManagerAppendError,
+  selectAdminInvoiceManagerAppendLoading,
   selectAdminInvoiceManagerCreating,
   selectAdminInvoiceManagerDeleting,
   selectAdminInvoiceManagerError,
+  selectAdminInvoiceManagerHasMore,
   selectAdminInvoiceManagerInvoices,
   selectAdminInvoiceManagerIssuing,
   selectAdminInvoiceManagerLoading,
+  selectAdminInvoiceManagerState,
   selectAdminInvoiceManagerUpdating,
 } from './admin-invoice-manager.selectors';
 
@@ -41,9 +47,29 @@ export class AdminInvoiceManagerFacade {
   readonly deleting$ = this.store.select(selectAdminInvoiceManagerDeleting);
   readonly actionLoading$ = this.store.select(selectAdminInvoiceManagerActionLoading);
   readonly error$ = this.store.select(selectAdminInvoiceManagerError);
+  readonly hasMore$ = this.store.select(selectAdminInvoiceManagerHasMore);
+  readonly appendLoading$ = this.store.select(selectAdminInvoiceManagerAppendLoading);
+  readonly appendError$ = this.store.select(selectAdminInvoiceManagerAppendError);
 
-  loadInvoices(): void {
-    this.store.dispatch(loadAdminInvoiceManager());
+  loadInvoices(params?: { search?: string; userId?: string }): void {
+    this.store.dispatch(loadAdminInvoiceManager(params ?? {}));
+  }
+
+  loadMore(): void {
+    this.store
+      .select(selectAdminInvoiceManagerState)
+      .pipe(take(1))
+      .subscribe((state) => {
+        if (!state.hasMore || state.appendLoading || state.loading) return;
+
+        this.store.dispatch(
+          loadMoreAdminInvoiceManager({
+            offset: state.nextOffset,
+            search: state.search ?? undefined,
+            userId: state.userId ?? undefined,
+          }),
+        );
+      });
   }
 
   createManualInvoice(dto: CreateManualInvoiceDto): void {

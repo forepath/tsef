@@ -15,6 +15,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -48,6 +49,14 @@ import {
 } from '../entities/ticket.enums';
 import { ClientsRepository } from '../repositories/clients.repository';
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
+import { mapTicketToSearchDocument } from '../search/agenstra-search-document.mapper';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
+import {
+  applyAgenstraSearchIlike,
+  hydrateEntitiesBySearchIds,
+  sanitizeListSearch,
+  tryAgenstraSearchIds,
+} from '../search/agenstra-search-list.util';
 import { buildSpecificationSubtaskSeeds } from '../utils/specification-ticket-subtasks.utils';
 import { derivePatchActionType, type FieldChange } from '../utils/ticket-activity-payload.utils';
 import {
@@ -73,10 +82,13 @@ export interface TicketListQuery {
   clientId?: string;
   status?: TicketStatus;
   parentId?: string | null;
+  search?: string;
 }
 
 @Injectable()
 export class TicketsService {
+  private readonly logger = new Logger(TicketsService.name);
+
   constructor(
     @InjectRepository(TicketEntity)
     private readonly ticketRepo: Repository<TicketEntity>,
@@ -99,6 +111,7 @@ export class TicketsService {
     @Inject(forwardRef(() => ExternalImportSyncMarkerService))
     private readonly externalImportSyncMarkerService: ExternalImportSyncMarkerService,
     private readonly notificationPublisher: AgenstraNotificationPublisher,
+    private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
   /**
@@ -274,38 +287,74 @@ export class TicketsService {
     return out;
   }
 
+  private filterTicketRows(rows: TicketEntity[], query: TicketListQuery): TicketEntity[] {
+    let filtered = rows;
+
+    if (query.status) {
+      filtered = filtered.filter((row) => row.status === query.status);
+    }
+
+    if (query.parentId === null) {
+      filtered = filtered.filter((row) => row.parentId == null);
+    } else if (query.parentId !== undefined) {
+      filtered = filtered.filter((row) => row.parentId === query.parentId);
+    }
+
+    return filtered;
+  }
+
+  private async resolveTicketSearchClientIds(
+    accessible: string[] | null,
+    clientId?: string,
+  ): Promise<string[] | undefined> {
+    if (clientId) {
+      return [clientId];
+    }
+
+    if (accessible !== null) {
+      return accessible;
+    }
+
+    return await this.clientsRepository.findAllIds();
+  }
+
   async listTickets(query: TicketListQuery, req?: RequestWithUser): Promise<TicketResponseDto[]> {
     const accessible = await this.getAccessibleClientIds(req);
-    const qb = this.ticketRepo.createQueryBuilder('t');
 
     if (accessible !== null && accessible.length === 0) {
       return [];
     }
 
-    if (accessible !== null) {
-      qb.andWhere('t.client_id IN (:...ids)', { ids: accessible });
+    if (query.clientId && accessible !== null && !accessible.includes(query.clientId)) {
+      throw new ForbiddenException('You do not have access to this client');
     }
 
-    if (query.clientId) {
-      if (accessible !== null && !accessible.includes(query.clientId)) {
-        throw new ForbiddenException('You do not have access to this client');
+    const sanitized = sanitizeListSearch(query.search);
+    let rows: TicketEntity[];
+
+    if (sanitized) {
+      const searchClientIds = await this.resolveTicketSearchClientIds(accessible, query.clientId);
+      const openSearchIds = await tryAgenstraSearchIds(
+        this.searchIndex,
+        {
+          entityType: 'tickets',
+          query: sanitized,
+          clientIds: searchClientIds,
+          limit: 10_000,
+          offset: 0,
+        },
+        this.logger,
+      );
+      const hydrated = await hydrateEntitiesBySearchIds(this.ticketRepo, openSearchIds);
+
+      if (hydrated) {
+        rows = this.filterTicketRows(hydrated.items, query);
+      } else {
+        rows = await this.loadTicketsWithSqlSearch(accessible, query, sanitized);
       }
-
-      qb.andWhere('t.client_id = :clientId', { clientId: query.clientId });
+    } else {
+      rows = await this.loadTicketsWithSqlSearch(accessible, query);
     }
-
-    if (query.status) {
-      qb.andWhere('t.status = :status', { status: query.status });
-    }
-
-    if (query.parentId === null) {
-      qb.andWhere('t.parent_id IS NULL');
-    } else if (query.parentId !== undefined) {
-      qb.andWhere('t.parent_id = :parentId', { parentId: query.parentId });
-    }
-
-    qb.orderBy('t.updated_at', 'DESC');
-    const rows = await qb.getMany();
 
     if (rows.length === 0) {
       return [];
@@ -320,6 +369,40 @@ export class TicketsService {
     const eligMap = await this.loadAutomationEligibleByTicketIds(allForAgg.map((t) => t.id));
 
     return Promise.all(rows.map((row) => this.mapTicket(row, eligMap.get(row.id) ?? false, descMap)));
+  }
+
+  private async loadTicketsWithSqlSearch(
+    accessible: string[] | null,
+    query: TicketListQuery,
+    search?: string,
+  ): Promise<TicketEntity[]> {
+    const qb = this.ticketRepo.createQueryBuilder('t');
+
+    if (accessible !== null) {
+      qb.andWhere('t.client_id IN (:...ids)', { ids: accessible });
+    }
+
+    if (query.clientId) {
+      qb.andWhere('t.client_id = :clientId', { clientId: query.clientId });
+    }
+
+    if (query.status) {
+      qb.andWhere('t.status = :status', { status: query.status });
+    }
+
+    if (query.parentId === null) {
+      qb.andWhere('t.parent_id IS NULL');
+    } else if (query.parentId !== undefined) {
+      qb.andWhere('t.parent_id = :parentId', { parentId: query.parentId });
+    }
+
+    if (search) {
+      applyAgenstraSearchIlike(qb, 'tickets', 't', search);
+    }
+
+    qb.orderBy('t.updated_at', 'DESC');
+
+    return await qb.getMany();
   }
 
   async findOne(id: string, includeDescendants: boolean, req?: RequestWithUser): Promise<TicketResponseDto> {
@@ -491,6 +574,7 @@ export class TicketsService {
 
       this.boardEmitTicketUpsert(ticketDto.clientId, ticketDto);
       this.notificationPublisher.publishTicket('ticket.created', ticketDto);
+      void this.searchIndex.upsertSafe('tickets', mapTicketToSearchDocument(allRows[i]));
       const activityRows = await this.activityRepo.find({
         where: { ticketId: allRows[i].id },
         order: { occurredAt: 'DESC' },
@@ -627,6 +711,7 @@ export class TicketsService {
 
     this.boardEmitTicketUpsert(mapped.clientId, mapped);
     this.notificationPublisher.publishTicket('ticket.updated', mapped);
+    void this.searchIndex.upsertSafe('tickets', mapTicketToSearchDocument(refreshed));
     const activityRows = await this.activityRepo.find({
       where: { ticketId: id },
       order: { occurredAt: 'DESC' },
@@ -771,6 +856,7 @@ export class TicketsService {
     });
     this.notificationPublisher.publishTicket('ticket.deleted', mapped);
     this.boardEmitTicketRemoved(clientId, id);
+    void this.searchIndex.deleteSafe('tickets', id);
   }
 
   /**

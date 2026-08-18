@@ -14,7 +14,7 @@ export const loadBackordersFailure = createAction('[Backorders] Load Backorders 
 
 export const loadBackordersBatch = createAction(
   '[Backorders] Load Backorders Batch',
-  props<{ offset: number; accumulatedBackorders: BackorderResponse[] }>(),
+  props<{ offset: number; accumulatedBackorders: BackorderResponse[]; params?: ListParams }>(),
 );
 
 // Retry Backorder Actions

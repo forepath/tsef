@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { take } from 'rxjs';
 
 import type { BillProjectTimeDto, CreateAdminProjectDto, UpdateAdminProjectDto } from '../../types/projects.types';
 
@@ -10,22 +11,34 @@ import {
   deleteAdminProject,
   loadAdminProjectDetail,
   loadAdminProjects,
+  loadMoreAdminProjects,
+  loadMoreProjects,
   loadProjectDetail,
   loadProjects,
+  loadProjectsCatalogSummary,
   loadProjectSummary,
   updateAdminProject,
 } from './projects.actions';
 import {
   selectAdminProjects,
+  selectAdminProjectsAppendError,
+  selectAdminProjectsAppendLoading,
+  selectAdminProjectsHasMore,
   selectCustomerProjects,
   selectProjectSummary,
+  selectProjectsAppendError,
+  selectProjectsAppendLoading,
   selectProjectsBilling,
+  selectProjectsCatalogSummary,
+  selectProjectsCatalogSummaryLoading,
   selectProjectsCreating,
   selectProjectsDeleting,
   selectProjectsError,
+  selectProjectsHasMore,
   selectProjectsLoading,
   selectProjectsLoadingDetail,
   selectProjectsLoadingSummary,
+  selectProjectsState,
   selectProjectsUpdating,
   selectSelectedProject,
 } from './projects.selectors';
@@ -38,6 +51,8 @@ export class ProjectsFacade {
   readonly adminProjects$ = this.store.select(selectAdminProjects);
   readonly selectedProject$ = this.store.select(selectSelectedProject);
   readonly summary$ = this.store.select(selectProjectSummary);
+  readonly catalogSummary$ = this.store.select(selectProjectsCatalogSummary);
+  readonly catalogSummaryLoading$ = this.store.select(selectProjectsCatalogSummaryLoading);
   readonly loading$ = this.store.select(selectProjectsLoading);
   readonly loadingDetail$ = this.store.select(selectProjectsLoadingDetail);
   readonly loadingSummary$ = this.store.select(selectProjectsLoadingSummary);
@@ -46,9 +61,35 @@ export class ProjectsFacade {
   readonly deleting$ = this.store.select(selectProjectsDeleting);
   readonly billing$ = this.store.select(selectProjectsBilling);
   readonly error$ = this.store.select(selectProjectsError);
+  readonly hasMore$ = this.store.select(selectProjectsHasMore);
+  readonly appendLoading$ = this.store.select(selectProjectsAppendLoading);
+  readonly appendError$ = this.store.select(selectProjectsAppendError);
+  readonly adminHasMore$ = this.store.select(selectAdminProjectsHasMore);
+  readonly adminAppendLoading$ = this.store.select(selectAdminProjectsAppendLoading);
+  readonly adminAppendError$ = this.store.select(selectAdminProjectsAppendError);
 
-  loadProjects(): void {
-    this.store.dispatch(loadProjects());
+  loadProjects(params?: { search?: string }): void {
+    this.store.dispatch(loadProjects({ search: params?.search }));
+  }
+
+  loadCatalogSummary(): void {
+    this.store.dispatch(loadProjectsCatalogSummary());
+  }
+
+  loadMore(): void {
+    this.store
+      .select(selectProjectsState)
+      .pipe(take(1))
+      .subscribe((state) => {
+        if (!state.hasMore || state.appendLoading || state.loading) return;
+
+        this.store.dispatch(
+          loadMoreProjects({
+            offset: state.nextOffset,
+            search: state.customerSearch ?? undefined,
+          }),
+        );
+      });
   }
 
   loadProjectDetail(projectId: string): void {
@@ -59,8 +100,25 @@ export class ProjectsFacade {
     this.store.dispatch(loadProjectSummary({ projectId }));
   }
 
-  loadAdminProjects(): void {
-    this.store.dispatch(loadAdminProjects());
+  loadAdminProjects(params?: { search?: string; userId?: string }): void {
+    this.store.dispatch(loadAdminProjects(params ?? {}));
+  }
+
+  loadMoreAdminProjects(): void {
+    this.store
+      .select(selectProjectsState)
+      .pipe(take(1))
+      .subscribe((state) => {
+        if (!state.adminHasMore || state.adminAppendLoading || state.loading) return;
+
+        this.store.dispatch(
+          loadMoreAdminProjects({
+            offset: state.adminNextOffset,
+            search: state.adminSearch ?? undefined,
+            userId: state.adminUserId ?? undefined,
+          }),
+        );
+      });
   }
 
   loadAdminProjectDetail(projectId: string): void {

@@ -65,7 +65,7 @@ describe('resolveProjectMilestoneLabel', () => {
     expect(resolveProjectMilestoneLabel('m1', milestones)).toBe('Alpha release');
   });
 
-  it('falls back to id when milestone is unknown', () => {
-    expect(resolveProjectMilestoneLabel('unknown', milestones)).toBe('unknown');
+  it('falls back to unavailable when milestone is unknown', () => {
+    expect(resolveProjectMilestoneLabel('unknown', milestones)).toBe('N/A');
   });
 });

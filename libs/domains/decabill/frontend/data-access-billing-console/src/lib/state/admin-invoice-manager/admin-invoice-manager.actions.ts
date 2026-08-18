@@ -9,17 +9,28 @@ import type {
   UpdateManualInvoiceDto,
 } from '../../types/billing.types';
 
-export const loadAdminInvoiceManager = createAction('[AdminInvoiceManager] Load Invoices');
-export const loadAdminInvoiceManagerBatch = createAction(
-  '[AdminInvoiceManager] Load Invoices Batch',
-  props<{ offset: number; accumulatedInvoices: AdminInvoiceListItem[] }>(),
+export const loadAdminInvoiceManager = createAction(
+  '[AdminInvoiceManager] Load Invoices',
+  props<{ search?: string; userId?: string }>(),
 );
 export const loadAdminInvoiceManagerSuccess = createAction(
   '[AdminInvoiceManager] Load Invoices Success',
-  props<{ invoices: AdminInvoiceListItem[] }>(),
+  props<{ invoices: AdminInvoiceListItem[]; hasMore: boolean; nextOffset: number }>(),
 );
 export const loadAdminInvoiceManagerFailure = createAction(
   '[AdminInvoiceManager] Load Invoices Failure',
+  props<{ error: string }>(),
+);
+export const loadMoreAdminInvoiceManager = createAction(
+  '[AdminInvoiceManager] Load More Invoices',
+  props<{ offset: number; search?: string; userId?: string }>(),
+);
+export const loadMoreAdminInvoiceManagerSuccess = createAction(
+  '[AdminInvoiceManager] Load More Invoices Success',
+  props<{ invoices: AdminInvoiceListItem[]; hasMore: boolean; nextOffset: number }>(),
+);
+export const loadMoreAdminInvoiceManagerFailure = createAction(
+  '[AdminInvoiceManager] Load More Invoices Failure',
   props<{ error: string }>(),
 );
 

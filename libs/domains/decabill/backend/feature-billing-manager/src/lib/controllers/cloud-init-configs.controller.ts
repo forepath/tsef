@@ -34,8 +34,9 @@ export class CloudInitConfigsController {
   async list(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<CloudInitConfigResponseDto[]> {
-    const rows = await this.cloudInitConfigsRepository.findAll(limit ?? 10, offset ?? 0);
+    const rows = await this.cloudInitConfigsRepository.findAll(limit ?? 10, offset ?? 0, search);
 
     return rows.map((row) => this.mapToResponse(row, false));
   }

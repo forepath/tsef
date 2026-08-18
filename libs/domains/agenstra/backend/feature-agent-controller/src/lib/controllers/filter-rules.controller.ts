@@ -43,10 +43,11 @@ export class FilterRulesController {
     @Req() req: RequestWithUser,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<FilterRuleResponseDto[]> {
     this.assertAdmin(req);
 
-    return await this.filterRulesService.findAll(limit ?? 10, offset ?? 0);
+    return await this.filterRulesService.findAll(limit ?? 10, offset ?? 0, search);
   }
 
   @Get(':id')

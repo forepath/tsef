@@ -9,10 +9,13 @@ import type {
   CustomerProfileResponse,
 } from '../../types/billing.types';
 
-export const loadAdminCustomerProfiles = createAction('[AdminCustomerProfiles] Load Profiles');
+export const loadAdminCustomerProfiles = createAction(
+  '[AdminCustomerProfiles] Load Profiles',
+  props<{ search?: string }>(),
+);
 export const loadAdminCustomerProfilesBatch = createAction(
   '[AdminCustomerProfiles] Load Profiles Batch',
-  props<{ offset: number; accumulatedProfiles: AdminCustomerProfileListItem[] }>(),
+  props<{ offset: number; accumulatedProfiles: AdminCustomerProfileListItem[]; search?: string }>(),
 );
 export const loadAdminCustomerProfilesSuccess = createAction(
   '[AdminCustomerProfiles] Load Profiles Success',

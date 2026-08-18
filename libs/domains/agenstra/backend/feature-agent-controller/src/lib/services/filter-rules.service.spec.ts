@@ -9,6 +9,7 @@ import { ClientsRepository } from '../repositories/clients.repository';
 
 import { AgentManagerFilterRulesClientService } from './agent-manager-filter-rules-client.service';
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 import { FilterRulesService } from './filter-rules.service';
 
@@ -19,6 +20,7 @@ describe('FilterRulesService', () => {
     create: jest.fn(),
     save: jest.fn(),
     remove: jest.fn(),
+    createQueryBuilder: jest.fn(),
   };
   const linksRepo = { save: jest.fn(), delete: jest.fn() };
   const targetsRepo = {
@@ -34,10 +36,17 @@ describe('FilterRulesService', () => {
   };
   const clientsRepository = { findAllIds: jest.fn().mockResolvedValue(['c1']), findByIdOrThrow: jest.fn() };
   const amClient = { deleteRule: jest.fn().mockResolvedValue(undefined) };
+  const searchIndex = {
+    upsertSafe: jest.fn().mockResolvedValue(undefined),
+    deleteSafe: jest.fn().mockResolvedValue(undefined),
+    isEnabled: jest.fn().mockReturnValue(false),
+    searchIds: jest.fn(),
+  };
   let service: FilterRulesService;
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    searchIndex.isEnabled.mockReturnValue(false);
     const m = await Test.createTestingModule({
       providers: [
         FilterRulesService,
@@ -54,6 +63,10 @@ describe('FilterRulesService', () => {
             publishTicket: jest.fn(),
             publish: jest.fn(),
           },
+        },
+        {
+          provide: AgenstraSearchIndexService,
+          useValue: searchIndex,
         },
       ],
     }).compile();
@@ -79,6 +92,47 @@ describe('FilterRulesService', () => {
       expect.objectContaining({
         take: 25,
         skip: 5,
+      }),
+    );
+  });
+
+  it('findAll uses searchIds when OpenSearch is enabled', async () => {
+    searchIndex.isEnabled.mockReturnValue(true);
+    searchIndex.searchIds
+      .mockResolvedValueOnce({ ids: ['rule-1'], total: 1 })
+      .mockResolvedValueOnce({ ids: [], total: 0 });
+    rulesRepo.find.mockResolvedValue([
+      {
+        id: 'rule-1',
+        pattern: 'foo',
+        regexFlags: 'g',
+        direction: 'incoming',
+        filterType: 'none',
+        replaceContent: null,
+        priority: 0,
+        enabled: true,
+        isGlobal: true,
+        clientLinks: [],
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      },
+    ]);
+    targetsRepo.find.mockResolvedValue([]);
+
+    await service.findAll(10, 0, 'foo');
+
+    expect(searchIndex.searchIds).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityType: 'filter-rules',
+        query: 'foo',
+        clientIds: ['c1'],
+      }),
+    );
+    expect(searchIndex.searchIds).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityType: 'filter-rules',
+        query: 'foo',
+        instanceScoped: true,
       }),
     );
   });

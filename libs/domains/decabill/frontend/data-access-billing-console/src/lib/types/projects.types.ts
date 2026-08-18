@@ -29,6 +29,12 @@ export interface PaginatedProjectsResponse {
   offset: number;
 }
 
+/** Catalog counts for the current user (independent of list pagination / search). */
+export interface ProjectsCatalogSummaryResponse {
+  total: number;
+  active: number;
+}
+
 export interface AdminProjectListItem extends ProjectListItem {
   userEmail?: string;
 }
@@ -191,6 +197,13 @@ export interface ListProjectTicketsParams {
   projectId: string;
   status?: ProjectTicketStatus;
   parentId?: string | null;
+  search?: string;
+  limit?: number;
+}
+
+export interface ListProjectMilestonesParams {
+  search?: string;
+  limit?: number;
 }
 
 export interface ProjectMilestoneResponse {

@@ -4,6 +4,7 @@ export type FilterRuleType = 'none' | 'filter' | 'drop';
 export interface ListFilterRulesParams {
   limit?: number;
   offset?: number;
+  search?: string;
 }
 
 export interface FilterRuleSyncSummary {

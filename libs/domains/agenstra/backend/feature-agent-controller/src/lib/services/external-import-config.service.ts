@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -8,12 +8,24 @@ import { UpdateExternalImportConfigDto } from '../dto/context-import/update-exte
 import { ExternalImportConfigEntity } from '../entities/external-import-config.entity';
 import { ExternalImportKind, ExternalImportProviderId } from '../entities/external-import.enums';
 import { TicketStatus } from '../entities/ticket.enums';
+import { ClientsRepository } from '../repositories/clients.repository';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
+import {
+  applyAgenstraSearchIlike,
+  hydrateEntitiesBySearchIds,
+  sanitizeListSearch,
+  tryAgenstraSearchIds,
+} from '../search/agenstra-search-list.util';
 
 @Injectable()
 export class ExternalImportConfigService {
+  private readonly logger = new Logger(ExternalImportConfigService.name);
+
   constructor(
     @InjectRepository(ExternalImportConfigEntity)
     private readonly repo: Repository<ExternalImportConfigEntity>,
+    private readonly clientsRepository: ClientsRepository,
+    private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
   private map(row: ExternalImportConfigEntity): ExternalImportConfigResponseDto {
@@ -65,12 +77,41 @@ export class ExternalImportConfigService {
     }
   }
 
-  async findAll(limit = 10, offset = 0): Promise<ExternalImportConfigResponseDto[]> {
-    const rows = await this.repo.find({
-      order: { createdAt: 'DESC' },
-      take: limit,
-      skip: offset,
-    });
+  async findAll(limit = 10, offset = 0, search?: string): Promise<ExternalImportConfigResponseDto[]> {
+    const sanitized = sanitizeListSearch(search);
+    let rows: ExternalImportConfigEntity[];
+
+    if (sanitized) {
+      const clientIds = await this.clientsRepository.findAllIds();
+      const openSearchIds = await tryAgenstraSearchIds(
+        this.searchIndex,
+        {
+          entityType: 'import-configs',
+          query: sanitized,
+          clientIds,
+          limit,
+          offset,
+        },
+        this.logger,
+      );
+      const hydrated = await hydrateEntitiesBySearchIds(this.repo, openSearchIds);
+
+      if (hydrated) {
+        rows = hydrated.items;
+      } else {
+        const qb = this.repo.createQueryBuilder('c').orderBy('c.created_at', 'DESC');
+
+        applyAgenstraSearchIlike(qb, 'import-configs', 'c', sanitized);
+        qb.take(limit).skip(offset);
+        rows = await qb.getMany();
+      }
+    } else {
+      rows = await this.repo.find({
+        order: { createdAt: 'DESC' },
+        take: limit,
+        skip: offset,
+      });
+    }
 
     return rows.map((r) => this.map(r));
   }

@@ -12,6 +12,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import axios, { AxiosError } from 'axios';
 
 import { ClientsRepository } from '../repositories/clients.repository';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 import { ClientAgentDeploymentsProxyService } from './client-agent-deployments-proxy.service';
 import { ClientsService } from './clients.service';
@@ -61,6 +62,10 @@ describe('ClientAgentDeploymentsProxyService', () => {
   const mockClientsRepository = {
     findByIdOrThrow: jest.fn(),
   };
+  const mockSearchIndex = {
+    isEnabled: jest.fn().mockReturnValue(false),
+    searchIds: jest.fn(),
+  };
 
   beforeEach(async () => {
     mockedAxios.request = jest.fn();
@@ -75,6 +80,10 @@ describe('ClientAgentDeploymentsProxyService', () => {
         {
           provide: ClientsRepository,
           useValue: mockClientsRepository,
+        },
+        {
+          provide: AgenstraSearchIndexService,
+          useValue: mockSearchIndex,
         },
       ],
     }).compile();

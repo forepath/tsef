@@ -43,6 +43,8 @@ export interface InvoicesState {
   historyList: InvoiceResponse[];
   historyListLoading: boolean;
   historyListError: string | null;
+  openOverdueSearch: string | null;
+  historySearch: string | null;
   error: string | null;
 }
 
@@ -62,6 +64,8 @@ export const initialInvoicesState: InvoicesState = {
   historyList: [],
   historyListLoading: false,
   historyListError: null,
+  openOverdueSearch: null,
+  historySearch: null,
   error: null,
 };
 
@@ -87,13 +91,14 @@ export const invoicesReducer = createReducer(
     summaryLoading: false,
     summaryError: error,
   })),
-  on(loadOpenOverdueInvoices, (state, { silent }) =>
+  on(loadOpenOverdueInvoices, (state, { silent, search }) =>
     silent
       ? state
       : {
           ...state,
           openOverdueListLoading: true,
           openOverdueListError: null,
+          openOverdueSearch: search?.trim() ? search.trim() : null,
         },
   ),
   on(loadOpenOverdueInvoicesSuccess, (state, { invoices }) => ({
@@ -107,13 +112,14 @@ export const invoicesReducer = createReducer(
     openOverdueListLoading: false,
     openOverdueListError: error,
   })),
-  on(loadHistoryInvoices, (state, { silent }) =>
+  on(loadHistoryInvoices, (state, { silent, search }) =>
     silent
       ? state
       : {
           ...state,
           historyListLoading: true,
           historyListError: null,
+          historySearch: search?.trim() ? search.trim() : null,
         },
   ),
   on(loadHistoryInvoicesSuccess, (state, { invoices }) => ({

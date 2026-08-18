@@ -45,6 +45,10 @@ export class ServicePlansService {
       httpParams = httpParams.set('offset', params.offset.toString());
     }
 
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
     return this.http.get<ServicePlanResponse[]>(`${this.apiUrl}/service-plans`, {
       params: httpParams,
     });

@@ -52,6 +52,7 @@ export class InstanceStatusService implements OnModuleInit {
       redis: 'not_applicable',
       queue: 'not_applicable',
       database,
+      opensearch: 'not_applicable',
     };
   }
 }

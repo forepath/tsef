@@ -85,7 +85,7 @@ describe('ContextImportController', () => {
 
       await controller.listConnections(adminReq);
 
-      expect(connections.findAll).toHaveBeenCalledWith(10, 0);
+      expect(connections.findAll).toHaveBeenCalledWith(10, 0, undefined);
     });
 
     it('allows PAT admin sessions through assertAdmin and relies on RequireScopes for PAT scope enforcement', async () => {
@@ -98,7 +98,7 @@ describe('ContextImportController', () => {
       (connections.findAll as jest.Mock).mockResolvedValue([]);
 
       await controller.listConnections(adminReq);
-      expect(connections.findAll).toHaveBeenCalledWith(10, 0);
+      expect(connections.findAll).toHaveBeenCalledWith(10, 0, undefined);
     });
   });
 
@@ -108,15 +108,15 @@ describe('ContextImportController', () => {
 
       await controller.listConnections(adminReq, undefined, undefined);
 
-      expect(connections.findAll).toHaveBeenCalledWith(10, 0);
+      expect(connections.findAll).toHaveBeenCalledWith(10, 0, undefined);
     });
 
-    it('forwards limit and offset to the service', async () => {
+    it('forwards limit, offset, and search to the service', async () => {
       (connections.findAll as jest.Mock).mockResolvedValue([]);
 
-      await controller.listConnections(adminReq, 25, 100);
+      await controller.listConnections(adminReq, 25, 100, 'wiki');
 
-      expect(connections.findAll).toHaveBeenCalledWith(25, 100);
+      expect(connections.findAll).toHaveBeenCalledWith(25, 100, 'wiki');
     });
   });
 
@@ -126,15 +126,15 @@ describe('ContextImportController', () => {
 
       await controller.listConfigs(adminReq, undefined, undefined);
 
-      expect(configs.findAll).toHaveBeenCalledWith(10, 0);
+      expect(configs.findAll).toHaveBeenCalledWith(10, 0, undefined);
     });
 
-    it('forwards limit and offset to the service', async () => {
+    it('forwards limit, offset, and search to the service', async () => {
       (configs.findAll as jest.Mock).mockResolvedValue([]);
 
-      await controller.listConfigs(adminReq, 25, 100);
+      await controller.listConfigs(adminReq, 25, 100, 'jira');
 
-      expect(configs.findAll).toHaveBeenCalledWith(25, 100);
+      expect(configs.findAll).toHaveBeenCalledWith(25, 100, 'jira');
     });
   });
 

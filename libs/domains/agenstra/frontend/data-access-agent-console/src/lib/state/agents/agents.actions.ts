@@ -17,7 +17,7 @@ export const loadClientAgents = createAction(
 
 export const loadClientAgentsSuccess = createAction(
   '[Agents] Load Client Agents Success',
-  props<{ clientId: string; agents: AgentResponseDto[] }>(),
+  props<{ clientId: string; agents: AgentResponseDto[]; hasMore: boolean; nextOffset: number }>(),
 );
 
 export const loadClientAgentsFailure = createAction(
@@ -25,9 +25,16 @@ export const loadClientAgentsFailure = createAction(
   props<{ clientId: string; error: string }>(),
 );
 
-export const loadClientAgentsBatch = createAction(
-  '[Agents] Load Client Agents Batch',
-  props<{ clientId: string; offset: number; accumulatedAgents: AgentResponseDto[] }>(),
+export const loadMoreClientAgents = createAction('[Agents] Load More Client Agents', props<{ clientId: string }>());
+
+export const loadMoreClientAgentsSuccess = createAction(
+  '[Agents] Load More Client Agents Success',
+  props<{ clientId: string; agents: AgentResponseDto[]; hasMore: boolean; nextOffset: number }>(),
+);
+
+export const loadMoreClientAgentsFailure = createAction(
+  '[Agents] Load More Client Agents Failure',
+  props<{ clientId: string; error: string }>(),
 );
 
 // Get Client Agent by ID Actions

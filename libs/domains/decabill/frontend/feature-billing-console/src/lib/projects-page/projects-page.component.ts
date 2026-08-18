@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ProjectsFacade, type ProjectListItem } from '@forepath/decabill/frontend/data-access-billing-console';
-import { combineLatestWith, map } from 'rxjs';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import {
   formatProjectHourlyRate,
@@ -18,32 +19,33 @@ import {
 @Component({
   selector: 'framework-projects-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, InfiniteScrollDirective, ListAppendFooterComponent],
   templateUrl: './projects-page.component.html',
   styleUrls: ['./projects-page.component.scss'],
 })
 export class ProjectsPageComponent implements OnInit {
-  private readonly facade = inject(ProjectsFacade);
+  readonly facade = inject(ProjectsFacade);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
-  readonly projects$ = this.facade.projects$.pipe(
-    combineLatestWith(this.searchQuery$),
-    map(([projects, q]) => {
-      const term = q.trim().toLowerCase();
-
-      if (!term) return projects;
-
-      return projects.filter((p) => p.name.toLowerCase().includes(term));
-    }),
-  );
+  readonly projects$ = this.facade.projects$;
 
   readonly loading$ = this.facade.loading$;
   readonly error$ = this.facade.error$;
-  readonly projects = toSignal(this.projects$, { initialValue: [] as ProjectListItem[] });
+  readonly hasMore$ = this.facade.hasMore$;
+  readonly appendLoading$ = this.facade.appendLoading$;
+  readonly appendError$ = this.facade.appendError$;
+  readonly projects = toSignal(this.facade.projects$, { initialValue: [] as ProjectListItem[] });
 
   ngOnInit(): void {
     this.facade.loadProjects();
+
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadProjects({ search: search.trim() || undefined });
+      });
   }
 
   projectStatusLabel(status: string): string {

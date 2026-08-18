@@ -6,6 +6,13 @@ import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { ClientsRepository } from '../repositories/clients.repository';
 import { getClientEndpointTlsPolicy, validateClientEndpointWithDnsOrThrow } from '../utils/client-endpoint-security';
 import { buildClientProxyRequestHeaders } from '../utils/client-proxy-request-headers';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
+import {
+  matchesInMemoryListSearch,
+  orderItemsBySearchIds,
+  sanitizeListSearch,
+  tryAgenstraSearchIds,
+} from '../search/agenstra-search-list.util';
 
 import { ClientsService } from './clients.service';
 
@@ -21,6 +28,7 @@ export class ClientAgentDeploymentsProxyService {
     @Inject(forwardRef(() => ClientsService))
     private readonly clientsService: ClientsService,
     private readonly clientsRepository: ClientsRepository,
+    private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
   /**
@@ -213,12 +221,67 @@ export class ClientAgentDeploymentsProxyService {
   /**
    * List deployment runs for an agent.
    */
-  async listRuns(clientId: string, agentId: string, limit?: number, offset?: number): Promise<unknown[]> {
+  async listRuns(
+    clientId: string,
+    agentId: string,
+    limit?: number,
+    offset?: number,
+    search?: string,
+  ): Promise<unknown[]> {
+    const sanitized = sanitizeListSearch(search);
+    const effectiveLimit = limit ?? 50;
+    const effectiveOffset = offset ?? 0;
+
+    if (sanitized) {
+      const openSearchIds = await tryAgenstraSearchIds(
+        this.searchIndex,
+        {
+          entityType: 'deployment-runs',
+          query: sanitized,
+          clientIds: [clientId],
+          additionalFilters: { agentId },
+          limit: effectiveLimit,
+          offset: effectiveOffset,
+        },
+        this.logger,
+      );
+
+      if (openSearchIds) {
+        if (openSearchIds.ids.length === 0) {
+          if (openSearchIds.total > 0) {
+            return [];
+          }
+        } else {
+          const allRuns = await this.fetchRuns(clientId, agentId, 1000, 0);
+          const runsWithIds = allRuns.filter(
+            (run): run is { id: string } =>
+              typeof run === 'object' && run !== null && typeof (run as { id?: unknown }).id === 'string',
+          );
+
+          return orderItemsBySearchIds(runsWithIds, openSearchIds.ids);
+        }
+      }
+
+      const runs = await this.fetchRuns(clientId, agentId, 1000, 0);
+
+      return runs
+        .filter((run) => matchesInMemoryListSearch(run, sanitized))
+        .slice(effectiveOffset, effectiveOffset + effectiveLimit);
+    }
+
+    return await this.fetchRuns(clientId, agentId, effectiveLimit, effectiveOffset);
+  }
+
+  private async fetchRuns(clientId: string, agentId: string, limit?: number, offset?: number): Promise<unknown[]> {
     const params = new URLSearchParams();
 
-    if (limit !== undefined) params.append('limit', limit.toString());
+    if (limit !== undefined) {
+      params.append('limit', limit.toString());
+    }
 
-    if (offset !== undefined) params.append('offset', offset.toString());
+    if (offset !== undefined) {
+      params.append('offset', offset.toString());
+    }
 
     const queryString = params.toString();
 

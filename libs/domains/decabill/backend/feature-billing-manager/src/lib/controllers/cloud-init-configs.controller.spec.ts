@@ -55,7 +55,7 @@ describe('CloudInitConfigsController', () => {
 
       await controller.list(25, 50);
 
-      expect(repository.findAll).toHaveBeenCalledWith(25, 50);
+      expect(repository.findAll).toHaveBeenCalledWith(25, 50, undefined);
     });
   });
 

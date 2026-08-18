@@ -4,6 +4,9 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import type { UserInfoFromRequest } from '../../utils/billing-access.utils';
 import { getUserFromRequest, type RequestWithUser } from '../../utils/billing-access.utils';
 import { BillingNotificationPublisher } from '../../notifications/billing-notification.publisher';
+import { mapTicketToSearchDocument } from '../../search/billing-search-document.mapper';
+import { BillingSearchIndexService } from '../../search/billing-search-index.service';
+import { getRequiredTenantId } from '../../utils/tenant-query.utils';
 import type {
   CreateProjectTicketCommentDto,
   CreateProjectTicketDto,
@@ -51,12 +54,13 @@ export class ProjectTicketsService {
     private readonly projectBoardRealtime: ProjectBoardRealtimeService,
     private readonly projectBoardSummary: ProjectBoardSummaryService,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
+    private readonly billingSearchIndexService: BillingSearchIndexService,
   ) {}
 
   async listTickets(
     projectId: string,
     userInfo: UserInfoFromRequest,
-    filters?: { status?: ProjectTicketStatus; parentId?: string | null },
+    filters?: { status?: ProjectTicketStatus; parentId?: string | null; search?: string },
   ): Promise<ProjectTicketResponseDto[]> {
     const project = await this.projectsRepository.findByIdOrThrow(projectId);
 
@@ -155,6 +159,7 @@ export class ProjectTicketsService {
     const mapped = await this.findOne(projectId, saved.id, false, userInfo);
 
     this.billingNotificationPublisher.publishTicket('ticket.created', project.userId, mapped);
+    this.billingSearchIndexService.scheduleUpsert('tickets', mapTicketToSearchDocument(saved, getRequiredTenantId()));
     this.projectBoardRealtime.emitToProject(projectId, PROJECTS_BOARD_EVENTS.ticketUpsert, mapped);
     await this.projectBoardSummary.emitSummaryChanged(project);
 
@@ -196,6 +201,10 @@ export class ProjectTicketsService {
       const mapped = await this.findOne(projectId, ticketId, false, userInfo);
 
       this.billingNotificationPublisher.publishTicket('ticket.updated', project.userId, mapped);
+      this.billingSearchIndexService.scheduleUpsert(
+        'tickets',
+        mapTicketToSearchDocument({ ...ticket, locked: true }, getRequiredTenantId()),
+      );
       this.projectBoardRealtime.emitToProject(projectId, PROJECTS_BOARD_EVENTS.ticketUpsert, mapped);
       await this.projectBoardSummary.emitSummaryChanged(project);
 
@@ -233,6 +242,12 @@ export class ProjectTicketsService {
     const mapped = await this.findOne(projectId, ticketId, false, userInfo);
 
     this.billingNotificationPublisher.publishTicket('ticket.updated', project.userId, mapped);
+    const refreshed = await this.ticketsRepository.findByIdOrThrow(ticketId);
+
+    this.billingSearchIndexService.scheduleUpsert(
+      'tickets',
+      mapTicketToSearchDocument(refreshed, getRequiredTenantId()),
+    );
     this.projectBoardRealtime.emitToProject(projectId, PROJECTS_BOARD_EVENTS.ticketUpsert, mapped);
     await this.projectBoardSummary.emitSummaryChanged(project);
 
@@ -266,6 +281,7 @@ export class ProjectTicketsService {
     await this.ticketsRepository.delete(ticketId);
 
     this.billingNotificationPublisher.publishTicket('ticket.deleted', project.userId, ticket);
+    this.billingSearchIndexService.scheduleDelete('tickets', ticketId);
     this.projectBoardRealtime.emitToProject(projectId, PROJECTS_BOARD_EVENTS.ticketRemoved, {
       id: ticketId,
       projectId,

@@ -61,10 +61,11 @@ export class ContextImportController {
     @Req() req: RequestWithUser,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<AtlassianSiteConnectionResponseDto[]> {
     this.assertAdmin(req);
 
-    return await this.connections.findAll(limit ?? 10, offset ?? 0);
+    return await this.connections.findAll(limit ?? 10, offset ?? 0, search);
   }
 
   @Get('connections/:id')
@@ -125,10 +126,11 @@ export class ContextImportController {
     @Req() req: RequestWithUser,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<ExternalImportConfigResponseDto[]> {
     this.assertAdmin(req);
 
-    return await this.configs.findAll(limit ?? 10, offset ?? 0);
+    return await this.configs.findAll(limit ?? 10, offset ?? 0, search);
   }
 
   @Get('configs/:id')

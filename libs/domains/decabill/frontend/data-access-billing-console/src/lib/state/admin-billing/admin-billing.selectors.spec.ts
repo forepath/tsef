@@ -26,7 +26,13 @@ import {
 
 describe('adminBillingSelectors', () => {
   const state: AdminBillingState = {
-    summary: { activeSubscriptionsCount: 1, openOverdueCount: 2, openOverdueTotal: 20, unbilledTotal: 5 },
+    summary: {
+      subscriptionsCount: 4,
+      activeSubscriptionsCount: 1,
+      openOverdueCount: 2,
+      openOverdueTotal: 20,
+      unbilledTotal: 5,
+    },
     summaryLoading: true,
     summaryError: 'summary err',
     billNowLoading: true,

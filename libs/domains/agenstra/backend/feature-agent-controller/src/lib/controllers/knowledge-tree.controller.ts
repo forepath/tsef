@@ -32,14 +32,22 @@ export class KnowledgeTreeController {
 
   @RequireScopes('knowledge:read')
   @Get()
-  async listByClient(@Query('clientId', ParseUUIDPipe) clientId: string, @Req() req?: RequestWithUser) {
-    return await this.knowledgeTreeService.listNodes(clientId, req);
+  async listByClient(
+    @Query('clientId', ParseUUIDPipe) clientId: string,
+    @Query('search') search?: string,
+    @Req() req?: RequestWithUser,
+  ) {
+    return await this.knowledgeTreeService.listNodes(clientId, req, search);
   }
 
   @RequireScopes('knowledge:read')
   @Get('tree')
-  async getTree(@Query('clientId', ParseUUIDPipe) clientId: string, @Req() req?: RequestWithUser) {
-    return await this.knowledgeTreeService.getTree(clientId, req);
+  async getTree(
+    @Query('clientId', ParseUUIDPipe) clientId: string,
+    @Query('search') search?: string,
+    @Req() req?: RequestWithUser,
+  ) {
+    return await this.knowledgeTreeService.getTree(clientId, req, search);
   }
 
   @RequireScopes('knowledge:read')

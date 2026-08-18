@@ -24,9 +24,11 @@ import {
   issueManualInvoiceFailure,
   issueManualInvoiceSuccess,
   loadAdminInvoiceManager,
-  loadAdminInvoiceManagerBatch,
   loadAdminInvoiceManagerFailure,
   loadAdminInvoiceManagerSuccess,
+  loadMoreAdminInvoiceManager,
+  loadMoreAdminInvoiceManagerFailure,
+  loadMoreAdminInvoiceManagerSuccess,
   updateManualInvoice,
   updateManualInvoiceFailure,
   updateManualInvoiceSuccess,
@@ -48,18 +50,16 @@ export const loadAdminInvoiceManager$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminBillingService)) =>
     actions$.pipe(
       ofType(loadAdminInvoiceManager),
-      switchMap(() =>
-        service.listInvoices({ limit: BATCH_SIZE, offset: 0 }).pipe(
-          switchMap((response) => {
-            if (response.items.length === 0) {
-              return of(loadAdminInvoiceManagerSuccess({ invoices: [] }));
-            }
+      switchMap(({ search, userId }) =>
+        service.listInvoices({ limit: BATCH_SIZE, offset: 0, search, userId }).pipe(
+          map((response) => {
+            const nextOffset = response.items.length;
 
-            if (response.items.length < BATCH_SIZE) {
-              return of(loadAdminInvoiceManagerSuccess({ invoices: response.items }));
-            }
-
-            return of(loadAdminInvoiceManagerBatch({ offset: BATCH_SIZE, accumulatedInvoices: response.items }));
+            return loadAdminInvoiceManagerSuccess({
+              invoices: response.items,
+              hasMore: nextOffset < response.total,
+              nextOffset,
+            });
           }),
           catchError((error) => of(loadAdminInvoiceManagerFailure({ error: normalizeError(error) }))),
         ),
@@ -68,27 +68,22 @@ export const loadAdminInvoiceManager$ = createEffect(
   { functional: true },
 );
 
-export const loadAdminInvoiceManagerBatch$ = createEffect(
+export const loadMoreAdminInvoiceManager$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminBillingService)) =>
     actions$.pipe(
-      ofType(loadAdminInvoiceManagerBatch),
-      switchMap(({ offset, accumulatedInvoices }) =>
-        service.listInvoices({ limit: BATCH_SIZE, offset }).pipe(
-          switchMap((response) => {
-            const newAccumulated = [...accumulatedInvoices, ...response.items];
+      ofType(loadMoreAdminInvoiceManager),
+      switchMap(({ offset, search, userId }) =>
+        service.listInvoices({ limit: BATCH_SIZE, offset, search, userId }).pipe(
+          map((response) => {
+            const nextOffset = offset + response.items.length;
 
-            if (response.items.length === 0 || response.items.length < BATCH_SIZE) {
-              return of(loadAdminInvoiceManagerSuccess({ invoices: newAccumulated }));
-            }
-
-            return of(
-              loadAdminInvoiceManagerBatch({
-                offset: offset + BATCH_SIZE,
-                accumulatedInvoices: newAccumulated,
-              }),
-            );
+            return loadMoreAdminInvoiceManagerSuccess({
+              invoices: response.items,
+              hasMore: nextOffset < response.total,
+              nextOffset,
+            });
           }),
-          catchError((error) => of(loadAdminInvoiceManagerFailure({ error: normalizeError(error) }))),
+          catchError((error) => of(loadMoreAdminInvoiceManagerFailure({ error: normalizeError(error) }))),
         ),
       ),
     ),

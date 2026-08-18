@@ -21,10 +21,10 @@
             <div class="card-body d-flex flex-column">
               <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureOverview-activePlans">Active plans</h6>
               <div class="d-flex align-items-center justify-content-between gap-2 mt-auto">
-                @if (subscriptionsLoading$ | async) {
+                @if (subscriptionsSummaryLoading$ | async) {
                   <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 } @else {
-                  <p class="card-title mb-0 fs-4 fw-bold">{{ activeSubscriptions().length }}</p>
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ subscriptionsSummary()?.active ?? 0 }}</p>
                 }
                 <div class="d-flex align-items-center gap-1 flex-shrink-0">
                   <a
@@ -66,10 +66,10 @@
             <div class="card-body d-flex flex-column">
               <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureOverview-projects">Active projects</h6>
               <div class="d-flex align-items-center justify-content-between gap-2 mt-auto">
-                @if (projectsLoading$ | async) {
+                @if (projectsCatalogSummaryLoading$ | async) {
                   <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 } @else {
-                  <p class="card-title mb-0 fs-4 fw-bold">{{ activeProjects().length }}</p>
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ projectsCatalogSummary()?.active ?? 0 }}</p>
                 }
                 <a
                   routerLink="/projects"
@@ -87,10 +87,10 @@
           <div class="card h-100 rounded-0 customer-overview__summary-card customer-overview__summary-card--third">
             <div class="card-body">
               <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureOverview-backorders">Backorders</h6>
-              @if (backordersLoading$ | async) {
+              @if (subscriptionsSummaryLoading$ | async) {
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               } @else {
-                <p class="card-title mb-0 fs-4 fw-bold">{{ pendingBackorders().length }}</p>
+                <p class="card-title mb-0 fs-4 fw-bold">{{ subscriptionsSummary()?.pendingBackorders ?? 0 }}</p>
               }
             </div>
           </div>
@@ -206,12 +206,12 @@
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featureOverview-noInstances">No cloud instances yet.</p>
               </div>
-            } @else if (filteredSubscriptionsWithServerInfo().length === 0) {
+            } @else if (subscriptionsWithServerInfo().length === 0) {
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featureOverview-noSearchResults">No instances match your search.</p>
               </div>
             } @else {
-              @for (item of filteredSubscriptionsWithServerInfo(); track item.subscription.id) {
+              @for (item of subscriptionsWithServerInfo(); track item.subscription.id) {
                 <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-3">
                   @if (item.itemId && isInstanceReady(item)) {
                     <a

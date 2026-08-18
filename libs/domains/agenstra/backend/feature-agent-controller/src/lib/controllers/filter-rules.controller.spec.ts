@@ -94,13 +94,13 @@ describe('FilterRulesController', () => {
       const result = await controller.list(adminReq, undefined, undefined);
 
       expect(result).toEqual([sampleRule]);
-      expect(mockService.findAll).toHaveBeenCalledWith(10, 0);
+      expect(mockService.findAll).toHaveBeenCalledWith(10, 0, undefined);
     });
 
-    it('passes explicit limit and offset', async () => {
+    it('passes explicit limit, offset, and search', async () => {
       (mockService.findAll as jest.Mock).mockResolvedValue([]);
-      await controller.list(adminReq, 25, 5);
-      expect(mockService.findAll).toHaveBeenCalledWith(25, 5);
+      await controller.list(adminReq, 25, 5, 'incoming');
+      expect(mockService.findAll).toHaveBeenCalledWith(25, 5, 'incoming');
     });
   });
 

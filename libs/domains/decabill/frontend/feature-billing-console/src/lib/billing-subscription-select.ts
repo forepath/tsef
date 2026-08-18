@@ -1,5 +1,7 @@
 import type { SubscriptionResponse } from '@forepath/decabill/frontend/data-access-billing-console';
 
+import { resolveNamedLabel } from './named-label.util';
+
 export function getBillingAdminSubscriptionPrimaryLabel(subscription: SubscriptionResponse): string {
   const number = subscription.number?.trim();
 
@@ -7,7 +9,11 @@ export function getBillingAdminSubscriptionPrimaryLabel(subscription: Subscripti
     return number;
   }
 
-  return subscription.planId;
+  return resolveNamedLabel(subscription.planName);
+}
+
+export function getBillingAdminSubscriptionPlanLabel(subscription: SubscriptionResponse): string {
+  return resolveNamedLabel(subscription.planName);
 }
 
 export function filterBillingAdminSubscriptions(
@@ -18,7 +24,13 @@ export function filterBillingAdminSubscriptions(
   const term = query.trim().toLowerCase();
   const filtered = term
     ? subscriptions.filter((subscription) => {
-        const haystack = [subscription.id, subscription.number, subscription.planId, subscription.status]
+        const haystack = [
+          subscription.id,
+          subscription.number,
+          subscription.planId,
+          subscription.planName,
+          subscription.status,
+        ]
           .join(' ')
           .toLowerCase();
 

@@ -18,6 +18,7 @@ import { ProvisioningReferencesRepository } from '../repositories/provisioning-r
 
 import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 import { ClientsService } from './clients.service';
 import { StatisticsService } from './statistics.service';
@@ -58,6 +59,8 @@ describe('ClientsService', () => {
     findAll: jest.fn(),
     findAllIds: jest.fn(),
     findIdsByCreatorId: jest.fn(),
+    findAllFiltered: jest.fn(),
+    findByIdsOrdered: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -118,6 +121,14 @@ describe('ClientsService', () => {
             publishTicket: jest.fn(),
             publishFilterRule: jest.fn(),
             publish: jest.fn(),
+          },
+        },
+        {
+          provide: AgenstraSearchIndexService,
+          useValue: {
+            upsertSafe: jest.fn().mockResolvedValue(undefined),
+            deleteSafe: jest.fn().mockResolvedValue(undefined),
+            isEnabled: jest.fn().mockReturnValue(false),
           },
         },
       ],

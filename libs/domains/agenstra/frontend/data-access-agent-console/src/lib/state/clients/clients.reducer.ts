@@ -17,10 +17,12 @@ import {
   loadClient,
   loadClientFailure,
   loadClients,
-  loadClientsBatch,
   loadClientsFailure,
   loadClientsSuccess,
   loadClientSuccess,
+  loadMoreClients,
+  loadMoreClientsFailure,
+  loadMoreClientsSuccess,
   loadClientUsers,
   loadClientUsersFailure,
   loadClientUsersSuccess,
@@ -68,6 +70,11 @@ export interface ClientsState {
   updating: boolean;
   deleting: boolean;
   error: string | null;
+  hasMore: boolean;
+  nextOffset: number;
+  appendLoading: boolean;
+  appendError: string | null;
+  search: string | null;
   // Provisioning state
   provisioningProviders: ProvisioningProviderInfo[];
   loadingProviders: boolean;
@@ -96,6 +103,11 @@ export const initialClientsState: ClientsState = {
   updating: false,
   deleting: false,
   error: null,
+  hasMore: false,
+  nextOffset: 0,
+  appendLoading: false,
+  appendError: null,
+  search: null,
   provisioningProviders: [],
   loadingProviders: false,
   serverTypes: {},
@@ -115,27 +127,51 @@ export const initialClientsState: ClientsState = {
 export const clientsReducer = createReducer(
   initialClientsState,
   // Load Clients
-  on(loadClients, (state) => ({
+  on(loadClients, (state, { params }) => ({
     ...state,
+    entities: [],
     loading: true,
     error: null,
+    hasMore: false,
+    nextOffset: 0,
+    appendLoading: false,
+    appendError: null,
+    search: params?.search?.trim() ? params.search.trim() : null,
   })),
-  on(loadClientsBatch, (state, { accumulatedClients }) => ({
-    ...state,
-    entities: accumulatedClients,
-    loading: true, // Keep loading true during batch loading
-    error: null,
-  })),
-  on(loadClientsSuccess, (state, { clients }) => ({
+  on(loadClientsSuccess, (state, { clients, hasMore, nextOffset }) => ({
     ...state,
     entities: clients,
     loading: false,
     error: null,
+    hasMore,
+    nextOffset,
+    appendLoading: false,
+    appendError: null,
   })),
   on(loadClientsFailure, (state, { error }) => ({
     ...state,
     loading: false,
     error,
+    hasMore: false,
+    appendLoading: false,
+  })),
+  on(loadMoreClients, (state) => ({
+    ...state,
+    appendLoading: true,
+    appendError: null,
+  })),
+  on(loadMoreClientsSuccess, (state, { clients, hasMore, nextOffset }) => ({
+    ...state,
+    entities: [...state.entities, ...clients],
+    hasMore,
+    nextOffset,
+    appendLoading: false,
+    appendError: null,
+  })),
+  on(loadMoreClientsFailure, (state, { error }) => ({
+    ...state,
+    appendLoading: false,
+    appendError: error,
   })),
   // Load Client by ID
   on(loadClient, (state) => ({

@@ -16,10 +16,12 @@ import {
   loadSubscription,
   loadSubscriptionFailure,
   loadSubscriptions,
-  loadSubscriptionsBatch,
   loadSubscriptionsFailure,
   loadSubscriptionsSuccess,
   loadSubscriptionSuccess,
+  loadMoreSubscriptions,
+  loadMoreSubscriptionsFailure,
+  loadMoreSubscriptionsSuccess,
   resumeSubscription,
   resumeSubscriptionFailure,
   resumeSubscriptionSuccess,
@@ -32,7 +34,7 @@ import {
   createSubscription$,
   loadSubscription$,
   loadSubscriptions$,
-  loadSubscriptionsBatch$,
+  loadMoreSubscriptions$,
   resumeSubscription$,
   withdrawSubscription$,
 } from './subscriptions.effects';
@@ -75,7 +77,7 @@ describe('SubscriptionsEffects', () => {
   describe('loadSubscriptions$', () => {
     it('should return loadSubscriptionsSuccess when batch is empty', (done) => {
       const action = loadSubscriptions({ params: {} });
-      const outcome = loadSubscriptionsSuccess({ subscriptions: [] });
+      const outcome = loadSubscriptionsSuccess({ subscriptions: [], hasMore: false, nextOffset: 0 });
 
       actions$ = of(action);
       subscriptionsService.listSubscriptions.mockReturnValue(of([]));
@@ -92,13 +94,24 @@ describe('SubscriptionsEffects', () => {
     it('should return loadSubscriptionsSuccess when batch is partial', (done) => {
       const subscriptions = [mockSubscription];
       const action = loadSubscriptions({ params: {} });
-      const outcome = loadSubscriptionsSuccess({ subscriptions });
+      const outcome = loadSubscriptionsSuccess({ subscriptions, hasMore: false, nextOffset: 1 });
 
       actions$ = of(action);
       subscriptionsService.listSubscriptions.mockReturnValue(of(subscriptions));
 
       loadSubscriptions$(actions$, subscriptionsService).subscribe((result) => {
         expect(result).toEqual(outcome);
+        done();
+      });
+    });
+
+    it('should set hasMore when batch is full', (done) => {
+      const subscriptions = Array(10).fill(mockSubscription);
+      actions$ = of(loadSubscriptions({ params: {} }));
+      subscriptionsService.listSubscriptions.mockReturnValue(of(subscriptions));
+
+      loadSubscriptions$(actions$, subscriptionsService).subscribe((result) => {
+        expect(result).toEqual(loadSubscriptionsSuccess({ subscriptions, hasMore: true, nextOffset: 10 }));
         done();
       });
     });
@@ -118,30 +131,29 @@ describe('SubscriptionsEffects', () => {
     });
   });
 
-  describe('loadSubscriptionsBatch$', () => {
-    it('should return loadSubscriptionsSuccess when batch is empty', (done) => {
-      const accumulatedSubscriptions = [mockSubscription];
-      const action = loadSubscriptionsBatch({ offset: 10, accumulatedSubscriptions });
-      const outcome = loadSubscriptionsSuccess({ subscriptions: accumulatedSubscriptions });
+  describe('loadMoreSubscriptions$', () => {
+    it('should append and clear hasMore on partial page', (done) => {
+      actions$ = of(loadMoreSubscriptions({ offset: 10 }));
+      subscriptionsService.listSubscriptions.mockReturnValue(of([mockSubscription]));
 
-      actions$ = of(action);
-      subscriptionsService.listSubscriptions.mockReturnValue(of([]));
-
-      loadSubscriptionsBatch$(actions$, subscriptionsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
+      loadMoreSubscriptions$(actions$, subscriptionsService).subscribe((result) => {
+        expect(result).toEqual(
+          loadMoreSubscriptionsSuccess({
+            subscriptions: [mockSubscription],
+            hasMore: false,
+            nextOffset: 11,
+          }),
+        );
         done();
       });
     });
 
-    it('should return loadSubscriptionsFailure on error', (done) => {
-      const action = loadSubscriptionsBatch({ offset: 10, accumulatedSubscriptions: [mockSubscription] });
-      const outcome = loadSubscriptionsFailure({ error: 'Load failed' });
-
-      actions$ = of(action);
+    it('should return loadMoreSubscriptionsFailure on error', (done) => {
+      actions$ = of(loadMoreSubscriptions({ offset: 10 }));
       subscriptionsService.listSubscriptions.mockReturnValue(throwError(() => new Error('Load failed')));
 
-      loadSubscriptionsBatch$(actions$, subscriptionsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
+      loadMoreSubscriptions$(actions$, subscriptionsService).subscribe((result) => {
+        expect(result).toEqual(loadMoreSubscriptionsFailure({ error: 'Load failed' }));
         done();
       });
     });
@@ -191,14 +203,11 @@ describe('SubscriptionsEffects', () => {
     });
 
     it('should return createSubscriptionFailure on error', (done) => {
-      const action = createSubscription({ subscription: { planId: 'plan-1' } });
-      const outcome = createSubscriptionFailure({ error: 'Create failed' });
-
-      actions$ = of(action);
+      actions$ = of(createSubscription({ subscription: { planId: 'plan-1' } }));
       subscriptionsService.createSubscription.mockReturnValue(throwError(() => new Error('Create failed')));
 
       createSubscription$(actions$, subscriptionsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
+        expect(result).toEqual(createSubscriptionFailure({ error: 'Create failed' }));
         done();
       });
     });
@@ -206,27 +215,21 @@ describe('SubscriptionsEffects', () => {
 
   describe('cancelSubscription$', () => {
     it('should return cancelSubscriptionSuccess on success', (done) => {
-      const action = cancelSubscription({ id: 'sub-1' });
-      const outcome = cancelSubscriptionSuccess({ subscription: mockSubscription });
-
-      actions$ = of(action);
+      actions$ = of(cancelSubscription({ id: 'sub-1' }));
       subscriptionsService.cancelSubscription.mockReturnValue(of(mockSubscription));
 
       cancelSubscription$(actions$, subscriptionsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
+        expect(result).toEqual(cancelSubscriptionSuccess({ subscription: mockSubscription }));
         done();
       });
     });
 
     it('should return cancelSubscriptionFailure on error', (done) => {
-      const action = cancelSubscription({ id: 'sub-1' });
-      const outcome = cancelSubscriptionFailure({ error: 'Cancel failed' });
-
-      actions$ = of(action);
+      actions$ = of(cancelSubscription({ id: 'sub-1' }));
       subscriptionsService.cancelSubscription.mockReturnValue(throwError(() => new Error('Cancel failed')));
 
       cancelSubscription$(actions$, subscriptionsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
+        expect(result).toEqual(cancelSubscriptionFailure({ error: 'Cancel failed' }));
         done();
       });
     });
@@ -234,27 +237,21 @@ describe('SubscriptionsEffects', () => {
 
   describe('withdrawSubscription$', () => {
     it('should return withdrawSubscriptionSuccess on success', (done) => {
-      const action = withdrawSubscription({ id: 'sub-1' });
-      const outcome = withdrawSubscriptionSuccess({ subscription: mockSubscription });
-
-      actions$ = of(action);
+      actions$ = of(withdrawSubscription({ id: 'sub-1' }));
       subscriptionsService.withdrawSubscription.mockReturnValue(of(mockSubscription));
 
       withdrawSubscription$(actions$, subscriptionsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
+        expect(result).toEqual(withdrawSubscriptionSuccess({ subscription: mockSubscription }));
         done();
       });
     });
 
     it('should return withdrawSubscriptionFailure on error', (done) => {
-      const action = withdrawSubscription({ id: 'sub-1' });
-      const outcome = withdrawSubscriptionFailure({ error: 'Withdraw failed' });
-
-      actions$ = of(action);
+      actions$ = of(withdrawSubscription({ id: 'sub-1' }));
       subscriptionsService.withdrawSubscription.mockReturnValue(throwError(() => new Error('Withdraw failed')));
 
       withdrawSubscription$(actions$, subscriptionsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
+        expect(result).toEqual(withdrawSubscriptionFailure({ error: 'Withdraw failed' }));
         done();
       });
     });
@@ -262,27 +259,21 @@ describe('SubscriptionsEffects', () => {
 
   describe('resumeSubscription$', () => {
     it('should return resumeSubscriptionSuccess on success', (done) => {
-      const action = resumeSubscription({ id: 'sub-1' });
-      const outcome = resumeSubscriptionSuccess({ subscription: mockSubscription });
-
-      actions$ = of(action);
+      actions$ = of(resumeSubscription({ id: 'sub-1' }));
       subscriptionsService.resumeSubscription.mockReturnValue(of(mockSubscription));
 
       resumeSubscription$(actions$, subscriptionsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
+        expect(result).toEqual(resumeSubscriptionSuccess({ subscription: mockSubscription }));
         done();
       });
     });
 
     it('should return resumeSubscriptionFailure on error', (done) => {
-      const action = resumeSubscription({ id: 'sub-1' });
-      const outcome = resumeSubscriptionFailure({ error: 'Resume failed' });
-
-      actions$ = of(action);
+      actions$ = of(resumeSubscription({ id: 'sub-1' }));
       subscriptionsService.resumeSubscription.mockReturnValue(throwError(() => new Error('Resume failed')));
 
       resumeSubscription$(actions$, subscriptionsService).subscribe((result) => {
-        expect(result).toEqual(outcome);
+        expect(result).toEqual(resumeSubscriptionFailure({ error: 'Resume failed' }));
         done();
       });
     });

@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { Component, computed, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DeploymentsFacade, type DeploymentRun } from '@forepath/agenstra/frontend/data-access-agent-console';
-import { combineLatestWith, map } from 'rxjs';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 @Component({
   selector: 'framework-deployment-runs-list',
@@ -14,6 +14,7 @@ import { combineLatestWith, map } from 'rxjs';
 })
 export class DeploymentRunsListComponent {
   private readonly deploymentsFacade = inject(DeploymentsFacade);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Inputs
   clientId = input.required<string>();
@@ -25,6 +26,7 @@ export class DeploymentRunsListComponent {
 
   // Search query
   readonly searchRunsQuery = signal<string>('');
+  readonly searchRunsQuery$ = toObservable(this.searchRunsQuery);
 
   // State from facade
   readonly runs$ = this.deploymentsFacade.runs$;
@@ -33,24 +35,7 @@ export class DeploymentRunsListComponent {
 
   // Convert observables to signals
   readonly error = toSignal(this.error$, { initialValue: null });
-
-  // Search query observable
-  readonly searchRunsQuery$ = toObservable(this.searchRunsQuery);
-
-  // Filtered runs based on search query
-  readonly filteredRuns$ = this.runs$.pipe(
-    combineLatestWith(this.searchRunsQuery$),
-    map(([runs, searchQuery]): DeploymentRun[] => {
-      if (!searchQuery) {
-        return runs;
-      }
-
-      return runs.filter((run: DeploymentRun) => JSON.stringify(run).toLowerCase().includes(searchQuery.toLowerCase()));
-    }),
-  );
-
-  // Convert filtered runs to signal
-  readonly filteredRuns = toSignal(this.filteredRuns$, { initialValue: [] as DeploymentRun[] });
+  readonly filteredRuns = toSignal(this.runs$, { initialValue: [] as DeploymentRun[] });
 
   readonly hasRuns = computed(() => (this.filteredRuns()?.length ?? 0) > 0);
 
@@ -86,6 +71,17 @@ export class DeploymentRunsListComponent {
         this.deploymentsFacade.loadRuns(clientId, agentId);
       }
     });
+
+    this.searchRunsQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        const clientId = this.clientId();
+        const agentId = this.agentId();
+
+        if (clientId && agentId) {
+          this.deploymentsFacade.loadRuns(clientId, agentId, undefined, undefined, search.trim() || undefined);
+        }
+      });
   }
 
   onRunClick(runId: string): void {

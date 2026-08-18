@@ -123,7 +123,13 @@ export class DeploymentsService {
   /**
    * List deployment runs for an agent.
    */
-  listRuns(clientId: string, agentId: string, limit?: number, offset?: number): Observable<DeploymentRun[]> {
+  listRuns(
+    clientId: string,
+    agentId: string,
+    limit?: number,
+    offset?: number,
+    search?: string,
+  ): Observable<DeploymentRun[]> {
     let params = new HttpParams();
 
     if (limit !== undefined) {
@@ -132,6 +138,10 @@ export class DeploymentsService {
 
     if (offset !== undefined) {
       params = params.set('offset', offset.toString());
+    }
+
+    if (search?.trim()) {
+      params = params.set('search', search.trim());
     }
 
     return this.http.get<DeploymentRun[]>(`${this.apiUrl}/clients/${clientId}/agents/${agentId}/deployments/runs`, {

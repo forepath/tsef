@@ -385,8 +385,7 @@
                   <div class="small text-muted d-flex align-items-center gap-3 flex-wrap">
                     <span><i class="bi bi-clock me-1" aria-hidden="true"></i>{{ formatDate(item.redeemedAt) }}</span>
                     <span
-                      ><i class="bi bi-box me-1" aria-hidden="true"></i
-                      >{{ item.subscriptionNumber ?? item.subscriptionId }}</span
+                      ><i class="bi bi-box me-1" aria-hidden="true"></i>{{ redemptionSubscriptionLabel(item) }}</span
                     >
                     @if (item.planName) {
                       <span><i class="bi bi-tag me-1" aria-hidden="true"></i>{{ item.planName }}</span>

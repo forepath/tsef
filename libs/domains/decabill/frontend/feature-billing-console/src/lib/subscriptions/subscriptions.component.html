@@ -47,10 +47,10 @@
               <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureSubscriptions-summaryTotal">
                 Subscriptions
               </h6>
-              @if (subscriptionsLoading$ | async) {
+              @if ((subscriptionsSummaryLoading$ | async) && summarySubscriptionsTotal() === 0) {
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               } @else {
-                <p class="card-title mb-0 fs-4 fw-bold">{{ subscriptions().length }}</p>
+                <p class="card-title mb-0 fs-4 fw-bold">{{ summarySubscriptionsTotal() }}</p>
               }
             </div>
           </div>
@@ -59,10 +59,10 @@
           <div class="card h-100 rounded-0 customer-plans__summary-card customer-plans__summary-card--second">
             <div class="card-body">
               <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureSubscriptions-summaryActive">Active</h6>
-              @if (subscriptionsLoading$ | async) {
+              @if ((subscriptionsSummaryLoading$ | async) && summaryActiveCount() === 0) {
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               } @else {
-                <p class="card-title mb-0 fs-4 fw-bold">{{ activeSubscriptionsCount() }}</p>
+                <p class="card-title mb-0 fs-4 fw-bold">{{ summaryActiveCount() }}</p>
               }
             </div>
           </div>
@@ -95,10 +95,10 @@
               <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureSubscriptions-backorders">
                 Pending backorders
               </h6>
-              @if (backordersLoading$ | async) {
+              @if ((subscriptionsSummaryLoading$ | async) && summaryBackordersCount() === 0) {
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               } @else {
-                <p class="card-title mb-0 fs-4 fw-bold">{{ backorders().length }}</p>
+                <p class="card-title mb-0 fs-4 fw-bold">{{ summaryBackordersCount() }}</p>
               }
             </div>
           </div>
@@ -146,36 +146,56 @@
               />
             </div>
           </form>
-          <div class="customer-plans__lane-list list-group list-group-flush flex-grow-1">
+          <div #subscriptionsScrollRoot class="customer-plans__lane-list list-group list-group-flush flex-grow-1">
             @if (subscriptionsLoading$ | async) {
               <div class="d-flex justify-content-center align-items-center p-4">
                 <div class="spinner-border text-primary" role="status">
                   <span class="visually-hidden" i18n="@@featureSubscriptions-loading">Loading subscriptions...</span>
                 </div>
               </div>
-            } @else if (subscriptions().length === 0) {
+            } @else if (subscriptions().length === 0 && !subscriptionsSearch()) {
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featureSubscriptions-noSubscriptions">No subscriptions yet.</p>
               </div>
-            } @else if (filteredSubscriptions().length === 0) {
+            } @else if (subscriptions().length === 0 && subscriptionsSearch()) {
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featureSubscriptions-noSearchResults">No subscriptions match your search.</p>
               </div>
             } @else {
               @if (servicePlans$ | async; as plans) {
-                @for (sub of filteredSubscriptions(); track sub.id) {
+                @for (sub of subscriptions(); track sub.id) {
                   <ng-container
                     *ngTemplateOutlet="subscriptionListItem; context: { $implicit: sub, plans: plans }"
                   ></ng-container>
                 }
               } @else {
-                @for (sub of filteredSubscriptions(); track sub.id) {
+                @for (sub of subscriptions(); track sub.id) {
                   <ng-container
                     *ngTemplateOutlet="subscriptionListItem; context: { $implicit: sub, plans: null }"
                   ></ng-container>
                 }
               }
             }
+            @if ((subscriptionsAppendLoading$ | async) || (subscriptionsAppendError$ | async)) {
+              <shared-list-append-footer
+                [loading]="!!(subscriptionsAppendLoading$ | async)"
+                [error]="!!(subscriptionsAppendError$ | async)"
+                (retry)="loadMoreSubscriptions()"
+              />
+            }
+            <div
+              sharedInfiniteScroll
+              [root]="subscriptionsScrollRoot"
+              [paused]="!!(subscriptionsAppendError$ | async)"
+              [disabled]="
+                (subscriptionsHasMore$ | async) === false ||
+                !!(subscriptionsAppendLoading$ | async) ||
+                !!(subscriptionsLoading$ | async)
+              "
+              (reachedEnd)="loadMoreSubscriptions()"
+              aria-hidden="true"
+              style="height: 1px; width: 100%; flex-shrink: 0"
+            ></div>
           </div>
         </div>
       </div>
@@ -215,11 +235,11 @@
                   >
                 </div>
               </div>
-            } @else if (backorders().length === 0) {
+            } @else if (backorders().length === 0 && !backordersSearch()) {
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featureSubscriptions-noBackorders">No pending backorders.</p>
               </div>
-            } @else if (filteredBackorders().length === 0) {
+            } @else if (backorders().length === 0 && backordersSearch()) {
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featureSubscriptions-noBackorderSearchResults">
                   No backorders match your search.
@@ -227,13 +247,13 @@
               </div>
             } @else {
               @if (servicePlans$ | async; as plans) {
-                @for (bo of filteredBackorders(); track bo.id) {
+                @for (bo of backorders(); track bo.id) {
                   <ng-container
                     *ngTemplateOutlet="backorderListItem; context: { $implicit: bo, plans: plans }"
                   ></ng-container>
                 }
               } @else {
-                @for (bo of filteredBackorders(); track bo.id) {
+                @for (bo of backorders(); track bo.id) {
                   <ng-container
                     *ngTemplateOutlet="backorderListItem; context: { $implicit: bo, plans: null }"
                   ></ng-container>
@@ -403,7 +423,7 @@
 <ng-template #backorderListItem let-bo let-plans="plans">
   <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
     <div class="min-w-0 flex-grow-1">
-      <div class="fw-semibold mb-1">{{ planNameByPlanId(plans, bo.planId) }}</div>
+      <div class="fw-semibold mb-1">{{ backorderDisplayTitle(bo, plans) }}</div>
       <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
         <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
           <span

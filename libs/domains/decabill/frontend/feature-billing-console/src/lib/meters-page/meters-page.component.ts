@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   MetersFacade,
@@ -9,7 +9,7 @@ import {
   type MeterResponse,
   type UpdateMeterDto,
 } from '@forepath/decabill/frontend/data-access-billing-console';
-import { combineLatest, map } from 'rxjs';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { getActiveStatusLabel, getActiveStatusTextClass, getMeterAggregatorLabel } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
@@ -41,13 +41,8 @@ export class MetersPageComponent implements OnInit {
 
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
-  readonly meters$ = combineLatest([this.facade.getMeters$(), this.searchQuery$]).pipe(
-    map(([meters, query]) => {
-      const term = query.trim().toLowerCase();
-
-      return term ? meters.filter((meter) => JSON.stringify(meter).toLowerCase().includes(term)) : meters;
-    }),
-  );
+  readonly meters$ = this.facade.getMeters$();
+  readonly meters = toSignal(this.facade.getMeters$(), { initialValue: [] as MeterResponse[] });
   readonly loading$ = this.facade.getMetersLoading$();
   readonly loadingAny$ = this.facade.getMetersLoadingAny$();
   readonly creating$ = this.facade.getMetersCreating$();
@@ -63,6 +58,12 @@ export class MetersPageComponent implements OnInit {
   ngOnInit(): void {
     this.facade.loadMeters();
     this.registerModalCloseWatchers();
+
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadMeters({ search: search.trim() || undefined });
+      });
   }
 
   openCreateModal(): void {

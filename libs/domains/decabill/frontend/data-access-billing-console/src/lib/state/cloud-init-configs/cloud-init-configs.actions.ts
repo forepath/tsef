@@ -24,7 +24,7 @@ export const loadCloudInitConfigsFailure = createAction(
 
 export const loadCloudInitConfigsBatch = createAction(
   '[CloudInit Configs] Load CloudInit Configs Batch',
-  props<{ offset: number; accumulatedCloudInitConfigs: CloudInitConfigResponse[] }>(),
+  props<{ offset: number; accumulatedCloudInitConfigs: CloudInitConfigResponse[]; params?: ListParams }>(),
 );
 
 export const loadCloudInitConfig = createAction('[CloudInit Configs] Load CloudInit Config', props<{ id: string }>());

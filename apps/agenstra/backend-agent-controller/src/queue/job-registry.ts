@@ -20,6 +20,9 @@ export const ControllerJobName = {
   FILTER_RULES_RECONCILE: 'filter-rules-sync.reconcile',
   AUTONOMOUS_TICKET_COORDINATOR: 'autonomous-ticket.coordinator',
   AUTONOMOUS_TICKET_UNIT: 'autonomous-ticket.unit',
+  SEARCH_REINDEX_COORDINATOR: 'search-reindex.coordinator',
+  SEARCH_REINDEX_UNIT: 'search-reindex.unit',
+  SEARCH_INDEX_SYNC_UNIT: 'search-index-sync.unit',
   WEBHOOK_DELIVERY_RETENTION_COORDINATOR,
   UPDATE_CHECK: UPDATE_CHECK_JOB_NAME,
 } as const;
@@ -41,9 +44,39 @@ function parseIntervalMs(envKey: string, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+/** Parses SEARCH_REINDEX_INTERVAL values like `15m`, `1h`, or raw milliseconds. */
+export function parseSearchReindexIntervalMs(envKey: string, fallbackMs: number): number {
+  const raw = process.env[envKey]?.trim();
+
+  if (!raw) {
+    return fallbackMs;
+  }
+
+  const match = /^(\d+)\s*(ms|s|m|h|d)?$/i.exec(raw);
+
+  if (!match) {
+    const asInt = parseInt(raw, 10);
+
+    return Number.isFinite(asInt) && asInt > 0 ? asInt : fallbackMs;
+  }
+
+  const amount = parseInt(match[1], 10);
+  const unit = (match[2] ?? 'ms').toLowerCase();
+  const multipliers: Record<string, number> = {
+    ms: 1,
+    s: 1_000,
+    m: 60_000,
+    h: 3_600_000,
+    d: 86_400_000,
+  };
+
+  return amount * (multipliers[unit] ?? 1);
+}
+
 export function getControllerRepeatableJobs(): ControllerRepeatableJobDefinition[] {
   const knowledgeInterval = parseIntervalMs('KNOWLEDGE_EMBEDDINGS_REINDEX_INTERVAL_MS', 3_600_000);
   const contextImportInterval = parseIntervalMs('CONTEXT_IMPORT_SCHEDULER_INTERVAL_MS', 120_000);
+  const searchReindexInterval = parseSearchReindexIntervalMs('SEARCH_REINDEX_INTERVAL', 900_000);
   const jobs: ControllerRepeatableJobDefinition[] = [
     {
       name: ControllerJobName.FILTER_RULES_SYNC_COORDINATOR,
@@ -83,6 +116,14 @@ export function getControllerRepeatableJobs(): ControllerRepeatableJobDefinition
     });
   }
 
+  if (searchReindexInterval > 0) {
+    jobs.push({
+      name: ControllerJobName.SEARCH_REINDEX_COORDINATOR,
+      coordinatorJobId: buildCoordinatorJobId('search-reindex'),
+      everyMs: searchReindexInterval,
+    });
+  }
+
   jobs.push({
     name: ControllerJobName.UPDATE_CHECK,
     coordinatorJobId: buildCoordinatorJobId('update-check'),
@@ -111,4 +152,8 @@ export function getAutonomousTicketBatchSize(): number {
 
 export function getKnowledgeEmbeddingPageBatchSize(): number {
   return parseInt(process.env.KNOWLEDGE_EMBEDDINGS_PAGE_BATCH_SIZE ?? '50', 10);
+}
+
+export function getSearchReindexBatchSize(): number {
+  return parseInt(process.env.SEARCH_REINDEX_BATCH_SIZE ?? '100', 10);
 }

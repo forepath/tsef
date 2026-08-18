@@ -18,7 +18,10 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { KEYCLOAK_CONNECT_OPTIONS, KEYCLOAK_INSTANCE } from 'nest-keycloak-connect';
 
 import { ClientsController } from '../controllers/clients.controller';
+import { AgentConsoleRegexFilterRuleEntity } from '../entities/agent-console-regex-filter-rule.entity';
+import { AtlassianSiteConnectionEntity } from '../entities/atlassian-site-connection.entity';
 import { ClientAgentAutonomyEntity } from '../entities/client-agent-autonomy.entity';
+import { ExternalImportConfigEntity } from '../entities/external-import-config.entity';
 import { KnowledgeNodeEmbeddingEntity } from '../entities/knowledge-node-embedding.entity';
 import { KnowledgeNodeEntity } from '../entities/knowledge-node.entity';
 import { KnowledgePageActivityEntity } from '../entities/knowledge-page-activity.entity';
@@ -55,6 +58,7 @@ import { AgenstraNotificationsModule } from './agenstra-notifications.module';
 import { ContextImportModule } from './context-import.module';
 import { FilterRulesModule } from './filter-rules.module';
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 @Module({
   providers: [
@@ -161,6 +165,14 @@ describe('ClientsModule', () => {
       .useModule(StubContextImportModule)
       .overrideModule(AgenstraNotificationsModule)
       .useModule(StubAgenstraNotificationsModule)
+      .overrideProvider(AgenstraSearchIndexService)
+      .useValue({
+        upsertSafe: jest.fn().mockResolvedValue(undefined),
+        deleteSafe: jest.fn().mockResolvedValue(undefined),
+        isEnabled: jest.fn().mockReturnValue(false),
+        searchIds: jest.fn().mockResolvedValue({ ids: [], total: 0 }),
+        reindexBatch: jest.fn().mockResolvedValue({ indexed: 0, hasMore: false }),
+      })
       .overrideProvider(getRepositoryToken(ClientEntity))
       .useValue(mockRepository)
       .overrideProvider(getRepositoryToken(ClientAgentCredentialEntity))
@@ -221,6 +233,12 @@ describe('ClientsModule', () => {
       .useValue(mockRepository)
       .overrideProvider(getRepositoryToken(UserEnvironmentReadStateEntity))
       .useValue(mockRepository)
+      .overrideProvider(getRepositoryToken(AgentConsoleRegexFilterRuleEntity))
+      .useValue(mockRepository)
+      .overrideProvider(getRepositoryToken(AtlassianSiteConnectionEntity))
+      .useValue(mockRepository)
+      .overrideProvider(getRepositoryToken(ExternalImportConfigEntity))
+      .useValue(mockRepository)
       .overrideProvider(UsersRepository)
       .useValue(mockRepository);
 
@@ -237,7 +255,9 @@ describe('ClientsModule', () => {
   });
 
   afterEach(async () => {
-    await module.close();
+    if (module) {
+      await module.close();
+    }
   });
 
   it('should be defined', () => {

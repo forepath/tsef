@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { PromotionRedemptionStatus } from '../constants/promotion.constants';
 import { PromotionRedemptionEntity } from '../entities/promotion-redemption.entity';
@@ -84,6 +84,7 @@ export class PromotionRedemptionsRepository {
     userId: string,
     limit = 10,
     offset = 0,
+    search?: string,
   ): Promise<{ items: PromotionRedemptionEntity[]; total: number }> {
     const qb = this.repository
       .createQueryBuilder('redemption')
@@ -97,6 +98,7 @@ export class PromotionRedemptionsRepository {
       .skip(offset);
 
     applyUserTenantFilter(qb, 'user');
+    this.applyRedemptionSearch(qb, search);
 
     const [items, total] = await qb.getManyAndCount();
 
@@ -107,6 +109,7 @@ export class PromotionRedemptionsRepository {
     userId: string,
     limit = 10,
     offset = 0,
+    search?: string,
   ): Promise<{ items: PromotionRedemptionEntity[]; total: number }> {
     const qb = this.repository
       .createQueryBuilder('redemption')
@@ -119,10 +122,30 @@ export class PromotionRedemptionsRepository {
       .skip(offset);
 
     applyUserTenantFilter(qb, 'user');
+    this.applyRedemptionSearch(qb, search);
 
     const [items, total] = await qb.getManyAndCount();
 
     return { items, total };
+  }
+
+  private applyRedemptionSearch(qb: SelectQueryBuilder<PromotionRedemptionEntity>, search?: string): void {
+    const term = search?.trim();
+
+    if (!term) {
+      return;
+    }
+
+    qb.andWhere(
+      `(LOWER(promotion.code) LIKE :term
+        OR LOWER(promotion.name) LIKE :term
+        OR LOWER(COALESCE(promotion.description, '')) LIKE :term
+        OR LOWER(redemption.status::text) LIKE :term
+        OR CAST(redemption.id AS text) LIKE :term
+        OR CAST(redemption.promotion_id AS text) LIKE :term
+        OR CAST(redemption.subscription_id AS text) LIKE :term)`,
+      { term: `%${term.toLowerCase()}%` },
+    );
   }
 
   async findByPromotion(

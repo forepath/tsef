@@ -68,8 +68,8 @@ export const loadKnowledgeTree$ = createEffect(
   (actions$ = inject(Actions), knowledgeService = inject(KnowledgeService)) => {
     return actions$.pipe(
       ofType(loadKnowledgeTree),
-      switchMap(({ clientId }) =>
-        knowledgeService.getTree(clientId).pipe(
+      switchMap(({ clientId, search }) =>
+        knowledgeService.getTree(clientId, search?.trim() || undefined).pipe(
           map((tree) => loadKnowledgeTreeSuccess({ clientId, tree })),
           catchError((error) => of(loadKnowledgeTreeFailure({ error: normalizeError(error) }))),
         ),

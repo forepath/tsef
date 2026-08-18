@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   AdminDatevExportsFacade,
@@ -13,7 +13,7 @@ import {
 import type { DatevExportScope } from '@forepath/decabill/frontend/data-access-billing-console';
 import { AuthenticationFacade, type UserResponseDto } from '@forepath/identity/frontend';
 import { ENVIRONMENT, type Environment } from '@forepath/shared/frontend/util-configuration';
-import { combineLatestWith, map } from 'rxjs';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import {
   getDatevExportScopeLabel,
@@ -46,18 +46,7 @@ export class AdminDatevExportsPageComponent implements OnInit {
 
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
-  readonly items$ = this.facade.items$.pipe(
-    combineLatestWith(this.searchQuery$),
-    map(([items, searchQuery]) => {
-      if (!searchQuery.trim()) {
-        return items;
-      }
-
-      const term = searchQuery.trim().toLowerCase();
-
-      return items.filter((item) => JSON.stringify(item).toLowerCase().includes(term));
-    }),
-  );
+  readonly items$ = this.facade.items$;
 
   readonly loading$ = this.facade.loading$;
   readonly error$ = this.facade.error$;
@@ -66,7 +55,7 @@ export class AdminDatevExportsPageComponent implements OnInit {
   readonly triggerError$ = this.facade.triggerError$;
   readonly unifiedExportAllowed$ = this.capabilitiesFacade.unifiedExportAllowed$;
 
-  readonly items = toSignal(this.items$, { initialValue: [] as AdminDatevExportListEntry[] });
+  readonly items = toSignal(this.facade.items$, { initialValue: [] as AdminDatevExportListEntry[] });
   readonly scope = toSignal(this.scope$, { initialValue: 'tenant' as DatevExportScope });
   readonly users = toSignal(this.authFacade.users$, { initialValue: [] as UserResponseDto[] });
 
@@ -78,6 +67,12 @@ export class AdminDatevExportsPageComponent implements OnInit {
     this.facade.loadExports({ scope: 'tenant' });
     this.authFacade.loadUsers();
     this.registerModalCloseWatcher();
+
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadExports({ scope: this.scope(), search: search.trim() || undefined });
+      });
   }
 
   openExportModal(): void {
@@ -86,7 +81,7 @@ export class AdminDatevExportsPageComponent implements OnInit {
   }
 
   setScope(scope: DatevExportScope): void {
-    this.facade.setScope(scope);
+    this.facade.loadExports({ scope, search: this.searchQuery().trim() || undefined });
   }
 
   submitTriggerExport(): void {

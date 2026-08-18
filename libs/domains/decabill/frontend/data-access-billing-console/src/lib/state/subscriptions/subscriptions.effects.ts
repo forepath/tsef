@@ -3,6 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap } from 'rxjs';
 
 import { SubscriptionsService } from '../../services/subscriptions.service';
+import { cancelBackorderSuccess, retryBackorderSuccess } from '../backorders/backorders.actions';
 
 import {
   cancelSubscription,
@@ -14,10 +15,15 @@ import {
   loadSubscription,
   loadSubscriptionFailure,
   loadSubscriptions,
-  loadSubscriptionsBatch,
   loadSubscriptionsFailure,
   loadSubscriptionsSuccess,
   loadSubscriptionSuccess,
+  loadSubscriptionsSummary,
+  loadSubscriptionsSummaryFailure,
+  loadSubscriptionsSummarySuccess,
+  loadMoreSubscriptions,
+  loadMoreSubscriptionsFailure,
+  loadMoreSubscriptionsSuccess,
   resumeSubscription,
   resumeSubscriptionFailure,
   resumeSubscriptionSuccess,
@@ -44,6 +50,21 @@ function normalizeError(error: unknown): string {
 
 const BATCH_SIZE = 10;
 
+export const loadSubscriptionsSummary$ = createEffect(
+  (actions$ = inject(Actions), subscriptionsService = inject(SubscriptionsService)) => {
+    return actions$.pipe(
+      ofType(loadSubscriptionsSummary),
+      switchMap(() =>
+        subscriptionsService.getSubscriptionsSummary().pipe(
+          map((summary) => loadSubscriptionsSummarySuccess({ summary })),
+          catchError((error) => of(loadSubscriptionsSummaryFailure({ error: normalizeError(error) }))),
+        ),
+      ),
+    );
+  },
+  { functional: true },
+);
+
 export const loadSubscriptions$ = createEffect(
   (actions$ = inject(Actions), subscriptionsService = inject(SubscriptionsService)) => {
     return actions$.pipe(
@@ -52,17 +73,13 @@ export const loadSubscriptions$ = createEffect(
         const batchParams = { limit: BATCH_SIZE, offset: 0, ...params };
 
         return subscriptionsService.listSubscriptions(batchParams).pipe(
-          switchMap((subscriptions) => {
-            if (subscriptions.length === 0) {
-              return of(loadSubscriptionsSuccess({ subscriptions: [] }));
-            }
-
-            if (subscriptions.length < BATCH_SIZE) {
-              return of(loadSubscriptionsSuccess({ subscriptions }));
-            }
-
-            return of(loadSubscriptionsBatch({ offset: BATCH_SIZE, accumulatedSubscriptions: subscriptions }));
-          }),
+          map((subscriptions) =>
+            loadSubscriptionsSuccess({
+              subscriptions,
+              hasMore: subscriptions.length === BATCH_SIZE,
+              nextOffset: subscriptions.length,
+            }),
+          ),
           catchError((error) => of(loadSubscriptionsFailure({ error: normalizeError(error) }))),
         );
       }),
@@ -71,33 +88,22 @@ export const loadSubscriptions$ = createEffect(
   { functional: true },
 );
 
-export const loadSubscriptionsBatch$ = createEffect(
+export const loadMoreSubscriptions$ = createEffect(
   (actions$ = inject(Actions), subscriptionsService = inject(SubscriptionsService)) => {
     return actions$.pipe(
-      ofType(loadSubscriptionsBatch),
-      switchMap(({ offset, accumulatedSubscriptions }) => {
-        const batchParams = { limit: BATCH_SIZE, offset };
+      ofType(loadMoreSubscriptions),
+      switchMap(({ offset, params }) => {
+        const batchParams = { limit: BATCH_SIZE, offset, ...params };
 
         return subscriptionsService.listSubscriptions(batchParams).pipe(
-          switchMap((subscriptions) => {
-            const newAccumulated = [...accumulatedSubscriptions, ...subscriptions];
-
-            if (subscriptions.length === 0) {
-              return of(loadSubscriptionsSuccess({ subscriptions: newAccumulated }));
-            }
-
-            if (subscriptions.length < BATCH_SIZE) {
-              return of(loadSubscriptionsSuccess({ subscriptions: newAccumulated }));
-            }
-
-            return of(
-              loadSubscriptionsBatch({
-                offset: offset + BATCH_SIZE,
-                accumulatedSubscriptions: newAccumulated,
-              }),
-            );
-          }),
-          catchError((error) => of(loadSubscriptionsFailure({ error: normalizeError(error) }))),
+          map((subscriptions) =>
+            loadMoreSubscriptionsSuccess({
+              subscriptions,
+              hasMore: subscriptions.length === BATCH_SIZE,
+              nextOffset: offset + subscriptions.length,
+            }),
+          ),
+          catchError((error) => of(loadMoreSubscriptionsFailure({ error: normalizeError(error) }))),
         );
       }),
     );
@@ -130,6 +136,23 @@ export const createSubscription$ = createEffect(
           catchError((error) => of(createSubscriptionFailure({ error: normalizeError(error) }))),
         ),
       ),
+    );
+  },
+  { functional: true },
+);
+
+export const reloadSubscriptionsSummaryAfterMutation$ = createEffect(
+  (actions$ = inject(Actions)) => {
+    return actions$.pipe(
+      ofType(
+        createSubscriptionSuccess,
+        cancelSubscriptionSuccess,
+        withdrawSubscriptionSuccess,
+        resumeSubscriptionSuccess,
+        retryBackorderSuccess,
+        cancelBackorderSuccess,
+      ),
+      map(() => loadSubscriptionsSummary()),
     );
   },
   { functional: true },

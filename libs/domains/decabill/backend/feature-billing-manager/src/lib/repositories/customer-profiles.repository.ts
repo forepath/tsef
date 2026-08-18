@@ -1,9 +1,12 @@
 import { UserEntity } from '@forepath/identity/backend';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CustomerProfileEntity } from '../entities/customer-profile.entity';
+import { hydrateEntitiesBySearchIds } from '../search/billing-search-hydrate.util';
+import { applyBillingSearchIlike } from '../search/billing-search-ilike.util';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
 @Injectable()
@@ -11,6 +14,7 @@ export class CustomerProfilesRepository {
   constructor(
     @InjectRepository(CustomerProfileEntity)
     private readonly repository: Repository<CustomerProfileEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   async findByUserId(userId: string): Promise<CustomerProfileEntity | null> {
@@ -37,7 +41,24 @@ export class CustomerProfilesRepository {
     return entity;
   }
 
-  async findAll(limit: number, offset: number): Promise<{ items: CustomerProfileEntity[]; total: number }> {
+  async findAll(
+    limit: number,
+    offset: number,
+    search?: string,
+  ): Promise<{ items: CustomerProfileEntity[]; total: number }> {
+    if (search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('customer-profiles', search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+      });
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
+
+      if (hydrated) {
+        return hydrated;
+      }
+    }
+
     const qb = this.repository
       .createQueryBuilder('profile')
       .leftJoin(UserEntity, 'user', 'user.id = profile.user_id')
@@ -75,6 +96,10 @@ export class CustomerProfilesRepository {
       .orderBy('profile.updatedAt', 'DESC');
 
     applyUserTenantFilter(qb, 'user');
+
+    if (search?.trim()) {
+      applyBillingSearchIlike(qb, 'customer-profiles', 'profile', search);
+    }
 
     const total = await qb.getCount();
     const items = await qb.take(limit).skip(offset).getMany();

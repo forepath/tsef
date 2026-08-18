@@ -34,8 +34,9 @@ export class UsersController {
   async findAll(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ) {
-    return this.usersService.findAll(limit ?? 10, offset ?? 0);
+    return this.usersService.findAll(limit ?? 10, offset ?? 0, search);
   }
 
   @Get(':id')

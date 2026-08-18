@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 
 import type {
   CancelSubscriptionDto,
@@ -17,6 +17,8 @@ import {
   createSubscription,
   loadSubscription,
   loadSubscriptions,
+  loadSubscriptionsSummary,
+  loadMoreSubscriptions,
   resumeSubscription,
   withdrawSubscription,
 } from './subscriptions.actions';
@@ -27,6 +29,8 @@ import {
   selectSelectedSubscription,
   selectSubscriptionById,
   selectSubscriptionLoading,
+  selectSubscriptionsAppendError,
+  selectSubscriptionsAppendLoading,
   selectSubscriptionsByPlanId,
   selectSubscriptionsByStatus,
   selectSubscriptionsCanceling,
@@ -34,9 +38,13 @@ import {
   selectSubscriptionsCreating,
   selectSubscriptionsEntities,
   selectSubscriptionsError,
+  selectSubscriptionsHasMore,
   selectSubscriptionsLoading,
   selectSubscriptionsLoadingAny,
   selectSubscriptionsResuming,
+  selectSubscriptionsState,
+  selectSubscriptionsSummary,
+  selectSubscriptionsSummaryLoading,
   selectSubscriptionsWithdrawing,
 } from './subscriptions.selectors';
 
@@ -86,6 +94,26 @@ export class SubscriptionsFacade {
     return this.store.select(selectSubscriptionsError);
   }
 
+  getSubscriptionsSummary$() {
+    return this.store.select(selectSubscriptionsSummary);
+  }
+
+  getSubscriptionsSummaryLoading$(): Observable<boolean> {
+    return this.store.select(selectSubscriptionsSummaryLoading);
+  }
+
+  getHasMore$(): Observable<boolean> {
+    return this.store.select(selectSubscriptionsHasMore);
+  }
+
+  getAppendLoading$(): Observable<boolean> {
+    return this.store.select(selectSubscriptionsAppendLoading);
+  }
+
+  getAppendError$(): Observable<string | null> {
+    return this.store.select(selectSubscriptionsAppendError);
+  }
+
   getSubscriptionsCount$(): Observable<number> {
     return this.store.select(selectSubscriptionsCount);
   }
@@ -116,6 +144,26 @@ export class SubscriptionsFacade {
 
   loadSubscriptions(params?: ListParams): void {
     this.store.dispatch(loadSubscriptions({ params }));
+  }
+
+  loadSubscriptionsSummary(): void {
+    this.store.dispatch(loadSubscriptionsSummary());
+  }
+
+  loadMore(): void {
+    this.store
+      .select(selectSubscriptionsState)
+      .pipe(take(1))
+      .subscribe((state) => {
+        if (!state.hasMore || state.appendLoading || state.loading) return;
+
+        this.store.dispatch(
+          loadMoreSubscriptions({
+            offset: state.nextOffset,
+            params: state.listParams ?? undefined,
+          }),
+        );
+      });
   }
 
   loadSubscription(id: string): void {

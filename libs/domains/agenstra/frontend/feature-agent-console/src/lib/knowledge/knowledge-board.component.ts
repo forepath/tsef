@@ -11,13 +11,14 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   ClientsFacade,
   KnowledgeFacade,
   KnowledgeBoardSocketFacade,
+  KnowledgeService,
   TicketsFacade,
   type ClientResponseDto,
   type KnowledgeNodeDto,
@@ -26,8 +27,9 @@ import {
   type KnowledgeRelationDto,
   type TicketResponseDto,
 } from '@forepath/agenstra/frontend/data-access-agent-console';
-import { EMPTY, distinctUntilChanged, switchMap } from 'rxjs';
+import { EMPTY, catchError, debounceTime, distinctUntilChanged, finalize, of, skip, switchMap } from 'rxjs';
 
+import { resolveNamedDisplayLabel } from '../display-name.util';
 import { KnowledgeEditorComponent } from './knowledge-editor/knowledge-editor.component';
 import { KnowledgeTreeComponent } from './knowledge-tree/knowledge-tree.component';
 
@@ -60,6 +62,7 @@ export class KnowledgeBoardComponent implements OnDestroy {
 
   private readonly clientsFacade = inject(ClientsFacade);
   private readonly knowledgeFacade = inject(KnowledgeFacade);
+  private readonly knowledgeService = inject(KnowledgeService);
   private readonly knowledgeBoardSocketFacade = inject(KnowledgeBoardSocketFacade);
   private readonly ticketsFacade = inject(TicketsFacade);
   private readonly route = inject(ActivatedRoute);
@@ -94,7 +97,11 @@ export class KnowledgeBoardComponent implements OnDestroy {
   private titleEditSyncNodeId: string | null = null;
   private skipSelectionClearForOpenNodeCleanup = false;
   readonly workspaceSwitchSearch = signal('');
+  readonly workspaceSwitchSearch$ = toObservable(this.workspaceSwitchSearch);
   readonly globalSearchQuery = signal('');
+  readonly globalSearchQuery$ = toObservable(this.globalSearchQuery);
+  readonly globalSearchTree = signal<KnowledgeNodeDto[]>([]);
+  readonly globalSearchLoading = signal(false);
   readonly relationsSearchQuery = signal('');
   readonly relationSuggestionsOpen = signal(false);
   readonly relationSearchError = signal<string | null>(null);
@@ -110,22 +117,26 @@ export class KnowledgeBoardComponent implements OnDestroy {
     return id ? (clients.find((c) => c.id === id) ?? null) : null;
   });
 
+  workspaceDisplayName(name: string | null | undefined): string {
+    return resolveNamedDisplayLabel(name);
+  }
+
+  relationKnowledgeTitle(title: string | null | undefined): string {
+    return resolveNamedDisplayLabel(title);
+  }
+
   readonly globalSearchHits = computed(() => {
-    const query = this.globalSearchQuery().trim().toLowerCase();
     const hits: Array<{ node: KnowledgeNodeDto; path: string[] }> = [];
     const walk = (nodes: KnowledgeNodeDto[], path: string[]) => {
       for (const node of nodes) {
         const nextPath = [...path, node.title];
 
-        if (!query || node.title.toLowerCase().includes(query) || node.shas.short.toLowerCase().includes(query)) {
-          hits.push({ node, path: nextPath });
-        }
-
+        hits.push({ node, path: nextPath });
         walk(node.children ?? [], nextPath);
       }
     };
 
-    walk(this.tree(), []);
+    walk(this.globalSearchTree(), []);
 
     return hits;
   });
@@ -191,6 +202,36 @@ export class KnowledgeBoardComponent implements OnDestroy {
 
   constructor() {
     this.clientsFacade.loadClients();
+
+    this.workspaceSwitchSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.clientsFacade.loadClients({ search: search.trim() || undefined });
+      });
+
+    this.globalSearchQuery$
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((query) => {
+        const trimmed = query.trim();
+        const clientId = this.activeClientId();
+
+        if (!trimmed || !clientId) {
+          this.globalSearchTree.set([]);
+          this.globalSearchLoading.set(false);
+
+          return;
+        }
+
+        this.globalSearchLoading.set(true);
+        this.knowledgeService
+          .getTree(clientId, trimmed)
+          .pipe(
+            catchError(() => of([] as KnowledgeNodeDto[])),
+            finalize(() => this.globalSearchLoading.set(false)),
+          )
+          .subscribe((tree) => this.globalSearchTree.set(tree));
+      });
+
     this.clientsFacade.activeClientId$
       .pipe(
         distinctUntilChanged(),
@@ -376,6 +417,7 @@ export class KnowledgeBoardComponent implements OnDestroy {
 
   openGlobalSearchModal(): void {
     this.globalSearchQuery.set('');
+    this.globalSearchTree.set([]);
     setTimeout(() => {
       const shell = this.globalSearchModal?.nativeElement;
 
@@ -392,11 +434,13 @@ export class KnowledgeBoardComponent implements OnDestroy {
   onCloseGlobalSearchModal(): void {
     this.hideGlobalSearchModalEl();
     this.globalSearchQuery.set('');
+    this.globalSearchTree.set([]);
   }
 
   onGlobalSearchResultClick(hit: { node: KnowledgeNodeDto; path: string[] }): void {
     this.hideGlobalSearchModalEl();
     this.globalSearchQuery.set('');
+    this.globalSearchTree.set([]);
     this.onSelectNode(hit.node);
   }
 
@@ -404,14 +448,6 @@ export class KnowledgeBoardComponent implements OnDestroy {
     if (hit.path.length <= 1) return '';
 
     return hit.path.slice(0, -1).join(' › ');
-  }
-
-  filteredClientsForWorkspaceSwitch(clients: ClientResponseDto[]): ClientResponseDto[] {
-    const q = this.workspaceSwitchSearch().trim().toLowerCase();
-
-    if (!q) return clients;
-
-    return clients.filter((c) => (c.name ?? '').toLowerCase().includes(q) || c.id.toLowerCase().includes(q));
   }
 
   onSelectWorkspaceForKnowledge(client: ClientResponseDto): void {

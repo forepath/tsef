@@ -5,7 +5,12 @@ import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
 import { Observable } from 'rxjs';
 
 import type { ListParams } from '../types/billing.types';
-import type { PaginatedProjectsResponse, ProjectResponse, ProjectSummaryResponse } from '../types/projects.types';
+import type {
+  PaginatedProjectsResponse,
+  ProjectResponse,
+  ProjectSummaryResponse,
+  ProjectsCatalogSummaryResponse,
+} from '../types/projects.types';
 
 @Injectable({
   providedIn: 'root',
@@ -25,11 +30,17 @@ export class ProjectsService {
 
     if (params?.offset != null) httpParams = httpParams.set('offset', String(params.offset));
 
+    if (params?.search?.trim()) httpParams = httpParams.set('search', params.search.trim());
+
     return this.http.get<PaginatedProjectsResponse>(`${this.apiUrl}/projects`, { params: httpParams });
   }
 
   getById(projectId: string): Observable<ProjectResponse> {
     return this.http.get<ProjectResponse>(`${this.apiUrl}/projects/${projectId}`);
+  }
+
+  getCatalogSummary(): Observable<ProjectsCatalogSummaryResponse> {
+    return this.http.get<ProjectsCatalogSummaryResponse>(`${this.apiUrl}/projects/summary`);
   }
 
   getSummary(projectId: string): Observable<ProjectSummaryResponse> {

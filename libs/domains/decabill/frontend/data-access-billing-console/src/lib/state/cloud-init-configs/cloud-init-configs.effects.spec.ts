@@ -91,7 +91,9 @@ describe('cloudInitConfigsEffects', () => {
       cloudInitConfigsService.listCloudInitConfigs.mockReturnValue(of(fullBatch));
 
       loadCloudInitConfigs$(actions$, cloudInitConfigsService).subscribe((result) => {
-        expect(result).toEqual(loadCloudInitConfigsBatch({ offset: 10, accumulatedCloudInitConfigs: fullBatch }));
+        expect(result).toEqual(
+          loadCloudInitConfigsBatch({ offset: 10, accumulatedCloudInitConfigs: fullBatch, params: {} }),
+        );
         done();
       });
     });
@@ -145,6 +147,7 @@ describe('cloudInitConfigsEffects', () => {
           loadCloudInitConfigsBatch({
             offset: 20,
             accumulatedCloudInitConfigs: [...accumulated, ...nextBatch],
+            params: undefined,
           }),
         );
         done();

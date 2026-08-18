@@ -264,6 +264,8 @@ export class AdminBillingService {
 
     if (params.scope) httpParams = httpParams.set('scope', params.scope);
 
+    if (params.search?.trim()) httpParams = httpParams.set('search', params.search.trim());
+
     return this.http.get<PaginatedAdminDatevExportsResponse>(`${this.apiUrl}/admin/billing/datev-exports`, {
       params: httpParams,
     });

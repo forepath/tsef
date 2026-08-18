@@ -30,6 +30,7 @@ describe('ProjectMilestonesController', () => {
     expect(milestonesService.list).toHaveBeenCalledWith(
       projectId,
       expect.objectContaining({ userId: 'user-1', isApiKeyAuth: false }),
+      undefined,
     );
   });
 

@@ -6,9 +6,11 @@ import { AdminBillingService } from '../../services/admin-billing.service';
 
 import {
   loadAdminSubscriptions,
-  loadAdminSubscriptionsBatch,
   loadAdminSubscriptionsFailure,
   loadAdminSubscriptionsSuccess,
+  loadMoreAdminSubscriptions,
+  loadMoreAdminSubscriptionsFailure,
+  loadMoreAdminSubscriptionsSuccess,
   adminCancelSubscription,
   adminCancelSubscriptionFailure,
   adminCancelSubscriptionSuccess,
@@ -41,23 +43,14 @@ export const loadAdminSubscriptions$ = createEffect(
       ofType(loadAdminSubscriptions),
       switchMap(({ search, userId }) =>
         service.listSubscriptions({ limit: BATCH_SIZE, offset: 0, search, userId }).pipe(
-          switchMap((response) => {
-            if (response.items.length === 0) {
-              return of(loadAdminSubscriptionsSuccess({ subscriptions: [] }));
-            }
+          map((response) => {
+            const nextOffset = response.items.length;
 
-            if (response.items.length < BATCH_SIZE || response.items.length >= response.total) {
-              return of(loadAdminSubscriptionsSuccess({ subscriptions: response.items }));
-            }
-
-            return of(
-              loadAdminSubscriptionsBatch({
-                offset: BATCH_SIZE,
-                accumulatedSubscriptions: response.items,
-                search,
-                userId,
-              }),
-            );
+            return loadAdminSubscriptionsSuccess({
+              subscriptions: response.items,
+              hasMore: nextOffset < response.total,
+              nextOffset,
+            });
           }),
           catchError((error) => of(loadAdminSubscriptionsFailure({ error: normalizeError(error) }))),
         ),
@@ -66,29 +59,22 @@ export const loadAdminSubscriptions$ = createEffect(
   { functional: true },
 );
 
-export const loadAdminSubscriptionsBatch$ = createEffect(
+export const loadMoreAdminSubscriptions$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminBillingService)) =>
     actions$.pipe(
-      ofType(loadAdminSubscriptionsBatch),
-      switchMap(({ offset, accumulatedSubscriptions, search, userId }) =>
+      ofType(loadMoreAdminSubscriptions),
+      switchMap(({ offset, search, userId }) =>
         service.listSubscriptions({ limit: BATCH_SIZE, offset, search, userId }).pipe(
-          switchMap((response) => {
-            const newAccumulated = [...accumulatedSubscriptions, ...response.items];
+          map((response) => {
+            const nextOffset = offset + response.items.length;
 
-            if (response.items.length === 0 || response.items.length < BATCH_SIZE) {
-              return of(loadAdminSubscriptionsSuccess({ subscriptions: newAccumulated }));
-            }
-
-            return of(
-              loadAdminSubscriptionsBatch({
-                offset: offset + BATCH_SIZE,
-                accumulatedSubscriptions: newAccumulated,
-                search,
-                userId,
-              }),
-            );
+            return loadMoreAdminSubscriptionsSuccess({
+              subscriptions: response.items,
+              hasMore: nextOffset < response.total,
+              nextOffset,
+            });
           }),
-          catchError((error) => of(loadAdminSubscriptionsFailure({ error: normalizeError(error) }))),
+          catchError((error) => of(loadMoreAdminSubscriptionsFailure({ error: normalizeError(error) }))),
         ),
       ),
     ),

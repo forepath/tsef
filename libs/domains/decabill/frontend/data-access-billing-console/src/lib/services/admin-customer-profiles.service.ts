@@ -35,6 +35,8 @@ export class AdminCustomerProfilesService {
 
     if (params?.offset != null) httpParams = httpParams.set('offset', String(params.offset));
 
+    if (params?.search?.trim()) httpParams = httpParams.set('search', params.search.trim());
+
     return this.http.get<PaginatedAdminCustomerProfilesResponse>(`${this.apiUrl}/admin/billing/customer-profiles`, {
       params: httpParams,
     });

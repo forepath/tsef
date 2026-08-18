@@ -5,6 +5,8 @@ export class BackorderResponseDto {
   userId!: string;
   serviceTypeId!: string;
   planId!: string;
+  /** Denormalized plan display name when the plan row is available. */
+  planName?: string;
   status!: BackorderStatus;
   failureReason?: string;
   requestedConfigSnapshot!: Record<string, unknown>;

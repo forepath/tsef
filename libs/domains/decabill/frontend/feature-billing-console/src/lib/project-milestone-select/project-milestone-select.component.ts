@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, input, model, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, input, model, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import type { ProjectMilestoneResponse } from '@forepath/decabill/frontend/data-access-billing-console';
-
-import { filterProjectMilestones } from '../project-milestone-select';
+import {
+  ProjectMilestonesService,
+  type ProjectMilestoneResponse,
+} from '@forepath/decabill/frontend/data-access-billing-console';
+import { catchError, debounceTime, distinctUntilChanged, of, skip, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'framework-project-milestone-select',
@@ -13,7 +16,9 @@ import { filterProjectMilestones } from '../project-milestone-select';
   styleUrls: ['./project-milestone-select.component.scss'],
 })
 export class ProjectMilestoneSelectComponent {
-  readonly milestones = input.required<ProjectMilestoneResponse[]>();
+  readonly projectId = input.required<string>();
+  /** Optional full list for resolving the selected milestone label. */
+  readonly milestones = input<ProjectMilestoneResponse[]>([]);
   readonly selectedMilestoneId = model<string | null>(null);
   readonly disabled = input(false);
   readonly inputId = input('projectMilestoneSelect');
@@ -22,27 +27,61 @@ export class ProjectMilestoneSelectComponent {
   readonly suggestionLimit = input(20);
   readonly compact = input(false);
 
-  readonly searchQuery = signal('');
-  readonly suggestionsOpen = signal(false);
+  private readonly milestonesService = inject(ProjectMilestonesService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly filteredMilestones = computed(() =>
-    filterProjectMilestones(this.milestones(), this.searchQuery(), this.suggestionLimit()),
-  );
+  readonly searchQuery = signal('');
+  readonly searchQuery$ = toObservable(this.searchQuery);
+  readonly suggestionsOpen = signal(false);
+  readonly searchResults = signal<ProjectMilestoneResponse[]>([]);
+  readonly loading = signal(false);
+
+  readonly filteredMilestones = computed(() => this.searchResults());
 
   readonly selectedMilestone = computed(
-    () => this.milestones().find((milestone) => milestone.id === this.selectedMilestoneId()) ?? null,
+    () =>
+      this.milestones().find((milestone) => milestone.id === this.selectedMilestoneId()) ??
+      this.searchResults().find((milestone) => milestone.id === this.selectedMilestoneId()) ??
+      null,
   );
 
   constructor() {
     effect(() => {
       this.selectedMilestoneId();
       this.searchQuery.set('');
+      this.searchResults.set([]);
       this.suggestionsOpen.set(false);
     });
+
+    this.searchQuery$
+      .pipe(
+        skip(1),
+        debounceTime(300),
+        distinctUntilChanged(),
+        tap(() => this.loading.set(true)),
+        switchMap((query) => {
+          const term = query.trim();
+          const projectId = this.projectId()?.trim();
+
+          if (!term || !projectId) {
+            return of([] as ProjectMilestoneResponse[]);
+          }
+
+          return this.milestonesService
+            .list(projectId, { search: term, limit: this.suggestionLimit() })
+            .pipe(catchError(() => of([] as ProjectMilestoneResponse[])));
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((milestones) => {
+        this.searchResults.set(milestones);
+        this.loading.set(false);
+      });
   }
 
   reset(): void {
     this.searchQuery.set('');
+    this.searchResults.set([]);
     this.suggestionsOpen.set(false);
   }
 

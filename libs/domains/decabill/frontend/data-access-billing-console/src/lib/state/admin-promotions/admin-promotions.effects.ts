@@ -40,8 +40,8 @@ export const loadAdminPromotions$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminPromotionsService)) =>
     actions$.pipe(
       ofType(loadAdminPromotions),
-      switchMap(() =>
-        service.list({ limit: BATCH_SIZE, offset: 0 }).pipe(
+      switchMap(({ search }) =>
+        service.list({ limit: BATCH_SIZE, offset: 0, search }).pipe(
           switchMap((response) => {
             if (response.items.length === 0) {
               return of(loadAdminPromotionsSuccess({ promotions: [] }));
@@ -51,7 +51,7 @@ export const loadAdminPromotions$ = createEffect(
               return of(loadAdminPromotionsSuccess({ promotions: response.items }));
             }
 
-            return of(loadAdminPromotionsBatch({ offset: BATCH_SIZE, accumulated: response.items }));
+            return of(loadAdminPromotionsBatch({ offset: BATCH_SIZE, accumulated: response.items, search }));
           }),
           catchError((error) => of(loadAdminPromotionsFailure({ error: normalizeError(error) }))),
         ),
@@ -64,8 +64,8 @@ export const loadAdminPromotionsBatch$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminPromotionsService)) =>
     actions$.pipe(
       ofType(loadAdminPromotionsBatch),
-      switchMap(({ offset, accumulated }) =>
-        service.list({ limit: BATCH_SIZE, offset }).pipe(
+      switchMap(({ offset, accumulated, search }) =>
+        service.list({ limit: BATCH_SIZE, offset, search }).pipe(
           switchMap((response) => {
             const newAccumulated = [...accumulated, ...response.items];
 
@@ -77,6 +77,7 @@ export const loadAdminPromotionsBatch$ = createEffect(
               loadAdminPromotionsBatch({
                 offset: offset + BATCH_SIZE,
                 accumulated: newAccumulated,
+                search,
               }),
             );
           }),

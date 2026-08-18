@@ -64,12 +64,14 @@ import {
   type WorkspaceConfigurationSettingKey,
   type WorkspaceConfigurationSettingResponseDto,
 } from '@forepath/agenstra/frontend/data-access-agent-console';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import { ENVIRONMENT, type Environment } from '@forepath/shared/frontend/util-configuration';
 import { StandaloneLoadingService } from '@forepath/shared/frontend';
 import {
   catchError,
   combineLatest,
   combineLatestWith,
+  debounceTime,
   delay,
   distinctUntilChanged,
   filter,
@@ -87,6 +89,7 @@ import {
 } from 'rxjs';
 
 import { DeploymentManagerComponent } from '../deployment-manager/deployment-manager.component';
+import { resolveNamedDisplayLabel } from '../display-name.util';
 import { ContainerStatsStatusBarComponent } from '../file-editor/container-stats-status-bar/container-stats-status-bar.component';
 import { FileEditorComponent } from '../file-editor/file-editor.component';
 import {
@@ -148,6 +151,8 @@ type ChatMessageWithFilter = {
     DeploymentManagerComponent,
     ContainerStatsStatusBarComponent,
     AgentChatEventRowComponent,
+    InfiniteScrollDirective,
+    ListAppendFooterComponent,
   ],
   styleUrls: ['./chat.component.scss'],
   templateUrl: './chat.component.html',
@@ -261,16 +266,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   // Client list observables
   readonly searchClientQuery$ = toObservable(this.searchClientQuery);
-  readonly clients$: Observable<ClientResponseDto[]> = this.clientsFacade.clients$.pipe(
-    combineLatestWith(this.searchClientQuery$),
-    map(([clients, searchQuery]) => {
-      if (!searchQuery) {
-        return clients;
-      }
-
-      return clients.filter((client) => JSON.stringify(client).toLowerCase().includes(searchQuery.toLowerCase()));
-    }),
-  );
+  readonly clients$: Observable<ClientResponseDto[]> = this.clientsFacade.clients$;
   readonly activeClientId$: Observable<string | null> = this.clientsFacade.activeClientId$;
   readonly activeClient$: Observable<ClientResponseDto | null> = this.clientsFacade.activeClient$;
   readonly clientsLoading$: Observable<boolean> = combineLatest([
@@ -278,6 +274,9 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     this.clientsFacade.clients$,
   ]).pipe(map(([loading, clients]) => loading && clients.length === 0));
   readonly clientsError$: Observable<string | null> = this.clientsFacade.error$;
+  readonly clientsHasMore$: Observable<boolean> = this.clientsFacade.hasMore$;
+  readonly clientsAppendLoading$: Observable<boolean> = this.clientsFacade.appendLoading$;
+  readonly clientsAppendError$: Observable<string | null> = this.clientsFacade.appendError$;
   readonly clientsDeleting$: Observable<boolean> = this.clientsFacade.deleting$;
   readonly clientsCreating$: Observable<boolean> = this.clientsFacade.creating$;
   readonly clientsUpdating$: Observable<boolean> = this.clientsFacade.updating$;
@@ -290,16 +289,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         return of([]);
       }
 
-      return this.agentsFacade.getClientAgents$(clientId).pipe(
-        combineLatestWith(this.searchAgentQuery$),
-        map(([agents, searchQuery]) => {
-          if (!searchQuery) {
-            return agents;
-          }
-
-          return agents.filter((agent) => JSON.stringify(agent).toLowerCase().includes(searchQuery.toLowerCase()));
-        }),
-      );
+      return this.agentsFacade.getClientAgents$(clientId);
     }),
   );
   readonly agentsLoading$: Observable<boolean> = this.activeClientId$.pipe(
@@ -312,6 +302,33 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         this.agentsFacade.getClientAgentsLoading$(clientId),
         this.agentsFacade.getClientAgents$(clientId),
       ]).pipe(map(([loading, agents]) => loading && agents.length === 0));
+    }),
+  );
+  readonly agentsHasMore$: Observable<boolean> = this.activeClientId$.pipe(
+    switchMap((clientId) => {
+      if (!clientId) {
+        return of(false);
+      }
+
+      return this.agentsFacade.getClientAgentsHasMore$(clientId);
+    }),
+  );
+  readonly agentsAppendLoading$: Observable<boolean> = this.activeClientId$.pipe(
+    switchMap((clientId) => {
+      if (!clientId) {
+        return of(false);
+      }
+
+      return this.agentsFacade.getClientAgentsAppendLoading$(clientId);
+    }),
+  );
+  readonly agentsAppendError$: Observable<string | null> = this.activeClientId$.pipe(
+    switchMap((clientId) => {
+      if (!clientId) {
+        return of(null);
+      }
+
+      return this.agentsFacade.getClientAgentsAppendError$(clientId);
     }),
   );
   readonly agentsDeleting$: Observable<boolean> = this.activeClientId$.pipe(
@@ -678,14 +695,14 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       }
 
       const agent = byId.get(id);
-      const name = agent?.name?.trim() ? agent.name.trim() : id;
+      const name = resolveNamedDisplayLabel(agent?.name);
 
       chips.push({
         trackKey: `env:${id}`,
         label: name,
         title: agent
           ? $localize`:@@featureChat-contextToolbarEnvTitle:Environment context: ${agent.name}:agentName:`
-          : $localize`:@@featureChat-contextToolbarEnvUnknownTitle:Environment: ${id}:agentId:`,
+          : $localize`:@@featureChat-contextToolbarEnvUnknownTitle:Environment context unavailable`,
       });
     }
 
@@ -1197,6 +1214,22 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
         this.clientsFacade.loadClients();
       }
     });
+
+    this.searchClientQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.clientsFacade.loadClients({ search: search.trim() || undefined });
+      });
+
+    this.searchAgentQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        const clientId = this.activeClientId;
+
+        if (clientId) {
+          this.agentsFacade.loadClientAgents(clientId, { search: search.trim() || undefined });
+        }
+      });
 
     // Sync local active client from store when component is recreated
     this.activeClientId$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe((clientId) => {
@@ -1973,6 +2006,18 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           this.agentsFacade.loadClientAgents(clientId);
         }
       });
+  }
+
+  onLoadMoreClients(): void {
+    this.clientsFacade.loadMoreClients();
+  }
+
+  onLoadMoreAgents(): void {
+    const clientId = this.activeClientIdSignal();
+
+    if (clientId) {
+      this.agentsFacade.loadMoreClientAgents(clientId);
+    }
   }
 
   onClientSelect(clientId: string, navigate = true): void {

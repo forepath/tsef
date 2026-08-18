@@ -91,6 +91,8 @@ import { TicketAutomationService } from '../services/ticket-automation.service';
 import { TicketBoardRealtimeService } from '../services/ticket-board-realtime.service';
 import { TicketsService } from '../services/tickets.service';
 
+import { AgenstraSearchModule } from '../search/agenstra-search.module';
+
 import { AgenstraNotificationsModule } from './agenstra-notifications.module';
 import { AgenstraUpdatesModule } from './agenstra-updates.module';
 import { ContextImportModule } from './context-import.module';
@@ -129,6 +131,7 @@ const authMethod = getAuthenticationMethod();
       UserEnvironmentReadStateEntity,
     ]),
     RedisCacheModule,
+    AgenstraSearchModule,
     AgenstraNotificationsModule,
     AgenstraUpdatesModule,
     StatisticsModule,

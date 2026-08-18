@@ -6,7 +6,7 @@ Hardware and software requirements for running Agenstra components in developmen
 
 Agenstra has two backend stacks and the agent console frontend:
 
-1. **Agent controller** control plane with BullMQ roles (`api`, `worker`, `scheduler`), PostgreSQL with **pgvector**, and Redis.
+1. **Agent controller** control plane with BullMQ roles (`api`, `worker`, `scheduler`), PostgreSQL with **pgvector**, Redis, and **OpenSearch**.
 2. **Agent manager** per-workspace runtime on a **Docker host** that spawns agent workload containers (worker, VNC, SSH).
 
 The console talks only to the controller. The controller proxies agent operations to one or more manager instances.
@@ -23,6 +23,7 @@ graph TB
         C_SCH[Controller Scheduler]
         C_PG[(PostgreSQL pgvector)]
         C_RD[(Redis)]
+        C_OS[(OpenSearch 2)]
     end
 
     subgraph "Manager host"
@@ -35,7 +36,9 @@ graph TB
 
     FE --> C_API
     C_API --> C_PG
+    C_API --> C_OS
     C_WRK --> C_RD
+    C_WRK --> C_OS
     C_SCH --> C_RD
     C_API --> M_API
     M_API --> M_PG
@@ -82,6 +85,17 @@ BullMQ for controller background jobs. AOF enabled in default Compose.
 | --------------- | ---- | ------- | ----- | ---------------------------------------------- |
 | Local / staging | 0.5  | 512 MiB | 1 GiB |                                                |
 | Production      | 1    | 1-2 GiB | 5 GiB | Completed jobs retained for Bull Board history |
+
+### OpenSearch 2
+
+Full-text search indexes for agent console list/search UIs (tickets, clients, knowledge, audit tables, and related entities). Default Compose uses `opensearchproject/opensearch:2.19.1` single-node with the security plugin disabled for local development. Production must keep OpenSearch private (no public exposure), use TLS and credentials from secrets, and plan disk for index growth and reindex I/O.
+
+| Profile         | vCPU | Memory  | Disk    | Notes                                                             |
+| --------------- | ---- | ------- | ------- | ----------------------------------------------------------------- |
+| Local / staging | 1    | 1 GiB   | 5 GiB   | JVM heap ~512 MiB; default host port **9200**                     |
+| Production      | 2    | 2-4 GiB | 20+ GiB | Knowledge and ticket corpora dominate size; reindex jobs add load |
+
+Controller API and worker roles both query and update indexes. Periodic `search-reindex` jobs keep indexes current after upgrades.
 
 ### Controller API (`QUEUE_ROLE=api`)
 

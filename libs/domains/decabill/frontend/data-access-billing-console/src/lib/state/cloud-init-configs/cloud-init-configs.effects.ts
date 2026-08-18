@@ -54,7 +54,9 @@ export const loadCloudInitConfigs$ = createEffect(
               return of(loadCloudInitConfigsSuccess({ cloudInitConfigs }));
             }
 
-            return of(loadCloudInitConfigsBatch({ offset: BATCH_SIZE, accumulatedCloudInitConfigs: cloudInitConfigs }));
+            return of(
+              loadCloudInitConfigsBatch({ offset: BATCH_SIZE, accumulatedCloudInitConfigs: cloudInitConfigs, params }),
+            );
           }),
           catchError((error) => of(loadCloudInitConfigsFailure({ error: normalizeError(error) }))),
         );
@@ -68,8 +70,8 @@ export const loadCloudInitConfigsBatch$ = createEffect(
   (actions$ = inject(Actions), cloudInitConfigsService = inject(CloudInitConfigsService)) => {
     return actions$.pipe(
       ofType(loadCloudInitConfigsBatch),
-      switchMap(({ offset, accumulatedCloudInitConfigs }) =>
-        cloudInitConfigsService.listCloudInitConfigs({ limit: BATCH_SIZE, offset }).pipe(
+      switchMap(({ offset, accumulatedCloudInitConfigs, params }) =>
+        cloudInitConfigsService.listCloudInitConfigs({ limit: BATCH_SIZE, offset, ...params }).pipe(
           switchMap((cloudInitConfigs) => {
             const newAccumulated = [...accumulatedCloudInitConfigs, ...cloudInitConfigs];
 
@@ -81,6 +83,7 @@ export const loadCloudInitConfigsBatch$ = createEffect(
               loadCloudInitConfigsBatch({
                 offset: offset + BATCH_SIZE,
                 accumulatedCloudInitConfigs: newAccumulated,
+                params,
               }),
             );
           }),

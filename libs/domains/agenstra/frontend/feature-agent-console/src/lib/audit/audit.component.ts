@@ -21,6 +21,8 @@ import type {
 } from 'ng-apexcharts';
 import { NgApexchartsModule } from 'ng-apexcharts';
 
+import { getUnavailableDisplayLabel, resolveNamedDisplayLabel } from '../display-name.util';
+
 const PAGE_SIZE = 10;
 const AUDIT_FILTERS_STORAGE_KEY = 'agent-console-audit-filters';
 
@@ -265,13 +267,13 @@ export class AuditComponent implements OnInit {
     this.applyFilters();
   }
 
-  /** Resolve originalUserId to email when user is loaded, otherwise show the ID. */
+  /** Resolve originalUserId to email when user is loaded; never show raw UUID. */
   resolveUserDisplay(originalUserId: string | undefined): string {
     if (!originalUserId) return '-';
 
     const user = this.users().find((u) => u.id === originalUserId);
 
-    return user?.email ?? originalUserId;
+    return resolveNamedDisplayLabel(user?.email);
   }
 
   /** Format agent display as "client name --> agent name" or fallback. */
@@ -282,9 +284,7 @@ export class AuditComponent implements OnInit {
 
     if (agentName) return agentName;
 
-    if (row.agentId) return row.agentId;
-
-    return '-';
+    return getUnavailableDisplayLabel();
   }
 
   /** Chat route for agent link: /clients/{clientId}/agents/{agentId} */
@@ -315,7 +315,7 @@ export class AuditComponent implements OnInit {
     return null;
   }
 
-  /** Display text for entity event: resolved name when available, otherwise originalEntityId. */
+  /** Display text for entity event: resolved name when available; never raw UUID. */
   resolveEntityDisplay(row: {
     entityType: string;
     originalEntityId: string;
@@ -327,7 +327,7 @@ export class AuditComponent implements OnInit {
     if (row.entityType === 'client') {
       const client = this.clients().find((c) => c.id === row.originalEntityId);
 
-      return client?.name ?? row.originalEntityId;
+      return resolveNamedDisplayLabel(client?.name);
     }
 
     if (row.entityType === 'agent') {
@@ -338,7 +338,7 @@ export class AuditComponent implements OnInit {
       if (row.agentName) return row.agentName;
     }
 
-    return row.originalEntityId;
+    return getUnavailableDisplayLabel();
   }
 
   private getDefaultFromDate(): Date {

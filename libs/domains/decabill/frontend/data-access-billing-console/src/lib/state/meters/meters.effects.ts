@@ -44,7 +44,7 @@ export const loadMeters$ = createEffect(
           switchMap((meters) =>
             meters.length < BATCH_SIZE
               ? of(loadMetersSuccess({ meters }))
-              : of(loadMetersBatch({ offset: BATCH_SIZE, accumulatedMeters: meters })),
+              : of(loadMetersBatch({ offset: BATCH_SIZE, accumulatedMeters: meters, params })),
           ),
           catchError((error) => of(loadMetersFailure({ error: normalizeError(error) }))),
         );
@@ -57,14 +57,14 @@ export const loadMetersBatch$ = createEffect(
   (actions$ = inject(Actions), metersService = inject(MetersService)) =>
     actions$.pipe(
       ofType(loadMetersBatch),
-      switchMap(({ offset, accumulatedMeters }) =>
-        metersService.listMeters({ limit: BATCH_SIZE, offset }).pipe(
+      switchMap(({ offset, accumulatedMeters, params }) =>
+        metersService.listMeters({ limit: BATCH_SIZE, offset, ...params }).pipe(
           switchMap((meters) => {
             const next = [...accumulatedMeters, ...meters];
 
             return meters.length < BATCH_SIZE
               ? of(loadMetersSuccess({ meters: next }))
-              : of(loadMetersBatch({ offset: offset + BATCH_SIZE, accumulatedMeters: next }));
+              : of(loadMetersBatch({ offset: offset + BATCH_SIZE, accumulatedMeters: next, params }));
           }),
           catchError((error) => of(loadMetersFailure({ error: normalizeError(error) }))),
         ),

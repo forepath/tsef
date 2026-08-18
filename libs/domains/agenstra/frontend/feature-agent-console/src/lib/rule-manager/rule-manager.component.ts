@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {
@@ -15,7 +15,9 @@ import {
   type FilterRuleWorkspaceSyncDto,
   type UpdateFilterRuleDto,
 } from '@forepath/agenstra/frontend/data-access-agent-console';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import { Actions, ofType } from '@ngrx/effects';
+import { combineLatest, debounceTime, distinctUntilChanged, filter, skip } from 'rxjs';
 
 import {
   filterRuleDirectionLabel,
@@ -26,10 +28,11 @@ import {
   filterRuleTypeLabel,
   filterRuleWorkspaceSyncTitle,
 } from './filter-rule-labels';
+import { resolveNamedDisplayLabel } from '../display-name.util';
 
 @Component({
   selector: 'framework-rule-manager',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, InfiniteScrollDirective, ListAppendFooterComponent],
   templateUrl: './rule-manager.component.html',
   styleUrls: ['./rule-manager.component.scss'],
   standalone: true,
@@ -55,10 +58,14 @@ export class RuleManagerComponent implements OnInit {
   readonly error$ = this.filterRulesFacade.error$;
   readonly saving$ = this.filterRulesFacade.saving$;
   readonly deleting$ = this.filterRulesFacade.deleting$;
+  readonly hasMore$ = this.filterRulesFacade.hasMore$;
+  readonly appendLoading$ = this.filterRulesFacade.appendLoading$;
+  readonly appendError$ = this.filterRulesFacade.appendError$;
 
   readonly clients = toSignal(this.clientsFacade.clients$, { initialValue: [] as ClientResponseDto[] });
 
-  searchQuery = '';
+  readonly searchQuery = signal('');
+  readonly searchQuery$ = toObservable(this.searchQuery);
 
   ruleToDelete: FilterRuleResponseDto | null = null;
   ruleToTest: FilterRuleResponseDto | null = null;
@@ -84,7 +91,26 @@ export class RuleManagerComponent implements OnInit {
 
   ngOnInit(): void {
     this.filterRulesFacade.load();
-    this.clientsFacade.loadClients({ limit: 500, offset: 0 });
+    this.clientsFacade.loadClients();
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.filterRulesFacade.load({ search: search.trim() || undefined });
+      });
+    // Workspace pickers need the full client list; drain pages without a search API.
+    combineLatest([
+      this.clientsFacade.hasMore$,
+      this.clientsFacade.appendLoading$,
+      this.clientsFacade.loading$,
+      this.clientsFacade.appendError$,
+    ])
+      .pipe(
+        filter(
+          ([hasMore, appendLoading, loading, appendError]) => hasMore && !appendLoading && !loading && !appendError,
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.clientsFacade.loadMoreClients());
     this.actions$
       .pipe(ofType(createFilterRuleSuccess, updateFilterRuleSuccess), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
@@ -98,19 +124,12 @@ export class RuleManagerComponent implements OnInit {
     });
   }
 
-  filteredRules(): FilterRuleResponseDto[] {
-    const q = this.searchQuery.trim().toLowerCase();
-    const list = this.rules();
-
-    if (!q) {
-      return list;
-    }
-
-    return list.filter((r) => JSON.stringify(r).toLowerCase().includes(q));
+  onLoadMoreRules(): void {
+    this.filterRulesFacade.loadMore();
   }
 
   clientName(id: string): string {
-    return this.clients().find((c) => c.id === id)?.name ?? id;
+    return resolveNamedDisplayLabel(this.clients().find((c) => c.id === id)?.name);
   }
 
   workspaceSyncRow(rule: FilterRuleResponseDto, clientId: string): FilterRuleWorkspaceSyncDto | undefined {

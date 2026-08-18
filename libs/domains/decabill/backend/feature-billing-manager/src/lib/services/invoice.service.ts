@@ -20,6 +20,9 @@ import { ProjectTimeReportService } from '../projects/services/project-time-repo
 import { BillingAuditLogService } from './billing-audit-log.service';
 import { BillingIssuerConfigService } from './billing-issuer-config.service';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
+import { mapInvoiceToSearchDocument } from '../search/billing-search-document.mapper';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
+import { getRequiredTenantId } from '../utils/tenant-query.utils';
 import { buildCreditNoteNumber } from './e-invoice-document-options';
 import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { InvoiceIssuanceService } from './invoice-issuance.service';
@@ -64,6 +67,7 @@ export class InvoiceService {
     private readonly customerTrustScoreService: CustomerTrustScoreService,
     private readonly invoiceTaxContextService: InvoiceTaxContextService,
     private readonly ossThresholdService: OssThresholdService,
+    private readonly billingSearchIndexService: BillingSearchIndexService,
   ) {}
 
   async createAndIssue(params: CreateInvoiceDraftParams): Promise<{ invoiceRefId: string; invoiceNumber?: string }> {
@@ -140,6 +144,10 @@ export class InvoiceService {
     });
 
     this.billingNotificationPublisher.publishInvoice('invoice.created', invoice);
+    this.billingSearchIndexService.scheduleUpsert(
+      'invoices',
+      mapInvoiceToSearchDocument(invoice, getRequiredTenantId()),
+    );
 
     return invoice;
   }

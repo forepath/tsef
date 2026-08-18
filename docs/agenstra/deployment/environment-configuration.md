@@ -261,19 +261,38 @@ When `CONFIG` is set, the frontend server fetches and validates the remote JSON 
 
 Used by **backend agent controller**. See [Background jobs](./background-jobs.md).
 
-| Variable                    | Description                            | Default                                |
-| --------------------------- | -------------------------------------- | -------------------------------------- |
-| `REDIS_HOST`                | Redis host                             | `localhost` (compose: `redis`)         |
-| `REDIS_PORT`                | Redis port                             | `6379`                                 |
-| `REDIS_PASSWORD`            | Optional password                      | empty                                  |
-| `REDIS_DB`                  | Redis DB index                         | `0`                                    |
-| `REDIS_KEY_PREFIX`          | Key prefix                             | `agenstra-controller`                  |
-| `QUEUE_ROLE`                | `api`, `scheduler`, `worker`, or `all` | `all` locally; `api` for API container |
-| `QUEUE_WORKER_CONCURRENCY`  | Worker concurrency                     | `5`                                    |
-| `QUEUE_BULL_BOARD_ENABLED`  | Enable Bull Board                      | `true` in dev for `all`/`scheduler`    |
-| `QUEUE_BULL_BOARD_PATH`     | Bull Board path                        | `/admin/queues`                        |
-| `QUEUE_BULL_BOARD_USERNAME` | Bull Board HTTP Basic user             | `admin`                                |
-| `QUEUE_BULL_BOARD_PASSWORD` | Bull Board HTTP Basic password         | required; `bullmq` in local compose    |
+| Variable                    | Description                            | Default                             |
+| --------------------------- | -------------------------------------- | ----------------------------------- |
+| `REDIS_HOST`                | Redis host                             | `localhost` (compose: `redis`)      |
+| `REDIS_PORT`                | Redis port                             | `6379`                              |
+| `REDIS_HOST_PORT`           | Host port published by compose         | `6379`                              |
+| `REDIS_PASSWORD`            | Optional password                      | empty                               |
+| `REDIS_DB`                  | Redis DB index                         | `0`                                 |
+| `REDIS_KEY_PREFIX`          | Key prefix                             | `agenstra-controller`               |
+| `QUEUE_ROLE`                | `api`, `scheduler`, `worker`, or `all` | `all` locally                       |
+| `QUEUE_WORKER_CONCURRENCY`  | Worker concurrency                     | `5`                                 |
+| `QUEUE_BULL_BOARD_ENABLED`  | Enable Bull Board                      | `true` in dev for `all`/`scheduler` |
+| `QUEUE_BULL_BOARD_PATH`     | Bull Board path                        | `/admin/queues`                     |
+| `QUEUE_BULL_BOARD_USERNAME` | Bull Board HTTP Basic user             | `admin`                             |
+| `QUEUE_BULL_BOARD_PASSWORD` | Bull Board HTTP Basic password         | required; `bullmq` in local compose |
+
+## OpenSearch (search indexes)
+
+Used by **agent controller** for list/typeahead search. See **[Search indexes](../features/search-indexes.md)** and **[System requirements](./system-requirements.md)**.
+
+| Variable                  | Description                              | Default                             |
+| ------------------------- | ---------------------------------------- | ----------------------------------- |
+| `OPENSEARCH_ENABLED`      | Set `false` to disable                   | `true`                              |
+| `OPENSEARCH_HOST`         | Host                                     | `localhost` (compose: `opensearch`) |
+| `OPENSEARCH_PORT`         | Port                                     | `9200`                              |
+| `OPENSEARCH_NODE`         | Full node URL                            | `http://opensearch:9200` in compose |
+| `OPENSEARCH_USERNAME`     | Optional basic auth user                 | empty                               |
+| `OPENSEARCH_PASSWORD`     | Optional basic auth password             | empty                               |
+| `OPENSEARCH_INDEX_PREFIX` | Index name prefix                        | `agenstra`                          |
+| `OPENSEARCH_HOST_PORT`    | Host port published by compose           | `9200`                              |
+| `SEARCH_REINDEX_INTERVAL` | Periodic reindex interval (`15m`, ms, …) | `15m`                               |
+
+Production: keep OpenSearch private; use TLS and secrets for credentials.
 
 Scheduler interval variables (for example `AUTONOMOUS_TICKET_SCHEDULER_INTERVAL_MS`) configure **coordinator** repeat intervals in BullMQ.
 

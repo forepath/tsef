@@ -61,6 +61,9 @@ import { SshExecutorService } from './ssh-executor.service';
 import { TaxCalculationService } from './tax-calculation.service';
 import { InvoiceTaxContextService } from './invoice-tax-context.service';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
+import { mapSubscriptionToSearchDocument } from '../search/billing-search-document.mapper';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
+import { getRequiredTenantId } from '../utils/tenant-query.utils';
 import { BillingEmailPublisher } from '../email/billing-email.publisher';
 import { CustomerTrustScoreService } from '../trust-score/customer-trust-score.service';
 import { SubscriptionPeriodChargeService } from './subscription-period-charge.service';
@@ -110,6 +113,7 @@ export class SubscriptionService {
     private readonly subscriptionPeriodChargeService: SubscriptionPeriodChargeService,
     private readonly sshExecutor: SshExecutorService,
     private readonly meterBillingService: MeterBillingService,
+    private readonly billingSearchIndexService: BillingSearchIndexService,
   ) {}
 
   async createSubscription(
@@ -351,6 +355,7 @@ export class SubscriptionService {
     this.billingNotificationPublisher.publishSubscription('subscription.created', created, plan, {
       addons: addonSummaries,
     });
+    this.indexSubscription(created, plan.name);
     await this.billingEmailPublisher.publishSubscriptionCreated(created, plan.name, {
       billInAdvance: plan.billInAdvance === true,
       addons: addonSummaries.map((addon) => ({ name: addon.name, periodPrice: addon.periodPrice })),
@@ -438,6 +443,7 @@ export class SubscriptionService {
     this.billingNotificationPublisher.publishSubscription('subscription.created', created, plan, {
       addons: [],
     });
+    this.indexSubscription(created, plan.name);
     await this.billingEmailPublisher.publishSubscriptionCreated(created, plan.name, {
       billInAdvance: plan.billInAdvance === true,
       addons: [],
@@ -733,8 +739,22 @@ export class SubscriptionService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  async listSubscriptions(userId: string, limit: number, offset: number) {
-    return await this.subscriptionsRepository.findAllByUser(userId, limit, offset);
+  async listSubscriptions(userId: string, limit: number, offset: number, search?: string) {
+    return await this.subscriptionsRepository.findAllByUser(userId, limit, offset, search);
+  }
+
+  async getSubscriptionsSummary(userId: string): Promise<{
+    total: number;
+    active: number;
+    pendingBackorders: number;
+  }> {
+    const [total, active, pendingBackorders] = await Promise.all([
+      this.subscriptionsRepository.countByUserId(userId),
+      this.subscriptionsRepository.countByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE),
+      this.backordersRepository.countOpenByUserId(userId),
+    ]);
+
+    return { total, active, pendingBackorders };
   }
 
   async getSubscription(subscriptionId: string, userId: string) {
@@ -771,6 +791,7 @@ export class SubscriptionService {
     });
 
     this.billingNotificationPublisher.publishSubscription('subscription.cancel_scheduled', canceled, plan);
+    this.indexSubscription(canceled, plan.name);
     this.customerTrustScoreService.triggerRecomputeForUser(canceled.userId);
     await this.billingEmailPublisher.publishSubscriptionCancelScheduled(canceled, plan.name);
 
@@ -793,6 +814,7 @@ export class SubscriptionService {
     });
 
     this.billingNotificationPublisher.publishSubscription('subscription.resumed', resumed, plan);
+    this.indexSubscription(resumed, plan.name);
     this.customerTrustScoreService.triggerRecomputeForUser(resumed.userId);
     await this.billingEmailPublisher.publishSubscriptionResumed(resumed, plan.name);
 
@@ -849,6 +871,7 @@ export class SubscriptionService {
     const updated = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
 
     this.billingNotificationPublisher.publishSubscription('subscription.updated', updated, plan);
+    this.indexSubscription(updated, plan.name);
     this.customerTrustScoreService.triggerRecomputeForUser(updated.userId);
 
     const withdrawalResult: WithdrawalResultDto = {
@@ -896,6 +919,7 @@ export class SubscriptionService {
     const updated = await this.subscriptionsRepository.findByIdOrThrow(subscriptionId);
 
     this.billingNotificationPublisher.publishSubscription('subscription.updated', updated, plan);
+    this.indexSubscription(updated, plan.name);
     this.customerTrustScoreService.triggerRecomputeForUser(updated.userId);
 
     return { subscription: updated };
@@ -954,6 +978,7 @@ export class SubscriptionService {
       id: subscription.id,
       number: subscription.number,
       planId: subscription.planId,
+      planName: plan?.name,
       userId: subscription.userId,
       status: subscription.status,
       currentPeriodStart: subscription.currentPeriodStart,
@@ -1022,6 +1047,13 @@ export class SubscriptionService {
           plansByPlanId.get(subscription.planId),
         ),
       ),
+    );
+  }
+
+  private indexSubscription(subscription: SubscriptionEntity, planName?: string): void {
+    this.billingSearchIndexService.scheduleUpsert(
+      'subscriptions',
+      mapSubscriptionToSearchDocument(subscription, getRequiredTenantId(), { planName }),
     );
   }
 }

@@ -6,6 +6,7 @@ export type ExternalImportKind = 'jira' | 'confluence';
 export interface ListAtlassianConnectionsParams {
   limit?: number;
   offset?: number;
+  search?: string;
 }
 
 /** Same shape as connections list; used for GET /imports/atlassian/configs pagination. */

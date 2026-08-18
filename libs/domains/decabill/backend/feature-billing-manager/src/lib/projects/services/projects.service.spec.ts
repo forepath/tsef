@@ -47,7 +47,7 @@ describe('ProjectsService', () => {
 
     const result = await service.listForUser('user-1', 10, 0);
 
-    expect(projectsRepository.findAllByUser).toHaveBeenCalledWith('user-1', 10, 0);
+    expect(projectsRepository.findAllByUser).toHaveBeenCalledWith('user-1', 10, 0, undefined);
     expect(timeEntriesRepository.sumDurationMinutes).toHaveBeenCalledWith('p1', false);
     expect(result.total).toBe(1);
     expect(result.items[0]?.unbilledMinutes).toBe(90);

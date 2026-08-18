@@ -37,6 +37,7 @@ export class TicketsController {
     @Query('clientId', new ParseUUIDPipe({ optional: true })) clientId?: string,
     @Query('status') status?: TicketStatus,
     @Query('parentId') parentIdRaw?: string,
+    @Query('search') search?: string,
     @Req() req?: RequestWithUser,
   ) {
     let parentId: string | null | undefined;
@@ -47,7 +48,7 @@ export class TicketsController {
       parentId = parentIdRaw;
     }
 
-    return await this.ticketsService.listTickets({ clientId, status, parentId }, req);
+    return await this.ticketsService.listTickets({ clientId, status, parentId, search }, req);
   }
 
   @Post()

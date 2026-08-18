@@ -25,6 +25,7 @@ describe('ProjectTicketsService', () => {
   };
 
   let service: ProjectTicketsService;
+  const billingSearchIndexService = { scheduleUpsert: jest.fn(), scheduleDelete: jest.fn() };
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -38,6 +39,7 @@ describe('ProjectTicketsService', () => {
       projectBoardRealtime as never,
       projectBoardSummary as never,
       billingNotificationPublisher as never,
+      billingSearchIndexService as never,
     );
   });
 

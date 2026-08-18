@@ -4,6 +4,7 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
+  AdminBillingFacade,
   AdminSubscriptionsFacade,
   MetersFacade,
   SubscriptionMetersFacade,
@@ -18,6 +19,7 @@ import {
   type UsageAttachmentType,
   type UsageMeterEntryResponse,
 } from '@forepath/decabill/frontend/data-access-billing-console';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
 import { debounceTime, distinctUntilChanged, filter, pairwise, skip } from 'rxjs';
 
 import {
@@ -26,6 +28,7 @@ import {
   getSubscriptionStatusBadgeClass,
   getSubscriptionStatusLabel,
   getUnavailableLabel,
+  resolveNamedLabel,
 } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
 
@@ -48,7 +51,7 @@ interface AddonMeterOption {
 @Component({
   selector: 'framework-admin-subscriptions-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, InfiniteScrollDirective, ListAppendFooterComponent],
   providers: [DatePipe],
   templateUrl: './admin-subscriptions-page.component.html',
   styleUrls: ['./admin-subscriptions-page.component.scss'],
@@ -63,7 +66,8 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   @ViewChild('metersModal', { static: false }) private metersModal!: ElementRef<HTMLDivElement>;
   @ViewChild('deleteEntryModal', { static: false }) private deleteEntryModal!: ElementRef<HTMLDivElement>;
 
-  private readonly facade = inject(AdminSubscriptionsFacade);
+  readonly facade = inject(AdminSubscriptionsFacade);
+  private readonly adminBillingFacade = inject(AdminBillingFacade);
   private readonly metersFacade = inject(MetersFacade);
   private readonly subscriptionMetersFacade = inject(SubscriptionMetersFacade);
   private readonly destroyRef = inject(DestroyRef);
@@ -72,6 +76,8 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
   readonly subscriptions = toSignal(this.facade.subscriptions$, { initialValue: [] as AdminSubscriptionListItem[] });
+  readonly billingSummary = toSignal(this.adminBillingFacade.summary$, { initialValue: null });
+  readonly billingSummaryLoading$ = this.adminBillingFacade.summaryLoading$;
   readonly meterSummaries = toSignal(this.subscriptionMetersFacade.summaries$, {
     initialValue: [] as SubscriptionMeterSummary[],
   });
@@ -80,6 +86,9 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   });
   readonly activeMeters = toSignal(this.metersFacade.getActiveMeters$(), { initialValue: [] as MeterResponse[] });
   readonly loading$ = this.facade.loading$;
+  readonly hasMore$ = this.facade.hasMore$;
+  readonly appendLoading$ = this.facade.appendLoading$;
+  readonly appendError$ = this.facade.appendError$;
   readonly canceling$ = this.facade.canceling$;
   readonly withdrawing$ = this.facade.withdrawing$;
   readonly instantCanceling$ = this.facade.instantCanceling$;
@@ -99,10 +108,9 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   entryForm: MeterEntryForm = this.defaultEntryForm();
   selectedAddonMeterKey = '';
 
-  readonly activeCount = () => this.subscriptions().filter((sub) => sub.status === 'active').length;
-
   ngOnInit(): void {
     this.facade.loadSubscriptions();
+    this.adminBillingFacade.loadSummary();
     this.metersFacade.loadMeters();
     this.registerModalCloseWatchers();
 
@@ -197,7 +205,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   }
 
   meterNameById(meterId: string): string {
-    return this.activeMeters().find((meter) => meter.id === meterId)?.name ?? meterId;
+    return resolveNamedLabel(this.activeMeters().find((meter) => meter.id === meterId)?.name);
   }
 
   formatMeterCharge(amount: number): string {
@@ -302,7 +310,7 @@ export class AdminSubscriptionsPageComponent implements OnInit {
   }
 
   subscriptionTitle(sub: AdminSubscriptionListItem): string {
-    return sub.planName?.trim() || sub.planId;
+    return resolveNamedLabel(sub.planName);
   }
 
   subscriptionUserLabel(sub: AdminSubscriptionListItem): string {

@@ -7,16 +7,25 @@ import {
   createFilterRule,
   deleteFilterRule,
   loadFilterRules,
+  loadMoreFilterRules,
   updateFilterRule,
 } from './filter-rules.actions';
 import {
   selectFilterRules,
+  selectFilterRulesAppendError,
+  selectFilterRulesAppendLoading,
   selectFilterRulesDeleting,
   selectFilterRulesError,
+  selectFilterRulesHasMore,
   selectFilterRulesLoading,
   selectFilterRulesSaving,
 } from './filter-rules.selectors';
-import type { CreateFilterRuleDto, FilterRuleResponseDto, UpdateFilterRuleDto } from './filter-rules.types';
+import type {
+  ListFilterRulesParams,
+  CreateFilterRuleDto,
+  FilterRuleResponseDto,
+  UpdateFilterRuleDto,
+} from './filter-rules.types';
 
 @Injectable({
   providedIn: 'root',
@@ -29,9 +38,20 @@ export class FilterRulesFacade {
   readonly error$: Observable<string | null> = this.store.select(selectFilterRulesError);
   readonly saving$: Observable<boolean> = this.store.select(selectFilterRulesSaving);
   readonly deleting$: Observable<boolean> = this.store.select(selectFilterRulesDeleting);
+  readonly hasMore$: Observable<boolean> = this.store.select(selectFilterRulesHasMore);
+  readonly appendLoading$: Observable<boolean> = this.store.select(selectFilterRulesAppendLoading);
+  readonly appendError$: Observable<string | null> = this.store.select(selectFilterRulesAppendError);
 
-  load(): void {
-    this.store.dispatch(loadFilterRules());
+  load(params?: ListFilterRulesParams): void {
+    this.store.dispatch(loadFilterRules({ params }));
+  }
+
+  loadMore(): void {
+    this.store.dispatch(loadMoreFilterRules());
+  }
+
+  retryLoadMore(): void {
+    this.store.dispatch(loadMoreFilterRules());
   }
 
   create(dto: CreateFilterRuleDto): void {

@@ -10,3 +10,4 @@ export * from './util-webhook/src';
 export * from './util-otel/src';
 export * from './feature-notifications/src';
 export * from './feature-updates/src';
+export * from './util-opensearch/src';

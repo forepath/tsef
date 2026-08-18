@@ -38,8 +38,9 @@ export class AdminDatevExportsController {
     @Query('offset', new ParseIntPipe({ optional: true })) offset = 0,
     @Query('year', new ParseIntPipe({ optional: true })) year?: number,
     @Query('scope') scope: DatevExportScope = DatevExportScope.TENANT,
+    @Query('search') search?: string,
   ): Promise<PaginatedAdminDatevExportsResponseDto> {
-    return await this.datevExportAdminService.listExports(scope, limit, offset, year);
+    return await this.datevExportAdminService.listExports(scope, limit, offset, year, search);
   }
 
   @Get(':exportId')

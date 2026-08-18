@@ -31,6 +31,7 @@ export interface AdminPromotionsState {
   updating: boolean;
   deactivating: boolean;
   error: string | null;
+  search: string | null;
 }
 
 export const initialAdminPromotionsState: AdminPromotionsState = {
@@ -42,15 +43,17 @@ export const initialAdminPromotionsState: AdminPromotionsState = {
   updating: false,
   deactivating: false,
   error: null,
+  search: null,
 };
 
 export const adminPromotionsReducer = createReducer(
   initialAdminPromotionsState,
-  on(loadAdminPromotions, (state) => ({
+  on(loadAdminPromotions, (state, { search }) => ({
     ...state,
     promotions: [],
     loading: true,
     error: null,
+    search: search?.trim() ? search.trim() : null,
   })),
   on(loadAdminPromotionsBatch, (state, { accumulated }) => ({
     ...state,

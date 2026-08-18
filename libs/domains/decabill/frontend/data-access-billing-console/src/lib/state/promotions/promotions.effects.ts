@@ -37,8 +37,8 @@ export const loadActivePromotions$ = createEffect(
   (actions$ = inject(Actions), service = inject(PromotionsService)) =>
     actions$.pipe(
       ofType(loadActivePromotions),
-      switchMap(() =>
-        service.listActive({ limit: BATCH_SIZE, offset: 0 }).pipe(
+      switchMap(({ search }) =>
+        service.listActive({ limit: BATCH_SIZE, offset: 0, search }).pipe(
           switchMap((response) => {
             if (response.items.length === 0) {
               return of(loadActivePromotionsSuccess({ items: [] }));
@@ -48,7 +48,7 @@ export const loadActivePromotions$ = createEffect(
               return of(loadActivePromotionsSuccess({ items: response.items }));
             }
 
-            return of(loadActivePromotionsBatch({ offset: BATCH_SIZE, accumulated: response.items }));
+            return of(loadActivePromotionsBatch({ offset: BATCH_SIZE, accumulated: response.items, search }));
           }),
           catchError((error) => of(loadActivePromotionsFailure({ error: normalizeError(error) }))),
         ),
@@ -61,8 +61,8 @@ export const loadActivePromotionsBatch$ = createEffect(
   (actions$ = inject(Actions), service = inject(PromotionsService)) =>
     actions$.pipe(
       ofType(loadActivePromotionsBatch),
-      switchMap(({ offset, accumulated }) =>
-        service.listActive({ limit: BATCH_SIZE, offset }).pipe(
+      switchMap(({ offset, accumulated, search }) =>
+        service.listActive({ limit: BATCH_SIZE, offset, search }).pipe(
           switchMap((response) => {
             const newAccumulated = [...accumulated, ...response.items];
 
@@ -74,6 +74,7 @@ export const loadActivePromotionsBatch$ = createEffect(
               loadActivePromotionsBatch({
                 offset: offset + BATCH_SIZE,
                 accumulated: newAccumulated,
+                search,
               }),
             );
           }),
@@ -88,8 +89,8 @@ export const loadPromotionRedemptions$ = createEffect(
   (actions$ = inject(Actions), service = inject(PromotionsService)) =>
     actions$.pipe(
       ofType(loadPromotionRedemptions),
-      switchMap(() =>
-        service.listRedemptions({ limit: BATCH_SIZE, offset: 0 }).pipe(
+      switchMap(({ search }) =>
+        service.listRedemptions({ limit: BATCH_SIZE, offset: 0, search }).pipe(
           switchMap((response) => {
             if (response.items.length === 0) {
               return of(loadPromotionRedemptionsSuccess({ items: [] }));
@@ -99,7 +100,7 @@ export const loadPromotionRedemptions$ = createEffect(
               return of(loadPromotionRedemptionsSuccess({ items: response.items }));
             }
 
-            return of(loadPromotionRedemptionsBatch({ offset: BATCH_SIZE, accumulated: response.items }));
+            return of(loadPromotionRedemptionsBatch({ offset: BATCH_SIZE, accumulated: response.items, search }));
           }),
           catchError((error) => of(loadPromotionRedemptionsFailure({ error: normalizeError(error) }))),
         ),
@@ -112,8 +113,8 @@ export const loadPromotionRedemptionsBatch$ = createEffect(
   (actions$ = inject(Actions), service = inject(PromotionsService)) =>
     actions$.pipe(
       ofType(loadPromotionRedemptionsBatch),
-      switchMap(({ offset, accumulated }) =>
-        service.listRedemptions({ limit: BATCH_SIZE, offset }).pipe(
+      switchMap(({ offset, accumulated, search }) =>
+        service.listRedemptions({ limit: BATCH_SIZE, offset, search }).pipe(
           switchMap((response) => {
             const newAccumulated = [...accumulated, ...response.items];
 
@@ -125,6 +126,7 @@ export const loadPromotionRedemptionsBatch$ = createEffect(
               loadPromotionRedemptionsBatch({
                 offset: offset + BATCH_SIZE,
                 accumulated: newAccumulated,
+                search,
               }),
             );
           }),

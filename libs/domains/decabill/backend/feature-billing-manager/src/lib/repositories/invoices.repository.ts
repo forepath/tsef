@@ -1,7 +1,7 @@
 import { UserEntity } from '@forepath/identity/backend';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 
 import { AutoPaymentStatus } from '../constants/auto-payment-status.constants';
 import {
@@ -13,6 +13,9 @@ import {
 } from '../constants/invoice-status.constants';
 import { InvoiceEntity } from '../entities/invoice.entity';
 import { OpenPositionEntity } from '../entities/open-position.entity';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
+import type { BillingSearchIdsLookup } from '../search/billing-search.types';
+import { applyBillingSearchIlike } from '../search/billing-search-ilike.util';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
 export interface OpenOverdueSummary {
@@ -51,6 +54,7 @@ export class InvoicesRepository {
   constructor(
     @InjectRepository(InvoiceEntity)
     private readonly repository: Repository<InvoiceEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   async findBySubscription(userId: string, subscriptionId: string): Promise<InvoiceEntity[]> {
@@ -331,7 +335,28 @@ export class InvoicesRepository {
     return (result.affected ?? 0) > 0;
   }
 
-  async findOpenOverdueByUserId(userId: string): Promise<InvoiceEntity[]> {
+  async findOpenOverdueByUserId(
+    userId: string,
+    options?: { search?: string; limit?: number; offset?: number },
+  ): Promise<InvoiceEntity[]> {
+    const limit = options?.limit;
+    const offset = options?.offset ?? 0;
+    const search = options?.search?.trim();
+
+    if (search && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('invoices', search, {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+        extraFilters: { userId, status: OPEN_OVERDUE_INVOICE_STATUSES },
+      });
+      const items = await this.hydrateInvoicesBySearchIds(lookup);
+
+      if (items !== null) {
+        return items;
+      }
+    }
+
     const qb = this.repository
       .createQueryBuilder('inv')
       .innerJoin('users', 'user', 'user.id = inv.user_id')
@@ -342,10 +367,42 @@ export class InvoicesRepository {
 
     applyUserTenantFilter(qb, 'user');
 
+    if (search) {
+      applyBillingSearchIlike(qb, 'invoices', 'inv', search, {
+        subscriptionNumber: 'subscription.number',
+        userEmail: 'user.email',
+      });
+    }
+
+    if (limit != null) {
+      qb.take(limit).skip(offset);
+    }
+
     return await qb.getMany();
   }
 
-  async findHistoryByUserId(userId: string): Promise<InvoiceEntity[]> {
+  async findHistoryByUserId(
+    userId: string,
+    options?: { search?: string; limit?: number; offset?: number },
+  ): Promise<InvoiceEntity[]> {
+    const limit = options?.limit;
+    const offset = options?.offset ?? 0;
+    const search = options?.search?.trim();
+
+    if (search && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('invoices', search, {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+        extraFilters: { userId, status: HISTORY_INVOICE_STATUSES },
+      });
+      const items = await this.hydrateInvoicesBySearchIds(lookup);
+
+      if (items !== null) {
+        return items;
+      }
+    }
+
     const qb = this.repository
       .createQueryBuilder('inv')
       .innerJoin('users', 'user', 'user.id = inv.user_id')
@@ -355,6 +412,17 @@ export class InvoicesRepository {
       .orderBy('inv.createdAt', 'DESC');
 
     applyUserTenantFilter(qb, 'user');
+
+    if (search) {
+      applyBillingSearchIlike(qb, 'invoices', 'inv', search, {
+        subscriptionNumber: 'subscription.number',
+        userEmail: 'user.email',
+      });
+    }
+
+    if (limit != null) {
+      qb.take(limit).skip(offset);
+    }
 
     return await qb.getMany();
   }
@@ -407,6 +475,21 @@ export class InvoicesRepository {
   }
 
   async findAllForAdmin(params: AdminInvoiceListParams): Promise<{ items: InvoiceEntity[]; total: number }> {
+    if (params.search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('invoices', params.search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit: params.limit,
+        offset: params.offset,
+        extraFilters: params.userId ? { userId: params.userId } : undefined,
+      });
+
+      const items = await this.hydrateInvoicesBySearchIds(lookup);
+
+      if (items !== null) {
+        return { items, total: lookup!.total };
+      }
+    }
+
     const qb = this.repository
       .createQueryBuilder('inv')
       .leftJoinAndSelect('inv.subscription', 'subscription')
@@ -419,17 +502,10 @@ export class InvoicesRepository {
     }
 
     if (params.search?.trim()) {
-      const term = `%${params.search.trim().toLowerCase()}%`;
-
-      qb.andWhere(
-        `(LOWER(inv.invoice_number) LIKE :term
-          OR LOWER(subscription.number) LIKE :term
-          OR LOWER(user.email) LIKE :term
-          OR CAST(inv.id AS text) LIKE :term
-          OR CAST(inv.user_id AS text) LIKE :term
-          OR CAST(user.id AS text) LIKE :term)`,
-        { term },
-      );
+      applyBillingSearchIlike(qb, 'invoices', 'inv', params.search, {
+        subscriptionNumber: 'subscription.number',
+        userEmail: 'user.email',
+      });
     }
 
     const total = await qb.getCount();
@@ -657,6 +733,25 @@ export class InvoicesRepository {
     applyUserTenantFilter(qb, 'user');
 
     return await qb.getMany();
+  }
+
+  private async hydrateInvoicesBySearchIds(lookup: BillingSearchIdsLookup): Promise<InvoiceEntity[] | null> {
+    if (!lookup) {
+      return null;
+    }
+
+    // Empty OS hits → fall through to ILIKE (unindexed data / analyzer gaps).
+    if (lookup.ids.length === 0) {
+      return lookup.total === 0 ? null : [];
+    }
+
+    const found = await this.repository.find({
+      where: { id: In(lookup.ids) },
+      relations: ['subscription'],
+    });
+    const byId = new Map(found.map((item) => [item.id, item]));
+
+    return lookup.ids.map((id) => byId.get(id)).filter((item): item is InvoiceEntity => item != null);
   }
 }
 

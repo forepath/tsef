@@ -7,12 +7,15 @@ import { SubscriptionsRepository } from './subscriptions.repository';
 const createMockQueryBuilder = () => ({
   innerJoin: jest.fn().mockReturnThis(),
   innerJoinAndMapOne: jest.fn().mockReturnThis(),
+  leftJoin: jest.fn().mockReturnThis(),
   where: jest.fn().mockReturnThis(),
   andWhere: jest.fn().mockReturnThis(),
   orderBy: jest.fn().mockReturnThis(),
   take: jest.fn().mockReturnThis(),
+  skip: jest.fn().mockReturnThis(),
   getMany: jest.fn(),
   getOne: jest.fn(),
+  getCount: jest.fn(),
 });
 
 describe('SubscriptionsRepository', () => {
@@ -26,6 +29,7 @@ describe('SubscriptionsRepository', () => {
     mockRepository = {
       findOne: jest.fn(),
       find: jest.fn(),
+      findBy: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
       createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
@@ -74,18 +78,34 @@ describe('SubscriptionsRepository', () => {
   it('finds all by user with pagination', async () => {
     const subscriptions = [{ id: 'sub-1' }, { id: 'sub-2' }];
 
-    mockRepository.find.mockResolvedValue(subscriptions);
+    mockQueryBuilder.getMany.mockResolvedValue(subscriptions);
 
     const result = await repository.findAllByUser('user-1', 10, 0);
 
     expect(result).toEqual(subscriptions);
-    expect(mockRepository.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { userId: 'user-1' },
-        take: 10,
-        skip: 0,
-      }),
+    expect(mockQueryBuilder.take).toHaveBeenCalledWith(10);
+    expect(mockQueryBuilder.skip).toHaveBeenCalledWith(0);
+  });
+
+  it('findAllByUser uses OpenSearch ids when search service returns hits', async () => {
+    const billingSearchIndexService = {
+      searchIds: jest.fn().mockResolvedValue({ ids: ['sub-2', 'sub-1'], total: 2 }),
+    };
+    const searchRepository = new SubscriptionsRepository(mockRepository, billingSearchIndexService as never);
+
+    mockRepository.findBy.mockResolvedValue([
+      { id: 'sub-1', userId: 'user-1' },
+      { id: 'sub-2', userId: 'user-1' },
+    ]);
+
+    const result = await searchRepository.findAllByUser('user-1', 10, 0, 'acme');
+
+    expect(billingSearchIndexService.searchIds).toHaveBeenCalledWith(
+      'subscriptions',
+      'acme',
+      expect.objectContaining({ extraFilters: { userId: 'user-1' }, limit: 10, offset: 0 }),
     );
+    expect(result.map((row) => row.id)).toEqual(['sub-2', 'sub-1']);
   });
 
   it('creates subscription', async () => {

@@ -51,7 +51,7 @@ describe('context-import effects', () => {
     const connections = [sampleConnection('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')];
     const configs = [sampleConfig('22222222-2222-4222-8222-222222222222')];
 
-    actions$ = of(loadAtlassianContextImport());
+    actions$ = of(loadAtlassianContextImport({}));
     adminService.listConnections.mockReturnValue(of(connections));
     adminService.listConfigs.mockReturnValue(of(configs));
 
@@ -69,7 +69,7 @@ describe('context-import effects', () => {
       sampleConnection(`00000000-0000-4000-8000-${String(i).padStart(12, '0')}`),
     );
 
-    actions$ = of(loadAtlassianContextImport());
+    actions$ = of(loadAtlassianContextImport({}));
     adminService.listConnections.mockReturnValue(of(connections));
     adminService.listConfigs.mockReturnValue(of(configs));
 
@@ -92,7 +92,7 @@ describe('context-import effects', () => {
       sampleConfig(`11111111-1111-4111-8111-${String(i).padStart(12, '0')}`),
     );
 
-    actions$ = of(loadAtlassianContextImport());
+    actions$ = of(loadAtlassianContextImport({}));
     adminService.listConnections.mockReturnValue(of(connections));
     adminService.listConfigs.mockReturnValue(of(configs));
 
@@ -156,7 +156,7 @@ describe('context-import effects', () => {
   });
 
   it('loadAtlassianContextImport$ emits failure on error', (done) => {
-    actions$ = of(loadAtlassianContextImport());
+    actions$ = of(loadAtlassianContextImport({}));
     adminService.listConfigs.mockReturnValue(of([]));
     adminService.listConnections.mockReturnValue(throwError(() => new Error('network')));
 

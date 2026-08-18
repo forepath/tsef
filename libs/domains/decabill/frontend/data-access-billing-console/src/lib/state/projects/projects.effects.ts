@@ -19,14 +19,21 @@ import {
   loadAdminProjectDetailFailure,
   loadAdminProjectDetailSuccess,
   loadAdminProjects,
-  loadAdminProjectsBatch,
   loadAdminProjectsFailure,
   loadAdminProjectsSuccess,
+  loadMoreAdminProjects,
+  loadMoreAdminProjectsFailure,
+  loadMoreAdminProjectsSuccess,
+  loadMoreProjects,
+  loadMoreProjectsFailure,
+  loadMoreProjectsSuccess,
   loadProjectDetail,
   loadProjectDetailFailure,
   loadProjectDetailSuccess,
   loadProjects,
-  loadProjectsBatch,
+  loadProjectsCatalogSummary,
+  loadProjectsCatalogSummaryFailure,
+  loadProjectsCatalogSummarySuccess,
   loadProjectsFailure,
   loadProjectsSuccess,
   loadProjectSummary,
@@ -53,14 +60,16 @@ export const loadProjects$ = createEffect(
   (actions$ = inject(Actions), service = inject(ProjectsService)) =>
     actions$.pipe(
       ofType(loadProjects),
-      switchMap(() =>
-        service.list({ limit: BATCH_SIZE, offset: 0 }).pipe(
-          switchMap((response) => {
-            if (response.items.length === 0) return of(loadProjectsSuccess({ projects: [] }));
+      switchMap(({ search }) =>
+        service.list({ limit: BATCH_SIZE, offset: 0, search }).pipe(
+          map((response) => {
+            const nextOffset = response.items.length;
 
-            if (response.items.length < BATCH_SIZE) return of(loadProjectsSuccess({ projects: response.items }));
-
-            return of(loadProjectsBatch({ offset: BATCH_SIZE, accumulatedProjects: response.items }));
+            return loadProjectsSuccess({
+              projects: response.items,
+              hasMore: nextOffset < response.total,
+              nextOffset,
+            });
           }),
           catchError((error) => of(loadProjectsFailure({ error: normalizeError(error) }))),
         ),
@@ -69,22 +78,36 @@ export const loadProjects$ = createEffect(
   { functional: true },
 );
 
-export const loadProjectsBatch$ = createEffect(
+export const loadProjectsCatalogSummary$ = createEffect(
   (actions$ = inject(Actions), service = inject(ProjectsService)) =>
     actions$.pipe(
-      ofType(loadProjectsBatch),
-      switchMap(({ offset, accumulatedProjects }) =>
-        service.list({ limit: BATCH_SIZE, offset }).pipe(
-          switchMap((response) => {
-            const newAccumulated = [...accumulatedProjects, ...response.items];
+      ofType(loadProjectsCatalogSummary),
+      switchMap(() =>
+        service.getCatalogSummary().pipe(
+          map((summary) => loadProjectsCatalogSummarySuccess({ summary })),
+          catchError((error) => of(loadProjectsCatalogSummaryFailure({ error: normalizeError(error) }))),
+        ),
+      ),
+    ),
+  { functional: true },
+);
 
-            if (response.items.length === 0 || response.items.length < BATCH_SIZE) {
-              return of(loadProjectsSuccess({ projects: newAccumulated }));
-            }
+export const loadMoreProjects$ = createEffect(
+  (actions$ = inject(Actions), service = inject(ProjectsService)) =>
+    actions$.pipe(
+      ofType(loadMoreProjects),
+      switchMap(({ offset, search }) =>
+        service.list({ limit: BATCH_SIZE, offset, search }).pipe(
+          map((response) => {
+            const nextOffset = offset + response.items.length;
 
-            return of(loadProjectsBatch({ offset: offset + BATCH_SIZE, accumulatedProjects: newAccumulated }));
+            return loadMoreProjectsSuccess({
+              projects: response.items,
+              hasMore: nextOffset < response.total,
+              nextOffset,
+            });
           }),
-          catchError((error) => of(loadProjectsFailure({ error: normalizeError(error) }))),
+          catchError((error) => of(loadMoreProjectsFailure({ error: normalizeError(error) }))),
         ),
       ),
     ),
@@ -123,16 +146,16 @@ export const loadAdminProjects$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminProjectsService)) =>
     actions$.pipe(
       ofType(loadAdminProjects),
-      switchMap(() =>
-        service.list({ limit: BATCH_SIZE, offset: 0 }).pipe(
-          switchMap((response) => {
-            if (response.items.length === 0) return of(loadAdminProjectsSuccess({ adminProjects: [] }));
+      switchMap(({ search, userId }) =>
+        service.list({ limit: BATCH_SIZE, offset: 0, search, userId }).pipe(
+          map((response) => {
+            const nextOffset = response.items.length;
 
-            if (response.items.length < BATCH_SIZE) {
-              return of(loadAdminProjectsSuccess({ adminProjects: response.items }));
-            }
-
-            return of(loadAdminProjectsBatch({ offset: BATCH_SIZE, accumulatedProjects: response.items }));
+            return loadAdminProjectsSuccess({
+              adminProjects: response.items,
+              hasMore: nextOffset < response.total,
+              nextOffset,
+            });
           }),
           catchError((error) => of(loadAdminProjectsFailure({ error: normalizeError(error) }))),
         ),
@@ -141,22 +164,22 @@ export const loadAdminProjects$ = createEffect(
   { functional: true },
 );
 
-export const loadAdminProjectsBatch$ = createEffect(
+export const loadMoreAdminProjects$ = createEffect(
   (actions$ = inject(Actions), service = inject(AdminProjectsService)) =>
     actions$.pipe(
-      ofType(loadAdminProjectsBatch),
-      switchMap(({ offset, accumulatedProjects }) =>
-        service.list({ limit: BATCH_SIZE, offset }).pipe(
-          switchMap((response) => {
-            const newAccumulated = [...accumulatedProjects, ...response.items];
+      ofType(loadMoreAdminProjects),
+      switchMap(({ offset, search, userId }) =>
+        service.list({ limit: BATCH_SIZE, offset, search, userId }).pipe(
+          map((response) => {
+            const nextOffset = offset + response.items.length;
 
-            if (response.items.length === 0 || response.items.length < BATCH_SIZE) {
-              return of(loadAdminProjectsSuccess({ adminProjects: newAccumulated }));
-            }
-
-            return of(loadAdminProjectsBatch({ offset: offset + BATCH_SIZE, accumulatedProjects: newAccumulated }));
+            return loadMoreAdminProjectsSuccess({
+              adminProjects: response.items,
+              hasMore: nextOffset < response.total,
+              nextOffset,
+            });
           }),
-          catchError((error) => of(loadAdminProjectsFailure({ error: normalizeError(error) }))),
+          catchError((error) => of(loadMoreAdminProjectsFailure({ error: normalizeError(error) }))),
         ),
       ),
     ),

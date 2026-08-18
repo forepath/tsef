@@ -41,6 +41,10 @@ export class AgentsService {
       httpParams = httpParams.set('offset', params.offset.toString());
     }
 
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
     return this.http.get<AgentResponseDto[]>(`${this.apiUrl}/clients/${clientId}/agents`, {
       params: httpParams,
     });

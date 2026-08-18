@@ -212,6 +212,16 @@
                     >
                       <i class="bi bi-database" aria-hidden="true"></i>
                     </div>
+                    <div
+                      class="updates-manager__dependency-status d-flex align-items-center justify-content-center px-3 border-start {{
+                        dependencyHealthClass(instance.dependencies.opensearch)
+                      }}"
+                      [attr.title]="dependencyStatusTitle('OpenSearch', instance.dependencies.opensearch)"
+                      [attr.aria-label]="dependencyStatusTitle('OpenSearch', instance.dependencies.opensearch)"
+                      role="img"
+                    >
+                      <i class="bi bi-search" aria-hidden="true"></i>
+                    </div>
                   </div>
                 </div>
               }

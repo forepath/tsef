@@ -21,8 +21,9 @@ export class AdminPromotionsController {
   async list(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<PaginatedAdminPromotionsResponseDto> {
-    return await this.promotionAdminService.list(limit ?? 10, offset ?? 0);
+    return await this.promotionAdminService.list(limit ?? 10, offset ?? 0, search);
   }
 
   @Post()

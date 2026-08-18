@@ -142,22 +142,22 @@ describe('InvoicesFacade', () => {
 
     it('should dispatch loadOpenOverdueInvoices', () => {
       facade.loadOpenOverdueInvoices();
-      expect(store.dispatch).toHaveBeenCalledWith(loadOpenOverdueInvoices());
+      expect(store.dispatch).toHaveBeenCalledWith(loadOpenOverdueInvoices({ silent: false, search: undefined }));
     });
 
     it('should dispatch silent loadOpenOverdueInvoices', () => {
       facade.loadOpenOverdueInvoices({ silent: true });
-      expect(store.dispatch).toHaveBeenCalledWith(loadOpenOverdueInvoices(true));
+      expect(store.dispatch).toHaveBeenCalledWith(loadOpenOverdueInvoices({ silent: true, search: undefined }));
     });
 
     it('should dispatch loadHistoryInvoices', () => {
       facade.loadHistoryInvoices();
-      expect(store.dispatch).toHaveBeenCalledWith(loadHistoryInvoices());
+      expect(store.dispatch).toHaveBeenCalledWith(loadHistoryInvoices({ silent: false, search: undefined }));
     });
 
     it('should dispatch silent loadHistoryInvoices', () => {
       facade.loadHistoryInvoices({ silent: true });
-      expect(store.dispatch).toHaveBeenCalledWith(loadHistoryInvoices(true));
+      expect(store.dispatch).toHaveBeenCalledWith(loadHistoryInvoices({ silent: true, search: undefined }));
     });
 
     it('should dispatch initiatePayment', () => {

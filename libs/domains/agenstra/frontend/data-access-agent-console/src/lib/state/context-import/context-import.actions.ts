@@ -10,7 +10,40 @@ import type {
   UpdateExternalImportConfigDto,
 } from './context-import.types';
 
-export const loadAtlassianContextImport = createAction('[Atlassian Context Import] Load');
+export const loadAtlassianContextImport = createAction(
+  '[Atlassian Context Import] Load',
+  props<{ connectionsSearch?: string; configsSearch?: string }>(),
+);
+
+export const loadAtlassianConnections = createAction(
+  '[Atlassian Context Import] Load Connections',
+  props<{ search?: string }>(),
+);
+
+export const loadAtlassianConnectionsSuccess = createAction(
+  '[Atlassian Context Import] Load Connections Success',
+  props<{ connections: AtlassianSiteConnectionDto[] }>(),
+);
+
+export const loadAtlassianConnectionsFailure = createAction(
+  '[Atlassian Context Import] Load Connections Failure',
+  props<{ error: string }>(),
+);
+
+export const loadExternalImportConfigsList = createAction(
+  '[Atlassian Context Import] Load Configs',
+  props<{ search?: string }>(),
+);
+
+export const loadExternalImportConfigsListSuccess = createAction(
+  '[Atlassian Context Import] Load Configs Success',
+  props<{ configs: ExternalImportConfigDto[] }>(),
+);
+
+export const loadExternalImportConfigsListFailure = createAction(
+  '[Atlassian Context Import] Load Configs Failure',
+  props<{ error: string }>(),
+);
 
 export const loadAtlassianContextImportBatch = createAction(
   '[Atlassian Context Import] Load Batch',

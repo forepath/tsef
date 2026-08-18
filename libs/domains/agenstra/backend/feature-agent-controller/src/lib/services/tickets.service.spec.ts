@@ -18,6 +18,7 @@ import { ExternalImportSyncMarkerService } from './external-import-sync-marker.s
 import { TicketAutomationService } from './ticket-automation.service';
 import { TicketBoardRealtimeService } from './ticket-board-realtime.service';
 import { AgenstraNotificationPublisher } from '../notifications/agenstra-notification.publisher';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 import { TicketsService } from './tickets.service';
 
@@ -154,6 +155,14 @@ describe('TicketsService', () => {
             publishClient: jest.fn(),
             publishFilterRule: jest.fn(),
             publish: jest.fn(),
+          },
+        },
+        {
+          provide: AgenstraSearchIndexService,
+          useValue: {
+            upsertSafe: jest.fn().mockResolvedValue(undefined),
+            deleteSafe: jest.fn().mockResolvedValue(undefined),
+            isEnabled: jest.fn().mockReturnValue(false),
           },
         },
       ],

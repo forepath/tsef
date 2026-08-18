@@ -292,6 +292,24 @@ Used by **backend billing manager only**. See **[Background Jobs](./background-j
 | `QUEUE_BULL_BOARD_USERNAME` | Bull Board HTTP Basic user             | `admin`                               |
 | `QUEUE_BULL_BOARD_PASSWORD` | Bull Board HTTP Basic password         | required in production                |
 
+## OpenSearch (Search Indexes)
+
+Used by **backend billing manager** for list/typeahead search. See **[Search indexes](../features/search-indexes.md)** and **[System requirements](./system-requirements.md)**.
+
+| Variable                  | Description                                    | Default                                    |
+| ------------------------- | ---------------------------------------------- | ------------------------------------------ |
+| `OPENSEARCH_ENABLED`      | Set `false` to disable indexing/search         | `true`                                     |
+| `OPENSEARCH_HOST`         | OpenSearch host                                | `localhost` (compose: `opensearch`)        |
+| `OPENSEARCH_PORT`         | OpenSearch port                                | `9200` (compose host publish often `9201`) |
+| `OPENSEARCH_NODE`         | Full node URL (overrides host/port when set)   | `http://opensearch:9200` in compose        |
+| `OPENSEARCH_USERNAME`     | Optional basic auth user                       | empty                                      |
+| `OPENSEARCH_PASSWORD`     | Optional basic auth password                   | empty                                      |
+| `OPENSEARCH_INDEX_PREFIX` | Index name prefix                              | `decabill`                                 |
+| `OPENSEARCH_HOST_PORT`    | Host port published by compose                 | `9201`                                     |
+| `SEARCH_REINDEX_INTERVAL` | Periodic reindex coordinator interval (`15m`…) | `15m`                                      |
+
+Production must not expose OpenSearch publicly; use private networking, TLS, and credentials from secrets.
+
 ## OpenTelemetry
 
 Applies to **Backend Billing Manager**. See [OpenTelemetry](../features/opentelemetry.md).

@@ -18,9 +18,11 @@ import {
   issueManualInvoiceFailure,
   issueManualInvoiceSuccess,
   loadAdminInvoiceManager,
-  loadAdminInvoiceManagerBatch,
   loadAdminInvoiceManagerFailure,
   loadAdminInvoiceManagerSuccess,
+  loadMoreAdminInvoiceManager,
+  loadMoreAdminInvoiceManagerFailure,
+  loadMoreAdminInvoiceManagerSuccess,
   updateManualInvoice,
   updateManualInvoiceFailure,
   updateManualInvoiceSuccess,
@@ -37,6 +39,10 @@ describe('adminInvoiceManagerReducer', () => {
     canDownload: false,
     canPreview: false,
   };
+  const listItem2 = {
+    ...listItem,
+    id: 'inv-2',
+  };
   const detail = {
     id: 'inv-1',
     userId: 'user-1',
@@ -50,31 +56,78 @@ describe('adminInvoiceManagerReducer', () => {
     canPreview: true,
   };
 
-  it('sets loading on loadAdminInvoiceManager', () => {
-    const state = adminInvoiceManagerReducer(initialAdminInvoiceManagerState, loadAdminInvoiceManager());
+  it('sets loading on loadAdminInvoiceManager and resets pagination', () => {
+    const state = adminInvoiceManagerReducer(
+      {
+        ...initialAdminInvoiceManagerState,
+        invoices: [listItem],
+        hasMore: true,
+        nextOffset: 10,
+        appendError: 'prev',
+      },
+      loadAdminInvoiceManager({}),
+    );
 
     expect(state.loading).toBe(true);
     expect(state.invoices).toEqual([]);
+    expect(state.hasMore).toBe(false);
+    expect(state.nextOffset).toBe(0);
+    expect(state.appendLoading).toBe(false);
+    expect(state.appendError).toBeNull();
   });
 
-  it('stores accumulated invoices on batch', () => {
+  it('sets appendLoading on loadMoreAdminInvoiceManager', () => {
     const state = adminInvoiceManagerReducer(
-      initialAdminInvoiceManagerState,
-      loadAdminInvoiceManagerBatch({ offset: 10, accumulatedInvoices: [listItem] }),
+      { ...initialAdminInvoiceManagerState, hasMore: true, nextOffset: 10, appendError: 'prev' },
+      loadMoreAdminInvoiceManager({ offset: 10 }),
     );
 
-    expect(state.invoices).toEqual([listItem]);
-    expect(state.loading).toBe(true);
+    expect(state.appendLoading).toBe(true);
+    expect(state.appendError).toBeNull();
+  });
+
+  it('appends invoices on loadMoreAdminInvoiceManagerSuccess', () => {
+    const state = adminInvoiceManagerReducer(
+      {
+        ...initialAdminInvoiceManagerState,
+        invoices: [listItem],
+        appendLoading: true,
+        hasMore: true,
+        nextOffset: 1,
+      },
+      loadMoreAdminInvoiceManagerSuccess({
+        invoices: [listItem2],
+        hasMore: false,
+        nextOffset: 2,
+      }),
+    );
+
+    expect(state.invoices).toEqual([listItem, listItem2]);
+    expect(state.appendLoading).toBe(false);
+    expect(state.hasMore).toBe(false);
+    expect(state.nextOffset).toBe(2);
+  });
+
+  it('stores appendError on loadMoreAdminInvoiceManagerFailure', () => {
+    const state = adminInvoiceManagerReducer(
+      { ...initialAdminInvoiceManagerState, appendLoading: true },
+      loadMoreAdminInvoiceManagerFailure({ error: 'Append failed' }),
+    );
+
+    expect(state.appendLoading).toBe(false);
+    expect(state.appendError).toBe('Append failed');
   });
 
   it('stores invoices on success', () => {
     const state = adminInvoiceManagerReducer(
       { ...initialAdminInvoiceManagerState, loading: true },
-      loadAdminInvoiceManagerSuccess({ invoices: [listItem] }),
+      loadAdminInvoiceManagerSuccess({ invoices: [listItem], hasMore: false, nextOffset: 1 }),
     );
 
     expect(state.loading).toBe(false);
     expect(state.invoices).toEqual([listItem]);
+    expect(state.hasMore).toBe(false);
+    expect(state.nextOffset).toBe(1);
   });
 
   it('stores error on load failure', () => {
@@ -85,6 +138,7 @@ describe('adminInvoiceManagerReducer', () => {
 
     expect(state.loading).toBe(false);
     expect(state.error).toBe('Load failed');
+    expect(state.hasMore).toBe(false);
   });
 
   it('upserts invoice on create success', () => {

@@ -19,12 +19,12 @@ describe('ProjectsFacade', () => {
 
   it('loadProjects dispatches loadProjects', () => {
     facade.loadProjects();
-    expect(store.dispatch).toHaveBeenCalledWith(loadProjects());
+    expect(store.dispatch).toHaveBeenCalledWith(loadProjects({}));
   });
 
   it('loadAdminProjects dispatches loadAdminProjects', () => {
     facade.loadAdminProjects();
-    expect(store.dispatch).toHaveBeenCalledWith(loadAdminProjects());
+    expect(store.dispatch).toHaveBeenCalledWith(loadAdminProjects({}));
   });
 
   it('createAdminProject dispatches createAdminProject', () => {

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   MetersFacade,
@@ -15,7 +15,18 @@ import {
   type ServiceTypeResponse,
   type UpdateServiceTypeDto,
 } from '@forepath/decabill/frontend/data-access-billing-console';
-import { catchError, combineLatest, forkJoin, map, of, switchMap, take } from 'rxjs';
+import {
+  catchError,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  forkJoin,
+  map,
+  of,
+  skip,
+  switchMap,
+  take,
+} from 'rxjs';
 
 import { getActiveStatusLabel, getActiveStatusTextClass, getProviderDisplayName } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
@@ -47,18 +58,8 @@ export class ServiceTypesPageComponent implements OnInit {
   readonly showProviderDefaultsLabel = $localize`:@@featureServiceTypes-showProviderDefaults:Show`;
   readonly hideProviderDefaultsLabel = $localize`:@@featureServiceTypes-hideProviderDefaults:Hide`;
   readonly editProviderDefaultsTouched = signal(false);
-  readonly serviceTypes$ = combineLatest([
-    this.facade.getServiceTypes$(),
-    this.facade.getProviderDetails$(),
-    this.searchQuery$,
-  ]).pipe(
-    map(([serviceTypes, providerDetails, searchQuery]) => {
-      const filtered = !searchQuery.trim()
-        ? serviceTypes
-        : serviceTypes.filter((item) => JSON.stringify(item).toLowerCase().includes(searchQuery.trim().toLowerCase()));
-
-      return { serviceTypes: filtered, providerDetails };
-    }),
+  readonly serviceTypes$ = combineLatest([this.facade.getServiceTypes$(), this.facade.getProviderDetails$()]).pipe(
+    map(([serviceTypes, providerDetails]) => ({ serviceTypes, providerDetails })),
   );
   readonly providerDetails$ = this.facade.getProviderDetails$();
   readonly providerDetailsLoading$ = this.facade.getProviderDetailsLoading$();
@@ -111,6 +112,12 @@ export class ServiceTypesPageComponent implements OnInit {
     this.facade.loadProviderDetails();
     this.metersFacade.loadMeters();
     this.registerModalCloseWatchers();
+
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadServiceTypes({ search: search.trim() || undefined });
+      });
   }
 
   openCreateModal(): void {

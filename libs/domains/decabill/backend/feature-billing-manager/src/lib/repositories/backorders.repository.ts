@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { BackorderEntity, BackorderStatus } from '../entities/backorder.entity';
+import { hydrateEntitiesBySearchIds } from '../search/billing-search-hydrate.util';
+import { applyBillingSearchIlike } from '../search/billing-search-ilike.util';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { applyUserTenantFilter, getRequiredTenantId } from '../utils/tenant-query.utils';
 
 @Injectable()
@@ -10,6 +13,7 @@ export class BackordersRepository {
   constructor(
     @InjectRepository(BackorderEntity)
     private readonly repository: Repository<BackorderEntity>,
+    @Optional() private readonly billingSearchIndexService?: BillingSearchIndexService,
   ) {}
 
   async findByIdOrThrow(id: string): Promise<BackorderEntity> {
@@ -27,13 +31,36 @@ export class BackordersRepository {
     return entity;
   }
 
-  async findAllByUser(userId: string, limit = 10, offset = 0): Promise<BackorderEntity[]> {
-    return await this.repository.find({
-      where: { userId },
-      take: limit,
-      skip: offset,
-      order: { createdAt: 'DESC' },
-    });
+  async findAllByUser(userId: string, limit = 10, offset = 0, search?: string): Promise<BackorderEntity[]> {
+    if (search?.trim() && this.billingSearchIndexService) {
+      const lookup = await this.billingSearchIndexService.searchIds('backorders', search.trim(), {
+        tenantId: getRequiredTenantId(),
+        limit,
+        offset,
+        extraFilters: { userId },
+      });
+      const hydrated = await hydrateEntitiesBySearchIds(this.repository, lookup);
+
+      if (hydrated) {
+        return hydrated.items;
+      }
+    }
+
+    const qb = this.repository
+      .createQueryBuilder('backorder')
+      .innerJoin('users', 'user', 'user.id = backorder.user_id')
+      .where('backorder.user_id = :userId', { userId })
+      .orderBy('backorder.createdAt', 'DESC')
+      .take(limit)
+      .skip(offset);
+
+    applyUserTenantFilter(qb, 'user');
+
+    if (search?.trim()) {
+      applyBillingSearchIlike(qb, 'backorders', 'backorder', search);
+    }
+
+    return await qb.getMany();
   }
 
   async countFailedByUserId(userId: string): Promise<number> {
@@ -42,6 +69,21 @@ export class BackordersRepository {
       .innerJoin('users', 'user', 'user.id = backorder.user_id')
       .where('backorder.user_id = :userId', { userId })
       .andWhere('backorder.status = :status', { status: BackorderStatus.FAILED });
+
+    applyUserTenantFilter(qb, 'user');
+
+    return await qb.getCount();
+  }
+
+  /** Pending + retrying — matches customer console “open backorders” KPI. */
+  async countOpenByUserId(userId: string): Promise<number> {
+    const qb = this.repository
+      .createQueryBuilder('backorder')
+      .innerJoin('users', 'user', 'user.id = backorder.user_id')
+      .where('backorder.user_id = :userId', { userId })
+      .andWhere('backorder.status IN (:...statuses)', {
+        statuses: [BackorderStatus.PENDING, BackorderStatus.RETRYING],
+      });
 
     applyUserTenantFilter(qb, 'user');
 

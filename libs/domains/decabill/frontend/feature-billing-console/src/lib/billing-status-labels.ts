@@ -1,8 +1,3 @@
-/**
- * Maps billing-manager API status strings to localized, human-readable labels.
- * Values align with SubscriptionStatus and BackorderStatus in feature-billing-manager.
- */
-
 import type {
   BillingIntervalType,
   MeterAggregator,
@@ -12,10 +7,14 @@ import type {
 } from '@forepath/decabill/frontend/data-access-billing-console';
 
 import { getCountryDisplayName } from './billing-country-options';
+import { getUnavailableLabel } from './named-label.util';
 
-export function getUnavailableLabel(): string {
-  return $localize`:@@featureBilling-notAvailable:N/A`;
-}
+export { getUnavailableLabel, resolveNamedLabel } from './named-label.util';
+
+/**
+ * Maps billing-manager API status strings to localized, human-readable labels.
+ * Values align with SubscriptionStatus and BackorderStatus in feature-billing-manager.
+ */
 
 export function getMeterAggregatorLabel(aggregator: MeterAggregator | string | null | undefined): string {
   if (aggregator == null || aggregator === '') {

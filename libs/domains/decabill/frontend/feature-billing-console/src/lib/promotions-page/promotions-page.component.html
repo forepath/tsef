@@ -197,14 +197,14 @@
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featurePromotions-noActive">No active promotions.</p>
               </div>
-            } @else if (filteredActivePromotions().length === 0) {
+            } @else if (activePromotions().length === 0) {
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featurePromotions-noActiveSearchResults">
                   No active promotions match your search.
                 </p>
               </div>
             } @else {
-              @for (item of filteredActivePromotions(); track item.id) {
+              @for (item of activePromotions(); track item.id) {
                 <div class="list-group-item border-bottom">
                   <div class="fw-semibold mb-1">{{ item.promotionName }} ({{ item.code }})</div>
                   <div class="small text-muted">{{ item.advantageSummary }}</div>
@@ -258,12 +258,12 @@
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featurePromotions-noHistory">No redemptions yet.</p>
               </div>
-            } @else if (filteredRedemptions().length === 0) {
+            } @else if (redemptions().length === 0) {
               <div class="d-flex justify-content-center align-items-center p-4 text-muted">
                 <p class="mb-0" i18n="@@featurePromotions-noHistorySearchResults">No redemptions match your search.</p>
               </div>
             } @else {
-              @for (item of filteredRedemptions(); track trackRedemption($index, item)) {
+              @for (item of redemptions(); track trackRedemption($index, item)) {
                 <div class="list-group-item border-bottom">
                   <div class="fw-semibold mb-1">{{ item.code }}</div>
                   <div class="small text-muted">{{ item.advantageSummary }}</div>
@@ -276,8 +276,7 @@
                       ><i class="bi bi-clock me-1" aria-hidden="true"></i>{{ formatDateTime(item.redeemedAt) }}</span
                     >
                     <span
-                      ><i class="bi bi-box me-1" aria-hidden="true"></i
-                      >{{ item.subscriptionNumber ?? item.subscriptionId }}</span
+                      ><i class="bi bi-box me-1" aria-hidden="true"></i>{{ redemptionSubscriptionLabel(item) }}</span
                     >
                     @if (item.planName) {
                       <span><i class="bi bi-tag me-1" aria-hidden="true"></i>{{ item.planName }}</span>

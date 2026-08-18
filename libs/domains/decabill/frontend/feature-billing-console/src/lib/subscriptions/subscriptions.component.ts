@@ -56,7 +56,21 @@ import {
   type ValidatePromotionRequest,
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import { ENVIRONMENT, type Environment } from '@forepath/shared/frontend/util-configuration';
-import { combineLatest, filter, interval, map, of, pairwise, switchMap, take, withLatestFrom } from 'rxjs';
+import { InfiniteScrollDirective, ListAppendFooterComponent } from '@forepath/shared/frontend/ui-lists';
+import {
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  interval,
+  map,
+  of,
+  pairwise,
+  skip,
+  switchMap,
+  take,
+  withLatestFrom,
+} from 'rxjs';
 
 import {
   getBackorderStatusBadgeClass,
@@ -69,8 +83,8 @@ import {
   getSubscriptionStatusBadgeClass,
   getSubscriptionStatusLabel,
   getVatIdValidationStatusLabel,
+  resolveNamedLabel,
 } from '../billing-status-labels';
-import { filterItemsBySearch } from '../billing-list-search';
 import {
   BILLING_COUNTRY_OPTIONS,
   DEFAULT_BILLING_COUNTRY_CODE,
@@ -100,7 +114,7 @@ type ConfigChangeWizardStep = {
 @Component({
   selector: 'framework-billing-subscriptions',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, InfiniteScrollDirective, ListAppendFooterComponent],
   providers: [DatePipe],
   templateUrl: './subscriptions.component.html',
   styleUrls: ['./subscriptions.component.scss'],
@@ -110,6 +124,8 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   readonly mobilePanel = signal<CustomerPlansMobilePanel>('subscriptions');
   readonly subscriptionsSearch = signal('');
   readonly backordersSearch = signal('');
+  readonly subscriptionsSearch$ = toObservable(this.subscriptionsSearch);
+  readonly backordersSearch$ = toObservable(this.backordersSearch);
   @ViewChild('orderPlanModal', { static: false }) private orderPlanModal!: ElementRef<HTMLDivElement>;
   @ViewChild('modifyConfigModal', { static: false }) private modifyConfigModal!: ElementRef<HTMLDivElement>;
   @ViewChild('cancelSubscriptionModal', { static: false }) private cancelSubscriptionModal!: ElementRef<HTMLDivElement>;
@@ -139,7 +155,11 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     initialValue: [] as SubscriptionResponse[],
   });
   readonly subscriptionsLoading$ = this.subscriptionsFacade.getSubscriptionsLoading$();
+  readonly subscriptionsSummaryLoading$ = this.subscriptionsFacade.getSubscriptionsSummaryLoading$();
   readonly subscriptionsError$ = this.subscriptionsFacade.getSubscriptionsError$();
+  readonly subscriptionsHasMore$ = this.subscriptionsFacade.getHasMore$();
+  readonly subscriptionsAppendLoading$ = this.subscriptionsFacade.getAppendLoading$();
+  readonly subscriptionsAppendError$ = this.subscriptionsFacade.getAppendError$();
   readonly subscriptionsCreating$ = this.subscriptionsFacade.getSubscriptionsCreating$();
   readonly subscriptionsCreating = toSignal(this.subscriptionsFacade.getSubscriptionsCreating$(), {
     initialValue: false,
@@ -155,14 +175,13 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     },
   );
 
-  readonly filteredSubscriptions = computed(() =>
-    filterItemsBySearch(this.subscriptions(), this.subscriptionsSearch(), (sub) =>
-      this.subscriptionSearchHaystack(sub),
-    ),
-  );
   readonly activeSubscriptionsCount = computed(
     () => this.subscriptions().filter((sub) => sub.status === 'active').length,
   );
+  /** KPI totals frozen while a list search is active so the summary bar does not flicker/reload. */
+  readonly summarySubscriptionsTotal = signal(0);
+  readonly summaryActiveCount = signal(0);
+  readonly summaryBackordersCount = signal(0);
   readonly isCustomerProfileComplete = toSignal(this.customerProfileFacade.isCustomerProfileComplete$(), {
     initialValue: false,
   });
@@ -179,12 +198,6 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   });
   readonly backordersLoading$ = this.backordersFacade.getBackordersLoading$();
   readonly backordersError$ = this.backordersFacade.getBackordersError$();
-
-  readonly filteredBackorders = computed(() =>
-    filterItemsBySearch(this.backorders(), this.backordersSearch(), (backorder) =>
-      this.backorderSearchHaystack(backorder),
-    ),
-  );
 
   readonly customerProfile$ = this.customerProfileFacade.getCustomerProfile$();
   readonly customerProfileUpdating$ = this.customerProfileFacade.getCustomerProfileUpdating$();
@@ -433,14 +446,18 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
   profileForm: CustomerProfileDto = {};
 
-  planNameByPlanId(plans: ServicePlanResponse[] | null, planId: string): string {
-    const plan = plans?.find((p) => p.id === planId);
+  planNameByPlanId(plans: ServicePlanResponse[] | null, planId: string, apiPlanName?: string | null): string {
+    const catalogName = plans?.find((p) => p.id === planId)?.name;
 
-    return plan?.name ?? planId;
+    return resolveNamedLabel(apiPlanName, catalogName);
   }
 
   subscriptionDisplayTitle(sub: SubscriptionResponse, plans: ServicePlanResponse[] | null): string {
-    return this.planNameByPlanId(plans, sub.planId);
+    return this.planNameByPlanId(plans, sub.planId, sub.planName);
+  }
+
+  backorderDisplayTitle(bo: BackorderResponse, plans: ServicePlanResponse[] | null): string {
+    return this.planNameByPlanId(plans, bo.planId, bo.planName);
   }
 
   subscriptionStatusLabel(status: string | null | undefined): string {
@@ -506,36 +523,12 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return `${this.formatDate(sub.currentPeriodStart)} to ${this.formatDate(sub.currentPeriodEnd)}`;
   }
 
-  subscriptionSearchHaystack(sub: SubscriptionResponse): string {
-    return [
-      sub.number,
-      sub.planId,
-      this.planNameByPlanId(this.servicePlans(), sub.planId),
-      sub.status,
-      this.subscriptionStatusLabel(sub.status),
-      sub.currentPeriodStart,
-      sub.currentPeriodEnd,
-      sub.nextBillingAt,
-      sub.periodTotalPrice,
-    ]
-      .filter((value) => value !== null && value !== undefined && value !== '')
-      .join(' ');
-  }
-
-  backorderSearchHaystack(backorder: BackorderResponse): string {
-    return [
-      backorder.planId,
-      this.planNameByPlanId(this.servicePlans(), backorder.planId),
-      backorder.status,
-      this.backorderStatusLabel(backorder.status),
-      backorder.periodTotalPrice,
-    ]
-      .filter((value) => value !== null && value !== undefined && value !== '')
-      .join(' ');
-  }
-
   onSubscriptionsSearchChange(value: string): void {
     this.subscriptionsSearch.set(value);
+  }
+
+  loadMoreSubscriptions(): void {
+    this.subscriptionsFacade.loadMore();
   }
 
   onBackordersSearchChange(value: string): void {
@@ -719,11 +712,37 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.subscriptionsFacade.loadSubscriptions();
+    this.subscriptionsFacade.loadSubscriptionsSummary();
     this.servicePlansFacade.loadServicePlans();
     this.serviceTypesFacade.loadServiceTypes();
     this.serviceTypesFacade.loadProviderDetails();
     this.backordersFacade.loadBackorders();
     this.customerProfileFacade.loadCustomerProfile();
+
+    this.subscriptionsSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.subscriptionsFacade.loadSubscriptions({ search: search.trim() || undefined });
+      });
+
+    this.backordersSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.backordersFacade.loadBackorders({ search: search.trim() || undefined });
+      });
+
+    this.subscriptionsFacade
+      .getSubscriptionsSummary$()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((summary) => {
+        if (!summary) {
+          return;
+        }
+
+        this.summarySubscriptionsTotal.set(summary.total);
+        this.summaryActiveCount.set(summary.active);
+        this.summaryBackordersCount.set(summary.pendingBackorders);
+      });
 
     this.subscriptionsLoading$
       .pipe(

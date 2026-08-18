@@ -81,7 +81,7 @@ export class AuthService {
     return this.http.post<void>(`${this.apiUrl}/auth/logout`, { invalidateAllSessions });
   }
 
-  listUsers(params?: { limit?: number; offset?: number }): Observable<UserResponseDto[]> {
+  listUsers(params?: { limit?: number; offset?: number; search?: string }): Observable<UserResponseDto[]> {
     let httpParams = new HttpParams();
 
     if (params?.limit !== undefined) {
@@ -90,6 +90,10 @@ export class AuthService {
 
     if (params?.offset !== undefined) {
       httpParams = httpParams.set('offset', params.offset.toString());
+    }
+
+    if (params?.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
     }
 
     return this.http.get<UserResponseDto[]>(`${this.apiUrl}/users`, { params: httpParams });

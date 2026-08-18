@@ -1,20 +1,29 @@
 import { createAction, props } from '@ngrx/store';
 
-import type { CreateFilterRuleDto, FilterRuleResponseDto, UpdateFilterRuleDto } from './filter-rules.types';
+import type {
+  CreateFilterRuleDto,
+  FilterRuleResponseDto,
+  ListFilterRulesParams,
+  UpdateFilterRuleDto,
+} from './filter-rules.types';
 
-export const loadFilterRules = createAction('[Filter Rules] Load');
-
-export const loadFilterRulesBatch = createAction(
-  '[Filter Rules] Load Batch',
-  props<{ offset: number; accumulatedRules: FilterRuleResponseDto[] }>(),
-);
+export const loadFilterRules = createAction('[Filter Rules] Load', props<{ params?: ListFilterRulesParams }>());
 
 export const loadFilterRulesSuccess = createAction(
   '[Filter Rules] Load Success',
-  props<{ rules: FilterRuleResponseDto[] }>(),
+  props<{ rules: FilterRuleResponseDto[]; hasMore: boolean; nextOffset: number }>(),
 );
 
 export const loadFilterRulesFailure = createAction('[Filter Rules] Load Failure', props<{ error: string }>());
+
+export const loadMoreFilterRules = createAction('[Filter Rules] Load More');
+
+export const loadMoreFilterRulesSuccess = createAction(
+  '[Filter Rules] Load More Success',
+  props<{ rules: FilterRuleResponseDto[]; hasMore: boolean; nextOffset: number }>(),
+);
+
+export const loadMoreFilterRulesFailure = createAction('[Filter Rules] Load More Failure', props<{ error: string }>());
 
 export const createFilterRule = createAction('[Filter Rules] Create', props<{ dto: CreateFilterRuleDto }>());
 

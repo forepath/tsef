@@ -57,8 +57,8 @@ export class UsersService {
     return this.usersRepository.countByTenant();
   }
 
-  async findAll(limit = 10, offset = 0): Promise<UserResponseDto[]> {
-    const users = await this.usersRepository.findAll(limit, offset);
+  async findAll(limit = 10, offset = 0, search?: string): Promise<UserResponseDto[]> {
+    const users = await this.usersRepository.findAll(limit, offset, search);
 
     return Promise.all(users.map((u) => this.mapToResponseDto(u)));
   }

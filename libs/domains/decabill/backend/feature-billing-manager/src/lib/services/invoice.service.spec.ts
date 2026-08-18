@@ -102,6 +102,7 @@ describe('InvoiceService', () => {
     recordCrossBorderB2cNet: jest.fn(),
     getDecision: jest.fn(),
   };
+  const billingSearchIndexService = { scheduleUpsert: jest.fn(), scheduleDelete: jest.fn() };
   const service = new InvoiceService(
     invoicesRepository as never,
     invoiceLineItemsRepository as never,
@@ -122,6 +123,7 @@ describe('InvoiceService', () => {
     customerTrustScoreService as never,
     invoiceTaxContextService as never,
     ossThresholdService as never,
+    billingSearchIndexService as never,
   );
   const subscriptionId = 'sub-1';
   const userId = 'user-1';

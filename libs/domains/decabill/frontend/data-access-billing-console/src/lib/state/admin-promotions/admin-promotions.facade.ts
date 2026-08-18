@@ -57,8 +57,8 @@ export class AdminPromotionsFacade {
     return this.store.select(selectAdminPromotionsError);
   }
 
-  loadPromotions(): void {
-    this.store.dispatch(loadAdminPromotions());
+  loadPromotions(params?: { search?: string }): void {
+    this.store.dispatch(loadAdminPromotions({ search: params?.search }));
   }
 
   loadRedemptions(promotionId: string): void {

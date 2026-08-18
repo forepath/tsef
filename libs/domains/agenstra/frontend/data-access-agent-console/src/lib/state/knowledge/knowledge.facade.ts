@@ -34,8 +34,8 @@ export class KnowledgeFacade {
   readonly selectedNodeId$ = this.store.select(selectKnowledgeSelectedNodeId);
   readonly selectedNode$ = this.store.select(selectKnowledgeSelectedNode);
 
-  loadTree(clientId: string): void {
-    this.store.dispatch(KnowledgeActions.loadKnowledgeTree({ clientId }));
+  loadTree(clientId: string, search?: string): void {
+    this.store.dispatch(KnowledgeActions.loadKnowledgeTree({ clientId, search }));
   }
 
   selectNode(nodeId: string | null): void {

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -28,14 +28,13 @@ import {
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import type { Environment } from '@forepath/shared/frontend/util-configuration';
 import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
-import { combineLatest, filter, finalize, map, take } from 'rxjs';
+import { combineLatest, debounceTime, distinctUntilChanged, filter, finalize, map, skip, take } from 'rxjs';
 
 import {
   getProfileCompleteLabel,
   getProvisioningStatusBadgeClass,
   getProvisioningStatusLabel,
 } from '../billing-status-labels';
-import { filterItemsBySearch } from '../billing-list-search';
 import { hideBillingModal, showBillingModal } from '../billing-modal';
 
 @Component({
@@ -69,6 +68,10 @@ export class OverviewComponent implements OnInit {
   sshAccessKeyCopied = false;
 
   readonly subscriptions$ = this.subscriptionsFacade.getSubscriptions$();
+  readonly subscriptionsSummary = toSignal(this.subscriptionsFacade.getSubscriptionsSummary$(), {
+    initialValue: null,
+  });
+  readonly subscriptionsSummaryLoading$ = this.subscriptionsFacade.getSubscriptionsSummaryLoading$();
   readonly invoicesSummary$ = this.invoicesFacade.getInvoicesSummary$();
   readonly invoicesSummary = toSignal(this.invoicesFacade.getInvoicesSummary$(), {
     initialValue: null as InvoicesSummaryResponse | null,
@@ -86,11 +89,7 @@ export class OverviewComponent implements OnInit {
     initialValue: [] as SubscriptionWithServerInfo[],
   });
   readonly instancesSearch = signal('');
-  readonly filteredSubscriptionsWithServerInfo = computed(() =>
-    filterItemsBySearch(this.subscriptionsWithServerInfo(), this.instancesSearch(), (item) =>
-      this.instanceSearchHaystack(item),
-    ),
-  );
+  readonly instancesSearch$ = toObservable(this.instancesSearch);
   readonly overviewServerInfoLoading$ = combineLatest([
     this.serverInfoFacade.getOverviewServerInfoLoading$(),
     this.billingDashboardSocketFacade.getStreamPending$(),
@@ -114,7 +113,8 @@ export class OverviewComponent implements OnInit {
   readonly projects = toSignal(this.projectsFacade.projects$, {
     initialValue: [] as ProjectListItem[],
   });
-  readonly activeProjects = computed(() => this.projects().filter((project) => project.status === 'active'));
+  readonly projectsCatalogSummary = toSignal(this.projectsFacade.catalogSummary$, { initialValue: null });
+  readonly projectsCatalogSummaryLoading$ = this.projectsFacade.catalogSummaryLoading$;
   readonly projectsLoading$ = this.projectsFacade.loading$;
   readonly projectsError$ = this.projectsFacade.error$;
 
@@ -163,22 +163,6 @@ export class OverviewComponent implements OnInit {
       serviceTypeName: item.serviceTypeName,
       service: item.service,
     });
-  }
-
-  instanceSearchHaystack(item: SubscriptionWithServerInfo): string {
-    return [
-      item.subscription.number,
-      this.serviceTypeLabel(item.service),
-      this.provisioningStatusLabel(item.provisioningStatus),
-      item.serverInfo ? this.serverStatusLabel(item.serverInfo) : undefined,
-      item.serviceTypeName,
-      item.serverInfo ? this.serverLocationLabel(item.serverInfo.metadata) : undefined,
-      item.serverInfo?.hostnameFqdn,
-      item.serverInfo?.publicIp,
-      item.serverInfo?.privateIp,
-    ]
-      .filter((value) => value !== null && value !== undefined && value !== '')
-      .join(' ');
   }
 
   onInstancesSearchChange(value: string): void {
@@ -235,10 +219,18 @@ export class OverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.subscriptionsFacade.loadSubscriptions();
+    this.subscriptionsFacade.loadSubscriptionsSummary();
     this.backordersFacade.loadBackorders();
     this.projectsFacade.loadProjects();
+    this.projectsFacade.loadCatalogSummary();
     this.customerProfileFacade.loadCustomerProfile();
     this.invoicesFacade.loadInvoicesSummary();
+
+    this.instancesSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.subscriptionsFacade.loadSubscriptions({ search: search.trim() || undefined });
+      });
 
     const useBillingSocket = !!this.environment.billing.websocketUrl?.trim();
 

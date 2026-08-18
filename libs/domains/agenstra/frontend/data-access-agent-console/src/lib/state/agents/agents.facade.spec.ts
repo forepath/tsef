@@ -9,6 +9,7 @@ import {
   loadClientAgent,
   loadClientAgentModels,
   loadClientAgents,
+  loadMoreClientAgents,
   restartClientAgent,
   startClientAgent,
   stopClientAgent,
@@ -266,6 +267,12 @@ describe('AgentsFacade', () => {
       facade.loadClientAgents(clientId);
 
       expect(store.dispatch).toHaveBeenCalledWith(loadClientAgents({ clientId, params: undefined }));
+    });
+
+    it('should dispatch loadMoreClientAgents action', () => {
+      facade.loadMoreClientAgents(clientId);
+
+      expect(store.dispatch).toHaveBeenCalledWith(loadMoreClientAgents({ clientId }));
     });
 
     it('should dispatch loadClientAgent action', () => {

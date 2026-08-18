@@ -23,12 +23,12 @@
       placeholder="Search projects"
       i18n-placeholder="@@featureAdminProjects-searchPlaceholder"
       [ngModel]="searchQuery()"
-      (ngModelChange)="searchQuery.set($event)"
+      (ngModelChange)="onSearchChange($event)"
       name="search"
     />
   </div>
 
-  <div class="flex-grow-1 overflow-auto">
+  <div #scrollRoot class="flex-grow-1 overflow-auto">
     @if (loading$ | async) {
       <div class="d-flex justify-content-center p-4"><div class="spinner-border text-primary" role="status"></div></div>
     } @else {
@@ -64,9 +64,7 @@
                     ><i class="bi bi-cash-stack me-1" aria-hidden="true"></i
                     >{{ openBillableLabel(project.openBillableAmountNet, project.currency) }}</span
                   >
-                  <span
-                    ><i class="bi bi-person me-1" aria-hidden="true"></i>{{ project.userEmail ?? project.userId }}</span
-                  >
+                  <span><i class="bi bi-person me-1" aria-hidden="true"></i>{{ projectOwnerLabel(project) }}</span>
                 </div>
               </a>
               <div class="btn-group btn-group-sm flex-shrink-0" role="group">
@@ -94,6 +92,22 @@
         </div>
       }
     }
+    @if ((appendLoading$ | async) || (appendError$ | async)) {
+      <shared-list-append-footer
+        [loading]="!!(appendLoading$ | async)"
+        [error]="!!(appendError$ | async)"
+        (retry)="facade.loadMoreAdminProjects()"
+      />
+    }
+    <div
+      sharedInfiniteScroll
+      [root]="scrollRoot"
+      [paused]="!!(appendError$ | async)"
+      [disabled]="(hasMore$ | async) === false || !!(appendLoading$ | async) || !!(loading$ | async)"
+      (reachedEnd)="facade.loadMoreAdminProjects()"
+      aria-hidden="true"
+      style="height: 1px; width: 100%; flex-shrink: 0"
+    ></div>
   </div>
 </div>
 

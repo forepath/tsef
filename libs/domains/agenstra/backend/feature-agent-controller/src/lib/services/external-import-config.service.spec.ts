@@ -16,12 +16,24 @@ describe('ExternalImportConfigService', () => {
     create: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),
+    createQueryBuilder: jest.fn(),
+  };
+  const clientsRepository = {
+    findAllIds: jest.fn().mockResolvedValue(['client-1']),
+  };
+  const searchIndex = {
+    isEnabled: jest.fn().mockReturnValue(false),
+    searchIds: jest.fn(),
   };
   let service: ExternalImportConfigService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new ExternalImportConfigService(mockRepo as unknown as Repository<ExternalImportConfigEntity>);
+    service = new ExternalImportConfigService(
+      mockRepo as unknown as Repository<ExternalImportConfigEntity>,
+      clientsRepository as never,
+      searchIndex as never,
+    );
   });
 
   describe('create', () => {

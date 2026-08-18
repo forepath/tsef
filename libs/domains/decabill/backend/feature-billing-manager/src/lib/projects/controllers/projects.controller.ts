@@ -1,7 +1,12 @@
 import { RequireScopes } from '@forepath/identity/backend';
 import { BadRequestException, Controller, Get, Param, ParseIntPipe, ParseUUIDPipe, Query, Req } from '@nestjs/common';
 
-import type { PaginatedProjectsResponseDto, ProjectResponseDto, ProjectSummaryResponseDto } from '../dto/project.dto';
+import type {
+  PaginatedProjectsResponseDto,
+  ProjectResponseDto,
+  ProjectSummaryResponseDto,
+  ProjectsCatalogSummaryResponseDto,
+} from '../dto/project.dto';
 import { ProjectsService } from '../services/projects.service';
 import { getUserFromRequest, type RequestWithUser } from '../../utils/billing-access.utils';
 
@@ -15,6 +20,7 @@ export class ProjectsController {
     @Req() req: RequestWithUser,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
   ): Promise<PaginatedProjectsResponseDto> {
     const userInfo = getUserFromRequest(req);
 
@@ -22,7 +28,18 @@ export class ProjectsController {
       throw new BadRequestException('User not authenticated');
     }
 
-    return await this.projectsService.listForUser(userInfo.userId, limit ?? 10, offset ?? 0);
+    return await this.projectsService.listForUser(userInfo.userId, limit ?? 10, offset ?? 0, search);
+  }
+
+  @Get('summary')
+  async catalogSummary(@Req() req: RequestWithUser): Promise<ProjectsCatalogSummaryResponseDto> {
+    const userInfo = getUserFromRequest(req);
+
+    if (!userInfo.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    return await this.projectsService.getCatalogSummaryForUser(userInfo.userId);
   }
 
   @Get(':id/summary')

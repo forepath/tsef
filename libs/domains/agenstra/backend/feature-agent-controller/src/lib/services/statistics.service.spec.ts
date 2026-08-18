@@ -5,6 +5,7 @@ import { StatisticsInteractionKind } from '../entities/statistics-chat-io.entity
 import { StatisticsEntityEventType, StatisticsEntityType } from '../entities/statistics-entity-event.entity';
 import { ClientsRepository } from '../repositories/clients.repository';
 import { StatisticsRepository } from '../repositories/statistics.repository';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
 
 import { StatisticsService } from './statistics.service';
 
@@ -54,6 +55,14 @@ describe('StatisticsService', () => {
         StatisticsService,
         { provide: StatisticsRepository, useValue: statisticsRepository },
         { provide: ClientsRepository, useValue: clientsRepository },
+        {
+          provide: AgenstraSearchIndexService,
+          useValue: {
+            upsertSafe: jest.fn().mockResolvedValue(undefined),
+            deleteSafe: jest.fn().mockResolvedValue(undefined),
+            isEnabled: jest.fn().mockReturnValue(false),
+          },
+        },
       ],
     });
     const compiled = await module.compile();

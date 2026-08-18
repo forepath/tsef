@@ -7,10 +7,10 @@ import type {
   ValidatePromotionRequest,
 } from '../../types/promotions.types';
 
-export const loadActivePromotions = createAction('[Promotions] Load Active Promotions');
+export const loadActivePromotions = createAction('[Promotions] Load Active Promotions', props<{ search?: string }>());
 export const loadActivePromotionsBatch = createAction(
   '[Promotions] Load Active Promotions Batch',
-  props<{ offset: number; accumulated: PromotionRedemptionResponse[] }>(),
+  props<{ offset: number; accumulated: PromotionRedemptionResponse[]; search?: string }>(),
 );
 export const loadActivePromotionsSuccess = createAction(
   '[Promotions] Load Active Promotions Success',
@@ -21,10 +21,10 @@ export const loadActivePromotionsFailure = createAction(
   props<{ error: string }>(),
 );
 
-export const loadPromotionRedemptions = createAction('[Promotions] Load Redemptions');
+export const loadPromotionRedemptions = createAction('[Promotions] Load Redemptions', props<{ search?: string }>());
 export const loadPromotionRedemptionsBatch = createAction(
   '[Promotions] Load Redemptions Batch',
-  props<{ offset: number; accumulated: PromotionRedemptionResponse[] }>(),
+  props<{ offset: number; accumulated: PromotionRedemptionResponse[]; search?: string }>(),
 );
 export const loadPromotionRedemptionsSuccess = createAction(
   '[Promotions] Load Redemptions Success',

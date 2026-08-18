@@ -7,7 +7,7 @@ export const loadMetersSuccess = createAction('[Meters] Load Meters Success', pr
 export const loadMetersFailure = createAction('[Meters] Load Meters Failure', props<{ error: string }>());
 export const loadMetersBatch = createAction(
   '[Meters] Load Meters Batch',
-  props<{ offset: number; accumulatedMeters: MeterResponse[] }>(),
+  props<{ offset: number; accumulatedMeters: MeterResponse[]; params?: ListParams }>(),
 );
 export const loadMeter = createAction('[Meters] Load Meter', props<{ id: string }>());
 export const loadMeterSuccess = createAction('[Meters] Load Meter Success', props<{ meter: MeterResponse }>());

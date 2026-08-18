@@ -236,10 +236,10 @@ describe('ClientsDeploymentsController', () => {
       proxyService.listRuns.mockResolvedValue(mockRuns);
 
       const mockReq = { apiKeyAuthenticated: true } as any;
-      const result = await controller.listRuns('client-uuid', 'agent-uuid', 50, 0, mockReq);
+      const result = await controller.listRuns('client-uuid', 'agent-uuid', 50, 0, undefined, mockReq);
 
       expect(result).toEqual(mockRuns);
-      expect(proxyService.listRuns).toHaveBeenCalledWith('client-uuid', 'agent-uuid', 50, 0);
+      expect(proxyService.listRuns).toHaveBeenCalledWith('client-uuid', 'agent-uuid', 50, 0, undefined);
     });
 
     it('should list runs without pagination parameters', async () => {
@@ -254,10 +254,10 @@ describe('ClientsDeploymentsController', () => {
       proxyService.listRuns.mockResolvedValue(mockRuns);
 
       const mockReq = { apiKeyAuthenticated: true } as any;
-      const result = await controller.listRuns('client-uuid', 'agent-uuid', undefined, undefined, mockReq);
+      const result = await controller.listRuns('client-uuid', 'agent-uuid', undefined, undefined, undefined, mockReq);
 
       expect(result).toEqual(mockRuns);
-      expect(proxyService.listRuns).toHaveBeenCalledWith('client-uuid', 'agent-uuid', undefined, undefined);
+      expect(proxyService.listRuns).toHaveBeenCalledWith('client-uuid', 'agent-uuid', undefined, undefined, undefined);
     });
   });
 

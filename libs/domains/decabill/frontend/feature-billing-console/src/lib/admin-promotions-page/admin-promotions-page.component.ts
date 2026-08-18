@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   AdminPromotionsFacade,
@@ -12,7 +12,7 @@ import {
   type PromotionRedemptionResponse,
   type PromotionSubscriptionEligibility,
 } from '@forepath/decabill/frontend/data-access-billing-console';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 
 import {
   getActiveStatusLabel,
@@ -21,6 +21,8 @@ import {
   getPromotionRedemptionStatusIconClass,
   getPromotionRedemptionStatusLabel,
   getPromotionRedemptionStatusTextClass,
+  getUnavailableLabel,
+  resolveNamedLabel,
 } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
 
@@ -46,17 +48,7 @@ export class AdminPromotionsPageComponent implements OnInit {
   readonly searchQuery = signal('');
   readonly searchQuery$ = toObservable(this.searchQuery);
   readonly allPromotions$ = this.facade.getPromotions$();
-  readonly promotions$ = combineLatest([this.allPromotions$, this.searchQuery$]).pipe(
-    map(([promotions, searchQuery]) => {
-      const term = searchQuery.trim().toLowerCase();
-
-      if (!term) {
-        return promotions;
-      }
-
-      return promotions.filter((item) => JSON.stringify(item).toLowerCase().includes(term));
-    }),
-  );
+  readonly promotions$ = this.facade.getPromotions$();
   readonly loading$ = this.facade.getLoading$();
   readonly creating$ = this.facade.getCreating$();
   readonly updating$ = this.facade.getUpdating$();
@@ -83,6 +75,13 @@ export class AdminPromotionsPageComponent implements OnInit {
     this.facade.loadPromotions();
     this.servicePlansFacade.loadServicePlans();
     this.serviceTypesFacade.loadServiceTypes();
+
+    this.searchQuery$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.facade.loadPromotions({ search: search.trim() || undefined });
+      });
+
     watchBillingMutationModalClose({
       loading$: this.creating$,
       error$: this.error$,
@@ -239,11 +238,15 @@ export class AdminPromotionsPageComponent implements OnInit {
   ): string {
     const plan = plans.find((item) => item.id === planId);
 
-    if (!plan) return planId;
+    if (!plan) return getUnavailableLabel();
 
     const typeName = plan.serviceTypeId ? (types.find((item) => item.id === plan.serviceTypeId)?.name ?? '') : '';
 
     return typeName ? `${plan.name} (${typeName})` : plan.name;
+  }
+
+  redemptionSubscriptionLabel(item: PromotionRedemptionResponse): string {
+    return resolveNamedLabel(item.subscriptionNumber);
   }
 
   private buildDto(form: CreateAdminPromotionDto): CreateAdminPromotionDto {

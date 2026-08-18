@@ -147,11 +147,12 @@ export class ClientsDeploymentsController {
     @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
     @Req() req?: RequestWithUser,
   ): Promise<unknown[]> {
     await ensureClientAccess(this.clientsRepository, this.clientUsersRepository, clientId, req);
 
-    return await this.proxyService.listRuns(clientId, agentId, limit, offset);
+    return await this.proxyService.listRuns(clientId, agentId, limit, offset, search);
   }
 
   /**

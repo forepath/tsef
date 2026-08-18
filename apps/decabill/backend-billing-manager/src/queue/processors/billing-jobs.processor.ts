@@ -12,6 +12,9 @@ import {
   PriceRecalcJobHandler,
   MeterCollectJobHandler,
   type PlanPriceMigrateUnitPayload,
+  SearchReindexJobHandler,
+  type SearchIndexSyncUnitPayload,
+  type SearchReindexUnitPayload,
   SubscriptionBillingJobHandler,
   SubscriptionConfigChangeJobHandler,
   SubscriptionExpirationJobHandler,
@@ -81,6 +84,7 @@ export class BillingJobsProcessor extends WorkerHost {
     private readonly webhookDeliveryRetentionService: WebhookDeliveryRetentionService,
     private readonly emailDeliveryService: EmailDeliveryService,
     private readonly updateCheckService: UpdateCheckService,
+    private readonly searchReindexJobHandler: SearchReindexJobHandler,
   ) {
     super();
   }
@@ -140,6 +144,9 @@ export class BillingJobsProcessor extends WorkerHost {
         break;
       case BillingJobName.METER_COLLECT_COORDINATOR:
         await this.runMeterCollectCoordinator();
+        break;
+      case BillingJobName.SEARCH_REINDEX_COORDINATOR:
+        await this.runSearchReindexCoordinator();
         break;
       case BillingJobName.UPDATE_CHECK:
       case UPDATE_CHECK_JOB_NAME:
@@ -238,6 +245,12 @@ export class BillingJobsProcessor extends WorkerHost {
               break;
             case BillingJobName.PLAN_PRICE_MIGRATE_UNIT:
               await this.priceRecalc.processPlanCommercialMigrate(job.data as PlanPriceMigrateUnitPayload);
+              break;
+            case BillingJobName.SEARCH_REINDEX_UNIT:
+              await this.runSearchReindexUnit(job.data as SearchReindexUnitPayload);
+              break;
+            case BillingJobName.SEARCH_INDEX_SYNC_UNIT:
+              await this.searchReindexJobHandler.processSyncUnit(job.data as SearchIndexSyncUnitPayload);
               break;
             default:
               this.logger.warn(`Unknown billing job name: ${job.name}`);
@@ -706,6 +719,52 @@ export class BillingJobsProcessor extends WorkerHost {
     }
 
     await this.meterCollect.processTenant(data.tenantId);
+  }
+
+  private async runSearchReindexCoordinator(): Promise<void> {
+    await this.forEachConfiguredTenant(async (tenantId) => {
+      try {
+        this.searchReindexJobHandler.publishReindexStarted(tenantId);
+
+        for (const entityType of this.searchReindexJobHandler.listEntityTypes()) {
+          await this.enqueueBillingUnitJob({
+            queue: this.billingQueue,
+            jobName: BillingJobName.SEARCH_REINDEX_UNIT,
+            payload: { tenantId, entityType, offset: 0 },
+            jobIdNamespace: 'search-reindex',
+            jobIdParts: [tenantId, entityType, '0'],
+          });
+        }
+
+        this.searchReindexJobHandler.publishReindexCompleted(
+          tenantId,
+          this.searchReindexJobHandler.listEntityTypes().length,
+        );
+      } catch (error) {
+        this.searchReindexJobHandler.publishReindexFailed(tenantId, (error as Error).message);
+        throw error;
+      }
+    });
+  }
+
+  private async runSearchReindexUnit(data: SearchReindexUnitPayload): Promise<void> {
+    const result = await this.searchReindexJobHandler.processReindexUnit(data);
+
+    if (!result.hasMore) {
+      return;
+    }
+
+    await this.enqueueBillingUnitJob({
+      queue: this.billingQueue,
+      jobName: BillingJobName.SEARCH_REINDEX_UNIT,
+      payload: {
+        tenantId: data.tenantId,
+        entityType: data.entityType,
+        offset: result.nextOffset,
+      },
+      jobIdNamespace: 'search-reindex',
+      jobIdParts: [data.tenantId, data.entityType, String(result.nextOffset)],
+    });
   }
 
   private async runAdminBillNowCoordinator(data: AdminBillNowCoordinatorPayload): Promise<void> {

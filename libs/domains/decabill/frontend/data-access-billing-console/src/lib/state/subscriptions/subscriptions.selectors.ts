@@ -26,6 +26,22 @@ export const selectSubscriptionsResuming = createSelector(selectSubscriptionsSta
 
 export const selectSubscriptionsError = createSelector(selectSubscriptionsState, (state) => state.error);
 
+export const selectSubscriptionsSummary = createSelector(selectSubscriptionsState, (state) => state.summary);
+
+export const selectSubscriptionsSummaryLoading = createSelector(
+  selectSubscriptionsState,
+  (state) => state.summaryLoading,
+);
+
+export const selectSubscriptionsHasMore = createSelector(selectSubscriptionsState, (state) => state.hasMore);
+
+export const selectSubscriptionsAppendLoading = createSelector(
+  selectSubscriptionsState,
+  (state) => state.appendLoading,
+);
+
+export const selectSubscriptionsAppendError = createSelector(selectSubscriptionsState, (state) => state.appendError);
+
 // Combined loading selector
 export const selectSubscriptionsLoadingAny = createSelector(
   selectSubscriptionsLoading,

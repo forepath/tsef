@@ -87,8 +87,8 @@ export class BackorderService {
     });
   }
 
-  async listForUser(userId: string, limit: number, offset: number): Promise<BackorderEntity[]> {
-    return await this.backordersRepository.findAllByUser(userId, limit, offset);
+  async listForUser(userId: string, limit: number, offset: number, search?: string): Promise<BackorderEntity[]> {
+    return await this.backordersRepository.findAllByUser(userId, limit, offset, search);
   }
 
   async cancel(backorderId: string): Promise<BackorderEntity> {
@@ -372,6 +372,7 @@ export class BackorderService {
       userId: row.userId,
       serviceTypeId: row.serviceTypeId,
       planId: row.planId,
+      planName: resolvedPlan.name,
       status: row.status,
       failureReason: row.failureReason,
       requestedConfigSnapshot: row.requestedConfigSnapshot ?? {},

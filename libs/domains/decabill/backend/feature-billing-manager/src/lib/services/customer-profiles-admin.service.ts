@@ -12,6 +12,8 @@ import type { CustomerProfileResponseDto } from '../dto/customer-profile-respons
 import type { CustomerTrustScoreResponseDto } from '../dto/customer-trust-score.dto';
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
+import { mapCustomerProfileToSearchDocument } from '../search/billing-search-document.mapper';
+import { BillingSearchIndexService } from '../search/billing-search-index.service';
 import { CustomerProfilesRepository } from '../repositories/customer-profiles.repository';
 import { DatevDebtorAccountsRepository } from '../repositories/datev-debtor-accounts.repository';
 import { InvoicesRepository } from '../repositories/invoices.repository';
@@ -32,10 +34,11 @@ export class CustomerProfilesAdminService {
     private readonly customerTrustScoreService: CustomerTrustScoreService,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
     private readonly datevDebtorAccountsRepository: DatevDebtorAccountsRepository,
+    private readonly billingSearchIndexService: BillingSearchIndexService,
   ) {}
 
-  async list(limit: number, offset: number): Promise<PaginatedAdminCustomerProfilesResponseDto> {
-    const { items, total } = await this.customerProfilesRepository.findAll(limit, offset);
+  async list(limit: number, offset: number, search?: string): Promise<PaginatedAdminCustomerProfilesResponseDto> {
+    const { items, total } = await this.customerProfilesRepository.findAll(limit, offset, search);
     const profiles = await Promise.all(
       items.map((profile) => this.customerTrustScoreService.ensureFreshSnapshot(profile)),
     );
@@ -121,12 +124,22 @@ export class CustomerProfilesAdminService {
     const { userId, ...profileFields } = dto;
     const profile = await this.customerProfilesService.upsert(userId, profileFields);
 
+    this.billingSearchIndexService.scheduleUpsert(
+      'customer-profiles',
+      mapCustomerProfileToSearchDocument(profile, getRequiredTenantId()),
+    );
+
     return this.mapResponse(profile);
   }
 
   async update(id: string, dto: CustomerProfileDto): Promise<CustomerProfileResponseDto> {
     const existing = await this.customerProfilesRepository.findByIdOrThrow(id);
     const updated = await this.customerProfilesService.upsert(existing.userId, this.sanitizeUpdate(dto));
+
+    this.billingSearchIndexService.scheduleUpsert(
+      'customer-profiles',
+      mapCustomerProfileToSearchDocument(updated, getRequiredTenantId()),
+    );
 
     return this.mapResponse(updated);
   }
@@ -146,6 +159,7 @@ export class CustomerProfilesAdminService {
     }
 
     await this.customerProfilesRepository.delete(id);
+    this.billingSearchIndexService.scheduleDelete('customer-profiles', id);
   }
 
   async addCustomData(id: string, key: string, value: string): Promise<AdminCustomerProfileDetailDto> {

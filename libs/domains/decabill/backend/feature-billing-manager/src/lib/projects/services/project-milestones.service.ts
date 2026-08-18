@@ -28,12 +28,16 @@ export class ProjectMilestonesService {
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
   ) {}
 
-  async list(projectId: string, userInfo: UserInfoFromRequest): Promise<ProjectMilestoneResponseDto[]> {
+  async list(
+    projectId: string,
+    userInfo: UserInfoFromRequest,
+    search?: string,
+  ): Promise<ProjectMilestoneResponseDto[]> {
     const project = await this.projectsRepository.findByIdOrThrow(projectId);
 
     ensureProjectReadable(userInfo, project);
 
-    const milestones = await this.milestonesRepository.findAllByProject(projectId);
+    const milestones = await this.milestonesRepository.findAllByProject(projectId, search);
 
     return await Promise.all(milestones.map((m) => this.mapMilestone(m)));
   }

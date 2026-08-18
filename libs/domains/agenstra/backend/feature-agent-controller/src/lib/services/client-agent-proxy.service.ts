@@ -15,6 +15,13 @@ import { StatisticsEntityType } from '../entities/statistics-entity-event.entity
 import { ClientsRepository } from '../repositories/clients.repository';
 import { getClientEndpointTlsPolicy, validateClientEndpointWithDnsOrThrow } from '../utils/client-endpoint-security';
 import { buildClientProxyRequestHeaders } from '../utils/client-proxy-request-headers';
+import { AgenstraSearchIndexService } from '../search/agenstra-search-index.service';
+import {
+  matchesInMemoryListSearch,
+  orderItemsBySearchIds,
+  sanitizeListSearch,
+  tryAgenstraSearchIds,
+} from '../search/agenstra-search-list.util';
 
 import { ClientsService } from './clients.service';
 import { StatisticsService } from './statistics.service';
@@ -33,6 +40,7 @@ export class ClientAgentProxyService {
     private readonly clientsRepository: ClientsRepository,
     private readonly clientAgentCredentialsService: ClientAgentCredentialsService,
     private readonly statisticsService: StatisticsService,
+    private readonly searchIndex: AgenstraSearchIndexService,
   ) {}
 
   /**
@@ -182,7 +190,45 @@ export class ClientAgentProxyService {
    * @param offset - Number of agents to skip
    * @returns Array of agent response DTOs
    */
-  async getClientAgents(clientId: string, limit = 10, offset = 0): Promise<AgentResponseDto[]> {
+  async getClientAgents(clientId: string, limit = 10, offset = 0, search?: string): Promise<AgentResponseDto[]> {
+    const sanitized = sanitizeListSearch(search);
+
+    if (sanitized) {
+      const openSearchIds = await tryAgenstraSearchIds(
+        this.searchIndex,
+        {
+          entityType: 'agents',
+          query: sanitized,
+          clientIds: [clientId],
+          limit,
+          offset,
+        },
+        this.logger,
+      );
+
+      if (openSearchIds) {
+        if (openSearchIds.ids.length === 0) {
+          if (openSearchIds.total > 0) {
+            return [];
+          }
+        } else {
+          const allAgents = await this.makeRequest<AgentResponseDto[]>(clientId, {
+            method: 'GET',
+            params: { limit: 1000, offset: 0 },
+          });
+
+          return orderItemsBySearchIds(allAgents, openSearchIds.ids);
+        }
+      }
+
+      const agents = await this.makeRequest<AgentResponseDto[]>(clientId, {
+        method: 'GET',
+        params: { limit: 1000, offset: 0 },
+      });
+
+      return agents.filter((agent) => matchesInMemoryListSearch(agent, sanitized)).slice(offset, offset + limit);
+    }
+
     return await this.makeRequest<AgentResponseDto[]>(clientId, {
       method: 'GET',
       params: { limit, offset },

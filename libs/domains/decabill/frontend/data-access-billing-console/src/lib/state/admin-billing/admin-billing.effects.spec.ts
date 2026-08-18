@@ -84,7 +84,13 @@ describe('AdminBillingEffects', () => {
   });
 
   it('loadAdminBillingSummary$ emits success', (done) => {
-    const summary = { activeSubscriptionsCount: 1, openOverdueCount: 0, openOverdueTotal: 0, unbilledTotal: 0 };
+    const summary = {
+      subscriptionsCount: 3,
+      activeSubscriptionsCount: 1,
+      openOverdueCount: 0,
+      openOverdueTotal: 0,
+      unbilledTotal: 0,
+    };
 
     service.getSummary.mockReturnValue(of(summary));
     actions$ = of(loadAdminBillingSummary());

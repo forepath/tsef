@@ -1510,8 +1510,8 @@
         <target>Umgebungskontext: <x id="agentName" equiv-text="agent.name"/></target>
       </trans-unit>
       <trans-unit id="featureChat-contextToolbarEnvUnknownTitle" datatype="html">
-        <source>Environment: <x id="agentId" equiv-text="id"/></source>
-        <target>Umgebung: <x id="agentId" equiv-text="id"/></target>
+        <source>Environment context unavailable</source>
+        <target>Umgebungskontext nicht verfügbar</target>
       </trans-unit>
       <trans-unit id="featureChat-hideFileTree" datatype="html">
         <source>Hide File Tree</source>

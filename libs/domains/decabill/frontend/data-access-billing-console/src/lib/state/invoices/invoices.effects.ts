@@ -57,8 +57,8 @@ export const loadOpenOverdueInvoices$ = createEffect(
   (actions$ = inject(Actions), invoicesService = inject(InvoicesService)) => {
     return actions$.pipe(
       ofType(loadOpenOverdueInvoices),
-      switchMap(() =>
-        invoicesService.getOpenOverdueInvoices().pipe(
+      switchMap(({ search }) =>
+        invoicesService.getOpenOverdueInvoices(search).pipe(
           map((invoices) => loadOpenOverdueInvoicesSuccess({ invoices })),
           catchError((error) => of(loadOpenOverdueInvoicesFailure({ error: normalizeError(error) }))),
         ),
@@ -72,8 +72,8 @@ export const loadHistoryInvoices$ = createEffect(
   (actions$ = inject(Actions), invoicesService = inject(InvoicesService)) => {
     return actions$.pipe(
       ofType(loadHistoryInvoices),
-      switchMap(() =>
-        invoicesService.getHistoryInvoices().pipe(
+      switchMap(({ search }) =>
+        invoicesService.getHistoryInvoices(search).pipe(
           map((invoices) => loadHistoryInvoicesSuccess({ invoices })),
           catchError((error) => of(loadHistoryInvoicesFailure({ error: normalizeError(error) }))),
         ),
@@ -119,8 +119,8 @@ export const reloadInvoicesAfterCreate$ = createEffect(
       ofType(createInvoiceSuccess),
       mergeMap(({ subscriptionId }) => [
         loadInvoices({ subscriptionId }),
-        loadHistoryInvoices(),
-        loadOpenOverdueInvoices(),
+        loadHistoryInvoices({}),
+        loadOpenOverdueInvoices({}),
         loadInvoicesSummary(),
       ]),
     );

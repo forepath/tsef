@@ -92,6 +92,7 @@ export class ClientsController {
   async getClients(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
     @Req() req?: RequestWithUser,
   ): Promise<ClientResponseDto[]> {
     const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
@@ -102,7 +103,7 @@ export class ClientsController {
       userInfo.userId,
       userInfo.userRole,
       userInfo.isApiKeyAuth,
-      { amr: userInfo.amr },
+      { amr: userInfo.amr, search },
     );
   }
 
@@ -140,6 +141,7 @@ export class ClientsController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('search') search?: string,
     @Req() req?: RequestWithUser,
   ): Promise<AgentResponseDto[]> {
     const userInfo = getUserFromRequest(req || ({} as RequestWithUser));
@@ -157,7 +159,7 @@ export class ClientsController {
       throw new ForbiddenException('You do not have access to this client');
     }
 
-    return await this.clientAgentProxyService.getClientAgents(id, limit ?? 10, offset ?? 0);
+    return await this.clientAgentProxyService.getClientAgents(id, limit ?? 10, offset ?? 0, search);
   }
 
   /**

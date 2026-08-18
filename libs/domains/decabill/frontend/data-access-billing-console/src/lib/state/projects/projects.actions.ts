@@ -9,20 +9,38 @@ import type {
   ProjectListItem,
   ProjectResponse,
   ProjectSummaryResponse,
+  ProjectsCatalogSummaryResponse,
   UpdateAdminProjectDto,
 } from '../../types/projects.types';
 
-export const loadProjects = createAction('[Projects] Load Customer Projects');
-export const loadProjectsBatch = createAction(
-  '[Projects] Load Customer Projects Batch',
-  props<{ offset: number; accumulatedProjects: ProjectListItem[] }>(),
-);
+export const loadProjects = createAction('[Projects] Load Customer Projects', props<{ search?: string }>());
 export const loadProjectsSuccess = createAction(
   '[Projects] Load Customer Projects Success',
-  props<{ projects: ProjectListItem[] }>(),
+  props<{ projects: ProjectListItem[]; hasMore: boolean; nextOffset: number }>(),
 );
 export const loadProjectsFailure = createAction(
   '[Projects] Load Customer Projects Failure',
+  props<{ error: string }>(),
+);
+export const loadProjectsCatalogSummary = createAction('[Projects] Load Catalog Summary');
+export const loadProjectsCatalogSummarySuccess = createAction(
+  '[Projects] Load Catalog Summary Success',
+  props<{ summary: ProjectsCatalogSummaryResponse }>(),
+);
+export const loadProjectsCatalogSummaryFailure = createAction(
+  '[Projects] Load Catalog Summary Failure',
+  props<{ error: string }>(),
+);
+export const loadMoreProjects = createAction(
+  '[Projects] Load More Customer Projects',
+  props<{ offset: number; search?: string }>(),
+);
+export const loadMoreProjectsSuccess = createAction(
+  '[Projects] Load More Customer Projects Success',
+  props<{ projects: ProjectListItem[]; hasMore: boolean; nextOffset: number }>(),
+);
+export const loadMoreProjectsFailure = createAction(
+  '[Projects] Load More Customer Projects Failure',
   props<{ error: string }>(),
 );
 
@@ -46,17 +64,28 @@ export const loadProjectSummaryFailure = createAction(
   props<{ error: string }>(),
 );
 
-export const loadAdminProjects = createAction('[Projects] Load Admin Projects');
-export const loadAdminProjectsBatch = createAction(
-  '[Projects] Load Admin Projects Batch',
-  props<{ offset: number; accumulatedProjects: AdminProjectListItem[] }>(),
+export const loadAdminProjects = createAction(
+  '[Projects] Load Admin Projects',
+  props<{ search?: string; userId?: string }>(),
 );
 export const loadAdminProjectsSuccess = createAction(
   '[Projects] Load Admin Projects Success',
-  props<{ adminProjects: AdminProjectListItem[] }>(),
+  props<{ adminProjects: AdminProjectListItem[]; hasMore: boolean; nextOffset: number }>(),
 );
 export const loadAdminProjectsFailure = createAction(
   '[Projects] Load Admin Projects Failure',
+  props<{ error: string }>(),
+);
+export const loadMoreAdminProjects = createAction(
+  '[Projects] Load More Admin Projects',
+  props<{ offset: number; search?: string; userId?: string }>(),
+);
+export const loadMoreAdminProjectsSuccess = createAction(
+  '[Projects] Load More Admin Projects Success',
+  props<{ adminProjects: AdminProjectListItem[]; hasMore: boolean; nextOffset: number }>(),
+);
+export const loadMoreAdminProjectsFailure = createAction(
+  '[Projects] Load More Admin Projects Failure',
   props<{ error: string }>(),
 );
 

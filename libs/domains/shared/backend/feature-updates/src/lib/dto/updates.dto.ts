@@ -27,6 +27,7 @@ export class InstanceDependencyHealthDto implements InstanceDependencyHealth {
   redis!: DependencyHealthStatus;
   queue!: DependencyHealthStatus;
   database!: DependencyHealthStatus;
+  opensearch!: DependencyHealthStatus;
 }
 
 export class ServiceInstanceRecordDto implements ServiceInstanceRecord {

@@ -583,6 +583,8 @@ export interface SubscriptionResponse {
   id: string;
   number: string;
   planId: string;
+  /** Denormalized plan display name when provided by the API. */
+  planName?: string;
   userId: string;
   status: SubscriptionStatus;
   currentPeriodStart?: string | null;
@@ -888,6 +890,8 @@ export interface BackorderResponse {
   userId: string;
   serviceTypeId: string;
   planId: string;
+  /** Denormalized plan display name when provided by the API. */
+  planName?: string;
   status: BackorderStatus;
   failureReason?: string | null;
   requestedConfigSnapshot: Record<string, unknown>;
@@ -1128,6 +1132,13 @@ export interface InvoicesSummaryResponse {
   minCheckoutPaymentAmount?: number;
 }
 
+/** Catalog counts for the current user (independent of list pagination / search). */
+export interface SubscriptionsSummaryResponse {
+  total: number;
+  active: number;
+  pendingBackorders: number;
+}
+
 // Usage
 export interface UsageSummary {
   subscriptionId: string;
@@ -1240,10 +1251,12 @@ export interface MessageResponse {
 export interface ListParams {
   limit?: number;
   offset?: number;
+  search?: string;
 }
 
 // Admin Billing
 export interface AdminBillingSummaryResponse {
+  subscriptionsCount: number;
   activeSubscriptionsCount: number;
   openOverdueCount: number;
   openOverdueTotal: number;
@@ -1534,6 +1547,7 @@ export interface AdminDatevExportListParams {
   offset?: number;
   year?: number;
   scope?: DatevExportScope;
+  search?: string;
 }
 
 export interface TriggerDatevExportDto {

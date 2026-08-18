@@ -29,7 +29,8 @@ export class BillingAdminService {
   ) {}
 
   async getGlobalSummary(): Promise<AdminBillingSummaryResponseDto> {
-    const [activeSubscriptionsCount, openOverdue, userIdsWithUnbilled] = await Promise.all([
+    const [subscriptionsCount, activeSubscriptionsCount, openOverdue, userIdsWithUnbilled] = await Promise.all([
+      this.subscriptionsRepository.countAll(),
       this.subscriptionsRepository.countByStatus(SubscriptionStatus.ACTIVE),
       this.invoicesRepository.findGlobalOpenOverdueSummary(),
       this.openPositionsRepository.findDistinctUserIdsWithUnbilled(),
@@ -41,6 +42,7 @@ export class BillingAdminService {
     }
 
     return {
+      subscriptionsCount,
       activeSubscriptionsCount,
       openOverdueCount: openOverdue.count,
       openOverdueTotal: openOverdue.totalBalance,
@@ -151,7 +153,7 @@ export class BillingAdminService {
     return mapped.map((subscription) => ({
       ...subscription,
       userEmail: userEmailById.get(subscription.userId),
-      planName: planNameById.get(subscription.planId) ?? subscription.planId,
+      planName: subscription.planName ?? planNameById.get(subscription.planId),
     }));
   }
 }

@@ -204,6 +204,7 @@ describe('SubscriptionService', () => {
     subscriptionPeriodChargeService as never,
     sshExecutor as never,
     { buildSubscriptionMeterSummaries: jest.fn().mockResolvedValue([]) } as never,
+    { scheduleUpsert: jest.fn(), scheduleDelete: jest.fn() } as never,
   );
 
   beforeEach(() => {

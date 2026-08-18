@@ -5,9 +5,10 @@ import type {
   ProjectListItemDto,
   ProjectResponseDto,
   ProjectSummaryResponseDto,
+  ProjectsCatalogSummaryResponseDto,
 } from '../dto/project.dto';
 import type { ProjectEntity } from '../entities/project.entity';
-import { ProjectTicketStatus } from '../entities/project.enums';
+import { ProjectStatus, ProjectTicketStatus } from '../entities/project.enums';
 import { ProjectMilestonesRepository } from '../repositories/project-milestones.repository';
 import { ProjectTicketsRepository } from '../repositories/project-tickets.repository';
 import { ProjectTimeEntriesRepository } from '../repositories/project-time-entries.repository';
@@ -25,8 +26,13 @@ export class ProjectsService {
     private readonly timeEntriesRepository: ProjectTimeEntriesRepository,
   ) {}
 
-  async listForUser(userId: string, limit: number, offset: number): Promise<PaginatedProjectsResponseDto> {
-    const { items, total } = await this.projectsRepository.findAllByUser(userId, limit, offset);
+  async listForUser(
+    userId: string,
+    limit: number,
+    offset: number,
+    search?: string,
+  ): Promise<PaginatedProjectsResponseDto> {
+    const { items, total } = await this.projectsRepository.findAllByUser(userId, limit, offset, search);
 
     return {
       items: await Promise.all(items.map((project) => this.mapListItem(project))),
@@ -34,6 +40,15 @@ export class ProjectsService {
       limit,
       offset,
     };
+  }
+
+  async getCatalogSummaryForUser(userId: string): Promise<ProjectsCatalogSummaryResponseDto> {
+    const [total, active] = await Promise.all([
+      this.projectsRepository.countByUserId(userId),
+      this.projectsRepository.countByUserIdAndStatus(userId, ProjectStatus.ACTIVE),
+    ]);
+
+    return { total, active };
   }
 
   async getByIdForUser(userInfo: UserInfoFromRequest, projectId: string): Promise<ProjectResponseDto> {

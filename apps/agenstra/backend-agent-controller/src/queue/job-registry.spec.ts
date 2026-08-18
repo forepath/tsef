@@ -14,6 +14,14 @@ describe('controller job-registry', () => {
     expect(names).toContain(ControllerJobName.WEBHOOK_DELIVERY_RETENTION_COORDINATOR);
   });
 
+  it('getControllerRepeatableJobs includes search reindex coordinator', () => {
+    const jobs = getControllerRepeatableJobs();
+    const searchJob = jobs.find((job) => job.name === ControllerJobName.SEARCH_REINDEX_COORDINATOR);
+
+    expect(searchJob).toBeDefined();
+    expect(searchJob?.everyMs).toBe(900_000);
+  });
+
   it('getControllerRepeatableJobs includes update check coordinator', () => {
     const jobs = getControllerRepeatableJobs();
     const updateCheckJob = jobs.find((job) => job.name === ControllerJobName.UPDATE_CHECK);

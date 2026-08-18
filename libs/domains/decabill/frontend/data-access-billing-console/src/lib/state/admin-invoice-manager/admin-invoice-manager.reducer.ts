@@ -22,9 +22,11 @@ import {
   issueManualInvoiceFailure,
   issueManualInvoiceSuccess,
   loadAdminInvoiceManager,
-  loadAdminInvoiceManagerBatch,
   loadAdminInvoiceManagerFailure,
   loadAdminInvoiceManagerSuccess,
+  loadMoreAdminInvoiceManager,
+  loadMoreAdminInvoiceManagerFailure,
+  loadMoreAdminInvoiceManagerSuccess,
   updateManualInvoice,
   updateManualInvoiceFailure,
   updateManualInvoiceSuccess,
@@ -39,6 +41,12 @@ export interface AdminInvoiceManagerState {
   deleting: boolean;
   actionLoading: boolean;
   error: string | null;
+  hasMore: boolean;
+  nextOffset: number;
+  appendLoading: boolean;
+  appendError: string | null;
+  search: string | null;
+  userId: string | null;
 }
 
 export const initialAdminInvoiceManagerState: AdminInvoiceManagerState = {
@@ -50,6 +58,12 @@ export const initialAdminInvoiceManagerState: AdminInvoiceManagerState = {
   deleting: false,
   actionLoading: false,
   error: null,
+  hasMore: false,
+  nextOffset: 0,
+  appendLoading: false,
+  appendError: null,
+  search: null,
+  userId: null,
 };
 
 function upsertInvoice(invoices: AdminInvoiceListItem[], invoice: AdminInvoiceListItem): AdminInvoiceListItem[] {
@@ -104,20 +118,23 @@ function mapDetailToListItem(invoice: {
 
 export const adminInvoiceManagerReducer = createReducer(
   initialAdminInvoiceManagerState,
-  on(loadAdminInvoiceManager, (state) => ({
+  on(loadAdminInvoiceManager, (state, { search, userId }) => ({
     ...state,
     invoices: [],
     loading: true,
     error: null,
+    appendError: null,
+    appendLoading: false,
+    hasMore: false,
+    nextOffset: 0,
+    search: search?.trim() ? search.trim() : null,
+    userId: userId ?? null,
   })),
-  on(loadAdminInvoiceManagerBatch, (state, { accumulatedInvoices }) => ({
-    ...state,
-    invoices: accumulatedInvoices,
-    loading: true,
-  })),
-  on(loadAdminInvoiceManagerSuccess, (state, { invoices }) => ({
+  on(loadAdminInvoiceManagerSuccess, (state, { invoices, hasMore, nextOffset }) => ({
     ...state,
     invoices,
+    hasMore,
+    nextOffset,
     loading: false,
     error: null,
   })),
@@ -125,6 +142,25 @@ export const adminInvoiceManagerReducer = createReducer(
     ...state,
     loading: false,
     error,
+    hasMore: false,
+  })),
+  on(loadMoreAdminInvoiceManager, (state) => ({
+    ...state,
+    appendLoading: true,
+    appendError: null,
+  })),
+  on(loadMoreAdminInvoiceManagerSuccess, (state, { invoices, hasMore, nextOffset }) => ({
+    ...state,
+    invoices: [...state.invoices, ...invoices],
+    hasMore,
+    nextOffset,
+    appendLoading: false,
+    appendError: null,
+  })),
+  on(loadMoreAdminInvoiceManagerFailure, (state, { error }) => ({
+    ...state,
+    appendLoading: false,
+    appendError: error,
   })),
   on(createManualInvoice, (state) => ({ ...state, creating: true, error: null })),
   on(createManualInvoiceSuccess, (state, { invoice }) => ({

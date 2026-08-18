@@ -11,6 +11,7 @@ import {
   loadClient,
   loadClientUsers,
   loadClients,
+  loadMoreClients,
   loadProvisioningProviders,
   loadServerInfo,
   loadServerTypes,
@@ -30,8 +31,11 @@ import {
   selectClientLoading,
   selectClientUpdating,
   selectClients,
+  selectClientsAppendError,
+  selectClientsAppendLoading,
   selectClientsCount,
   selectClientsError,
+  selectClientsHasMore,
   selectClientsLoading,
   selectClientsLoadingAny,
   selectClientUsers,
@@ -91,15 +95,27 @@ export class ClientsFacade {
   // Error observable
   readonly error$: Observable<string | null> = this.store.select(selectClientsError);
 
+  // Infinite scroll
+  readonly hasMore$: Observable<boolean> = this.store.select(selectClientsHasMore);
+  readonly appendLoading$: Observable<boolean> = this.store.select(selectClientsAppendLoading);
+  readonly appendError$: Observable<string | null> = this.store.select(selectClientsAppendError);
+
   // Derived state observables
   readonly clientsCount$: Observable<number> = this.store.select(selectClientsCount);
   readonly hasClients$: Observable<boolean> = this.store.select(selectHasClients);
 
   /**
-   * Load all clients with optional pagination.
+   * Load clients (resets list to the first page).
    */
   loadClients(params?: ListClientsParams): void {
     this.store.dispatch(loadClients({ params }));
+  }
+
+  /**
+   * Append the next page of clients when hasMore is true.
+   */
+  loadMoreClients(): void {
+    this.store.dispatch(loadMoreClients());
   }
 
   /**

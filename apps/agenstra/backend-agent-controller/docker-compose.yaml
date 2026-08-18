@@ -29,6 +29,14 @@ x-backend-agent-controller-environment: &backend-agent-controller-environment
   REDIS_PASSWORD: ${REDIS_PASSWORD:-}
   REDIS_DB: ${REDIS_DB:-0}
   REDIS_KEY_PREFIX: ${REDIS_KEY_PREFIX:-agenstra-controller}
+  OPENSEARCH_ENABLED: ${OPENSEARCH_ENABLED:-true}
+  OPENSEARCH_HOST: ${OPENSEARCH_HOST:-opensearch}
+  OPENSEARCH_PORT: ${OPENSEARCH_PORT:-9200}
+  OPENSEARCH_NODE: ${OPENSEARCH_NODE:-http://opensearch:9200}
+  OPENSEARCH_USERNAME: ${OPENSEARCH_USERNAME:-}
+  OPENSEARCH_PASSWORD: ${OPENSEARCH_PASSWORD:-}
+  OPENSEARCH_INDEX_PREFIX: ${OPENSEARCH_INDEX_PREFIX:-agenstra}
+  SEARCH_REINDEX_INTERVAL: ${SEARCH_REINDEX_INTERVAL:-15m}
   QUEUE_WORKER_CONCURRENCY: ${QUEUE_WORKER_CONCURRENCY:-5}
   QUEUE_BULL_BOARD_ENABLED: ${QUEUE_BULL_BOARD_ENABLED:-false}
   QUEUE_BULL_BOARD_PATH: ${QUEUE_BULL_BOARD_PATH:-/admin/queues}
@@ -120,6 +128,38 @@ services:
       - agent-controller-network
     restart: unless-stopped
 
+  opensearch:
+    image: opensearchproject/opensearch:2.19.1
+    container_name: agent-controller-opensearch
+    environment:
+      discovery.type: single-node
+      plugins.security.disabled: 'true'
+      OPENSEARCH_JAVA_OPTS: ${OPENSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}
+      DISABLE_INSTALL_DEMO_CONFIG: 'true'
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -sf http://localhost:9200/_cluster/health || exit 1',
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    ports:
+      - '${OPENSEARCH_HOST_PORT:-9200}:9200'
+    networks:
+      - agent-controller-network
+    restart: unless-stopped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+
   backend-agent-controller:
     image: ghcr.io/forepath/agenstra-controller-api:latest
     pull_policy: never
@@ -137,6 +177,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      opensearch:
         condition: service_healthy
       mailhog:
         condition: service_started
@@ -161,6 +203,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      opensearch:
+        condition: service_healthy
       mailhog:
         condition: service_started
     networks:
@@ -184,6 +228,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      opensearch:
+        condition: service_healthy
       mailhog:
         condition: service_started
     networks:
@@ -203,6 +249,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  opensearch_data:
 
 networks:
   agent-controller-network:
