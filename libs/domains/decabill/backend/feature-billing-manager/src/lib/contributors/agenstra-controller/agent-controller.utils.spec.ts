@@ -197,7 +197,7 @@ describe('cloud-init.utils', () => {
       expect(script).toContain('CSP_ENFORCE: true');
     });
 
-    it('generates a compose stack with redis + api/worker/scheduler split', () => {
+    it('generates a compose stack with redis, opensearch, and api/worker/scheduler split', () => {
       const config: CloudInitConfig = {
         ssh: { publicKey: '' },
         host: { hostname: 'test', fqdn: 'test.spirde.com' },
@@ -231,6 +231,12 @@ describe('cloud-init.utils', () => {
       const script = Buffer.from(b64, 'base64').toString('utf-8');
 
       expect(script).toContain('redis:');
+      expect(script).toContain('opensearch:');
+      expect(script).toContain('pgvector/pgvector:pg16');
+      expect(script).toContain('redis:7-alpine');
+      expect(script).toContain('nginx:alpine');
+      expect(script).toContain('opensearchproject/opensearch:2.19.1');
+      expect(script).toContain('container_name: agent-controller-opensearch');
       expect(script).toContain('backend-agent-controller-worker:');
       expect(script).toContain('backend-agent-controller-scheduler:');
 
@@ -240,6 +246,12 @@ describe('cloud-init.utils', () => {
 
       expect(script).toContain('REDIS_HOST: redis');
       expect(script).toContain('REDIS_PORT: 6379');
+      expect(script).toContain('OPENSEARCH_HOST: opensearch');
+      expect(script).toContain("OPENSEARCH_NODE: 'http://opensearch:9200'");
+      expect(script).toContain('OPENSEARCH_INDEX_PREFIX: agenstra');
+      expect(script).toContain('SEARCH_REINDEX_INTERVAL: 15m');
+      expect(script).toContain('vm.max_map_count=262144');
+      expect(script).not.toContain('9200:9200');
       expect(script).toContain('FILTER_RULES_SYNC_INTERVAL_MS: 30000');
       expect(script).toContain('CONTEXT_IMPORT_SCHEDULER_INTERVAL_MS: 120000');
       expect(script).toContain('KNOWLEDGE_EMBEDDINGS_REINDEX_INTERVAL_MS: 3600000');

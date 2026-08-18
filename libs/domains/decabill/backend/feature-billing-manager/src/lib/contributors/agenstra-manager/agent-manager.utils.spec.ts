@@ -220,6 +220,8 @@ describe('agent-manager.utils', () => {
       expect(script).toContain('agent-manager');
       expect(script).toContain('docker compose up -d');
       expect(script).toContain('backend-agent-manager');
+      expect(script).toContain('postgres:16-alpine');
+      expect(script).toContain('nginx:alpine');
       expect(script).toContain('AUTHENTICATION_METHOD');
       expect(script).not.toContain('DISABLE_SIGNUP');
       expect(script).not.toContain('HETZNER_API_TOKEN');

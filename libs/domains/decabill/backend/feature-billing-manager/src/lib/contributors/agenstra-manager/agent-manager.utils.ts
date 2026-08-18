@@ -1,7 +1,14 @@
 import { randomBytes } from 'crypto';
 
 import { buildCertbotBootstrapScript } from '../../utils/cloud-init/certbot-bootstrap.script';
-import { formatEnvLines, quoteYamlScalar } from '../../utils/cloud-init/env.utils';
+import { buildComposeBridgeNetwork, buildComposeNamedVolumes } from '../../utils/cloud-init/compose-service.utils';
+import { formatEnvLines } from '../../utils/cloud-init/env.utils';
+import { buildNginxComposeService } from '../../utils/cloud-init/nginx-compose.utils';
+import {
+  POSTGRES_COMPOSE_DEPENDS_ON,
+  buildPostgresBackendEnvLines,
+  buildPostgresComposeService,
+} from '../../utils/cloud-init/postgres-compose.utils';
 
 export interface AgentManagerCloudInitConfig {
   ssh: {
@@ -173,11 +180,7 @@ export function buildAgentManagerCloudInitUserData(config: AgentManagerCloudInit
     `PORT: ${config.backend?.port ?? '3000'}`,
     `WEBSOCKET_PORT: ${config.backend?.websocketPort ?? '8080'}`,
     `NODE_ENV: ${config.backend?.nodeEnv ?? 'production'}`,
-    `DB_HOST: ${config.backend?.database?.host ?? 'postgres'}`,
-    `DB_PORT: ${config.backend?.database?.port ?? '5432'}`,
-    `DB_USERNAME: ${config.backend?.database?.username ?? 'postgres'}`,
-    `DB_PASSWORD: ${config.backend?.database?.password ?? 'postgres'}`,
-    `DB_DATABASE: ${config.backend?.database?.database ?? 'postgres'}`,
+    ...buildPostgresBackendEnvLines(config.backend?.database),
     `AUTHENTICATION_METHOD: ${config.backend?.authentication?.authenticationMethod ?? 'api-key'}`,
     `STATIC_API_KEY: ${config.backend?.authentication?.staticApiKey ?? ''}`,
     `KEYCLOAK_SERVER_URL: ${config.backend?.authentication?.keycloak?.serverUrl ?? ''}`,
@@ -218,23 +221,13 @@ export function buildAgentManagerCloudInitUserData(config: AgentManagerCloudInit
       : []),
   ]);
   const dockerCompose = `services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: agent-manager-postgres
-    environment:
-      POSTGRES_USER: ${quoteYamlScalar(config.backend?.database?.username ?? 'postgres')}
-      POSTGRES_PASSWORD: ${quoteYamlScalar(config.backend?.database?.password ?? 'postgres')}
-      POSTGRES_DB: ${quoteYamlScalar(config.backend?.database?.database ?? 'postgres')}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${config.backend?.database?.username ?? 'postgres'}']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - agent-manager-network
-    restart: unless-stopped
+${buildPostgresComposeService({
+  containerName: 'agent-manager-postgres',
+  network: 'agent-manager-network',
+  username: config.backend?.database?.username ?? 'postgres',
+  password: config.backend?.database?.password ?? 'postgres',
+  database: config.backend?.database?.database ?? 'postgres',
+})}
 
   backend-agent-manager:
     image: ghcr.io/forepath/agenstra-manager-api:latest
@@ -248,36 +241,24 @@ ${backendEnv}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
-      postgres:
-        condition: service_healthy
+${POSTGRES_COMPOSE_DEPENDS_ON}
     networks:
       - agent-manager-network
     restart: unless-stopped
 
-  nginx:
-    image: nginx:alpine
-    container_name: agent-manager-nginx
-    ports:
-      - '${config.proxy?.httpPort ?? '80'}:${config.proxy?.httpPort ?? '80'}'
-      - '${config.proxy?.httpsPort ?? '443'}:${config.proxy?.httpsPort ?? '443'}'
-      - '${config.proxy?.websocketPort ?? '8443'}:${config.proxy?.websocketPort ?? '8443'}'
-    volumes:
-      - /opt/agent-manager/sites-enabled:/etc/nginx/conf.d:ro
-      - /opt/agent-manager/ssl:/etc/nginx/ssl:ro
-      - /opt/agent-manager/certbot-webroot:/var/www/certbot:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      - backend-agent-manager
-    networks:
-      - agent-manager-network
-    restart: unless-stopped
+${buildNginxComposeService({
+  containerName: 'agent-manager-nginx',
+  network: 'agent-manager-network',
+  stackDir: '/opt/agent-manager',
+  httpPort: config.proxy?.httpPort ?? 80,
+  httpsPort: config.proxy?.httpsPort ?? 443,
+  websocketPort: config.proxy?.websocketPort ?? 8443,
+  dependsOn: ['backend-agent-manager'],
+})}
 
-volumes:
-  postgres_data:
+${buildComposeNamedVolumes(['postgres_data'])}
 
-networks:
-  agent-manager-network:
-    driver: bridge
+${buildComposeBridgeNetwork('agent-manager-network')}
 `;
   const nginxBootstrapConfig = `
 server {

@@ -1,7 +1,25 @@
 import { randomBytes } from 'crypto';
 
 import { buildCertbotBootstrapScript } from '../../utils/cloud-init/certbot-bootstrap.script';
-import { formatEnvLines as formatEnv, quoteYamlScalar } from '../../utils/cloud-init/env.utils';
+import { buildComposeBridgeNetwork, buildComposeNamedVolumes } from '../../utils/cloud-init/compose-service.utils';
+import { formatEnvLines as formatEnv } from '../../utils/cloud-init/env.utils';
+import { buildNginxComposeService } from '../../utils/cloud-init/nginx-compose.utils';
+import {
+  OPENSEARCH_COMPOSE_DEPENDS_ON,
+  buildOpenSearchBackendEnvLines,
+  buildOpenSearchComposeService,
+  buildOpenSearchHostSysctlScript,
+} from '../../utils/cloud-init/opensearch-compose.utils';
+import {
+  POSTGRES_COMPOSE_DEPENDS_ON,
+  buildPostgresBackendEnvLines,
+  buildPostgresComposeService,
+} from '../../utils/cloud-init/postgres-compose.utils';
+import {
+  REDIS_COMPOSE_DEPENDS_ON,
+  buildRedisBackendEnvLines,
+  buildRedisComposeService,
+} from '../../utils/cloud-init/redis-compose.utils';
 
 export const DECABILL_BILLING_STACK_DIR = '/opt/decabill-billing';
 
@@ -167,16 +185,9 @@ export function buildDecabillBillingCloudInitUserData(config: DecabillBillingClo
     `WEBSOCKET_PORT: ${config.backend?.websocketPort ?? '8082'}`,
     `WEBSOCKET_NAMESPACE: ${config.backend?.websocketNamespace ?? 'billing'}`,
     `NODE_ENV: ${config.backend?.nodeEnv ?? 'production'}`,
-    `DB_HOST: ${config.backend?.database?.host ?? 'postgres'}`,
-    `DB_PORT: ${config.backend?.database?.port ?? '5432'}`,
-    `DB_USERNAME: ${config.backend?.database?.username ?? 'postgres'}`,
-    `DB_PASSWORD: ${config.backend?.database?.password ?? 'postgres'}`,
-    `DB_DATABASE: ${config.backend?.database?.database ?? 'postgres'}`,
-    `REDIS_HOST: redis`,
-    `REDIS_PORT: 6379`,
-    `REDIS_PASSWORD: `,
-    `REDIS_DB: 0`,
-    `REDIS_KEY_PREFIX: decabill-billing`,
+    ...buildPostgresBackendEnvLines(config.backend?.database),
+    ...buildRedisBackendEnvLines('decabill-billing'),
+    ...buildOpenSearchBackendEnvLines('decabill'),
     `QUEUE_WORKER_CONCURRENCY: 5`,
     `QUEUE_BULL_BOARD_ENABLED: false`,
     `QUEUE_BULL_BOARD_PATH: /admin/queues`,
@@ -248,38 +259,23 @@ export function buildDecabillBillingCloudInitUserData(config: DecabillBillingClo
     },
   };
   const dockerCompose = `services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: decabill-billing-postgres
-    environment:
-      POSTGRES_USER: ${quoteYamlScalar(config.backend?.database?.username ?? 'postgres')}
-      POSTGRES_PASSWORD: ${quoteYamlScalar(config.backend?.database?.password ?? 'postgres')}
-      POSTGRES_DB: ${quoteYamlScalar(config.backend?.database?.database ?? 'postgres')}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${config.backend?.database?.username ?? 'postgres'}']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - decabill-billing-network
-    restart: unless-stopped
+${buildPostgresComposeService({
+  containerName: 'decabill-billing-postgres',
+  network: 'decabill-billing-network',
+  username: config.backend?.database?.username ?? 'postgres',
+  password: config.backend?.database?.password ?? 'postgres',
+  database: config.backend?.database?.database ?? 'postgres',
+})}
 
-  redis:
-    image: redis:7-alpine
-    container_name: decabill-billing-redis
-    command: ['redis-server', '--appendonly', 'yes']
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - decabill-billing-network
-    restart: unless-stopped
+${buildRedisComposeService({
+  containerName: 'decabill-billing-redis',
+  network: 'decabill-billing-network',
+})}
+
+${buildOpenSearchComposeService({
+  containerName: 'decabill-billing-opensearch',
+  network: 'decabill-billing-network',
+})}
 
   backend-billing-manager:
     image: ghcr.io/forepath/decabill-billing-api:latest
@@ -294,10 +290,9 @@ ${backendApiEnv}
       - '${config.backend?.port ?? '3200'}:${config.backend?.port ?? '3200'}'
       - '${config.backend?.websocketPort ?? '8082'}:${config.backend?.websocketPort ?? '8082'}'
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+${POSTGRES_COMPOSE_DEPENDS_ON}
+${REDIS_COMPOSE_DEPENDS_ON}
+${OPENSEARCH_COMPOSE_DEPENDS_ON}
     networks:
       - decabill-billing-network
     restart: unless-stopped
@@ -312,10 +307,9 @@ ${backendWorkerEnv}
       - invoice_pdf_data:/data/invoices
       - datev_export_data:/data/datev-exports
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+${POSTGRES_COMPOSE_DEPENDS_ON}
+${REDIS_COMPOSE_DEPENDS_ON}
+${OPENSEARCH_COMPOSE_DEPENDS_ON}
     networks:
       - decabill-billing-network
     restart: unless-stopped
@@ -330,10 +324,9 @@ ${backendSchedulerEnv}
       - invoice_pdf_data:/data/invoices
       - datev_export_data:/data/datev-exports
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+${POSTGRES_COMPOSE_DEPENDS_ON}
+${REDIS_COMPOSE_DEPENDS_ON}
+${OPENSEARCH_COMPOSE_DEPENDS_ON}
     networks:
       - decabill-billing-network
     restart: unless-stopped
@@ -351,34 +344,19 @@ ${frontendEnv}
       - decabill-billing-network
     restart: unless-stopped
 
-  nginx:
-    image: nginx:alpine
-    container_name: decabill-billing-nginx
-    ports:
-      - '${config.proxy?.httpPort ?? '80'}:${config.proxy?.httpPort ?? '80'}'
-      - '${config.proxy?.httpsPort ?? '443'}:${config.proxy?.httpsPort ?? '443'}'
-      - '${config.proxy?.websocketPort ?? '8443'}:${config.proxy?.websocketPort ?? '8443'}'
-    depends_on:
-      - frontend-billing-console-server
-      - backend-billing-manager
-    volumes:
-      - ${DECABILL_BILLING_STACK_DIR}/sites-enabled:/etc/nginx/conf.d:ro
-      - ${DECABILL_BILLING_STACK_DIR}/ssl:/etc/nginx/ssl:ro
-      - ${DECABILL_BILLING_STACK_DIR}/certbot-webroot:/var/www/certbot:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    networks:
-      - decabill-billing-network
-    restart: unless-stopped
+${buildNginxComposeService({
+  containerName: 'decabill-billing-nginx',
+  network: 'decabill-billing-network',
+  stackDir: DECABILL_BILLING_STACK_DIR,
+  httpPort: config.proxy?.httpPort ?? 80,
+  httpsPort: config.proxy?.httpsPort ?? 443,
+  websocketPort: config.proxy?.websocketPort ?? 8443,
+  dependsOn: ['frontend-billing-console-server', 'backend-billing-manager'],
+})}
 
-volumes:
-  postgres_data:
-  redis_data:
-  invoice_pdf_data:
-  datev_export_data:
+${buildComposeNamedVolumes(['postgres_data', 'redis_data', 'opensearch_data', 'invoice_pdf_data', 'datev_export_data'])}
 
-networks:
-  decabill-billing-network:
-    driver: bridge
+${buildComposeBridgeNetwork('decabill-billing-network')}
 `;
   const nginxBootstrapConfig = `
 server {
@@ -635,6 +613,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\
 chmod 600 ${DECABILL_BILLING_STACK_DIR}/ssl/bootstrap.key
 chmod 644 ${DECABILL_BILLING_STACK_DIR}/ssl/bootstrap.crt
 
+${buildOpenSearchHostSysctlScript()}
 log "Creating docker-compose.yaml file..."
 cat > ${DECABILL_BILLING_STACK_DIR}/docker-compose.yaml <<'${heredocMarker}'
 ${dockerCompose}
