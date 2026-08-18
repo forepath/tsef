@@ -308,7 +308,7 @@ Used by **backend billing manager** for list/typeahead search. See **[Search ind
 | `OPENSEARCH_HOST_PORT`    | Host port published by compose                 | `9201`                                     |
 | `SEARCH_REINDEX_INTERVAL` | Periodic reindex coordinator interval (`15m`…) | `15m`                                      |
 
-Production must not expose OpenSearch publicly; use private networking, TLS, and credentials from secrets.
+Production must not expose OpenSearch publicly; use private networking, TLS, and credentials from secrets. Provisioned `decabill-billing` stacks keep OpenSearch on the compose network only (no `OPENSEARCH_HOST_PORT` publish).
 
 ## OpenTelemetry
 

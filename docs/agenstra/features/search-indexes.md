@@ -16,6 +16,8 @@ Search boxes debounce (~300ms) and call list/tree APIs with a `search` query par
 
 See [environment configuration](../deployment/environment-configuration.md) and [system requirements](../deployment/system-requirements.md).
 
+Provisioned `agenstra-controller` stacks deploy a single-node OpenSearch container on the compose network only (no host port). Cloud-init sets `vm.max_map_count=262144` so mmapfs can start. Existing hosts need a stack update (or re-provision) to pick up the service.
+
 ## Webhook events
 
 - `search.reindex.started`

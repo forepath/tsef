@@ -292,7 +292,7 @@ Used by **agent controller** for list/typeahead search. See **[Search indexes](.
 | `OPENSEARCH_HOST_PORT`    | Host port published by compose           | `9200`                              |
 | `SEARCH_REINDEX_INTERVAL` | Periodic reindex interval (`15m`, ms, …) | `15m`                               |
 
-Production: keep OpenSearch private; use TLS and secrets for credentials.
+Production: keep OpenSearch private; use TLS and secrets for credentials. Provisioned `agenstra-controller` stacks keep OpenSearch on the compose network only (no `OPENSEARCH_HOST_PORT` publish).
 
 Scheduler interval variables (for example `AUTONOMOUS_TICKET_SCHEDULER_INTERVAL_MS`) configure **coordinator** repeat intervals in BullMQ.
 

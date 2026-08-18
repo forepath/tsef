@@ -3,7 +3,26 @@ import { randomBytes } from 'crypto';
 import { parseAllowedHosts } from '@forepath/shared/shared/util-network-address';
 
 import { buildCertbotBootstrapScript } from '../../utils/cloud-init/certbot-bootstrap.script';
-import { formatEnvLines as formatEnv, quoteYamlScalar } from '../../utils/cloud-init/env.utils';
+import { buildComposeBridgeNetwork, buildComposeNamedVolumes } from '../../utils/cloud-init/compose-service.utils';
+import { formatEnvLines as formatEnv } from '../../utils/cloud-init/env.utils';
+import { buildNginxComposeService } from '../../utils/cloud-init/nginx-compose.utils';
+import {
+  OPENSEARCH_COMPOSE_DEPENDS_ON,
+  buildOpenSearchBackendEnvLines,
+  buildOpenSearchComposeService,
+  buildOpenSearchHostSysctlScript,
+} from '../../utils/cloud-init/opensearch-compose.utils';
+import {
+  POSTGRES_COMPOSE_DEPENDS_ON,
+  POSTGRES_PGVECTOR_COMPOSE_IMAGE,
+  buildPostgresBackendEnvLines,
+  buildPostgresComposeService,
+} from '../../utils/cloud-init/postgres-compose.utils';
+import {
+  REDIS_COMPOSE_DEPENDS_ON,
+  buildRedisBackendEnvLines,
+  buildRedisComposeService,
+} from '../../utils/cloud-init/redis-compose.utils';
 
 export interface AgentControllerCloudInitConfig {
   ssh: {
@@ -234,18 +253,9 @@ export function buildAgentControllerCloudInitUserData(config: AgentControllerClo
     `WEBSOCKET_PORT: ${config.backend?.websocketPort ?? '8081'}`,
     `WEBSOCKET_NAMESPACE: ${config.backend?.websocketNamespace ?? 'websocket'}`,
     `NODE_ENV: ${config.backend?.nodeEnv ?? 'production'}`,
-    // Database configuration
-    `DB_HOST: ${config.backend?.database?.host ?? 'postgres'}`,
-    `DB_PORT: ${config.backend?.database?.port ?? '5432'}`,
-    `DB_USERNAME: ${config.backend?.database?.username ?? 'postgres'}`,
-    `DB_PASSWORD: ${config.backend?.database?.password ?? 'postgres'}`,
-    `DB_DATABASE: ${config.backend?.database?.database ?? 'postgres'}`,
-    // Redis / BullMQ configuration
-    `REDIS_HOST: redis`,
-    `REDIS_PORT: 6379`,
-    `REDIS_PASSWORD: `,
-    `REDIS_DB: 0`,
-    `REDIS_KEY_PREFIX: agenstra-controller`,
+    ...buildPostgresBackendEnvLines(config.backend?.database),
+    ...buildRedisBackendEnvLines('agenstra-controller'),
+    ...buildOpenSearchBackendEnvLines('agenstra'),
     `QUEUE_WORKER_CONCURRENCY: 5`,
     // Coordinator / worker scheduler intervals (shared across api, worker, scheduler)
     `FILTER_RULES_SYNC_INTERVAL_MS: 30000`,
@@ -341,38 +351,24 @@ export function buildAgentControllerCloudInitUserData(config: AgentControllerClo
     },
   };
   const dockerCompose = `services:
-  postgres:
-    image: pgvector/pgvector:pg16
-    container_name: agent-controller-postgres
-    environment:
-      POSTGRES_USER: ${quoteYamlScalar(config.backend?.database?.username ?? 'postgres')}
-      POSTGRES_PASSWORD: ${quoteYamlScalar(config.backend?.database?.password ?? 'postgres')}
-      POSTGRES_DB: ${quoteYamlScalar(config.backend?.database?.database ?? 'postgres')}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${config.backend?.database?.username ?? 'postgres'}']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - agent-controller-network
-    restart: unless-stopped
+${buildPostgresComposeService({
+  image: POSTGRES_PGVECTOR_COMPOSE_IMAGE,
+  containerName: 'agent-controller-postgres',
+  network: 'agent-controller-network',
+  username: config.backend?.database?.username ?? 'postgres',
+  password: config.backend?.database?.password ?? 'postgres',
+  database: config.backend?.database?.database ?? 'postgres',
+})}
 
-  redis:
-    image: redis:7-alpine
-    container_name: agent-controller-redis
-    command: ['redis-server', '--appendonly', 'yes']
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - agent-controller-network
-    restart: unless-stopped
+${buildRedisComposeService({
+  containerName: 'agent-controller-redis',
+  network: 'agent-controller-network',
+})}
+
+${buildOpenSearchComposeService({
+  containerName: 'agent-controller-opensearch',
+  network: 'agent-controller-network',
+})}
 
   backend-agent-controller:
     image: ghcr.io/forepath/agenstra-controller-api:latest
@@ -384,10 +380,9 @@ ${backendApiEnv}
       - '${config.backend?.port ?? '3100'}:${config.backend?.port ?? '3100'}'
       - '${config.backend?.websocketPort ?? '8081'}:${config.backend?.websocketPort ?? '8081'}'
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+${POSTGRES_COMPOSE_DEPENDS_ON}
+${REDIS_COMPOSE_DEPENDS_ON}
+${OPENSEARCH_COMPOSE_DEPENDS_ON}
     networks:
       - agent-controller-network
     restart: unless-stopped
@@ -399,10 +394,9 @@ ${backendApiEnv}
     environment:
 ${backendWorkerEnv}
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+${POSTGRES_COMPOSE_DEPENDS_ON}
+${REDIS_COMPOSE_DEPENDS_ON}
+${OPENSEARCH_COMPOSE_DEPENDS_ON}
     networks:
       - agent-controller-network
     restart: unless-stopped
@@ -414,10 +408,9 @@ ${backendWorkerEnv}
     environment:
 ${backendSchedulerEnv}
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+${POSTGRES_COMPOSE_DEPENDS_ON}
+${REDIS_COMPOSE_DEPENDS_ON}
+${OPENSEARCH_COMPOSE_DEPENDS_ON}
     networks:
       - agent-controller-network
     restart: unless-stopped
@@ -435,32 +428,19 @@ ${frontendEnv}
       - agent-controller-network
     restart: unless-stopped
 
-  nginx:
-    image: nginx:alpine
-    container_name: agent-controller-nginx
-    ports:
-      - '${config.proxy?.httpPort ?? '80'}:${config.proxy?.httpPort ?? '80'}'
-      - '${config.proxy?.httpsPort ?? '443'}:${config.proxy?.httpsPort ?? '443'}'
-      - '${config.proxy?.websocketPort ?? '8443'}:${config.proxy?.websocketPort ?? '8443'}'
-    depends_on:
-      - frontend-agent-console-server
-      - backend-agent-controller
-    volumes:
-      - /opt/agent-controller/sites-enabled:/etc/nginx/conf.d:ro
-      - /opt/agent-controller/ssl:/etc/nginx/ssl:ro
-      - /opt/agent-controller/certbot-webroot:/var/www/certbot:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    networks:
-      - agent-controller-network
-    restart: unless-stopped
+${buildNginxComposeService({
+  containerName: 'agent-controller-nginx',
+  network: 'agent-controller-network',
+  stackDir: '/opt/agent-controller',
+  httpPort: config.proxy?.httpPort ?? 80,
+  httpsPort: config.proxy?.httpsPort ?? 443,
+  websocketPort: config.proxy?.websocketPort ?? 8443,
+  dependsOn: ['frontend-agent-console-server', 'backend-agent-controller'],
+})}
 
-volumes:
-  postgres_data:
-  redis_data:
+${buildComposeNamedVolumes(['postgres_data', 'redis_data', 'opensearch_data'])}
 
-networks:
-  agent-controller-network:
-    driver: bridge
+${buildComposeBridgeNetwork('agent-controller-network')}
 `;
   const nginxBootstrapConfig = `
 server {
@@ -736,6 +716,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 chmod 600 /opt/agent-controller/ssl/bootstrap.key
 chmod 644 /opt/agent-controller/ssl/bootstrap.crt
 
+${buildOpenSearchHostSysctlScript()}
 # Create docker-compose.yaml file
 log "Creating docker-compose.yaml file..."
 cat > /opt/agent-controller/docker-compose.yaml <<'EOF'

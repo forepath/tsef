@@ -54,13 +54,15 @@ sequenceDiagram
 
 Cloud-init installs Docker CE and deploys a docker-compose stack on the instance. Integrated service kinds:
 
-| Service id            | Stack                                                                                                                                      |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `agenstra-controller` | PostgreSQL (pgvector), Redis, Agenstra Controller API (api/worker/scheduler), agent console, Nginx + Certbot under `/opt/agent-controller` |
-| `agenstra-manager`    | PostgreSQL, Agenstra Manager API, Nginx under `/opt/agent-manager`                                                                         |
-| `decabill-billing`    | PostgreSQL, Redis, Decabill billing API (api/worker/scheduler), billing console, Nginx + Certbot under `/opt/decabill-billing`             |
+| Service id            | Stack                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `agenstra-controller` | PostgreSQL (pgvector), Redis, OpenSearch, Agenstra Controller API (api/worker/scheduler), agent console, Nginx + Certbot under `/opt/agent-controller` |
+| `agenstra-manager`    | PostgreSQL, Agenstra Manager API, Nginx under `/opt/agent-manager`                                                                                     |
+| `decabill-billing`    | PostgreSQL, Redis, OpenSearch, Decabill billing API (api/worker/scheduler), billing console, Nginx + Certbot under `/opt/decabill-billing`             |
 
 Containers share a defined application directory on the host (typically under `/opt/`). Environment variables for authentication, database connection, and product-specific settings are interpolated into the generated compose file from the subscription's requested configuration.
+
+OpenSearch on `agenstra-controller` and `decabill-billing` is single-node, bound only to the compose network (no host port), with `vm.max_map_count=262144` set during cloud-init. Existing provisioned hosts do not pick this up from image pull alone; re-provision or replace the host compose file.
 
 Operators choose service kind and image tags through service type and plan configuration; the update scheduler pulls latest tagged images on a schedule.
 

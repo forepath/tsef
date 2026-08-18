@@ -23,6 +23,8 @@ Customer promotions active/history lists use `search` with SQL `ILIKE` on joined
 
 See [environment configuration](../deployment/environment-configuration.md) and [system requirements](../deployment/system-requirements.md) for `OPENSEARCH_*` and sizing.
 
+Provisioned `decabill-billing` stacks deploy a single-node OpenSearch container on the compose network only (no host port). Cloud-init sets `vm.max_map_count=262144` so mmapfs can start. Existing hosts need a stack update (or re-provision) to pick up the service.
+
 ## Webhook events
 
 - `search.reindex.started`
