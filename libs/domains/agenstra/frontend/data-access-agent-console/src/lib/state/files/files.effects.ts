@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, exhaustMap, map, mergeMap, of, switchMap } from 'rxjs';
+import { catchError, exhaustMap, groupBy, map, mergeMap, of, switchMap } from 'rxjs';
 
 import { FilesService } from '../../services/files.service';
 
@@ -86,25 +86,35 @@ export const listDirectory$ = createEffect(
   (actions$ = inject(Actions), filesService = inject(FilesService)) => {
     return actions$.pipe(
       ofType(listDirectory),
-      mergeMap(({ clientId, agentId, params }) => {
+      groupBy(({ clientId, agentId, params }) => {
         const directoryPath = params?.path || '.';
         const c = params?.context ?? 'app';
 
-        return filesService.listDirectory(clientId, agentId, params).pipe(
-          map((files) => listDirectorySuccess({ clientId, agentId, directoryPath, files, context: c })),
-          catchError((error) =>
-            of(
-              listDirectoryFailure({
-                clientId,
-                agentId,
-                directoryPath,
-                error: normalizeError(error),
-                context: c,
-              }),
-            ),
-          ),
-        );
+        return `${clientId}:${agentId}:${c}:${directoryPath}`;
       }),
+      mergeMap((group$) =>
+        group$.pipe(
+          switchMap(({ clientId, agentId, params }) => {
+            const directoryPath = params?.path || '.';
+            const c = params?.context ?? 'app';
+
+            return filesService.listDirectory(clientId, agentId, params).pipe(
+              map((files) => listDirectorySuccess({ clientId, agentId, directoryPath, files, context: c })),
+              catchError((error) =>
+                of(
+                  listDirectoryFailure({
+                    clientId,
+                    agentId,
+                    directoryPath,
+                    error: normalizeError(error),
+                    context: c,
+                  }),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
     );
   },
   { functional: true },

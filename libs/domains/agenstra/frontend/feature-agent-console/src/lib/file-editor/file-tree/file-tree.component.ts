@@ -39,6 +39,27 @@ interface TreeNode {
   loading?: boolean;
 }
 
+/** Minimal File System Access API entry shape for OS drag-and-drop (Chrome / Safari). */
+interface DroppedFileSystemEntry {
+  isFile: boolean;
+  isDirectory: boolean;
+  name: string;
+  file: (callback: (file: File) => void, errorCallback?: (error: DOMException) => void) => void;
+  createReader: () => DroppedFileSystemDirectoryReader;
+}
+
+interface DroppedFileSystemDirectoryReader {
+  readEntries: (
+    successCallback: (entries: DroppedFileSystemEntry[]) => void,
+    errorCallback?: (error: DOMException) => void,
+  ) => void;
+}
+
+interface CollectedUploadFile {
+  relativePath: string;
+  file: File;
+}
+
 @Component({
   selector: 'framework-file-tree',
   imports: [CommonModule, FormsModule, GitBranchModalComponent],
@@ -155,16 +176,12 @@ export class FileTreeComponent implements OnInit {
         return of(false);
       }
 
-      // Only show loading if we don't have cached data (silent refresh)
+      // Only show loading if we don't have cached data (silent refresh).
+      // Use local treeCache — store listings are invalidated on create/delete/move.
       return combineLatest([
         this.filesFacade.isListingDirectory$(config.clientId, config.agentId, '.', config.context),
-        this.filesFacade.getDirectoryListing$(config.clientId, config.agentId, '.', config.context),
-      ]).pipe(
-        map(([isLoading, cachedData]) => {
-          // Show loading only if loading AND no cached data exists
-          return isLoading && !cachedData;
-        }),
-      );
+        toObservable(this.treeCache),
+      ]).pipe(map(([isLoading, cache]) => isLoading && !cache.has('.')));
     }),
   );
 
@@ -620,6 +637,33 @@ export class FileTreeComponent implements OnInit {
   }
 
   onDragOver(event: DragEvent, node: TreeNode): void {
+    if (this.isExternalFileDrag(event)) {
+      if (node.type !== 'directory') {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'copy';
+      }
+
+      if (this.dragOverPath() === '.') {
+        this.dragOverPath.set(null);
+      }
+
+      this.dragOverPath.set(node.path);
+
+      if (!node.expanded) {
+        this.startHoverTimeout(node.path);
+      } else {
+        this.clearHoverTimeout();
+      }
+
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -660,6 +704,27 @@ export class FileTreeComponent implements OnInit {
   }
 
   onDragEnter(event: DragEvent, node: TreeNode): void {
+    if (this.isExternalFileDrag(event)) {
+      if (node.type !== 'directory') {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (this.dragOverPath() === '.') {
+        this.dragOverPath.set(null);
+      }
+
+      this.dragOverPath.set(node.path);
+
+      if (!node.expanded) {
+        this.startHoverTimeout(node.path);
+      }
+
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -715,6 +780,18 @@ export class FileTreeComponent implements OnInit {
   onDrop(event: DragEvent, node: TreeNode): void {
     event.preventDefault();
     event.stopPropagation();
+
+    if (this.isExternalFileDrag(event)) {
+      if (node.type !== 'directory') {
+        return;
+      }
+
+      this.dragOverPath.set(null);
+      this.clearHoverTimeout();
+      void this.uploadDroppedItems(event, node.path);
+
+      return;
+    }
 
     const dragged = this.draggedItem();
 
@@ -776,6 +853,19 @@ export class FileTreeComponent implements OnInit {
   }
 
   onDragOverRoot(event: DragEvent): void {
+    if (this.isExternalFileDrag(event)) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'copy';
+      }
+
+      this.dragOverPath.set('.');
+
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -801,6 +891,14 @@ export class FileTreeComponent implements OnInit {
   }
 
   onDragEnterRoot(event: DragEvent): void {
+    if (this.isExternalFileDrag(event)) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.dragOverPath.set('.');
+
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -842,6 +940,14 @@ export class FileTreeComponent implements OnInit {
   onDropRoot(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
+
+    if (this.isExternalFileDrag(event)) {
+      this.dragOverPath.set(null);
+      this.clearHoverTimeout();
+      void this.uploadDroppedItems(event, '.');
+
+      return;
+    }
 
     const dragged = this.draggedItem();
 
@@ -1611,80 +1717,315 @@ export class FileTreeComponent implements OnInit {
     }
 
     const targetPath = this.uploadTargetPath();
-    const fileArray = Array.from(files);
-    let uploadedCount = 0;
 
-    fileArray.forEach((file) => {
-      // Convert file to base64
+    this.uploadFilesToPath(Array.from(files), targetPath);
+
+    // Reset input
+    input.value = '';
+  }
+
+  /**
+   * True when the drag payload comes from the OS file manager (not an in-tree move).
+   */
+  private isExternalFileDrag(event: DragEvent): boolean {
+    const types = event.dataTransfer?.types;
+
+    if (!types) {
+      return false;
+    }
+
+    return Array.from(types).includes('Files');
+  }
+
+  private getDroppedFileSystemEntries(dataTransfer: DataTransfer): DroppedFileSystemEntry[] {
+    const entries: DroppedFileSystemEntry[] = [];
+
+    if (!dataTransfer.items) {
+      return entries;
+    }
+
+    for (let index = 0; index < dataTransfer.items.length; index++) {
+      const item = dataTransfer.items[index];
+
+      if (item.kind !== 'file') {
+        continue;
+      }
+
+      const entry = item.webkitGetAsEntry?.() as DroppedFileSystemEntry | null;
+
+      if (entry) {
+        entries.push(entry);
+      }
+    }
+
+    return entries;
+  }
+
+  private readAllDirectoryEntries(reader: DroppedFileSystemDirectoryReader): Promise<DroppedFileSystemEntry[]> {
+    return new Promise((resolve, reject) => {
+      const allEntries: DroppedFileSystemEntry[] = [];
+
+      const readBatch = (): void => {
+        reader.readEntries(
+          (entries) => {
+            if (entries.length === 0) {
+              resolve(allEntries);
+
+              return;
+            }
+
+            allEntries.push(...entries);
+            readBatch();
+          },
+          (error) => reject(error),
+        );
+      };
+
+      readBatch();
+    });
+  }
+
+  private collectUploadEntries(
+    entry: DroppedFileSystemEntry,
+    relativePath: string,
+    files: CollectedUploadFile[],
+    directories: Set<string>,
+  ): Promise<void> {
+    const entryPath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
+
+    if (entry.isFile) {
+      return new Promise((resolve, reject) => {
+        entry.file(
+          (file) => {
+            files.push({ relativePath: entryPath, file });
+            resolve();
+          },
+          (error) => reject(error),
+        );
+      });
+    }
+
+    if (entry.isDirectory) {
+      directories.add(entryPath);
+
+      return this.readAllDirectoryEntries(entry.createReader()).then((childEntries) =>
+        Promise.all(
+          childEntries.map((childEntry) => this.collectUploadEntries(childEntry, entryPath, files, directories)),
+        ).then(() => undefined),
+      );
+    }
+
+    return Promise.resolve();
+  }
+
+  private buildFullUploadPath(targetPath: string, relativePath: string): string {
+    return targetPath === '.' ? relativePath : `${targetPath}/${relativePath}`;
+  }
+
+  private uploadFileContent(fullPath: string, base64Content: string): void {
+    this.filesFacade.createFileOrDirectory(
+      this.clientId(),
+      this.agentId(),
+      fullPath,
+      {
+        type: 'file',
+        content: base64Content,
+      },
+      this.fileManagerContext(),
+    );
+  }
+
+  private readFileAsBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
       reader.onload = () => {
         const result = reader.result as string;
-        // Remove data URL prefix if present (data:...;base64,)
         const base64Content = result.includes(',') ? result.split(',')[1] : result;
-        // Build full file path
-        const fullPath = targetPath === '.' ? file.name : `${targetPath}/${file.name}`;
 
-        // Create file with content using createFileOrDirectory
-        this.filesFacade.createFileOrDirectory(
-          this.clientId(),
-          this.agentId(),
-          fullPath,
-          {
-            type: 'file',
-            content: base64Content,
-          },
-          this.fileManagerContext(),
-        );
-
-        uploadedCount++;
-
-        // After all files are uploaded, refresh directory listing and git status
-        if (uploadedCount === fileArray.length) {
-          // Expand target folder if it's not already expanded (only for non-root folders)
-          if (targetPath !== '.' && !this.expandedPaths().has(targetPath)) {
-            this.directoryExpand.emit(targetPath);
-            // Load directory if not cached
-            const hasCachedData = this.treeCache().has(targetPath);
-
-            if (!hasCachedData) {
-              this.listDirectoryRel(targetPath);
-            }
-          }
-
-          // Refresh directory listing
-          setTimeout(() => {
-            this.listDirectoryRel(targetPath);
-          }, 100);
-
-          // Reload git status after file upload (workspace app tree only)
-          if (this.fileManagerContext() === 'app') {
-            setTimeout(() => {
-              this.vcsFacade.loadStatus(this.clientId(), this.agentId());
-            }, 500);
-          }
-
-          // Select the last uploaded file
-          if (fileArray.length === 1) {
-            setTimeout(() => {
-              const lastFilePath = targetPath === '.' ? fileArray[0].name : `${targetPath}/${fileArray[0].name}`;
-
-              this.fileSelect.emit(lastFilePath);
-            }, 500);
-          }
-        }
+        resolve(base64Content);
       };
 
-      reader.onerror = () => {
-        console.error(`Failed to read file: ${file.name}`);
-        uploadedCount++;
-      };
-
-      // Read file as data URL (base64)
+      reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
       reader.readAsDataURL(file);
     });
+  }
 
-    // Reset input
-    input.value = '';
+  private uploadFilesToPath(files: File[], targetPath: string): void {
+    if (files.length === 0) {
+      return;
+    }
+
+    this.uploadTargetPath.set(targetPath);
+
+    let completedCount = 0;
+    const uploadedPaths: string[] = [];
+
+    files.forEach((file) => {
+      const fullPath = this.buildFullUploadPath(targetPath, file.name);
+
+      this.readFileAsBase64(file)
+        .then((base64Content) => {
+          this.uploadFileContent(fullPath, base64Content);
+          uploadedPaths.push(fullPath);
+        })
+        .catch((error: unknown) => {
+          console.error(error);
+        })
+        .finally(() => {
+          completedCount++;
+
+          if (completedCount === files.length) {
+            this.onUploadComplete(targetPath, uploadedPaths, uploadedPaths);
+          }
+        });
+    });
+  }
+
+  private async uploadDroppedItems(event: DragEvent, targetPath: string): Promise<void> {
+    const dataTransfer = event.dataTransfer;
+
+    if (!dataTransfer) {
+      return;
+    }
+
+    this.uploadTargetPath.set(targetPath);
+
+    const entries = this.getDroppedFileSystemEntries(dataTransfer);
+
+    if (entries.length === 0) {
+      if (dataTransfer.files.length > 0) {
+        this.uploadFilesToPath(Array.from(dataTransfer.files), targetPath);
+      }
+
+      return;
+    }
+
+    const filesToUpload: CollectedUploadFile[] = [];
+    const directories = new Set<string>();
+
+    try {
+      await Promise.all(entries.map((entry) => this.collectUploadEntries(entry, '', filesToUpload, directories)));
+    } catch (error) {
+      console.error('Failed to read dropped files:', error);
+
+      return;
+    }
+
+    const sortedDirectories = Array.from(directories).sort(
+      (left, right) => left.split('/').length - right.split('/').length,
+    );
+    const pendingCreatePaths: string[] = [];
+    const expandedDirectoryPaths: string[] = [];
+
+    for (const relativeDirectory of sortedDirectories) {
+      const fullDirectoryPath = this.buildFullUploadPath(targetPath, relativeDirectory);
+
+      pendingCreatePaths.push(fullDirectoryPath);
+
+      this.filesFacade.createFileOrDirectory(
+        this.clientId(),
+        this.agentId(),
+        fullDirectoryPath,
+        { type: 'directory' },
+        this.fileManagerContext(),
+      );
+
+      if (!this.expandedPaths().has(fullDirectoryPath)) {
+        this.directoryExpand.emit(fullDirectoryPath);
+        expandedDirectoryPaths.push(fullDirectoryPath);
+      }
+    }
+
+    if (filesToUpload.length === 0) {
+      this.onUploadComplete(targetPath, [], pendingCreatePaths, expandedDirectoryPaths);
+
+      return;
+    }
+
+    let completedCount = 0;
+    const uploadedPaths: string[] = [];
+
+    for (const { relativePath, file } of filesToUpload) {
+      const fullPath = this.buildFullUploadPath(targetPath, relativePath);
+
+      pendingCreatePaths.push(fullPath);
+      uploadedPaths.push(fullPath);
+
+      this.readFileAsBase64(file)
+        .then((base64Content) => {
+          this.uploadFileContent(fullPath, base64Content);
+        })
+        .catch((error: unknown) => {
+          console.error(error);
+        })
+        .finally(() => {
+          completedCount++;
+
+          if (completedCount === filesToUpload.length) {
+            this.onUploadComplete(targetPath, uploadedPaths, pendingCreatePaths, expandedDirectoryPaths);
+          }
+        });
+    }
+  }
+
+  private waitForCreatesToFinish(createPaths: string[]): Observable<void> {
+    const clientId = this.clientId();
+    const agentId = this.agentId();
+    const context = this.fileManagerContext();
+    const uniquePaths = [...new Set(createPaths)];
+
+    if (!clientId || !agentId || uniquePaths.length === 0) {
+      return of(undefined);
+    }
+
+    return combineLatest(
+      uniquePaths.map((path) => this.filesFacade.isCreatingFile$(clientId, agentId, path, context)),
+    ).pipe(
+      filter((creatingFlags) => creatingFlags.every((creating) => !creating)),
+      take(1),
+      map(() => undefined),
+    );
+  }
+
+  private refreshUploadedDirectories(targetPath: string, expandedDirectoryPaths: string[] = []): void {
+    const pathsToRefresh = [...new Set([targetPath, ...expandedDirectoryPaths])].sort(
+      (left, right) => left.split('/').length - right.split('/').length,
+    );
+
+    pathsToRefresh.forEach((path, index) => {
+      setTimeout(() => {
+        this.listDirectoryRel(path);
+      }, index * 50);
+    });
+  }
+
+  private onUploadComplete(
+    targetPath: string,
+    uploadedPaths: string[],
+    pendingCreatePaths: string[] = uploadedPaths,
+    expandedDirectoryPaths: string[] = [],
+  ): void {
+    if (targetPath !== '.' && !this.expandedPaths().has(targetPath)) {
+      this.directoryExpand.emit(targetPath);
+    }
+
+    this.waitForCreatesToFinish(pendingCreatePaths)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.refreshUploadedDirectories(targetPath, expandedDirectoryPaths);
+
+        if (this.fileManagerContext() === 'app') {
+          setTimeout(() => {
+            this.vcsFacade.loadStatus(this.clientId(), this.agentId());
+          }, 500);
+        }
+
+        if (uploadedPaths.length === 1) {
+          setTimeout(() => {
+            this.fileSelect.emit(uploadedPaths[0]);
+          }, 500);
+        }
+      });
   }
 }
