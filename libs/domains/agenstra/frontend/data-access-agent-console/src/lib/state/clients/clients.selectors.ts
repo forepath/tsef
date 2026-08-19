@@ -11,8 +11,19 @@ export const selectSelectedClient = createSelector(selectClientsState, (state) =
 
 export const selectActiveClientId = createSelector(selectClientsState, (state) => state.activeClientId);
 
-export const selectActiveClient = createSelector(selectClients, selectActiveClientId, (clients, activeClientId) =>
-  activeClientId ? (clients.find((c) => c.id === activeClientId) ?? null) : null,
+export const selectActiveClient = createSelector(
+  selectClients,
+  selectActiveClientId,
+  selectSelectedClient,
+  (clients, activeClientId, selectedClient) => {
+    if (!activeClientId) {
+      return null;
+    }
+
+    return (
+      clients.find((c) => c.id === activeClientId) ?? (selectedClient?.id === activeClientId ? selectedClient : null)
+    );
+  },
 );
 
 // Loading state selectors

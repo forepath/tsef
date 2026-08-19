@@ -162,6 +162,18 @@ describe('Clients Selectors', () => {
 
       expect(result).toBeNull();
     });
+
+    it('should fall back to selectedClient when active client is filtered out of entities', () => {
+      const state = createState({
+        entities: [],
+        activeClientId: 'client-1',
+        selectedClient: mockClient,
+      });
+      const rootState = { clients: state };
+      const result = selectActiveClient(rootState as any);
+
+      expect(result).toEqual(mockClient);
+    });
   });
 
   describe('selectClientsLoading', () => {

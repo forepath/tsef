@@ -455,6 +455,26 @@ describe('clientsReducer', () => {
       expect(newState.activeClientId).toBe('client-1');
       expect(newState.error).toBeNull();
     });
+
+    it('should persist selectedClient from entities when activating a client', () => {
+      const mockClient = {
+        id: 'client-1',
+        name: 'Test Client',
+        endpoint: 'https://example.com/api',
+        authenticationType: 'api_key' as const,
+        isAutoProvisioned: false,
+        canManageWorkspaceConfiguration: true,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+      const state: ClientsState = {
+        ...initialClientsState,
+        entities: [mockClient],
+      };
+      const newState = clientsReducer(state, setActiveClientSuccess({ id: 'client-1' }));
+
+      expect(newState.selectedClient).toEqual(mockClient);
+    });
   });
 
   describe('setActiveClientFailure', () => {
