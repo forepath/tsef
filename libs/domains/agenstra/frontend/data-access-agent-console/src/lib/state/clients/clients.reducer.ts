@@ -262,11 +262,17 @@ export const clientsReducer = createReducer(
     ...state,
     error: null,
   })),
-  on(setActiveClientSuccess, (state, { id }) => ({
-    ...state,
-    activeClientId: id,
-    error: null,
-  })),
+  on(setActiveClientSuccess, (state, { id }) => {
+    const activeClient =
+      state.entities.find((c) => c.id === id) ?? (state.selectedClient?.id === id ? state.selectedClient : null);
+
+    return {
+      ...state,
+      activeClientId: id,
+      selectedClient: activeClient,
+      error: null,
+    };
+  }),
   on(setActiveClientFailure, (state, { error }) => ({
     ...state,
     error,
