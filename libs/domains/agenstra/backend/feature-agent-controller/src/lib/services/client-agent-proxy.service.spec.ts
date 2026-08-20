@@ -55,6 +55,8 @@ describe('ClientAgentProxyService', () => {
     description: 'Test Agent Description',
     agentType: 'cursor',
     containerType: ContainerType.GENERIC,
+    chats: [],
+    primaryChatId: 'primary-chat-uuid',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };

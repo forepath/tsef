@@ -659,6 +659,51 @@
       <trans-unit id="featureChat-chatHeader" datatype="html">
         <source>Chat</source>
         </trans-unit>
+      <trans-unit id="featureChat-chatSessionSwitcherAria" datatype="html">
+        <source>Chat sessions</source>
+      </trans-unit>
+      <trans-unit id="featureChat-chatSessionDefaultTitle" datatype="html">
+        <source>Chat</source>
+      </trans-unit>
+      <trans-unit id="featureChat-chatSessionPrimaryTitle" datatype="html">
+        <source>Primary</source>
+      </trans-unit>
+      <trans-unit id="featureChat-chatSessionUntitledTitle" datatype="html">
+        <source>Untitled chat</source>
+      </trans-unit>
+      <trans-unit id="featureChat-chatSessionPrimaryBadge" datatype="html">
+        <source>(primary)</source>
+      </trans-unit>
+      <trans-unit id="featureChat-renameChatSessionModalTitle" datatype="html">
+        <source>Rename Chat Session</source>
+      </trans-unit>
+      <trans-unit id="featureChat-renameChatSessionSave" datatype="html">
+        <source>Save</source>
+      </trans-unit>
+      <trans-unit id="featureChat-renameChatSessionAria" datatype="html">
+        <source>Rename chat session</source>
+      </trans-unit>
+      <trans-unit id="featureChat-renameChatSessionTitle" datatype="html">
+        <source>Rename</source>
+      </trans-unit>
+      <trans-unit id="featureChat-deleteChatSessionModalTitle" datatype="html">
+        <source>Delete Chat Session</source>
+      </trans-unit>
+      <trans-unit id="featureChat-deleteChatSessionConfirm" datatype="html">
+        <source>Are you sure you want to delete the chat session <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ chatSessionToDeleteName() }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/>?</source>
+      </trans-unit>
+      <trans-unit id="featureChat-deleteChatSessionAria" datatype="html">
+        <source>Delete chat session</source>
+      </trans-unit>
+      <trans-unit id="featureChat-deleteChatSessionTitle" datatype="html">
+        <source>Delete</source>
+      </trans-unit>
+      <trans-unit id="featureChat-newChatSession" datatype="html">
+        <source>New chat</source>
+      </trans-unit>
+      <trans-unit id="featureChat-newChatSessionTitle" datatype="html">
+        <source>New chat</source>
+      </trans-unit>
       <trans-unit id="featureChat-startEnvironmentTitle" datatype="html">
         <source>Start environment</source>
         </trans-unit>

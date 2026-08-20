@@ -86,6 +86,20 @@ Regex rules scoped to this manager instance (distinct from controller global rul
 - `GET .../deployments/runs/:runId/jobs/:jobId/logs` - Job logs
 - `POST .../deployments/runs/:runId/cancel` - Cancel run
 
+### Chat sessions
+
+User-visible chat sessions per agent environment (primary plus operator-created threads). Hidden ACP suffixes are not exposed here. See [Chat Interface](../features/chat-interface.md).
+
+- `GET /api/agents/:agentId/chats` - List sessions (`limit`, `offset`)
+- `GET /api/agents/:agentId/chats/count` - Count sessions
+- `POST /api/agents/:agentId/chats` - Create a user session (`201 Created`)
+- `GET /api/agents/:agentId/chats/:chatId` - Get a session
+- `PUT /api/agents/:agentId/chats/:chatId` - Update session title
+- `DELETE /api/agents/:agentId/chats/:chatId` - Delete a session
+- `GET /api/agents/:agentId/chats/:chatId/messages` - List messages for a session (`limit`, `offset`)
+
+Agent profile responses include `chats` and `primaryChatId`.
+
 ### Messages metadata
 
 - `GET /api/agents/:id/messages/latest-agent` - Latest agent chat message metadata for unread tracking
@@ -136,25 +150,23 @@ The Socket.IO WebSocket gateway is available at `http://localhost:8080/agents` (
 
 #### Client → Server
 
-- `login` - Authenticate with agent ID (UUID or name) and password
-- `chat` - Send chat message (requires authentication)
+- `login` - Authenticate with agent ID (UUID or name) and password; optional `chatId` restores that session (primary when omitted)
+- `chat` - Send chat message (requires authentication); optional `chatId` scopes the turn to a user-visible session
+- `restoreChat` - Re-emit history for `{ chatId }` after the client clears its local thread
 - `enhanceChat` / `generateTicketBody` - Isolated prompt helpers (unicast results)
 - Additional events for files, terminals, and tooling as described in the agent-manager AsyncAPI (for example `fileUpdate`, `createTerminal`, `terminalInput`, `closeTerminal`)
 
 #### Server → Client
 
-- `loginSuccess` / `loginError` / `chatMessage` / `chatEvent` / `messageFilterResult`
-- `chatEnhanceResult` / `ticketBodyResult`
-- `gitStateChanged` - Workspace git may have changed; refresh dirty indicators
-- `fileUpdateNotification` / `containerStats` / terminal events / `error`
-
-#### Server → Client
-
 - `loginSuccess` - Emitted on successful authentication
 - `loginError` - Emitted on authentication failure
-- `chatMessage` - Chat traffic (broadcast or unicast depending on message options)
+- `chatMessage` - Chat traffic (broadcast or unicast depending on message options); includes `chatId` when tied to a persisted session
+- `restoreChatSuccess` - Acknowledgement after history restore for a `chatId`
+- `chatEvent` / `messageFilterResult`
+- `chatEnhanceResult` / `ticketBodyResult`
+- `gitStateChanged` - Workspace git may have changed; refresh dirty indicators
 - `containerStats`, container status and resource usage; first event after login, then every 15 seconds by default (`CONTAINER_STATS_SCHEDULER_INTERVAL` in ms)
-- File and terminal notifications, and other provider-specific events per AsyncAPI
+- `fileUpdateNotification` / terminal events, and other provider-specific events per AsyncAPI
 - `error` - Emitted on authorization or processing errors
 
 For complete WebSocket event specifications, authentication flow, and usage examples, see the application and API reference docs linked below.

@@ -2,22 +2,29 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { AgentEventEnvelope } from '../providers/agent-events.types';
 import { AgentMessageEventsRepository } from '../repositories/agent-message-events.repository';
+import { AgentChatSessionsService } from './agent-chat-sessions.service';
 
 @Injectable()
 export class AgentMessageEventsService {
   private readonly logger = new Logger(AgentMessageEventsService.name);
 
-  constructor(private readonly repository: AgentMessageEventsRepository) {}
+  constructor(
+    private readonly repository: AgentMessageEventsRepository,
+    private readonly agentChatSessionsService: AgentChatSessionsService,
+  ) {}
 
-  async persistEvent(agentId: string, event: AgentEventEnvelope): Promise<void> {
+  async persistEvent(agentId: string, event: AgentEventEnvelope, chatSessionId?: string): Promise<void> {
     // Avoid storing high-volume deltas by default; transcript + key events remain.
     if (event.kind === 'assistantDelta') {
       return;
     }
 
     try {
+      const session = await this.agentChatSessionsService.resolveSessionForChat(agentId, chatSessionId);
+
       await this.repository.create({
         agentId,
+        chatSessionId: session.id,
         correlationId: event.correlationId,
         sequence: event.sequence,
         kind: event.kind,
@@ -35,9 +42,11 @@ export class AgentMessageEventsService {
   async listRecentEvents(
     agentId: string,
     limit = 200,
-    opts?: { kinds?: string[]; since?: Date },
+    opts?: { kinds?: string[]; since?: Date; chatSessionId?: string },
   ): Promise<AgentEventEnvelope[]> {
-    const rows = await this.repository.listRecent(agentId, limit, opts);
+    const chatSessionId =
+      opts?.chatSessionId ?? (await this.agentChatSessionsService.resolveSessionForChat(agentId)).id;
+    const rows = await this.repository.listRecent(agentId, limit, { ...opts, chatSessionId });
 
     return rows.map(
       (row) =>
@@ -49,6 +58,7 @@ export class AgentMessageEventsService {
           sequence: row.sequence,
           timestamp: row.eventTimestamp.toISOString(),
           payload: row.payload as AgentEventEnvelope['payload'],
+          chatId: row.chatSessionId,
         }) as AgentEventEnvelope,
     );
   }

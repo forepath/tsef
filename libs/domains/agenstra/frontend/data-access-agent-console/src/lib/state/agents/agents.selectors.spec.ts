@@ -46,6 +46,8 @@ describe('Agents Selectors', () => {
     description: 'Test Description',
     agentType: 'cursor',
     containerType: 'generic' as ContainerType,
+    chats: [],
+    primaryChatId: 'primary-chat-1',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
@@ -54,6 +56,8 @@ describe('Agents Selectors', () => {
     name: 'Test Agent 2',
     agentType: 'cursor',
     containerType: 'generic' as ContainerType,
+    chats: [],
+    primaryChatId: 'primary-chat-2',
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',
   };

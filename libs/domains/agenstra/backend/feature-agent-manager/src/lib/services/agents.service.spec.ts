@@ -11,6 +11,7 @@ import { AgentProviderFactory } from '../providers/agent-provider.factory';
 import { AgentProvider, AgentProviderModels } from '../providers/agent-provider.interface';
 import { AgentsRepository } from '../repositories/agents.repository';
 
+import { AgentChatSessionsService } from './agent-chat-sessions.service';
 import { AgentsService } from './agents.service';
 import { DeploymentsService } from './deployments.service';
 import { DockerService } from './docker.service';
@@ -22,6 +23,23 @@ describe('AgentsService', () => {
   let dockerService: jest.Mocked<DockerService>;
   let agentProviderFactory: jest.Mocked<AgentProviderFactory>;
   let deploymentsService: jest.Mocked<DeploymentsService>;
+  const mockPrimaryChatSession = {
+    id: 'primary-chat-id',
+    agentId: 'test-uuid',
+    title: 'Chat',
+    kind: 'primary' as const,
+    resumeSessionSuffix: '',
+    lastMessageAt: null,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+  };
+  const mockPrimaryChatSummary = {
+    id: 'primary-chat-id',
+    title: 'Chat',
+    kind: 'primary' as const,
+    lastMessageAt: undefined,
+    createdAt: new Date('2024-01-01'),
+  };
   const mockAgent: AgentEntity = {
     id: 'test-uuid',
     name: 'Test Agent',
@@ -92,8 +110,31 @@ describe('AgentsService', () => {
     deleteConfiguration: jest.fn(),
     getConfiguration: jest.fn(),
   };
+  const mockAgentChatSessionsService = {
+    ensurePrimarySession: jest.fn(),
+    getSummariesByAgentIds: jest.fn(),
+    mapToSummaryDto: jest.fn(),
+  };
 
   beforeEach(async () => {
+    mockAgentChatSessionsService.ensurePrimarySession.mockResolvedValue(mockPrimaryChatSession);
+    mockAgentChatSessionsService.getSummariesByAgentIds.mockImplementation(async (agentIds: string[]) => {
+      const byAgent = new Map<string, (typeof mockPrimaryChatSession)[]>();
+
+      for (const agentId of agentIds) {
+        byAgent.set(agentId, [{ ...mockPrimaryChatSession, agentId }]);
+      }
+
+      return byAgent;
+    });
+    mockAgentChatSessionsService.mapToSummaryDto.mockImplementation((entity: typeof mockPrimaryChatSession) => ({
+      id: entity.id,
+      title: entity.title ?? undefined,
+      kind: entity.kind,
+      lastMessageAt: entity.lastMessageAt ?? undefined,
+      createdAt: entity.createdAt,
+    }));
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AgentsService,
@@ -112,6 +153,10 @@ describe('AgentsService', () => {
         {
           provide: AgentProviderFactory,
           useValue: mockAgentProviderFactory,
+        },
+        {
+          provide: AgentChatSessionsService,
+          useValue: mockAgentChatSessionsService,
         },
         {
           provide: DeploymentsService,
@@ -191,6 +236,8 @@ describe('AgentsService', () => {
       expect(result.password).toBeDefined();
       expect(result.password.length).toBeGreaterThan(0);
       expect(typeof result.password).toBe('string');
+      expect(result.chats).toEqual([mockPrimaryChatSummary]);
+      expect(result.primaryChatId).toBe('primary-chat-id');
       expect(repository.findByName).toHaveBeenCalledWith(createDto.name);
       expect(passwordService.hashPassword).toHaveBeenCalled();
       expect(agentProviderFactory.getProvider).toHaveBeenCalledWith('cursor');
@@ -1676,6 +1723,10 @@ describe('AgentsService', () => {
             useValue: mockAgentProviderFactory,
           },
           {
+            provide: AgentChatSessionsService,
+            useValue: mockAgentChatSessionsService,
+          },
+          {
             provide: DeploymentsService,
             useValue: undefined,
           },
@@ -1801,8 +1852,11 @@ describe('AgentsService', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(mockAgent.id);
+      expect(result[0].chats).toEqual([mockPrimaryChatSummary]);
+      expect(result[0].primaryChatId).toBe('primary-chat-id');
       expect(result[0]).not.toHaveProperty('hashedPassword');
       expect(repository.findAll).toHaveBeenCalledWith(10, 0);
+      expect(mockAgentChatSessionsService.getSummariesByAgentIds).toHaveBeenCalledWith([mockAgent.id]);
     });
 
     it('should use default pagination values', async () => {
@@ -1823,8 +1877,11 @@ describe('AgentsService', () => {
       const result = await service.findOne('test-uuid');
 
       expect(result.id).toBe(mockAgent.id);
+      expect(result.chats).toEqual([mockPrimaryChatSummary]);
+      expect(result.primaryChatId).toBe('primary-chat-id');
       expect(result).not.toHaveProperty('hashedPassword');
       expect(repository.findByIdOrThrow).toHaveBeenCalledWith('test-uuid');
+      expect(mockAgentChatSessionsService.ensurePrimarySession).toHaveBeenCalledWith('test-uuid');
     });
   });
 

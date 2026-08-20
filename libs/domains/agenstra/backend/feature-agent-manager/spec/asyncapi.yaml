@@ -40,10 +40,26 @@ channels:
         $ref: '#/components/messages/Chat'
     description: |
       Client sends a chat message (requires prior login). Payload may include `responseMode` "single" | "stream" | "sync",
-      `ephemeral` (skip `agent_messages` persistence for the turn), `continue`, `resumeSessionSuffix`, `correlationId`, `model`.
+      `ephemeral` (skip `agent_messages` persistence for the turn), `continue`, `resumeSessionSuffix`, `chatId`, `correlationId`, `model`.
+      When `chatId` is set (and `resumeSessionSuffix` is not a reserved hidden ACP suffix), messages and events persist and
+      emit under that user-visible chat session; otherwise the primary session is used.
       When `ephemeral` is true, `chatMessage`, `chatEvent`, and `messageFilterResult` for that turn are emitted only to the
       requesting socket (not broadcast to other clients on the same agent). Otherwise those events are broadcast to every
       socket authenticated to the agent. The gateway forwards options to `sendMessage` as implemented in code.
+  agents/restoreChat:
+    address: agents/restoreChat
+    messages:
+      restoreChatCommand:
+        $ref: '#/components/messages/RestoreChat'
+    description: >
+      Client requests restoration of a specific chat session's history (requires prior login).
+      The client clears its local thread; the server re-emits recent chatMessage / messageFilterResult / chatEvent events for that chatId.
+  agents/restoreChatSuccess:
+    address: agents/restoreChatSuccess
+    messages:
+      restoreChatSuccessEvent:
+        $ref: '#/components/messages/RestoreChatSuccess'
+    description: Server acknowledges successful chat history restoration for the requested chatId.
   agents/enhanceChat:
     address: agents/enhanceChat
     messages:
@@ -204,6 +220,18 @@ operations:
       $ref: '#/channels/agents~1chat'
     messages:
       - $ref: '#/channels/agents~1chat/messages/chatCommand'
+  clientSendsRestoreChat:
+    action: send
+    channel:
+      $ref: '#/channels/agents~1restoreChat'
+    messages:
+      - $ref: '#/channels/agents~1restoreChat/messages/restoreChatCommand'
+  serverEmitsRestoreChatSuccess:
+    action: receive
+    channel:
+      $ref: '#/channels/agents~1restoreChatSuccess'
+    messages:
+      - $ref: '#/channels/agents~1restoreChatSuccess/messages/restoreChatSuccessEvent'
   clientSendsEnhanceChat:
     action: send
     channel:
@@ -345,6 +373,9 @@ components:
             description: Agent UUID or name
           password:
             type: string
+          chatId:
+            type: string
+            description: Optional chat session id to restore on login; defaults to the agent's primary session when omitted.
     LoginSuccess:
       name: LoginSuccess
       title: Login success event
@@ -434,6 +465,11 @@ components:
           resumeSessionSuffix:
             type: string
             description: Optional suffix to isolate or resume session routing for this chat turn.
+          chatId:
+            type: string
+            description: >
+              Optional user-visible chat session id. When omitted, the primary session is used.
+              Ignored when resumeSessionSuffix is a reserved hidden ACP suffix (prompt enhance, ticket body, automation).
           contextInjection:
             type: object
             description: >
@@ -462,6 +498,41 @@ components:
               autoEnrichmentEnabled:
                 type: boolean
                 description: Enable prompt-based automatic enrichment (default true when omitted).
+    RestoreChat:
+      name: RestoreChat
+      title: Restore chat command
+      contentType: application/json
+      payload:
+        type: object
+        required: [chatId]
+        properties:
+          chatId:
+            type: string
+            description: Chat session id whose history should be re-emitted to the requesting socket
+    RestoreChatSuccess:
+      name: RestoreChatSuccess
+      title: Restore chat success event
+      contentType: application/json
+      payload:
+        type: object
+        required: [success, data, timestamp]
+        properties:
+          success:
+            type: boolean
+            enum: [true]
+          data:
+            type: object
+            required: [chatId, message]
+            properties:
+              chatId:
+                type: string
+                description: Restored chat session id
+              message:
+                type: string
+                description: Human-readable confirmation
+          timestamp:
+            type: string
+            description: ISO timestamp
     EnhanceChat:
       name: EnhanceChat
       title: Prompt enhancement command
@@ -659,6 +730,9 @@ components:
                   timestamp:
                     type: string
                     description: ISO timestamp
+                  chatId:
+                    type: string
+                    description: User-visible chat session id when the message belongs to a persisted chat
               - type: object
                 required: [from, response, timestamp]
                 properties:
@@ -706,6 +780,9 @@ components:
                   timestamp:
                     type: string
                     description: ISO timestamp
+                  chatId:
+                    type: string
+                    description: User-visible chat session id when the message belongs to a persisted chat
           timestamp:
             type: string
             description: ISO timestamp
@@ -739,6 +816,9 @@ components:
               agentId:
                 type: string
                 description: Agent UUID
+              chatId:
+                type: string
+                description: User-visible chat session id when the event belongs to a persisted chat
               correlationId:
                 type: string
                 description: Correlates events that belong to a single user request

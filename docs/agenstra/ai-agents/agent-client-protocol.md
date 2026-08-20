@@ -38,7 +38,11 @@ Built-in providers:
 - **Version:** ACP protocol version 1 (stable)
 - **Transport:** newline-delimited JSON-RPC 2.0 over stdio
 - **Session flow:** `initialize` → `session/new` (or `session/load` with a persisted agent-issued id) → `session/prompt` → `session/update` notifications
-- **Session resume:** ACP session ids are stored per agent on `acp_sessions` (jsonb), keyed by `resumeSessionSuffix` (empty key = primary chat). After an API restart, the manager opens a new stdio transport and calls `session/load` when the container id still matches. That covers main chat and background automation sessions (`-ticket-auto-loop`, `-ticket-auto-pre`, etc.) the same way in-memory reuse already did within a process.
+- **Session resume:** ACP session ids are stored per agent on `acp_sessions` (jsonb), keyed by `resumeSessionSuffix`:
+  - **Empty suffix** (`''`) — primary user-visible chat session
+  - **User chats** — `-chat-{uuid}` where `{uuid}` is the chat session id (one ACP session per user-created thread)
+  - **Reserved / hidden** — not listed in agent `chats` / UI: `-prompt-enhance`, `-ticket-body`, and `-ticket-auto-*` (for example `-ticket-auto-pre`, `-ticket-auto-loop`, `-ticket-auto-commit-msg`)
+    After an API restart, the manager opens a new stdio transport and calls `session/load` when the container id still matches. That covers primary, user, and background sessions the same way in-memory reuse already did within a process.
 - **Permissions:** `session/request_permission` is auto-approved when `ACP_AUTO_APPROVE` is not `false` (default for headless agents)
 
 ## Configuration

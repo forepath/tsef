@@ -20,6 +20,7 @@ import { ActivatedRoute, NavigationEnd, Router, RouterModule } from '@angular/ro
 import {
   AgentsFacade,
   AuthenticationFacade,
+  ChatSessionsFacade,
   ClientAgentAutonomyFacade,
   ClientsFacade,
   ContainerType,
@@ -40,6 +41,7 @@ import {
   type AgentResponseDto,
   type AgentResponseObject,
   type ChatMessageData,
+  type ChatSessionResponseDto,
   type ClientAgentAutonomyResponseDto,
   type ClientAuthenticationType,
   type ClientResponseDto,
@@ -170,6 +172,7 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   private readonly agentsFacade = inject(AgentsFacade);
   private readonly authFacade = inject(AuthenticationFacade);
   private readonly socketsFacade = inject(SocketsFacade);
+  private readonly chatSessionsFacade = inject(ChatSessionsFacade);
   protected readonly notificationsFacade = inject(NotificationsFacade);
   private readonly statsFacade = inject(StatsFacade);
   private readonly ticketsFacade = inject(TicketsFacade);
@@ -195,6 +198,12 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
   @ViewChild('deleteAgentModal', { static: false })
   private deleteAgentModal!: ElementRef<HTMLDivElement>;
+
+  @ViewChild('deleteChatSessionModal', { static: false })
+  private deleteChatSessionModal!: ElementRef<HTMLDivElement>;
+
+  @ViewChild('renameChatSessionModal', { static: false })
+  private renameChatSessionModal!: ElementRef<HTMLDivElement>;
 
   @ViewChild('addClientModal', { static: false })
   private addClientModal!: ElementRef<HTMLDivElement>;
@@ -386,6 +395,53 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
       }
 
       return this.agentsFacade.getSelectedClientAgent$(clientId);
+    }),
+  );
+
+  /** User-visible chat sessions for the active client + selected agent. */
+  readonly chatSessions$: Observable<ChatSessionResponseDto[]> = combineLatest([
+    this.activeClientId$,
+    this.selectedAgent$,
+  ]).pipe(
+    switchMap(([clientId, agent]) => {
+      if (!clientId || !agent) {
+        return of([]);
+      }
+
+      return this.chatSessionsFacade.getChatSessions$(clientId, agent.id).pipe(map((sessions) => sessions ?? []));
+    }),
+  );
+
+  readonly selectedChatSession$: Observable<ChatSessionResponseDto | null> = combineLatest([
+    this.activeClientId$,
+    this.selectedAgent$,
+  ]).pipe(
+    switchMap(([clientId, agent]) => {
+      if (!clientId || !agent) {
+        return of(null);
+      }
+
+      return this.chatSessionsFacade.getSelectedChatSession$(clientId, agent.id);
+    }),
+  );
+
+  readonly selectedChatId$: Observable<string | null> = combineLatest([this.activeClientId$, this.selectedAgent$]).pipe(
+    switchMap(([clientId, agent]) => {
+      if (!clientId || !agent) {
+        return of(null);
+      }
+
+      return this.chatSessionsFacade.getSelectedChatId$(clientId, agent.id);
+    }),
+  );
+
+  readonly chatSessionsCreating$: Observable<boolean> = combineLatest([this.activeClientId$, this.selectedAgent$]).pipe(
+    switchMap(([clientId, agent]) => {
+      if (!clientId || !agent) {
+        return of(false);
+      }
+
+      return this.chatSessionsFacade.isCreatingChatSession$(clientId, agent.id);
     }),
   );
 
@@ -860,6 +916,38 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
   readonly clientToDeleteHasProvisioning = signal<boolean>(false);
   readonly agentToDeleteId = signal<string | null>(null);
   readonly agentToDeleteName = signal<string>('');
+  readonly chatSessionToDeleteId = signal<string | null>(null);
+  readonly chatSessionToDeleteName = signal<string>('');
+  readonly chatSessionToRenameId = signal<string | null>(null);
+  readonly chatSessionToRenameTitle = signal<string>('');
+
+  readonly chatSessionDeleting$: Observable<boolean> = combineLatest([
+    this.activeClientId$,
+    this.selectedAgent$,
+    toObservable(this.chatSessionToDeleteId),
+  ]).pipe(
+    switchMap(([clientId, agent, chatId]) => {
+      if (!clientId || !agent || !chatId) {
+        return of(false);
+      }
+
+      return this.chatSessionsFacade.isDeletingChatSession$(clientId, agent.id, chatId);
+    }),
+  );
+
+  readonly chatSessionUpdating$: Observable<boolean> = combineLatest([
+    this.activeClientId$,
+    this.selectedAgent$,
+    toObservable(this.chatSessionToRenameId),
+  ]).pipe(
+    switchMap(([clientId, agent, chatId]) => {
+      if (!clientId || !agent || !chatId) {
+        return of(false);
+      }
+
+      return this.chatSessionsFacade.isUpdatingChatSession$(clientId, agent.id, chatId);
+    }),
+  );
 
   // Add state
   readonly newClient = signal<Partial<CreateClientDto>>({
@@ -2146,8 +2234,205 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
 
         this.notificationsFacade.setActiveEnvironment(clientId, agentId);
         this.notificationsFacade.markEnvironmentRead(clientId, agentId);
+        this.loadChatSessionsForAgent(clientId, agentId);
       }
     }
+  }
+
+  /**
+   * Load or hydrate chat sessions for an agent and select the primary session (no restore; login restores).
+   */
+  private loadChatSessionsForAgent(clientId: string, agentId: string): void {
+    this.agentsFacade
+      .getSelectedClientAgent$(clientId)
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((agent) => {
+        if (agent?.id === agentId && agent.chats?.length && agent.primaryChatId) {
+          this.chatSessionsFacade.hydrateChatSessions(clientId, agentId, agent.chats, agent.primaryChatId);
+        }
+
+        this.chatSessionsFacade.loadChatSessions(clientId, agentId);
+      });
+  }
+
+  getChatSessionDisplayTitle(session: ChatSessionResponseDto | null | undefined): string {
+    if (!session) {
+      return $localize`:@@featureChat-chatSessionDefaultTitle:Chat`;
+    }
+
+    const title = session.title?.trim();
+
+    if (title) {
+      return title;
+    }
+
+    return session.kind === 'primary'
+      ? $localize`:@@featureChat-chatSessionPrimaryTitle:Primary`
+      : $localize`:@@featureChat-chatSessionUntitledTitle:Untitled chat`;
+  }
+
+  onSelectChatSession(chatId: string, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const clientId = this.activeClientId;
+    const agentId = this.selectedAgentId();
+
+    if (!clientId || !agentId || !chatId) {
+      return;
+    }
+
+    this.selectedChatId$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe((currentId) => {
+      if (currentId === chatId) {
+        return;
+      }
+
+      this.chatSessionsFacade.selectChatSession(clientId, agentId, chatId, true);
+      this.socketsFacade.clearChatHistory();
+      this.socketsFacade.forwardRestoreChat(chatId, agentId);
+      this.previousMessageCount = 0;
+      this.previousDisplayThreadLength = 0;
+      this.lastUserMessageTimestamp.set(null);
+    });
+  }
+
+  onCreateChatSession(): void {
+    const clientId = this.activeClientId;
+    const agentId = this.selectedAgentId();
+
+    if (!clientId || !agentId) {
+      return;
+    }
+
+    this.selectedChatId$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe((previousId) => {
+      this.chatSessionsFacade
+        .getSelectedChatId$(clientId, agentId)
+        .pipe(
+          filter((id): id is string => !!id && id !== previousId),
+          take(1),
+          takeUntilDestroyed(this.destroyRef),
+        )
+        .subscribe((chatId) => {
+          this.socketsFacade.clearChatHistory();
+          this.socketsFacade.forwardRestoreChat(chatId, agentId);
+          this.previousMessageCount = 0;
+          this.previousDisplayThreadLength = 0;
+          this.lastUserMessageTimestamp.set(null);
+        });
+
+      this.chatSessionsFacade.createChatSession(clientId, agentId);
+    });
+  }
+
+  onRenameChatSession(session: ChatSessionResponseDto, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    this.chatSessionToRenameId.set(session.id);
+    this.chatSessionToRenameTitle.set(session.title?.trim() ?? '');
+    this.hideChatSessionDropdown(event);
+    this.showModal(this.renameChatSessionModal);
+  }
+
+  onSubmitRenameChatSession(): void {
+    const clientId = this.activeClientId;
+    const agentId = this.selectedAgentId();
+    const sessionId = this.chatSessionToRenameId();
+    const title = this.chatSessionToRenameTitle().trim();
+
+    if (!clientId || !agentId || !sessionId || !title) {
+      return;
+    }
+
+    this.chatSessionsFacade.updateChatSession(clientId, agentId, sessionId, { title });
+    this.chatSessionUpdating$
+      .pipe(
+        filter((updating) => !updating),
+        take(1),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.hideModal(this.renameChatSessionModal);
+        this.chatSessionToRenameId.set(null);
+        this.chatSessionToRenameTitle.set('');
+      });
+  }
+
+  onDeleteChatSession(session: ChatSessionResponseDto, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    if (session.kind === 'primary') {
+      return;
+    }
+
+    this.chatSessionToDeleteId.set(session.id);
+    this.chatSessionToDeleteName.set(this.getChatSessionDisplayTitle(session));
+    this.hideChatSessionDropdown(event);
+    this.showModal(this.deleteChatSessionModal);
+  }
+
+  confirmDeleteChatSession(): void {
+    const clientId = this.activeClientId;
+    const agentId = this.selectedAgentId();
+    const sessionId = this.chatSessionToDeleteId();
+
+    if (!clientId || !agentId || !sessionId) {
+      return;
+    }
+
+    this.selectedChatId$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe((selectedId) => {
+      const wasSelected = selectedId === sessionId;
+
+      if (wasSelected) {
+        this.chatSessionsFacade
+          .getSelectedChatId$(clientId, agentId)
+          .pipe(
+            filter((id): id is string => !!id && id !== sessionId),
+            take(1),
+            takeUntilDestroyed(this.destroyRef),
+          )
+          .subscribe((nextId) => {
+            this.socketsFacade.clearChatHistory();
+            this.socketsFacade.forwardRestoreChat(nextId, agentId);
+            this.previousMessageCount = 0;
+            this.previousDisplayThreadLength = 0;
+            this.lastUserMessageTimestamp.set(null);
+          });
+      }
+
+      this.chatSessionsFacade.deleteChatSession(clientId, agentId, sessionId);
+      this.chatSessionDeleting$
+        .pipe(
+          filter((deleting) => !deleting),
+          take(1),
+          takeUntilDestroyed(this.destroyRef),
+        )
+        .subscribe(() => {
+          this.hideModal(this.deleteChatSessionModal);
+          this.chatSessionToDeleteId.set(null);
+          this.chatSessionToDeleteName.set('');
+        });
+    });
+  }
+
+  private hideChatSessionDropdown(event?: Event): void {
+    const dropdownRoot =
+      (event?.target as HTMLElement | undefined)?.closest?.('.dropdown') ??
+      document.getElementById('chatSessionDropdown')?.closest('.dropdown');
+    const toggleButton =
+      dropdownRoot?.querySelector('[data-bs-toggle="dropdown"]') ?? document.getElementById('chatSessionDropdown');
+
+    if (!toggleButton) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bootstrap = (window as any).bootstrap;
+    const dropdown =
+      bootstrap?.Dropdown?.getInstance(toggleButton) ?? bootstrap?.Dropdown?.getOrCreateInstance?.(toggleButton);
+
+    dropdown?.hide();
   }
 
   /**
@@ -2156,10 +2441,15 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
    */
   onAgentUnselect(navigate = true): void {
     const clientId = this.activeClientId;
+    const previousAgentId = this.selectedAgentId();
 
     if (clientId) {
       // Clear selected agent in facade
       this.agentsFacade.clearSelectedClientAgent(clientId);
+
+      if (previousAgentId) {
+        this.chatSessionsFacade.clearChatSessions(clientId, previousAgentId);
+      }
     }
 
     // Clear local selected agent ID
@@ -2221,7 +2511,15 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
     }
 
     // agentId is required for routing the event to the correct agent
-    this.socketsFacade.forwardChat(message, agentId, this.selectedChatModel(), this.buildContextInjection(agentId));
+    this.selectedChatId$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe((chatId) => {
+      this.socketsFacade.forwardChat(
+        message,
+        agentId,
+        this.selectedChatModel(),
+        this.buildContextInjection(agentId),
+        chatId,
+      );
+    });
 
     // Track when we sent the message to show loading indicator
     this.lastUserMessageTimestamp.set(Date.now());
@@ -5399,8 +5697,10 @@ export class AgentConsoleChatComponent implements OnInit, AfterViewChecked, OnDe
           );
         }),
         tap(() => {
-          // setClientSuccess received, now forward login
-          this.socketsFacade.forwardLogin(agentId);
+          // setClientSuccess received, now forward login (optionally with selected chat)
+          this.selectedChatId$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe((chatId) => {
+            this.socketsFacade.forwardLogin(agentId, chatId);
+          });
         }),
         takeUntilDestroyed(this.destroyRef),
       )

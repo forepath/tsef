@@ -91,10 +91,16 @@ Forward an event to the remote agent-manager:
 ```typescript
 socket.emit('forward', {
   event: 'chat',
-  payload: { message: 'Hello, agent!' },
+  payload: { message: 'Hello, agent!', chatId: 'chat-session-uuid' }, // chatId optional; primary when omitted
   agentId: 'agent-uuid', // Optional, for auto-login
 });
 ```
+
+Common forwarded agent-manager events for chat:
+
+- `login` — credentials plus optional `chatId` (defaults to the agent’s primary session)
+- `chat` — message payload; optional `chatId` scopes persistence and emits to that user-visible session
+- `restoreChat` — `{ chatId }` to re-emit history for a specific session after the client clears its local thread
 
 ### Controller → Frontend (`clients` namespace)
 
@@ -135,14 +141,15 @@ Authentication successful:
 
 #### chatMessage
 
-Chat messages (user or agent):
+Chat messages (user or agent). When the turn belongs to a persisted user-visible session, `data` includes `chatId`:
 
 ```typescript
 // User message
 {
   from: 'user',
   text: 'Hello, agent!',
-  timestamp: '2024-01-01T00:00:00Z'
+  timestamp: '2024-01-01T00:00:00Z',
+  chatId: 'chat-session-uuid'
 }
 
 // Agent message
@@ -152,6 +159,23 @@ Chat messages (user or agent):
     type: 'text',
     result: 'Hello, user!'
   },
+  timestamp: '2024-01-01T00:00:00Z',
+  chatId: 'chat-session-uuid'
+}
+```
+
+#### restoreChat / restoreChatSuccess
+
+Client requests history for a session; server acknowledges after replaying events:
+
+```typescript
+// Client → Manager (via forward)
+{ chatId: 'chat-session-uuid' }
+
+// Manager → Client
+{
+  success: true,
+  data: { chatId: 'chat-session-uuid', message: '...' },
   timestamp: '2024-01-01T00:00:00Z'
 }
 ```
@@ -199,10 +223,10 @@ When the frontend reconnects to the controller:
 
 1. WebSocket automatically reconnects (repeat for `tickets` if used)
 2. Frontend sends `setClient` event to restore context on each namespace
-3. Frontend sends `forward` event with `login` to restore agent login (`clients` only)
+3. Frontend sends `forward` event with `login` (optional `chatId`) to restore agent login (`clients` only)
 4. Controller forwards login to manager
-5. Manager restores chat history
-6. Frontend clears old events to prevent duplicates
+5. Manager restores chat history for the selected or primary session
+6. Frontend clears old events to prevent duplicates; switching sessions uses `restoreChat` with the target `chatId`
 
 ### Controller-to-Manager Reconnection
 
@@ -215,12 +239,12 @@ When the controller reconnects to a manager:
 
 ## Chat History Restoration
 
-Chat history is automatically restored on reconnection:
+Chat history is restored per session:
 
-1. When an agent logs in, the manager loads and emits all chat history
-2. History is sent as `chatMessage` events
-3. Frontend receives and displays the history
-4. Old events are cleared to prevent duplicates
+1. On `login`, the manager loads recent history for the requested `chatId` (or the primary session when omitted)
+2. History is sent as `chatMessage` events (with `chatId` when applicable)
+3. To switch sessions without re-login, the client emits `restoreChat` with `{ chatId }`; the manager re-emits history and then `restoreChatSuccess`
+4. Frontend clears the previous local thread before restore to prevent duplicates
 
 ## Event Forwarding
 
@@ -238,15 +262,15 @@ sequenceDiagram
     participant AM as Agent Manager
     participant A as Agent Container
 
-    F->>AC: forward (chat, message)
-    AC->>AM: forward (chat, message)
+    F->>AC: forward (chat, message, chatId)
+    AC->>AM: forward (chat, message, chatId)
     AM->>A: Send Message (stdin)
     A-->>AM: Agent Response
-    AM->>AM: Save Messages
-    AM-->>AC: chatMessage (user)
-    AM-->>AC: chatMessage (agent)
-    AC-->>F: chatMessage (user)
-    AC-->>F: chatMessage (agent)
+    AM->>AM: Save Messages (session)
+    AM-->>AC: chatMessage (user, chatId)
+    AM-->>AC: chatMessage (agent, chatId)
+    AC-->>F: chatMessage (user, chatId)
+    AC-->>F: chatMessage (agent, chatId)
 ```
 
 ## Error Handling

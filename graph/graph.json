@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-17T22:41:15.178Z",
+  "generatedAt": "2026-08-20T19:04:50.200Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -3435,6 +3435,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-frontend-data-access-agent-console"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/clients.service.ts",
       "type": "service",
       "attrs": {
@@ -3548,6 +3557,24 @@
           "agents.reducer.ts",
           "agents.selectors.ts",
           "agents.types.ts"
+        ]
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/state/chat-sessions",
+      "type": "state",
+      "attrs": {
+        "path": "libs/domains/agenstra/frontend/data-access-agent-console/src/lib/state/chat-sessions",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-frontend-data-access-agent-console",
+        "sliceName": "chat-sessions",
+        "memberFiles": [
+          "chat-sessions.actions.ts",
+          "chat-sessions.effects.ts",
+          "chat-sessions.facade.ts",
+          "chat-sessions.reducer.ts",
+          "chat-sessions.selectors.ts",
+          "chat-sessions.types.ts"
         ]
       }
     },
@@ -5210,6 +5237,15 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-autonomy.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-controller"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-chats-proxy.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-chats-proxy.service.ts",
         "languageOrKind": "ts",
         "projectName": "agenstra-backend-feature-agent-controller"
       }
@@ -9047,6 +9083,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-chat-sessions.controller.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-chat-sessions.controller.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-deployments.controller.ts",
       "type": "controller",
       "attrs": {
@@ -9164,6 +9209,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/chat-session-response.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/chat-session-response.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/commit.dto.ts",
       "type": "dto",
       "attrs": {
@@ -9204,6 +9258,15 @@
       "type": "dto",
       "attrs": {
         "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/create-branch.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/create-chat-session.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/create-chat-session.dto.ts",
         "languageOrKind": "ts",
         "projectName": "agenstra-backend-feature-agent-manager"
       }
@@ -9416,6 +9479,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/update-chat-session.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/update-chat-session.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/update-environment-variable.dto.ts",
       "type": "dto",
       "attrs": {
@@ -9456,6 +9528,15 @@
       "type": "dto",
       "attrs": {
         "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/write-file.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/entities/agent-chat-session.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/entities/agent-chat-session.entity.ts",
         "languageOrKind": "ts",
         "projectName": "agenstra-backend-feature-agent-manager"
       }
@@ -9623,6 +9704,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-chat-sessions.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-chat-sessions.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-environment-variables.repository.ts",
       "type": "repository",
       "attrs": {
@@ -9699,6 +9789,15 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agenstra-manager-metrics-collector.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
         "languageOrKind": "ts",
         "projectName": "agenstra-backend-feature-agent-manager"
       }
@@ -14320,6 +14419,83 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/clients/{id}/agents/{agentId}/chats",
+        "operationId": "listClientAgentChatSessions",
+        "summary": "List chat sessions for an agent (proxied)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/clients/{id}/agents/{agentId}/chats",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/clients/{id}/agents/{agentId}/chats",
+        "operationId": "createClientAgentChatSession",
+        "summary": "Create chat session for an agent (proxied)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/count",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/clients/{id}/agents/{agentId}/chats/count",
+        "operationId": "countClientAgentChatSessions",
+        "summary": "Get count of chat sessions for an agent (proxied)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/clients/{id}/agents/{agentId}/chats/{chatId}",
+        "operationId": "getClientAgentChatSession",
+        "summary": "Get chat session for an agent (proxied)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:PUT:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "PUT",
+        "pathOrChannel": "/clients/{id}/agents/{agentId}/chats/{chatId}",
+        "operationId": "updateClientAgentChatSession",
+        "summary": "Update chat session for an agent (proxied)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/clients/{id}/agents/{agentId}/chats/{chatId}",
+        "operationId": "deleteClientAgentChatSession",
+        "summary": "Delete chat session for an agent (proxied)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}/messages",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/clients/{id}/agents/{agentId}/chats/{chatId}/messages",
+        "operationId": "listClientAgentChatSessionMessages",
+        "summary": "List messages for a chat session (proxied)",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "api:HTTP:GET:/clients/{id}/configuration-overrides",
       "type": "endpoint",
       "attrs": {
@@ -15036,6 +15212,33 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "chat_message.created",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:chat_session.created",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "chat_session.created",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:chat_session.deleted",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "chat_session.deleted",
+        "projectName": "agenstra-backend-feature-agent-controller",
+        "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:agenstra-backend-feature-agent-controller:chat_session.updated",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "chat_session.updated",
         "projectName": "agenstra-backend-feature-agent-controller",
         "catalogPath": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/notifications/agenstra-notification.events.ts"
       }
@@ -18573,7 +18776,25 @@
       "type": "channel",
       "attrs": {
         "pathOrChannel": "agents/chat",
-        "summary": "Client sends a chat message (requires prior login). Payload may include `responseMode` \"single\" | \"stream\" | \"sync\",\n`ephemeral` (skip `agent_messages` persistence for the turn), `continue`, `resumeSessionSuffix`, `correlationId`, `model`.\nWhen `ephemeral` is true, `chatMessage`, `chatEvent`, and `messageFilterResult` for that turn are emitted only to the\nrequesting socket (not broadcast to other clients on the same agent). Otherwise those events are broadcast to every\nsocket authenticated to the agent. The gateway forwards options to `sendMessage` as implemented in code.\n",
+        "summary": "Client sends a chat message (requires prior login). Payload may include `responseMode` \"single\" | \"stream\" | \"sync\",\n`ephemeral` (skip `agent_messages` persistence for the turn), `continue`, `resumeSessionSuffix`, `chatId`, `correlationId`, `model`.\nWhen `chatId` is set (and `resumeSessionSuffix` is not a reserved hidden ACP suffix), messages and events persist and\nemit under that user-visible chat session; otherwise the primary session is used.\nWhen `ephemeral` is true, `chatMessage`, `chatEvent`, and `messageFilterResult` for that turn are emitted only to the\nrequesting socket (not broadcast to other clients on the same agent). Otherwise those events are broadcast to every\nsocket authenticated to the agent. The gateway forwards options to `sendMessage` as implemented in code.\n",
+        "specKind": "asyncapi"
+      }
+    },
+    {
+      "id": "api:channel:agents/restoreChat",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "agents/restoreChat",
+        "summary": "Client requests restoration of a specific chat session's history (requires prior login). The client clears its local thread; the server re-emits recent chatMessage / messageFilterResult / chatEvent events for that chatId.\n",
+        "specKind": "asyncapi"
+      }
+    },
+    {
+      "id": "api:channel:agents/restoreChatSuccess",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "agents/restoreChatSuccess",
+        "summary": "Server acknowledges successful chat history restoration for the requested chatId.",
         "specKind": "asyncapi"
       }
     },
@@ -19084,6 +19305,83 @@
         "pathOrChannel": "/agents/{agentId}/environment/{id}",
         "operationId": "deleteEnvironmentVariable",
         "summary": "Delete environment variable",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/agents/{agentId}/chats",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/agents/{agentId}/chats",
+        "operationId": "listChatSessions",
+        "summary": "List chat sessions",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/agents/{agentId}/chats",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/agents/{agentId}/chats",
+        "operationId": "createChatSession",
+        "summary": "Create chat session",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/agents/{agentId}/chats/count",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/agents/{agentId}/chats/count",
+        "operationId": "countChatSessions",
+        "summary": "Get count of chat sessions",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/agents/{agentId}/chats/{chatId}",
+        "operationId": "getChatSession",
+        "summary": "Get chat session",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:PUT:/agents/{agentId}/chats/{chatId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "PUT",
+        "pathOrChannel": "/agents/{agentId}/chats/{chatId}",
+        "operationId": "updateChatSession",
+        "summary": "Update chat session",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/agents/{agentId}/chats/{chatId}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/agents/{agentId}/chats/{chatId}",
+        "operationId": "deleteChatSession",
+        "summary": "Delete chat session",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}/messages",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/agents/{agentId}/chats/{chatId}/messages",
+        "operationId": "listChatSessionMessages",
+        "summary": "List messages for a chat session",
         "specKind": "openapi"
       }
     },
@@ -21913,6 +22211,16 @@
         "title": "Chat Interface",
         "docPath": "docs/agenstra/features/chat-interface.md",
         "sectionAnchor": "chat-interface",
+        "domain": "agenstra"
+      }
+    },
+    {
+      "id": "concept:agenstra-chat-sessions",
+      "type": "concept",
+      "attrs": {
+        "title": "Chat sessions",
+        "docPath": "docs/agenstra/features/chat-interface.md",
+        "sectionAnchor": "chat-sessions",
         "domain": "agenstra"
       }
     },
@@ -31460,6 +31768,11 @@
     },
     {
       "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@opensearch-project/opensearch",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
       "to": "package:@opentelemetry/api",
       "type": "depends_on"
     },
@@ -32840,6 +33153,11 @@
     },
     {
       "from": "project:agenstra-frontend-data-access-agent-console",
+      "to": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-frontend-data-access-agent-console",
       "to": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/clients.service.ts",
       "type": "contains"
     },
@@ -32896,6 +33214,11 @@
     {
       "from": "project:agenstra-frontend-data-access-agent-console",
       "to": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/state/agents",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-frontend-data-access-agent-console",
+      "to": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/state/chat-sessions",
       "type": "contains"
     },
     {
@@ -33726,6 +34049,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-controller",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-autonomy.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-chats-proxy.service.ts",
       "type": "contains"
     },
     {
@@ -35850,6 +36178,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-chat-sessions.controller.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-deployments.controller.ts",
       "type": "contains"
     },
@@ -35915,6 +36248,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/chat-session-response.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/commit.dto.ts",
       "type": "contains"
     },
@@ -35936,6 +36274,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/create-branch.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/create-chat-session.dto.ts",
       "type": "contains"
     },
     {
@@ -36055,6 +36398,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/update-chat-session.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/update-environment-variable.dto.ts",
       "type": "contains"
     },
@@ -36076,6 +36424,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/dto/write-file.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/entities/agent-chat-session.entity.ts",
       "type": "contains"
     },
     {
@@ -36170,6 +36523,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-chat-sessions.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-environment-variables.repository.ts",
       "type": "contains"
     },
@@ -36211,6 +36569,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agenstra-manager-metrics-collector.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
       "type": "contains"
     },
     {
@@ -37955,6 +38318,41 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/clients/{id}/agents/{agentId}/chats",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/count",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:PUT:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}/messages",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/openapi.yaml",
       "to": "api:HTTP:GET:/clients/{id}/configuration-overrides",
       "type": "contains"
     },
@@ -38291,6 +38689,21 @@
     {
       "from": "project:agenstra-backend-feature-agent-controller",
       "to": "webhook-event:agenstra-backend-feature-agent-controller:chat_message.created",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:chat_session.created",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:chat_session.deleted",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "webhook-event:agenstra-backend-feature-agent-controller:chat_session.updated",
       "type": "contains"
     },
     {
@@ -40135,6 +40548,16 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/asyncapi.yaml",
+      "to": "api:channel:agents/restoreChat",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/asyncapi.yaml",
+      "to": "api:channel:agents/restoreChatSuccess",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/asyncapi.yaml",
       "to": "api:channel:agents/enhanceChat",
       "type": "contains"
     },
@@ -40381,6 +40804,41 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
       "to": "api:HTTP:DELETE:/agents/{agentId}/environment/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/agents/{agentId}/chats",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/count",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:PUT:/agents/{agentId}/chats/{chatId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/agents/{agentId}/chats/{chatId}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}/messages",
       "type": "contains"
     },
     {
@@ -42301,6 +42759,11 @@
     {
       "from": "file:docs/agenstra/features/chat-interface.md",
       "to": "concept:agenstra-overview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/agenstra/features/chat-interface.md",
+      "to": "concept:agenstra-chat-sessions",
       "type": "contains"
     },
     {
@@ -47780,6 +48243,76 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
+      "to": "api:HTTP:POST:/clients/{id}/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:POST:/clients/{id}/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/count",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/count",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
+      "to": "api:HTTP:PUT:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:PUT:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
+      "to": "api:HTTP:DELETE:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:DELETE:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}/messages",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}/messages",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
       "to": "api:HTTP:GET:/clients/{id}/configuration-overrides",
       "type": "implements"
     },
@@ -51505,6 +52038,76 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-messages.controller.ts",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-messages.controller.ts",
+      "to": "api:HTTP:POST:/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:HTTP:POST:/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-messages.controller.ts",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/count",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/count",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-messages.controller.ts",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-messages.controller.ts",
+      "to": "api:HTTP:PUT:/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:HTTP:PUT:/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-messages.controller.ts",
+      "to": "api:HTTP:DELETE:/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:HTTP:DELETE:/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-messages.controller.ts",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}/messages",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}/messages",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-messages.controller.ts",
       "to": "api:HTTP:GET:/agents/{agentId}/vcs/status",
       "type": "implements"
     },
@@ -51901,6 +52504,41 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
       "to": "api:HTTP:DELETE:/agents/{agentId}/environment/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
+      "to": "api:HTTP:POST:/agents/{agentId}/chats",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/count",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
+      "to": "api:HTTP:PUT:/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
+      "to": "api:HTTP:DELETE:/agents/{agentId}/chats/{chatId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents.controller.ts",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats/{chatId}/messages",
       "type": "implements"
     },
     {
@@ -52975,6 +53613,26 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/gateways/agents.gateway.ts",
+      "to": "api:channel:agents/restoreChat",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:channel:agents/restoreChat",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/gateways/agents.gateway.ts",
+      "to": "api:channel:agents/restoreChatSuccess",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "api:channel:agents/restoreChatSuccess",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/gateways/agents.gateway.ts",
       "to": "api:channel:agents/enhanceChat",
       "type": "implements"
     },
@@ -53286,6 +53944,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-environment-variables-proxy.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/controllers/clients.controller.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-chats-proxy.service.ts",
       "type": "injects"
     },
     {
@@ -53646,6 +54309,16 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-autonomy.service.ts",
       "to": "file:libs/domains/identity/backend/feature-auth/src/lib/repositories/client-users.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-chats-proxy.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/clients.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-chats-proxy.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/clients.repository.ts",
       "type": "injects"
     },
     {
@@ -56909,6 +57582,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-chat-sessions.controller.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-deployments.controller.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/deployments.service.ts",
       "type": "injects"
@@ -56990,6 +57668,11 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/gateways/agents.gateway.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/gateways/agents.gateway.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/prompt-context-composer.service.ts",
       "type": "injects"
     },
@@ -57021,6 +57704,21 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/providers/agents/opencode-agent.provider.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/providers/acp/acp-agent-messaging.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-chat-sessions.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agents.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-messages.repository.ts",
       "type": "injects"
     },
     {
@@ -57074,8 +57772,18 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-message-events.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-messages.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-messages.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-messages.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
       "type": "injects"
     },
     {
@@ -57141,6 +57849,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agents.service.ts",
       "to": "file:libs/domains/identity/backend/util-auth/src/lib/password.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agents.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
       "type": "injects"
     },
     {
@@ -57731,6 +58444,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-environment-variables-proxy.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-chats-proxy.service.ts",
       "type": "provides"
     },
     {
@@ -59130,6 +59848,11 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-chat-sessions.controller.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/controllers/agents-filters.controller.ts",
       "type": "provides"
     },
@@ -59181,6 +59904,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-session-hydration.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/services/agent-chat-sessions.service.ts",
       "type": "provides"
     },
     {
@@ -59241,6 +59969,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-message-events.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/modules/agents.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-manager/src/lib/repositories/agent-chat-sessions.repository.ts",
       "type": "provides"
     },
     {
@@ -60239,6 +60972,41 @@
       "type": "calls"
     },
     {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/count",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+      "to": "api:HTTP:POST:/clients/{id}/agents/{agentId}/chats",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+      "to": "api:HTTP:PUT:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+      "to": "api:HTTP:DELETE:/clients/{id}/agents/{agentId}/chats/{chatId}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats/{chatId}/messages",
+      "type": "calls"
+    },
+    {
       "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/clients.service.ts",
       "to": "api:HTTP:GET:/clients",
       "type": "calls"
@@ -60951,6 +61719,11 @@
     {
       "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/state/agents",
       "to": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/agents.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/state/chat-sessions",
+      "to": "file:libs/domains/agenstra/frontend/data-access-agent-console/src/lib/services/chat-sessions.service.ts",
       "type": "contains"
     },
     {
@@ -62299,6 +63072,91 @@
       "type": "documents"
     },
     {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:POST:/auth/login",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:GET:/clients",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:POST:/clients",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:GET:/clients/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:POST:/clients/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:DELETE:/clients/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:GET:/clients/{id}/agents",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:POST:/clients/{id}/agents",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:POST:/clients/{id}/agents/{agentId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:DELETE:/clients/{id}/agents/{agentId}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:GET:/clients/{id}/agents/{agentId}/chats",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:POST:/clients/{id}/agents/{agentId}/chats",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:GET:/agents",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:POST:/agents",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:GET:/agents/{agentId}/chats",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
+      "to": "api:HTTP:POST:/agents/{agentId}/chats",
+      "type": "documents"
+    },
+    {
       "from": "concept:agenstra-supported-providers",
       "to": "api:HTTP:POST:/auth/register",
       "type": "documents"
@@ -62391,6 +63249,11 @@
     {
       "from": "concept:agenstra-wiring",
       "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-events",
+      "to": "api:HTTP:POST:/auth/login",
       "type": "documents"
     },
     {
@@ -62716,6 +63579,11 @@
     {
       "from": "concept:agenstra-knowledge-board-realtime-pages-namespace",
       "to": "api:HTTP:POST:/knowledge",
+      "type": "documents"
+    },
+    {
+      "from": "concept:agenstra-chat-history-restoration",
+      "to": "api:HTTP:POST:/auth/login",
       "type": "documents"
     },
     {
@@ -70360,6 +71228,11 @@
     },
     {
       "from": "concept:agenstra-chat-interface",
+      "to": "domain:agenstra",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:agenstra-chat-sessions",
       "to": "domain:agenstra",
       "type": "belongs_to"
     },

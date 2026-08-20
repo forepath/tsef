@@ -49,7 +49,9 @@ describe('selectChatTimelineOrdered', () => {
       ],
       selectedAgentId: 'a1',
     } as never;
-    const out = selectChatTimelineOrdered.projector(state.forwardedEvents as never, state.selectedAgentId);
+    const out = selectChatTimelineOrdered.projector(state.forwardedEvents as never, state.selectedAgentId, 'c1', {
+      'c1:a1': null,
+    });
 
     expect(out.map((r) => r.event)).toEqual([CLIENT_CHAT_AUTOMATION_SOCKET_EVENT, 'chatMessage']);
     expect((out[0]?.payload as typeof autoPayload2).run.status).toBe('succeeded');
@@ -88,6 +90,49 @@ describe('selectChatTimelineOrdered', () => {
         { event: CLIENT_CHAT_AUTOMATION_SOCKET_EVENT, payload: autoPayload, timestamp: 1, semanticTimestamp: 1 },
       ] as never,
       'a1',
+      'c1',
+      {},
+    );
+
+    expect(out).toHaveLength(0);
+  });
+
+  it('filters chat messages by selected chatId when present', () => {
+    const matching: ForwardedEventPayload = {
+      success: true,
+      data: { from: 'user', text: 'keep', timestamp: new Date(1000).toISOString(), chatId: 'chat-a' },
+      timestamp: new Date(1000).toISOString(),
+    } as ForwardedEventPayload;
+    const other: ForwardedEventPayload = {
+      success: true,
+      data: { from: 'user', text: 'drop', timestamp: new Date(2000).toISOString(), chatId: 'chat-b' },
+      timestamp: new Date(2000).toISOString(),
+    } as ForwardedEventPayload;
+    const out = selectChatTimelineOrdered.projector(
+      [
+        { event: 'chatMessage', payload: matching, timestamp: 1, chatId: 'chat-a' },
+        { event: 'chatMessage', payload: other, timestamp: 2, chatId: 'chat-b' },
+      ] as never,
+      'a1',
+      'c1',
+      { 'c1:a1': 'chat-a' },
+    );
+
+    expect(out).toHaveLength(1);
+    expect((out[0]?.payload as typeof matching).data).toMatchObject({ text: 'keep' });
+  });
+
+  it('hides chat messages without chatId when a session is selected', () => {
+    const legacy: ForwardedEventPayload = {
+      success: true,
+      data: { from: 'user', text: 'legacy', timestamp: new Date(1000).toISOString() },
+      timestamp: new Date(1000).toISOString(),
+    } as ForwardedEventPayload;
+    const out = selectChatTimelineOrdered.projector(
+      [{ event: 'chatMessage', payload: legacy, timestamp: 1 }] as never,
+      'a1',
+      'c1',
+      { 'c1:a1': 'chat-a' },
     );
 
     expect(out).toHaveLength(0);

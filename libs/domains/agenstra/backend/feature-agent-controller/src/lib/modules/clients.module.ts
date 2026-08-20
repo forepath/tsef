@@ -70,6 +70,7 @@ import { AgenstraMetricsCollectorService } from '../services/agenstra-metrics-co
 import { AutoContextResolverService } from '../services/auto-context-resolver.service';
 import { AutonomousRunOrchestratorService } from '../services/autonomous-run-orchestrator.service';
 import { ClientAgentAutonomyService } from '../services/client-agent-autonomy.service';
+import { ClientAgentChatsProxyService } from '../services/client-agent-chats-proxy.service';
 import { ClientAgentDeploymentsProxyService } from '../services/client-agent-deployments-proxy.service';
 import { ClientAgentEnvironmentVariablesProxyService } from '../services/client-agent-environment-variables-proxy.service';
 import { ClientAgentFileSystemProxyService } from '../services/client-agent-file-system-proxy.service';
@@ -177,6 +178,7 @@ const authMethod = getAuthenticationMethod();
     ClientAgentVcsProxyService,
     ClientAgentDeploymentsProxyService,
     ClientAgentEnvironmentVariablesProxyService,
+    ClientAgentChatsProxyService,
     ClientWorkspaceConfigurationOverridesProxyService,
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,
@@ -236,6 +238,7 @@ const authMethod = getAuthenticationMethod();
     ClientAgentVcsProxyService,
     ClientAgentDeploymentsProxyService,
     ClientAgentEnvironmentVariablesProxyService,
+    ClientAgentChatsProxyService,
     ClientWorkspaceConfigurationOverridesProxyService,
     ClientAgentCredentialsRepository,
     ClientAgentCredentialsService,

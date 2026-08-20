@@ -587,7 +587,7 @@
       >
         <div class="p-3 border-bottom bg-body-tertiary">
           <div class="d-flex justify-content-between align-items-center gap-3">
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center">
               <!-- Back button (mobile only) -->
               <button
                 type="button"
@@ -602,7 +602,7 @@
                 @if (selectedAgent$ | async; as selectedAgent) {
                   @if ({ running: getAgentContainerRunning$(activeClient.id, selectedAgent.id) | async }; as status) {
                     <span
-                      class="rounded-circle d-inline-block flex-shrink-0 me-2"
+                      class="rounded-circle d-inline-block flex-shrink-0 me-3"
                       [ngClass]="status.running ? 'bg-success' : 'bg-danger'"
                       style="width: 0.5rem; height: 0.5rem"
                       [attr.aria-label]="status.running ? 'Container started' : 'Container stopped'"
@@ -610,7 +610,90 @@
                   }
                 }
               }
-              <h5 class="mb-0 fw-semibold" i18n="@@featureChat-chatHeader">Chat</h5>
+              @if (selectedAgent$ | async) {
+                <div class="dropdown">
+                  <button
+                    class="btn border-0 bg-transparent text-body p-0 d-inline-flex align-items-center"
+                    type="button"
+                    id="chatSessionDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    i18n-aria-label="@@featureChat-chatSessionSwitcherAria"
+                    aria-label="Chat sessions"
+                  >
+                    <span class="h5 mb-0 fw-semibold">{{
+                      getChatSessionDisplayTitle(selectedChatSession$ | async)
+                    }}</span>
+                    <span class="btn btn-sm btn-outline-primary py-0 px-1 border-0 text-white bg-transparent pe-none">
+                      <i class="bi bi-chevron-down chat-session-chevron" aria-hidden="true"></i>
+                    </span>
+                  </button>
+                  <ul class="dropdown-menu py-0 overflow-hidden" aria-labelledby="chatSessionDropdown">
+                    @for (session of chatSessions$ | async; track session.id) {
+                      <li>
+                        <div
+                          class="dropdown-item d-flex align-items-center justify-content-between gap-2 ps-2 pe-1"
+                          [class.active]="(selectedChatId$ | async) === session.id"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-sm border-0 bg-transparent text-start flex-grow-1 p-0"
+                            (click)="onSelectChatSession(session.id, $event)"
+                            [attr.aria-current]="(selectedChatId$ | async) === session.id ? 'true' : null"
+                          >
+                            {{ getChatSessionDisplayTitle(session) }}
+                            @if (session.kind === 'primary') {
+                              <span class="text-muted small ms-1" i18n="@@featureChat-chatSessionPrimaryBadge"
+                                >(primary)</span
+                              >
+                            }
+                          </button>
+                          <div class="btn-group btn-group-sm" role="group">
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-outline-primary py-0 px-1"
+                              (click)="onRenameChatSession(session, $event)"
+                              i18n-aria-label="@@featureChat-renameChatSessionAria"
+                              aria-label="Rename chat session"
+                              i18n-title="@@featureChat-renameChatSessionTitle"
+                              title="Rename"
+                            >
+                              <i class="bi bi-pencil" aria-hidden="true"></i>
+                            </button>
+                            @if (session.kind !== 'primary') {
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger py-0 px-1"
+                                (click)="onDeleteChatSession(session, $event)"
+                                i18n-aria-label="@@featureChat-deleteChatSessionAria"
+                                aria-label="Delete chat session"
+                                i18n-title="@@featureChat-deleteChatSessionTitle"
+                                title="Delete"
+                              >
+                                <i class="bi bi-trash" aria-hidden="true"></i>
+                              </button>
+                            }
+                          </div>
+                        </div>
+                      </li>
+                    }
+                    <li><hr class="dropdown-divider m-0" /></li>
+                    <li>
+                      <button
+                        type="button"
+                        class="dropdown-item small ps-2 pe-1 chat-session-new-item"
+                        (click)="onCreateChatSession()"
+                        [disabled]="(chatSessionsCreating$ | async) === true"
+                        i18n="@@featureChat-newChatSession"
+                      >
+                        New chat
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              } @else {
+                <h5 class="mb-0 fw-semibold">{{ getChatSessionDisplayTitle(selectedChatSession$ | async) }}</h5>
+              }
             </div>
             <div class="d-flex align-items-center gap-2">
               @if (activeClient$ | async; as activeClient) {
@@ -1636,6 +1719,116 @@
           <span i18n="@@featureChat-delete">Delete</span>
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Chat Session Confirmation Modal -->
+<div
+  class="modal fade"
+  id="deleteChatSessionModal"
+  tabindex="-1"
+  aria-labelledby="deleteChatSessionModalLabel"
+  aria-hidden="true"
+  #deleteChatSessionModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteChatSessionModalLabel" i18n="@@featureChat-deleteChatSessionModalTitle">
+          Delete Chat Session
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          i18n-aria-label="@@featureChat-closeAriaLabel"
+          aria-label="Close"
+          [disabled]="(chatSessionDeleting$ | async) === true"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p i18n="@@featureChat-deleteChatSessionConfirm">
+          Are you sure you want to delete the chat session <strong>{{ chatSessionToDeleteName() }}</strong
+          >?
+        </p>
+        <p class="text-danger mb-0">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <span i18n="@@featureChat-cannotUndo">This action cannot be undone.</span>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="confirmDeleteChatSession()"
+          [disabled]="(chatSessionDeleting$ | async) === true"
+        >
+          @if (chatSessionDeleting$ | async) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          }
+          <span i18n="@@featureChat-delete">Delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rename Chat Session Modal -->
+<div
+  class="modal fade"
+  id="renameChatSessionModal"
+  tabindex="-1"
+  aria-labelledby="renameChatSessionModalLabel"
+  aria-hidden="true"
+  #renameChatSessionModal
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="renameChatSessionModalLabel" i18n="@@featureChat-renameChatSessionModalTitle">
+          Rename Chat Session
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          i18n-aria-label="@@featureChat-closeAriaLabel"
+          aria-label="Close"
+          [disabled]="(chatSessionUpdating$ | async) === true"
+        ></button>
+      </div>
+      <form #renameChatSessionForm="ngForm" (ngSubmit)="onSubmitRenameChatSession()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="renameChatSessionTitle" class="form-label" i18n="@@featureChat-nameLabel"
+              >Name <span class="text-danger">*</span></label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="renameChatSessionTitle"
+              name="title"
+              [ngModel]="chatSessionToRenameTitle()"
+              (ngModelChange)="chatSessionToRenameTitle.set($event)"
+              required
+              [disabled]="(chatSessionUpdating$ | async) === true"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!renameChatSessionForm.valid || (chatSessionUpdating$ | async) === true"
+          >
+            @if (chatSessionUpdating$ | async) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            }
+            <span i18n="@@featureChat-renameChatSessionSave">Save</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

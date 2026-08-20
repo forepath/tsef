@@ -1,5 +1,7 @@
 $icon-button-size: 2.375rem;
 $icon-button-size-sm: 2rem;
+// Compact inline actions (file tree hover, chat session switcher, etc.): use `.py-0` (often with `.px-1`).
+$icon-button-size-xs: 1.5rem;
 
 @mixin icon-button-size($size) {
   width: $size;
@@ -32,4 +34,11 @@ $icon-button-selector: '.btn:not(.btn-close):not(.btn-options):not(.btn-link):no
 .btn-group-sm > #{$icon-button-selector},
 .btn-group > #{$icon-button-selector}.btn-sm {
   @include icon-button-size($icon-button-size-sm);
+}
+
+#{$icon-button-selector}.py-0,
+#{$icon-button-selector}.btn-sm.py-0,
+.btn-group-sm > #{$icon-button-selector}.py-0,
+.btn-group > #{$icon-button-selector}.btn-sm.py-0 {
+  @include icon-button-size($icon-button-size-xs);
 }

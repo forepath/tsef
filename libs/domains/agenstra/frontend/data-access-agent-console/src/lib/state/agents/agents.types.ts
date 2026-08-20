@@ -1,3 +1,5 @@
+import type { AgentChatSessionSummaryDto } from '../chat-sessions/chat-sessions.types';
+
 // Types based on OpenAPI spec
 export interface AgentTypeCapabilities {
   transport?: 'acp';
@@ -26,6 +28,10 @@ export interface AgentResponseDto {
     repositoryUrl?: string;
     setupMode: 'clone' | 'empty';
   };
+  /** User-visible chat sessions for this agent (primary + user; never hidden/background). */
+  chats: AgentChatSessionSummaryDto[];
+  /** Id of the primary chat session for this agent. */
+  primaryChatId: string;
   createdAt: string;
   updatedAt: string;
 }

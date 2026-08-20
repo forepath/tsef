@@ -1,8 +1,10 @@
 import {
   AgentResponseDto,
+  ChatSessionResponseDto,
   ContainerType,
   CreateAgentDto,
   CreateAgentResponseDto,
+  CreateChatSessionDto,
   CreateEnvironmentVariableDto,
   CreateFileDto,
   EnvironmentVariableResponseDto,
@@ -10,6 +12,7 @@ import {
   FileNodeDto,
   MoveFileDto,
   UpdateAgentDto,
+  UpdateChatSessionDto,
   UpdateEnvironmentVariableDto,
   WriteFileDto,
 } from '@forepath/agenstra/backend/feature-agent-manager';
@@ -35,6 +38,7 @@ import { UpdateClientDto } from '../dto/update-client.dto';
 import { ProvisioningProviderFactory } from '../providers/provisioning-provider.factory';
 import { ProvisioningProvider } from '../providers/provisioning-provider.interface';
 import { ClientsRepository } from '../repositories/clients.repository';
+import { ClientAgentChatsProxyService } from '../services/client-agent-chats-proxy.service';
 import { ClientAgentEnvironmentVariablesProxyService } from '../services/client-agent-environment-variables-proxy.service';
 import { ClientAgentFileSystemProxyService } from '../services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from '../services/client-agent-proxy.service';
@@ -90,6 +94,8 @@ describe('ClientsController', () => {
     description: 'Test Agent Description',
     agentType: 'cursor',
     containerType: ContainerType.GENERIC,
+    chats: [],
+    primaryChatId: 'primary-chat-uuid',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
@@ -131,6 +137,15 @@ describe('ClientsController', () => {
     updateEnvironmentVariable: jest.fn(),
     deleteEnvironmentVariable: jest.fn(),
     deleteAllEnvironmentVariables: jest.fn(),
+  };
+  const mockChatsProxyService = {
+    list: jest.fn(),
+    count: jest.fn(),
+    create: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    listMessages: jest.fn(),
   };
   const mockProvisioningService = {
     provisionServer: jest.fn(),
@@ -175,6 +190,10 @@ describe('ClientsController', () => {
         {
           provide: ClientAgentEnvironmentVariablesProxyService,
           useValue: mockEnvironmentVariablesProxyService,
+        },
+        {
+          provide: ClientAgentChatsProxyService,
+          useValue: mockChatsProxyService,
         },
         {
           provide: ProvisioningService,
@@ -1181,6 +1200,137 @@ describe('ClientsController', () => {
           clientId,
           agentId,
         );
+      });
+    });
+  });
+
+  describe('Agent Chat Sessions Proxy', () => {
+    const clientId = 'client-uuid';
+    const agentId = 'agent-uuid';
+    const chatId = 'chat-uuid';
+    const mockChatSession: ChatSessionResponseDto = {
+      id: chatId,
+      agentId,
+      title: 'My chat',
+      kind: 'user',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
+    };
+
+    describe('listClientAgentChatSessions', () => {
+      it('should proxy list chat sessions request', async () => {
+        const mockReq = { apiKeyAuthenticated: true } as any;
+
+        clientsRepository.findById.mockResolvedValue({ id: clientId, userId: null } as any);
+        clientUsersRepository.findUserClientAccess.mockResolvedValue(null);
+        mockChatsProxyService.list.mockResolvedValue([mockChatSession]);
+
+        const result = await controller.listClientAgentChatSessions(clientId, agentId, 50, 0, mockReq);
+
+        expect(result).toEqual([mockChatSession]);
+        expect(mockChatsProxyService.list).toHaveBeenCalledWith(clientId, agentId, 50, 0);
+      });
+    });
+
+    describe('countClientAgentChatSessions', () => {
+      it('should proxy count chat sessions request', async () => {
+        const mockReq = { apiKeyAuthenticated: true } as any;
+
+        clientsRepository.findById.mockResolvedValue({ id: clientId, userId: null } as any);
+        clientUsersRepository.findUserClientAccess.mockResolvedValue(null);
+        mockChatsProxyService.count.mockResolvedValue({ count: 5 });
+
+        const result = await controller.countClientAgentChatSessions(clientId, agentId, mockReq);
+
+        expect(result).toEqual({ count: 5 });
+        expect(mockChatsProxyService.count).toHaveBeenCalledWith(clientId, agentId);
+      });
+    });
+
+    describe('createClientAgentChatSession', () => {
+      it('should proxy create chat session request', async () => {
+        const createDto: CreateChatSessionDto = { title: 'My chat' };
+        const mockReq = { apiKeyAuthenticated: true } as any;
+
+        clientsRepository.findById.mockResolvedValue({ id: clientId, userId: null } as any);
+        clientUsersRepository.findUserClientAccess.mockResolvedValue(null);
+        mockChatsProxyService.create.mockResolvedValue(mockChatSession);
+
+        const result = await controller.createClientAgentChatSession(clientId, agentId, createDto, mockReq);
+
+        expect(result).toEqual(mockChatSession);
+        expect(mockChatsProxyService.create).toHaveBeenCalledWith(clientId, agentId, createDto);
+      });
+    });
+
+    describe('getClientAgentChatSession', () => {
+      it('should proxy get chat session request', async () => {
+        const mockReq = { apiKeyAuthenticated: true } as any;
+
+        clientsRepository.findById.mockResolvedValue({ id: clientId, userId: null } as any);
+        clientUsersRepository.findUserClientAccess.mockResolvedValue(null);
+        mockChatsProxyService.get.mockResolvedValue(mockChatSession);
+
+        const result = await controller.getClientAgentChatSession(clientId, agentId, chatId, mockReq);
+
+        expect(result).toEqual(mockChatSession);
+        expect(mockChatsProxyService.get).toHaveBeenCalledWith(clientId, agentId, chatId);
+      });
+    });
+
+    describe('updateClientAgentChatSession', () => {
+      it('should proxy update chat session request', async () => {
+        const updateDto: UpdateChatSessionDto = { title: 'Renamed' };
+        const mockReq = { apiKeyAuthenticated: true } as any;
+        const updated = { ...mockChatSession, title: 'Renamed' };
+
+        clientsRepository.findById.mockResolvedValue({ id: clientId, userId: null } as any);
+        clientUsersRepository.findUserClientAccess.mockResolvedValue(null);
+        mockChatsProxyService.update.mockResolvedValue(updated);
+
+        const result = await controller.updateClientAgentChatSession(clientId, agentId, chatId, updateDto, mockReq);
+
+        expect(result).toEqual(updated);
+        expect(mockChatsProxyService.update).toHaveBeenCalledWith(clientId, agentId, chatId, updateDto);
+      });
+    });
+
+    describe('deleteClientAgentChatSession', () => {
+      it('should proxy delete chat session request', async () => {
+        const mockReq = { apiKeyAuthenticated: true } as any;
+
+        clientsRepository.findById.mockResolvedValue({ id: clientId, userId: null } as any);
+        clientUsersRepository.findUserClientAccess.mockResolvedValue(null);
+        mockChatsProxyService.delete.mockResolvedValue(undefined);
+
+        await controller.deleteClientAgentChatSession(clientId, agentId, chatId, mockReq);
+
+        expect(mockChatsProxyService.delete).toHaveBeenCalledWith(clientId, agentId, chatId);
+      });
+    });
+
+    describe('listClientAgentChatSessionMessages', () => {
+      it('should proxy list chat session messages request', async () => {
+        const mockReq = { apiKeyAuthenticated: true } as any;
+        const mockMessages = [
+          {
+            id: 'msg-1',
+            actor: 'user',
+            message: 'Hello',
+            filtered: false,
+            createdAt: new Date('2024-01-01'),
+            updatedAt: new Date('2024-01-01'),
+          },
+        ];
+
+        clientsRepository.findById.mockResolvedValue({ id: clientId, userId: null } as any);
+        clientUsersRepository.findUserClientAccess.mockResolvedValue(null);
+        mockChatsProxyService.listMessages.mockResolvedValue(mockMessages);
+
+        const result = await controller.listClientAgentChatSessionMessages(clientId, agentId, chatId, 50, 0, mockReq);
+
+        expect(result).toEqual(mockMessages);
+        expect(mockChatsProxyService.listMessages).toHaveBeenCalledWith(clientId, agentId, chatId, 50, 0);
       });
     });
   });

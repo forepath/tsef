@@ -3,10 +3,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AgentMessageEntity } from '../entities/agent-message.entity';
 import { AgentMessagesRepository } from '../repositories/agent-messages.repository';
 
+import { AgentChatSessionsService } from './agent-chat-sessions.service';
 import { AgentMessagesService } from './agent-messages.service';
 
 describe('AgentMessagesService', () => {
   let service: AgentMessagesService;
+  const primaryChatSessionId = 'primary-chat-id';
+  const mockPrimarySession = {
+    id: primaryChatSessionId,
+    agentId: 'agent-uuid-123',
+    title: 'Chat',
+    kind: 'primary' as const,
+    resumeSessionSuffix: '',
+    lastMessageAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
   const mockAgent = {
     id: 'agent-uuid-123',
     name: 'Test Agent',
@@ -20,6 +32,8 @@ describe('AgentMessagesService', () => {
   const mockMessage: AgentMessageEntity = {
     id: 'message-uuid-123',
     agentId: 'agent-uuid-123',
+    chatSessionId: primaryChatSessionId,
+    chatSession: mockPrimarySession as any,
     agent: mockAgent as any,
     actor: 'user',
     message: 'Test message content',
@@ -30,18 +44,31 @@ describe('AgentMessagesService', () => {
   const mockRepository = {
     create: jest.fn(),
     findByAgentId: jest.fn(),
+    findByAgentIdAndChatSessionId: jest.fn(),
     findLatestAgentMessage: jest.fn(),
     countByAgentId: jest.fn(),
+    countByAgentIdAndChatSessionId: jest.fn(),
     deleteByAgentId: jest.fn(),
+  };
+  const mockAgentChatSessionsService = {
+    resolveSessionForChat: jest.fn(),
+    touchLastMessageAt: jest.fn(),
   };
 
   beforeEach(async () => {
+    mockAgentChatSessionsService.resolveSessionForChat.mockResolvedValue(mockPrimarySession);
+    mockAgentChatSessionsService.touchLastMessageAt.mockResolvedValue(undefined);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AgentMessagesService,
         {
           provide: AgentMessagesRepository,
           useValue: mockRepository,
+        },
+        {
+          provide: AgentChatSessionsService,
+          useValue: mockAgentChatSessionsService,
         },
       ],
     }).compile();
@@ -69,12 +96,18 @@ describe('AgentMessagesService', () => {
       const result = await service.createUserMessage(agentId, messageText);
 
       expect(result).toEqual(expectedMessage);
+      expect(mockAgentChatSessionsService.resolveSessionForChat).toHaveBeenCalledWith(agentId, undefined);
       expect(mockRepository.create).toHaveBeenCalledWith({
         agentId,
+        chatSessionId: primaryChatSessionId,
         actor: 'user',
         message: messageText,
         filtered: false,
       });
+      expect(mockAgentChatSessionsService.touchLastMessageAt).toHaveBeenCalledWith(
+        primaryChatSessionId,
+        expectedMessage.createdAt,
+      );
     });
 
     it('should trim the message content', async () => {
@@ -93,6 +126,7 @@ describe('AgentMessagesService', () => {
 
       expect(mockRepository.create).toHaveBeenCalledWith({
         agentId,
+        chatSessionId: primaryChatSessionId,
         actor: 'user',
         message: 'Hello, agent!',
         filtered: false,
@@ -118,10 +152,15 @@ describe('AgentMessagesService', () => {
       expect(result).toEqual(expectedMessage);
       expect(mockRepository.create).toHaveBeenCalledWith({
         agentId,
+        chatSessionId: primaryChatSessionId,
         actor: 'agent',
         message: response,
         filtered: false,
       });
+      expect(mockAgentChatSessionsService.touchLastMessageAt).toHaveBeenCalledWith(
+        primaryChatSessionId,
+        expectedMessage.createdAt,
+      );
     });
 
     it('should create and persist a filtered agent message', async () => {
@@ -142,6 +181,7 @@ describe('AgentMessagesService', () => {
       expect(result).toEqual(expectedMessage);
       expect(mockRepository.create).toHaveBeenCalledWith({
         agentId,
+        chatSessionId: primaryChatSessionId,
         actor: 'agent',
         message: response,
         filtered: true,
@@ -169,6 +209,7 @@ describe('AgentMessagesService', () => {
       expect(result).toEqual(expectedMessage);
       expect(mockRepository.create).toHaveBeenCalledWith({
         agentId,
+        chatSessionId: primaryChatSessionId,
         actor: 'agent',
         message: JSON.stringify(response),
         filtered: false,
@@ -192,6 +233,7 @@ describe('AgentMessagesService', () => {
       expect(result).toEqual(expectedMessage);
       expect(mockRepository.create).toHaveBeenCalledWith({
         agentId,
+        chatSessionId: primaryChatSessionId,
         actor: 'agent',
         message: 'null',
         filtered: false,
@@ -215,6 +257,7 @@ describe('AgentMessagesService', () => {
       expect(result).toEqual(expectedMessage);
       expect(mockRepository.create).toHaveBeenCalledWith({
         agentId,
+        chatSessionId: primaryChatSessionId,
         actor: 'agent',
         message: '42',
         filtered: false,
@@ -248,6 +291,7 @@ describe('AgentMessagesService', () => {
       expect(result).toEqual(expectedMessage);
       expect(mockRepository.create).toHaveBeenCalledWith({
         agentId,
+        chatSessionId: primaryChatSessionId,
         actor: 'agent',
         message: expect.any(String),
         filtered: false,
@@ -259,40 +303,42 @@ describe('AgentMessagesService', () => {
   });
 
   describe('getChatHistory', () => {
-    it('should return chat history for an agent', async () => {
+    it('should return chat history for an agent primary session', async () => {
       const agentId = 'agent-uuid-123';
       const messages = [mockMessage];
 
-      mockRepository.findByAgentId.mockResolvedValue(messages);
+      mockRepository.findByAgentIdAndChatSessionId.mockResolvedValue(messages);
 
       const result = await service.getChatHistory(agentId);
 
       expect(result).toEqual(messages);
-      expect(mockRepository.findByAgentId).toHaveBeenCalledWith(agentId, 50, 0);
+      expect(mockAgentChatSessionsService.resolveSessionForChat).toHaveBeenCalledWith(agentId);
+      expect(mockRepository.findByAgentIdAndChatSessionId).toHaveBeenCalledWith(agentId, primaryChatSessionId, 50, 0);
     });
 
     it('should use custom pagination parameters', async () => {
       const agentId = 'agent-uuid-123';
       const messages = [mockMessage];
 
-      mockRepository.findByAgentId.mockResolvedValue(messages);
+      mockRepository.findByAgentIdAndChatSessionId.mockResolvedValue(messages);
 
       await service.getChatHistory(agentId, 100, 10);
 
-      expect(mockRepository.findByAgentId).toHaveBeenCalledWith(agentId, 100, 10);
+      expect(mockRepository.findByAgentIdAndChatSessionId).toHaveBeenCalledWith(agentId, primaryChatSessionId, 100, 10);
     });
   });
 
   describe('countMessages', () => {
-    it('should return count of messages for an agent', async () => {
+    it('should return count of messages for an agent primary session', async () => {
       const agentId = 'agent-uuid-123';
 
-      mockRepository.countByAgentId.mockResolvedValue(5);
+      mockRepository.countByAgentIdAndChatSessionId.mockResolvedValue(5);
 
       const result = await service.countMessages(agentId);
 
       expect(result).toBe(5);
-      expect(mockRepository.countByAgentId).toHaveBeenCalledWith(agentId);
+      expect(mockAgentChatSessionsService.resolveSessionForChat).toHaveBeenCalledWith(agentId);
+      expect(mockRepository.countByAgentIdAndChatSessionId).toHaveBeenCalledWith(agentId, primaryChatSessionId);
     });
   });
 
@@ -304,6 +350,7 @@ describe('AgentMessagesService', () => {
         id: 'msg-1',
         createdAt,
         agentId: 'agent-uuid-123',
+        chatSessionId: primaryChatSessionId,
         actor: 'agent',
         message: 'hi',
         filtered: false,

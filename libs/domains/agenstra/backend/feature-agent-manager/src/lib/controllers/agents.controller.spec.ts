@@ -19,6 +19,15 @@ describe('AgentsController', () => {
     description: 'Test Description',
     agentType: 'cursor',
     containerType: ContainerType.GENERIC,
+    chats: [
+      {
+        id: 'primary-chat-id',
+        title: 'Chat',
+        kind: 'primary',
+        createdAt: new Date('2024-01-01'),
+      },
+    ],
+    primaryChatId: 'primary-chat-id',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };

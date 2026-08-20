@@ -6,6 +6,7 @@ import { distinctUntilChanged, Observable, take } from 'rxjs';
 import {
   chatEnhancementStarted,
   ticketBodyGenerationStarted,
+  clearChatHistory,
   connectSocket,
   disconnectSocket,
   forwardEvent,
@@ -194,22 +195,41 @@ export class SocketsFacade {
    * Forward a chat event with typed payload
    * @param message - The chat message text
    * @param agentId - Agent UUID (required for routing the event to the correct agent)
+   * @param model - Optional model override
+   * @param contextInjection - Optional context injection payload
+   * @param chatId - Optional chat session id (defaults to primary on the agent)
    */
   forwardChat(
     message: string,
     agentId: string,
     model?: string | null,
     contextInjection?: ContextInjectionPayload,
+    chatId?: string | null,
   ): void {
     const effectiveModel = model ?? this.currentChatModel ?? undefined;
     const responseMode = this.currentChatResponseMode;
     const contextPart = contextInjection ? { contextInjection } : {};
+    const chatIdPart = chatId ? { chatId } : {};
     const payload =
       effectiveModel !== undefined && effectiveModel !== null
-        ? { message, model: effectiveModel, responseMode, ...contextPart }
-        : { message, responseMode, ...contextPart };
+        ? { message, model: effectiveModel, responseMode, ...contextPart, ...chatIdPart }
+        : { message, responseMode, ...contextPart, ...chatIdPart };
 
     this.forwardEvent(ForwardableEvent.CHAT, payload, agentId);
+  }
+
+  /**
+   * Clear the local chat timeline (messages + filter results).
+   */
+  clearChatHistory(): void {
+    this.store.dispatch(clearChatHistory());
+  }
+
+  /**
+   * Ask the agent gateway to restore a chat session into the viewer timeline.
+   */
+  forwardRestoreChat(chatId: string, agentId: string): void {
+    this.forwardEvent(ForwardableEvent.RESTORE_CHAT, { chatId }, agentId);
   }
 
   /**
@@ -281,12 +301,15 @@ export class SocketsFacade {
 
   /**
    * Forward a login event
-   * Note: When agentId is provided, the payload is automatically overridden with credentials from database
+   * Note: When agentId is provided, credentials are loaded from the database.
+   * Optional chatId requests restore of that session after login (when supported by the controller).
    * @param agentId - Agent UUID for auto-login (credentials loaded from database)
+   * @param chatId - Optional chat session to restore on login
    */
-  forwardLogin(agentId: string): void {
-    // Payload is optional and ignored when agentId is provided (credentials loaded from DB)
-    this.forwardEvent(ForwardableEvent.LOGIN, undefined, agentId);
+  forwardLogin(agentId: string, chatId?: string | null): void {
+    const payload = chatId ? ({ agentId, password: '', chatId } as const) : undefined;
+
+    this.forwardEvent(ForwardableEvent.LOGIN, payload, agentId);
   }
 
   /**

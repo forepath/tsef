@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { AgentMessageEntity } from '../entities/agent-message.entity';
 import { AgentMessagesRepository } from '../repositories/agent-messages.repository';
+import { AgentChatSessionsService } from './agent-chat-sessions.service';
 
 /**
  * Service for agent message business logic operations.
@@ -11,24 +12,36 @@ import { AgentMessagesRepository } from '../repositories/agent-messages.reposito
 export class AgentMessagesService {
   private readonly logger = new Logger(AgentMessagesService.name);
 
-  constructor(private readonly agentMessagesRepository: AgentMessagesRepository) {}
+  constructor(
+    private readonly agentMessagesRepository: AgentMessagesRepository,
+    private readonly agentChatSessionsService: AgentChatSessionsService,
+  ) {}
 
   /**
    * Persist a user message.
    * @param agentId - The UUID of the agent
    * @param message - The message text from the user
    * @param filtered - Whether the message was filtered (default: false)
+   * @param chatSessionId - Optional chat session; defaults to primary
    * @returns The created message entity
    */
-  async createUserMessage(agentId: string, message: string, filtered = false): Promise<AgentMessageEntity> {
+  async createUserMessage(
+    agentId: string,
+    message: string,
+    filtered = false,
+    chatSessionId?: string,
+  ): Promise<AgentMessageEntity> {
+    const session = await this.agentChatSessionsService.resolveSessionForChat(agentId, chatSessionId);
     const messageEntity = await this.agentMessagesRepository.create({
       agentId,
+      chatSessionId: session.id,
       actor: 'user',
       message: message.trim(),
       filtered,
     });
 
-    this.logger.debug(`Persisted user message for agent ${agentId}${filtered ? ' (filtered)' : ''}`);
+    await this.agentChatSessionsService.touchLastMessageAt(session.id, messageEntity.createdAt);
+    this.logger.debug(`Persisted user message for agent ${agentId} chat ${session.id}${filtered ? ' (filtered)' : ''}`);
 
     return messageEntity;
   }
@@ -38,9 +51,15 @@ export class AgentMessagesService {
    * @param agentId - The UUID of the agent
    * @param response - The agent response (can be JSON object or string)
    * @param filtered - Whether the message was filtered (default: false)
+   * @param chatSessionId - Optional chat session; defaults to primary
    * @returns The created message entity
    */
-  async createAgentMessage(agentId: string, response: unknown, filtered = false): Promise<AgentMessageEntity> {
+  async createAgentMessage(
+    agentId: string,
+    response: unknown,
+    filtered = false,
+    chatSessionId?: string,
+  ): Promise<AgentMessageEntity> {
     // Convert response to string representation
     let messageContent: string;
 
@@ -59,36 +78,47 @@ export class AgentMessagesService {
       messageContent = String(response);
     }
 
+    const session = await this.agentChatSessionsService.resolveSessionForChat(agentId, chatSessionId);
     const messageEntity = await this.agentMessagesRepository.create({
       agentId,
+      chatSessionId: session.id,
       actor: 'agent',
       message: messageContent,
       filtered,
     });
 
-    this.logger.debug(`Persisted agent message for agent ${agentId}${filtered ? ' (filtered)' : ''}`);
+    await this.agentChatSessionsService.touchLastMessageAt(session.id, messageEntity.createdAt);
+    this.logger.debug(
+      `Persisted agent message for agent ${agentId} chat ${session.id}${filtered ? ' (filtered)' : ''}`,
+    );
 
     return messageEntity;
   }
 
   /**
-   * Get chat history for a specific agent.
-   * @param agentId - The UUID of the agent
-   * @param limit - Maximum number of messages to return
-   * @param offset - Number of messages to skip
-   * @returns Array of message entities ordered chronologically
+   * Get chat history for a specific agent (optionally scoped to a chat session).
    */
-  async getChatHistory(agentId: string, limit = 50, offset = 0): Promise<AgentMessageEntity[]> {
-    return await this.agentMessagesRepository.findByAgentId(agentId, limit, offset);
+  async getChatHistory(agentId: string, limit = 50, offset = 0, chatSessionId?: string): Promise<AgentMessageEntity[]> {
+    if (chatSessionId) {
+      return await this.agentMessagesRepository.findByAgentIdAndChatSessionId(agentId, chatSessionId, limit, offset);
+    }
+
+    const primary = await this.agentChatSessionsService.resolveSessionForChat(agentId);
+
+    return await this.agentMessagesRepository.findByAgentIdAndChatSessionId(agentId, primary.id, limit, offset);
   }
 
   /**
-   * Count messages for a specific agent.
-   * @param agentId - The UUID of the agent
-   * @returns Total count of messages for the agent
+   * Count messages for a specific agent (optionally scoped to a chat session).
    */
-  async countMessages(agentId: string): Promise<number> {
-    return await this.agentMessagesRepository.countByAgentId(agentId);
+  async countMessages(agentId: string, chatSessionId?: string): Promise<number> {
+    if (chatSessionId) {
+      return await this.agentMessagesRepository.countByAgentIdAndChatSessionId(agentId, chatSessionId);
+    }
+
+    const primary = await this.agentChatSessionsService.resolveSessionForChat(agentId);
+
+    return await this.agentMessagesRepository.countByAgentIdAndChatSessionId(agentId, primary.id);
   }
 
   /**

@@ -2659,6 +2659,285 @@ paths:
           description: No client access, or workspace management rights required
         '404':
           description: Client, agent, or environment variable not found
+  /clients/{id}/agents/{agentId}/chats:
+    get:
+      summary: List chat sessions for an agent (proxied)
+      operationId: listClientAgentChatSessions
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum number of chat sessions to return (default 50)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of chat sessions to skip (default 0)
+      responses:
+        '200':
+          description: Array of chat sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatSessionResponseDto'
+        '403':
+          description: User does not have access to this client
+        '404':
+          description: Client or agent not found
+    post:
+      summary: Create chat session for an agent (proxied)
+      operationId: createClientAgentChatSession
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatSessionDto'
+      responses:
+        '201':
+          description: Created chat session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponseDto'
+        '400':
+          description: Invalid request
+        '403':
+          description: User does not have access to this client
+        '404':
+          description: Client or agent not found
+  /clients/{id}/agents/{agentId}/chats/count:
+    get:
+      summary: Get count of chat sessions for an agent (proxied)
+      operationId: countClientAgentChatSessions
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+      responses:
+        '200':
+          description: Count of chat sessions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [count]
+                properties:
+                  count:
+                    type: integer
+        '403':
+          description: User does not have access to this client
+        '404':
+          description: Client or agent not found
+  /clients/{id}/agents/{agentId}/chats/{chatId}:
+    get:
+      summary: Get chat session for an agent (proxied)
+      operationId: getClientAgentChatSession
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the chat session
+      responses:
+        '200':
+          description: Chat session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponseDto'
+        '403':
+          description: User does not have access to this client
+        '404':
+          description: Client, agent, or chat session not found
+    put:
+      summary: Update chat session for an agent (proxied)
+      operationId: updateClientAgentChatSession
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the chat session to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChatSessionDto'
+      responses:
+        '200':
+          description: Updated chat session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponseDto'
+        '400':
+          description: Invalid request
+        '403':
+          description: User does not have access to this client
+        '404':
+          description: Client, agent, or chat session not found
+    delete:
+      summary: Delete chat session for an agent (proxied)
+      operationId: deleteClientAgentChatSession
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the chat session to delete
+      responses:
+        '204':
+          description: Chat session deleted successfully
+        '403':
+          description: User does not have access to this client
+        '404':
+          description: Client, agent, or chat session not found
+  /clients/{id}/agents/{agentId}/chats/{chatId}/messages:
+    get:
+      summary: List messages for a chat session (proxied)
+      operationId: listClientAgentChatSessionMessages
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the client
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the agent
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the chat session
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum number of messages to return (default 50)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of messages to skip (default 0)
+      responses:
+        '200':
+          description: Array of chat session messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatSessionMessageResponseDto'
+        '403':
+          description: User does not have access to this client
+        '404':
+          description: Client, agent, or chat session not found
   /clients/{id}/configuration-overrides:
     get:
       summary: List effective workspace configuration overrides (proxied)
@@ -5031,7 +5310,7 @@ components:
       description: Model catalog for an agent; keys are model identifiers, values are display names
     AgentResponseDto:
       type: object
-      required: [id, name, createdAt, updatedAt]
+      required: [id, name, createdAt, updatedAt, chats, primaryChatId]
       properties:
         id:
           type: string
@@ -5056,6 +5335,15 @@ components:
               enum: [clone, empty]
               description: How the workspace repository was initialized
           description: Git information when the agent has an associated repository or empty local repo
+        chats:
+          type: array
+          description: User-visible chat sessions for this environment
+          items:
+            $ref: '#/components/schemas/AgentChatSessionSummaryDto'
+        primaryChatId:
+          type: string
+          format: uuid
+          description: Id of the primary chat session for this environment
         createdAt:
           type: string
           format: date-time
@@ -5564,6 +5852,82 @@ components:
           type: string
         content:
           type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateChatSessionDto:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Optional title for the new chat session
+    UpdateChatSessionDto:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: New title for the chat session
+    ChatSessionResponseDto:
+      type: object
+      required: [id, agentId, kind, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        kind:
+          type: string
+          enum: [primary, user]
+        lastMessageAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    AgentChatSessionSummaryDto:
+      type: object
+      required: [id, kind, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        kind:
+          type: string
+          enum: [primary, user]
+        lastMessageAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    ChatSessionMessageResponseDto:
+      type: object
+      required: [id, actor, message, filtered, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        actor:
+          type: string
+        message:
+          type: string
+        filtered:
+          type: boolean
         createdAt:
           type: string
           format: date-time

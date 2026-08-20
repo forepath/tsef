@@ -8,10 +8,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { AgentChatSessionEntity } from './agent-chat-session.entity';
 import { AgentEntity } from './agent.entity';
 
 /**
- * Agent message entity representing a chat message bound to an agent.
+ * Agent message entity representing a chat message bound to an agent chat session.
  * Each message has an actor (user or agent) and the message content.
  */
 @Entity('agent_messages')
@@ -25,6 +26,13 @@ export class AgentMessageEntity {
   @ManyToOne(() => AgentEntity, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'agent_id' })
   agent!: AgentEntity;
+
+  @Column({ type: 'uuid', name: 'chat_session_id' })
+  chatSessionId!: string;
+
+  @ManyToOne(() => AgentChatSessionEntity, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'chat_session_id' })
+  chatSession!: AgentChatSessionEntity;
 
   @Column({ type: 'varchar', length: 50, name: 'actor' })
   actor!: string;

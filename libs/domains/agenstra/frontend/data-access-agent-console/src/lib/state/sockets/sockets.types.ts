@@ -27,6 +27,7 @@ export enum ForwardableEvent {
   CREATE_TERMINAL = 'createTerminal',
   TERMINAL_INPUT = 'terminalInput',
   CLOSE_TERMINAL = 'closeTerminal',
+  RESTORE_CHAT = 'restoreChat',
 }
 
 /**
@@ -51,7 +52,8 @@ export type ForwardableEventPayload =
   | FileUpdatePayload
   | CreateTerminalPayload
   | TerminalInputPayload
-  | CloseTerminalPayload;
+  | CloseTerminalPayload
+  | RestoreChatPayload;
 
 /**
  * Chat event payload (from agents.gateway.ts ChatPayload)
@@ -62,6 +64,15 @@ export interface ChatPayload {
   correlationId?: string;
   responseMode?: AgentResponseMode;
   contextInjection?: ContextInjectionPayload;
+  /** User-visible chat session id; defaults to primary when omitted. */
+  chatId?: string;
+}
+
+/**
+ * Restore a specific chat session history into the viewer timeline.
+ */
+export interface RestoreChatPayload {
+  chatId: string;
 }
 
 export type AgentResponseMode = 'single' | 'stream';
@@ -86,6 +97,7 @@ export interface AgentEventEnvelopeBase {
   timestamp: string;
   kind: AgentEventKind;
   payload: unknown;
+  chatId?: string;
 }
 
 export type AgentEventEnvelope = AgentEventEnvelopeBase;
@@ -146,11 +158,13 @@ export type TicketBodyResultPayload = ChatEnhanceResultPayload;
 
 /**
  * Login event payload (from agents.gateway.ts LoginPayload)
- * Note: When forwarding with agentId, the payload is overridden with credentials from database
+ * Note: When forwarding with agentId, credentials are loaded from the database;
+ * optional chatId requests restore of that session on login.
  */
 export interface LoginPayload {
   agentId: string;
   password: string;
+  chatId?: string;
 }
 
 /**
@@ -255,6 +269,7 @@ export interface UserChatMessageData {
   from: ChatActor.USER;
   text: string;
   timestamp: string;
+  chatId?: string;
 }
 
 /**
@@ -264,6 +279,7 @@ export interface AgentChatMessageData {
   from: ChatActor.AGENT;
   response: AgentResponseObject | string; // Parsed JSON object or raw string if parsing fails
   timestamp: string;
+  chatId?: string;
 }
 
 /**
