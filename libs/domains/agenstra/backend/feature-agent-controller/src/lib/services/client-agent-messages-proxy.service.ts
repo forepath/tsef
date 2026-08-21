@@ -101,7 +101,14 @@ export class ClientAgentMessagesProxyService {
     }
   }
 
-  async getLatestAgentMessage(clientId: string, agentId: string): Promise<LatestAgentMessageDto | null> {
-    return await this.makeRequest<LatestAgentMessageDto>(clientId, agentId, { method: 'GET' });
+  async getLatestAgentMessage(
+    clientId: string,
+    agentId: string,
+    chatSessionId?: string,
+  ): Promise<LatestAgentMessageDto | null> {
+    return await this.makeRequest<LatestAgentMessageDto>(clientId, agentId, {
+      method: 'GET',
+      params: chatSessionId ? { chatSessionId } : undefined,
+    });
   }
 }

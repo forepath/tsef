@@ -431,7 +431,11 @@ export class ClientsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
             });
 
             void this.agentConsoleStatusService
-              .onAgentChatActivity(currentClientId, lastAgentId)
+              .onAgentChatActivity(
+                currentClientId,
+                lastAgentId,
+                typeof payload?.chatId === 'string' ? payload.chatId : null,
+              )
               .catch(() => undefined);
           }
         } else if (event === 'gitStateChanged' && currentClientId && args.length > 0) {

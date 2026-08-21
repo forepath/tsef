@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-20T19:04:50.200Z",
+  "generatedAt": "2026-08-21T12:40:24.251Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -4936,6 +4936,15 @@
       }
     },
     {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/entities/user-chat-session-read-state.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/entities/user-chat-session-read-state.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-controller"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/entities/user-environment-read-state.entity.ts",
       "type": "entity",
       "attrs": {
@@ -5129,6 +5138,15 @@
       "type": "repository",
       "attrs": {
         "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/ticket-automation-runs-status.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "agenstra-backend-feature-agent-controller"
+      }
+    },
+    {
+      "id": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/user-chat-session-read-state.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/user-chat-session-read-state.repository.ts",
         "languageOrKind": "ts",
         "projectName": "agenstra-backend-feature-agent-controller"
       }
@@ -13223,7 +13241,7 @@
       "type": "channel",
       "attrs": {
         "pathOrChannel": "status/statusSnapshot",
-        "summary": "Full per-user notification state on connect (git dirty + unread per environment, client rollups, spacesHasAttention).\nUnicast to the connecting socket only. Namespace **status** (STATUS_WEBSOCKET_NAMESPACE, default \"status\").\n",
+        "summary": "Full per-user notification state on connect (git dirty + unread per environment, nested `chats[]`\nfor visible primary/user sessions, client rollups, spacesHasAttention).\nUnicast to the connecting socket only. Namespace **status** (STATUS_WEBSOCKET_NAMESPACE, default \"status\").\n",
         "specKind": "asyncapi"
       }
     },
@@ -13232,7 +13250,7 @@
       "type": "channel",
       "attrs": {
         "pathOrChannel": "status/statusPatch",
-        "summary": "Incremental notification deltas after connect (unicast).",
+        "summary": "Incremental notification deltas after connect (unicast), including nested `chats[]` when unread changes.",
         "specKind": "asyncapi"
       }
     },
@@ -13241,7 +13259,16 @@
       "type": "channel",
       "attrs": {
         "pathOrChannel": "status/markEnvironmentRead",
-        "summary": "Client marks an environment chat as read; persists user_environment_read_state.",
+        "summary": "Client marks the selected visible chat session as read (optional `chatSessionId`; defaults to primary).\nPersists `user_chat_session_read_state` and updates env cursor helpers in `user_environment_read_state`.\n",
+        "specKind": "asyncapi"
+      }
+    },
+    {
+      "id": "api:channel:status/markChatSessionRead",
+      "type": "channel",
+      "attrs": {
+        "pathOrChannel": "status/markChatSessionRead",
+        "summary": "Client marks a specific visible chat session as read (`clientId`, `agentId`, `chatSessionId`).",
         "specKind": "asyncapi"
       }
     },
@@ -13250,7 +13277,7 @@
       "type": "channel",
       "attrs": {
         "pathOrChannel": "status/setActiveEnvironment",
-        "summary": "Client reports the environment currently in view (suppresses unread for active user).",
+        "summary": "Client reports the environment and optional `chatSessionId` currently in view\n(suppresses unread auto-clear only when activity matches that chat).\n",
         "specKind": "asyncapi"
       }
     },
@@ -33883,6 +33910,11 @@
     },
     {
       "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/entities/user-chat-session-read-state.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/entities/user-environment-read-state.entity.ts",
       "type": "contains"
     },
@@ -33989,6 +34021,11 @@
     {
       "from": "project:agenstra-backend-feature-agent-controller",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/ticket-automation-runs-status.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/user-chat-session-read-state.repository.ts",
       "type": "contains"
     },
     {
@@ -37779,6 +37816,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/asyncapi.yaml",
       "to": "api:channel:status/markEnvironmentRead",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/spec/asyncapi.yaml",
+      "to": "api:channel:status/markChatSessionRead",
       "type": "contains"
     },
     {
@@ -53243,6 +53285,16 @@
     },
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/gateways/status.gateway.ts",
+      "to": "api:channel:status/markChatSessionRead",
+      "type": "implements"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "api:channel:status/markChatSessionRead",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/gateways/status.gateway.ts",
       "to": "api:channel:status/setActiveEnvironment",
       "type": "implements"
     },
@@ -54204,6 +54256,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-console-status.service.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/user-environment-read-state.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/agent-console-status.service.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/user-chat-session-read-state.repository.ts",
       "type": "injects"
     },
     {
@@ -58474,6 +58531,11 @@
     {
       "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
       "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/services/client-agent-messages-proxy.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/modules/clients.module.ts",
+      "to": "file:libs/domains/agenstra/backend/feature-agent-controller/src/lib/repositories/user-chat-session-read-state.repository.ts",
       "type": "provides"
     },
     {

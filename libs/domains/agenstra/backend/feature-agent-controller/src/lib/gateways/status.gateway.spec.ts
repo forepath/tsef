@@ -133,7 +133,7 @@ describe('StatusGateway', () => {
 
     await gateway.handleMarkEnvironmentRead({ clientId: 'c1', agentId: 'a1' }, socket);
 
-    expect(mockStatusService.markEnvironmentRead).toHaveBeenCalledWith(socket.data.userInfo, 'c1', 'a1');
+    expect(mockStatusService.markEnvironmentRead).toHaveBeenCalledWith(socket.data.userInfo, 'c1', 'a1', undefined);
   });
 
   it('emits errors for unauthorized or invalid markEnvironmentRead payloads', async () => {
@@ -156,10 +156,10 @@ describe('StatusGateway', () => {
     const socket = createMockSocket();
 
     gateway.handleSetActiveEnvironment({ clientId: 'c1', agentId: 'a1' }, socket);
-    expect(mockStatusService.setActiveEnvironment).toHaveBeenCalledWith('socket-1', 'c1', 'a1');
+    expect(mockStatusService.setActiveEnvironment).toHaveBeenCalledWith('socket-1', 'c1', 'a1', undefined);
 
     gateway.handleSetActiveEnvironment({ clientId: null, agentId: null }, socket);
-    expect(mockStatusService.setActiveEnvironment).toHaveBeenCalledWith('socket-1', null, null);
+    expect(mockStatusService.setActiveEnvironment).toHaveBeenCalledWith('socket-1', null, null, undefined);
   });
 
   it('rejects setActiveEnvironment without user info', () => {

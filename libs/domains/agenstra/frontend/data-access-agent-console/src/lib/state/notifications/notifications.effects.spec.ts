@@ -8,6 +8,7 @@ import {
   connectNotificationsSocketSuccess,
   disconnectNotificationsSocket,
   markEnvironmentRead,
+  markChatSessionRead,
   notificationsSocketError,
   notificationsSocketReconnected,
   notificationsSocketReconnectError,
@@ -24,6 +25,7 @@ import {
   disconnectNotificationsSocket$,
   getStatusSocketInstance,
   markEnvironmentRead$,
+  markChatSessionRead$,
   playUnreadNotificationSound$,
   playUnreadSoundEffect$,
   setActiveEnvironment$,
@@ -168,11 +170,28 @@ describe('NotificationsEffects', () => {
     actions$.next(connectNotificationsSocket());
     markEnvironmentRead$(markRead$ as never).subscribe();
 
-    markRead$.next(markEnvironmentRead({ clientId: 'c1', agentId: 'a1' }));
+    markRead$.next(markEnvironmentRead({ clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-1' }));
 
     expect(mockSocket.emit).toHaveBeenCalledWith(STATUS_SOCKET_EVENTS.markEnvironmentRead, {
       clientId: 'c1',
       agentId: 'a1',
+      chatSessionId: 'chat-1',
+    });
+  });
+
+  it('markChatSessionRead effect emits socket event', () => {
+    const markRead$ = new Subject<ReturnType<typeof markChatSessionRead>>();
+
+    connectNotificationsSocket$(actions$ as never, testEnvironment as never, null).subscribe();
+    actions$.next(connectNotificationsSocket());
+    markChatSessionRead$(markRead$ as never).subscribe();
+
+    markRead$.next(markChatSessionRead({ clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-2' }));
+
+    expect(mockSocket.emit).toHaveBeenCalledWith(STATUS_SOCKET_EVENTS.markChatSessionRead, {
+      clientId: 'c1',
+      agentId: 'a1',
+      chatSessionId: 'chat-2',
     });
   });
 
@@ -185,13 +204,16 @@ describe('NotificationsEffects', () => {
     actions$.next(connectNotificationsSocket());
     setActiveEnvironment$(setActive$ as never, fakeStore as never).subscribe();
 
-    setActive$.next(setActiveEnvironment({ clientId: 'c1', agentId: 'a1' }));
+    setActive$.next(setActiveEnvironment({ clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-1' }));
 
     expect(mockSocket.emit).toHaveBeenCalledWith(STATUS_SOCKET_EVENTS.setActiveEnvironment, {
       clientId: 'c1',
       agentId: 'a1',
+      chatSessionId: 'chat-1',
     });
-    expect(dispatch).toHaveBeenCalledWith(setActiveEnvironmentLocal({ active: { clientId: 'c1', agentId: 'a1' } }));
+    expect(dispatch).toHaveBeenCalledWith(
+      setActiveEnvironmentLocal({ active: { clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-1' } }),
+    );
   });
 
   it('connect effect uses api key from localStorage when env key is absent', async () => {

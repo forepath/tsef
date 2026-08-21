@@ -4,6 +4,7 @@ import {
   connectNotificationsSocketSuccess,
   disconnectNotificationsSocket,
   disconnectNotificationsSocketSuccess,
+  markChatSessionRead,
   notificationsSocketError,
   notificationsSocketReconnected,
   notificationsSocketReconnectError,
@@ -38,7 +39,209 @@ describe('notificationsReducer', () => {
     );
 
     expect(state.environmentsByKey['c1:a1']?.hasUnreadMessages).toBe(true);
+    expect(state.environmentsByKey['c1:a1']?.chats).toEqual([]);
     expect(state.spacesHasAttention).toBe(true);
+  });
+
+  it('preserves nested chats on snapshot and patch', () => {
+    const chats = [{ chatSessionId: 'chat-1', hasUnreadMessages: true }];
+    const withSnapshot = notificationsReducer(
+      initialNotificationsState,
+      statusSnapshotReceived({
+        snapshot: {
+          generatedAt: '2026-01-01T00:00:00.000Z',
+          environments: [
+            {
+              clientId: 'c1',
+              agentId: 'a1',
+              hasUnreadMessages: true,
+              gitDirty: false,
+              gitConflict: false,
+              chats,
+            },
+          ],
+          clients: [{ clientId: 'c1', hasUnreadMessages: true, gitDirty: false }],
+          spacesHasAttention: true,
+        },
+      }),
+    );
+
+    expect(withSnapshot.environmentsByKey['c1:a1']?.chats).toEqual(chats);
+
+    const patched = notificationsReducer(
+      withSnapshot,
+      statusPatchReceived({
+        patch: {
+          generatedAt: '2026-01-02T00:00:00.000Z',
+          environments: [
+            {
+              clientId: 'c1',
+              agentId: 'a1',
+              hasUnreadMessages: false,
+              gitDirty: false,
+              gitConflict: false,
+              chats: [{ chatSessionId: 'chat-1', hasUnreadMessages: false }],
+            },
+          ],
+        },
+      }),
+    );
+
+    expect(patched.environmentsByKey['c1:a1']?.chats).toEqual([{ chatSessionId: 'chat-1', hasUnreadMessages: false }]);
+  });
+
+  it('optimistically clears chat unread on markChatSessionRead', () => {
+    const withUnread = notificationsReducer(
+      initialNotificationsState,
+      statusSnapshotReceived({
+        snapshot: {
+          generatedAt: '2026-01-01T00:00:00.000Z',
+          environments: [
+            {
+              clientId: 'c1',
+              agentId: 'a1',
+              hasUnreadMessages: true,
+              gitDirty: false,
+              gitConflict: false,
+              chats: [
+                { chatSessionId: 'chat-1', hasUnreadMessages: true },
+                { chatSessionId: 'chat-2', hasUnreadMessages: true },
+              ],
+            },
+          ],
+          clients: [{ clientId: 'c1', hasUnreadMessages: true, gitDirty: false }],
+          spacesHasAttention: true,
+        },
+      }),
+    );
+
+    const cleared = notificationsReducer(
+      withUnread,
+      markChatSessionRead({ clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-1' }),
+    );
+
+    expect(cleared.environmentsByKey['c1:a1']?.chats).toEqual([
+      { chatSessionId: 'chat-1', hasUnreadMessages: false },
+      { chatSessionId: 'chat-2', hasUnreadMessages: true },
+    ]);
+    expect(cleared.environmentsByKey['c1:a1']?.hasUnreadMessages).toBe(true);
+  });
+
+  it('ignores stale unread=true patches after optimistic mark-read', () => {
+    const withUnread = notificationsReducer(
+      initialNotificationsState,
+      statusSnapshotReceived({
+        snapshot: {
+          generatedAt: '2026-01-01T00:00:00.000Z',
+          environments: [
+            {
+              clientId: 'c1',
+              agentId: 'a1',
+              hasUnreadMessages: true,
+              gitDirty: false,
+              gitConflict: false,
+              chats: [{ chatSessionId: 'chat-1', hasUnreadMessages: true }],
+            },
+          ],
+          clients: [{ clientId: 'c1', hasUnreadMessages: true, gitDirty: false }],
+          spacesHasAttention: true,
+        },
+      }),
+    );
+    const cleared = notificationsReducer(
+      withUnread,
+      markChatSessionRead({ clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-1' }),
+    );
+
+    const stale = notificationsReducer(
+      cleared,
+      statusPatchReceived({
+        patch: {
+          generatedAt: '2025-12-31T23:59:00.000Z',
+          environments: [
+            {
+              clientId: 'c1',
+              agentId: 'a1',
+              hasUnreadMessages: true,
+              gitDirty: false,
+              gitConflict: false,
+              chats: [{ chatSessionId: 'chat-1', hasUnreadMessages: true }],
+            },
+          ],
+        },
+      }),
+    );
+
+    expect(stale.environmentsByKey['c1:a1']?.chats).toEqual([{ chatSessionId: 'chat-1', hasUnreadMessages: false }]);
+    expect(stale.environmentsByKey['c1:a1']?.hasUnreadMessages).toBe(false);
+  });
+
+  it('accepts unread=true after server confirms read (suppress cleared)', () => {
+    const withUnread = notificationsReducer(
+      initialNotificationsState,
+      statusSnapshotReceived({
+        snapshot: {
+          generatedAt: '2026-01-01T00:00:00.000Z',
+          environments: [
+            {
+              clientId: 'c1',
+              agentId: 'a1',
+              hasUnreadMessages: true,
+              gitDirty: false,
+              gitConflict: false,
+              chats: [{ chatSessionId: 'chat-1', hasUnreadMessages: true }],
+            },
+          ],
+          clients: [{ clientId: 'c1', hasUnreadMessages: true, gitDirty: false }],
+          spacesHasAttention: true,
+        },
+      }),
+    );
+    const cleared = notificationsReducer(
+      withUnread,
+      markChatSessionRead({ clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-1' }),
+    );
+    const confirmed = notificationsReducer(
+      cleared,
+      statusPatchReceived({
+        patch: {
+          generatedAt: '2026-01-01T00:00:01.000Z',
+          environments: [
+            {
+              clientId: 'c1',
+              agentId: 'a1',
+              hasUnreadMessages: false,
+              gitDirty: false,
+              gitConflict: false,
+              chats: [{ chatSessionId: 'chat-1', hasUnreadMessages: false }],
+            },
+          ],
+        },
+      }),
+    );
+
+    expect(confirmed.optimisticChatReadAtByKey['c1:a1:chat-1']).toBeUndefined();
+
+    const fresh = notificationsReducer(
+      confirmed,
+      statusPatchReceived({
+        patch: {
+          generatedAt: '2026-01-01T00:00:02.000Z',
+          environments: [
+            {
+              clientId: 'c1',
+              agentId: 'a1',
+              hasUnreadMessages: true,
+              gitDirty: false,
+              gitConflict: false,
+              chats: [{ chatSessionId: 'chat-1', hasUnreadMessages: true }],
+            },
+          ],
+        },
+      }),
+    );
+
+    expect(fresh.environmentsByKey['c1:a1']?.chats).toEqual([{ chatSessionId: 'chat-1', hasUnreadMessages: true }]);
   });
 
   it('merges status patch for environment', () => {

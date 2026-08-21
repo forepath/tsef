@@ -36,11 +36,15 @@ export const statusPatchReceived = createAction(
 
 export const markEnvironmentRead = createAction(
   '[Notifications] Mark Environment Read',
-  props<{ clientId: string; agentId: string }>(),
+  props<{ clientId: string; agentId: string; chatSessionId?: string }>(),
+);
+export const markChatSessionRead = createAction(
+  '[Notifications] Mark Chat Session Read',
+  props<{ clientId: string; agentId: string; chatSessionId: string }>(),
 );
 export const setActiveEnvironment = createAction(
   '[Notifications] Set Active Environment',
-  props<{ clientId: string | null; agentId: string | null }>(),
+  props<{ clientId: string | null; agentId: string | null; chatSessionId?: string | null }>(),
 );
 export const setActiveEnvironmentLocal = createAction(
   '[Notifications] Set Active Environment Local',

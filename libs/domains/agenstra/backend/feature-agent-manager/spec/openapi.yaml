@@ -118,7 +118,8 @@ paths:
       summary: Get latest agent chat message metadata
       description: |
         Returns id and createdAt of the latest persisted agent-role chat message for unread tracking.
-        Returns 404 when the agent has no agent messages yet.
+        Optionally scoped to a visible chat session via `chatSessionId`.
+        Returns 404 when no matching agent messages exist.
       operationId: getLatestAgentMessage
       parameters:
         - in: path
@@ -127,6 +128,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: chatSessionId
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: When set, return the latest agent message for this chat session only
       responses:
         '200':
           description: Latest agent message metadata

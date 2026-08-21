@@ -152,7 +152,7 @@ Main container component that provides the layout and routing structure.
 
 ### AgentConsoleChatComponent
 
-Main workspace shell: chat (including a **session switcher** for multiple user-visible chat sessions per environment), file tree, Git, environment variables, deployments entry, statistics, and modals for client and agent management. Sessions are managed via controller `/clients/{id}/agents/{agentId}/chats` and restored over WebSocket with `login` / `restoreChat` `chatId` (see [Chat Interface](../features/chat-interface.md)).
+Main workspace shell: chat (including a **session switcher** for multiple user-visible chat sessions per environment, with per-session unread badges), file tree, Git, environment variables, deployments entry, statistics, and modals for client and agent management. Sessions are managed via controller `/clients/{id}/agents/{agentId}/chats` and restored over WebSocket with `login` / `restoreChat` `chatId` (see [Chat Interface](../features/chat-interface.md)). Unread status for each visible session comes from the `status` WebSocket snapshot/patch (`environments[].chats[]`).
 
 ### TicketsBoardComponent
 

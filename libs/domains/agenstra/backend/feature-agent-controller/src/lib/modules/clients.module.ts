@@ -51,6 +51,7 @@ import { TicketAutomationEntity } from '../entities/ticket-automation.entity';
 import { TicketBodyGenerationSessionEntity } from '../entities/ticket-body-generation-session.entity';
 import { TicketCommentEntity } from '../entities/ticket-comment.entity';
 import { TicketEntity } from '../entities/ticket.entity';
+import { UserChatSessionReadStateEntity } from '../entities/user-chat-session-read-state.entity';
 import { UserEnvironmentReadStateEntity } from '../entities/user-environment-read-state.entity';
 import { ClientsGateway } from '../gateways/clients.gateway';
 import { KnowledgeBoardGateway } from '../gateways/knowledge-board.gateway';
@@ -63,6 +64,7 @@ import { ProvisioningProvider } from '../providers/provisioning-provider.interfa
 import { ClientsRepository } from '../repositories/clients.repository';
 import { ProvisioningReferencesRepository } from '../repositories/provisioning-references.repository';
 import { TicketAutomationRunsStatusRepository } from '../repositories/ticket-automation-runs-status.repository';
+import { UserChatSessionReadStateRepository } from '../repositories/user-chat-session-read-state.repository';
 import { UserEnvironmentReadStateRepository } from '../repositories/user-environment-read-state.repository';
 import { AgentConsoleStatusRealtimeService } from '../services/agent-console-status-realtime.service';
 import { AgentConsoleStatusService } from '../services/agent-console-status.service';
@@ -129,6 +131,7 @@ const authMethod = getAuthenticationMethod();
       KnowledgeNodeEmbeddingEntity,
       KnowledgePageActivityEntity,
       KnowledgeRelationEntity,
+      UserChatSessionReadStateEntity,
       UserEnvironmentReadStateEntity,
     ]),
     RedisCacheModule,
@@ -186,6 +189,7 @@ const authMethod = getAuthenticationMethod();
     AgentConsoleStatusRealtimeService,
     AgentConsoleStatusService,
     ClientAgentMessagesProxyService,
+    UserChatSessionReadStateRepository,
     UserEnvironmentReadStateRepository,
     TicketAutomationRunsStatusRepository,
     ClientsGateway,

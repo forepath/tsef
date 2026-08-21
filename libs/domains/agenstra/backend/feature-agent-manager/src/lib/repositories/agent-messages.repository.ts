@@ -116,10 +116,11 @@ export class AgentMessagesRepository {
 
   /**
    * Find the most recent agent-authored message for an environment.
+   * @param chatSessionId - When set, limit to that visible chat session
    */
-  async findLatestAgentMessage(agentId: string): Promise<AgentMessageEntity | null> {
+  async findLatestAgentMessage(agentId: string, chatSessionId?: string): Promise<AgentMessageEntity | null> {
     return await this.repository.findOne({
-      where: { agentId, actor: 'agent' },
+      where: chatSessionId ? { agentId, actor: 'agent', chatSessionId } : { agentId, actor: 'agent' },
       order: { createdAt: 'DESC' },
     });
   }

@@ -123,9 +123,13 @@ export class AgentMessagesService {
 
   /**
    * Latest agent-authored message for unread cursor comparison.
+   * @param chatSessionId - Optional visible chat session id
    */
-  async getLatestAgentMessage(agentId: string): Promise<{ id: string; createdAt: Date } | null> {
-    const message = await this.agentMessagesRepository.findLatestAgentMessage(agentId);
+  async getLatestAgentMessage(
+    agentId: string,
+    chatSessionId?: string,
+  ): Promise<{ id: string; createdAt: Date } | null> {
+    const message = await this.agentMessagesRepository.findLatestAgentMessage(agentId, chatSessionId);
 
     if (!message) {
       return null;

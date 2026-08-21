@@ -1,4 +1,4 @@
-import { GitStatusDto } from '@forepath/agenstra/backend/feature-agent-manager';
+import { AgentResponseDto, GitStatusDto } from '@forepath/agenstra/backend/feature-agent-manager';
 import {
   checkClientAccess,
   ClientUsersRepository,
@@ -10,6 +10,7 @@ import {
 import { ForbiddenException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 
 import {
+  ChatSessionStatusPayload,
   ClientStatusPayload,
   EnvironmentStatusPayload,
   StatusPatchPayload,
@@ -17,6 +18,7 @@ import {
 } from '../dto/agent-console-status.dto';
 import { ClientsRepository } from '../repositories/clients.repository';
 import { TicketAutomationRunsStatusRepository } from '../repositories/ticket-automation-runs-status.repository';
+import { UserChatSessionReadStateRepository } from '../repositories/user-chat-session-read-state.repository';
 import { UserEnvironmentReadStateRepository } from '../repositories/user-environment-read-state.repository';
 
 import { AgentConsoleStatusRealtimeService } from './agent-console-status-realtime.service';
@@ -26,6 +28,8 @@ import { ClientAgentVcsProxyService } from './client-agent-vcs-proxy.service';
 import { ClientsService } from './clients.service';
 
 const DEFAULT_VCS_CONCURRENCY = 3;
+
+type ActiveEnvironment = { clientId: string; agentId: string; chatSessionId: string | null };
 
 function resolveUserId(userInfo: SocketUserInfo): string | null {
   return userInfo.user?.id ?? userInfo.userId ?? null;
@@ -60,10 +64,23 @@ function spacesHasAttention(clients: ClientStatusPayload[]): boolean {
   return clients.some((c) => c.hasUnreadMessages || c.gitDirty);
 }
 
+function chatsEqual(a: ChatSessionStatusPayload[] | undefined, b: ChatSessionStatusPayload[] | undefined): boolean {
+  const left = a ?? [];
+  const right = b ?? [];
+
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  const rightById = new Map(right.map((c) => [c.chatSessionId, c.hasUnreadMessages]));
+
+  return left.every((c) => rightById.get(c.chatSessionId) === c.hasUnreadMessages);
+}
+
 @Injectable()
 export class AgentConsoleStatusService {
   private readonly logger = new Logger(AgentConsoleStatusService.name);
-  private readonly activeEnvironmentBySocketId = new Map<string, { clientId: string; agentId: string } | null>();
+  private readonly activeEnvironmentBySocketId = new Map<string, ActiveEnvironment | null>();
   private readonly lastSnapshotBySocketId = new Map<string, StatusSnapshotPayload>();
 
   constructor(
@@ -71,6 +88,7 @@ export class AgentConsoleStatusService {
     private readonly clientsRepository: ClientsRepository,
     private readonly clientUsersRepository: ClientUsersRepository,
     private readonly readStateRepository: UserEnvironmentReadStateRepository,
+    private readonly chatReadStateRepository: UserChatSessionReadStateRepository,
     private readonly automationRunsStatusRepository: TicketAutomationRunsStatusRepository,
     private readonly messagesProxy: ClientAgentMessagesProxyService,
     @Inject(forwardRef(() => ClientAgentVcsProxyService))
@@ -79,14 +97,23 @@ export class AgentConsoleStatusService {
     private readonly realtime: AgentConsoleStatusRealtimeService,
   ) {}
 
-  setActiveEnvironment(socketId: string, clientId: string | null, agentId: string | null): void {
+  setActiveEnvironment(
+    socketId: string,
+    clientId: string | null,
+    agentId: string | null,
+    chatSessionId?: string | null,
+  ): void {
     if (!clientId || !agentId) {
       this.activeEnvironmentBySocketId.set(socketId, null);
 
       return;
     }
 
-    this.activeEnvironmentBySocketId.set(socketId, { clientId, agentId });
+    this.activeEnvironmentBySocketId.set(socketId, {
+      clientId,
+      agentId,
+      chatSessionId: chatSessionId ?? null,
+    });
   }
 
   clearSocket(socketId: string): void {
@@ -109,7 +136,12 @@ export class AgentConsoleStatusService {
     }
   }
 
-  async markEnvironmentRead(userInfo: SocketUserInfo, clientId: string, agentId: string): Promise<void> {
+  async markEnvironmentRead(
+    userInfo: SocketUserInfo,
+    clientId: string,
+    agentId: string,
+    chatSessionId?: string,
+  ): Promise<void> {
     const userId = resolveUserId(userInfo);
 
     if (!userId) {
@@ -118,7 +150,55 @@ export class AgentConsoleStatusService {
 
     await this.assertEnvironmentAccess(userInfo, clientId, agentId);
 
-    const latest = await this.messagesProxy.getLatestAgentMessage(clientId, agentId);
+    const resolvedChatId = chatSessionId ?? (await this.resolvePrimaryChatId(clientId, agentId));
+    const latest = await this.messagesProxy.getLatestAgentMessage(clientId, agentId, resolvedChatId ?? undefined);
+
+    await this.readStateRepository.upsertReadState({
+      userId,
+      clientId,
+      agentId,
+      lastReadAt: new Date(),
+      lastReadAgentMessageId: latest?.id ?? null,
+    });
+
+    if (resolvedChatId) {
+      await this.chatReadStateRepository.upsertReadState({
+        userId,
+        clientId,
+        agentId,
+        chatSessionId: resolvedChatId,
+        lastReadAt: new Date(),
+        lastReadAgentMessageId: latest?.id ?? null,
+      });
+    }
+
+    await this.pushPatchForUser(userId, clientId, agentId);
+  }
+
+  async markChatSessionRead(
+    userInfo: SocketUserInfo,
+    clientId: string,
+    agentId: string,
+    chatSessionId: string,
+  ): Promise<void> {
+    const userId = resolveUserId(userInfo);
+
+    if (!userId) {
+      return;
+    }
+
+    await this.assertEnvironmentAccess(userInfo, clientId, agentId);
+
+    const latest = await this.messagesProxy.getLatestAgentMessage(clientId, agentId, chatSessionId);
+
+    await this.chatReadStateRepository.upsertReadState({
+      userId,
+      clientId,
+      agentId,
+      chatSessionId,
+      lastReadAt: new Date(),
+      lastReadAgentMessageId: latest?.id ?? null,
+    });
 
     await this.readStateRepository.upsertReadState({
       userId,
@@ -188,12 +268,21 @@ export class AgentConsoleStatusService {
     }
   }
 
-  async onAgentChatActivity(clientId: string, agentId: string, activityAt = new Date()): Promise<void> {
-    await this.notifyEnvironmentActivity(clientId, agentId, activityAt);
+  async onAgentChatActivity(
+    clientId: string,
+    agentId: string,
+    chatSessionId?: string | null,
+    activityAt = new Date(),
+  ): Promise<void> {
+    const resolvedChatId = chatSessionId ?? (await this.resolvePrimaryChatId(clientId, agentId));
+
+    await this.notifyChatActivity(clientId, agentId, resolvedChatId, activityAt);
   }
 
   async onAutomationChatActivity(clientId: string, agentId: string, activityAt = new Date()): Promise<void> {
-    await this.notifyEnvironmentActivity(clientId, agentId, activityAt);
+    const primaryChatId = await this.resolvePrimaryChatId(clientId, agentId);
+
+    await this.notifyChatActivity(clientId, agentId, primaryChatId, activityAt);
   }
 
   /**
@@ -206,12 +295,16 @@ export class AgentConsoleStatusService {
     await Promise.all(userIds.map((userId) => this.pushPatchForUser(userId, clientId, agentId)));
   }
 
-  private async notifyEnvironmentActivity(clientId: string, agentId: string, activityAt: Date): Promise<void> {
+  private async notifyChatActivity(
+    clientId: string,
+    agentId: string,
+    chatSessionId: string | null,
+    activityAt: Date,
+  ): Promise<void> {
     const userIds = await this.resolveUserIdsToNotify(clientId);
 
     for (const userId of userIds) {
-      const readState = await this.readStateRepository.findOne(userId, clientId, agentId);
-      const activeForUser = this.findActiveEnvironmentForUser(userId, clientId, agentId);
+      const activeForUser = this.findActiveEnvironmentForUser(userId, clientId, agentId, chatSessionId);
 
       if (activeForUser) {
         await this.readStateRepository.upsertReadState({
@@ -219,8 +312,19 @@ export class AgentConsoleStatusService {
           clientId,
           agentId,
           lastReadAt: activityAt,
-          lastReadAgentMessageId: readState?.lastReadAgentMessageId ?? null,
+          lastReadAgentMessageId: null,
         });
+
+        if (chatSessionId) {
+          await this.chatReadStateRepository.upsertReadState({
+            userId,
+            clientId,
+            agentId,
+            chatSessionId,
+            lastReadAt: activityAt,
+            lastReadAgentMessageId: null,
+          });
+        }
       }
 
       await this.pushPatchForUser(userId, clientId, agentId);
@@ -233,18 +337,52 @@ export class AgentConsoleStatusService {
     return active?.clientId === clientId && active?.agentId === agentId;
   }
 
-  private findActiveEnvironmentForUser(userId: string, clientId: string, agentId: string): boolean {
+  private findActiveEnvironmentForUser(
+    userId: string,
+    clientId: string,
+    agentId: string,
+    chatSessionId: string | null,
+  ): boolean {
     for (const [socketId, active] of this.activeEnvironmentBySocketId.entries()) {
       if (!active || active.clientId !== clientId || active.agentId !== agentId) {
         continue;
       }
 
-      if (this.realtime.getUserIdForSocket(socketId) === userId) {
+      if (this.realtime.getUserIdForSocket(socketId) !== userId) {
+        continue;
+      }
+
+      // No chat attribution (legacy): suppress when environment is active.
+      if (!chatSessionId) {
         return true;
       }
+
+      // Only auto-clear when the client explicitly claims this chat as active.
+      // null active.chatSessionId must not imply primary — that hid primary unread while loading
+      // or after setActiveEnvironment(client, agent) without a chat id.
+      return active.chatSessionId === chatSessionId;
     }
 
     return false;
+  }
+
+  private async resolvePrimaryChatId(clientId: string, agentId: string): Promise<string | null> {
+    try {
+      const agents = await this.agentProxy.getClientAgents(clientId, 1000, 0);
+      const agent = agents.find((a) => a.id === agentId) as AgentResponseDto | undefined;
+
+      if (!agent) {
+        return null;
+      }
+
+      if (agent.primaryChatId) {
+        return agent.primaryChatId;
+      }
+
+      return agent.chats?.find((c) => c.kind === 'primary')?.id ?? agent.chats?.[0]?.id ?? null;
+    } catch {
+      return null;
+    }
   }
 
   private async pushPatchForUser(userId: string, clientId: string, agentId: string): Promise<void> {
@@ -263,18 +401,18 @@ export class AgentConsoleStatusService {
   }
 
   private async buildEnvironmentsForUser(userId: string, clientIds: string[]): Promise<EnvironmentStatusPayload[]> {
-    const readStates = await this.readStateRepository.findByUserAndClientIds(userId, clientIds);
-    const readByKey = new Map<string, (typeof readStates)[0]>();
+    const chatReadStates = await this.chatReadStateRepository.findByUserAndClientIds(userId, clientIds);
+    const chatReadByKey = new Map<string, (typeof chatReadStates)[0]>();
 
-    for (const row of readStates) {
-      readByKey.set(`${row.clientId}:${row.agentId}`, row);
+    for (const row of chatReadStates) {
+      chatReadByKey.set(`${row.clientId}:${row.agentId}:${row.chatSessionId}`, row);
     }
 
     const environments: EnvironmentStatusPayload[] = [];
     const vcsConcurrency = this.getVcsConcurrency();
 
     for (const clientId of clientIds) {
-      let agents: { id: string }[] = [];
+      let agents: AgentResponseDto[] = [];
 
       try {
         agents = await this.agentProxy.getClientAgents(clientId, 1000, 0);
@@ -290,14 +428,30 @@ export class AgentConsoleStatusService {
         const chunk = agents.slice(i, i + vcsConcurrency);
         const chunkResults = await Promise.all(
           chunk.map(async (agent) => {
-            const readState = readByKey.get(`${clientId}:${agent.id}`);
-            const latestAgentMsg = await this.messagesProxy.getLatestAgentMessage(clientId, agent.id);
+            const visibleChats = (agent.chats ?? []).filter((c) => c.kind === 'primary' || c.kind === 'user');
+            const primaryChatId = agent.primaryChatId ?? visibleChats.find((c) => c.kind === 'primary')?.id ?? null;
             const latestAutomationAt = automationByAgent.get(agent.id) ?? null;
-            const latestAgentAt = latestAgentMsg ? new Date(latestAgentMsg.createdAt) : null;
-            const latestActivityAt = this.maxDate(latestAgentAt, latestAutomationAt);
-            const lastReadAt = readState?.lastReadAt ?? null;
-            const hasUnreadMessages =
-              latestActivityAt !== null && (lastReadAt === null || latestActivityAt > lastReadAt);
+
+            const chatStatuses: ChatSessionStatusPayload[] = await Promise.all(
+              visibleChats.map(async (chat) => {
+                const latestAgentMsg = await this.messagesProxy.getLatestAgentMessage(clientId, agent.id, chat.id);
+                const latestAgentAt = latestAgentMsg ? new Date(latestAgentMsg.createdAt) : null;
+                const activityAt =
+                  chat.kind === 'primary' || chat.id === primaryChatId
+                    ? this.maxDate(latestAgentAt, latestAutomationAt)
+                    : latestAgentAt;
+                const readState = chatReadByKey.get(`${clientId}:${agent.id}:${chat.id}`);
+                const lastReadAt = readState?.lastReadAt ?? null;
+                const hasUnreadMessages = activityAt !== null && (lastReadAt === null || activityAt > lastReadAt);
+
+                return {
+                  chatSessionId: chat.id,
+                  hasUnreadMessages,
+                };
+              }),
+            );
+
+            const hasUnreadMessages = chatStatuses.some((c) => c.hasUnreadMessages);
             let gitDirty = false;
             let gitConflict = false;
 
@@ -317,6 +471,7 @@ export class AgentConsoleStatusService {
               hasUnreadMessages,
               gitDirty,
               gitConflict,
+              chats: chatStatuses,
             } satisfies EnvironmentStatusPayload;
           }),
         );
@@ -362,7 +517,8 @@ export class AgentConsoleStatusService {
         !prev ||
         prev.hasUnreadMessages !== env.hasUnreadMessages ||
         prev.gitDirty !== env.gitDirty ||
-        prev.gitConflict !== env.gitConflict
+        prev.gitConflict !== env.gitConflict ||
+        !chatsEqual(prev.chats, env.chats)
       ) {
         changedEnvs.push(env);
       }

@@ -243,6 +243,21 @@ describe('AgentMessagesRepository', () => {
       });
     });
 
+    it('filters by chatSessionId when provided', async () => {
+      const chatSessionId = 'primary-chat-id';
+      const agentMessage = { ...mockMessage, actor: 'agent', chatSessionId };
+
+      mockTypeOrmRepository.findOne.mockResolvedValue(agentMessage);
+
+      const result = await repository.findLatestAgentMessage('agent-uuid-123', chatSessionId);
+
+      expect(result).toEqual(agentMessage);
+      expect(mockTypeOrmRepository.findOne).toHaveBeenCalledWith({
+        where: { agentId: 'agent-uuid-123', actor: 'agent', chatSessionId },
+        order: { createdAt: 'DESC' },
+      });
+    });
+
     it('returns null when no agent messages exist', async () => {
       mockTypeOrmRepository.findOne.mockResolvedValue(null);
 

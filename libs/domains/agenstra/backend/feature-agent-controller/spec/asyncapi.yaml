@@ -269,17 +269,25 @@ channels:
   status/statusSnapshot:
     address: status/statusSnapshot
     description: |
-      Full per-user notification state on connect (git dirty + unread per environment, client rollups, spacesHasAttention).
+      Full per-user notification state on connect (git dirty + unread per environment, nested `chats[]`
+      for visible primary/user sessions, client rollups, spacesHasAttention).
       Unicast to the connecting socket only. Namespace **status** (STATUS_WEBSOCKET_NAMESPACE, default "status").
   status/statusPatch:
     address: status/statusPatch
-    description: Incremental notification deltas after connect (unicast).
+    description: Incremental notification deltas after connect (unicast), including nested `chats[]` when unread changes.
   status/markEnvironmentRead:
     address: status/markEnvironmentRead
-    description: Client marks an environment chat as read; persists user_environment_read_state.
+    description: |
+      Client marks the selected visible chat session as read (optional `chatSessionId`; defaults to primary).
+      Persists `user_chat_session_read_state` and updates env cursor helpers in `user_environment_read_state`.
+  status/markChatSessionRead:
+    address: status/markChatSessionRead
+    description: Client marks a specific visible chat session as read (`clientId`, `agentId`, `chatSessionId`).
   status/setActiveEnvironment:
     address: status/setActiveEnvironment
-    description: Client reports the environment currently in view (suppresses unread for active user).
+    description: |
+      Client reports the environment and optional `chatSessionId` currently in view
+      (suppresses unread auto-clear only when activity matches that chat).
   status/error:
     address: status/error
     messages:
@@ -454,6 +462,10 @@ operations:
     action: send
     channel:
       $ref: '#/channels/status~1markEnvironmentRead'
+  statusClientSendsMarkChatSessionRead:
+    action: send
+    channel:
+      $ref: '#/channels/status~1markChatSessionRead'
   statusClientSendsSetActiveEnvironment:
     action: send
     channel:

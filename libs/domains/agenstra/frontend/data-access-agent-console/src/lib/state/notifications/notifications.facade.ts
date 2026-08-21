@@ -6,10 +6,12 @@ import type { AttentionBadgeKind } from './notifications-attention.util';
 import {
   connectNotificationsSocket,
   disconnectNotificationsSocket,
+  markChatSessionRead,
   markEnvironmentRead,
   setActiveEnvironment,
 } from './notifications.actions';
 import {
+  selectChatSessionHasUnread,
   selectClientAttentionBadge,
   selectClientGitDirty,
   selectClientHasUnread,
@@ -17,6 +19,7 @@ import {
   selectEnvironmentGitDirty,
   selectEnvironmentHasUnread,
   selectEnvironmentStatus,
+  selectOtherChatSessionsHaveUnread,
   selectSpacesAttentionBadge,
   selectSpacesHasAttention,
 } from './notifications.selectors';
@@ -36,12 +39,16 @@ export class NotificationsFacade {
     this.store.dispatch(disconnectNotificationsSocket());
   }
 
-  markEnvironmentRead(clientId: string, agentId: string): void {
-    this.store.dispatch(markEnvironmentRead({ clientId, agentId }));
+  markEnvironmentRead(clientId: string, agentId: string, chatSessionId?: string): void {
+    this.store.dispatch(markEnvironmentRead({ clientId, agentId, chatSessionId }));
   }
 
-  setActiveEnvironment(clientId: string | null, agentId: string | null): void {
-    this.store.dispatch(setActiveEnvironment({ clientId, agentId }));
+  markChatSessionRead(clientId: string, agentId: string, chatSessionId: string): void {
+    this.store.dispatch(markChatSessionRead({ clientId, agentId, chatSessionId }));
+  }
+
+  setActiveEnvironment(clientId: string | null, agentId: string | null, chatSessionId?: string | null): void {
+    this.store.dispatch(setActiveEnvironment({ clientId, agentId, chatSessionId }));
   }
 
   getClientHasUnread$(clientId: string): Observable<boolean> {
@@ -62,6 +69,18 @@ export class NotificationsFacade {
 
   getEnvironmentStatus$(clientId: string, agentId: string) {
     return this.store.select(selectEnvironmentStatus(clientId, agentId));
+  }
+
+  getChatSessionHasUnread$(clientId: string, agentId: string, chatSessionId: string): Observable<boolean> {
+    return this.store.select(selectChatSessionHasUnread(clientId, agentId, chatSessionId));
+  }
+
+  getOtherChatSessionsHaveUnread$(
+    clientId: string,
+    agentId: string,
+    selectedChatSessionId: string | null,
+  ): Observable<boolean> {
+    return this.store.select(selectOtherChatSessionsHaveUnread(clientId, agentId, selectedChatSessionId));
   }
 
   getClientAttentionBadge$(clientId: string): Observable<AttentionBadgeKind | null> {

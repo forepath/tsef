@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 
 import { LatestAgentMessageDto } from '../dto/latest-agent-message.dto';
 import { AgentMessagesService } from '../services/agent-messages.service';
@@ -13,8 +13,9 @@ export class AgentsMessagesController {
   @Get(':id/messages/latest-agent')
   async getLatestAgentMessage(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Query('chatSessionId', new ParseUUIDPipe({ version: '4', optional: true })) chatSessionId?: string,
   ): Promise<LatestAgentMessageDto> {
-    const latest = await this.agentMessagesService.getLatestAgentMessage(id);
+    const latest = await this.agentMessagesService.getLatestAgentMessage(id, chatSessionId);
 
     if (!latest) {
       throw new NotFoundException('No agent messages found for this environment');

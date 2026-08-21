@@ -29,11 +29,11 @@ Unauthenticated connections are rejected with `connect_error` "Unauthorized". Th
 The agent console opens a dedicated Socket.IO connection to **`status`** (derived from `controller.websocketUrl` by replacing `/clients` with `/status`, or via `controller.statusWebsocketUrl`). Handshake auth matches other controller namespaces.
 
 - **No `setClient`**: the stream is scoped to the authenticated user only.
-- **On connect**: server emits **`statusSnapshot`** with all accessible workspaces/environments (git dirty + unread flags).
+- **On connect**: server emits **`statusSnapshot`** with all accessible workspaces/environments (git dirty + unread flags, including nested `chats[]` for visible primary/user sessions).
 - **While connected**: server emits **`statusPatch`** for deltas; background polling (`STATUS_POLL_INTERVAL_MS`, default 30s) refreshes git state and catches unread when no `clients` socket is active. Successful VCS mutations proxied through the controller (stage, commit, fetch, pull, push including force, branch operations, conflict resolve, prepare-clean workspace) also emit **`statusPatch`** immediately to every user with access to that workspace.
 - **Agent workspace changes**: agent-manager broadcasts **`gitStateChanged`** on the agents namespace after file writes, file-update notifications, workspace-affecting agent tool results, and local VCS/file mutations. The controller **`clients`** gateway listens for **`gitStateChanged`** and **`fileUpdateNotification`**, then pushes **`statusPatch`** on the **`status`** namespace to users with workspace access (same security model as VCS proxy hooks).
-- **Client → server**: `markEnvironmentRead` `{ clientId, agentId }`, `setActiveEnvironment` `{ clientId, agentId | null }`.
-- **Unread** includes agent chat replies and live ticket automation chat card updates; read cursors persist in `user_environment_read_state` on the controller database.
+- **Client → server**: `markEnvironmentRead` `{ clientId, agentId, chatSessionId? }`, `markChatSessionRead` `{ clientId, agentId, chatSessionId }`, `setActiveEnvironment` `{ clientId, agentId | null, chatSessionId? }`.
+- **Unread** is computed per visible chat session (latest agent message in that session; automation activity attributes to the primary session only). Environment `hasUnreadMessages` is the OR of those sessions. Per-session cursors live in `user_chat_session_read_state`; `user_environment_read_state` remains for env-level helpers.
 
 See `libs/domains/agenstra/backend/feature-agent-controller/spec/asyncapi.yaml` and `libs/domains/agenstra/frontend/data-access-agent-console/docs/notifications-state.mmd`.
 

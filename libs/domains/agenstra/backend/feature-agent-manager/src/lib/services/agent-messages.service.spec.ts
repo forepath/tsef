@@ -360,7 +360,27 @@ describe('AgentMessagesService', () => {
       const result = await service.getLatestAgentMessage('agent-uuid-123');
 
       expect(result).toEqual({ id: 'msg-1', createdAt });
-      expect(mockRepository.findLatestAgentMessage).toHaveBeenCalledWith('agent-uuid-123');
+      expect(mockRepository.findLatestAgentMessage).toHaveBeenCalledWith('agent-uuid-123', undefined);
+    });
+
+    it('forwards chatSessionId when scoped to a session', async () => {
+      const createdAt = new Date('2026-01-01T00:00:00.000Z');
+
+      mockRepository.findLatestAgentMessage.mockResolvedValue({
+        id: 'msg-2',
+        createdAt,
+        agentId: 'agent-uuid-123',
+        chatSessionId: primaryChatSessionId,
+        actor: 'agent',
+        message: 'hi',
+        filtered: false,
+        updatedAt: createdAt,
+      });
+
+      const result = await service.getLatestAgentMessage('agent-uuid-123', primaryChatSessionId);
+
+      expect(result).toEqual({ id: 'msg-2', createdAt });
+      expect(mockRepository.findLatestAgentMessage).toHaveBeenCalledWith('agent-uuid-123', primaryChatSessionId);
     });
 
     it('returns null when repository has no agent message', async () => {

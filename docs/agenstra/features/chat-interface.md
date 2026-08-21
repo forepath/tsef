@@ -30,6 +30,8 @@ See [Agent Client Protocol](../ai-agents/agent-client-protocol.md) for suffix ru
 
 Ticket automation **run cards** in the chat timeline are environment-scoped ACP work, but the console shows those embeddings on the **primary chat session only**. Side (`user`) sessions show that session’s messages without automation cards.
 
+Unread badges in the chat session dropdown follow the same rule: each visible session has its own unread flag (shown even when that session is selected); automation activity only marks the primary session unread. Selecting a session marks that session read. The dropdown toggle shows a badge when any visible session for the environment has unread.
+
 ### REST API
 
 Console and API clients manage sessions through the agent controller (proxied to the manager):
