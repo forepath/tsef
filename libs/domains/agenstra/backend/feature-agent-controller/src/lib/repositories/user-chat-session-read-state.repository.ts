@@ -4,6 +4,14 @@ import { In, Repository } from 'typeorm';
 
 import { UserChatSessionReadStateEntity } from '../entities/user-chat-session-read-state.entity';
 
+function laterDate(a: Date | null | undefined, b: Date): Date {
+  if (!a) {
+    return b;
+  }
+
+  return a.getTime() > b.getTime() ? a : b;
+}
+
 @Injectable()
 export class UserChatSessionReadStateRepository {
   constructor(
@@ -20,6 +28,11 @@ export class UserChatSessionReadStateRepository {
     return await this.repository.findOne({ where: { userId, clientId, agentId, chatSessionId } });
   }
 
+  /**
+   * Upsert read cursor. Never moves `lastReadAt` backwards.
+   * Omit `lastReadAgentMessageId` (undefined) to keep the existing message id;
+   * pass null only when intentionally clearing.
+   */
   async upsertReadState(params: {
     userId: string;
     clientId: string;
@@ -31,8 +44,11 @@ export class UserChatSessionReadStateRepository {
     const existing = await this.findOne(params.userId, params.clientId, params.agentId, params.chatSessionId);
 
     if (existing) {
-      existing.lastReadAt = params.lastReadAt;
-      existing.lastReadAgentMessageId = params.lastReadAgentMessageId ?? null;
+      existing.lastReadAt = laterDate(existing.lastReadAt, params.lastReadAt);
+
+      if (params.lastReadAgentMessageId !== undefined) {
+        existing.lastReadAgentMessageId = params.lastReadAgentMessageId;
+      }
 
       return await this.repository.save(existing);
     }

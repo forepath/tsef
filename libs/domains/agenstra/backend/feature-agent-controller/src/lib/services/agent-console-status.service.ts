@@ -152,12 +152,14 @@ export class AgentConsoleStatusService {
 
     const resolvedChatId = chatSessionId ?? (await this.resolvePrimaryChatId(clientId, agentId));
     const latest = await this.messagesProxy.getLatestAgentMessage(clientId, agentId, resolvedChatId ?? undefined);
+    const latestAt = latest?.createdAt ? new Date(latest.createdAt) : null;
+    const readAt = this.maxDate(new Date(), latestAt) ?? new Date();
 
     await this.readStateRepository.upsertReadState({
       userId,
       clientId,
       agentId,
-      lastReadAt: new Date(),
+      lastReadAt: readAt,
       lastReadAgentMessageId: latest?.id ?? null,
     });
 
@@ -167,7 +169,7 @@ export class AgentConsoleStatusService {
         clientId,
         agentId,
         chatSessionId: resolvedChatId,
-        lastReadAt: new Date(),
+        lastReadAt: readAt,
         lastReadAgentMessageId: latest?.id ?? null,
       });
     }
@@ -190,13 +192,15 @@ export class AgentConsoleStatusService {
     await this.assertEnvironmentAccess(userInfo, clientId, agentId);
 
     const latest = await this.messagesProxy.getLatestAgentMessage(clientId, agentId, chatSessionId);
+    const latestAt = latest?.createdAt ? new Date(latest.createdAt) : null;
+    const readAt = this.maxDate(new Date(), latestAt) ?? new Date();
 
     await this.chatReadStateRepository.upsertReadState({
       userId,
       clientId,
       agentId,
       chatSessionId,
-      lastReadAt: new Date(),
+      lastReadAt: readAt,
       lastReadAgentMessageId: latest?.id ?? null,
     });
 
@@ -204,7 +208,7 @@ export class AgentConsoleStatusService {
       userId,
       clientId,
       agentId,
-      lastReadAt: new Date(),
+      lastReadAt: readAt,
       lastReadAgentMessageId: latest?.id ?? null,
     });
 
@@ -302,6 +306,11 @@ export class AgentConsoleStatusService {
     activityAt: Date,
   ): Promise<void> {
     const userIds = await this.resolveUserIdsToNotify(clientId);
+    const latest = chatSessionId
+      ? await this.messagesProxy.getLatestAgentMessage(clientId, agentId, chatSessionId)
+      : await this.messagesProxy.getLatestAgentMessage(clientId, agentId);
+    const latestAt = latest?.createdAt ? new Date(latest.createdAt) : null;
+    const readAt = this.maxDate(activityAt, latestAt) ?? activityAt;
 
     for (const userId of userIds) {
       const activeForUser = this.findActiveEnvironmentForUser(userId, clientId, agentId, chatSessionId);
@@ -311,8 +320,9 @@ export class AgentConsoleStatusService {
           userId,
           clientId,
           agentId,
-          lastReadAt: activityAt,
-          lastReadAgentMessageId: null,
+          lastReadAt: readAt,
+          // Keep prior message id when latest is unknown — never wipe a successful mark-read.
+          ...(latest?.id ? { lastReadAgentMessageId: latest.id } : {}),
         });
 
         if (chatSessionId) {
@@ -321,8 +331,8 @@ export class AgentConsoleStatusService {
             clientId,
             agentId,
             chatSessionId,
-            lastReadAt: activityAt,
-            lastReadAgentMessageId: null,
+            lastReadAt: readAt,
+            ...(latest?.id ? { lastReadAgentMessageId: latest.id } : {}),
           });
         }
       }
@@ -401,16 +411,21 @@ export class AgentConsoleStatusService {
   }
 
   private async buildEnvironmentsForUser(userId: string, clientIds: string[]): Promise<EnvironmentStatusPayload[]> {
-    const chatReadStates = await this.chatReadStateRepository.findByUserAndClientIds(userId, clientIds);
-    const chatReadByKey = new Map<string, (typeof chatReadStates)[0]>();
+    type PendingEnv = {
+      clientId: string;
+      agentId: string;
+      gitDirty: boolean;
+      gitConflict: boolean;
+      visibleChats: Array<{ id: string; kind: string }>;
+      primaryChatId: string | null;
+      latestAutomationAt: Date | null;
+    };
 
-    for (const row of chatReadStates) {
-      chatReadByKey.set(`${row.clientId}:${row.agentId}:${row.chatSessionId}`, row);
-    }
-
-    const environments: EnvironmentStatusPayload[] = [];
+    const pending: PendingEnv[] = [];
     const vcsConcurrency = this.getVcsConcurrency();
 
+    // Phase 1: resolve agents + slow VCS. Unread is computed afterward so a mark-read
+    // that lands during VCS cannot be overwritten by a stale pre-mark read snapshot.
     for (const clientId of clientIds) {
       let agents: AgentResponseDto[] = [];
 
@@ -428,30 +443,11 @@ export class AgentConsoleStatusService {
         const chunk = agents.slice(i, i + vcsConcurrency);
         const chunkResults = await Promise.all(
           chunk.map(async (agent) => {
-            const visibleChats = (agent.chats ?? []).filter((c) => c.kind === 'primary' || c.kind === 'user');
+            const visibleChats = (agent.chats ?? [])
+              .filter((c) => c.kind === 'primary' || c.kind === 'user')
+              .map((c) => ({ id: c.id, kind: c.kind }));
             const primaryChatId = agent.primaryChatId ?? visibleChats.find((c) => c.kind === 'primary')?.id ?? null;
             const latestAutomationAt = automationByAgent.get(agent.id) ?? null;
-
-            const chatStatuses: ChatSessionStatusPayload[] = await Promise.all(
-              visibleChats.map(async (chat) => {
-                const latestAgentMsg = await this.messagesProxy.getLatestAgentMessage(clientId, agent.id, chat.id);
-                const latestAgentAt = latestAgentMsg ? new Date(latestAgentMsg.createdAt) : null;
-                const activityAt =
-                  chat.kind === 'primary' || chat.id === primaryChatId
-                    ? this.maxDate(latestAgentAt, latestAutomationAt)
-                    : latestAgentAt;
-                const readState = chatReadByKey.get(`${clientId}:${agent.id}:${chat.id}`);
-                const lastReadAt = readState?.lastReadAt ?? null;
-                const hasUnreadMessages = activityAt !== null && (lastReadAt === null || activityAt > lastReadAt);
-
-                return {
-                  chatSessionId: chat.id,
-                  hasUnreadMessages,
-                };
-              }),
-            );
-
-            const hasUnreadMessages = chatStatuses.some((c) => c.hasUnreadMessages);
             let gitDirty = false;
             let gitConflict = false;
 
@@ -468,19 +464,72 @@ export class AgentConsoleStatusService {
             return {
               clientId,
               agentId: agent.id,
-              hasUnreadMessages,
               gitDirty,
               gitConflict,
-              chats: chatStatuses,
-            } satisfies EnvironmentStatusPayload;
+              visibleChats,
+              primaryChatId,
+              latestAutomationAt,
+            } satisfies PendingEnv;
           }),
         );
 
-        environments.push(...chunkResults);
+        pending.push(...chunkResults);
       }
     }
 
-    return environments;
+    // Phase 2: fresh read cursors + latest messages (after any concurrent mark-read).
+    const chatReadStates = await this.chatReadStateRepository.findByUserAndClientIds(userId, clientIds);
+    const chatReadByKey = new Map<string, (typeof chatReadStates)[0]>();
+
+    for (const row of chatReadStates) {
+      chatReadByKey.set(`${row.clientId}:${row.agentId}:${row.chatSessionId}`, row);
+    }
+
+    return await Promise.all(
+      pending.map(async (item) => {
+        const chatStatuses: ChatSessionStatusPayload[] = await Promise.all(
+          item.visibleChats.map(async (chat) => {
+            const latestAgentMsg = await this.messagesProxy.getLatestAgentMessage(item.clientId, item.agentId, chat.id);
+            const latestAgentAt = latestAgentMsg ? new Date(latestAgentMsg.createdAt) : null;
+            const isPrimary = chat.kind === 'primary' || chat.id === item.primaryChatId;
+            const readState = chatReadByKey.get(`${item.clientId}:${item.agentId}:${chat.id}`);
+            const lastReadAt = readState?.lastReadAt ?? null;
+            const lastReadMessageId = readState?.lastReadAgentMessageId ?? null;
+
+            // Prefer message-id equality so clock skew / auto-clear races cannot revive unread.
+            let messageUnread = false;
+
+            if (latestAgentMsg) {
+              if (lastReadMessageId && lastReadMessageId === latestAgentMsg.id) {
+                messageUnread = false;
+              } else {
+                messageUnread = lastReadAt === null || (latestAgentAt !== null && latestAgentAt > lastReadAt);
+              }
+            }
+
+            const automationUnread =
+              isPrimary &&
+              item.latestAutomationAt !== null &&
+              (lastReadAt === null || item.latestAutomationAt > lastReadAt);
+            const hasUnreadMessages = messageUnread || Boolean(automationUnread);
+
+            return {
+              chatSessionId: chat.id,
+              hasUnreadMessages,
+            };
+          }),
+        );
+
+        return {
+          clientId: item.clientId,
+          agentId: item.agentId,
+          hasUnreadMessages: chatStatuses.some((c) => c.hasUnreadMessages),
+          gitDirty: item.gitDirty,
+          gitConflict: item.gitConflict,
+          chats: chatStatuses,
+        } satisfies EnvironmentStatusPayload;
+      }),
+    );
   }
 
   private async buildEnvironmentStatus(

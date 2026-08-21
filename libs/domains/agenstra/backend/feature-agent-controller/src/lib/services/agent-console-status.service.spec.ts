@@ -212,6 +212,62 @@ describe('AgentConsoleStatusService', () => {
     expect(realtime.emitToUser).toHaveBeenCalledWith('user-1', 'statusPatch', expect.any(Object));
   });
 
+  it('computes unread after VCS so a mark-read during build is visible', async () => {
+    const messageCreatedAt = new Date('2026-01-02T00:00:00.000Z');
+    messagesProxy.getLatestAgentMessage.mockResolvedValue({
+      id: 'msg-1',
+      createdAt: messageCreatedAt.toISOString(),
+    });
+
+    let vcsResolve: ((value: unknown) => void) | undefined;
+    const vcsGate = new Promise((resolve) => {
+      vcsResolve = resolve;
+    });
+
+    vcsProxy.getStatus.mockImplementation(async () => {
+      await vcsGate;
+
+      return {
+        isClean: true,
+        hasUnpushedCommits: false,
+        files: [],
+      };
+    });
+
+    const snapshotPromise = service.buildSnapshotForUser({
+      isApiKeyAuth: false,
+      userId: 'user-1',
+      userRole: UserRole.USER,
+      user: { id: 'user-1', roles: [] },
+    });
+
+    // Let phase-1 reach the gated VCS call.
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // Mark-read lands while VCS is still in flight; phase-2 must observe it.
+    chatReadStateRepository.findByUserAndClientIds.mockResolvedValue([
+      {
+        userId: 'user-1',
+        clientId: 'client-1',
+        agentId: 'agent-1',
+        chatSessionId: USER_CHAT_ID,
+        lastReadAt: new Date('2026-01-03T00:00:00.000Z'),
+      },
+    ]);
+
+    vcsResolve?.({
+      isClean: true,
+      hasUnpushedCommits: false,
+      files: [],
+    });
+
+    const snapshot = await snapshotPromise;
+    const chats = snapshot.environments[0].chats ?? [];
+
+    expect(chats.find((c) => c.chatSessionId === USER_CHAT_ID)?.hasUnreadMessages).toBe(false);
+  });
+
   it('notifyVcsStateChanged emits status patches to users with client access', async () => {
     vcsProxy.getStatus.mockResolvedValue({
       isClean: true,

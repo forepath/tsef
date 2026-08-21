@@ -176,7 +176,7 @@ describe('notificationsReducer', () => {
     expect(stale.environmentsByKey['c1:a1']?.hasUnreadMessages).toBe(false);
   });
 
-  it('accepts unread=true after server confirms read (suppress cleared)', () => {
+  it('keeps suppress after server confirms read so late unread=true stays blocked', () => {
     const withUnread = notificationsReducer(
       initialNotificationsState,
       statusSnapshotReceived({
@@ -220,9 +220,9 @@ describe('notificationsReducer', () => {
       }),
     );
 
-    expect(confirmed.optimisticChatReadAtByKey['c1:a1:chat-1']).toBeUndefined();
+    expect(confirmed.optimisticChatReadAtByKey['c1:a1:chat-1']).toBeDefined();
 
-    const fresh = notificationsReducer(
+    const lateStale = notificationsReducer(
       confirmed,
       statusPatchReceived({
         patch: {
@@ -241,7 +241,9 @@ describe('notificationsReducer', () => {
       }),
     );
 
-    expect(fresh.environmentsByKey['c1:a1']?.chats).toEqual([{ chatSessionId: 'chat-1', hasUnreadMessages: true }]);
+    expect(lateStale.environmentsByKey['c1:a1']?.chats).toEqual([
+      { chatSessionId: 'chat-1', hasUnreadMessages: false },
+    ]);
   });
 
   it('merges status patch for environment', () => {

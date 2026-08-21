@@ -80,6 +80,27 @@ describe('UserEnvironmentReadStateRepository', () => {
       expect(mockTypeOrmRepository.create).not.toHaveBeenCalled();
     });
 
+    it('does not move lastReadAt backwards or clear message id when omitted', async () => {
+      const existing = {
+        ...mockRow,
+        lastReadAt: new Date('2026-02-01T00:00:00.000Z'),
+        lastReadAgentMessageId: 'msg-keep',
+      };
+
+      mockTypeOrmRepository.findOne.mockResolvedValue(existing);
+      mockTypeOrmRepository.save.mockImplementation(async (row) => row);
+
+      const result = await repository.upsertReadState({
+        userId: 'user-1',
+        clientId: 'client-1',
+        agentId: 'agent-1',
+        lastReadAt: new Date('2026-01-01T00:00:00.000Z'),
+      });
+
+      expect(result.lastReadAt).toEqual(new Date('2026-02-01T00:00:00.000Z'));
+      expect(result.lastReadAgentMessageId).toBe('msg-keep');
+    });
+
     it('creates row when missing', async () => {
       mockTypeOrmRepository.findOne.mockResolvedValue(null);
       mockTypeOrmRepository.create.mockReturnValue(mockRow);

@@ -155,11 +155,8 @@ export function mergeEnvironmentWithOptimisticReads(
     const suppressActive = nextOptimistic[key] != null;
 
     if (!chat.hasUnreadMessages) {
-      // Server confirmed read — drop suppress so a later real unread can surface.
-      if (suppressActive) {
-        delete nextOptimistic[key];
-      }
-
+      // Keep suppress until TTL so a slower in-flight unread=true patch (e.g. VCS build)
+      // cannot clear suppress and then resurrect the badge.
       return { ...chat, hasUnreadMessages: false };
     }
 
