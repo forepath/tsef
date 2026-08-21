@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.26.0](https://github.com/forepath/one/compare/v2.25.1...v2.26.0) (2026-08-21)
+
+
+### Features
+
+* **agenstra:** drag to upload files ([#574](https://github.com/forepath/one/issues/574)) ([582268c](https://github.com/forepath/one/commit/582268cdafbe76842cc5d3ee3f45eea147c2fe9c))
+* **agenstra:** environment multichat support ([#576](https://github.com/forepath/one/issues/576)) ([5e15822](https://github.com/forepath/one/commit/5e15822ee7558658c9935fdd963973196e306a3f))
+
+
+### Bug Fixes
+
+* **agenstra:** workspace filtering ([#573](https://github.com/forepath/one/issues/573)) ([7ec5266](https://github.com/forepath/one/commit/7ec52668d26a857542f9ca4db2186cd8b7876fd5))
+
 ## [2.25.1](https://github.com/forepath/one/compare/v2.25.0...v2.25.1) (2026-08-18)
 
 
