@@ -28,6 +28,8 @@ Background and helper flows use reserved ACP `resumeSessionSuffix` values. Those
 
 See [Agent Client Protocol](../ai-agents/agent-client-protocol.md) for suffix rules.
 
+Ticket automation **run cards** in the chat timeline are environment-scoped ACP work, but the console shows those embeddings on the **primary chat session only**. Side (`user`) sessions show that session’s messages without automation cards.
+
 ### REST API
 
 Console and API clients manage sessions through the agent controller (proxied to the manager):

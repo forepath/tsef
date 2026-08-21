@@ -2,6 +2,28 @@ import { CLIENT_CHAT_AUTOMATION_SOCKET_EVENT } from './client-chat-automation.co
 import { selectChatTimelineOrdered } from './sockets.selectors';
 import type { ForwardedEventPayload } from './sockets.types';
 
+const primarySession = {
+  id: 'chat-primary',
+  agentId: 'a1',
+  title: 'Chat',
+  kind: 'primary' as const,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+const userSession = {
+  id: 'chat-user',
+  agentId: 'a1',
+  title: 'Side',
+  kind: 'user' as const,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+const sessionsMap = {
+  'c1:a1': [primarySession, userSession],
+};
+
 describe('selectChatTimelineOrdered', () => {
   it('orders chat and automation by semantic timestamp and dedupes automation by run id', () => {
     const chatPayload: ForwardedEventPayload = {
@@ -49,9 +71,13 @@ describe('selectChatTimelineOrdered', () => {
       ],
       selectedAgentId: 'a1',
     } as never;
-    const out = selectChatTimelineOrdered.projector(state.forwardedEvents as never, state.selectedAgentId, 'c1', {
-      'c1:a1': null,
-    });
+    const out = selectChatTimelineOrdered.projector(
+      state.forwardedEvents as never,
+      state.selectedAgentId,
+      'c1',
+      { 'c1:a1': null },
+      sessionsMap,
+    );
 
     expect(out.map((r) => r.event)).toEqual([CLIENT_CHAT_AUTOMATION_SOCKET_EVENT, 'chatMessage']);
     expect((out[0]?.payload as typeof autoPayload2).run.status).toBe('succeeded');
@@ -92,9 +118,53 @@ describe('selectChatTimelineOrdered', () => {
       'a1',
       'c1',
       {},
+      sessionsMap,
     );
 
     expect(out).toHaveLength(0);
+  });
+
+  it('shows automation cards on the primary chat session only', () => {
+    const autoPayload = {
+      timelineAt: new Date(500).toISOString(),
+      hydrate: false,
+      ticket: {
+        id: 't1',
+        clientId: 'c1',
+        title: 'T',
+        priority: 'medium',
+        status: 'todo',
+        automationEligible: true,
+        preferredChatAgentId: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      run: {
+        id: 'r1',
+        ticketId: 't1',
+        clientId: 'c1',
+        agentId: 'a1',
+        status: 'running',
+        phase: 'iterate',
+        startedAt: new Date(500).toISOString(),
+        updatedAt: new Date(500).toISOString(),
+        finishedAt: null,
+      },
+      actions: [],
+    };
+    const events = [{ event: CLIENT_CHAT_AUTOMATION_SOCKET_EVENT, payload: autoPayload, timestamp: 1 }] as never;
+
+    const onPrimary = selectChatTimelineOrdered.projector(
+      events,
+      'a1',
+      'c1',
+      { 'c1:a1': primarySession.id },
+      sessionsMap,
+    );
+    const onUser = selectChatTimelineOrdered.projector(events, 'a1', 'c1', { 'c1:a1': userSession.id }, sessionsMap);
+
+    expect(onPrimary).toHaveLength(1);
+    expect(onUser).toHaveLength(0);
   });
 
   it('filters chat messages by selected chatId when present', () => {
@@ -116,6 +186,7 @@ describe('selectChatTimelineOrdered', () => {
       'a1',
       'c1',
       { 'c1:a1': 'chat-a' },
+      sessionsMap,
     );
 
     expect(out).toHaveLength(1);
@@ -133,6 +204,7 @@ describe('selectChatTimelineOrdered', () => {
       'a1',
       'c1',
       { 'c1:a1': 'chat-a' },
+      sessionsMap,
     );
 
     expect(out).toHaveLength(0);

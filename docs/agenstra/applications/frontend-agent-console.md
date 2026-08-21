@@ -205,7 +205,7 @@ On reconnection:
 2. Restores client context (`setClient`)
 3. Restores agent login (if previously logged in)
 4. Clears stale local buffers where required to avoid duplicates
-5. Receives chat history for the active session (`chatId` / primary) and ticket automation cards from the backend as implemented in NgRx effects; session switches use `restoreChat`
+5. Receives chat history for the active session (`chatId` / primary) and ticket automation cards on the **primary** session only (as implemented in NgRx selectors/effects); session switches use `restoreChat`
 
 ## Authentication
 
