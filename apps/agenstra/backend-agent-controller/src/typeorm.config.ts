@@ -28,6 +28,7 @@ import {
   TicketBodyGenerationSessionEntity,
   TicketCommentEntity,
   TicketEntity,
+  UserChatSessionReadStateEntity,
   UserEnvironmentReadStateEntity,
 } from '@forepath/agenstra/backend/feature-agent-controller';
 import { WebhookDeliveryEntity, WebhookEndpointEntity, EmailDeliveryEntity } from '@forepath/shared/backend';
@@ -106,6 +107,7 @@ export const typeormConfig: DataSourceOptions = {
     AgentConsoleRegexFilterRuleEntity,
     AgentConsoleRegexFilterRuleClientEntity,
     AgentConsoleRegexFilterRuleSyncTargetEntity,
+    UserChatSessionReadStateEntity,
     UserEnvironmentReadStateEntity,
     WebhookEndpointEntity,
     WebhookDeliveryEntity,

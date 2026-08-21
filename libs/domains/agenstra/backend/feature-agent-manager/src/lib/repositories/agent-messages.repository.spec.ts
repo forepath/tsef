@@ -25,6 +25,16 @@ describe('AgentMessagesRepository', () => {
     id: 'message-uuid-123',
     agentId: 'agent-uuid-123',
     agent: mockAgent,
+    chatSessionId: 'primary-chat-id',
+    chatSession: {
+      id: 'primary-chat-id',
+      agentId: 'agent-uuid-123',
+      title: 'Chat',
+      kind: 'primary',
+      resumeSessionSuffix: '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as AgentMessageEntity['chatSession'],
     actor: 'user',
     message: 'Test message content',
     filtered: false,
@@ -229,6 +239,21 @@ describe('AgentMessagesRepository', () => {
       expect(result).toEqual(agentMessage);
       expect(mockTypeOrmRepository.findOne).toHaveBeenCalledWith({
         where: { agentId: 'agent-uuid-123', actor: 'agent' },
+        order: { createdAt: 'DESC' },
+      });
+    });
+
+    it('filters by chatSessionId when provided', async () => {
+      const chatSessionId = 'primary-chat-id';
+      const agentMessage = { ...mockMessage, actor: 'agent', chatSessionId };
+
+      mockTypeOrmRepository.findOne.mockResolvedValue(agentMessage);
+
+      const result = await repository.findLatestAgentMessage('agent-uuid-123', chatSessionId);
+
+      expect(result).toEqual(agentMessage);
+      expect(mockTypeOrmRepository.findOne).toHaveBeenCalledWith({
+        where: { agentId: 'agent-uuid-123', actor: 'agent', chatSessionId },
         order: { createdAt: 'DESC' },
       });
     });

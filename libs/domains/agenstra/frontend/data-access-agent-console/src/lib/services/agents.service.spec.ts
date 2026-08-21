@@ -23,6 +23,8 @@ describe('AgentsService', () => {
     description: 'Test Description',
     agentType: 'cursor',
     containerType: 'generic' as ContainerType,
+    chats: [],
+    primaryChatId: 'primary-chat-1',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };

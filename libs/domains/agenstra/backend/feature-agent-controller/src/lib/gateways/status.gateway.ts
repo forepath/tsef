@@ -12,7 +12,11 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-import { MarkEnvironmentReadPayload, SetActiveEnvironmentPayload } from '../dto/agent-console-status.dto';
+import {
+  MarkChatSessionReadPayload,
+  MarkEnvironmentReadPayload,
+  SetActiveEnvironmentPayload,
+} from '../dto/agent-console-status.dto';
 import { AgentConsoleStatusRealtimeService } from '../services/agent-console-status-realtime.service';
 import { AgentConsoleStatusService } from '../services/agent-console-status.service';
 
@@ -120,9 +124,41 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
 
     try {
-      await this.statusService.markEnvironmentRead(userInfo, clientId, agentId);
+      await this.statusService.markEnvironmentRead(userInfo, clientId, agentId, body?.chatSessionId);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unable to mark environment read';
+
+      socket.emit('error', { message });
+    }
+  }
+
+  @SubscribeMessage('markChatSessionRead')
+  async handleMarkChatSessionRead(
+    @MessageBody() body: MarkChatSessionReadPayload,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void> {
+    const userInfo = (socket as StatusSocket).data?.userInfo;
+
+    if (!userInfo) {
+      socket.emit('error', { message: 'Unauthorized' });
+
+      return;
+    }
+
+    const clientId = body?.clientId;
+    const agentId = body?.agentId;
+    const chatSessionId = body?.chatSessionId;
+
+    if (!clientId || !agentId || !chatSessionId) {
+      socket.emit('error', { message: 'clientId, agentId, and chatSessionId are required' });
+
+      return;
+    }
+
+    try {
+      await this.statusService.markChatSessionRead(userInfo, clientId, agentId, chatSessionId);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unable to mark chat session read';
 
       socket.emit('error', { message });
     }
@@ -141,7 +177,12 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return;
     }
 
-    this.statusService.setActiveEnvironment(socket.id, body?.clientId ?? null, body?.agentId ?? null);
+    this.statusService.setActiveEnvironment(
+      socket.id,
+      body?.clientId ?? null,
+      body?.agentId ?? null,
+      body?.chatSessionId,
+    );
   }
 
   private startPoll(socket: StatusSocket): void {

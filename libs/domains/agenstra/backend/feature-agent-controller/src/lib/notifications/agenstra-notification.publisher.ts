@@ -2,7 +2,10 @@ import { ClientEntity, IIdentityNotificationPublisher } from '@forepath/identity
 import { INSTANCE_SCOPE_KEY, NotificationDispatcherService } from '@forepath/shared/backend';
 import { Injectable } from '@nestjs/common';
 
-import type { EnvironmentVariableResponseDto } from '@forepath/agenstra/backend/feature-agent-manager';
+import type {
+  ChatSessionResponseDto,
+  EnvironmentVariableResponseDto,
+} from '@forepath/agenstra/backend/feature-agent-manager';
 
 import type { FilterRuleResponseDto } from '../dto/filter-rules/filter-rule-response.dto';
 import type { ClientResponseDto } from '../dto/client-response.dto';
@@ -24,6 +27,7 @@ export type ChatMessageNotificationPayload = {
   message: string;
   userId?: string | null;
   interactionKind?: string | null;
+  chatId?: string | null;
 };
 
 export type FilterRuleTriggeredNotificationPayload = {
@@ -45,6 +49,16 @@ export type EnvironmentNotificationPayload = {
   variable?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+};
+
+export type ChatSessionNotificationPayload = {
+  id: string;
+  agentId: string;
+  title?: string | null;
+  kind?: string | null;
+  lastMessageAt?: string | Date | null;
+  createdAt?: string | Date | null;
+  updatedAt?: string | Date | null;
 };
 
 export type TicketCommentNotificationPayload = {
@@ -134,6 +148,14 @@ export class AgenstraNotificationPublisher implements IIdentityNotificationPubli
     this.publish(type, this.toEnvironmentPayload(environment), clientId);
   }
 
+  publishChatSession(
+    type: 'chat_session.created' | 'chat_session.updated' | 'chat_session.deleted',
+    clientId: string,
+    chatSession: ChatSessionResponseDto | ChatSessionNotificationPayload,
+  ): void {
+    this.publish(type, this.toChatSessionPayload(chatSession), clientId);
+  }
+
   publishUserCreated(data: Record<string, unknown>): void {
     this.publish('user.created', data);
   }
@@ -220,6 +242,20 @@ export class AgenstraNotificationPublisher implements IIdentityNotificationPubli
       variable: 'variable' in environment ? (environment.variable ?? null) : null,
       createdAt: this.toIsoString(environment.createdAt),
       updatedAt: this.toIsoString(environment.updatedAt),
+    };
+  }
+
+  private toChatSessionPayload(
+    chatSession: ChatSessionResponseDto | ChatSessionNotificationPayload,
+  ): Record<string, unknown> {
+    return {
+      id: chatSession.id,
+      agentId: chatSession.agentId,
+      title: 'title' in chatSession ? (chatSession.title ?? null) : null,
+      kind: 'kind' in chatSession ? (chatSession.kind ?? null) : null,
+      lastMessageAt: this.toIsoString('lastMessageAt' in chatSession ? chatSession.lastMessageAt : null),
+      createdAt: this.toIsoString(chatSession.createdAt),
+      updatedAt: this.toIsoString(chatSession.updatedAt),
     };
   }
 

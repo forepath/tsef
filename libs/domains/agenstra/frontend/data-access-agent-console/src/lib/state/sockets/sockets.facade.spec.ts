@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import {
   chatEnhancementStarted,
   ticketBodyGenerationStarted,
+  clearChatHistory,
   connectSocket,
   disconnectSocket,
   forwardEvent,
@@ -464,6 +465,43 @@ describe('SocketsFacade', () => {
         payload: undefined,
         agentId,
       });
+    });
+
+    it('should forward login event with optional chatId', () => {
+      const agentId = 'agent-1';
+      const chatId = 'chat-1';
+
+      facade.forwardLogin(agentId, chatId);
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        forwardEvent({
+          event: ForwardableEvent.LOGIN,
+          payload: { agentId, password: '', chatId },
+          agentId,
+        }),
+      );
+    });
+
+    it('should forward restoreChat event', () => {
+      const agentId = 'agent-1';
+      const chatId = 'chat-1';
+
+      facade.forwardRestoreChat(chatId, agentId);
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        forwardEvent({ event: ForwardableEvent.RESTORE_CHAT, payload: { chatId }, agentId }),
+      );
+      expect(mockSocket.emit).toHaveBeenCalledWith('forward', {
+        event: ForwardableEvent.RESTORE_CHAT,
+        payload: { chatId },
+        agentId,
+      });
+    });
+
+    it('should dispatch clearChatHistory', () => {
+      facade.clearChatHistory();
+
+      expect(store.dispatch).toHaveBeenCalledWith(clearChatHistory());
     });
 
     it('should forward logout event', () => {

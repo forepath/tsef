@@ -17,6 +17,7 @@ import { AgentProviderModels } from '../providers/agent-provider.interface';
 import { AgentsRepository } from '../repositories/agents.repository';
 import { expandProviderPathTildeInContainer } from '../utils/provider-container-path.utils';
 
+import { AgentChatSessionsService } from './agent-chat-sessions.service';
 import { DeploymentsService } from './deployments.service';
 import { DockerService } from './docker.service';
 
@@ -38,6 +39,7 @@ export class AgentsService implements OnApplicationBootstrap {
     private readonly dockerService: DockerService,
     private readonly passwordService: PasswordService,
     private readonly agentProviderFactory: AgentProviderFactory,
+    private readonly agentChatSessionsService: AgentChatSessionsService,
     @Inject(forwardRef(() => DeploymentsService))
     private readonly deploymentsService?: DeploymentsService,
   ) {}
@@ -580,6 +582,8 @@ export class AgentsService implements OnApplicationBootstrap {
               : createAgentDto.gitRepositorySetupMode,
         });
 
+        await this.agentChatSessionsService.ensurePrimarySession(agent.id);
+
         // Create deployment configuration if provided
         if (createAgentDto.deploymentConfiguration && this.deploymentsService) {
           try {
@@ -600,7 +604,7 @@ export class AgentsService implements OnApplicationBootstrap {
         }
 
         return {
-          ...this.mapToResponseDto(agent),
+          ...(await this.mapToResponseDto(agent)),
           password: generatedPassword,
         };
       } catch (error) {
@@ -655,8 +659,9 @@ export class AgentsService implements OnApplicationBootstrap {
    */
   async findAll(limit = 10, offset = 0): Promise<AgentResponseDto[]> {
     const agents = await this.agentsRepository.findAll(limit, offset);
+    const chatsByAgent = await this.agentChatSessionsService.getSummariesByAgentIds(agents.map((agent) => agent.id));
 
-    return agents.map((agent) => this.mapToResponseDto(agent));
+    return Promise.all(agents.map((agent) => this.mapToResponseDto(agent, chatsByAgent.get(agent.id))));
   }
 
   /**
@@ -668,7 +673,7 @@ export class AgentsService implements OnApplicationBootstrap {
   async findOne(id: string): Promise<AgentResponseDto> {
     const agent = await this.agentsRepository.findByIdOrThrow(id);
 
-    return this.mapToResponseDto(agent);
+    return await this.mapToResponseDto(agent);
   }
 
   /**
@@ -722,7 +727,7 @@ export class AgentsService implements OnApplicationBootstrap {
       }
     }
 
-    return this.mapToResponseDto(agent);
+    return await this.mapToResponseDto(agent);
   }
 
   /**
@@ -815,7 +820,7 @@ export class AgentsService implements OnApplicationBootstrap {
       }
     }
 
-    return this.mapToResponseDto(agent);
+    return await this.mapToResponseDto(agent);
   }
 
   /**
@@ -865,7 +870,7 @@ export class AgentsService implements OnApplicationBootstrap {
       }
     }
 
-    return this.mapToResponseDto(agent);
+    return await this.mapToResponseDto(agent);
   }
 
   /**
@@ -915,7 +920,7 @@ export class AgentsService implements OnApplicationBootstrap {
       }
     }
 
-    return this.mapToResponseDto(agent);
+    return await this.mapToResponseDto(agent);
   }
 
   /**
@@ -958,7 +963,10 @@ export class AgentsService implements OnApplicationBootstrap {
    * @param agent - The agent entity to map
    * @returns The agent response DTO
    */
-  private mapToResponseDto(agent: AgentEntity): AgentResponseDto {
+  private async mapToResponseDto(
+    agent: AgentEntity,
+    preloadedSessions?: import('../entities/agent-chat-session.entity').AgentChatSessionEntity[],
+  ): Promise<AgentResponseDto> {
     let capabilities: AgentResponseDto['capabilities'];
 
     try {
@@ -974,6 +982,22 @@ export class AgentsService implements OnApplicationBootstrap {
       };
     } catch {
       capabilities = undefined;
+    }
+
+    let sessions = preloadedSessions;
+
+    if (!sessions?.some((session) => session.kind === 'primary')) {
+      await this.agentChatSessionsService.ensurePrimarySession(agent.id);
+      const byAgent = await this.agentChatSessionsService.getSummariesByAgentIds([agent.id]);
+
+      sessions = byAgent.get(agent.id) ?? [];
+    }
+
+    const primary = sessions.find((session) => session.kind === 'primary') ?? sessions[0];
+    const chats = sessions.map((session) => this.agentChatSessionsService.mapToSummaryDto(session));
+
+    if (!primary?.id) {
+      throw new Error(`Primary chat session missing for agent ${agent.id}`);
     }
 
     return {
@@ -996,6 +1020,8 @@ export class AgentsService implements OnApplicationBootstrap {
           }
         : undefined,
       git: this.mapAgentGit(agent),
+      chats,
+      primaryChatId: primary.id,
       createdAt: agent.createdAt,
       updatedAt: agent.updatedAt,
     };

@@ -13,6 +13,8 @@ export type AgentEventKind =
   | 'error';
 
 export interface AgentEventEnvelopeBase {
+  /** User-visible chat session id when the event belongs to a persisted chat. */
+  chatId?: string;
   /**
    * Unique id for this event (uuid).
    */

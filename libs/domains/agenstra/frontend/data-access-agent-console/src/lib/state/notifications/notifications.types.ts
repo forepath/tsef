@@ -1,9 +1,15 @@
+export interface ChatSessionStatus {
+  chatSessionId: string;
+  hasUnreadMessages: boolean;
+}
+
 export interface EnvironmentStatus {
   clientId: string;
   agentId: string;
   hasUnreadMessages: boolean;
   gitDirty: boolean;
   gitConflict: boolean;
+  chats: ChatSessionStatus[];
 }
 
 export interface ClientStatus {
@@ -29,4 +35,5 @@ export interface StatusPatchPayload {
 export interface ActiveEnvironment {
   clientId: string;
   agentId: string;
+  chatSessionId?: string | null;
 }

@@ -1,8 +1,10 @@
 import {
   AgentModelsResponseDto,
   AgentResponseDto,
+  ChatSessionResponseDto,
   CreateAgentDto,
   CreateAgentResponseDto,
+  CreateChatSessionDto,
   CreateEnvironmentVariableDto,
   CreateFileDto,
   EnvironmentVariableResponseDto,
@@ -12,6 +14,7 @@ import {
   parseAgentFileManagerContext,
   type AgentFileManagerContext,
   UpdateAgentDto,
+  UpdateChatSessionDto,
   UpdateEnvironmentVariableDto,
   WriteFileDto,
 } from '@forepath/agenstra/backend/feature-agent-manager';
@@ -55,6 +58,7 @@ import { ProvisionedServerResponseDto } from '../dto/provisioned-server-response
 import { UpdateClientDto } from '../dto/update-client.dto';
 import { ProvisioningProviderFactory } from '../providers/provisioning-provider.factory';
 import { ClientsRepository } from '../repositories/clients.repository';
+import { ChatSessionMessageResponse, ClientAgentChatsProxyService } from '../services/client-agent-chats-proxy.service';
 import { ClientAgentEnvironmentVariablesProxyService } from '../services/client-agent-environment-variables-proxy.service';
 import { ClientAgentFileSystemProxyService } from '../services/client-agent-file-system-proxy.service';
 import { ClientAgentProxyService } from '../services/client-agent-proxy.service';
@@ -72,6 +76,7 @@ export class ClientsController {
     private readonly clientAgentProxyService: ClientAgentProxyService,
     private readonly clientAgentFileSystemProxyService: ClientAgentFileSystemProxyService,
     private readonly clientAgentEnvironmentVariablesProxyService: ClientAgentEnvironmentVariablesProxyService,
+    private readonly clientAgentChatsProxyService: ClientAgentChatsProxyService,
     private readonly provisioningService: ProvisioningService,
     private readonly provisioningProviderFactory: ProvisioningProviderFactory,
     private readonly clientUsersService: ClientUsersService,
@@ -937,6 +942,129 @@ export class ClientsController {
     await ensureWorkspaceManagementAccess(this.clientsRepository, this.clientUsersRepository, id, req);
 
     return await this.clientAgentEnvironmentVariablesProxyService.deleteAllEnvironmentVariables(id, agentId);
+  }
+
+  /**
+   * List chat sessions for an agent with pagination (proxied).
+   * Only accessible if the user has access to the client.
+   */
+  @Get(':id/agents/:agentId/chats')
+  @RequireScopes('agents:chats')
+  async listClientAgentChatSessions(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Req() req?: RequestWithUser,
+  ): Promise<ChatSessionResponseDto[]> {
+    await ensureClientAccess(this.clientsRepository, this.clientUsersRepository, id, req);
+
+    return await this.clientAgentChatsProxyService.list(id, agentId, limit ?? 50, offset ?? 0);
+  }
+
+  /**
+   * Get count of chat sessions for an agent (proxied).
+   * Only accessible if the user has access to the client.
+   */
+  @Get(':id/agents/:agentId/chats/count')
+  @RequireScopes('agents:chats')
+  async countClientAgentChatSessions(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Req() req?: RequestWithUser,
+  ): Promise<{ count: number }> {
+    await ensureClientAccess(this.clientsRepository, this.clientUsersRepository, id, req);
+
+    return await this.clientAgentChatsProxyService.count(id, agentId);
+  }
+
+  /**
+   * Create a new chat session for an agent (proxied).
+   * Only accessible if the user has access to the client.
+   */
+  @Post(':id/agents/:agentId/chats')
+  @HttpCode(HttpStatus.CREATED)
+  @RequireScopes('agents:chats')
+  async createClientAgentChatSession(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Body() createDto: CreateChatSessionDto,
+    @Req() req?: RequestWithUser,
+  ): Promise<ChatSessionResponseDto> {
+    await ensureClientAccess(this.clientsRepository, this.clientUsersRepository, id, req);
+
+    return await this.clientAgentChatsProxyService.create(id, agentId, createDto);
+  }
+
+  /**
+   * Get a chat session by ID (proxied).
+   * Only accessible if the user has access to the client.
+   */
+  @Get(':id/agents/:agentId/chats/:chatId')
+  @RequireScopes('agents:chats')
+  async getClientAgentChatSession(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('chatId', new ParseUUIDPipe({ version: '4' })) chatId: string,
+    @Req() req?: RequestWithUser,
+  ): Promise<ChatSessionResponseDto> {
+    await ensureClientAccess(this.clientsRepository, this.clientUsersRepository, id, req);
+
+    return await this.clientAgentChatsProxyService.get(id, agentId, chatId);
+  }
+
+  /**
+   * Update a chat session title (proxied).
+   * Only accessible if the user has access to the client.
+   */
+  @Put(':id/agents/:agentId/chats/:chatId')
+  @RequireScopes('agents:chats')
+  async updateClientAgentChatSession(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('chatId', new ParseUUIDPipe({ version: '4' })) chatId: string,
+    @Body() updateDto: UpdateChatSessionDto,
+    @Req() req?: RequestWithUser,
+  ): Promise<ChatSessionResponseDto> {
+    await ensureClientAccess(this.clientsRepository, this.clientUsersRepository, id, req);
+
+    return await this.clientAgentChatsProxyService.update(id, agentId, chatId, updateDto);
+  }
+
+  /**
+   * Delete a chat session by ID (proxied).
+   * Only accessible if the user has access to the client.
+   */
+  @Delete(':id/agents/:agentId/chats/:chatId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @RequireScopes('agents:chats')
+  async deleteClientAgentChatSession(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('chatId', new ParseUUIDPipe({ version: '4' })) chatId: string,
+    @Req() req?: RequestWithUser,
+  ): Promise<void> {
+    await ensureClientAccess(this.clientsRepository, this.clientUsersRepository, id, req);
+    await this.clientAgentChatsProxyService.delete(id, agentId, chatId);
+  }
+
+  /**
+   * List messages for a chat session (proxied).
+   * Only accessible if the user has access to the client.
+   */
+  @Get(':id/agents/:agentId/chats/:chatId/messages')
+  @RequireScopes('agents:chats')
+  async listClientAgentChatSessionMessages(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('agentId', new ParseUUIDPipe({ version: '4' })) agentId: string,
+    @Param('chatId', new ParseUUIDPipe({ version: '4' })) chatId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Req() req?: RequestWithUser,
+  ): Promise<ChatSessionMessageResponse[]> {
+    await ensureClientAccess(this.clientsRepository, this.clientUsersRepository, id, req);
+
+    return await this.clientAgentChatsProxyService.listMessages(id, agentId, chatId, limit ?? 50, offset ?? 0);
   }
 
   /**

@@ -33,12 +33,14 @@ describe('NotificationsFacade', () => {
                   hasUnreadMessages: true,
                   gitDirty: false,
                   gitConflict: false,
+                  chats: [],
                 },
               },
               clientsById: {
                 c1: { clientId: 'c1', hasUnreadMessages: true, gitDirty: true },
               },
               activeEnvironment: null,
+              optimisticChatReadAtByKey: {},
             },
           },
         }),
@@ -72,17 +74,17 @@ describe('NotificationsFacade', () => {
   it('markEnvironmentRead dispatches action with ids', () => {
     const spy = jest.spyOn(store, 'dispatch');
 
-    facade.markEnvironmentRead('c1', 'a1');
+    facade.markEnvironmentRead('c1', 'a1', 'chat-1');
 
-    expect(spy).toHaveBeenCalledWith(markEnvironmentRead({ clientId: 'c1', agentId: 'a1' }));
+    expect(spy).toHaveBeenCalledWith(markEnvironmentRead({ clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-1' }));
   });
 
   it('setActiveEnvironment dispatches action', () => {
     const spy = jest.spyOn(store, 'dispatch');
 
-    facade.setActiveEnvironment('c1', 'a1');
+    facade.setActiveEnvironment('c1', 'a1', 'chat-1');
 
-    expect(spy).toHaveBeenCalledWith(setActiveEnvironment({ clientId: 'c1', agentId: 'a1' }));
+    expect(spy).toHaveBeenCalledWith(setActiveEnvironment({ clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-1' }));
   });
 
   it('exposes attention and status selectors', async () => {

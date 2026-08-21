@@ -57,6 +57,31 @@ export class AgentMessagesRepository {
     });
   }
 
+  async findByAgentIdAndChatSessionId(
+    agentId: string,
+    chatSessionId: string,
+    limit = 50,
+    offset = 0,
+  ): Promise<AgentMessageEntity[]> {
+    return await this.repository.find({
+      where: { agentId, chatSessionId },
+      take: limit,
+      skip: offset,
+      order: { createdAt: 'ASC' },
+      relations: ['agent'],
+    });
+  }
+
+  async countByAgentIdAndChatSessionId(agentId: string, chatSessionId: string): Promise<number> {
+    return await this.repository.count({ where: { agentId, chatSessionId } });
+  }
+
+  async deleteByChatSessionId(chatSessionId: string): Promise<number> {
+    const result = await this.repository.delete({ chatSessionId });
+
+    return result.affected || 0;
+  }
+
   /**
    * Find all messages with pagination.
    * @param limit - Maximum number of messages to return
@@ -91,10 +116,11 @@ export class AgentMessagesRepository {
 
   /**
    * Find the most recent agent-authored message for an environment.
+   * @param chatSessionId - When set, limit to that visible chat session
    */
-  async findLatestAgentMessage(agentId: string): Promise<AgentMessageEntity | null> {
+  async findLatestAgentMessage(agentId: string, chatSessionId?: string): Promise<AgentMessageEntity | null> {
     return await this.repository.findOne({
-      where: { agentId, actor: 'agent' },
+      where: chatSessionId ? { agentId, actor: 'agent', chatSessionId } : { agentId, actor: 'agent' },
       order: { createdAt: 'DESC' },
     });
   }

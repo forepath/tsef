@@ -12,7 +12,7 @@ export class AgentMessageEventsRepository {
   ) {}
 
   async create(
-    entity: Omit<AgentMessageEventEntity, 'id' | 'agent' | 'createdAt' | 'updatedAt'>,
+    entity: Omit<AgentMessageEventEntity, 'id' | 'agent' | 'chatSession' | 'createdAt' | 'updatedAt'>,
   ): Promise<AgentMessageEventEntity> {
     const created = this.repository.create(entity);
 
@@ -22,10 +22,11 @@ export class AgentMessageEventsRepository {
   async listRecent(
     agentId: string,
     limit: number,
-    opts?: { kinds?: string[]; since?: Date },
+    opts?: { kinds?: string[]; since?: Date; chatSessionId?: string },
   ): Promise<AgentMessageEventEntity[]> {
     const where: FindOptionsWhere<AgentMessageEventEntity> = {
       agentId,
+      ...(opts?.chatSessionId ? { chatSessionId: opts.chatSessionId } : {}),
       ...(opts?.kinds?.length ? { kind: In(opts.kinds) } : {}),
       ...(opts?.since ? { eventTimestamp: MoreThanOrEqual(opts.since) } : {}),
     };

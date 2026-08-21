@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { AgentChatSessionEntity } from './agent-chat-session.entity';
 import { AgentEntity } from './agent.entity';
 
 @Entity('agent_message_events')
@@ -23,6 +24,13 @@ export class AgentMessageEventEntity {
   @ManyToOne(() => AgentEntity, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'agent_id' })
   agent!: AgentEntity;
+
+  @Column({ type: 'uuid', name: 'chat_session_id' })
+  chatSessionId!: string;
+
+  @ManyToOne(() => AgentChatSessionEntity, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'chat_session_id' })
+  chatSession!: AgentChatSessionEntity;
 
   @Column({ type: 'varchar', length: 64, name: 'correlation_id' })
   correlationId!: string;

@@ -42,7 +42,8 @@ Events are published from the **agent-controller** service after proxied operati
 
 ### Chat and filter rules
 
-- `chat_message.created`, user or agent chat message in a workspace session
+- `chat_message.created`, user or agent chat message in a workspace session (payload may include `chatId`)
+- `chat_session.created`, `chat_session.updated`, `chat_session.deleted` — user-visible chat session lifecycle for an agent environment
 - `filter_rule.created`, `filter_rule.updated`, `filter_rule.deleted`
 - `filter_rule.triggered`, a filter rule dropped or flagged a message
 
@@ -92,11 +93,28 @@ Author email is never included. Ticket body `content` is never included on ticke
   "direction": "incoming",
   "source": "user",
   "message": "Hello agent",
-  "userId": "user-uuid"
+  "userId": "user-uuid",
+  "chatId": "chat-session-uuid"
 }
 ```
 
-`direction` is `incoming` or `outgoing`. `source` is `user` or `agent`.
+`direction` is `incoming` or `outgoing`. `source` is `user` or `agent`. `chatId` is the user-visible chat session when the message is tied to one (may be null for some flows).
+
+### `chat_session.created` / `chat_session.updated` / `chat_session.deleted`
+
+```json
+{
+  "id": "chat-session-uuid",
+  "agentId": "agent-uuid",
+  "title": "Investigation",
+  "kind": "user",
+  "lastMessageAt": "2026-07-01T11:00:00.000Z",
+  "createdAt": "2026-07-01T10:00:00.000Z",
+  "updatedAt": "2026-07-01T11:00:00.000Z"
+}
+```
+
+`kind` is `primary` or `user`. Delete events always include `id` and `agentId`; other fields may be null when only identifiers are available.
 
 ### `filter_rule.triggered`
 

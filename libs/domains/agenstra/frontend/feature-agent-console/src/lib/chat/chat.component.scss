@@ -391,7 +391,8 @@ span {
 }
 
 // Active list items - white text on primary background
-.list-group-item.active {
+.list-group-item.active,
+.dropdown-item.active {
   color: white;
 
   strong,
@@ -404,6 +405,10 @@ span {
   .text-primary {
     color: white !important;
     opacity: 1;
+  }
+
+  > .btn:not(.btn-outline-primary):not(.btn-outline-danger) {
+    color: white;
   }
 
   .btn-outline-primary {
@@ -429,6 +434,21 @@ span {
       color: white;
     }
   }
+}
+
+.chat-session-new-item {
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.chat-session-chevron {
+  display: inline-block;
+  transition: transform 0.15s ease-in-out;
+}
+
+#chatSessionDropdown[aria-expanded='true'] .chat-session-chevron {
+  transform: translateY(-1px) rotate(180deg);
 }
 
 .section__column--chat {

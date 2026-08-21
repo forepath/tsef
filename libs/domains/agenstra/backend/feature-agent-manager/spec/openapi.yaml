@@ -118,7 +118,8 @@ paths:
       summary: Get latest agent chat message metadata
       description: |
         Returns id and createdAt of the latest persisted agent-role chat message for unread tracking.
-        Returns 404 when the agent has no agent messages yet.
+        Optionally scoped to a visible chat session via `chatSessionId`.
+        Returns 404 when no matching agent messages exist.
       operationId: getLatestAgentMessage
       parameters:
         - in: path
@@ -127,6 +128,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: chatSessionId
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: When set, return the latest agent message for this chat session only
       responses:
         '200':
           description: Latest agent message metadata
@@ -702,6 +710,212 @@ paths:
           description: Environment variable deleted
         '404':
           description: Agent or environment variable not found
+  /agents/{agentId}/chats:
+    get:
+      summary: List chat sessions
+      operationId: listChatSessions
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum number of chat sessions to return (default 50)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of chat sessions to skip (default 0)
+      responses:
+        '200':
+          description: Array of chat sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatSessionResponseDto'
+        '404':
+          description: Agent not found
+    post:
+      summary: Create chat session
+      operationId: createChatSession
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatSessionDto'
+      responses:
+        '201':
+          description: Chat session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponseDto'
+        '400':
+          description: Invalid request
+        '404':
+          description: Agent not found
+  /agents/{agentId}/chats/count:
+    get:
+      summary: Get count of chat sessions
+      operationId: countChatSessions
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Count of chat sessions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [count]
+                properties:
+                  count:
+                    type: integer
+                    description: Total count of chat sessions for the agent
+        '404':
+          description: Agent not found
+  /agents/{agentId}/chats/{chatId}:
+    get:
+      summary: Get chat session
+      operationId: getChatSession
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Chat session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponseDto'
+        '404':
+          description: Agent or chat session not found
+    put:
+      summary: Update chat session
+      operationId: updateChatSession
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChatSessionDto'
+      responses:
+        '200':
+          description: Chat session updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponseDto'
+        '400':
+          description: Invalid request
+        '404':
+          description: Agent or chat session not found
+    delete:
+      summary: Delete chat session
+      operationId: deleteChatSession
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Chat session deleted
+        '404':
+          description: Agent or chat session not found
+  /agents/{agentId}/chats/{chatId}/messages:
+    get:
+      summary: List messages for a chat session
+      operationId: listChatSessionMessages
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum number of messages to return (default 50)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of messages to skip (default 0)
+      responses:
+        '200':
+          description: Array of chat session messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatSessionMessageResponseDto'
+        '404':
+          description: Agent or chat session not found
   /configuration-overrides:
     get:
       summary: List effective workspace configuration overrides
@@ -1609,7 +1823,8 @@ components:
       description: Model catalog for an agent; keys are model identifiers, values are display names
     AgentResponseDto:
       type: object
-      required: [id, name, agentType, createdAt, updatedAt]
+      required:
+        [id, name, agentType, createdAt, updatedAt, chats, primaryChatId]
       properties:
         id:
           type: string
@@ -1634,6 +1849,15 @@ components:
               enum: [clone, empty]
               description: How the workspace repository was initialized
           description: Git information when the agent has an associated repository or empty local repo
+        chats:
+          type: array
+          description: User-visible chat sessions for this environment
+          items:
+            $ref: '#/components/schemas/AgentChatSessionSummaryDto'
+        primaryChatId:
+          type: string
+          format: uuid
+          description: Id of the primary chat session for this environment
         createdAt:
           type: string
           format: date-time
@@ -2283,6 +2507,82 @@ components:
         content:
           type: string
           description: Environment variable content
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateChatSessionDto:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Optional title for the new chat session
+    UpdateChatSessionDto:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: New title for the chat session
+    ChatSessionResponseDto:
+      type: object
+      required: [id, agentId, kind, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        kind:
+          type: string
+          enum: [primary, user]
+        lastMessageAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    AgentChatSessionSummaryDto:
+      type: object
+      required: [id, kind, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        kind:
+          type: string
+          enum: [primary, user]
+        lastMessageAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    ChatSessionMessageResponseDto:
+      type: object
+      required: [id, actor, message, filtered, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        actor:
+          type: string
+        message:
+          type: string
+        filtered:
+          type: boolean
         createdAt:
           type: string
           format: date-time

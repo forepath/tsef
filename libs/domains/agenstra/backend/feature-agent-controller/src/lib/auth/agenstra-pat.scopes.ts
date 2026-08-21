@@ -17,6 +17,7 @@ export const AGENSTRA_PAT_SCOPES = [
   'agents:lifecycle',
   'agents:files',
   'agents:environment',
+  'agents:chats',
   'agents:vcs',
   'agents:deployments',
   'imports:write',

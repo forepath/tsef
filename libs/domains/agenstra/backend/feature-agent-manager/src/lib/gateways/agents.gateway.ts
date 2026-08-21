@@ -1,4 +1,4 @@
-import { Logger, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Logger, OnModuleInit } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -12,6 +12,7 @@ import { Server, Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 
 import { GIT_STATE_CHANGED_EVENT, toolMayMutateGitWorkspace } from '../constants/agent-git-state.constants';
+import { isReservedChatResumeSessionSuffix } from '../constants/chat-session.constants';
 import { AgentEventEnvelope, AgentInteractionQueryPayload, AgentResponseMode } from '../providers/agent-events.types';
 import { AgentProviderFactory } from '../providers/agent-provider.factory';
 import { AgentResponseObject } from '../providers/agent-provider.interface';
@@ -23,6 +24,7 @@ import {
   FilterDirection,
 } from '../providers/chat-filter.interface';
 import { AgentsRepository } from '../repositories/agents.repository';
+import { AgentChatSessionsService } from '../services/agent-chat-sessions.service';
 import { AgentGitStateBroadcastService } from '../services/agent-git-state-broadcast.service';
 import { AgentMessageEventsService } from '../services/agent-message-events.service';
 import { AgentMessagesService } from '../services/agent-messages.service';
@@ -39,6 +41,8 @@ import { PROMPT_TICKET_BODY_RESUME_SESSION_SUFFIX } from '../utils/ticket-body-p
 interface LoginPayload {
   agentId: string;
   password: string;
+  /** Restore this session; defaults to primary when omitted. */
+  chatId?: string;
 }
 
 interface ChatPayload {
@@ -50,7 +54,13 @@ interface ChatPayload {
   ephemeral?: boolean;
   continue?: boolean;
   resumeSessionSuffix?: string;
+  /** User-visible chat session id; defaults to primary when omitted (ignored for reserved ACP suffixes). */
+  chatId?: string;
   contextInjection?: ContextInjectionPayload;
+}
+
+interface RestoreChatPayload {
+  chatId: string;
 }
 
 interface EnhanceChatPayload {
@@ -149,12 +159,14 @@ interface UserChatMessageData {
   from: ChatActor.USER;
   text: string;
   timestamp: string;
+  chatId?: string;
 }
 
 interface AgentChatMessageData {
   from: ChatActor.AGENT;
   response: AgentResponseObject | string; // Parsed JSON object or raw string if parsing fails
   timestamp: string;
+  chatId?: string;
 }
 
 type ChatMessageData = UserChatMessageData | AgentChatMessageData;
@@ -184,6 +196,12 @@ interface MessageFilterResultData {
   };
   action?: 'drop' | 'flag';
   timestamp: string;
+  chatId?: string;
+}
+
+interface RestoreChatSuccessData {
+  chatId: string;
+  message: string;
 }
 
 // Helper functions to create standardized responses
@@ -261,6 +279,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
     private readonly dockerService: DockerService,
     private readonly agentMessagesService: AgentMessagesService,
     private readonly agentMessageEventsService: AgentMessageEventsService,
+    private readonly agentChatSessionsService: AgentChatSessionsService,
     private readonly agentProviderFactory: AgentProviderFactory,
     private readonly chatFilterFactory: ChatFilterFactory,
     private readonly promptContextComposer: PromptContextComposerService,
@@ -389,9 +408,9 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
     }
   }
 
-  private broadcastChatEvent(agentUuid: string, event: AgentEventEnvelope): void {
+  private broadcastChatEvent(agentUuid: string, event: AgentEventEnvelope, chatSessionId?: string): void {
     this.broadcastToAgent(agentUuid, 'chatEvent', createSuccessResponse<AgentEventEnvelope>(event));
-    void this.agentMessageEventsService.persistEvent(agentUuid, event);
+    void this.agentMessageEventsService.persistEvent(agentUuid, event, chatSessionId);
 
     if (event.kind === 'toolResult' && !event.payload.isError && toolMayMutateGitWorkspace(event.payload.name)) {
       this.gitStateBroadcast.notifyGitStateMayHaveChanged(agentUuid);
@@ -434,14 +453,58 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
     ephemeral: boolean,
     requestSocket: Socket,
     envelope: AgentEventEnvelope,
+    chatSessionId?: string,
+    chatId?: string,
   ): void {
+    const event: AgentEventEnvelope = chatId ? { ...envelope, chatId } : envelope;
+
     if (ephemeral) {
-      requestSocket.emit('chatEvent', createSuccessResponse<AgentEventEnvelope>(envelope));
+      requestSocket.emit('chatEvent', createSuccessResponse<AgentEventEnvelope>(event));
 
       return;
     }
 
-    this.broadcastChatEvent(agentUuid, envelope);
+    this.broadcastChatEvent(agentUuid, event, chatSessionId);
+  }
+
+  private async resolveChatContext(
+    agentId: string,
+    data: { chatId?: string; resumeSessionSuffix?: string; ephemeral?: boolean },
+  ): Promise<{
+    resumeSessionSuffix: string | undefined;
+    chatSessionId: string | undefined;
+    chatId: string | undefined;
+    /** Hidden ACP suffixes must never persist or broadcast into user-visible chats. */
+    hidden: boolean;
+  }> {
+    if (isReservedChatResumeSessionSuffix(data.resumeSessionSuffix)) {
+      // Ignore chatId: reserved suffixes are isolated ACP sessions, not user chat rows.
+      return {
+        resumeSessionSuffix: data.resumeSessionSuffix,
+        chatSessionId: undefined,
+        chatId: undefined,
+        hidden: true,
+      };
+    }
+
+    const rawChatId = typeof data.chatId === 'string' ? data.chatId.trim() : '';
+
+    if (rawChatId && !AgentsGateway.isUuidV4(rawChatId)) {
+      throw new BadRequestException('chatId must be a valid UUID');
+    }
+
+    const session = await this.agentChatSessionsService.resolveSessionForChat(agentId, rawChatId || undefined);
+
+    return {
+      resumeSessionSuffix: session.resumeSessionSuffix || undefined,
+      chatSessionId: session.id,
+      chatId: session.id,
+      hidden: false,
+    };
+  }
+
+  private static isUuidV4(value: string): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
   }
 
   /**
@@ -600,6 +663,8 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
     agentUuid: string,
     agentResponseTimestamp: string,
     finalResponse: AgentResponseObject,
+    chatSessionId?: string,
+    chatId?: string,
   ): Promise<void> {
     const outgoingFilterResult = await this.applyFilters(JSON.stringify(finalResponse), FilterDirection.OUTGOING, {
       agentId: agentUuid,
@@ -612,6 +677,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
       createSuccessResponse<MessageFilterResultData>({
         direction: 'outgoing',
         ...outgoingFilterResult,
+        ...(chatId ? { chatId } : {}),
       }),
     );
 
@@ -631,6 +697,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
           agentUuid,
           responseToUse,
           outgoingFilterResult.status === 'filtered',
+          chatSessionId,
         );
       } catch (persistError) {
         const err = persistError as { message?: string };
@@ -645,6 +712,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
           from: ChatActor.AGENT,
           response: responseToUse,
           timestamp: agentResponseTimestamp,
+          ...(chatId ? { chatId } : {}),
         }),
       );
     }
@@ -965,8 +1033,14 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
       // 2. The socket was not already authenticated (to avoid restoring history twice)
       // This prevents duplicate messages when logging in after reconnection
       if (!wasRecovered && !wasAlreadyAuthenticated) {
-        // Restore chat history
-        await this.restoreChatHistory(agentUuid, socket);
+        // Restore chat history for the requested (or primary) session
+        try {
+          await this.restoreChatHistory(agentUuid, socket, data.chatId);
+        } catch (restoreError) {
+          const err = restoreError as { message?: string; stack?: string };
+
+          this.logger.warn(`Failed to restore chat history for agent ${agentUuid} on login: ${err.message}`, err.stack);
+        }
       } else {
         this.logger.debug(
           `Skipping chat history restoration for agent ${agentUuid} on socket ${socket.id} because socket was ${wasRecovered ? 'recovered' : 'already authenticated'}`,
@@ -984,15 +1058,18 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
   }
 
   /**
-   * Restore and re-emit chat history for an agent.
+   * Restore and re-emit chat history for an agent chat session.
    * Messages are emitted in chronological order by their creation date.
    * @param agentUuid - The UUID of the agent
    * @param socket - The socket instance to emit messages to
+   * @param chatId - Optional chat session id; defaults to primary
    */
-  private async restoreChatHistory(agentUuid: string, socket: Socket): Promise<void> {
+  private async restoreChatHistory(agentUuid: string, socket: Socket, chatId?: string): Promise<void> {
+    const session = await this.agentChatSessionsService.resolveSessionForChat(agentUuid, chatId);
+
     try {
       // Get total message count to calculate offset for latest messages
-      const totalCount = await this.agentMessagesService.countMessages(agentUuid);
+      const totalCount = await this.agentMessagesService.countMessages(agentUuid, session.id);
       const limit = 20;
       // Calculate offset to get the latest 20 messages
       // If totalCount <= 20, offset is 0 (get all messages)
@@ -1000,15 +1077,15 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
       const offset = Math.max(0, totalCount - limit);
       // Fetch chat history (ordered chronologically by createdAt ASC)
       // Only restore the most recent 20 messages
-      const chatHistory = await this.agentMessagesService.getChatHistory(agentUuid, limit, offset);
+      const chatHistory = await this.agentMessagesService.getChatHistory(agentUuid, limit, offset, session.id);
 
       if (chatHistory.length === 0) {
-        this.logger.debug(`No chat history found for agent ${agentUuid}`);
+        this.logger.debug(`No chat history found for agent ${agentUuid} chat ${session.id}`);
 
         return;
       }
 
-      this.logger.log(`Restoring ${chatHistory.length} messages for agent ${agentUuid}`);
+      this.logger.log(`Restoring ${chatHistory.length} messages for agent ${agentUuid} chat ${session.id}`);
 
       // Emit each message in chronological order
       for (const messageEntity of chatHistory) {
@@ -1027,6 +1104,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
             matchedFilter: undefined,
             action: 'flag', // Since it was persisted, it must have been flagged, not dropped
             timestamp,
+            chatId: session.id,
           };
 
           socket.emit('messageFilterResult', createSuccessResponse<MessageFilterResultData>(filterResult));
@@ -1040,6 +1118,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
               from: ChatActor.USER,
               text: messageEntity.message,
               timestamp,
+              chatId: session.id,
             }),
           );
         } else if (messageEntity.actor === 'agent') {
@@ -1081,6 +1160,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
               from: ChatActor.AGENT,
               response,
               timestamp,
+              chatId: session.id,
             }),
           );
         }
@@ -1091,19 +1171,76 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
       const since = chatHistory[0]?.createdAt;
       const persistedToolEvents = await this.agentMessageEventsService.listRecentEvents(agentUuid, 400, {
         kinds: ['toolCall', 'toolResult'],
+        chatSessionId: session.id,
         ...(since ? { since } : {}),
       });
 
       for (const event of persistedToolEvents) {
-        socket.emit('chatEvent', createSuccessResponse<AgentEventEnvelope>(event));
+        socket.emit(
+          'chatEvent',
+          createSuccessResponse<AgentEventEnvelope>({
+            ...event,
+            chatId: session.id,
+          }),
+        );
       }
 
-      this.logger.debug(`Successfully restored ${chatHistory.length} messages for agent ${agentUuid}`);
+      this.logger.debug(
+        `Successfully restored ${chatHistory.length} messages for agent ${agentUuid} chat ${session.id}`,
+      );
     } catch (error) {
       const err = error as { message?: string; stack?: string };
 
-      this.logger.warn(`Failed to restore chat history for agent ${agentUuid}: ${err.message}`, err.stack);
-      // Don't fail login if history restoration fails
+      this.logger.warn(
+        `Failed to restore chat history for agent ${agentUuid} chat ${session.id}: ${err.message}`,
+        err.stack,
+      );
+      // Don't fail login if history restoration fails after session resolve
+    }
+  }
+
+  /**
+   * Restore a specific chat session's history for the authenticated client.
+   * Client is responsible for clearing the local thread before calling.
+   */
+  @SubscribeMessage('restoreChat')
+  async handleRestoreChat(@MessageBody() data: RestoreChatPayload, @ConnectedSocket() socket: Socket) {
+    const agentUuid = this.authenticatedClients.get(socket.id);
+
+    if (!agentUuid) {
+      socket.emit('error', createErrorResponse('Unauthorized. Please login first.', 'UNAUTHORIZED'));
+
+      return;
+    }
+
+    const chatId = typeof data?.chatId === 'string' ? data.chatId.trim() : '';
+
+    if (!chatId) {
+      socket.emit('error', createErrorResponse('chatId is required', 'INVALID_PAYLOAD'));
+
+      return;
+    }
+
+    if (!AgentsGateway.isUuidV4(chatId)) {
+      socket.emit('error', createErrorResponse('chatId must be a valid UUID', 'INVALID_CHAT_ID'));
+
+      return;
+    }
+
+    try {
+      await this.restoreChatHistory(agentUuid, socket, chatId);
+      socket.emit(
+        'restoreChatSuccess',
+        createSuccessResponse<RestoreChatSuccessData>({
+          chatId,
+          message: 'Chat history restored',
+        }),
+      );
+    } catch (error) {
+      socket.emit('error', createErrorResponse('Failed to restore chat history', 'RESTORE_CHAT_ERROR'));
+      const err = error as { message?: string; stack?: string };
+
+      this.logger.error(`Restore chat error for agent ${agentUuid}: ${err.message}`, err.stack);
     }
   }
 
@@ -1131,12 +1268,28 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 
     const correlationId =
       typeof data.correlationId === 'string' && data.correlationId.trim() ? data.correlationId.trim() : uuidv4();
-    const ephemeral = data.ephemeral === true;
     const wantsStream = data.responseMode === 'stream';
     const responseMode: AgentResponseMode = wantsStream ? 'stream' : data.responseMode === 'sync' ? 'sync' : 'single';
     let sequence = 0;
     // Create timestamp immediately for consistent message ordering
     const chatTimestamp = new Date().toISOString();
+    let chatContext: Awaited<ReturnType<AgentsGateway['resolveChatContext']>>;
+
+    try {
+      chatContext = await this.resolveChatContext(agentUuid, data);
+    } catch (error) {
+      const err = error as { message?: string };
+      const code = error instanceof BadRequestException ? 'INVALID_CHAT_ID' : 'CHAT_ERROR';
+
+      socket.emit('error', createErrorResponse(err.message || 'Invalid or unknown chat session', code));
+
+      return;
+    }
+
+    // Reserved ACP suffixes must never persist/broadcast into user-visible chat history.
+    const ephemeral = data.ephemeral === true || chatContext.hidden;
+    const { chatSessionId, chatId } = chatContext;
+    const chatIdFields = chatId ? { chatId } : {};
     // Apply incoming filters before processing (single hook point for incoming messages)
     const incomingFilterResult = await this.applyFilters(message, FilterDirection.INCOMING, {
       agentId: agentUuid,
@@ -1151,6 +1304,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
       createSuccessResponse<MessageFilterResultData>({
         direction: 'incoming',
         ...incomingFilterResult,
+        ...chatIdFields,
       }),
     );
 
@@ -1167,7 +1321,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 
       if (!ephemeral) {
         try {
-          await this.agentMessagesService.createUserMessage(agentUuid, fakeUserMessage, false);
+          await this.agentMessagesService.createUserMessage(agentUuid, fakeUserMessage, false, chatSessionId);
         } catch (persistError) {
           const err = persistError as { message?: string };
 
@@ -1184,14 +1338,22 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
           from: ChatActor.USER,
           text: fakeUserMessage,
           timestamp: droppedResponseTimestamp,
+          ...chatIdFields,
         }),
       );
 
-      this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, {
-        ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
-        kind: 'userMessage',
-        payload: { text: fakeUserMessage },
-      });
+      this.emitOrPersistChatEvent(
+        agentUuid,
+        ephemeral,
+        socket,
+        {
+          ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
+          kind: 'userMessage',
+          payload: { text: fakeUserMessage },
+        },
+        chatSessionId,
+        chatId,
+      );
 
       return;
     }
@@ -1213,62 +1375,91 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
         from: ChatActor.USER,
         text: filteredMessage,
         timestamp: chatTimestamp,
+        ...chatIdFields,
       }),
     );
 
-    this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, {
-      ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
-      kind: 'userMessage',
-      payload: { text: filteredMessage },
-    });
+    this.emitOrPersistChatEvent(
+      agentUuid,
+      ephemeral,
+      socket,
+      {
+        ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
+        kind: 'userMessage',
+        payload: { text: filteredMessage },
+      },
+      chatSessionId,
+      chatId,
+    );
 
     if (contextInjection) {
-      this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, {
-        ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
-        kind: 'toolCall',
-        payload: {
-          toolCallId: `enrichment-${correlationId}`,
-          name: 'enrichment',
-          args: {
-            includeWorkspace: contextInjection.includeWorkspace === true,
-            environmentIds: contextInjection.environmentIds ?? [],
-            workspaceContainerType: contextInjection.workspaceContainerType,
-            environmentContainerTypes: contextInjection.environmentContainerTypes ?? [],
-            ticketShas: contextInjection.ticketShas ?? [],
-            ticketContextCount: contextInjection.ticketContexts?.length ?? 0,
-            knowledgeShas: contextInjection.knowledgeShas ?? [],
-            knowledgeContextCount: contextInjection.knowledgeContexts?.length ?? 0,
+      this.emitOrPersistChatEvent(
+        agentUuid,
+        ephemeral,
+        socket,
+        {
+          ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
+          kind: 'toolCall',
+          payload: {
+            toolCallId: `enrichment-${correlationId}`,
+            name: 'enrichment',
+            args: {
+              includeWorkspace: contextInjection.includeWorkspace === true,
+              environmentIds: contextInjection.environmentIds ?? [],
+              workspaceContainerType: contextInjection.workspaceContainerType,
+              environmentContainerTypes: contextInjection.environmentContainerTypes ?? [],
+              ticketShas: contextInjection.ticketShas ?? [],
+              ticketContextCount: contextInjection.ticketContexts?.length ?? 0,
+              knowledgeShas: contextInjection.knowledgeShas ?? [],
+              knowledgeContextCount: contextInjection.knowledgeContexts?.length ?? 0,
+            },
+            status: 'succeeded',
           },
-          status: 'succeeded',
         },
-      });
-      this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, {
-        ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
-        kind: 'toolResult',
-        payload: {
-          toolCallId: `enrichment-${correlationId}`,
-          name: 'enrichment',
-          result: {
-            applied: true,
-            includeWorkspace: contextInjection.includeWorkspace === true,
-            environmentIds: contextInjection.environmentIds ?? [],
-            workspaceContainerType: contextInjection.workspaceContainerType,
-            environmentContainerTypes: contextInjection.environmentContainerTypes ?? [],
-            ticketShas: contextInjection.ticketShas ?? [],
-            ticketContextCount: contextInjection.ticketContexts?.length ?? 0,
-            knowledgeShas: contextInjection.knowledgeShas ?? [],
-            knowledgeContextCount: contextInjection.knowledgeContexts?.length ?? 0,
+        chatSessionId,
+        chatId,
+      );
+      this.emitOrPersistChatEvent(
+        agentUuid,
+        ephemeral,
+        socket,
+        {
+          ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
+          kind: 'toolResult',
+          payload: {
+            toolCallId: `enrichment-${correlationId}`,
+            name: 'enrichment',
+            result: {
+              applied: true,
+              includeWorkspace: contextInjection.includeWorkspace === true,
+              environmentIds: contextInjection.environmentIds ?? [],
+              workspaceContainerType: contextInjection.workspaceContainerType,
+              environmentContainerTypes: contextInjection.environmentContainerTypes ?? [],
+              ticketShas: contextInjection.ticketShas ?? [],
+              ticketContextCount: contextInjection.ticketContexts?.length ?? 0,
+              knowledgeShas: contextInjection.knowledgeShas ?? [],
+              knowledgeContextCount: contextInjection.knowledgeContexts?.length ?? 0,
+            },
+            isError: false,
           },
-          isError: false,
         },
-      });
+        chatSessionId,
+        chatId,
+      );
     }
 
-    this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, {
-      ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
-      kind: 'thinking',
-      payload: {},
-    });
+    this.emitOrPersistChatEvent(
+      agentUuid,
+      ephemeral,
+      socket,
+      {
+        ...toAgentEventEnvelopeBase(agentUuid, correlationId, sequence++),
+        kind: 'thinking',
+        payload: {},
+      },
+      chatSessionId,
+      chatId,
+    );
 
     try {
       // Get agent details for display
@@ -1320,6 +1511,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
             agentUuid,
             filteredMessage,
             incomingFilterResult.status === 'filtered',
+            chatSessionId,
           );
         } catch (persistError) {
           const err = persistError as { message?: string };
@@ -1372,7 +1564,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                   }
                 }
 
-                this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev);
+                this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev, chatSessionId, chatId);
               }
 
               if (
@@ -1387,7 +1579,13 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                 );
 
                 if (built) {
-                  await this.persistFilteredAgentChatResponse(agentUuid, agentResponseTimestamp, built);
+                  await this.persistFilteredAgentChatResponse(
+                    agentUuid,
+                    agentResponseTimestamp,
+                    built,
+                    chatSessionId,
+                    chatId,
+                  );
                   streamingTurnPersisted = true;
                 }
               }
@@ -1398,7 +1596,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
               for await (const parsed of provider.streamChatEvents!(agent.id, containerId, messageToUse, {
                 model: data.model,
                 continue: data.continue,
-                resumeSessionSuffix: data.resumeSessionSuffix,
+                resumeSessionSuffix: chatContext.resumeSessionSuffix,
               })) {
                 await consumeParsedResponse(parsed);
               }
@@ -1427,7 +1625,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
               for await (const chunk of provider.sendMessageStream(agent.id, containerId, messageToUse, {
                 model: data.model,
                 continue: data.continue,
-                resumeSessionSuffix: data.resumeSessionSuffix,
+                resumeSessionSuffix: chatContext.resumeSessionSuffix,
               })) {
                 buffered += chunk;
                 const parts = buffered.split('\n');
@@ -1452,7 +1650,13 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
               );
 
               if (finalResponse) {
-                await this.persistFilteredAgentChatResponse(agentUuid, agentResponseTimestamp, finalResponse);
+                await this.persistFilteredAgentChatResponse(
+                  agentUuid,
+                  agentResponseTimestamp,
+                  finalResponse,
+                  chatSessionId,
+                  chatId,
+                );
               } else {
                 const finalTextLen = aggregatedText.trim().length;
 
@@ -1466,7 +1670,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
             const agentResponse = await provider.sendMessage(agent.id, containerId, messageToUse, {
               model: data.model,
               continue: data.continue,
-              resumeSessionSuffix: data.resumeSessionSuffix,
+              resumeSessionSuffix: chatContext.resumeSessionSuffix,
             });
 
             if (agentResponse && agentResponse.trim()) {
@@ -1494,6 +1698,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                     createSuccessResponse<MessageFilterResultData>({
                       direction: 'outgoing',
                       ...outgoingFilterResult,
+                      ...chatIdFields,
                     }),
                   );
 
@@ -1511,7 +1716,12 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 
                     if (!ephemeral) {
                       try {
-                        await this.agentMessagesService.createAgentMessage(agentUuid, fakeAgentResponse, false);
+                        await this.agentMessagesService.createAgentMessage(
+                          agentUuid,
+                          fakeAgentResponse,
+                          false,
+                          chatSessionId,
+                        );
                       } catch (persistError) {
                         const err = persistError as { message?: string };
 
@@ -1528,6 +1738,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                         from: ChatActor.AGENT,
                         response: fakeAgentResponse,
                         timestamp: agentResponseTimestamp,
+                        ...chatIdFields,
                       }),
                     );
 
@@ -1539,7 +1750,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                     );
 
                     for (const ev of events) {
-                      this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev);
+                      this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev, chatSessionId, chatId);
                     }
 
                     return;
@@ -1561,6 +1772,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                         agentUuid,
                         responseToUse,
                         outgoingFilterResult.status === 'filtered',
+                        chatSessionId,
                       );
                     } catch (persistError) {
                       const err = persistError as { message?: string };
@@ -1578,13 +1790,14 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                       from: ChatActor.AGENT,
                       response: responseToUse,
                       timestamp: agentResponseTimestamp,
+                      ...chatIdFields,
                     }),
                   );
 
                   const events = this.agentResponseToChatEvents(agentUuid, correlationId, sequence++, responseToUse);
 
                   for (const ev of events) {
-                    this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev);
+                    this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev, chatSessionId, chatId);
                   }
                 } catch (parseError) {
                   const parseErr = parseError as { message?: string };
@@ -1604,6 +1817,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                     createSuccessResponse<MessageFilterResultData>({
                       direction: 'outgoing',
                       ...outgoingFilterResult,
+                      ...chatIdFields,
                     }),
                   );
 
@@ -1617,7 +1831,12 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 
                     if (!ephemeral) {
                       try {
-                        await this.agentMessagesService.createAgentMessage(agentUuid, fakeAgentResponse, false);
+                        await this.agentMessagesService.createAgentMessage(
+                          agentUuid,
+                          fakeAgentResponse,
+                          false,
+                          chatSessionId,
+                        );
                       } catch (persistError) {
                         const err = persistError as { message?: string };
 
@@ -1634,6 +1853,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                         from: ChatActor.AGENT,
                         response: fakeAgentResponse,
                         timestamp: agentResponseTimestamp,
+                        ...chatIdFields,
                       }),
                     );
 
@@ -1645,7 +1865,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                     );
 
                     for (const ev of events) {
-                      this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev);
+                      this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev, chatSessionId, chatId);
                     }
 
                     return;
@@ -1659,6 +1879,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                         agentUuid,
                         stringResponseToUse,
                         outgoingFilterResult.status === 'filtered',
+                        chatSessionId,
                       );
                     } catch (persistError) {
                       const err = persistError as { message?: string };
@@ -1676,6 +1897,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                       from: ChatActor.AGENT,
                       response: stringResponseToUse,
                       timestamp: agentResponseTimestamp,
+                      ...chatIdFields,
                     }),
                   );
 
@@ -1687,7 +1909,7 @@ export class AgentsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
                   );
 
                   for (const ev of events) {
-                    this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev);
+                    this.emitOrPersistChatEvent(agentUuid, ephemeral, socket, ev, chatSessionId, chatId);
                   }
                 }
               }

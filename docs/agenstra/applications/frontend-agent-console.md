@@ -152,7 +152,7 @@ Main container component that provides the layout and routing structure.
 
 ### AgentConsoleChatComponent
 
-Main workspace shell: chat, file tree, Git, environment variables, deployments entry, statistics, and modals for client and agent management.
+Main workspace shell: chat (including a **session switcher** for multiple user-visible chat sessions per environment, with per-session unread badges), file tree, Git, environment variables, deployments entry, statistics, and modals for client and agent management. Sessions are managed via controller `/clients/{id}/agents/{agentId}/chats` and restored over WebSocket with `login` / `restoreChat` `chatId` (see [Chat Interface](../features/chat-interface.md)). Unread status for each visible session comes from the `status` WebSocket snapshot/patch (`environments[].chats[]`).
 
 ### TicketsBoardComponent
 
@@ -205,7 +205,7 @@ On reconnection:
 2. Restores client context (`setClient`)
 3. Restores agent login (if previously logged in)
 4. Clears stale local buffers where required to avoid duplicates
-5. Receives chat history and ticket automation cards from the backend as implemented in NgRx effects
+5. Receives chat history for the active session (`chatId` / primary) and ticket automation cards on the **primary** session only (as implemented in NgRx selectors/effects); session switches use `restoreChat`
 
 ## Authentication
 

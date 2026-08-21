@@ -36,6 +36,27 @@ import {
 } from './sockets.actions';
 import { ForwardableEvent, type AgentResponseMode } from './sockets.types';
 
+function extractForwardedEventChatId(
+  event: string,
+  payload: import('./sockets.types').ForwardedEventPayload,
+): string | undefined {
+  if (!payload || typeof payload !== 'object' || !('success' in payload) || !payload.success) {
+    return undefined;
+  }
+
+  const data = (payload as { data?: { chatId?: unknown } }).data;
+
+  if (!data || typeof data !== 'object' || typeof data.chatId !== 'string' || data.chatId.trim() === '') {
+    return undefined;
+  }
+
+  if (event === 'chatMessage' || event === 'chatEvent') {
+    return data.chatId;
+  }
+
+  return undefined;
+}
+
 export interface RemoteConnectionState {
   clientId: string;
   connected: boolean;
@@ -63,6 +84,8 @@ export interface SocketsState {
     event: string;
     payload: import('./sockets.types').ForwardedEventPayload;
     timestamp: number;
+    /** Chat session id when present on chatMessage/chatEvent payloads. */
+    chatId?: string;
   }>;
   // Track message filter results keyed by direction and timestamp (for matching to messages)
   messageFilterResults: Array<{
@@ -488,9 +511,18 @@ export const socketsReducer = createReducer(
       }
     }
 
+    const eventChatId = skipForwardedAppend ? undefined : extractForwardedEventChatId(event, payload);
     const updatedForwardedEvents = skipForwardedAppend
       ? state.forwardedEvents
-      : [...state.forwardedEvents, { event, payload, timestamp: eventRowTimestamp }];
+      : [
+          ...state.forwardedEvents,
+          {
+            event,
+            payload,
+            timestamp: eventRowTimestamp,
+            ...(eventChatId ? { chatId: eventChatId } : {}),
+          },
+        ];
     const trimmedForwardedEvents =
       updatedForwardedEvents.length > state.maxForwardedEvents
         ? updatedForwardedEvents.slice(-state.maxForwardedEvents)

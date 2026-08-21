@@ -1,6 +1,7 @@
 import { initialNotificationsState } from './notifications.reducer';
 import {
   selectActiveEnvironment,
+  selectChatSessionHasUnread,
   selectClientAttentionBadge,
   selectClientGitDirty,
   selectClientHasUnread,
@@ -9,6 +10,7 @@ import {
   selectEnvironmentGitDirty,
   selectEnvironmentHasUnread,
   selectEnvironmentStatus,
+  selectOtherChatSessionsHaveUnread,
   selectSpacesAttentionBadge,
   selectSpacesHasAttention,
 } from './notifications.selectors';
@@ -24,13 +26,17 @@ describe('notifications selectors', () => {
           hasUnreadMessages: true,
           gitDirty: true,
           gitConflict: false,
+          chats: [
+            { chatSessionId: 'chat-1', hasUnreadMessages: true },
+            { chatSessionId: 'chat-2', hasUnreadMessages: false },
+          ],
         },
       },
       clientsById: {
         c1: { clientId: 'c1', hasUnreadMessages: true, gitDirty: true },
       },
       spacesHasAttention: true,
-      activeEnvironment: { clientId: 'c1', agentId: 'a1' },
+      activeEnvironment: { clientId: 'c1', agentId: 'a1', chatSessionId: 'chat-1' },
     },
   };
 
@@ -51,7 +57,21 @@ describe('notifications selectors', () => {
   });
 
   it('selectActiveEnvironment', () => {
-    expect(selectActiveEnvironment(baseState)).toEqual({ clientId: 'c1', agentId: 'a1' });
+    expect(selectActiveEnvironment(baseState)).toEqual({
+      clientId: 'c1',
+      agentId: 'a1',
+      chatSessionId: 'chat-1',
+    });
+  });
+
+  it('selectChatSessionHasUnread', () => {
+    expect(selectChatSessionHasUnread('c1', 'a1', 'chat-1')(baseState)).toBe(true);
+    expect(selectChatSessionHasUnread('c1', 'a1', 'chat-2')(baseState)).toBe(false);
+  });
+
+  it('selectOtherChatSessionsHaveUnread', () => {
+    expect(selectOtherChatSessionsHaveUnread('c1', 'a1', 'chat-2')(baseState)).toBe(true);
+    expect(selectOtherChatSessionsHaveUnread('c1', 'a1', 'chat-1')(baseState)).toBe(false);
   });
 
   it('selectEnvironmentStatus', () => {

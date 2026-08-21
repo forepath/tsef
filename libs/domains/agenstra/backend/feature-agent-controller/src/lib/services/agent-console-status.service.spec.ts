@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { ClientsRepository } from '../repositories/clients.repository';
 import { TicketAutomationRunsStatusRepository } from '../repositories/ticket-automation-runs-status.repository';
+import { UserChatSessionReadStateRepository } from '../repositories/user-chat-session-read-state.repository';
 import { UserEnvironmentReadStateRepository } from '../repositories/user-environment-read-state.repository';
 
 import { AgentConsoleStatusRealtimeService } from './agent-console-status-realtime.service';
@@ -12,6 +13,18 @@ import { ClientAgentMessagesProxyService } from './client-agent-messages-proxy.s
 import { ClientAgentProxyService } from './client-agent-proxy.service';
 import { ClientAgentVcsProxyService } from './client-agent-vcs-proxy.service';
 import { ClientsService } from './clients.service';
+
+const PRIMARY_CHAT_ID = 'chat-primary';
+const USER_CHAT_ID = 'chat-user';
+
+const mockAgent = {
+  id: 'agent-1',
+  primaryChatId: PRIMARY_CHAT_ID,
+  chats: [
+    { id: PRIMARY_CHAT_ID, kind: 'primary' as const, createdAt: new Date() },
+    { id: USER_CHAT_ID, kind: 'user' as const, createdAt: new Date() },
+  ],
+};
 
 describe('AgentConsoleStatusService', () => {
   let service: AgentConsoleStatusService;
@@ -26,6 +39,11 @@ describe('AgentConsoleStatusService', () => {
     findUserClientAccess: jest.fn().mockResolvedValue({ role: 'user' }),
   };
   const readStateRepository = {
+    findByUserAndClientIds: jest.fn().mockResolvedValue([]),
+    findOne: jest.fn().mockResolvedValue(null),
+    upsertReadState: jest.fn().mockResolvedValue({}),
+  };
+  const chatReadStateRepository = {
     findByUserAndClientIds: jest.fn().mockResolvedValue([]),
     findOne: jest.fn().mockResolvedValue(null),
     upsertReadState: jest.fn().mockResolvedValue({}),
@@ -47,7 +65,7 @@ describe('AgentConsoleStatusService', () => {
     }),
   };
   const agentProxy = {
-    getClientAgents: jest.fn().mockResolvedValue([{ id: 'agent-1' }]),
+    getClientAgents: jest.fn().mockResolvedValue([mockAgent]),
   };
   const realtime = {
     emitToUser: jest.fn(),
@@ -64,6 +82,7 @@ describe('AgentConsoleStatusService', () => {
         { provide: ClientsRepository, useValue: clientsRepository },
         { provide: ClientUsersRepository, useValue: clientUsersRepository },
         { provide: UserEnvironmentReadStateRepository, useValue: readStateRepository },
+        { provide: UserChatSessionReadStateRepository, useValue: chatReadStateRepository },
         { provide: TicketAutomationRunsStatusRepository, useValue: automationRunsStatusRepository },
         { provide: ClientAgentMessagesProxyService, useValue: messagesProxy },
         { provide: ClientAgentVcsProxyService, useValue: vcsProxy },
@@ -74,12 +93,18 @@ describe('AgentConsoleStatusService', () => {
 
     service = module.get(AgentConsoleStatusService);
     jest.clearAllMocks();
-    agentProxy.getClientAgents.mockResolvedValue([{ id: 'agent-1' }]);
+    agentProxy.getClientAgents.mockResolvedValue([mockAgent]);
     clientsRepository.findById.mockResolvedValue({ id: 'client-1', userId: 'user-1' });
     clientUsersRepository.findByClientId.mockResolvedValue([]);
+    chatReadStateRepository.findByUserAndClientIds.mockResolvedValue([]);
+    automationRunsStatusRepository.findLatestUpdatedAtByClient.mockResolvedValue(new Map());
+    messagesProxy.getLatestAgentMessage.mockResolvedValue({
+      id: 'msg-1',
+      createdAt: new Date('2026-01-02T00:00:00.000Z').toISOString(),
+    });
   });
 
-  it('builds snapshot with unread and git dirty', async () => {
+  it('builds snapshot with per-chat unread rollup and git dirty', async () => {
     const snapshot = await service.buildSnapshotForUser({
       isApiKeyAuth: false,
       userId: 'user-1',
@@ -94,28 +119,96 @@ describe('AgentConsoleStatusService', () => {
       hasUnreadMessages: true,
       gitDirty: true,
     });
+    expect(snapshot.environments[0].chats).toEqual(
+      expect.arrayContaining([
+        { chatSessionId: PRIMARY_CHAT_ID, hasUnreadMessages: true },
+        { chatSessionId: USER_CHAT_ID, hasUnreadMessages: true },
+      ]),
+    );
     expect(snapshot.spacesHasAttention).toBe(true);
   });
 
-  it('marks environment read and emits patch', async () => {
+  it('excludes hidden ACP chat sessions from chats[]', async () => {
+    agentProxy.getClientAgents.mockResolvedValue([
+      {
+        ...mockAgent,
+        chats: [...mockAgent.chats, { id: 'chat-hidden', kind: 'reserved' as never, createdAt: new Date() }],
+      },
+    ]);
+
+    const snapshot = await service.buildSnapshotForUser({
+      isApiKeyAuth: false,
+      userId: 'user-1',
+      userRole: UserRole.USER,
+      user: { id: 'user-1', roles: [] },
+    });
+
+    expect(snapshot.environments[0].chats?.map((c) => c.chatSessionId)).toEqual([PRIMARY_CHAT_ID, USER_CHAT_ID]);
+  });
+
+  it('attributes automation activity only to primary chat unread', async () => {
+    messagesProxy.getLatestAgentMessage.mockImplementation(
+      async (_clientId: string, _agentId: string, chatSessionId?: string) => {
+        if (chatSessionId === USER_CHAT_ID) {
+          return null;
+        }
+
+        return null;
+      },
+    );
+    automationRunsStatusRepository.findLatestUpdatedAtByClient.mockResolvedValue(
+      new Map([['agent-1', new Date('2026-01-05T00:00:00.000Z')]]),
+    );
+
+    const snapshot = await service.buildSnapshotForUser({
+      isApiKeyAuth: false,
+      userId: 'user-1',
+      userRole: UserRole.USER,
+      user: { id: 'user-1', roles: [] },
+    });
+
+    const chats = snapshot.environments[0].chats ?? [];
+    expect(chats.find((c) => c.chatSessionId === PRIMARY_CHAT_ID)?.hasUnreadMessages).toBe(true);
+    expect(chats.find((c) => c.chatSessionId === USER_CHAT_ID)?.hasUnreadMessages).toBe(false);
+    expect(snapshot.environments[0].hasUnreadMessages).toBe(true);
+  });
+
+  it('marks environment read for selected chat session', async () => {
     jest.mocked(readStateRepository.upsertReadState).mockResolvedValue({
       userId: 'user-1',
       clientId: 'client-1',
       agentId: 'agent-1',
       lastReadAt: new Date(),
     } as never);
-    messagesProxy.getLatestAgentMessage.mockResolvedValue({
-      id: 'msg-1',
-      createdAt: new Date().toISOString(),
-    });
 
     await service.markEnvironmentRead(
       { isApiKeyAuth: false, userId: 'user-1', user: { id: 'user-1', roles: [] } },
       'client-1',
       'agent-1',
+      USER_CHAT_ID,
     );
 
-    expect(readStateRepository.upsertReadState).toHaveBeenCalled();
+    expect(messagesProxy.getLatestAgentMessage).toHaveBeenCalledWith('client-1', 'agent-1', USER_CHAT_ID);
+    expect(chatReadStateRepository.upsertReadState).toHaveBeenCalledWith(
+      expect.objectContaining({ chatSessionId: USER_CHAT_ID }),
+    );
+    expect(realtime.emitToUser).toHaveBeenCalledWith('user-1', 'statusPatch', expect.any(Object));
+  });
+
+  it('marks chat session read', async () => {
+    await service.markChatSessionRead(
+      { isApiKeyAuth: false, userId: 'user-1', user: { id: 'user-1', roles: [] } },
+      'client-1',
+      'agent-1',
+      USER_CHAT_ID,
+    );
+
+    expect(chatReadStateRepository.upsertReadState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-1',
+        chatSessionId: USER_CHAT_ID,
+      }),
+    );
     expect(realtime.emitToUser).toHaveBeenCalledWith('user-1', 'statusPatch', expect.any(Object));
   });
 
@@ -160,13 +253,13 @@ describe('AgentConsoleStatusService', () => {
   });
 
   it('tracks active environment per socket and clears on disconnect', () => {
-    service.setActiveEnvironment('socket-1', 'client-1', 'agent-1');
+    service.setActiveEnvironment('socket-1', 'client-1', 'agent-1', PRIMARY_CHAT_ID);
     expect(service.isActiveEnvironmentForSocket('socket-1', 'client-1', 'agent-1')).toBe(true);
 
     service.setActiveEnvironment('socket-1', null, null);
     expect(service.isActiveEnvironmentForSocket('socket-1', 'client-1', 'agent-1')).toBe(false);
 
-    service.setActiveEnvironment('socket-1', 'client-1', 'agent-1');
+    service.setActiveEnvironment('socket-1', 'client-1', 'agent-1', PRIMARY_CHAT_ID);
     service.clearSocket('socket-1');
     expect(service.isActiveEnvironmentForSocket('socket-1', 'client-1', 'agent-1')).toBe(false);
   });
@@ -204,7 +297,7 @@ describe('AgentConsoleStatusService', () => {
   });
 
   it('rejects markEnvironmentRead when agent is not accessible', async () => {
-    agentProxy.getClientAgents.mockResolvedValue([{ id: 'other-agent' }]);
+    agentProxy.getClientAgents.mockResolvedValue([{ id: 'other-agent', chats: [], primaryChatId: '' }]);
 
     await expect(
       service.markEnvironmentRead(
@@ -215,20 +308,39 @@ describe('AgentConsoleStatusService', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
-  it('notifies users on agent chat activity and auto-reads active environment', async () => {
+  it('auto-reads only when active chatSessionId matches activity chat', async () => {
     realtime.getUserIdForSocket.mockReturnValue('user-1');
-    service.setActiveEnvironment('socket-1', 'client-1', 'agent-1');
+    service.setActiveEnvironment('socket-1', 'client-1', 'agent-1', PRIMARY_CHAT_ID);
 
-    await service.onAgentChatActivity('client-1', 'agent-1', new Date('2026-01-03T00:00:00.000Z'));
+    await service.onAgentChatActivity('client-1', 'agent-1', PRIMARY_CHAT_ID, new Date('2026-01-03T00:00:00.000Z'));
 
-    expect(readStateRepository.upsertReadState).toHaveBeenCalledWith(
+    expect(chatReadStateRepository.upsertReadState).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: 'user-1',
-        clientId: 'client-1',
-        agentId: 'agent-1',
+        chatSessionId: PRIMARY_CHAT_ID,
         lastReadAt: new Date('2026-01-03T00:00:00.000Z'),
       }),
     );
+    expect(realtime.emitToUser).toHaveBeenCalledWith('user-1', 'statusPatch', expect.any(Object));
+  });
+
+  it('does not auto-read primary when active env has no chatSessionId', async () => {
+    realtime.getUserIdForSocket.mockReturnValue('user-1');
+    service.setActiveEnvironment('socket-1', 'client-1', 'agent-1', null);
+
+    await service.onAgentChatActivity('client-1', 'agent-1', PRIMARY_CHAT_ID, new Date('2026-01-03T00:00:00.000Z'));
+
+    expect(chatReadStateRepository.upsertReadState).not.toHaveBeenCalled();
+    expect(realtime.emitToUser).toHaveBeenCalledWith('user-1', 'statusPatch', expect.any(Object));
+  });
+
+  it('does not auto-read when viewing a different chat session', async () => {
+    realtime.getUserIdForSocket.mockReturnValue('user-1');
+    service.setActiveEnvironment('socket-1', 'client-1', 'agent-1', USER_CHAT_ID);
+
+    await service.onAgentChatActivity('client-1', 'agent-1', PRIMARY_CHAT_ID, new Date('2026-01-03T00:00:00.000Z'));
+
+    expect(chatReadStateRepository.upsertReadState).not.toHaveBeenCalled();
     expect(realtime.emitToUser).toHaveBeenCalledWith('user-1', 'statusPatch', expect.any(Object));
   });
 
@@ -239,7 +351,7 @@ describe('AgentConsoleStatusService', () => {
       files: [{ status: 'UU', path: 'conflict.ts' }],
     });
     messagesProxy.getLatestAgentMessage.mockResolvedValue(null);
-    readStateRepository.findByUserAndClientIds.mockResolvedValue([]);
+    chatReadStateRepository.findByUserAndClientIds.mockResolvedValue([]);
 
     const snapshot = await service.buildSnapshotForUser({
       isApiKeyAuth: false,
@@ -268,7 +380,7 @@ describe('AgentConsoleStatusService', () => {
     expect(snapshot.environments).toEqual([]);
   });
 
-  it('notifies workspace owner and members on automation chat activity', async () => {
+  it('notifies workspace owner and members on automation chat activity via primary', async () => {
     clientsRepository.findById.mockResolvedValue({ id: 'client-1', userId: 'owner-1' });
     clientUsersRepository.findByClientId.mockResolvedValue([{ userId: 'member-1' }]);
 

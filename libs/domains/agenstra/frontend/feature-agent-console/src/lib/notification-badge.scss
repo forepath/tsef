@@ -10,3 +10,7 @@
 .list-group-item.active .notification-badge {
   background-color: var(--bs-white);
 }
+
+.dropdown-item.active .notification-badge {
+  background-color: var(--bs-white);
+}

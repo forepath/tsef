@@ -80,6 +80,20 @@ In api-key mode, users do not play a role; these endpoints are not applicable.
 - `DELETE /api/clients/:id/agents/:agentId/environment/:envVarId` - Delete environment variable (proxied)
 - `DELETE /api/clients/:id/agents/:agentId/environment` - Delete all environment variables (proxied)
 
+### Proxied chat sessions
+
+User-visible chat sessions for an agent environment. See [Chat Interface](../features/chat-interface.md). PAT scope: `agents:chats`.
+
+- `GET /api/clients/:id/agents/:agentId/chats` - List sessions (proxied; `limit`, `offset`)
+- `GET /api/clients/:id/agents/:agentId/chats/count` - Count sessions (proxied)
+- `POST /api/clients/:id/agents/:agentId/chats` - Create a user session (proxied)
+- `GET /api/clients/:id/agents/:agentId/chats/:chatId` - Get a session (proxied)
+- `PUT /api/clients/:id/agents/:agentId/chats/:chatId` - Update session title (proxied)
+- `DELETE /api/clients/:id/agents/:agentId/chats/:chatId` - Delete a session (proxied)
+- `GET /api/clients/:id/agents/:agentId/chats/:chatId/messages` - List session messages (proxied)
+
+Agent profile responses from the manager include `chats` and `primaryChatId`. Create/update/delete publish `chat_session.*` webhooks.
+
 ### Proxied deployments (CI/CD)
 
 The console calls the controller; the controller proxies to each client’s agent-manager. Typical paths:
@@ -227,7 +241,7 @@ Unauthenticated connections are rejected with `connect_error` "Unauthorized". Th
 #### Client → Server
 
 - `setClient` - Set the client context for subsequent operations (requires access to the client)
-- `forward` - Forward an event to the remote agent-manager WebSocket (same event names as on the manager, e.g. `chat`, `login`)
+- `forward` - Forward an event to the remote agent-manager WebSocket (same event names as on the manager, e.g. `chat`, `login`, `restoreChat`; chat/login payloads may include `chatId`)
 
 #### Server → Client
 

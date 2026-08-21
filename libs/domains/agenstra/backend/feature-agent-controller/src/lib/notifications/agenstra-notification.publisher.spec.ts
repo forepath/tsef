@@ -149,6 +149,7 @@ describe('AgenstraNotificationPublisher', () => {
       source: 'user',
       message: 'Hello agent',
       userId: 'user-1',
+      chatId: 'chat-1',
     });
 
     expect(dispatcher.publishFireAndForget).toHaveBeenCalledWith({
@@ -159,6 +160,7 @@ describe('AgenstraNotificationPublisher', () => {
         agentId: 'agent-1',
         message: 'Hello agent',
         source: 'user',
+        chatId: 'chat-1',
       }),
     });
   });
@@ -315,5 +317,46 @@ describe('AgenstraNotificationPublisher', () => {
         updatedAt: '2026-07-02T10:00:00.000Z',
       },
     });
+  });
+
+  it('publishes chat session lifecycle events', () => {
+    const dispatcher = {
+      publishFireAndForget: jest.fn(),
+    } as unknown as NotificationDispatcherService;
+    const publisher = new AgenstraNotificationPublisher(dispatcher);
+
+    publisher.publishChatSession('chat_session.created', 'client-1', {
+      id: 'chat-1',
+      agentId: 'agent-1',
+      title: 'Planning',
+      kind: 'user',
+      lastMessageAt: new Date('2026-07-01T11:00:00.000Z'),
+      createdAt: new Date('2026-07-01T10:00:00.000Z'),
+      updatedAt: new Date('2026-07-02T10:00:00.000Z'),
+    });
+
+    expect(dispatcher.publishFireAndForget).toHaveBeenCalledWith({
+      type: 'chat_session.created',
+      scopeKey: INSTANCE_SCOPE_KEY,
+      clientId: 'client-1',
+      data: {
+        id: 'chat-1',
+        agentId: 'agent-1',
+        title: 'Planning',
+        kind: 'user',
+        lastMessageAt: '2026-07-01T11:00:00.000Z',
+        createdAt: '2026-07-01T10:00:00.000Z',
+        updatedAt: '2026-07-02T10:00:00.000Z',
+      },
+    });
+    expect(dispatcher.publishFireAndForget).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({
+          message: expect.anything(),
+          body: expect.anything(),
+          content: expect.anything(),
+        }),
+      }),
+    );
   });
 });

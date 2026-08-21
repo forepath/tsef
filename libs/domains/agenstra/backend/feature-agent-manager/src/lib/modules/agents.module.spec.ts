@@ -6,6 +6,7 @@ import { AgentsDeploymentsController } from '../controllers/agents-deployments.c
 import { AgentsMessagesController } from '../controllers/agents-messages.controller';
 import { AgentsController } from '../controllers/agents.controller';
 import { InstanceStatusController } from '../controllers/instance-status.controller';
+import { AgentChatSessionEntity } from '../entities/agent-chat-session.entity';
 import { AgentEnvironmentVariableEntity } from '../entities/agent-environment-variable.entity';
 import { AgentMessageEventEntity } from '../entities/agent-message-event.entity';
 import { AgentMessageEntity } from '../entities/agent-message.entity';
@@ -33,6 +34,7 @@ import { AgentMessagesRepository } from '../repositories/agent-messages.reposito
 import { AgentsRepository } from '../repositories/agents.repository';
 import { DeploymentConfigurationsRepository } from '../repositories/deployment-configurations.repository';
 import { DeploymentRunsRepository } from '../repositories/deployment-runs.repository';
+import { AgentChatSessionsService } from '../services/agent-chat-sessions.service';
 import { AgentEnvironmentVariablesService } from '../services/agent-environment-variables.service';
 import { AgentMessagesService } from '../services/agent-messages.service';
 import { AgentsService } from '../services/agents.service';
@@ -78,6 +80,8 @@ describe('AgentsModule', () => {
       .overrideProvider(getRepositoryToken(AgentEntity))
       .useValue(mockRepository)
       .overrideProvider(getRepositoryToken(AgentMessageEntity))
+      .useValue(mockRepository)
+      .overrideProvider(getRepositoryToken(AgentChatSessionEntity))
       .useValue(mockRepository)
       .overrideProvider(getRepositoryToken(AgentEnvironmentVariableEntity))
       .useValue(mockRepository)
@@ -341,6 +345,13 @@ describe('AgentsModule', () => {
 
     expect(service).toBeDefined();
     expect(service).toBeInstanceOf(AgentMessagesService);
+  });
+
+  it('should provide AgentChatSessionsService', () => {
+    const service = module.get<AgentChatSessionsService>(AgentChatSessionsService);
+
+    expect(service).toBeDefined();
+    expect(service).toBeInstanceOf(AgentChatSessionsService);
   });
 
   it('should provide AgentMessagesRepository', () => {

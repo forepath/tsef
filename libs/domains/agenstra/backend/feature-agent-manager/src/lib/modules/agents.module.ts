@@ -6,6 +6,7 @@ import { PasswordService } from '@forepath/identity/backend';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AgentsChatSessionsController } from '../controllers/agents-chat-sessions.controller';
 import { AgentsDeploymentsController } from '../controllers/agents-deployments.controller';
 import { InstanceStatusController } from '../controllers/instance-status.controller';
 import { AgentsEnvironmentVariablesController } from '../controllers/agents-environment-variables.controller';
@@ -17,6 +18,7 @@ import { AgentsVerificationController } from '../controllers/agents-verification
 import { AgentsController } from '../controllers/agents.controller';
 import { ConfigController } from '../controllers/config.controller';
 import { WorkspaceConfigurationOverridesController } from '../controllers/workspace-configuration-overrides.controller';
+import { AgentChatSessionEntity } from '../entities/agent-chat-session.entity';
 import { AgentEnvironmentVariableEntity } from '../entities/agent-environment-variable.entity';
 import { AgentMessageEventEntity } from '../entities/agent-message-event.entity';
 import { AgentMessageEntity } from '../entities/agent-message.entity';
@@ -48,6 +50,7 @@ import type { PipelineProvider } from '../providers/pipeline-provider.interface'
 import type { ChatFilter } from '../providers/chat-filter.interface';
 import { GitHubProvider } from '../providers/pipelines/github.provider';
 import { GitLabProvider } from '../providers/pipelines/gitlab.provider';
+import { AgentChatSessionsRepository } from '../repositories/agent-chat-sessions.repository';
 import { AgentEnvironmentVariablesRepository } from '../repositories/agent-environment-variables.repository';
 import { AgentMessageEventsRepository } from '../repositories/agent-message-events.repository';
 import { AgentMessagesRepository } from '../repositories/agent-messages.repository';
@@ -56,6 +59,7 @@ import { DeploymentConfigurationsRepository } from '../repositories/deployment-c
 import { DeploymentRunsRepository } from '../repositories/deployment-runs.repository';
 import { RegexFilterRulesRepository } from '../repositories/regex-filter-rules.repository';
 import { WorkspaceConfigurationOverridesRepository } from '../repositories/workspace-configuration-overrides.repository';
+import { AgentChatSessionsService } from '../services/agent-chat-sessions.service';
 import { AgentEnvironmentVariablesService } from '../services/agent-environment-variables.service';
 import { AgentFileSystemService } from '../services/agent-file-system.service';
 import { AgentGitStateBroadcastService } from '../services/agent-git-state-broadcast.service';
@@ -85,6 +89,7 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
       AgentEntity,
       AgentMessageEntity,
       AgentMessageEventEntity,
+      AgentChatSessionEntity,
       AgentEnvironmentVariableEntity,
       DeploymentConfigurationEntity,
       DeploymentRunEntity,
@@ -100,6 +105,7 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
     AgentsVerificationController,
     AgentsDeploymentsController,
     AgentsEnvironmentVariablesController,
+    AgentsChatSessionsController,
     AgentsFiltersController,
     ConfigController,
     InstanceStatusController,
@@ -113,6 +119,7 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
     PromptContextComposerService,
     AgentMessageEventsService,
     AgentSessionHydrationService,
+    AgentChatSessionsService,
     AgentEnvironmentVariablesService,
     AgentGitStateBroadcastService,
     AgentFileSystemService,
@@ -125,6 +132,7 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
     AgentsRepository,
     AgentMessagesRepository,
     AgentMessageEventsRepository,
+    AgentChatSessionsRepository,
     AgentEnvironmentVariablesRepository,
     DeploymentConfigurationsRepository,
     DeploymentRunsRepository,
@@ -243,10 +251,12 @@ import { WorkspaceConfigurationOverridesService } from '../services/workspace-co
   ],
   exports: [
     AgentsService,
+    AgentChatSessionsService,
     AgentEnvironmentVariablesService,
     AgentMessagesService,
     DeploymentsService,
     AgentsRepository,
+    AgentChatSessionsRepository,
     AgentEnvironmentVariablesRepository,
     AgentMessagesRepository,
     DeploymentConfigurationsRepository,

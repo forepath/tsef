@@ -42,3 +42,25 @@ export const selectEnvironmentAttentionBadge = (clientId: string, agentId: strin
     selectEnvironmentHasUnread(clientId, agentId),
     (gitDirty, hasUnread) => resolveAttentionBadgeKind(gitDirty, hasUnread),
   );
+
+export const selectChatSessionHasUnread = (clientId: string, agentId: string, chatSessionId: string) =>
+  createSelector(selectEnvironmentStatus(clientId, agentId), (env) => {
+    if (!env?.chats?.length) {
+      return false;
+    }
+
+    return env.chats.some((c) => c.chatSessionId === chatSessionId && c.hasUnreadMessages);
+  });
+
+export const selectOtherChatSessionsHaveUnread = (
+  clientId: string,
+  agentId: string,
+  selectedChatSessionId: string | null,
+) =>
+  createSelector(selectEnvironmentStatus(clientId, agentId), (env) => {
+    if (!env?.chats?.length || !selectedChatSessionId) {
+      return false;
+    }
+
+    return env.chats.some((c) => c.chatSessionId !== selectedChatSessionId && c.hasUnreadMessages);
+  });

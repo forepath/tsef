@@ -1,5 +1,8 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 
+import { selectChatSessionsMap, selectSelectedChatIdsMap } from '../chat-sessions/chat-sessions.selectors';
+import { getClientAgentKey } from '../chat-sessions/chat-sessions.reducer';
+
 import { CLIENT_CHAT_AUTOMATION_SOCKET_EVENT } from './client-chat-automation.constants';
 import type { SocketsState } from './sockets.reducer';
 import type { ChatMessageData, TicketAutomationRunChatEventPayload } from './sockets.types';
@@ -154,6 +157,7 @@ export type ChatTimelineOrderedRow = {
   payload: import('./sockets.types').ForwardedEventPayload;
   timestamp: number;
   semanticTimestamp: number;
+  chatId?: string;
 };
 
 function semanticSortKey(row: { event: string; payload: unknown; timestamp: number }): number {
@@ -186,14 +190,43 @@ function semanticSortKey(row: { event: string; payload: unknown; timestamp: numb
 
 /**
  * Chat messages merged with ticket automation chat events, ordered by semantic time.
- * Automation rows are deduped by `run.id` (latest `timelineAt` wins). Filtered to `run.agentId === selectedAgentId` when an agent is selected.
+ * Automation rows are deduped by `run.id` (latest `timelineAt` wins). Filtered to `run.agentId === selectedAgentId`
+ * when an agent is selected, and shown only on the primary chat session (main thread).
+ * Chat messages are filtered to the selected chat session when a chatId is selected and present on the message.
  */
 export const selectChatTimelineOrdered = createSelector(
   selectForwardedEvents,
   selectSelectedAgentId,
-  (events, selectedAgentId): ChatTimelineOrderedRow[] => {
-    const chatMsgs = events.filter((e) => e.event === 'chatMessage');
-    const rawAuto = events.filter((e) => e.event === CLIENT_CHAT_AUTOMATION_SOCKET_EVENT);
+  selectSelectedClientId,
+  selectSelectedChatIdsMap,
+  selectChatSessionsMap,
+  (events, selectedAgentId, selectedClientId, selectedChatIds, sessionsMap): ChatTimelineOrderedRow[] => {
+    const agentKey = selectedClientId && selectedAgentId ? getClientAgentKey(selectedClientId, selectedAgentId) : null;
+    const selectedChatId = agentKey ? (selectedChatIds[agentKey] ?? null) : null;
+    const sessions = agentKey ? (sessionsMap[agentKey] ?? null) : null;
+    const primaryChatId = sessions?.find((session) => session.kind === 'primary')?.id ?? null;
+    const showAutomationCards = !selectedChatId || (!!primaryChatId && selectedChatId === primaryChatId);
+    const chatMsgs = events.filter((e) => {
+      if (e.event !== 'chatMessage') {
+        return false;
+      }
+
+      if (!selectedChatId) {
+        return true;
+      }
+
+      const rowChatId =
+        e.chatId ??
+        (e.payload &&
+          typeof e.payload === 'object' &&
+          'success' in e.payload &&
+          e.payload.success &&
+          (e.payload as { data?: ChatMessageData }).data?.chatId);
+
+      // Strict session isolation: only show messages tagged for the selected chat.
+      return rowChatId === selectedChatId;
+    });
+    const rawAuto = showAutomationCards ? events.filter((e) => e.event === CLIENT_CHAT_AUTOMATION_SOCKET_EVENT) : [];
     const byRun = new Map<string, (typeof events)[0]>();
 
     for (const e of rawAuto) {

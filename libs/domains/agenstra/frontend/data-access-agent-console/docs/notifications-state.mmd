@@ -15,5 +15,5 @@ sequenceDiagram
     SG-->>NgRx: statusPatch
     NgRx-->>UI: play sound if not active env
 
-    UI->>NgRx: markEnvironmentRead / setActiveEnvironment
+    UI->>NgRx: markEnvironmentRead / markChatSessionRead / setActiveEnvironment
     NgRx->>SG: emit to server

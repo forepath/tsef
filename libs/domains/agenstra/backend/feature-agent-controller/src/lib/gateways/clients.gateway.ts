@@ -427,10 +427,15 @@ export class ClientsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
               source: 'agent',
               message: text,
               userId: userId ?? null,
+              chatId: typeof payload?.chatId === 'string' ? payload.chatId : null,
             });
 
             void this.agentConsoleStatusService
-              .onAgentChatActivity(currentClientId, lastAgentId)
+              .onAgentChatActivity(
+                currentClientId,
+                lastAgentId,
+                typeof payload?.chatId === 'string' ? payload.chatId : null,
+              )
               .catch(() => undefined);
           }
         } else if (event === 'gitStateChanged' && currentClientId && args.length > 0) {
@@ -1126,6 +1131,7 @@ export class ClientsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       if (event === 'chat' && agentId) {
         const message =
           (payloadWithContext as { message?: string; contextInjection?: ContextInjectionPayload })?.message ?? '';
+        const chatId = (payloadWithContext as { chatId?: string })?.chatId;
         const wordCount = message.trim().split(/\s+/).filter(Boolean).length;
         const charCount = message.length;
         const userInfo = (socket as Socket & { data?: { userInfo?: { userId?: string } } }).data?.userInfo;
@@ -1139,6 +1145,7 @@ export class ClientsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           source: 'user',
           message,
           userId: userInfo?.userId ?? null,
+          chatId: typeof chatId === 'string' ? chatId : null,
         });
         this.lastAgentIdBySocket.set(socket.id, agentId);
         this.lastChatMessageBySocket.set(socket.id, message);

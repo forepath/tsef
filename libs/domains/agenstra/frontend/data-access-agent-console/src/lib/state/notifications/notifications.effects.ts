@@ -15,6 +15,7 @@ import {
   disconnectNotificationsSocket,
   disconnectNotificationsSocketSuccess,
   markEnvironmentRead,
+  markChatSessionRead,
   notificationsSocketError,
   notificationsSocketReconnected,
   notificationsSocketReconnectError,
@@ -186,8 +187,27 @@ export const markEnvironmentRead$ = createEffect(
   (actions$ = inject(Actions)) =>
     actions$.pipe(
       ofType(markEnvironmentRead),
-      tap(({ clientId, agentId }) => {
-        statusSocketInstance?.emit(STATUS_SOCKET_EVENTS.markEnvironmentRead, { clientId, agentId });
+      tap(({ clientId, agentId, chatSessionId }) => {
+        statusSocketInstance?.emit(STATUS_SOCKET_EVENTS.markEnvironmentRead, {
+          clientId,
+          agentId,
+          chatSessionId,
+        });
+      }),
+    ),
+  { functional: true, dispatch: false },
+);
+
+export const markChatSessionRead$ = createEffect(
+  (actions$ = inject(Actions)) =>
+    actions$.pipe(
+      ofType(markChatSessionRead),
+      tap(({ clientId, agentId, chatSessionId }) => {
+        statusSocketInstance?.emit(STATUS_SOCKET_EVENTS.markChatSessionRead, {
+          clientId,
+          agentId,
+          chatSessionId,
+        });
       }),
     ),
   { functional: true, dispatch: false },
@@ -197,11 +217,15 @@ export const setActiveEnvironment$ = createEffect(
   (actions$ = inject(Actions), store = inject(Store)) =>
     actions$.pipe(
       ofType(setActiveEnvironment),
-      tap(({ clientId, agentId }) => {
-        statusSocketInstance?.emit(STATUS_SOCKET_EVENTS.setActiveEnvironment, { clientId, agentId });
+      tap(({ clientId, agentId, chatSessionId }) => {
+        statusSocketInstance?.emit(STATUS_SOCKET_EVENTS.setActiveEnvironment, {
+          clientId,
+          agentId,
+          chatSessionId,
+        });
         store.dispatch(
           setActiveEnvironmentLocal({
-            active: clientId && agentId ? { clientId, agentId } : null,
+            active: clientId && agentId ? { clientId, agentId, chatSessionId: chatSessionId ?? null } : null,
           }),
         );
       }),
