@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.26.1](https://github.com/forepath/one/compare/v2.26.0...v2.26.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **agenstra:** acp session management ([#578](https://github.com/forepath/one/issues/578)) ([b728c38](https://github.com/forepath/one/commit/b728c38bfe24a4cf7101f256e87c8d1849c4dab3))
+* **agenstra:** new message marker persistence ([#577](https://github.com/forepath/one/issues/577)) ([7b9b2ae](https://github.com/forepath/one/commit/7b9b2aeba0565c575805f9b4b47efd372a2d58ab))
+
 ## [2.26.0](https://github.com/forepath/one/compare/v2.25.1...v2.26.0) (2026-08-21)
 
 
