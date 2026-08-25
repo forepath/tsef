@@ -3,8 +3,12 @@ import {
   getGeographyEnumFromSchema,
   getGeographyFieldKeyFromSchema,
   mirrorGeographyInConfig,
+  normalizeGeographyByProvider,
   providerConfigSchemaSupportsLocationSelection,
+  readRequestedGeography,
+  resolveDefaultGeographyForProvider,
   resolveProvisioningRegion,
+  stripGeographyByProviderFromConfig,
   stripGeographyFromRequestedConfig,
 } from './provider-location.utils';
 
@@ -66,14 +70,39 @@ describe('provider-location.utils', () => {
     expect(out).toEqual({ x: 1 });
   });
 
-  it('effectiveSchemaSupportsLocationSelection uses provider schema when service type schema is empty', () => {
-    expect(effectiveSchemaSupportsLocationSelection({}, schemaWithRegion)).toBe(true);
-    expect(effectiveSchemaSupportsLocationSelection({ properties: {} }, schemaWithRegion)).toBe(true);
-  });
-
-  it('effectiveSchemaSupportsLocationSelection prefers service type schema when present', () => {
+  it('effectiveSchemaSupportsLocationSelection falls back to provider schema', () => {
     const st = { properties: { region: { type: 'string', enum: ['a'] } } };
 
-    expect(effectiveSchemaSupportsLocationSelection(st, undefined)).toBe(true);
+    expect(effectiveSchemaSupportsLocationSelection({}, st)).toBe(true);
+  });
+
+  it('resolveDefaultGeographyForProvider prefers per-provider map', () => {
+    expect(
+      resolveDefaultGeographyForProvider(
+        {
+          location: 'fsn1',
+          geographyByProvider: { hetzner: 'nbg1', 'digital-ocean': 'fra1' },
+        },
+        'digital-ocean',
+      ),
+    ).toBe('fra1');
+  });
+
+  it('normalizeGeographyByProvider and stripGeographyByProviderFromConfig', () => {
+    expect(normalizeGeographyByProvider({ hetzner: ' fsn1 ', '': 'x' })).toEqual({ hetzner: 'fsn1' });
+
+    const config: Record<string, unknown> = {
+      location: 'fsn1',
+      geographyByProvider: { hetzner: 'fsn1' },
+    };
+
+    stripGeographyByProviderFromConfig(config);
+    expect(config).toEqual({ location: 'fsn1' });
+  });
+
+  it('readRequestedGeography prefers region then location', () => {
+    expect(readRequestedGeography({ region: 'fra1', location: 'fsn1' })).toBe('fra1');
+    expect(readRequestedGeography({ location: 'nbg1' })).toBe('nbg1');
+    expect(readRequestedGeography({})).toBe('');
   });
 });

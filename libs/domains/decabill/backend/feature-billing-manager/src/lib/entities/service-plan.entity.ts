@@ -104,6 +104,14 @@ export class ServicePlanEntity {
   @Column({ type: 'jsonb', name: 'allowed_server_types', default: () => "'[]'::jsonb" })
   allowedServerTypes!: string[];
 
+  /** When true, customers may choose provider from allowedProviders at checkout. */
+  @Column({ type: 'boolean', name: 'allow_customer_provider_selection', default: false })
+  allowCustomerProviderSelection!: boolean;
+
+  /** Provider ids customers may select when allowCustomerProviderSelection is true (subset of service type). */
+  @Column({ type: 'jsonb', name: 'allowed_providers', default: () => "'[]'::jsonb" })
+  allowedProviders!: string[];
+
   @Column({
     type: 'enum',
     enum: TaxCategory,

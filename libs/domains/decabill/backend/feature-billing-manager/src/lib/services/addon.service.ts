@@ -18,6 +18,7 @@ import {
 } from '../utils/addon-config.utils';
 import { assertNonNegativeAddonPrice } from '../utils/addon-pricing.util';
 import { parsePlanMandatoryAddonIds, planReferencesAddonId } from '../utils/plan-addons.utils';
+import { resolveEffectiveProvider, resolveServiceTypeAllowedProviders } from '../utils/provider-selection.utils';
 import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { ProviderRegistryService } from './provider-registry.service';
 
@@ -144,8 +145,14 @@ export class AddonService {
     return getAddonOrderFields(parseAddonConfigFields(addon.configSchema) as never);
   }
 
-  providerSupportsAddons(providerId: string): boolean {
-    const detail = this.providerRegistry.getProviders().find((p) => p.id === providerId);
+  providerSupportsAddons(providerId: string | null | undefined): boolean {
+    const trimmed = providerId?.trim();
+
+    if (!trimmed) {
+      return false;
+    }
+
+    const detail = this.providerRegistry.getProviders().find((p) => p.id === trimmed);
 
     return detail?.supportsAddons === true;
   }
@@ -160,10 +167,11 @@ export class AddonService {
     }
 
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
+    const primaryProvider = resolveServiceTypeAllowedProviders(serviceType)[0] ?? serviceType.provider ?? null;
 
-    if (!this.providerSupportsAddons(serviceType.provider)) {
+    if (!this.providerSupportsAddons(primaryProvider)) {
       throw new BadRequestException(
-        `Provider "${serviceType.provider}" does not support addons; remove allowedAddonIds from the plan`,
+        `Provider "${primaryProvider ?? 'none'}" does not support addons; remove allowedAddonIds from the plan`,
       );
     }
 
@@ -186,8 +194,12 @@ export class AddonService {
         throw new BadRequestException(`Addon "${addon.key}" is not active`);
       }
 
-      if (addon.compatibleProviders.length > 0 && !addon.compatibleProviders.includes(serviceType.provider)) {
-        throw new BadRequestException(`Addon "${addon.key}" is not compatible with provider "${serviceType.provider}"`);
+      if (
+        primaryProvider &&
+        addon.compatibleProviders.length > 0 &&
+        !addon.compatibleProviders.includes(primaryProvider)
+      ) {
+        throw new BadRequestException(`Addon "${addon.key}" is not compatible with provider "${primaryProvider}"`);
       }
     }
   }
@@ -207,15 +219,24 @@ export class AddonService {
     serviceTypeId: string,
     planAllowedAddonIds: string[],
     requestedAddonIds: string[],
+    requestedConfig?: Record<string, unknown>,
+    plan?: {
+      allowCustomerProviderSelection?: boolean | null;
+      allowedProviders?: string[] | null;
+    },
   ): Promise<AddonEntity[]> {
     if (requestedAddonIds.length === 0) {
       return [];
     }
 
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
+    const providerToCheck =
+      resolveEffectiveProvider(serviceType, plan ?? {}, requestedConfig) ??
+      resolveServiceTypeAllowedProviders(serviceType)[0] ??
+      null;
 
-    if (!this.providerSupportsAddons(serviceType.provider)) {
-      throw new BadRequestException(`Provider "${serviceType.provider}" does not support addons`);
+    if (!this.providerSupportsAddons(providerToCheck)) {
+      throw new BadRequestException(`Provider "${providerToCheck ?? 'none'}" does not support addons`);
     }
 
     const allowed = new Set(planAllowedAddonIds);
@@ -235,6 +256,14 @@ export class AddonService {
     for (const addon of addons) {
       if (!addon.isActive) {
         throw new BadRequestException(`Addon "${addon.key}" is not active`);
+      }
+
+      if (
+        providerToCheck &&
+        addon.compatibleProviders.length > 0 &&
+        !addon.compatibleProviders.includes(providerToCheck)
+      ) {
+        throw new BadRequestException(`Addon "${addon.key}" is not compatible with provider "${providerToCheck}"`);
       }
     }
 

@@ -23,6 +23,7 @@ import {
 } from '../utils/cloud-init/integrated-provisioning-service';
 import { CONTAINER_MANAGER_MODULE_KEY } from '../utils/plan-addons.utils';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
+import { resolveItemProvider } from '../utils/provider-selection.utils';
 import { ServerInfo } from '../utils/provisioning.utils';
 import {
   appendServiceTabs,
@@ -317,7 +318,7 @@ export class SubscriptionItemServerService {
     };
     const hostname = item.hostname;
     const hostnameFqdn = hostname ? this.cloudflareDnsService.getFqdn(hostname) : undefined;
-    const provider = item.serviceType?.provider ?? null;
+    const provider = resolveItemProvider(item);
     let serverInfo = item.serverInfoSnapshot
       ? mapServerInfoSnapshotToResponse(item.serverInfoSnapshot, hostname, hostnameFqdn)
       : undefined;
@@ -457,7 +458,7 @@ export class SubscriptionItemServerService {
   private async fetchLiveServerInfo(
     item: Awaited<ReturnType<SubscriptionItemsRepository['findByIdAndSubscriptionId']>> & object,
   ): Promise<ServerInfo | undefined> {
-    const provider = item.serviceType?.provider;
+    const provider = resolveItemProvider(item);
 
     if (!provider || !item.providerReference) {
       return undefined;
@@ -534,7 +535,7 @@ export class SubscriptionItemServerService {
 
     this.assertProvisioned(item.providerReference, item.provisioningStatus);
 
-    if (!item.serviceType?.provider) {
+    if (!resolveItemProvider(item)) {
       throw new BadRequestException('Service type has no provider');
     }
 

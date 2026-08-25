@@ -1,4 +1,4 @@
-import { IsBoolean, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsObject, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 export class UpdateServiceTypeDto {
   @IsOptional()
@@ -10,8 +10,14 @@ export class UpdateServiceTypeDto {
   description?: string;
 
   @IsOptional()
+  @ValidateIf((_, value) => value != null && value !== '')
   @IsString({ message: 'Provider must be a string' })
-  provider?: string;
+  provider?: string | null;
+
+  @IsOptional()
+  @IsArray({ message: 'allowedProviders must be an array' })
+  @IsString({ each: true, message: 'Each allowed provider must be a string' })
+  allowedProviders?: string[];
 
   @IsOptional()
   @IsObject({ message: 'Config schema must be an object' })

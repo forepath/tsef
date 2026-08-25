@@ -27,7 +27,13 @@ Provider metadata capability flags (all **fail closed** when omitted, treated as
 | `supportsServerTypeUpgrade`   | In-place resize to a more expensive server type works |
 | `supportsServerTypeDowngrade` | In-place resize to a cheaper server type works        |
 
-See [Addons](./addons.md) and [Subscription Config Change](./subscription-config-change.md). Operators shipping dynamic providers must set the resize flags explicitly; built-in Hetzner/DigitalOcean already register both.
+Optional metadata for interchangeable providers on one service type:
+
+| Field                | Meaning                                                                                                                                |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `compatibilityGroup` | Shared group id (e.g. `host-cloud-init` for built-in Hetzner + DigitalOcean). Omitted/empty ⇒ provider is only compatible with itself. |
+
+See [Customer provider selection](./customer-provider-selection.md), [Addons](./addons.md) and [Subscription Config Change](./subscription-config-change.md). Operators shipping dynamic providers must set the resize flags explicitly; built-in Hetzner/DigitalOcean already register both.
 
 Addon modules may declare `configFields` (CloudInit-style env metadata). Decabill persists that list onto the catalog addon’s `configSchema` at create/update; admins set encrypted defaults only. At order time, customer `addonConfigs` merge with defaults and random fills into `configSnapshot` for `provision` / `teardown`.
 

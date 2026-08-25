@@ -15,7 +15,7 @@ When a [Subscription](./subscriptions.md) order includes a provisioning-enabled 
 
 ## Supported Providers
 
-First-party Hetzner and DigitalOcean are **contributor Nest modules** under `contributors/hetzner` and `contributors/digital-ocean`. Each registers provider metadata and runtime hooks (`provision`, lifecycle, catalog) in `onModuleInit`. Host code dispatches through `ProvisioningDispatchService` and `ProviderCatalogDispatchService` (unknown provider ids or missing hooks **fail closed**).
+First-party Hetzner and DigitalOcean are **contributor Nest modules** under `contributors/hetzner` and `contributors/digital-ocean`. Each registers provider metadata and runtime hooks (`provision`, lifecycle, catalog) in `onModuleInit`. Both share `compatibilityGroup: host-cloud-init` so a service type may offer them as interchangeable options (see [Customer provider selection](./customer-provider-selection.md)). Host code dispatches through `ProvisioningDispatchService` and `ProviderCatalogDispatchService` (unknown provider ids or missing hooks **fail closed**).
 
 #### Hetzner Cloud
 

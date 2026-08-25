@@ -34,6 +34,11 @@ export interface ProviderDetail {
   supportsAddons?: boolean;
   supportsServerTypeUpgrade?: boolean;
   supportsServerTypeDowngrade?: boolean;
+  /**
+   * Interchangeability key for multi-provider service types.
+   * Missing/empty ⇒ provider is only compatible with itself (`self:{id}`).
+   */
+  compatibilityGroup?: string;
   /** Required meters declared by the provider implementation. */
   meters?: DeclaredMeterDefinition[];
 }
@@ -104,7 +109,10 @@ export interface ServiceTypeResponse {
   key: string;
   name: string;
   description?: string | null;
-  provider: string;
+  /** Primary provider id; null when None (no cloud provider). */
+  provider: string | null;
+  /** Interchangeable provider ids (first is primary). Empty means None. */
+  allowedProviders: string[];
   configSchema: Record<string, unknown>;
   disallowStatutoryWithdrawal: boolean;
   isActive: boolean;
@@ -117,7 +125,13 @@ export interface CreateServiceTypeDto {
   key: string;
   name: string;
   description?: string;
-  provider: string;
+  /**
+   * Primary provider id (first of allowedProviders). Null/empty with empty allowedProviders means None.
+   * When omitted, derived from allowedProviders[0].
+   */
+  provider?: string | null;
+  /** Interchangeable provider ids (order preserved; first is primary). Empty means None. */
+  allowedProviders?: string[];
   configSchema?: Record<string, unknown>;
   disallowStatutoryWithdrawal?: boolean;
   isActive?: boolean;
@@ -127,7 +141,8 @@ export interface CreateServiceTypeDto {
 export interface UpdateServiceTypeDto {
   name?: string;
   description?: string;
-  provider?: string;
+  provider?: string | null;
+  allowedProviders?: string[];
   configSchema?: Record<string, unknown>;
   disallowStatutoryWithdrawal?: boolean;
   isActive?: boolean;
@@ -520,6 +535,10 @@ export interface ServicePlanResponse {
   allowCustomerLocationSelection: boolean;
   allowCustomerServerTypeSelection: boolean;
   allowedServerTypes: string[];
+  /** When true, customers may choose provider from allowedProviders at checkout. */
+  allowCustomerProviderSelection: boolean;
+  /** Provider ids customers may select when allowCustomerProviderSelection is true. */
+  allowedProviders: string[];
   taxCategory?: TaxCategory;
   withdrawalPolicy: WithdrawalPolicy;
   isActive: boolean;
@@ -549,6 +568,8 @@ export interface CreateServicePlanDto {
   allowCustomerLocationSelection?: boolean;
   allowCustomerServerTypeSelection?: boolean;
   allowedServerTypes?: string[];
+  allowCustomerProviderSelection?: boolean;
+  allowedProviders?: string[];
   taxCategory?: TaxCategory;
   isActive?: boolean;
 }
@@ -572,6 +593,8 @@ export interface UpdateServicePlanDto {
   allowCustomerLocationSelection?: boolean;
   allowCustomerServerTypeSelection?: boolean;
   allowedServerTypes?: string[];
+  allowCustomerProviderSelection?: boolean;
+  allowedProviders?: string[];
   taxCategory?: TaxCategory;
   /** Request-only: migrate eligible subscriptions when commercial pricing fields change. */
   migrateExistingSubscriptions?: boolean;

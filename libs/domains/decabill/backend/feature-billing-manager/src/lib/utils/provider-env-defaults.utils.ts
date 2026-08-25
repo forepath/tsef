@@ -17,12 +17,41 @@ export interface ProvisioningCredentials {
   apiToken?: string;
 }
 
-export function getProviderEnvDefaultFields(providerId: string): ProviderEnvDefaultField[] {
+export function getProviderEnvDefaultFields(providerId: string | null | undefined): ProviderEnvDefaultField[] {
+  if (!providerId?.trim()) {
+    return [];
+  }
+
   return PROVIDER_ENV_FIELDS[providerId] ?? [];
 }
 
-export function getProviderEnvDefaultFieldKeys(providerId: string): string[] {
+/**
+ * Union of env default fields across one or more providers (deduped by envKey, order preserved).
+ */
+export function getProvidersEnvDefaultFields(providerIds: Array<string | null | undefined>): ProviderEnvDefaultField[] {
+  const seen = new Set<string>();
+  const out: ProviderEnvDefaultField[] = [];
+
+  for (const providerId of providerIds) {
+    for (const field of getProviderEnvDefaultFields(providerId)) {
+      if (seen.has(field.envKey)) {
+        continue;
+      }
+
+      seen.add(field.envKey);
+      out.push(field);
+    }
+  }
+
+  return out;
+}
+
+export function getProviderEnvDefaultFieldKeys(providerId: string | null | undefined): string[] {
   return getProviderEnvDefaultFields(providerId).map((field) => field.envKey);
+}
+
+export function getProvidersEnvDefaultFieldKeys(providerIds: Array<string | null | undefined>): string[] {
+  return getProvidersEnvDefaultFields(providerIds).map((field) => field.envKey);
 }
 
 export function sanitizeProviderDefaults(

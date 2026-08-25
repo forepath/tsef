@@ -37,6 +37,8 @@ export interface ConfigChangeEligibility {
   reasonCode?: ConfigChangeErrorCode | null;
   reason?: string | null;
   hasPendingChange: boolean;
+  /** Effective cloud provider for this subscription (configSnapshot, then service-type primary). */
+  provider?: string | null;
   currentServerType?: string | null;
   allowedServerTypes: string[];
   supportsServerTypeUpgrade: boolean;

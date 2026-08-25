@@ -2952,6 +2952,30 @@
       <trans-unit id="featureServicePlans-autoRecalculatePriceDailyHelp" datatype="html">
         <source> Opt in only when required for EU compliance. When enabled, the package price is recalculated nightly at midnight from the provider catalog. Checkout must disclose this and the statutory withdrawal restart when the price changes. </source>
         </trans-unit>
+      <trans-unit id="featureServicePlans-allowCustomerProviderSelection" datatype="html">
+        <source>Allow provider selection</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-allowCustomerProviderSelectionHelp" datatype="html">
+        <source>Customers may choose a cloud provider from the selected options when ordering.</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-allowedProviders" datatype="html">
+        <source>Allowed providers</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-allowedProvidersHelp" datatype="html">
+        <source>Hold Ctrl/Cmd to select. First selected is the default provider at checkout.</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-pinnedProvider" datatype="html">
+        <source>Plan provider</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-pinnedProviderHelp" datatype="html">
+        <source>Customers cannot choose a provider. This provider is used for all orders on this plan.</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-serverTypeByProviderHelp" datatype="html">
+        <source>Choose a default server type for each provider. Used when the customer picks that provider (or omits server type at checkout).</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-geographyByProviderHelp" datatype="html">
+        <source>Choose a default location or region for each provider.</source>
+        </trans-unit>
       <trans-unit id="featureServicePlans-active" datatype="html">
         <source>Active</source>
         </trans-unit>
@@ -3082,7 +3106,16 @@
         <source>Description</source>
         </trans-unit>
       <trans-unit id="featureServiceTypes-provider" datatype="html">
-        <source>Provider</source>
+        <source>Providers</source>
+        </trans-unit>
+      <trans-unit id="featureServiceTypes-noneProvider" datatype="html">
+        <source>None</source>
+        </trans-unit>
+      <trans-unit id="featureServiceTypes-providersMultiHelp" datatype="html">
+        <source>Hold Ctrl/Cmd to select multiple compatible providers. First selected is primary. Choose None for no cloud provider.</source>
+        </trans-unit>
+      <trans-unit id="featureServiceTypes-providersPrimaryPlusCount" datatype="html">
+        <source><x id="PH" equiv-text="primary"/> (+<x id="PH_1" equiv-text="extraCount"/>)</source>
         </trans-unit>
       <trans-unit id="featureServiceTypes-loadingProviders" datatype="html">
         <source> Loading providers... </source>
@@ -3101,6 +3134,9 @@
         </trans-unit>
       <trans-unit id="featureServiceTypes-providerDefaultsHelp" datatype="html">
         <source> Overrides platform environment variables for this service type. Leave blank to use the environment default. </source>
+        </trans-unit>
+      <trans-unit id="featureServiceTypes-providerDefaultsGroupIntro" datatype="html">
+        <source>Defaults for <x id="INTERPOLATION" equiv-text="{{ group.label }}"/></source>
         </trans-unit>
       <trans-unit id="featureServiceTypes-providerDefaultEnvPlaceholder" datatype="html">
         <source>Using environment default</source>
@@ -3671,6 +3707,15 @@
         </trans-unit>
       <trans-unit id="featureSubscriptions-orderStepPlanAddons" datatype="html">
         <source>Plan &amp; addons</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-orderStepInfrastructure" datatype="html">
+        <source>Server &amp; region</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-orderProvider" datatype="html">
+        <source>Provider</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-orderProviderHelp" datatype="html">
+        <source>Choose which cloud provider provisions this subscription.</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-configChangeStepServerType" datatype="html">
         <source>Server type</source>

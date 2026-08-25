@@ -7,6 +7,9 @@ export interface JsonSchemaLike {
   basePriceFromField?: unknown;
 }
 
+/** Admin-only map on providerConfigDefaults: provider id → default server type id. */
+export const SERVER_TYPE_BY_PROVIDER_KEY = 'serverTypeByProvider';
+
 /**
  * True when the schema defines server type as the field that drives base price.
  */
@@ -44,6 +47,61 @@ export function stripServerTypeFromRequestedConfig(
   delete out['serverType'];
 
   return out;
+}
+
+/**
+ * Remove admin-only serverTypeByProvider from a merged effective config (not a provisioning field).
+ */
+export function stripServerTypeByProviderFromConfig(config: Record<string, unknown>): void {
+  delete config[SERVER_TYPE_BY_PROVIDER_KEY];
+}
+
+/**
+ * Normalize provider → server type map: non-empty string keys/values, order not significant.
+ */
+export function normalizeServerTypeByProvider(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+
+  const out: Record<string, string> = {};
+
+  for (const [providerId, serverType] of Object.entries(value as Record<string, unknown>)) {
+    const provider = typeof providerId === 'string' ? providerId.trim() : '';
+    const typeId = typeof serverType === 'string' ? serverType.trim() : '';
+
+    if (!provider || !typeId) {
+      continue;
+    }
+
+    out[provider] = typeId;
+  }
+
+  return out;
+}
+
+/**
+ * Default server type for a provider: serverTypeByProvider[provider] then top-level serverType.
+ */
+export function resolveDefaultServerTypeForProvider(
+  providerConfigDefaults: Record<string, unknown> | null | undefined,
+  providerId: string | null | undefined,
+): string | null {
+  const defaults = providerConfigDefaults ?? {};
+  const provider = typeof providerId === 'string' ? providerId.trim() : '';
+  const byProvider = normalizeServerTypeByProvider(defaults[SERVER_TYPE_BY_PROVIDER_KEY]);
+
+  if (provider && byProvider[provider]) {
+    return byProvider[provider];
+  }
+
+  const legacy = defaults['serverType'];
+
+  if (typeof legacy === 'string' && legacy.trim()) {
+    return legacy.trim();
+  }
+
+  return null;
 }
 
 /**

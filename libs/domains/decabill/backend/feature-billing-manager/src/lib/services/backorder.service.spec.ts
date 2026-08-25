@@ -29,6 +29,8 @@ describe('BackorderService cancel', () => {
     {} as never,
     {} as never,
     {} as never,
+    { requiresProvisioning: jest.fn().mockReturnValue(false) } as never,
+    { getProvider: jest.fn() } as never,
   );
 
   beforeEach(() => {
@@ -83,6 +85,8 @@ describe('BackorderService retry guard', () => {
     {} as never,
     {} as never,
     {} as never,
+    { requiresProvisioning: jest.fn().mockReturnValue(false) } as never,
+    { getProvider: jest.fn() } as never,
   );
 
   beforeEach(() => {
@@ -132,6 +136,8 @@ describe('BackorderService server type validation', () => {
     {} as never,
     {} as never,
     {} as never,
+    { requiresProvisioning: jest.fn().mockReturnValue(false) } as never,
+    { getProvider: jest.fn().mockReturnValue(undefined) } as never,
   );
 
   beforeEach(() => {

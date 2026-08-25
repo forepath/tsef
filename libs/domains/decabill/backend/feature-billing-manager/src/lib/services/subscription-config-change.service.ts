@@ -36,6 +36,7 @@ import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
 import { parsePlanAllowedAddonIds, parsePlanMandatoryAddonIds } from '../utils/plan-addons.utils';
 import { roundMoney } from '../utils/promotion-advantage.util';
 import { normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
+import { resolveItemProvider } from '../utils/provider-selection.utils';
 import { assertServerTypeAllowed, normalizeAllowedServerTypes } from '../utils/provider-server-type.utils';
 import {
   resolveServerTypePriceMonthly,
@@ -194,7 +195,7 @@ export class SubscriptionConfigChangeService {
       ACTIVE_ADDON_STATUSES.has(row.status),
     );
     const latestChange = await this.configChangesRepository.findLatestForSubscription(subscriptionId);
-    const serviceType = items.find((item) => item.serviceType)?.serviceType;
+    const itemWithServiceType = items.find((item) => item.serviceType);
 
     return {
       subscription,
@@ -202,8 +203,8 @@ export class SubscriptionConfigChangeService {
       items,
       activeAddons,
       latestChange,
-      provider: serviceType?.provider,
-      providerDefaults: normalizeStoredProviderDefaults(serviceType?.providerDefaults),
+      provider: itemWithServiceType ? (resolveItemProvider(itemWithServiceType) ?? undefined) : undefined,
+      providerDefaults: normalizeStoredProviderDefaults(itemWithServiceType?.serviceType?.providerDefaults),
       currentServerType: this.resolveCurrentServerType(items),
     };
   }
@@ -245,6 +246,7 @@ export class SubscriptionConfigChangeService {
       reasonCode,
       reason,
       hasPendingChange,
+      provider: context.provider,
       currentServerType: context.currentServerType,
       allowedServerTypes:
         context.plan.allowCustomerServerTypeSelection === true
@@ -260,7 +262,7 @@ export class SubscriptionConfigChangeService {
   /** Cloud servers must finish first-time provisioning before mid-life config changes. */
   private hasIncompleteInitialServerProvisioning(items: SubscriptionItemEntity[]): boolean {
     return items.some((item) => {
-      const provider = item.serviceType?.provider?.trim();
+      const provider = resolveItemProvider(item)?.trim();
 
       if (!this.providerCatalogDispatchService.requiresProvisioning(provider)) {
         return false;

@@ -12,6 +12,8 @@ import { SubscriptionItemsRepository } from '../repositories/subscription-items.
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { UsageRecordsRepository } from '../repositories/usage-records.repository';
 
+import { resolveItemProvider } from '../utils/provider-selection.utils';
+
 import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { MeterService } from './meter.service';
 import { ProviderModuleRegistryService } from './provider-module-registry.service';
@@ -105,7 +107,7 @@ export class MeterCollectJobHandler {
       return;
     }
 
-    const providerId = item.serviceType?.provider?.trim();
+    const providerId = resolveItemProvider(item)?.trim();
 
     if (!providerId) {
       return;
@@ -244,7 +246,7 @@ export class MeterCollectJobHandler {
           continue;
         }
 
-        const providerId = item?.serviceType?.provider ?? '';
+        const providerId = (item ? resolveItemProvider(item) : null) ?? '';
 
         for (const window of dueWindows) {
           const samples = await module.collectMeters({

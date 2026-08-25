@@ -414,6 +414,48 @@ export class BillingNotificationPublisher implements IIdentityNotificationPublis
     });
   }
 
+  publishServiceTypeAllowedProvidersChanged(payload: {
+    serviceTypeId: string;
+    serviceTypeKey: string;
+    tenantId: string;
+    previousPrimary: string | null;
+    previousAllowedProviders: string[];
+    nextPrimary: string | null;
+    nextAllowedProviders: string[];
+  }): void {
+    this.publish('service_type.allowed_providers_changed', {
+      serviceTypeId: payload.serviceTypeId,
+      serviceTypeKey: payload.serviceTypeKey,
+      tenantId: payload.tenantId,
+      previousPrimary: payload.previousPrimary,
+      previousAllowedProviders: payload.previousAllowedProviders,
+      nextPrimary: payload.nextPrimary,
+      nextAllowedProviders: payload.nextAllowedProviders,
+    });
+  }
+
+  publishServicePlanAllowedProvidersChanged(payload: {
+    servicePlanId: string;
+    servicePlanName: string;
+    tenantId: string;
+    serviceTypeId: string | null;
+    previousAllowCustomerProviderSelection: boolean;
+    previousAllowedProviders: string[];
+    nextAllowCustomerProviderSelection: boolean;
+    nextAllowedProviders: string[];
+  }): void {
+    this.publish('service_plan.allowed_providers_changed', {
+      servicePlanId: payload.servicePlanId,
+      servicePlanName: payload.servicePlanName,
+      tenantId: payload.tenantId,
+      serviceTypeId: payload.serviceTypeId,
+      previousAllowCustomerProviderSelection: payload.previousAllowCustomerProviderSelection,
+      previousAllowedProviders: payload.previousAllowedProviders,
+      nextAllowCustomerProviderSelection: payload.nextAllowCustomerProviderSelection,
+      nextAllowedProviders: payload.nextAllowedProviders,
+    });
+  }
+
   publishSubscriptionPriceChanged(
     subscription: SubscriptionEntity,
     plan: SubscriptionPlanBillingFields,

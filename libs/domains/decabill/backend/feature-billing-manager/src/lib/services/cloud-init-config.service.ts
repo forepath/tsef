@@ -31,6 +31,7 @@ import {
   sanitizeCloudInitServiceTabs,
   type CloudInitConfigServiceTabDefinition,
 } from '../utils/service-detail-tabs.utils';
+import { resolveServiceTypeAllowedProviders } from '../utils/provider-selection.utils';
 
 import { ProviderCatalogDispatchService } from './provider-catalog-dispatch.service';
 
@@ -395,7 +396,8 @@ export class CloudInitConfigService {
   ): Promise<void> {
     const options = parsePlanProvisioningOptions(providerConfigDefaults);
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
-    const requiresProvisioning = this.providerCatalogDispatchService.requiresProvisioning(serviceType.provider);
+    const primaryProvider = resolveServiceTypeAllowedProviders(serviceType)[0] ?? serviceType.provider ?? undefined;
+    const requiresProvisioning = this.providerCatalogDispatchService.requiresProvisioning(primaryProvider);
 
     if (requiresProvisioning && options.length === 0) {
       throw new BadRequestException('At least one provisioning option is required for this service type');

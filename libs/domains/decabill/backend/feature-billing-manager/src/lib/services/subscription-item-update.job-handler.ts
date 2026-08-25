@@ -4,6 +4,7 @@ import { SubscriptionItemsRepository } from '../repositories/subscription-items.
 import { CloudInitServiceType, normalizeCloudInitService } from '../utils/cloud-init/cloud-init-dispatch.utils';
 import { canonicalizeIntegratedProvisioningService } from '../utils/cloud-init/integrated-provisioning-service';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
+import { resolveItemProvider } from '../utils/provider-selection.utils';
 
 import { IntegratedStackRegistryService } from './integrated-stack-registry.service';
 import { ProvisioningDispatchService } from './provisioning-dispatch.service';
@@ -36,7 +37,7 @@ export class SubscriptionItemUpdateJobHandler {
       throw new Error(`Subscription item ${subscriptionItemId} not found`);
     }
 
-    const provider = item.serviceType?.provider;
+    const provider = resolveItemProvider(item);
 
     if (!provider || !item.providerReference || !item.sshPrivateKey) {
       return;

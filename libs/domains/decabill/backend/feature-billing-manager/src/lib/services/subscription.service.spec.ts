@@ -212,6 +212,7 @@ describe('SubscriptionService', () => {
     { buildSubscriptionMeterSummaries: jest.fn().mockResolvedValue([]) } as never,
     { scheduleUpsert: jest.fn(), scheduleDelete: jest.fn() } as never,
     cloudInitDispatchService as never,
+    { getProvider: jest.fn().mockReturnValue(undefined) } as never,
   );
 
   beforeEach(() => {
@@ -1287,6 +1288,45 @@ describe('SubscriptionService', () => {
       expect(sshExecutor.exec).not.toHaveBeenCalled();
       expect(itemsRepository.updateProvisioningStatus).toHaveBeenCalledWith('item-1', 'active');
       expect(cloudflareDnsService.createARecord).not.toHaveBeenCalled();
+    });
+
+    it('provisions using configSnapshot.provider over service type primary', async () => {
+      (itemsRepository.findByIdWithRelations as jest.Mock).mockResolvedValue({
+        id: 'item-1',
+        serviceTypeId: 'stype-1',
+        provisioningStatus: 'pending',
+        providerReference: undefined,
+        configSnapshot: {
+          ...controllerProvisioningDefaults,
+          provider: 'digital-ocean',
+          region: 'fra1',
+          serverType: 's-1vcpu-1gb',
+        },
+        subscription: {
+          id: 'sub-1',
+          userId: 'user-1',
+          planId: 'plan-1',
+          status: SubscriptionStatus.ACTIVE,
+          autoBackorder: false,
+        },
+        serviceType: {
+          id: 'stype-1',
+          provider: 'hetzner',
+          allowedProviders: ['hetzner', 'digital-ocean'],
+        },
+      });
+      (provisioningService.provision as jest.Mock).mockResolvedValue({ serverId: 'srv-do-1' });
+
+      await service.provisionSubscriptionItem('item-1');
+
+      expect(provisioningService.provision).toHaveBeenCalledWith(
+        'digital-ocean',
+        expect.objectContaining({
+          serverType: 's-1vcpu-1gb',
+          location: 'fra1',
+        }),
+        expect.any(Object),
+      );
     });
 
     it('skips SSH readiness for non-server providers', async () => {

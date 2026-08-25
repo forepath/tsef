@@ -6,6 +6,8 @@ export class ConfigChangeEligibilityDto {
   reasonCode?: ConfigChangeErrorCode;
   reason?: string;
   hasPendingChange!: boolean;
+  /** Effective cloud provider for this subscription (configSnapshot, then service-type primary). */
+  provider?: string;
   currentServerType?: string;
   allowedServerTypes!: string[];
   supportsServerTypeUpgrade!: boolean;

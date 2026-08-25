@@ -25,6 +25,8 @@ describe('PublicServicePlanOfferingsService', () => {
     taxRate: 19,
     orderingHighlights: [],
     allowCustomerServerTypeSelection: false,
+    allowCustomerProviderSelection: false,
+    allowedProviders: [],
     withdrawalPolicy: {
       periodDays: 14,
       allowedAfterProvisioning: true,

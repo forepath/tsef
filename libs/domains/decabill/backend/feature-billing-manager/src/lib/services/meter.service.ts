@@ -16,6 +16,7 @@ import { ServicePlanMetersRepository } from '../repositories/service-plan-meters
 import { ServiceTypeMetersRepository } from '../repositories/service-type-meters.repository';
 import { UsageRecordsRepository } from '../repositories/usage-records.repository';
 import { resolveEffectiveUnitPriceNet } from '../utils/meter-aggregation.util';
+import { resolveServiceTypeAllowedProviders } from '../utils/provider-selection.utils';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { mapMeterToSearchDocument } from '../search/billing-search-document.mapper';
 import { BillingSearchIndexService } from '../search/billing-search-index.service';
@@ -156,7 +157,8 @@ export class MeterService {
   }
 
   async syncServiceTypeProviderMeters(serviceType: ServiceTypeEntity): Promise<AttachedMeterResponseDto[]> {
-    const provider = this.providerRegistry.getProvider(serviceType.provider);
+    const primaryProvider = resolveServiceTypeAllowedProviders(serviceType)[0] ?? serviceType.provider ?? undefined;
+    const provider = primaryProvider ? this.providerRegistry.getProvider(primaryProvider) : undefined;
     const declared = provider?.meters ?? [];
     const declaredKeys = new Set(declared.map((item) => item.key.trim()));
     const existing = await this.serviceTypeMetersRepository.findByServiceTypeId(serviceType.id);

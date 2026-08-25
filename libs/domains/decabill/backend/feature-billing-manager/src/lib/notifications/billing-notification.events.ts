@@ -60,6 +60,8 @@ export const BILLING_NOTIFICATION_EVENTS = [
   'service_type.meter_attached',
   'service_type.meter_updated',
   'service_type.meter_detached',
+  'service_type.allowed_providers_changed',
+  'service_plan.allowed_providers_changed',
   'usage.recorded',
   'usage.updated',
   'usage.deleted',

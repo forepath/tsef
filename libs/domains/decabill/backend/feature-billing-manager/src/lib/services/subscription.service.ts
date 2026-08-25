@@ -22,14 +22,27 @@ import {
 import { validateConfigSchema } from '../utils/config-validation.utils';
 import {
   mirrorGeographyInConfig,
+  readRequestedGeography,
+  resolveDefaultGeographyForProvider,
   resolveProvisioningRegion,
+  stripGeographyByProviderFromConfig,
   stripGeographyFromRequestedConfig,
 } from '../utils/provider-location.utils';
 import {
   assertServerTypeAllowed,
   normalizeAllowedServerTypes,
+  resolveDefaultServerTypeForProvider,
+  stripServerTypeByProviderFromConfig,
   stripServerTypeFromRequestedConfig,
 } from '../utils/provider-server-type.utils';
+import {
+  assertProviderAllowed,
+  resolveEffectiveProvider,
+  resolveItemProvider,
+  resolvePlanAllowedProviders,
+  resolveServiceTypeAllowedProviders,
+  stripProviderFromRequestedConfig,
+} from '../utils/provider-selection.utils';
 import {
   BILLING_BASE_PRICE_CONFIG_KEY,
   buildBackorderRequestedConfigSnapshot,
@@ -57,6 +70,7 @@ import { HostnameReservationService } from './hostname-reservation.service';
 import { ProviderServerTypesService } from './provider-server-types.service';
 import { PricingService } from './pricing.service';
 import { ProviderCatalogDispatchService } from './provider-catalog-dispatch.service';
+import { ProviderRegistryService } from './provider-registry.service';
 import { ProvisioningDispatchService } from './provisioning-dispatch.service';
 import { PromotionRedemptionService } from './promotion-redemption.service';
 import { SshExecutorService } from './ssh-executor.service';
@@ -118,6 +132,7 @@ export class SubscriptionService {
     private readonly meterBillingService: MeterBillingService,
     private readonly billingSearchIndexService: BillingSearchIndexService,
     private readonly cloudInitDispatchService: CloudInitDispatchService,
+    private readonly providerRegistry: ProviderRegistryService,
   ) {}
 
   async createSubscription(
@@ -160,20 +175,29 @@ export class SubscriptionService {
       plan.serviceTypeId,
       parsePlanAllowedAddonIds(plan.providerConfigDefaults),
       selectedAddonIds,
+      requestedConfig,
+      plan,
     );
     const allowCustomerLocationSelection = plan.allowCustomerLocationSelection === true;
     const allowCustomerServerTypeSelection = plan.allowCustomerServerTypeSelection === true;
+    const allowCustomerProviderSelection = plan.allowCustomerProviderSelection === true;
     let sanitizedRequested = allowCustomerLocationSelection
       ? { ...(requestedConfig ?? {}) }
       : stripGeographyFromRequestedConfig(requestedConfig);
     sanitizedRequested = allowCustomerServerTypeSelection
       ? sanitizedRequested
       : stripServerTypeFromRequestedConfig(sanitizedRequested);
+    sanitizedRequested = allowCustomerProviderSelection
+      ? sanitizedRequested
+      : stripProviderFromRequestedConfig(sanitizedRequested);
     const baseConfig = plan.providerConfigDefaults ?? {};
     const effectiveConfig: Record<string, unknown> = {
       ...(baseConfig || {}),
       ...sanitizedRequested,
     };
+
+    stripServerTypeByProviderFromConfig(effectiveConfig);
+    stripGeographyByProviderFromConfig(effectiveConfig);
 
     try {
       const selection = resolveOrderProvisioningSelection(baseConfig, sanitizedRequested);
@@ -183,27 +207,57 @@ export class SubscriptionService {
       throw new BadRequestException((error as Error).message);
     }
 
-    const provider = serviceType.provider;
+    if (allowCustomerProviderSelection) {
+      const requestedProvider =
+        typeof sanitizedRequested['provider'] === 'string' ? sanitizedRequested['provider'].trim() : '';
 
-    if (this.providerCatalogDispatchService.requiresProvisioning(provider)) {
-      const regionResolved = resolveProvisioningRegion(effectiveConfig, provider);
+      if (requestedProvider) {
+        const allowedError = assertProviderAllowed(requestedProvider, resolvePlanAllowedProviders(plan, serviceType));
 
-      mirrorGeographyInConfig(effectiveConfig, regionResolved);
+        if (allowedError) {
+          throw new BadRequestException(allowedError);
+        }
+      }
     }
 
-    const validationErrors = validateConfigSchema(serviceType.configSchema, effectiveConfig);
+    const provider = resolveEffectiveProvider(serviceType, plan, sanitizedRequested);
+    const primaryForProvisioningCheck = resolveServiceTypeAllowedProviders(serviceType)[0] ?? undefined;
+
+    if (!provider && this.providerCatalogDispatchService.requiresProvisioning(primaryForProvisioningCheck)) {
+      throw new BadRequestException('provider could not be resolved for this service type');
+    }
+
+    if (provider) {
+      effectiveConfig.provider = provider;
+    }
+
+    if (this.providerCatalogDispatchService.requiresProvisioning(provider ?? undefined)) {
+      const planDefaultGeo = resolveDefaultGeographyForProvider(baseConfig, provider);
+      const requestedGeo = readRequestedGeography(sanitizedRequested);
+      const geography = allowCustomerLocationSelection
+        ? requestedGeo || planDefaultGeo || resolveProvisioningRegion({}, provider!)
+        : planDefaultGeo || resolveProvisioningRegion({}, provider!);
+
+      mirrorGeographyInConfig(effectiveConfig, geography);
+    }
+
+    const schemaForValidation =
+      (provider ? this.providerRegistry.getProvider(provider)?.configSchema : undefined) ?? serviceType.configSchema;
+    const validationErrors = validateConfigSchema(schemaForValidation, effectiveConfig);
 
     if (validationErrors.length > 0) {
       throw new BadRequestException(validationErrors.join('; '));
     }
 
-    if (this.providerCatalogDispatchService.requiresProvisioning(provider)) {
+    if (this.providerCatalogDispatchService.requiresProvisioning(provider ?? undefined)) {
+      const planDefaultServerType = resolveDefaultServerTypeForProvider(baseConfig, provider);
+      const requestedServerType =
+        typeof sanitizedRequested['serverType'] === 'string' ? sanitizedRequested['serverType'].trim() : '';
+
       if (allowCustomerServerTypeSelection) {
         const allowed = normalizeAllowedServerTypes(plan.allowedServerTypes);
         const resolvedServerType = String(
-          effectiveConfig.serverType ??
-            baseConfig['serverType'] ??
-            (provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11'),
+          requestedServerType || planDefaultServerType || (provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11'),
         );
         const serverTypeError = assertServerTypeAllowed(resolvedServerType, allowed);
 
@@ -212,8 +266,8 @@ export class SubscriptionService {
         }
 
         effectiveConfig.serverType = resolvedServerType.trim();
-      } else if (!effectiveConfig.serverType) {
-        effectiveConfig.serverType = provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11';
+      } else {
+        effectiveConfig.serverType = planDefaultServerType ?? (provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11');
       }
     }
 
@@ -245,12 +299,13 @@ export class SubscriptionService {
       effectiveConfig.env = resolvedCustomEnv;
     }
 
-    const region = resolveProvisioningRegion(effectiveConfig, provider);
-    const serverType =
-      (effectiveConfig.serverType as string | undefined) ?? (provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11');
     const providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
 
-    if (this.providerCatalogDispatchService.requiresProvisioning(provider)) {
+    if (provider && this.providerCatalogDispatchService.requiresProvisioning(provider)) {
+      const region = resolveProvisioningRegion(effectiveConfig, provider);
+      const serverType =
+        (effectiveConfig.serverType as string | undefined) ?? (provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11');
+
       if (allowCustomerServerTypeSelection) {
         const billingBasePrice = await resolveServerTypePriceMonthly(
           this.providerServerTypesService,
@@ -263,28 +318,28 @@ export class SubscriptionService {
           effectiveConfig[BILLING_BASE_PRICE_CONFIG_KEY] = billingBasePrice;
         }
       }
-    }
 
-    const availability = await this.availabilityService.checkAvailability(
-      provider,
-      region,
-      serverType,
-      providerDefaults,
-    );
+      const availability = await this.availabilityService.checkAvailability(
+        provider,
+        region,
+        serverType,
+        providerDefaults,
+      );
 
-    if (!availability.isAvailable) {
-      if (autoBackorder) {
-        await this.backorderService.create({
-          userId,
-          serviceTypeId: plan.serviceTypeId,
-          planId,
-          requestedConfigSnapshot: buildBackorderRequestedConfigSnapshot(sanitizedRequested, effectiveConfig),
-          providerErrors: { reason: availability.reason },
-          preferredAlternatives: availability.alternatives ?? {},
-        });
+      if (!availability.isAvailable) {
+        if (autoBackorder) {
+          await this.backorderService.create({
+            userId,
+            serviceTypeId: plan.serviceTypeId,
+            planId,
+            requestedConfigSnapshot: buildBackorderRequestedConfigSnapshot(sanitizedRequested, effectiveConfig),
+            providerErrors: { reason: availability.reason },
+            preferredAlternatives: availability.alternatives ?? {},
+          });
+        }
+
+        throw new BadRequestException(availability.reason || 'Configuration not available');
       }
-
-      throw new BadRequestException(availability.reason || 'Configuration not available');
     }
 
     const schedule = this.billingScheduleService.calculateSchedule(
@@ -480,7 +535,7 @@ export class SubscriptionService {
     }
 
     const subscription = item.subscription;
-    const provider = item.serviceType?.provider;
+    const provider = resolveItemProvider(item);
 
     if (!subscription || subscription.status !== SubscriptionStatus.ACTIVE) {
       this.logger.log(`Skipping provisioning for item ${itemId}; subscription is not active`);
@@ -488,7 +543,7 @@ export class SubscriptionService {
       return;
     }
 
-    if (!this.providerCatalogDispatchService.requiresProvisioning(provider)) {
+    if (!provider || !this.providerCatalogDispatchService.requiresProvisioning(provider)) {
       // Nothing to provision for non-server providers; treat the item as fulfilled.
       await this.subscriptionItemsRepository.updateProvisioningStatus(itemId, 'active');
 

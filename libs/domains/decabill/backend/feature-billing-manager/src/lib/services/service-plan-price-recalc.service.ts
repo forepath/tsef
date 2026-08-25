@@ -10,6 +10,7 @@ import { SubscriptionAddonsRepository } from '../repositories/subscription-addon
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
+import { resolveServiceTypeAllowedProviders } from '../utils/provider-selection.utils';
 import { roundMoney } from '../utils/promotion-advantage.util';
 import {
   PRICE_RECALC_ADJUSTMENT_KINDS,
@@ -181,7 +182,7 @@ export class ServicePlanPriceRecalcService {
   }
 
   async processPlan(plan: ServicePlanEntity, runDate: string, changedAt: Date): Promise<ServicePlanPriceRecalcResult> {
-    const provider = plan.serviceType?.provider?.trim();
+    const provider = resolveServiceTypeAllowedProviders(plan.serviceType ?? {})[0] ?? undefined;
     const providerDefaults = normalizeStoredProviderDefaults(plan.serviceType?.providerDefaults);
     const defaultServerType = this.resolvePlanPricingServerType(plan);
     const currentPlanBase = this.parseNumeric(plan.basePrice);

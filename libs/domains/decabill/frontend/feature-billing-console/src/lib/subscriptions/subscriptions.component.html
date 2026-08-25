@@ -700,6 +700,38 @@
                     @case ('infrastructure') {
                       <div class="card bg-body-tertiary border">
                         <div class="card-body">
+                          @if (orderHasProviderSelection()) {
+                            <div class="mb-3">
+                              <label
+                                for="orderProvisioningProvider"
+                                class="form-label"
+                                i18n="@@featureSubscriptions-orderProvider"
+                                >Provider</label
+                              >
+                              <select
+                                id="orderProvisioningProvider"
+                                name="orderProvisioningProvider"
+                                class="form-select"
+                                [(ngModel)]="orderProvisioningProvider"
+                                (ngModelChange)="onOrderProviderChange()"
+                                [disabled]="(subscriptionsCreating$ | async) === true"
+                              >
+                                @if (providerDetails$ | async; as providers) {
+                                  @for (providerId of orderProviderOptions(); track providerId) {
+                                    <option [ngValue]="providerId">
+                                      {{ orderProviderLabel(providerId, providers) }}
+                                    </option>
+                                  }
+                                }
+                              </select>
+                              <div
+                                class="form-text text-body-secondary small"
+                                i18n="@@featureSubscriptions-orderProviderHelp"
+                              >
+                                Choose which cloud provider provisions this subscription.
+                              </div>
+                            </div>
+                          }
                           @if (orderServerTypesLoading) {
                             <div class="text-body-secondary small d-flex align-items-center gap-2">
                               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -1413,6 +1445,18 @@
                                 <dt class="text-body-secondary" i18n="@@featureSubscriptions-selectPlan">Plan</dt>
                                 <dd class="mb-0 text-end fw-medium">{{ plan.name }}</dd>
                               </div>
+                              @if (orderHasProviderSelection()) {
+                                <div class="d-flex justify-content-between gap-3 border-bottom pb-2 mb-2">
+                                  <dt class="text-body-secondary" i18n="@@featureSubscriptions-orderProvider">
+                                    Provider
+                                  </dt>
+                                  <dd class="mb-0 text-end">
+                                    @if (providerDetails$ | async; as providers) {
+                                      {{ formatOrderProviderSummary(providers) }}
+                                    }
+                                  </dd>
+                                </div>
+                              }
                               @if (orderServerTypeOptions.length > 0) {
                                 <div class="d-flex justify-content-between gap-3 border-bottom pb-2 mb-2">
                                   <dt class="text-body-secondary">Server type</dt>

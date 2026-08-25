@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 
 import { ServiceTypeEntity } from '../entities/service-type.entity';
+import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { ServiceTypesRepository } from '../repositories/service-types.repository';
 import { MeterService } from '../services/meter.service';
 import { ProviderRegistryService } from '../services/provider-registry.service';
@@ -23,6 +24,13 @@ describe('ServiceTypesController', () => {
     updateServiceTypeMeter: jest.fn(),
     detachServiceTypeMeter: jest.fn(),
   };
+  const notificationPublisherStub = {
+    publishServiceTypeAllowedProvidersChanged: jest.fn(),
+  };
+  const providerRegistryStub = {
+    getProviders: jest.fn().mockReturnValue([]),
+    getProvider: jest.fn((id: string) => ({ id, compatibilityGroup: 'host-cloud-init' })),
+  };
 
   const mockServiceTypeRow: ServiceTypeEntity = {
     id: '11111111-1111-4111-8111-111111111111',
@@ -30,6 +38,7 @@ describe('ServiceTypesController', () => {
     tenantId: 'default',
     name: 'Hetzner',
     provider: 'hetzner',
+    allowedProviders: ['hetzner'],
     configSchema: {},
     isActive: true,
     disallowStatutoryWithdrawal: false,
@@ -39,9 +48,17 @@ describe('ServiceTypesController', () => {
   };
 
   const meterProvider = { provide: MeterService, useValue: mockMeterService };
+  const notificationProvider = {
+    provide: BillingNotificationPublisher,
+    useValue: notificationPublisherStub,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    providerRegistryStub.getProvider.mockImplementation((id: string) => ({
+      id,
+      compatibilityGroup: 'host-cloud-init',
+    }));
   });
 
   describe('getProviderServerTypes', () => {
@@ -54,10 +71,11 @@ describe('ServiceTypesController', () => {
         controllers: [ServiceTypesController],
         providers: [
           { provide: ServiceTypesRepository, useValue: {} },
-          { provide: ProviderRegistryService, useValue: { getProviders: jest.fn() } },
+          { provide: ProviderRegistryService, useValue: providerRegistryStub },
           { provide: ProviderServerTypesService, useValue: serverTypesService },
           { provide: ProviderLocationsService, useValue: mockProviderLocations },
           meterProvider,
+          notificationProvider,
         ],
       }).compile();
       const controller = moduleRef.get(ServiceTypesController);
@@ -78,10 +96,11 @@ describe('ServiceTypesController', () => {
         controllers: [ServiceTypesController],
         providers: [
           { provide: ServiceTypesRepository, useValue: serviceTypesRepository },
-          { provide: ProviderRegistryService, useValue: { getProviders: jest.fn() } },
+          { provide: ProviderRegistryService, useValue: providerRegistryStub },
           { provide: ProviderServerTypesService, useValue: serverTypesService },
           { provide: ProviderLocationsService, useValue: mockProviderLocations },
           meterProvider,
+          notificationProvider,
         ],
       }).compile();
       const controller = moduleRef.get(ServiceTypesController);
@@ -104,10 +123,11 @@ describe('ServiceTypesController', () => {
         controllers: [ServiceTypesController],
         providers: [
           { provide: ServiceTypesRepository, useValue: {} },
-          { provide: ProviderRegistryService, useValue: { getProviders: jest.fn() } },
+          { provide: ProviderRegistryService, useValue: providerRegistryStub },
           { provide: ProviderServerTypesService, useValue: mockProviderServerTypes },
           { provide: ProviderLocationsService, useValue: locationsService },
           meterProvider,
+          notificationProvider,
         ],
       }).compile();
       const controller = moduleRef.get(ServiceTypesController);
@@ -125,6 +145,7 @@ describe('ServiceTypesController', () => {
       ];
       const providerRegistry = {
         getProviders: jest.fn().mockReturnValue(providerDetails),
+        getProvider: jest.fn((id: string) => ({ id, compatibilityGroup: 'host-cloud-init' })),
       };
       const moduleRef = await Test.createTestingModule({
         controllers: [ServiceTypesController],
@@ -134,6 +155,7 @@ describe('ServiceTypesController', () => {
           { provide: ProviderServerTypesService, useValue: mockProviderServerTypes },
           { provide: ProviderLocationsService, useValue: mockProviderLocations },
           meterProvider,
+          notificationProvider,
         ],
       }).compile();
       const controller = moduleRef.get(ServiceTypesController);
@@ -156,7 +178,10 @@ describe('ServiceTypesController', () => {
           },
         },
       ];
-      const providerRegistry = { getProviders: jest.fn().mockReturnValue(providerDetails) };
+      const providerRegistry = {
+        getProviders: jest.fn().mockReturnValue(providerDetails),
+        getProvider: jest.fn((id: string) => ({ id, compatibilityGroup: 'host-cloud-init' })),
+      };
       const moduleRef = await Test.createTestingModule({
         controllers: [ServiceTypesController],
         providers: [
@@ -165,6 +190,7 @@ describe('ServiceTypesController', () => {
           { provide: ProviderServerTypesService, useValue: mockProviderServerTypes },
           { provide: ProviderLocationsService, useValue: mockProviderLocations },
           meterProvider,
+          notificationProvider,
         ],
       }).compile();
       const controller = moduleRef.get(ServiceTypesController);
@@ -191,10 +217,11 @@ describe('ServiceTypesController', () => {
         controllers: [ServiceTypesController],
         providers: [
           { provide: ServiceTypesRepository, useValue: serviceTypesRepository },
-          { provide: ProviderRegistryService, useValue: { getProviders: jest.fn() } },
+          { provide: ProviderRegistryService, useValue: providerRegistryStub },
           { provide: ProviderServerTypesService, useValue: mockProviderServerTypes },
           { provide: ProviderLocationsService, useValue: mockProviderLocations },
           meterProvider,
+          notificationProvider,
         ],
       }).compile();
       const controller = moduleRef.get(ServiceTypesController);
@@ -228,10 +255,11 @@ describe('ServiceTypesController', () => {
         controllers: [ServiceTypesController],
         providers: [
           { provide: ServiceTypesRepository, useValue: serviceTypesRepository },
-          { provide: ProviderRegistryService, useValue: { getProviders: jest.fn() } },
+          { provide: ProviderRegistryService, useValue: providerRegistryStub },
           { provide: ProviderServerTypesService, useValue: mockProviderServerTypes },
           { provide: ProviderLocationsService, useValue: mockProviderLocations },
           meterProvider,
+          notificationProvider,
         ],
       }).compile();
       const controller = moduleRef.get(ServiceTypesController);

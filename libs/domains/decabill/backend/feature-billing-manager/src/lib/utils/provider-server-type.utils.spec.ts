@@ -2,7 +2,10 @@ import {
   assertServerTypeAllowed,
   effectiveSchemaSupportsServerTypeSelection,
   normalizeAllowedServerTypes,
+  normalizeServerTypeByProvider,
   providerConfigSchemaSupportsServerTypeSelection,
+  resolveDefaultServerTypeForProvider,
+  stripServerTypeByProviderFromConfig,
   stripServerTypeFromRequestedConfig,
 } from '../utils/provider-server-type.utils';
 
@@ -31,5 +34,33 @@ describe('provider-server-type.utils', () => {
 
   it('normalizeAllowedServerTypes deduplicates and trims', () => {
     expect(normalizeAllowedServerTypes([' cx11 ', 'cx11', '', 'cx22', 1])).toEqual(['cx11', 'cx22']);
+  });
+
+  it('resolveDefaultServerTypeForProvider prefers per-provider map', () => {
+    expect(
+      resolveDefaultServerTypeForProvider(
+        {
+          serverType: 'cx11',
+          serverTypeByProvider: { hetzner: 'cx21', 'digital-ocean': 's-1vcpu-1gb' },
+        },
+        'digital-ocean',
+      ),
+    ).toBe('s-1vcpu-1gb');
+  });
+
+  it('resolveDefaultServerTypeForProvider falls back to top-level serverType', () => {
+    expect(resolveDefaultServerTypeForProvider({ serverType: 'cx11' }, 'hetzner')).toBe('cx11');
+  });
+
+  it('normalizeServerTypeByProvider and stripServerTypeByProviderFromConfig', () => {
+    expect(normalizeServerTypeByProvider({ hetzner: ' cx11 ', '': 'x', do: 1 })).toEqual({ hetzner: 'cx11' });
+
+    const config: Record<string, unknown> = {
+      serverType: 'cx11',
+      serverTypeByProvider: { hetzner: 'cx11' },
+    };
+
+    stripServerTypeByProviderFromConfig(config);
+    expect(config).toEqual({ serverType: 'cx11' });
   });
 });

@@ -33,6 +33,13 @@ export class ServicePlanResponseDto {
   allowCustomerServerTypeSelection!: boolean;
   /** Server type ids customers may select when allowCustomerServerTypeSelection is true. */
   allowedServerTypes!: string[];
+  /** When true, customers may choose provider from allowedProviders at checkout. */
+  allowCustomerProviderSelection!: boolean;
+  /**
+   * With customer selection: checkout options.
+   * Without: single pinned provider when the service type has multiple providers.
+   */
+  allowedProviders!: string[];
   taxCategory!: TaxCategory;
   withdrawalPolicy!: WithdrawalPolicyDto;
   meters!: AttachedMeterResponseDto[];

@@ -33,5 +33,9 @@ export class PublicServicePlanOfferingDto {
   allowCustomerLocationSelection!: boolean;
   /** When true, checkout UIs may offer server type selection from allowed types. */
   allowCustomerServerTypeSelection!: boolean;
+  /** When true, checkout UIs may offer provider selection from allowedProviders. */
+  allowCustomerProviderSelection!: boolean;
+  /** Checkout options when selection is allowed; otherwise the pinned plan provider (length 0–1). */
+  allowedProviders!: string[];
   withdrawalPolicy!: WithdrawalPolicyDto;
 }
