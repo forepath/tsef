@@ -64,9 +64,41 @@ function getAuthHeader(environment: Environment, keycloakService: KeycloakServic
 
 let statusSocketInstance: Socket | null = null;
 let notificationAudio: HTMLAudioElement | null = null;
+let pendingActiveEnvironment: {
+  clientId: string | null;
+  agentId: string | null;
+  chatSessionId?: string | null;
+} | null = null;
+let pendingChatSessionRead: { clientId: string; agentId: string; chatSessionId: string } | null = null;
+let pendingEnvironmentRead: { clientId: string; agentId: string; chatSessionId?: string } | null = null;
 
 export function getStatusSocketInstance(): Socket | null {
   return statusSocketInstance;
+}
+
+/** @internal Test helper — reset module-level pending emit buffers. */
+export function resetStatusSocketPendingEmitsForTests(): void {
+  pendingActiveEnvironment = null;
+  pendingChatSessionRead = null;
+  pendingEnvironmentRead = null;
+}
+
+function flushPendingStatusEmits(): void {
+  if (!statusSocketInstance?.connected) {
+    return;
+  }
+
+  if (pendingActiveEnvironment) {
+    statusSocketInstance.emit(STATUS_SOCKET_EVENTS.setActiveEnvironment, pendingActiveEnvironment);
+  }
+
+  if (pendingChatSessionRead) {
+    statusSocketInstance.emit(STATUS_SOCKET_EVENTS.markChatSessionRead, pendingChatSessionRead);
+  }
+
+  if (pendingEnvironmentRead) {
+    statusSocketInstance.emit(STATUS_SOCKET_EVENTS.markEnvironmentRead, pendingEnvironmentRead);
+  }
 }
 
 function playNotificationSound(): void {
@@ -117,6 +149,7 @@ export const connectNotificationsSocket$ = createEffect(
             });
 
             const connectSuccess$ = fromEvent(statusSocketInstance, 'connect').pipe(
+              tap(() => flushPendingStatusEmits()),
               map(() => connectNotificationsSocketSuccess()),
             );
             const connectError$ = fromEvent<Error>(statusSocketInstance, 'connect_error').pipe(
@@ -127,6 +160,7 @@ export const connectNotificationsSocket$ = createEffect(
               fromEvent<number>(statusSocketInstance, 'reconnecting'),
             ).pipe(map((attempt) => notificationsSocketReconnecting({ attempt })));
             const reconnect$ = fromEvent(statusSocketInstance, 'reconnect').pipe(
+              tap(() => flushPendingStatusEmits()),
               map(() => notificationsSocketReconnected()),
             );
             const reconnectError$ = fromEvent<Error>(statusSocketInstance, 'reconnect_error').pipe(
@@ -188,11 +222,11 @@ export const markEnvironmentRead$ = createEffect(
     actions$.pipe(
       ofType(markEnvironmentRead),
       tap(({ clientId, agentId, chatSessionId }) => {
-        statusSocketInstance?.emit(STATUS_SOCKET_EVENTS.markEnvironmentRead, {
-          clientId,
-          agentId,
-          chatSessionId,
-        });
+        pendingEnvironmentRead = { clientId, agentId, chatSessionId };
+
+        if (statusSocketInstance?.connected) {
+          statusSocketInstance.emit(STATUS_SOCKET_EVENTS.markEnvironmentRead, pendingEnvironmentRead);
+        }
       }),
     ),
   { functional: true, dispatch: false },
@@ -203,11 +237,11 @@ export const markChatSessionRead$ = createEffect(
     actions$.pipe(
       ofType(markChatSessionRead),
       tap(({ clientId, agentId, chatSessionId }) => {
-        statusSocketInstance?.emit(STATUS_SOCKET_EVENTS.markChatSessionRead, {
-          clientId,
-          agentId,
-          chatSessionId,
-        });
+        pendingChatSessionRead = { clientId, agentId, chatSessionId };
+
+        if (statusSocketInstance?.connected) {
+          statusSocketInstance.emit(STATUS_SOCKET_EVENTS.markChatSessionRead, pendingChatSessionRead);
+        }
       }),
     ),
   { functional: true, dispatch: false },
@@ -218,16 +252,46 @@ export const setActiveEnvironment$ = createEffect(
     actions$.pipe(
       ofType(setActiveEnvironment),
       tap(({ clientId, agentId, chatSessionId }) => {
-        statusSocketInstance?.emit(STATUS_SOCKET_EVENTS.setActiveEnvironment, {
-          clientId,
-          agentId,
-          chatSessionId,
-        });
+        pendingActiveEnvironment = { clientId, agentId, chatSessionId };
+
+        if (statusSocketInstance?.connected) {
+          statusSocketInstance.emit(STATUS_SOCKET_EVENTS.setActiveEnvironment, pendingActiveEnvironment);
+        }
+
         store.dispatch(
           setActiveEnvironmentLocal({
             active: clientId && agentId ? { clientId, agentId, chatSessionId: chatSessionId ?? null } : null,
           }),
         );
+      }),
+    ),
+  { functional: true, dispatch: false },
+);
+
+/** After snapshot, re-assert active chat + mark-read so reload races cannot drop the cursor. */
+export const reassertActiveChatAfterSnapshot$ = createEffect(
+  (actions$ = inject(Actions), store = inject(Store)) =>
+    actions$.pipe(
+      ofType(statusSnapshotReceived),
+      withLatestFrom(store.select(selectActiveEnvironment)),
+      tap(([, active]) => {
+        if (!statusSocketInstance?.connected || !active?.clientId || !active?.agentId) {
+          return;
+        }
+
+        statusSocketInstance.emit(STATUS_SOCKET_EVENTS.setActiveEnvironment, {
+          clientId: active.clientId,
+          agentId: active.agentId,
+          chatSessionId: active.chatSessionId,
+        });
+
+        if (active.chatSessionId) {
+          statusSocketInstance.emit(STATUS_SOCKET_EVENTS.markChatSessionRead, {
+            clientId: active.clientId,
+            agentId: active.agentId,
+            chatSessionId: active.chatSessionId,
+          });
+        }
       }),
     ),
   { functional: true, dispatch: false },

@@ -29,8 +29,13 @@ export class UserEnvironmentReadStateRepository {
     const existing = await this.findOne(params.userId, params.clientId, params.agentId);
 
     if (existing) {
-      existing.lastReadAt = params.lastReadAt;
-      existing.lastReadAgentMessageId = params.lastReadAgentMessageId ?? null;
+      const existingAt = existing.lastReadAt;
+      existing.lastReadAt =
+        existingAt && existingAt.getTime() > params.lastReadAt.getTime() ? existingAt : params.lastReadAt;
+
+      if (params.lastReadAgentMessageId !== undefined) {
+        existing.lastReadAgentMessageId = params.lastReadAgentMessageId;
+      }
 
       return await this.repository.save(existing);
     }
