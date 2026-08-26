@@ -17,6 +17,7 @@ import type { ProjectTimeEntryEntity } from '../projects/entities/project-time-e
 import type { ProjectEntity } from '../projects/entities/project.entity';
 
 import type { BillingSearchDocument, BillingSearchEntityType } from './billing-search.types';
+import { resolveServiceTypeAllowedProviders } from '../utils/provider-selection.utils';
 
 function text(value: string | number | null | undefined): string | undefined {
   if (value === null || value === undefined) {
@@ -139,11 +140,13 @@ export function mapServicePlanToSearchDocument(plan: ServicePlanEntity): Billing
 }
 
 export function mapServiceTypeToSearchDocument(serviceType: ServiceTypeEntity): BillingSearchDocument {
+  const primaryProvider = resolveServiceTypeAllowedProviders(serviceType)[0] ?? serviceType.provider ?? null;
+
   return baseDoc('service-types', serviceType.id, serviceType.tenantId, {
     key: text(serviceType.key),
     name: text(serviceType.name),
     description: text(serviceType.description),
-    provider: text(serviceType.provider),
+    provider: text(primaryProvider),
     // Intentionally omit providerDefaults / configSchema secrets
   });
 }

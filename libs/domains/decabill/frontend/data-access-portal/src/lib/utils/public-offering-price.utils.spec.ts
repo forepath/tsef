@@ -19,6 +19,8 @@ describe('formatPublicOfferingPrice', () => {
     orderingHighlights: [],
     allowCustomerLocationSelection: false,
     allowCustomerServerTypeSelection: false,
+    allowCustomerProviderSelection: false,
+    allowedProviders: [],
     withdrawalPolicy: {
       periodDays: 14,
       allowedAfterProvisioning: true,

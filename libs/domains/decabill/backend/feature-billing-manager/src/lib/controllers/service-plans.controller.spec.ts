@@ -16,6 +16,7 @@ import { AddonsRepository } from '../repositories/addons.repository';
 import { PLAN_PRICE_MIGRATE_ENQUEUE } from '../queue/plan-price-migrate-enqueue.token';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { ContainerManagerCatalogService } from '../contributors/container-manager/services/container-manager-catalog.service';
+import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 
 import { ServicePlansController } from './service-plans.controller';
 
@@ -45,6 +46,8 @@ describe('ServicePlansController', () => {
     allowCustomerLocationSelection: false,
     allowCustomerServerTypeSelection: false,
     allowedServerTypes: [],
+    allowCustomerProviderSelection: false,
+    allowedProviders: [],
     taxCategory: TaxCategory.STANDARD,
     isActive: true,
     createdAt: new Date('2024-01-01T00:00:00.000Z'),
@@ -59,6 +62,7 @@ describe('ServicePlansController', () => {
     findByIdOrThrow: jest.fn().mockResolvedValue({
       id: basePlanRow.serviceTypeId,
       provider: 'hetzner',
+      allowedProviders: ['hetzner'],
       configSchema: schemaWithRegionEnum,
       disallowStatutoryWithdrawal: false,
     }),
@@ -84,6 +88,9 @@ describe('ServicePlansController', () => {
   const containerManagerCatalogServiceStub = {
     applyIntegratedPlanDefaults: jest.fn(async (defaults: Record<string, unknown> | undefined) => defaults ?? {}),
   };
+  const notificationPublisherStub = {
+    publishServicePlanAllowedProvidersChanged: jest.fn(),
+  };
 
   beforeEach(() => {
     planPriceMigrateEnqueueStub.enqueueUnit.mockReset();
@@ -92,6 +99,7 @@ describe('ServicePlansController', () => {
     serviceTypesRepoStub.findByIdOrThrow.mockResolvedValue({
       id: basePlanRow.serviceTypeId,
       provider: 'hetzner',
+      allowedProviders: ['hetzner'],
       configSchema: schemaWithRegionEnum,
       disallowStatutoryWithdrawal: false,
     });
@@ -111,6 +119,7 @@ describe('ServicePlansController', () => {
     containerManagerCatalogServiceStub.applyIntegratedPlanDefaults.mockImplementation(
       async (defaults: Record<string, unknown> | undefined) => defaults ?? {},
     );
+    notificationPublisherStub.publishServicePlanAllowedProvidersChanged.mockReset();
   });
 
   function setupRepositoryMock(mock: Partial<jest.Mocked<ServicePlansRepository>>) {
@@ -137,6 +146,7 @@ describe('ServicePlansController', () => {
         { provide: SubscriptionsRepository, useValue: subscriptionsRepositoryStub },
         { provide: WithdrawalPolicyService, useValue: new WithdrawalPolicyService() },
         { provide: ContainerManagerCatalogService, useValue: containerManagerCatalogServiceStub },
+        { provide: BillingNotificationPublisher, useValue: notificationPublisherStub },
         { provide: PLAN_PRICE_MIGRATE_ENQUEUE, useValue: planPriceMigrateEnqueueStub },
       ],
     }).compile();
@@ -526,6 +536,101 @@ describe('ServicePlansController', () => {
     );
   });
 
+  it('create rejects allowCustomerProviderSelection with a single provider', async () => {
+    serviceTypesRepoStub.findByIdOrThrow.mockResolvedValueOnce({
+      id: basePlanRow.serviceTypeId,
+      provider: 'hetzner',
+      allowedProviders: ['hetzner', 'digital-ocean'],
+      configSchema: schemaWithRegionEnum,
+      disallowStatutoryWithdrawal: false,
+    });
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    await expect(
+      controller.create({
+        serviceTypeId: basePlanRow.serviceTypeId,
+        name: 'Basic',
+        billingIntervalType: BillingIntervalType.MONTH,
+        billingIntervalValue: 1,
+        allowCustomerProviderSelection: true,
+        allowedProviders: ['hetzner'],
+      } as CreateServicePlanDto),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('create rejects allowCustomerProviderSelection when service type has fewer than two providers', async () => {
+    serviceTypesRepoStub.findByIdOrThrow.mockResolvedValueOnce({
+      id: basePlanRow.serviceTypeId,
+      provider: 'hetzner',
+      allowedProviders: ['hetzner'],
+      configSchema: schemaWithRegionEnum,
+      disallowStatutoryWithdrawal: false,
+    });
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    await expect(
+      controller.create({
+        serviceTypeId: basePlanRow.serviceTypeId,
+        name: 'Basic',
+        billingIntervalType: BillingIntervalType.MONTH,
+        billingIntervalValue: 1,
+        allowCustomerProviderSelection: true,
+        allowedProviders: ['hetzner', 'digital-ocean'],
+      } as CreateServicePlanDto),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('create passes allowCustomerProviderSelection with at least two providers', async () => {
+    serviceTypesRepoStub.findByIdOrThrow.mockResolvedValueOnce({
+      id: basePlanRow.serviceTypeId,
+      provider: 'hetzner',
+      allowedProviders: ['hetzner', 'digital-ocean'],
+      configSchema: schemaWithRegionEnum,
+      disallowStatutoryWithdrawal: false,
+    });
+    const create = jest
+      .fn()
+      .mockImplementation((dto: Partial<ServicePlanEntity>) => Promise.resolve({ ...basePlanRow, ...dto }));
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn(),
+      create,
+      update: jest.fn(),
+      delete: jest.fn(),
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    await controller.create({
+      serviceTypeId: basePlanRow.serviceTypeId,
+      name: 'Basic',
+      billingIntervalType: BillingIntervalType.MONTH,
+      billingIntervalValue: 1,
+      allowCustomerProviderSelection: true,
+      allowedProviders: ['hetzner', 'digital-ocean'],
+    } as CreateServicePlanDto);
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allowCustomerProviderSelection: true,
+        allowedProviders: ['hetzner', 'digital-ocean'],
+      }),
+    );
+  });
+
   it('create with null serviceTypeId stores null and skips provider asserts', async () => {
     const create = jest.fn().mockImplementation((dto: Partial<ServicePlanEntity>) =>
       Promise.resolve({
@@ -557,6 +662,8 @@ describe('ServicePlansController', () => {
         providerConfigDefaults: {},
         allowCustomerLocationSelection: false,
         allowCustomerServerTypeSelection: false,
+        allowCustomerProviderSelection: false,
+        allowedProviders: [],
         autoRecalculatePriceDaily: false,
       }),
     );

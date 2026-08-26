@@ -25,6 +25,8 @@ describe('ServicePlansService', () => {
     orderingHighlights: [],
     allowCustomerLocationSelection: false,
     allowCustomerServerTypeSelection: false,
+    allowCustomerProviderSelection: false,
+    allowedProviders: [],
     allowedServerTypes: [],
     withdrawalPolicy: {
       periodDays: 14,

@@ -18,14 +18,26 @@ import {
 import { validateConfigSchema } from '../utils/config-validation.utils';
 import {
   mirrorGeographyInConfig,
+  readRequestedGeography,
+  resolveDefaultGeographyForProvider,
   resolveProvisioningRegion,
+  stripGeographyByProviderFromConfig,
   stripGeographyFromRequestedConfig,
 } from '../utils/provider-location.utils';
 import {
   assertServerTypeAllowed,
   normalizeAllowedServerTypes,
+  resolveDefaultServerTypeForProvider,
+  stripServerTypeByProviderFromConfig,
   stripServerTypeFromRequestedConfig,
 } from '../utils/provider-server-type.utils';
+import {
+  assertProviderAllowed,
+  resolveEffectiveProvider,
+  resolvePlanAllowedProviders,
+  resolveServiceTypeAllowedProviders,
+  stripProviderFromRequestedConfig,
+} from '../utils/provider-selection.utils';
 import {
   BILLING_BASE_PRICE_CONFIG_KEY,
   resolvePeriodTotalPrice,
@@ -41,6 +53,8 @@ import { CloudflareDnsService } from './cloudflare-dns.service';
 import { HostnameReservationService } from './hostname-reservation.service';
 import { ProviderServerTypesService } from './provider-server-types.service';
 import { PricingService } from './pricing.service';
+import { ProviderCatalogDispatchService } from './provider-catalog-dispatch.service';
+import { ProviderRegistryService } from './provider-registry.service';
 import { ProvisioningDispatchService } from './provisioning-dispatch.service';
 import { TaxCalculationService } from './tax-calculation.service';
 import { InvoiceTaxContextService } from './invoice-tax-context.service';
@@ -68,6 +82,8 @@ export class BackorderService {
     private readonly invoiceTaxContextService: InvoiceTaxContextService,
     private readonly subscriptionPeriodChargeService: SubscriptionPeriodChargeService,
     private readonly cloudInitDispatchService: CloudInitDispatchService,
+    private readonly providerCatalogDispatchService: ProviderCatalogDispatchService,
+    private readonly providerRegistry: ProviderRegistryService,
   ) {}
 
   async create(data: {
@@ -123,17 +139,24 @@ export class BackorderService {
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
     const allowCustomerLocationSelection = plan.allowCustomerLocationSelection === true;
     const allowCustomerServerTypeSelection = plan.allowCustomerServerTypeSelection === true;
+    const allowCustomerProviderSelection = plan.allowCustomerProviderSelection === true;
     let sanitizedSnapshot = allowCustomerLocationSelection
       ? { ...(backorder.requestedConfigSnapshot ?? {}) }
       : stripGeographyFromRequestedConfig(backorder.requestedConfigSnapshot);
     sanitizedSnapshot = allowCustomerServerTypeSelection
       ? sanitizedSnapshot
       : stripServerTypeFromRequestedConfig(sanitizedSnapshot);
+    sanitizedSnapshot = allowCustomerProviderSelection
+      ? sanitizedSnapshot
+      : stripProviderFromRequestedConfig(sanitizedSnapshot);
     const baseConfig = plan.providerConfigDefaults ?? {};
     const effectiveConfig: Record<string, unknown> = {
       ...(baseConfig || {}),
       ...sanitizedSnapshot,
     };
+
+    stripServerTypeByProviderFromConfig(effectiveConfig);
+    stripGeographyByProviderFromConfig(effectiveConfig);
 
     try {
       const selection = resolveOrderProvisioningSelection(plan.providerConfigDefaults ?? {}, sanitizedSnapshot);
@@ -143,21 +166,49 @@ export class BackorderService {
       throw new BadRequestException((error as Error).message);
     }
 
-    const provider = serviceType.provider;
+    if (allowCustomerProviderSelection) {
+      const requestedProvider =
+        typeof sanitizedSnapshot['provider'] === 'string' ? sanitizedSnapshot['provider'].trim() : '';
 
-    if (provider === 'hetzner' || provider === 'digital-ocean') {
-      const regionResolved = resolveProvisioningRegion(effectiveConfig, provider);
+      if (requestedProvider) {
+        const allowedError = assertProviderAllowed(requestedProvider, resolvePlanAllowedProviders(plan, serviceType));
 
-      mirrorGeographyInConfig(effectiveConfig, regionResolved);
+        if (allowedError) {
+          throw new BadRequestException(allowedError);
+        }
+      }
     }
 
-    if (!effectiveConfig.serverType) {
-      effectiveConfig.serverType = provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11';
+    const provider = resolveEffectiveProvider(serviceType, plan, sanitizedSnapshot);
+    const primaryForProvisioningCheck = resolveServiceTypeAllowedProviders(serviceType)[0] ?? undefined;
+
+    if (!provider && this.providerCatalogDispatchService.requiresProvisioning(primaryForProvisioningCheck)) {
+      throw new BadRequestException('provider could not be resolved for this service type');
     }
+
+    if (provider) {
+      effectiveConfig.provider = provider;
+    }
+
+    if (provider && this.providerCatalogDispatchService.requiresProvisioning(provider)) {
+      const planDefaultGeo = resolveDefaultGeographyForProvider(baseConfig, provider);
+      const requestedGeo = readRequestedGeography(sanitizedSnapshot);
+      const geography = allowCustomerLocationSelection
+        ? requestedGeo || planDefaultGeo || resolveProvisioningRegion({}, provider)
+        : planDefaultGeo || resolveProvisioningRegion({}, provider);
+
+      mirrorGeographyInConfig(effectiveConfig, geography);
+    }
+
+    const planDefaultServerType = resolveDefaultServerTypeForProvider(baseConfig, provider);
+    const requestedServerType =
+      typeof sanitizedSnapshot['serverType'] === 'string' ? sanitizedSnapshot['serverType'].trim() : '';
 
     if (allowCustomerServerTypeSelection) {
       const allowed = normalizeAllowedServerTypes(plan.allowedServerTypes);
-      const resolvedServerType = String(effectiveConfig.serverType);
+      const resolvedServerType = String(
+        requestedServerType || planDefaultServerType || (provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11'),
+      );
       const serverTypeError = assertServerTypeAllowed(resolvedServerType, allowed);
 
       if (serverTypeError) {
@@ -165,9 +216,13 @@ export class BackorderService {
       }
 
       effectiveConfig.serverType = resolvedServerType.trim();
+    } else if (provider) {
+      effectiveConfig.serverType = planDefaultServerType ?? (provider === 'digital-ocean' ? 's-1vcpu-1gb' : 'cx11');
     }
 
-    const validationErrors = validateConfigSchema(serviceType.configSchema, effectiveConfig);
+    const schemaForValidation =
+      (provider ? this.providerRegistry.getProvider(provider)?.configSchema : undefined) ?? serviceType.configSchema;
+    const validationErrors = validateConfigSchema(schemaForValidation, effectiveConfig);
 
     if (validationErrors.length > 0) {
       throw new BadRequestException(validationErrors.join('; '));
@@ -201,11 +256,11 @@ export class BackorderService {
       effectiveConfig.env = resolvedCustomEnv;
     }
 
-    const region = resolveProvisioningRegion(effectiveConfig, provider);
+    const region = provider ? resolveProvisioningRegion(effectiveConfig, provider) : '';
     const serverType = effectiveConfig.serverType as string;
     const providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
 
-    if (provider === 'hetzner' || provider === 'digital-ocean') {
+    if (provider && this.providerCatalogDispatchService.requiresProvisioning(provider)) {
       if (allowCustomerServerTypeSelection) {
         const billingBasePrice = await resolveServerTypePriceMonthly(
           this.providerServerTypesService,
@@ -218,21 +273,21 @@ export class BackorderService {
           effectiveConfig[BILLING_BASE_PRICE_CONFIG_KEY] = billingBasePrice;
         }
       }
-    }
 
-    const availability = await this.availabilityService.checkAvailability(
-      provider,
-      region,
-      serverType,
-      providerDefaults,
-    );
+      const availability = await this.availabilityService.checkAvailability(
+        provider,
+        region,
+        serverType,
+        providerDefaults,
+      );
 
-    if (!availability.isAvailable) {
-      return await this.backordersRepository.update(backorderId, {
-        status: BackorderStatus.RETRYING,
-        failureReason: availability.reason,
-        preferredAlternatives: availability.alternatives ?? {},
-      });
+      if (!availability.isAvailable) {
+        return await this.backordersRepository.update(backorderId, {
+          status: BackorderStatus.RETRYING,
+          failureReason: availability.reason,
+          preferredAlternatives: availability.alternatives ?? {},
+        });
+      }
     }
 
     const schedule = this.billingScheduleService.calculateSchedule(
@@ -255,9 +310,9 @@ export class BackorderService {
       configSnapshot: { ...effectiveConfig },
     });
 
-    if (serviceType.provider === 'hetzner' || serviceType.provider === 'digital-ocean') {
+    if (provider && this.providerCatalogDispatchService.requiresProvisioning(provider)) {
       let hostname: string | null = null;
-      const credentials = getProvisioningCredentials(serviceType.provider, serviceType.providerDefaults);
+      const credentials = getProvisioningCredentials(provider, serviceType.providerDefaults);
 
       try {
         hostname = await this.hostnameReservationService.reserveHostname(baseItem.id);
@@ -281,22 +336,18 @@ export class BackorderService {
           firewallId: effectiveConfig.firewallId as number | undefined,
           userData,
         };
-        const provisioned = await this.provisioningDispatchService.provision(
-          serviceType.provider,
-          provisioningConfig,
-          credentials,
-        );
+        const provisioned = await this.provisioningDispatchService.provision(provider, provisioningConfig, credentials);
 
         if (provisioned?.serverId) {
           await this.subscriptionItemsRepository.updateProviderReference(baseItem.id, provisioned.serverId);
           await this.subscriptionItemsRepository.updateProvisioningStatus(baseItem.id, 'active');
           const serverInfo = await this.provisioningDispatchService.getServerInfo(
-            serviceType.provider,
+            provider,
             provisioned.serverId,
             credentials,
           );
           const publicIp = await this.provisioningDispatchService.ensurePublicIpForDns(
-            serviceType.provider,
+            provider,
             provisioned.serverId,
             serverInfo,
             credentials,

@@ -116,10 +116,30 @@ describe('SubscriptionConfigChangeService', () => {
     const eligibility = await service.getEligibility('sub-1', 'user-1');
 
     expect(eligibility.canRequestChange).toBe(true);
+    expect(eligibility.provider).toBe('hetzner');
     expect(eligibility.currentServerType).toBe('cx11');
     expect(eligibility.allowedServerTypes).toEqual(['cx11', 'cx21', 'cpx11']);
     expect(eligibility.availableAddonIds).toEqual(['addon-1']);
     expect(eligibility.activeAddonIds).toEqual(['addon-2']);
+  });
+
+  it('getEligibility prefers configSnapshot.provider over service type primary', async () => {
+    subscriptionItemsRepository.findBySubscription.mockResolvedValue([
+      {
+        id: 'item-1',
+        provisioningStatus: 'active',
+        configSnapshot: { provider: 'digital-ocean', serverType: 's-1vcpu-1gb', billingBasePrice: 5 },
+        serviceType: {
+          provider: 'hetzner',
+          allowedProviders: ['hetzner', 'digital-ocean'],
+          providerDefaults: {},
+        },
+      },
+    ]);
+
+    const eligibility = await service.getEligibility('sub-1', 'user-1');
+
+    expect(eligibility.provider).toBe('digital-ocean');
   });
 
   it('getEligibility rejects subscriptions that are not active', async () => {

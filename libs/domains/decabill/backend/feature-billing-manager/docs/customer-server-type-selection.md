@@ -15,14 +15,17 @@ Provisioning plans (Hetzner, DigitalOcean) use `basePriceFromField: 'serverType'
 - The billing console shows “Allow server type selection” only when the merged provider schema has **`basePriceFromField === 'serverType'`**.
 - When the flag is **false**, `allowedServerTypes` is ignored/cleared on save; a single server type is selected in `providerConfigDefaults.serverType` and `basePrice` follows that type.
 - When the flag is **true**, admins multi-select `allowedServerTypes` (minimum one). `providerConfigDefaults.serverType` is set to the first selected type (checkout default). `basePrice` is synced from that default type’s `priceMonthly`.
+- When **customer provider selection** is also enabled (multiple plan providers), admins set **`providerConfigDefaults.serverTypeByProvider`** (`{ [providerId]: serverTypeId }`). Order/pricing resolve the default for the effective provider from that map (falling back to top-level `serverType`). The admin UI shows one default select per provider.
 - The API returns **400** if `allowCustomerServerTypeSelection: true` is sent when the effective schema does not support server-type selection, or when `allowedServerTypes` is empty or contains invalid values.
 
 ## Order API (`POST /subscriptions`)
 
 1. If **`allowCustomerServerTypeSelection` is false**, `serverType` is removed from `requestedConfig` before merging with `providerConfigDefaults`.
-2. If **true**, client-supplied `serverType` is kept; when omitted, the plan default (`providerConfigDefaults.serverType`) is used.
+2. If **true**, client-supplied `serverType` is kept; when omitted, the plan default for the effective provider is used (`serverTypeByProvider[provider]` or `providerConfigDefaults.serverType`).
 3. The resolved `serverType` must be listed in `plan.allowedServerTypes` when the flag is true.
 4. The resolved infrastructure base price (`priceMonthly` for the chosen type) is snapshotted in subscription item `configSnapshot` as **`billingBasePrice`** so recurring billing matches checkout pricing.
+
+When customer provider selection is enabled and server type selection is **false**, `serverType` is still taken from `serverTypeByProvider` for the resolved provider (not a single global default that may belong to another cloud).
 
 ## Pricing preview (`POST /pricing/preview`)
 

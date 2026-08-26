@@ -27,6 +27,7 @@ import { UpdateServicePlanDto } from '../dto/update-service-plan.dto';
 import { ServicePlanEntity } from '../entities/service-plan.entity';
 import { fromApiServiceTypeId, isNoneServiceTypeId, toApiServiceTypeId } from '../constants/service-type-id.constants';
 import { TaxCategory } from '../constants/tax-category.constants';
+import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { AddonsRepository } from '../repositories/addons.repository';
 import { ServicePlansRepository } from '../repositories/service-plans.repository';
 import { ServiceTypesRepository } from '../repositories/service-types.repository';
@@ -50,6 +51,11 @@ import { commercialPricingFieldsChanged, snapshotCommercialPricing } from '../ut
 import { isPostgresForeignKeyViolation } from '../utils/postgres-foreign-key-violation.util';
 import { effectiveSchemaSupportsLocationSelection } from '../utils/provider-location.utils';
 import {
+  allowedProvidersEqual,
+  normalizeAllowedProviders,
+  resolveServiceTypeAllowedProviders,
+} from '../utils/provider-selection.utils';
+import {
   effectiveSchemaSupportsServerTypeSelection,
   normalizeAllowedServerTypes,
 } from '../utils/provider-server-type.utils';
@@ -69,6 +75,7 @@ export class ServicePlansController {
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly withdrawalPolicyService: WithdrawalPolicyService,
     private readonly containerManagerCatalogService: ContainerManagerCatalogService,
+    private readonly notificationPublisher: BillingNotificationPublisher,
     @Inject(PLAN_PRICE_MIGRATE_ENQUEUE)
     private readonly planPriceMigrateEnqueue: PlanPriceMigrateEnqueuePort,
   ) {}
@@ -166,8 +173,9 @@ export class ServicePlansController {
     }
 
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
+    const primaryProvider = resolveServiceTypeAllowedProviders(serviceType)[0] ?? serviceType.provider ?? null;
 
-    if (!this.addonService.providerSupportsAddons(serviceType.provider)) {
+    if (!primaryProvider || !this.addonService.providerSupportsAddons(primaryProvider)) {
       return [];
     }
 
@@ -182,9 +190,7 @@ export class ServicePlansController {
 
     const compatible = addons
       .filter((addon) => addon.isActive)
-      .filter(
-        (addon) => addon.compatibleProviders.length === 0 || addon.compatibleProviders.includes(serviceType.provider),
-      );
+      .filter((addon) => addon.compatibleProviders.length === 0 || addon.compatibleProviders.includes(primaryProvider));
 
     return await Promise.all(
       compatible.map(async (addon) => ({
@@ -254,6 +260,14 @@ export class ServicePlansController {
     const allowedServerTypes = allowCustomerServerTypeSelection
       ? normalizeAllowedServerTypes(dto.allowedServerTypes)
       : [];
+    const allowCustomerProviderSelection = isNone ? false : dto.allowCustomerProviderSelection === true;
+    const allowedProviders = isNone
+      ? []
+      : await this.resolvePlanProvidersForPersist(
+          dbServiceTypeId as string,
+          allowCustomerProviderSelection,
+          dto.allowedProviders,
+        );
 
     if (!isNone && dbServiceTypeId) {
       await this.cloudInitConfigService.assertActiveConfigForPlanDefaults(dbServiceTypeId, normalizedDefaults);
@@ -285,8 +299,21 @@ export class ServicePlansController {
       allowCustomerLocationSelection: isNone ? false : (dto.allowCustomerLocationSelection ?? false),
       allowCustomerServerTypeSelection,
       allowedServerTypes,
+      allowCustomerProviderSelection,
+      allowedProviders,
       taxCategory: dto.taxCategory ?? TaxCategory.STANDARD,
       isActive: dto.isActive ?? true,
+    });
+
+    this.notificationPublisher.publishServicePlanAllowedProvidersChanged({
+      servicePlanId: row.id,
+      servicePlanName: row.name,
+      tenantId: row.tenantId ?? getTenantIdOrDefault(),
+      serviceTypeId: row.serviceTypeId,
+      previousAllowCustomerProviderSelection: false,
+      previousAllowedProviders: [],
+      nextAllowCustomerProviderSelection: allowCustomerProviderSelection,
+      nextAllowedProviders: allowedProviders,
     });
 
     return await this.mapToResponse(row);
@@ -335,6 +362,22 @@ export class ServicePlansController {
         : allowCustomerServerTypeSelection
           ? normalizeAllowedServerTypes(existing.allowedServerTypes)
           : [];
+    const allowCustomerProviderSelection = isNone
+      ? false
+      : dto.allowCustomerProviderSelection !== undefined
+        ? dto.allowCustomerProviderSelection === true
+        : existing.allowCustomerProviderSelection === true;
+    const providerSelectionTouched =
+      dto.allowCustomerProviderSelection !== undefined || dto.allowedProviders !== undefined || isNone;
+    const allowedProviders = isNone
+      ? []
+      : providerSelectionTouched
+        ? await this.resolvePlanProvidersForPersist(
+            existing.serviceTypeId as string,
+            allowCustomerProviderSelection,
+            dto.allowedProviders !== undefined ? dto.allowedProviders : existing.allowedProviders,
+          )
+        : normalizeAllowedProviders(existing.allowedProviders);
 
     if (!isNone && existing.serviceTypeId && dto.providerConfigDefaults !== undefined) {
       const normalizedDefaultsRaw = normalizePlanProviderConfigDefaults(dto.providerConfigDefaults);
@@ -396,9 +439,33 @@ export class ServicePlansController {
       ...(dto.allowedServerTypes !== undefined || dto.allowCustomerServerTypeSelection !== undefined || isNone
         ? { allowedServerTypes }
         : {}),
+      ...(dto.allowCustomerProviderSelection !== undefined || isNone ? { allowCustomerProviderSelection } : {}),
+      ...(providerSelectionTouched ? { allowedProviders } : {}),
       ...(dto.taxCategory !== undefined ? { taxCategory: dto.taxCategory } : {}),
       ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
     });
+
+    const previousAllowCustomerProviderSelection = existing.allowCustomerProviderSelection === true;
+    const previousAllowedProviders = normalizeAllowedProviders(existing.allowedProviders);
+    const selectionFieldsTouched =
+      dto.allowCustomerProviderSelection !== undefined || dto.allowedProviders !== undefined || isNone;
+    const selectionChanged =
+      selectionFieldsTouched &&
+      (previousAllowCustomerProviderSelection !== allowCustomerProviderSelection ||
+        !allowedProvidersEqual(previousAllowedProviders, allowedProviders));
+
+    if (selectionChanged) {
+      this.notificationPublisher.publishServicePlanAllowedProvidersChanged({
+        servicePlanId: row.id,
+        servicePlanName: row.name,
+        tenantId: row.tenantId ?? getTenantIdOrDefault(),
+        serviceTypeId: row.serviceTypeId,
+        previousAllowCustomerProviderSelection,
+        previousAllowedProviders,
+        nextAllowCustomerProviderSelection: allowCustomerProviderSelection,
+        nextAllowedProviders: allowedProviders,
+      });
+    }
 
     if (shouldMigrate && previousPricing) {
       const changeId = randomUUID();
@@ -481,6 +548,8 @@ export class ServicePlansController {
       allowCustomerLocationSelection: row.allowCustomerLocationSelection === true,
       allowCustomerServerTypeSelection: row.allowCustomerServerTypeSelection === true,
       allowedServerTypes: normalizeAllowedServerTypes(row.allowedServerTypes),
+      allowCustomerProviderSelection: row.allowCustomerProviderSelection === true,
+      allowedProviders: normalizeAllowedProviders(row.allowedProviders),
       taxCategory: row.taxCategory ?? TaxCategory.STANDARD,
       withdrawalPolicy,
       meters: await this.meterService.listEffectivePlanMeters(row.id, row.serviceTypeId),
@@ -500,6 +569,12 @@ export class ServicePlansController {
     if (dto.allowCustomerServerTypeSelection === true) {
       throw new BadRequestException(
         'allowCustomerServerTypeSelection is not supported when serviceTypeId is null (no deployment)',
+      );
+    }
+
+    if (dto.allowCustomerProviderSelection === true) {
+      throw new BadRequestException(
+        'allowCustomerProviderSelection is not supported when serviceTypeId is null (no deployment)',
       );
     }
 
@@ -523,6 +598,12 @@ export class ServicePlansController {
       );
     }
 
+    if (dto.allowCustomerProviderSelection === true) {
+      throw new BadRequestException(
+        'allowCustomerProviderSelection is not supported when serviceTypeId is null (no deployment)',
+      );
+    }
+
     if (dto.autoRecalculatePriceDaily === true) {
       throw new BadRequestException(
         'autoRecalculatePriceDaily is not supported when serviceTypeId is null (no deployment)',
@@ -534,7 +615,10 @@ export class ServicePlansController {
     if (!allow) return;
 
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
-    const providerDetail = this.providerRegistry.getProviders().find((p) => p.id === serviceType.provider);
+    const primaryProvider = resolveServiceTypeAllowedProviders(serviceType)[0] ?? serviceType.provider ?? null;
+    const providerDetail = primaryProvider
+      ? this.providerRegistry.getProviders().find((p) => p.id === primaryProvider)
+      : undefined;
 
     if (!effectiveSchemaSupportsLocationSelection(serviceType.configSchema, providerDetail?.configSchema)) {
       throw new BadRequestException(
@@ -551,7 +635,10 @@ export class ServicePlansController {
     if (!allow) return;
 
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
-    const providerDetail = this.providerRegistry.getProviders().find((p) => p.id === serviceType.provider);
+    const primaryProvider = resolveServiceTypeAllowedProviders(serviceType)[0] ?? serviceType.provider ?? null;
+    const providerDetail = primaryProvider
+      ? this.providerRegistry.getProviders().find((p) => p.id === primaryProvider)
+      : undefined;
 
     if (!effectiveSchemaSupportsServerTypeSelection(serviceType.configSchema, providerDetail?.configSchema)) {
       throw new BadRequestException(
@@ -566,5 +653,68 @@ export class ServicePlansController {
         'allowedServerTypes must contain at least one server type when customer selection is enabled',
       );
     }
+  }
+
+  /**
+   * Validates and normalizes plan allowedProviders for persistence.
+   * - Customer selection on: require ≥2 type providers and a subset of ≥2.
+   * - Customer selection off + multiple type providers: require exactly one pinned provider.
+   * - Customer selection off + single type provider: pin that provider automatically.
+   * - No type providers: empty list; customer selection not allowed.
+   */
+  private async resolvePlanProvidersForPersist(
+    serviceTypeId: string,
+    allowCustomerProviderSelection: boolean,
+    planAllowedProviders: string[] | undefined,
+  ): Promise<string[]> {
+    const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
+    const typeAllowed = resolveServiceTypeAllowedProviders(serviceType);
+    const normalized = normalizeAllowedProviders(planAllowedProviders).filter((id) => typeAllowed.includes(id));
+
+    if (typeAllowed.length === 0) {
+      if (allowCustomerProviderSelection) {
+        throw new BadRequestException(
+          'allowCustomerProviderSelection requires the service type to have at least two allowed providers',
+        );
+      }
+
+      return [];
+    }
+
+    if (allowCustomerProviderSelection) {
+      if (typeAllowed.length < 2) {
+        throw new BadRequestException(
+          'allowCustomerProviderSelection requires the service type to have at least two allowed providers',
+        );
+      }
+
+      if (normalized.length < 2) {
+        throw new BadRequestException(
+          'allowedProviders must contain at least two providers when customer selection is enabled',
+        );
+      }
+
+      const invalid = normalizeAllowedProviders(planAllowedProviders).filter((id) => !typeAllowed.includes(id));
+
+      if (invalid.length > 0) {
+        throw new BadRequestException(
+          `allowedProviders must be a subset of the service type allowedProviders (invalid: ${invalid.join(', ')})`,
+        );
+      }
+
+      return normalized;
+    }
+
+    if (typeAllowed.length === 1) {
+      return [typeAllowed[0]];
+    }
+
+    if (normalized.length !== 1) {
+      throw new BadRequestException(
+        'allowedProviders must contain exactly one provider when customer selection is disabled and the service type has multiple providers',
+      );
+    }
+
+    return normalized;
   }
 }

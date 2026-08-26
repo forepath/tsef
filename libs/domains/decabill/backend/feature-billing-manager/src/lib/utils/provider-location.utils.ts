@@ -102,6 +102,87 @@ export function mirrorGeographyInConfig(config: Record<string, unknown>, value: 
   config['location'] = value;
 }
 
+/** Admin-only map on providerConfigDefaults: provider id → default geography (location/region) id. */
+export const GEOGRAPHY_BY_PROVIDER_KEY = 'geographyByProvider';
+
+/**
+ * Remove admin-only geographyByProvider from a merged effective config.
+ */
+export function stripGeographyByProviderFromConfig(config: Record<string, unknown>): void {
+  delete config[GEOGRAPHY_BY_PROVIDER_KEY];
+}
+
+/**
+ * Normalize provider → geography map.
+ */
+export function normalizeGeographyByProvider(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+
+  const out: Record<string, string> = {};
+
+  for (const [providerId, geography] of Object.entries(value as Record<string, unknown>)) {
+    const provider = typeof providerId === 'string' ? providerId.trim() : '';
+    const geo = typeof geography === 'string' ? geography.trim() : '';
+
+    if (!provider || !geo) {
+      continue;
+    }
+
+    out[provider] = geo;
+  }
+
+  return out;
+}
+
+/**
+ * Default geography for a provider: geographyByProvider[provider], then region, then location.
+ */
+export function resolveDefaultGeographyForProvider(
+  providerConfigDefaults: Record<string, unknown> | null | undefined,
+  providerId: string | null | undefined,
+): string | null {
+  const defaults = providerConfigDefaults ?? {};
+  const provider = typeof providerId === 'string' ? providerId.trim() : '';
+  const byProvider = normalizeGeographyByProvider(defaults[GEOGRAPHY_BY_PROVIDER_KEY]);
+
+  if (provider && byProvider[provider]) {
+    return byProvider[provider];
+  }
+
+  const region = defaults['region'];
+  const location = defaults['location'];
+
+  if (typeof region === 'string' && region.trim()) {
+    return region.trim();
+  }
+
+  if (typeof location === 'string' && location.trim()) {
+    return location.trim();
+  }
+
+  return null;
+}
+
+/**
+ * Geography from a request overlay only (ignores plan defaults merged into effective config).
+ */
+export function readRequestedGeography(requestedConfig: Record<string, unknown> | undefined): string {
+  const region = requestedConfig?.['region'];
+  const location = requestedConfig?.['location'];
+
+  if (typeof region === 'string' && region.trim()) {
+    return region.trim();
+  }
+
+  if (typeof location === 'string' && location.trim()) {
+    return location.trim();
+  }
+
+  return '';
+}
+
 /**
  * Shallow copy of requestedConfig without geography keys when customer selection is disabled.
  */

@@ -201,6 +201,55 @@ describe('AddonService', () => {
     await expect(service.assertAddonIdsForOrder('st-1', ['addon-1'], ['addon-1'])).rejects.toThrow(BadRequestException);
   });
 
+  it('rejects order addons incompatible with the effective plan provider', async () => {
+    serviceTypesRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'st-1',
+      provider: 'hetzner',
+      allowedProviders: ['hetzner', 'digital-ocean'],
+    });
+    providerRegistry.getProviders.mockReturnValue([
+      { id: 'hetzner', displayName: 'Hetzner', supportsAddons: true },
+      { id: 'digital-ocean', displayName: 'DigitalOcean', supportsAddons: true },
+    ]);
+    addonsRepository.findByIds.mockResolvedValue([
+      { id: 'addon-1', key: 'av', isActive: true, compatibleProviders: ['hetzner'] },
+    ]);
+
+    await expect(
+      service.assertAddonIdsForOrder(
+        'st-1',
+        ['addon-1'],
+        ['addon-1'],
+        { provider: 'digital-ocean' },
+        { allowCustomerProviderSelection: true, allowedProviders: ['hetzner', 'digital-ocean'] },
+      ),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('uses pinned plan provider for order addon checks when customer selection is off', async () => {
+    const addon = { id: 'addon-1', key: 'av', isActive: true, compatibleProviders: ['digital-ocean'] };
+    serviceTypesRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'st-1',
+      provider: 'hetzner',
+      allowedProviders: ['hetzner', 'digital-ocean'],
+    });
+    providerRegistry.getProviders.mockReturnValue([
+      { id: 'hetzner', displayName: 'Hetzner', supportsAddons: true },
+      { id: 'digital-ocean', displayName: 'DigitalOcean', supportsAddons: true },
+    ]);
+    addonsRepository.findByIds.mockResolvedValue([addon]);
+
+    await expect(
+      service.assertAddonIdsForOrder(
+        'st-1',
+        ['addon-1'],
+        ['addon-1'],
+        { provider: 'hetzner' },
+        { allowCustomerProviderSelection: false, allowedProviders: ['digital-ocean'] },
+      ),
+    ).resolves.toEqual([addon]);
+  });
+
   it('validateCreatePayload rejects negative base price and invalid scripts', () => {
     expect(() =>
       service.validateCreatePayload({

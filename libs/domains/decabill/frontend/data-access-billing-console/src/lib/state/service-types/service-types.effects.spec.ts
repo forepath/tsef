@@ -45,6 +45,7 @@ describe('ServiceTypesEffects', () => {
     key: 'cursor',
     name: 'Cursor',
     provider: 'provider-1',
+    allowedProviders: ['provider-1'],
     configSchema: {},
     disallowStatutoryWithdrawal: false,
     isActive: true,

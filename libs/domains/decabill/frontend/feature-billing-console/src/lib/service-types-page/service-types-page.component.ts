@@ -6,6 +6,8 @@ import {
   MetersFacade,
   ServiceTypesFacade,
   ServiceTypesService,
+  normalizeAllowedProviders,
+  providersAreCompatible,
   type AttachedMeterResponse,
   type CreateServiceTypeDto,
   type DeclaredMeterDefinition,
@@ -34,6 +36,9 @@ import { optionalNumberInputValue } from '../optional-number-input.util';
 
 type ServiceTypeFormMode = 'create' | 'edit';
 
+/** Sentinel value for the persistent None option in the multi-select. */
+const NONE_PROVIDER_SENTINEL = '';
+
 @Component({
   selector: 'framework-billing-service-types-page',
   standalone: true,
@@ -57,6 +62,8 @@ export class ServiceTypesPageComponent implements OnInit {
   readonly editProviderDefaultsExpanded = signal(false);
   readonly showProviderDefaultsLabel = $localize`:@@featureServiceTypes-showProviderDefaults:Show`;
   readonly hideProviderDefaultsLabel = $localize`:@@featureServiceTypes-hideProviderDefaults:Hide`;
+  readonly noneProviderLabel = $localize`:@@featureServiceTypes-noneProvider:None`;
+  readonly noneProviderValue = NONE_PROVIDER_SENTINEL;
   readonly editProviderDefaultsTouched = signal(false);
   readonly serviceTypes$ = combineLatest([this.facade.getServiceTypes$(), this.facade.getProviderDetails$()]).pipe(
     map(([serviceTypes, providerDetails]) => ({ serviceTypes, providerDetails })),
@@ -73,11 +80,16 @@ export class ServiceTypesPageComponent implements OnInit {
     .getMeters$()
     .pipe(map((meters) => meters.filter((meter) => meter.isActive)));
 
+  /** Multi-select model; includes None sentinel or real provider ids (first = primary). */
+  createSelectedProviders: string[] = [NONE_PROVIDER_SENTINEL];
+  editSelectedProviders: string[] = [NONE_PROVIDER_SENTINEL];
+
   createForm: CreateServiceTypeDto & { providerDefaults: Record<string, string> } = {
     key: '',
     name: '',
     description: '',
-    provider: '',
+    provider: null,
+    allowedProviders: [],
     disallowStatutoryWithdrawal: false,
     isActive: true,
     providerDefaults: {},
@@ -90,7 +102,8 @@ export class ServiceTypesPageComponent implements OnInit {
     id: '',
     name: '',
     description: '',
-    provider: '',
+    provider: null,
+    allowedProviders: [],
     disallowStatutoryWithdrawal: false,
     isActive: true,
     providerDefaults: {},
@@ -126,16 +139,20 @@ export class ServiceTypesPageComponent implements OnInit {
   }
 
   openEditModal(st: ServiceTypeResponse): void {
+    const allowedProviders = this.resolveServiceTypeAllowedProviders(st);
+
     this.editForm = {
       id: st.id,
       name: st.name,
       description: st.description ?? '',
-      provider: st.provider,
+      provider: allowedProviders[0] ?? null,
+      allowedProviders: [...allowedProviders],
       disallowStatutoryWithdrawal: st.disallowStatutoryWithdrawal,
       isActive: st.isActive,
       providerDefaults: {},
       providerDefaultsConfigured: { ...(st.providerDefaultsConfigured ?? {}) },
     };
+    this.editSelectedProviders = allowedProviders.length > 0 ? [...allowedProviders] : [NONE_PROVIDER_SENTINEL];
     this.editProviderDefaultsExpanded.set(false);
     this.editProviderDefaultsTouched.set(false);
     this.resetMeterAttachForm('edit');
@@ -149,8 +166,29 @@ export class ServiceTypesPageComponent implements OnInit {
     showBillingModal(this.deleteConfirmModal);
   }
 
-  providerLabel(providerId: string, providers: ProviderDetail[] | null | undefined): string {
+  providerLabel(providerId: string | null | undefined, providers: ProviderDetail[] | null | undefined): string {
     return getProviderDisplayName(providerId, providers);
+  }
+
+  /**
+   * List column: None, single primary label, or primary + count of additional providers.
+   */
+  providersListLabel(st: ServiceTypeResponse, providers: ProviderDetail[] | null | undefined): string {
+    const allowed = this.resolveServiceTypeAllowedProviders(st);
+
+    if (allowed.length === 0) {
+      return this.noneProviderLabel;
+    }
+
+    const primaryLabel = this.providerLabel(allowed[0], providers);
+
+    if (allowed.length === 1) {
+      return primaryLabel;
+    }
+
+    const extraCount = allowed.length - 1;
+
+    return $localize`:@@featureServiceTypes-providersPrimaryPlusCount:${primaryLabel}:primary: (+${extraCount}:extraCount:)`;
   }
 
   activeStatusLabel(isActive: boolean): string {
@@ -161,19 +199,172 @@ export class ServiceTypesPageComponent implements OnInit {
     return getActiveStatusTextClass(isActive);
   }
 
-  hasProviderDefaultsSection(
-    providerId: string | undefined,
+  selectedProvidersFor(mode: ServiceTypeFormMode): string[] {
+    return mode === 'create' ? this.createSelectedProviders : this.editSelectedProviders;
+  }
+
+  primaryProviderId(mode: ServiceTypeFormMode): string | null {
+    const allowed = normalizeAllowedProviders(
+      mode === 'create' ? this.createForm.allowedProviders : this.editForm.allowedProviders,
+    );
+
+    return allowed[0] ?? null;
+  }
+
+  compareProviderId = (left: string | null | undefined, right: string | null | undefined): boolean => left === right;
+
+  isProviderOptionDisabled(
+    mode: ServiceTypeFormMode,
+    provider: ProviderDetail,
     providerDetails: ProviderDetail[] | null | undefined,
   ): boolean {
-    if (!providerId?.trim()) {
+    const selected = normalizeAllowedProviders(this.selectedProvidersFor(mode));
+
+    if (selected.length === 0) {
       return false;
     }
 
-    return this.getProviderEnvDefaultFields(providerId, providerDetails).length > 0;
+    const primaryId = selected[0];
+
+    if (provider.id === primaryId) {
+      return false;
+    }
+
+    const primary = providerDetails?.find((item) => item.id === primaryId);
+
+    if (!primary) {
+      return false;
+    }
+
+    return !providersAreCompatible(primary, provider);
+  }
+
+  onProvidersSelectionChange(
+    mode: ServiceTypeFormMode,
+    selectedIds: unknown,
+    providerDetails: ProviderDetail[] | null | undefined,
+  ): void {
+    const previous = this.selectedProvidersFor(mode);
+    const nextRaw = Array.isArray(selectedIds) ? selectedIds.map(String) : [];
+    const hadNone = previous.includes(NONE_PROVIDER_SENTINEL);
+    const hasNone = nextRaw.includes(NONE_PROVIDER_SENTINEL);
+    const realNext = normalizeAllowedProviders(nextRaw.filter((id) => id !== NONE_PROVIDER_SENTINEL));
+
+    if (hasNone && !hadNone) {
+      this.applyProviderSelection(mode, []);
+
+      return;
+    }
+
+    if (hasNone && realNext.length === 0) {
+      this.applyProviderSelection(mode, []);
+
+      return;
+    }
+
+    let allowed = realNext;
+
+    if (allowed.length > 0 && providerDetails?.length) {
+      const primary = providerDetails.find((item) => item.id === allowed[0]);
+
+      if (primary) {
+        allowed = allowed.filter((id) => {
+          const other = providerDetails.find((item) => item.id === id);
+
+          return other != null && providersAreCompatible(primary, other);
+        });
+      }
+    }
+
+    this.applyProviderSelection(mode, allowed);
+  }
+
+  private applyProviderSelection(mode: ServiceTypeFormMode, allowedProviders: string[]): void {
+    const normalized = normalizeAllowedProviders(allowedProviders);
+    const previousPrimary = this.primaryProviderId(mode);
+    const nextPrimary = normalized[0] ?? null;
+    const selectionChanged =
+      previousPrimary !== nextPrimary ||
+      JSON.stringify(mode === 'create' ? this.createForm.allowedProviders : this.editForm.allowedProviders) !==
+        JSON.stringify(normalized);
+
+    if (mode === 'create') {
+      this.createForm.provider = nextPrimary;
+      this.createForm.allowedProviders = [...normalized];
+      this.createSelectedProviders = normalized.length > 0 ? [...normalized] : [NONE_PROVIDER_SENTINEL];
+
+      if (selectionChanged) {
+        this.createForm.providerDefaults = {};
+        this.createProviderDefaultsExpanded.set(false);
+      }
+
+      return;
+    }
+
+    this.editForm.provider = nextPrimary;
+    this.editForm.allowedProviders = [...normalized];
+    this.editSelectedProviders = normalized.length > 0 ? [...normalized] : [NONE_PROVIDER_SENTINEL];
+
+    if (selectionChanged) {
+      this.editForm.providerDefaults = {};
+      this.editForm.providerDefaultsConfigured = {};
+      this.editProviderDefaultsExpanded.set(false);
+      this.editProviderDefaultsTouched.set(true);
+    }
+  }
+
+  hasProviderDefaultsSection(mode: ServiceTypeFormMode, providerDetails: ProviderDetail[] | null | undefined): boolean {
+    return this.getProviderDefaultsGroups(mode, providerDetails).some((group) => group.fields.length > 0);
+  }
+
+  /**
+   * Env default fields grouped by selected provider (order matches allowedProviders).
+   * Used so multi-provider service types show transparent rounded groups with an intro per provider.
+   */
+  getProviderDefaultsGroups(
+    mode: ServiceTypeFormMode,
+    providerDetails: ProviderDetail[] | null | undefined,
+  ): Array<{ providerId: string; label: string; fields: ProviderEnvDefaultField[] }> {
+    const allowed = normalizeAllowedProviders(
+      mode === 'create' ? this.createForm.allowedProviders : this.editForm.allowedProviders,
+    );
+
+    return allowed
+      .map((providerId) => {
+        const detail = providerDetails?.find((item) => item.id === providerId);
+
+        return {
+          providerId,
+          label: detail?.displayName?.trim() || providerId,
+          fields: this.getProviderEnvDefaultFields(providerId, providerDetails),
+        };
+      })
+      .filter((group) => group.fields.length > 0);
+  }
+
+  getSelectedProvidersEnvDefaultFields(
+    mode: ServiceTypeFormMode,
+    providerDetails: ProviderDetail[] | null | undefined,
+  ): ProviderEnvDefaultField[] {
+    const fields: ProviderEnvDefaultField[] = [];
+    const seen = new Set<string>();
+
+    for (const group of this.getProviderDefaultsGroups(mode, providerDetails)) {
+      for (const field of group.fields) {
+        if (seen.has(field.envKey)) {
+          continue;
+        }
+
+        seen.add(field.envKey);
+        fields.push(field);
+      }
+    }
+
+    return fields;
   }
 
   getProviderEnvDefaultFields(
-    providerId: string | undefined,
+    providerId: string | null | undefined,
     providerDetails: ProviderDetail[] | null | undefined,
   ): ProviderEnvDefaultField[] {
     if (!providerId?.trim()) {
@@ -186,7 +377,7 @@ export class ServiceTypesPageComponent implements OnInit {
   }
 
   getProviderDeclaredMeters(
-    providerId: string | undefined,
+    providerId: string | null | undefined,
     providerDetails: ProviderDetail[] | null | undefined,
   ): DeclaredMeterDefinition[] {
     if (!providerId?.trim()) {
@@ -225,16 +416,14 @@ export class ServiceTypesPageComponent implements OnInit {
     return this.editForm.providerDefaultsConfigured[envKey] === true;
   }
 
-  onCreateProviderChange(): void {
-    this.createForm.providerDefaults = {};
-    this.createProviderDefaultsExpanded.set(false);
-  }
+  private resolveServiceTypeAllowedProviders(st: ServiceTypeResponse): string[] {
+    const fromList = normalizeAllowedProviders(st.allowedProviders);
 
-  onEditProviderChange(): void {
-    this.editForm.providerDefaults = {};
-    this.editForm.providerDefaultsConfigured = {};
-    this.editProviderDefaultsExpanded.set(false);
-    this.editProviderDefaultsTouched.set(true);
+    if (fromList.length > 0) {
+      return fromList;
+    }
+
+    return normalizeAllowedProviders(st.provider ? [st.provider] : []);
   }
 
   attachedMetersFor(mode: ServiceTypeFormMode): AttachedMeterResponse[] {
@@ -247,7 +436,7 @@ export class ServiceTypesPageComponent implements OnInit {
     providerDetails: ProviderDetail[] | null | undefined,
   ): MeterResponse[] {
     const attachedIds = new Set(this.attachedMetersFor(mode).map((item) => item.meterId));
-    const providerId = mode === 'create' ? this.createForm.provider : this.editForm.provider;
+    const providerId = this.primaryProviderId(mode);
     const declaredKeys =
       mode === 'create'
         ? new Set(this.getProviderDeclaredMeters(providerId, providerDetails).map((item) => item.key))
@@ -424,15 +613,18 @@ export class ServiceTypesPageComponent implements OnInit {
   }
 
   onSubmitCreate(): void {
-    if (!this.createForm.key?.trim() || !this.createForm.name?.trim() || !this.createForm.provider?.trim()) return;
+    if (!this.createForm.key?.trim() || !this.createForm.name?.trim()) return;
 
+    const allowedProviders = normalizeAllowedProviders(this.createForm.allowedProviders);
+    const provider = allowedProviders[0] ?? null;
     const providerDefaults = this.buildProviderDefaultsForSubmit('create');
 
     this.facade.createServiceType({
       key: this.createForm.key.trim(),
       name: this.createForm.name.trim(),
       description: this.createForm.description?.trim() || undefined,
-      provider: this.createForm.provider.trim(),
+      provider,
+      allowedProviders,
       disallowStatutoryWithdrawal: this.createForm.disallowStatutoryWithdrawal ?? false,
       isActive: this.createForm.isActive ?? true,
       ...(Object.keys(providerDefaults).length > 0 ? { providerDefaults } : {}),
@@ -442,12 +634,15 @@ export class ServiceTypesPageComponent implements OnInit {
   onSubmitEdit(): void {
     if (!this.editForm.id) return;
 
+    const allowedProviders = normalizeAllowedProviders(this.editForm.allowedProviders);
+    const provider = allowedProviders[0] ?? null;
     const providerDefaults = this.buildProviderDefaultsForSubmit('edit');
 
     this.facade.updateServiceType(this.editForm.id, {
       name: this.editForm.name,
       description: this.editForm.description,
-      provider: this.editForm.provider,
+      provider,
+      allowedProviders,
       disallowStatutoryWithdrawal: this.editForm.disallowStatutoryWithdrawal,
       isActive: this.editForm.isActive,
       ...(this.editProviderDefaultsTouched() ? { providerDefaults } : {}),
@@ -553,11 +748,13 @@ export class ServiceTypesPageComponent implements OnInit {
       key: '',
       name: '',
       description: '',
-      provider: '',
+      provider: null,
+      allowedProviders: [],
       disallowStatutoryWithdrawal: false,
       isActive: true,
       providerDefaults: {},
     };
+    this.createSelectedProviders = [NONE_PROVIDER_SENTINEL];
     this.createProviderDefaultsExpanded.set(false);
     this.createAttachedMeters = [];
     this.resetMeterAttachForm('create');
@@ -569,12 +766,14 @@ export class ServiceTypesPageComponent implements OnInit {
       id: '',
       name: '',
       description: '',
-      provider: '',
+      provider: null,
+      allowedProviders: [],
       disallowStatutoryWithdrawal: false,
       isActive: true,
       providerDefaults: {},
       providerDefaultsConfigured: {},
     };
+    this.editSelectedProviders = [NONE_PROVIDER_SENTINEL];
     this.editProviderDefaultsExpanded.set(false);
     this.editProviderDefaultsTouched.set(false);
     this.editAttachedMeters = [];

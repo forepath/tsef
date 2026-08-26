@@ -67,4 +67,4 @@ If no company name is resolved, header and footer are omitted. On Decabill, leav
 
 ## Future (webhook-only today)
 
-`payment.initiated`, `invoice.created`, `invoice.overdue`, `subscription.updated`, project/milestone/ticket/time_entry CRUD, `datev_export.*`, `addon.container_manager.collection_failed`
+`payment.initiated`, `invoice.created`, `invoice.overdue`, `subscription.updated`, project/milestone/ticket/time_entry CRUD, `datev_export.*`, `addon.container_manager.collection_failed`, `service_type.allowed_providers_changed`, `service_plan.allowed_providers_changed`

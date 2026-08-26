@@ -1,5 +1,6 @@
 import { applyProviderConfigFieldScopes } from '../../utils/provider-config-schema.utils';
 import { DIGITALOCEAN_ENV_DEFAULT_FIELDS } from '../../utils/provider-env-defaults.utils';
+import { HOST_CLOUD_INIT_COMPATIBILITY_GROUP } from '../../utils/provider-selection.utils';
 
 import { HOST_PROVIDER_CONFIG_PROPERTIES } from '../shared/host-provider-config.properties';
 
@@ -28,6 +29,7 @@ export const DIGITAL_OCEAN_CONFIG_SCHEMA: Record<string, unknown> = {
 export const DIGITAL_OCEAN_PROVIDER_METADATA = {
   id: DIGITAL_OCEAN_PROVIDER_ID,
   displayName: 'DigitalOcean Cloud-Init',
+  compatibilityGroup: HOST_CLOUD_INIT_COMPATIBILITY_GROUP,
   configSchema: DIGITAL_OCEAN_CONFIG_SCHEMA,
   envDefaultFields: DIGITALOCEAN_ENV_DEFAULT_FIELDS,
   supportsAddons: true,

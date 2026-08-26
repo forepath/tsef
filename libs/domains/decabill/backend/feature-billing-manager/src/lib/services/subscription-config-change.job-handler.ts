@@ -12,6 +12,7 @@ import { SubscriptionConfigChangesRepository } from '../repositories/subscriptio
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { getProvisioningCredentials, normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
+import { resolveItemProvider } from '../utils/provider-selection.utils';
 import { BILLING_BASE_PRICE_CONFIG_KEY, resolveServerTypePriceMonthly } from '../utils/server-type-billing.utils';
 
 import { AddonLifecycleService } from './addon-lifecycle.service';
@@ -272,7 +273,7 @@ export class SubscriptionConfigChangeJobHandler {
       return;
     }
 
-    const provider = item.serviceType?.provider?.trim();
+    const provider = resolveItemProvider(item)?.trim();
 
     if (!provider || !item.providerReference) {
       throw new Error(`Subscription item ${item.id} has no provisioned server to resize`);
@@ -331,7 +332,7 @@ export class SubscriptionConfigChangeJobHandler {
     appliedSteps: Set<string>;
   }): Promise<void> {
     const { change, claimGeneration, subscription, plan, item, appliedSteps } = params;
-    const provider = item.serviceType?.provider?.trim() ?? '';
+    const provider = resolveItemProvider(item)?.trim() ?? '';
 
     for (const addonId of change.requestedPayload?.removeAddonIds ?? []) {
       const step = `${ADDON_REMOVE_STEP_PREFIX}${addonId}`;
@@ -363,7 +364,7 @@ export class SubscriptionConfigChangeJobHandler {
     appliedSteps: Set<string>;
   }): Promise<void> {
     const { change, claimGeneration, subscription, plan, item, appliedSteps } = params;
-    const provider = item.serviceType?.provider?.trim() ?? '';
+    const provider = resolveItemProvider(item)?.trim() ?? '';
     const addonConfigs = change.requestedPayload?.addonConfigs;
 
     for (const addonId of change.requestedPayload?.addAddonIds ?? []) {

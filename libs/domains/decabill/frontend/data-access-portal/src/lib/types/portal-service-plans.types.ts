@@ -32,6 +32,10 @@ export interface PublicServicePlanOffering {
   orderingHighlights: ServicePlanOrderingHighlight[];
   allowCustomerLocationSelection?: boolean;
   allowCustomerServerTypeSelection: boolean;
+  /** When true, checkout UIs may offer provider selection from allowedProviders. */
+  allowCustomerProviderSelection: boolean;
+  /** Provider ids customers may select when allowCustomerProviderSelection is true. */
+  allowedProviders: string[];
   withdrawalPolicy: WithdrawalPolicy;
 }
 

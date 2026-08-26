@@ -7,6 +7,7 @@ import { ServicePlansRepository } from '../repositories/service-plans.repository
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { getProvisioningCredentials } from '../utils/provider-env-defaults.utils';
+import { resolveItemProvider as resolveSubscriptionItemProvider } from '../utils/provider-selection.utils';
 
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { CloudflareDnsService } from './cloudflare-dns.service';
@@ -120,8 +121,10 @@ export class SubscriptionTeardownService {
     const providerByItemId = new Map<string, string>();
 
     for (const item of items) {
-      if (item.serviceType?.provider) {
-        providerByItemId.set(item.id, item.serviceType.provider);
+      const provider = this.resolveItemProvider(item);
+
+      if (provider) {
+        providerByItemId.set(item.id, provider);
       }
     }
 
@@ -149,14 +152,12 @@ export class SubscriptionTeardownService {
         }
       }
 
-      if (item.providerReference && item.serviceType?.provider) {
+      const provider = this.resolveItemProvider(item);
+
+      if (item.providerReference && provider && item.serviceType) {
         try {
-          const credentials = getProvisioningCredentials(item.serviceType.provider, item.serviceType.providerDefaults);
-          await this.provisioningDispatchService.deprovision(
-            item.serviceType.provider,
-            item.providerReference,
-            credentials,
-          );
+          const credentials = getProvisioningCredentials(provider, item.serviceType.providerDefaults);
+          await this.provisioningDispatchService.deprovision(provider, item.providerReference, credentials);
           await this.subscriptionItemsRepository.clearProviderReference(item.id);
           this.billingNotificationPublisher.publish(
             'subscription.service.removed',
@@ -203,5 +204,12 @@ export class SubscriptionTeardownService {
     } else {
       await this.billingEmailPublisher.publishSubscriptionCanceled(canceled, plan.name);
     }
+  }
+
+  private resolveItemProvider(item: {
+    configSnapshot?: Record<string, unknown> | null;
+    serviceType?: { provider?: string | null; allowedProviders?: string[] | null } | null;
+  }): string | null {
+    return resolveSubscriptionItemProvider(item);
   }
 }

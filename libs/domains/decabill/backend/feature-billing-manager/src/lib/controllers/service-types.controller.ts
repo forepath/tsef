@@ -1,5 +1,7 @@
 import { KeycloakRoles, RequireScopes, UserRole, UsersRoles } from '@forepath/identity/backend';
+import { getTenantIdOrDefault } from '@forepath/shared/backend';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -22,18 +24,26 @@ import { ServerTypeDto } from '../dto/server-type.dto';
 import { ServiceTypeResponseDto } from '../dto/service-type-response.dto';
 import { UpdateServiceTypeDto } from '../dto/update-service-type.dto';
 import { ServiceTypeEntity } from '../entities/service-type.entity';
+import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { ServiceTypesRepository } from '../repositories/service-types.repository';
 import { MeterService } from '../services/meter.service';
 import { ProviderRegistryService } from '../services/provider-registry.service';
 import { ProviderLocationsService } from '../services/provider-locations.service';
 import { ProviderServerTypesService } from '../services/provider-server-types.service';
 import {
-  getProviderEnvDefaultFieldKeys,
-  getProviderEnvDefaultFields,
+  getProvidersEnvDefaultFieldKeys,
+  getProvidersEnvDefaultFields,
   maskProviderDefaultsForResponse,
   normalizeStoredProviderDefaults,
   sanitizeProviderDefaults,
 } from '../utils/provider-env-defaults.utils';
+import {
+  allowedProvidersEqual,
+  assertProvidersCompatible,
+  normalizeAllowedProviders,
+  resolvePrimaryProvider,
+  resolveServiceTypeAllowedProviders,
+} from '../utils/provider-selection.utils';
 
 @Controller('service-types')
 export class ServiceTypesController {
@@ -43,6 +53,7 @@ export class ServiceTypesController {
     private readonly providerServerTypesService: ProviderServerTypesService,
     private readonly providerLocationsService: ProviderLocationsService,
     private readonly meterService: MeterService,
+    private readonly notificationPublisher: BillingNotificationPublisher,
   ) {}
 
   /**
@@ -59,8 +70,9 @@ export class ServiceTypesController {
 
     if (serviceTypeId) {
       const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
+      const allowed = resolveServiceTypeAllowedProviders(serviceType);
 
-      if (serviceType.provider !== providerId) {
+      if (!allowed.includes(providerId)) {
         providerDefaults = {};
       } else {
         providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
@@ -84,8 +96,9 @@ export class ServiceTypesController {
 
     if (serviceTypeId) {
       const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
+      const allowed = resolveServiceTypeAllowedProviders(serviceType);
 
-      if (serviceType.provider !== providerId) {
+      if (!allowed.includes(providerId)) {
         providerDefaults = {};
       } else {
         providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
@@ -96,7 +109,7 @@ export class ServiceTypesController {
   }
 
   /**
-   * Get all registered provider details (id, displayName, configSchema).
+   * Get all registered provider details (id, displayName, configSchema, compatibilityGroup).
    * Used by clients to build provider selectors and validate provider-specific config.
    */
   @RequireScopes('subscriptions:read')
@@ -130,19 +143,30 @@ export class ServiceTypesController {
   @KeycloakRoles(UserRole.ADMIN)
   @UsersRoles(UserRole.ADMIN)
   async create(@Body() dto: CreateServiceTypeDto): Promise<ServiceTypeResponseDto> {
-    const providerDefaults = this.resolveProviderDefaultsForPersist(dto.provider, dto.providerDefaults, undefined);
+    const { provider, allowedProviders, configSchema } = this.resolveProvidersForPersist(dto);
+    const providerDefaults = this.resolveProviderDefaultsForPersist(allowedProviders, dto.providerDefaults, undefined);
     const row = await this.serviceTypesRepository.create({
       key: dto.key,
       name: dto.name,
       description: dto.description,
-      provider: dto.provider,
-      configSchema: dto.configSchema ?? {},
+      provider,
+      allowedProviders,
+      configSchema,
       isActive: dto.isActive ?? true,
       disallowStatutoryWithdrawal: dto.disallowStatutoryWithdrawal ?? false,
       providerDefaults,
     });
 
     await this.meterService.syncServiceTypeProviderMeters(row);
+    this.notificationPublisher.publishServiceTypeAllowedProvidersChanged({
+      serviceTypeId: row.id,
+      serviceTypeKey: row.key,
+      tenantId: row.tenantId ?? getTenantIdOrDefault(),
+      previousPrimary: null,
+      previousAllowedProviders: [],
+      nextPrimary: provider,
+      nextAllowedProviders: allowedProviders,
+    });
 
     return this.mapToResponse(row);
   }
@@ -205,24 +229,58 @@ export class ServiceTypesController {
     @Body() dto: UpdateServiceTypeDto,
   ): Promise<ServiceTypeResponseDto> {
     const existing = await this.serviceTypesRepository.findByIdOrThrow(id);
-    const provider = dto.provider ?? existing.provider;
+    const previousAllowed = resolveServiceTypeAllowedProviders(existing);
+    const previousPrimary = existing.provider?.trim() || previousAllowed[0] || null;
+    const providersTouched = dto.allowedProviders !== undefined || dto.provider !== undefined;
+    const resolved = providersTouched
+      ? this.resolveProvidersForPersist({
+          provider: dto.provider !== undefined ? dto.provider : existing.provider,
+          allowedProviders: dto.allowedProviders !== undefined ? dto.allowedProviders : previousAllowed,
+          configSchema: dto.configSchema,
+        })
+      : {
+          provider: existing.provider,
+          allowedProviders: previousAllowed,
+          configSchema: dto.configSchema ?? existing.configSchema ?? {},
+        };
+    const providersChanged =
+      previousPrimary !== resolved.provider || !allowedProvidersEqual(previousAllowed, resolved.allowedProviders);
     const providerDefaults = this.resolveProviderDefaultsForPersist(
-      provider,
+      resolved.allowedProviders,
       dto.providerDefaults,
       normalizeStoredProviderDefaults(existing.providerDefaults),
-      dto.provider !== undefined && dto.provider !== existing.provider,
+      providersChanged,
     );
     const row = await this.serviceTypesRepository.update(id, {
       name: dto.name,
       description: dto.description,
-      provider: dto.provider,
-      configSchema: dto.configSchema,
+      ...(providersTouched
+        ? {
+            provider: resolved.provider,
+            allowedProviders: resolved.allowedProviders,
+            configSchema: resolved.configSchema,
+          }
+        : dto.configSchema !== undefined
+          ? { configSchema: dto.configSchema }
+          : {}),
       isActive: dto.isActive,
       disallowStatutoryWithdrawal: dto.disallowStatutoryWithdrawal,
       ...(providerDefaults !== undefined ? { providerDefaults } : {}),
     });
 
     await this.meterService.syncServiceTypeProviderMeters(row);
+
+    if (providersChanged) {
+      this.notificationPublisher.publishServiceTypeAllowedProvidersChanged({
+        serviceTypeId: row.id,
+        serviceTypeKey: row.key,
+        tenantId: row.tenantId ?? getTenantIdOrDefault(),
+        previousPrimary,
+        previousAllowedProviders: previousAllowed,
+        nextPrimary: resolved.provider,
+        nextAllowedProviders: resolved.allowedProviders,
+      });
+    }
 
     return this.mapToResponse(row);
   }
@@ -236,19 +294,61 @@ export class ServiceTypesController {
     await this.serviceTypesRepository.delete(id);
   }
 
+  private resolveProvidersForPersist(dto: {
+    provider?: string | null;
+    allowedProviders?: string[];
+    configSchema?: Record<string, unknown>;
+  }): { provider: string | null; allowedProviders: string[]; configSchema: Record<string, unknown> } {
+    let allowedProviders = normalizeAllowedProviders(dto.allowedProviders);
+
+    if (allowedProviders.length === 0) {
+      const legacy = typeof dto.provider === 'string' ? dto.provider.trim() : '';
+
+      if (legacy) {
+        allowedProviders = [legacy];
+      }
+    }
+
+    // Non-empty allowlist wins over a null/empty provider field (primary is derived from the list).
+    // None is represented only by an empty allowlist (and null primary).
+
+    const compatibilityError = assertProvidersCompatible(allowedProviders, (id) =>
+      this.providerRegistry.getProvider(id),
+    );
+
+    if (compatibilityError) {
+      throw new BadRequestException(compatibilityError);
+    }
+
+    const provider = resolvePrimaryProvider(allowedProviders);
+    let configSchema = dto.configSchema ?? {};
+
+    if (provider) {
+      const registered = this.providerRegistry.getProvider(provider)?.configSchema;
+
+      if (registered && (!dto.configSchema || Object.keys(dto.configSchema).length === 0)) {
+        configSchema = { ...registered };
+      }
+    } else {
+      configSchema = dto.configSchema ?? {};
+    }
+
+    return { provider, allowedProviders, configSchema };
+  }
+
   private resolveProviderDefaultsForPersist(
-    providerId: string,
+    allowedProviders: string[],
     input: Record<string, string> | undefined,
     existing: Record<string, string> | undefined,
-    providerChanged = false,
+    providersChanged = false,
   ): Record<string, string> | undefined {
-    const allowedKeys = getProviderEnvDefaultFieldKeys(providerId);
+    const allowedKeys = getProvidersEnvDefaultFieldKeys(allowedProviders);
 
     if (input !== undefined) {
       return sanitizeProviderDefaults(input, allowedKeys);
     }
 
-    if (providerChanged && existing) {
+    if (providersChanged && existing) {
       return sanitizeProviderDefaults(existing, allowedKeys);
     }
 
@@ -256,10 +356,11 @@ export class ServiceTypesController {
   }
 
   private mapToResponse(row: ServiceTypeEntity): ServiceTypeResponseDto {
+    const allowedProviders = resolveServiceTypeAllowedProviders(row);
     const providerDefaults = normalizeStoredProviderDefaults(row.providerDefaults);
     const { providerDefaultsConfigured } = maskProviderDefaultsForResponse(
       providerDefaults,
-      getProviderEnvDefaultFields(row.provider),
+      getProvidersEnvDefaultFields(allowedProviders),
     );
 
     return {
@@ -267,7 +368,8 @@ export class ServiceTypesController {
       key: row.key,
       name: row.name,
       description: row.description,
-      provider: row.provider,
+      provider: row.provider?.trim() ? row.provider : (allowedProviders[0] ?? null),
+      allowedProviders,
       configSchema: row.configSchema ?? {},
       isActive: row.isActive,
       disallowStatutoryWithdrawal: row.disallowStatutoryWithdrawal,

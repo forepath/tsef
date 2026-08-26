@@ -115,6 +115,15 @@ export class CreateServicePlanDto {
   allowedServerTypes?: string[];
 
   @IsOptional()
+  @IsBoolean({ message: 'allowCustomerProviderSelection must be a boolean' })
+  allowCustomerProviderSelection?: boolean;
+
+  @IsOptional()
+  @IsArray({ message: 'allowedProviders must be an array' })
+  @IsString({ each: true, message: 'Each allowed provider must be a string' })
+  allowedProviders?: string[];
+
+  @IsOptional()
   @IsEnum(TaxCategory, { message: 'taxCategory must be standard or reduced' })
   taxCategory?: TaxCategory;
 }

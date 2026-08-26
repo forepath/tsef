@@ -97,6 +97,8 @@ describe('PublicServicePlanOfferingsController', () => {
       orderingHighlights: [{ icon: 'check', text: 'Included' }],
       allowCustomerLocationSelection: false,
       allowCustomerServerTypeSelection: false,
+      allowCustomerProviderSelection: false,
+      allowedProviders: [],
       withdrawalPolicy: {
         periodDays: 14,
         allowedAfterProvisioning: true,

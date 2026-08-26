@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-21T12:40:24.251Z",
+  "generatedAt": "2026-08-25T17:44:36.644Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -5685,6 +5685,15 @@
       "type": "readme",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/docs/customer-location-selection.md",
+        "languageOrKind": "md",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/docs/customer-provider-selection.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/docs/customer-provider-selection.md",
         "languageOrKind": "md",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -12615,6 +12624,14 @@
       }
     },
     {
+      "id": "file:docs/decabill/features/customer-provider-selection.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/customer-provider-selection.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
       "id": "file:docs/decabill/features/customer-trust-score.md",
       "type": "doc",
       "attrs": {
@@ -18421,6 +18438,15 @@
       }
     },
     {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:service_plan.allowed_providers_changed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "service_plan.allowed_providers_changed",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
       "id": "webhook-event:decabill-backend-feature-billing-manager:service_plan.meter_attached",
       "type": "webhook-event",
       "attrs": {
@@ -18452,6 +18478,15 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "service_plan.price_recalculated",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:service_type.allowed_providers_changed",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "service_type.allowed_providers_changed",
         "projectName": "decabill-backend-feature-billing-manager",
         "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
       }
@@ -26962,6 +26997,86 @@
       }
     },
     {
+      "id": "concept:decabill-customer-provider-selection",
+      "type": "concept",
+      "attrs": {
+        "title": "Customer provider selection",
+        "docPath": "docs/decabill/features/customer-provider-selection.md",
+        "sectionAnchor": "customer-provider-selection",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-provider-compatibility",
+      "type": "concept",
+      "attrs": {
+        "title": "Provider compatibility",
+        "docPath": "docs/decabill/features/customer-provider-selection.md",
+        "sectionAnchor": "provider-compatibility",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-service-type-fields",
+      "type": "concept",
+      "attrs": {
+        "title": "Service type fields",
+        "docPath": "docs/decabill/features/customer-provider-selection.md",
+        "sectionAnchor": "service-type-fields",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-service-plan-fields",
+      "type": "concept",
+      "attrs": {
+        "title": "Service plan fields",
+        "docPath": "docs/decabill/features/customer-provider-selection.md",
+        "sectionAnchor": "service-plan-fields",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-order-api-post-subscriptions",
+      "type": "concept",
+      "attrs": {
+        "title": "Order API (`POST /subscriptions`)",
+        "docPath": "docs/decabill/features/customer-provider-selection.md",
+        "sectionAnchor": "order-api-post-subscriptions",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-availability-post-availability-check",
+      "type": "concept",
+      "attrs": {
+        "title": "Availability (`POST /availability/check`)",
+        "docPath": "docs/decabill/features/customer-provider-selection.md",
+        "sectionAnchor": "availability-post-availability-check",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-public-catalog",
+      "type": "concept",
+      "attrs": {
+        "title": "Public catalog",
+        "docPath": "docs/decabill/features/customer-provider-selection.md",
+        "sectionAnchor": "public-catalog",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-related-code",
+      "type": "concept",
+      "attrs": {
+        "title": "Related code",
+        "docPath": "docs/decabill/features/customer-provider-selection.md",
+        "sectionAnchor": "related-code",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-customer-trust-score",
       "type": "concept",
       "attrs": {
@@ -27448,16 +27563,6 @@
         "title": "API Key Auth and Tenant Scope",
         "docPath": "docs/decabill/features/multi-tenancy.md",
         "sectionAnchor": "api-key-auth-and-tenant-scope",
-        "domain": "decabill"
-      }
-    },
-    {
-      "id": "concept:decabill-public-catalog",
-      "type": "concept",
-      "attrs": {
-        "title": "Public Catalog",
-        "docPath": "docs/decabill/features/multi-tenancy.md",
-        "sectionAnchor": "public-catalog",
         "domain": "decabill"
       }
     },
@@ -34320,6 +34425,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/docs/customer-provider-selection.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/docs/customer-server-type-selection.md",
       "type": "contains"
     },
@@ -40375,6 +40485,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:service_plan.allowed_providers_changed",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:service_plan.meter_attached",
       "type": "contains"
     },
@@ -40391,6 +40506,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:service_plan.price_recalculated",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:service_type.allowed_providers_changed",
       "type": "contains"
     },
     {
@@ -46151,6 +46271,51 @@
     {
       "from": "file:docs/decabill/features/customer-profiles.md",
       "to": "concept:decabill-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
+      "to": "concept:decabill-customer-provider-selection",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
+      "to": "concept:decabill-purpose",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
+      "to": "concept:decabill-provider-compatibility",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
+      "to": "concept:decabill-service-type-fields",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
+      "to": "concept:decabill-service-plan-fields",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
+      "to": "concept:decabill-order-api-post-subscriptions",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
+      "to": "concept:decabill-availability-post-availability-check",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
+      "to": "concept:decabill-public-catalog",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
+      "to": "concept:decabill-related-code",
       "type": "contains"
     },
     {
@@ -54979,6 +55144,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/availability.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/service-types.repository.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/backorders.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/backorder.service.ts",
       "type": "injects"
@@ -55786,6 +55956,16 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/backorder.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-dispatch.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/backorder.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provider-catalog-dispatch.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/backorder.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provider-registry.service.ts",
       "type": "injects"
     },
     {
@@ -57446,6 +57626,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/cloud-init-dispatch.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provider-registry.service.ts",
       "type": "injects"
     },
     {
@@ -66244,6 +66429,51 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-provider-compatibility",
+      "to": "api:HTTP:GET:/service-types",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-provider-compatibility",
+      "to": "api:HTTP:POST:/service-types",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-provider-compatibility",
+      "to": "api:HTTP:GET:/service-types/providers",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-order-api-post-subscriptions",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-order-api-post-subscriptions",
+      "to": "api:HTTP:GET:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-order-api-post-subscriptions",
+      "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-availability-post-availability-check",
+      "to": "api:HTTP:POST:/availability/check",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-public-catalog",
+      "to": "api:HTTP:GET:/public/service-plan-offerings",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-public-catalog",
+      "to": "api:HTTP:GET:/public/service-plan-offerings/cheapest",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-scope",
       "to": "api:HTTP:GET:/customer-profile",
       "type": "documents"
@@ -66571,16 +66801,6 @@
     {
       "from": "concept:decabill-api-endpoints-summary",
       "to": "api:HTTP:POST:/admin/billing/invoices/{invoiceRefId}/issue",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-public-catalog",
-      "to": "api:HTTP:GET:/public/service-plan-offerings",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-public-catalog",
-      "to": "api:HTTP:GET:/public/service-plan-offerings/cheapest",
       "type": "documents"
     },
     {
@@ -69885,6 +70105,11 @@
     },
     {
       "from": "file:docs/decabill/features/customer-profiles.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/decabill/features/customer-provider-selection.md",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -73654,6 +73879,46 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:decabill-customer-provider-selection",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-provider-compatibility",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-service-type-fields",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-service-plan-fields",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-order-api-post-subscriptions",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-availability-post-availability-check",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-public-catalog",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-related-code",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:decabill-customer-trust-score",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -73895,11 +74160,6 @@
     },
     {
       "from": "concept:decabill-api-key-auth-and-tenant-scope",
-      "to": "domain:decabill",
-      "type": "belongs_to"
-    },
-    {
-      "from": "concept:decabill-public-catalog",
       "to": "domain:decabill",
       "type": "belongs_to"
     },

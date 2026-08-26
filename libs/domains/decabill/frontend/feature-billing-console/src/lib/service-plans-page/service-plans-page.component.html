@@ -465,94 +465,321 @@
                 }}</strong>
               }
             </div>
-            @if (getProviderSchema(data.serviceTypes, data.providerDetails, createForm.serviceTypeId); as schema) {
+            @if (supportsCustomerProviderSelection(data.serviceTypes, createForm.serviceTypeId)) {
+              <div class="form-check mb-3">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="createAllowCustomerProvider"
+                  name="allowCustomerProviderSelection"
+                  [(ngModel)]="createForm.allowCustomerProviderSelection"
+                  (ngModelChange)="
+                    onAllowCustomerProviderSelectionChange('create', data.serviceTypes, data.providerDetails)
+                  "
+                  [disabled]="(creating$ | async) === true"
+                />
+                <label
+                  class="form-check-label"
+                  for="createAllowCustomerProvider"
+                  i18n="@@featureServicePlans-allowCustomerProviderSelection"
+                >
+                  Allow provider selection
+                </label>
+                <div
+                  class="form-text text-body-secondary small"
+                  i18n="@@featureServicePlans-allowCustomerProviderSelectionHelp"
+                >
+                  Customers may choose a cloud provider from the selected options when ordering.
+                </div>
+              </div>
+              @if (createForm.allowCustomerProviderSelection === true) {
+                <div class="mb-3">
+                  <label for="createAllowedProviders" class="form-label" i18n="@@featureServicePlans-allowedProviders"
+                    >Allowed providers</label
+                  >
+                  <select
+                    id="createAllowedProviders"
+                    name="createAllowedProviders"
+                    class="form-select"
+                    multiple
+                    size="4"
+                    [ngModel]="createAllowedProviders"
+                    (ngModelChange)="onAllowedProvidersChangeCreate($event, data.serviceTypes, data.providerDetails)"
+                    [compareWith]="compareProviderId"
+                    [disabled]="(creating$ | async) === true"
+                  >
+                    @for (
+                      providerId of getServiceTypeAllowedProviders(data.serviceTypes, createForm.serviceTypeId);
+                      track providerId
+                    ) {
+                      <option [ngValue]="providerId">
+                        {{ providerLabel(providerId, data.providerDetails) }}
+                      </option>
+                    }
+                  </select>
+                  <div class="form-text text-body-secondary small" i18n="@@featureServicePlans-allowedProvidersHelp">
+                    Hold Ctrl/Cmd to select. First selected is the default provider at checkout.
+                  </div>
+                </div>
+              } @else {
+                <div class="mb-3">
+                  <label for="createPinnedProvider" class="form-label" i18n="@@featureServicePlans-pinnedProvider"
+                    >Plan provider</label
+                  >
+                  <select
+                    id="createPinnedProvider"
+                    name="createPinnedProvider"
+                    class="form-select"
+                    [ngModel]="pinnedProviderId(createAllowedProviders)"
+                    (ngModelChange)="onPinnedProviderChangeCreate($event, data.serviceTypes, data.providerDetails)"
+                    [compareWith]="compareProviderId"
+                    [disabled]="(creating$ | async) === true"
+                  >
+                    @for (
+                      providerId of getServiceTypeAllowedProviders(data.serviceTypes, createForm.serviceTypeId);
+                      track providerId
+                    ) {
+                      <option [ngValue]="providerId">
+                        {{ providerLabel(providerId, data.providerDetails) }}
+                      </option>
+                    }
+                  </select>
+                  <div class="form-text text-body-secondary small" i18n="@@featureServicePlans-pinnedProviderHelp">
+                    Customers cannot choose a provider. This provider is used for all orders on this plan.
+                  </div>
+                </div>
+              }
+            }
+            @if (
+              supportsCustomerLocationSelection(
+                data.serviceTypes,
+                data.providerDetails,
+                createForm.serviceTypeId,
+                'create'
+              )
+            ) {
+              <div class="form-check mb-3">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="createAllowCustomerLocation"
+                  name="allowCustomerLocationSelection"
+                  [(ngModel)]="createForm.allowCustomerLocationSelection"
+                  [disabled]="(creating$ | async) === true"
+                />
+                <label class="form-check-label" for="createAllowCustomerLocation"> Allow location selection </label>
+                <div class="form-text text-body-secondary small">
+                  Customers may override the plan default region or location when ordering, if the provider supports it.
+                </div>
+              </div>
+            }
+            @if (
+              supportsCustomerServerTypeSelection(
+                data.serviceTypes,
+                data.providerDetails,
+                createForm.serviceTypeId,
+                'create'
+              )
+            ) {
+              <div class="form-check mb-3">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="createAllowCustomerServerType"
+                  name="allowCustomerServerTypeSelection"
+                  [(ngModel)]="createForm.allowCustomerServerTypeSelection"
+                  (ngModelChange)="onAllowCustomerServerTypeSelectionChange('create')"
+                  [disabled]="(creating$ | async) === true"
+                />
+                <label class="form-check-label" for="createAllowCustomerServerType">
+                  Allow server type selection
+                </label>
+                <div class="form-text text-body-secondary small">
+                  Customers may choose a server type from the selected options when ordering.
+                </div>
+              </div>
+            }
+            @if (
+              getProviderSchema(data.serviceTypes, data.providerDetails, createForm.serviceTypeId, 'create');
+              as schema
+            ) {
               <div class="mb-3 border rounded p-3 bg-body-secondary">
                 <h6 class="mb-3" i18n="@@featureServicePlans-providerConfigDefaults">Provider default config</h6>
                 @for (key of getServerProviderConfigKeys(schema); track key) {
-                  <div class="mb-2">
-                    <label [attr.for]="'createProviderConfig_' + key" class="form-label">{{ key }}</label>
-                    @if (getProviderConfigPropertyDescription(schema, key); as desc) {
-                      <small class="text-body-secondary d-block mb-1">{{ desc }}</small>
-                    }
-                    @if (
-                      getBasePriceFromField(data.serviceTypes, data.providerDetails, createForm.serviceTypeId) === key
-                    ) {
-                      @if (serverTypesLoading) {
-                        <span class="text-body-secondary" i18n="@@featureServicePlans-loadingServerTypes"
-                          >Loading server types...</span
-                        >
-                      } @else {
-                        @if (
-                          createForm.allowCustomerServerTypeSelection === true &&
-                          getBasePriceFromField(data.serviceTypes, data.providerDetails, createForm.serviceTypeId) ===
-                            key
-                        ) {
-                          <select
-                            [id]="'createProviderConfig_' + key"
-                            class="form-select"
-                            multiple
-                            [ngModel]="createAllowedServerTypes"
-                            (ngModelChange)="onAllowedServerTypesChangeCreate($event)"
-                            [compareWith]="compareServerTypeId"
-                            [name]="'createProviderConfig_' + key + '_multi'"
-                            [disabled]="(creating$ | async) === true"
-                            size="6"
+                  @if (!(needsPerProviderGeographyDefaults('create') && isGeographyConfigKey(key))) {
+                    <div class="mb-2">
+                      <label [attr.for]="'createProviderConfig_' + key" class="form-label">{{ key }}</label>
+                      @if (getProviderConfigPropertyDescription(schema, key); as desc) {
+                        <small class="text-body-secondary d-block mb-1">{{ desc }}</small>
+                      }
+                      @if (
+                        getBasePriceFromField(
+                          data.serviceTypes,
+                          data.providerDetails,
+                          createForm.serviceTypeId,
+                          'create'
+                        ) === key
+                      ) {
+                        @if (serverTypesLoading) {
+                          <span class="text-body-secondary" i18n="@@featureServicePlans-loadingServerTypes"
+                            >Loading server types...</span
                           >
-                            @for (st of currentServerTypes; track st.id) {
-                              <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
-                            }
-                          </select>
-                          <div class="form-text text-body-secondary small">
-                            Hold Ctrl/Cmd to select multiple server types customers may choose at checkout.
-                          </div>
                         } @else {
+                          @if (createForm.allowCustomerServerTypeSelection === true) {
+                            <select
+                              [id]="'createProviderConfig_' + key"
+                              class="form-select"
+                              multiple
+                              [ngModel]="createAllowedServerTypes"
+                              (ngModelChange)="onAllowedServerTypesChangeCreate($event)"
+                              [compareWith]="compareServerTypeId"
+                              [name]="'createProviderConfig_' + key + '_multi'"
+                              [disabled]="(creating$ | async) === true"
+                              size="6"
+                            >
+                              @if (currentServerTypeGroups.length > 1) {
+                                @for (group of currentServerTypeGroups; track group.providerId) {
+                                  <optgroup [label]="group.label">
+                                    @for (st of group.types; track st.id) {
+                                      <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                                    }
+                                  </optgroup>
+                                }
+                              } @else {
+                                @for (st of currentServerTypes; track st.id) {
+                                  <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                                }
+                              }
+                            </select>
+                            <div class="form-text text-body-secondary small">
+                              Hold Ctrl/Cmd to select multiple server types customers may choose at checkout.
+                            </div>
+                          }
+                          @if (needsPerProviderServerTypeDefaults('create')) {
+                            <div class="border rounded p-3 mt-2">
+                              <div
+                                class="form-text text-body-secondary small mb-2 mt-0"
+                                i18n="@@featureServicePlans-serverTypeByProviderHelp"
+                              >
+                                Choose a default server type for each provider. Used when the customer picks that
+                                provider (or omits server type at checkout).
+                              </div>
+                              @for (group of currentServerTypeGroups; track group.providerId) {
+                                <div class="mb-2">
+                                  <label
+                                    class="form-label small mb-1"
+                                    [attr.for]="'createDefaultServerType_' + group.providerId"
+                                  >
+                                    Default for {{ group.label }}
+                                  </label>
+                                  <select
+                                    [id]="'createDefaultServerType_' + group.providerId"
+                                    class="form-select"
+                                    [ngModel]="getDefaultServerTypeForProvider('create', group.providerId)"
+                                    (ngModelChange)="
+                                      onDefaultServerTypeForProviderChange('create', group.providerId, $event)
+                                    "
+                                    [compareWith]="compareServerTypeId"
+                                    [name]="'createDefaultServerType_' + group.providerId"
+                                    [disabled]="(creating$ | async) === true"
+                                  >
+                                    <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">
+                                      Choose...
+                                    </option>
+                                    @for (st of serverTypesForProviderDefault('create', group); track st.id) {
+                                      <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                                    }
+                                  </select>
+                                </div>
+                              }
+                            </div>
+                          } @else if (createForm.allowCustomerServerTypeSelection !== true) {
+                            <select
+                              [id]="'createProviderConfig_' + key"
+                              class="form-select"
+                              [(ngModel)]="createForm.providerConfigDefaults![key]"
+                              (ngModelChange)="onServerTypeSelectCreate($event)"
+                              [name]="'createProviderConfig_' + key"
+                              [disabled]="(creating$ | async) === true"
+                            >
+                              <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">Choose...</option>
+                              @for (st of currentServerTypes; track st.id) {
+                                <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                              }
+                            </select>
+                          }
+                        }
+                      } @else {
+                        @if (getProviderConfigEnum(schema, key); as enumValues) {
                           <select
                             [id]="'createProviderConfig_' + key"
                             class="form-select"
                             [(ngModel)]="createForm.providerConfigDefaults![key]"
-                            (ngModelChange)="onServerTypeSelectCreate($event)"
                             [name]="'createProviderConfig_' + key"
                             [disabled]="(creating$ | async) === true"
                           >
                             <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">Choose...</option>
-                            @for (st of currentServerTypes; track st.id) {
-                              <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                            @for (opt of enumValues; track opt) {
+                              <option [ngValue]="opt">{{ formatProviderConfigEnumLabel(key, opt) }}</option>
                             }
                           </select>
+                        } @else if (getProviderConfigPropertyType(schema, key) === 'number') {
+                          <input
+                            type="number"
+                            [id]="'createProviderConfig_' + key"
+                            class="form-control"
+                            [(ngModel)]="createForm.providerConfigDefaults![key]"
+                            [name]="'createProviderConfig_' + key"
+                            [disabled]="(creating$ | async) === true"
+                          />
+                        } @else {
+                          <input
+                            type="text"
+                            [id]="'createProviderConfig_' + key"
+                            class="form-control"
+                            [(ngModel)]="createForm.providerConfigDefaults![key]"
+                            [name]="'createProviderConfig_' + key"
+                            [disabled]="(creating$ | async) === true"
+                          />
                         }
                       }
+                    </div>
+                  }
+                }
+
+                @if (needsPerProviderGeographyDefaults('create')) {
+                  <div class="border rounded p-3 mt-3">
+                    <div
+                      class="form-text text-body-secondary small mb-2 mt-0"
+                      i18n="@@featureServicePlans-geographyByProviderHelp"
+                    >
+                      Choose a default location or region for each provider.
+                    </div>
+                    @if (providerLocationsLoading) {
+                      <span class="text-body-secondary small">Loading locations...</span>
                     } @else {
-                      @if (getProviderConfigEnum(schema, key); as enumValues) {
-                        <select
-                          [id]="'createProviderConfig_' + key"
-                          class="form-select"
-                          [(ngModel)]="createForm.providerConfigDefaults![key]"
-                          [name]="'createProviderConfig_' + key"
-                          [disabled]="(creating$ | async) === true"
-                        >
-                          <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">Choose...</option>
-                          @for (opt of enumValues; track opt) {
-                            <option [ngValue]="opt">{{ formatProviderConfigEnumLabel(key, opt) }}</option>
-                          }
-                        </select>
-                      } @else if (getProviderConfigPropertyType(schema, key) === 'number') {
-                        <input
-                          type="number"
-                          [id]="'createProviderConfig_' + key"
-                          class="form-control"
-                          [(ngModel)]="createForm.providerConfigDefaults![key]"
-                          [name]="'createProviderConfig_' + key"
-                          [disabled]="(creating$ | async) === true"
-                        />
-                      } @else {
-                        <input
-                          type="text"
-                          [id]="'createProviderConfig_' + key"
-                          class="form-control"
-                          [(ngModel)]="createForm.providerConfigDefaults![key]"
-                          [name]="'createProviderConfig_' + key"
-                          [disabled]="(creating$ | async) === true"
-                        />
+                      @for (group of geographyProviderGroups('create', data.providerDetails); track group.providerId) {
+                        <div class="mb-2">
+                          <label
+                            class="form-label small mb-1"
+                            [attr.for]="'createDefaultGeography_' + group.providerId"
+                          >
+                            Default for {{ group.label }}
+                          </label>
+                          <select
+                            [id]="'createDefaultGeography_' + group.providerId"
+                            class="form-select"
+                            [ngModel]="getDefaultGeographyForProvider('create', group.providerId)"
+                            (ngModelChange)="onDefaultGeographyForProviderChange('create', group.providerId, $event)"
+                            [name]="'createDefaultGeography_' + group.providerId"
+                            [disabled]="(creating$ | async) === true"
+                          >
+                            <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">Choose...</option>
+                            @for (loc of locationsForProvider(group.providerId); track loc.id) {
+                              <option [ngValue]="loc.id">{{ loc.name || loc.id }}</option>
+                            }
+                          </select>
+                        </div>
                       }
                     }
                   </div>
@@ -560,7 +787,12 @@
               </div>
             }
             @if (
-              supportsProvisioningOptionsSelection(data.serviceTypes, data.providerDetails, createForm.serviceTypeId)
+              supportsProvisioningOptionsSelection(
+                data.serviceTypes,
+                data.providerDetails,
+                createForm.serviceTypeId,
+                'create'
+              )
             ) {
               <div class="mb-3 border rounded p-3 bg-body-secondary">
                 <h6 class="mb-2" i18n="@@featureServicePlans-provisioningOptions">Customer-selectable options</h6>
@@ -575,7 +807,8 @@
                     data.serviceTypes,
                     data.providerDetails,
                     createForm.serviceTypeId,
-                    'agenstra-controller'
+                    'agenstra-controller',
+                    'create'
                   )
                 ) {
                   <div class="form-check mb-2">
@@ -601,7 +834,8 @@
                     data.serviceTypes,
                     data.providerDetails,
                     createForm.serviceTypeId,
-                    'agenstra-manager'
+                    'agenstra-manager',
+                    'create'
                   )
                 ) {
                   <div class="form-check mb-2">
@@ -623,7 +857,8 @@
                     data.serviceTypes,
                     data.providerDetails,
                     createForm.serviceTypeId,
-                    'decabill-billing'
+                    'decabill-billing',
+                    'create'
                   )
                 ) {
                   <div class="form-check mb-2">
@@ -655,7 +890,10 @@
                 }
               </div>
             }
-            @if (getProviderSchema(data.serviceTypes, data.providerDetails, createForm.serviceTypeId); as schema) {
+            @if (
+              getProviderSchema(data.serviceTypes, data.providerDetails, createForm.serviceTypeId, 'create');
+              as schema
+            ) {
               @if (cloudInitConfigs$ | async; as cloudInitConfigs) {
                 @if (hasProductDefaultsSection('create', schema, cloudInitConfigs)) {
                   <div class="mb-3 border rounded p-3 bg-body-secondary">
@@ -860,7 +1098,8 @@
                   addons,
                   data.serviceTypes,
                   data.providerDetails,
-                  createForm.serviceTypeId
+                  createForm.serviceTypeId,
+                  'create'
                 );
                 as availableAddons
               ) {
@@ -922,43 +1161,6 @@
                 }
               "
             ></ng-container>
-            @if (supportsCustomerLocationSelection(data.serviceTypes, data.providerDetails, createForm.serviceTypeId)) {
-              <div class="form-check mb-3">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="createAllowCustomerLocation"
-                  name="allowCustomerLocationSelection"
-                  [(ngModel)]="createForm.allowCustomerLocationSelection"
-                  [disabled]="(creating$ | async) === true"
-                />
-                <label class="form-check-label" for="createAllowCustomerLocation"> Allow location selection </label>
-                <div class="form-text text-body-secondary small">
-                  Customers may override the plan default region or location when ordering, if the provider supports it.
-                </div>
-              </div>
-            }
-            @if (
-              supportsCustomerServerTypeSelection(data.serviceTypes, data.providerDetails, createForm.serviceTypeId)
-            ) {
-              <div class="form-check mb-3">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="createAllowCustomerServerType"
-                  name="allowCustomerServerTypeSelection"
-                  [(ngModel)]="createForm.allowCustomerServerTypeSelection"
-                  (ngModelChange)="onAllowCustomerServerTypeSelectionChange('create')"
-                  [disabled]="(creating$ | async) === true"
-                />
-                <label class="form-check-label" for="createAllowCustomerServerType">
-                  Allow server type selection
-                </label>
-                <div class="form-text text-body-secondary small">
-                  Customers may choose a server type from the selected options when ordering.
-                </div>
-              </div>
-            }
             <div class="form-check mb-3">
               <input
                 type="checkbox"
@@ -1398,94 +1600,320 @@
                 }}</strong>
               }
             </div>
+            @if (editingPlan && supportsCustomerProviderSelection(data.serviceTypes, editingPlan.serviceTypeId)) {
+              <div class="form-check mb-3">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="editAllowCustomerProvider"
+                  name="allowCustomerProviderSelection"
+                  [(ngModel)]="editForm.allowCustomerProviderSelection"
+                  (ngModelChange)="
+                    onAllowCustomerProviderSelectionChange('edit', data.serviceTypes, data.providerDetails)
+                  "
+                  [disabled]="(updating$ | async) === true"
+                />
+                <label
+                  class="form-check-label"
+                  for="editAllowCustomerProvider"
+                  i18n="@@featureServicePlans-allowCustomerProviderSelection"
+                >
+                  Allow provider selection
+                </label>
+                <div
+                  class="form-text text-body-secondary small"
+                  i18n="@@featureServicePlans-allowCustomerProviderSelectionHelp"
+                >
+                  Customers may choose a cloud provider from the selected options when ordering.
+                </div>
+              </div>
+              @if (editForm.allowCustomerProviderSelection === true) {
+                <div class="mb-3">
+                  <label for="editAllowedProviders" class="form-label" i18n="@@featureServicePlans-allowedProviders"
+                    >Allowed providers</label
+                  >
+                  <select
+                    id="editAllowedProviders"
+                    name="editAllowedProviders"
+                    class="form-select"
+                    multiple
+                    size="4"
+                    [ngModel]="editAllowedProviders"
+                    (ngModelChange)="onAllowedProvidersChangeEdit($event, data.serviceTypes, data.providerDetails)"
+                    [compareWith]="compareProviderId"
+                    [disabled]="(updating$ | async) === true"
+                  >
+                    @for (
+                      providerId of getServiceTypeAllowedProviders(data.serviceTypes, editingPlan.serviceTypeId);
+                      track providerId
+                    ) {
+                      <option [ngValue]="providerId">
+                        {{ providerLabel(providerId, data.providerDetails) }}
+                      </option>
+                    }
+                  </select>
+                  <div class="form-text text-body-secondary small" i18n="@@featureServicePlans-allowedProvidersHelp">
+                    Hold Ctrl/Cmd to select. First selected is the default provider at checkout.
+                  </div>
+                </div>
+              } @else {
+                <div class="mb-3">
+                  <label for="editPinnedProvider" class="form-label" i18n="@@featureServicePlans-pinnedProvider"
+                    >Plan provider</label
+                  >
+                  <select
+                    id="editPinnedProvider"
+                    name="editPinnedProvider"
+                    class="form-select"
+                    [ngModel]="pinnedProviderId(editAllowedProviders)"
+                    (ngModelChange)="onPinnedProviderChangeEdit($event, data.serviceTypes, data.providerDetails)"
+                    [compareWith]="compareProviderId"
+                    [disabled]="(updating$ | async) === true"
+                  >
+                    @for (
+                      providerId of getServiceTypeAllowedProviders(data.serviceTypes, editingPlan.serviceTypeId);
+                      track providerId
+                    ) {
+                      <option [ngValue]="providerId">
+                        {{ providerLabel(providerId, data.providerDetails) }}
+                      </option>
+                    }
+                  </select>
+                  <div class="form-text text-body-secondary small" i18n="@@featureServicePlans-pinnedProviderHelp">
+                    Customers cannot choose a provider. This provider is used for all orders on this plan.
+                  </div>
+                </div>
+              }
+            }
             @if (
-              editingPlan && getProviderSchema(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId);
+              editingPlan &&
+              supportsCustomerLocationSelection(
+                data.serviceTypes,
+                data.providerDetails,
+                editingPlan.serviceTypeId,
+                'edit'
+              )
+            ) {
+              <div class="form-check mb-3">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="editAllowCustomerLocation"
+                  name="allowCustomerLocationSelection"
+                  [(ngModel)]="editForm.allowCustomerLocationSelection"
+                  [disabled]="(updating$ | async) === true"
+                />
+                <label class="form-check-label" for="editAllowCustomerLocation"> Allow location selection </label>
+                <div class="form-text text-body-secondary small">
+                  Customers may override the plan default region or location when ordering, if the provider supports it.
+                </div>
+              </div>
+            }
+            @if (
+              editingPlan &&
+              supportsCustomerServerTypeSelection(
+                data.serviceTypes,
+                data.providerDetails,
+                editingPlan.serviceTypeId,
+                'edit'
+              )
+            ) {
+              <div class="form-check mb-3">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="editAllowCustomerServerType"
+                  name="allowCustomerServerTypeSelection"
+                  [(ngModel)]="editForm.allowCustomerServerTypeSelection"
+                  (ngModelChange)="onAllowCustomerServerTypeSelectionChange('edit')"
+                  [disabled]="(updating$ | async) === true"
+                />
+                <label class="form-check-label" for="editAllowCustomerServerType"> Allow server type selection </label>
+                <div class="form-text text-body-secondary small">
+                  Customers may choose a server type from the selected options when ordering.
+                </div>
+              </div>
+            }
+            @if (
+              editingPlan &&
+                getProviderSchema(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId, 'edit');
               as schema
             ) {
               <div class="mb-3 border rounded p-3 bg-body-secondary">
                 <h6 class="mb-3" i18n="@@featureServicePlans-providerConfigDefaults">Provider default config</h6>
                 @for (key of getServerProviderConfigKeys(schema); track key) {
-                  <div class="mb-2">
-                    <label [attr.for]="'editProviderConfig_' + key" class="form-label">{{ key }}</label>
-                    @if (getProviderConfigPropertyDescription(schema, key); as desc) {
-                      <small class="text-body-secondary d-block mb-1">{{ desc }}</small>
-                    }
-                    @if (
-                      editingPlan &&
-                      getBasePriceFromField(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId) === key
-                    ) {
-                      @if (serverTypesLoading) {
-                        <span class="text-body-secondary" i18n="@@featureServicePlans-loadingServerTypes"
-                          >Loading server types...</span
-                        >
-                      } @else {
-                        @if (editForm.allowCustomerServerTypeSelection === true) {
-                          <select
-                            [id]="'editProviderConfig_' + key"
-                            class="form-select"
-                            multiple
-                            [ngModel]="editAllowedServerTypes"
-                            (ngModelChange)="onAllowedServerTypesChangeEdit($event)"
-                            [compareWith]="compareServerTypeId"
-                            [name]="'editProviderConfig_' + key + '_multi'"
-                            [disabled]="(updating$ | async) === true"
-                            size="6"
+                  @if (!(needsPerProviderGeographyDefaults('edit') && isGeographyConfigKey(key))) {
+                    <div class="mb-2">
+                      <label [attr.for]="'editProviderConfig_' + key" class="form-label">{{ key }}</label>
+                      @if (getProviderConfigPropertyDescription(schema, key); as desc) {
+                        <small class="text-body-secondary d-block mb-1">{{ desc }}</small>
+                      }
+                      @if (
+                        editingPlan &&
+                        getBasePriceFromField(
+                          data.serviceTypes,
+                          data.providerDetails,
+                          editingPlan.serviceTypeId,
+                          'edit'
+                        ) === key
+                      ) {
+                        @if (serverTypesLoading) {
+                          <span class="text-body-secondary" i18n="@@featureServicePlans-loadingServerTypes"
+                            >Loading server types...</span
                           >
-                            @for (st of currentServerTypes; track st.id) {
-                              <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
-                            }
-                          </select>
-                          <div class="form-text text-body-secondary small">
-                            Hold Ctrl/Cmd to select multiple server types customers may choose at checkout.
-                          </div>
                         } @else {
+                          @if (editForm.allowCustomerServerTypeSelection === true) {
+                            <select
+                              [id]="'editProviderConfig_' + key"
+                              class="form-select"
+                              multiple
+                              [ngModel]="editAllowedServerTypes"
+                              (ngModelChange)="onAllowedServerTypesChangeEdit($event)"
+                              [compareWith]="compareServerTypeId"
+                              [name]="'editProviderConfig_' + key + '_multi'"
+                              [disabled]="(updating$ | async) === true"
+                              size="6"
+                            >
+                              @if (currentServerTypeGroups.length > 1) {
+                                @for (group of currentServerTypeGroups; track group.providerId) {
+                                  <optgroup [label]="group.label">
+                                    @for (st of group.types; track st.id) {
+                                      <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                                    }
+                                  </optgroup>
+                                }
+                              } @else {
+                                @for (st of currentServerTypes; track st.id) {
+                                  <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                                }
+                              }
+                            </select>
+                            <div class="form-text text-body-secondary small">
+                              Hold Ctrl/Cmd to select multiple server types customers may choose at checkout.
+                            </div>
+                          }
+                          @if (needsPerProviderServerTypeDefaults('edit')) {
+                            <div class="border rounded p-3 mt-2">
+                              <div
+                                class="form-text text-body-secondary small mb-2 mt-0"
+                                i18n="@@featureServicePlans-serverTypeByProviderHelp"
+                              >
+                                Choose a default server type for each provider. Used when the customer picks that
+                                provider (or omits server type at checkout).
+                              </div>
+                              @for (group of currentServerTypeGroups; track group.providerId) {
+                                <div class="mb-2">
+                                  <label
+                                    class="form-label small mb-1"
+                                    [attr.for]="'editDefaultServerType_' + group.providerId"
+                                  >
+                                    Default for {{ group.label }}
+                                  </label>
+                                  <select
+                                    [id]="'editDefaultServerType_' + group.providerId"
+                                    class="form-select"
+                                    [ngModel]="getDefaultServerTypeForProvider('edit', group.providerId)"
+                                    (ngModelChange)="
+                                      onDefaultServerTypeForProviderChange('edit', group.providerId, $event)
+                                    "
+                                    [compareWith]="compareServerTypeId"
+                                    [name]="'editDefaultServerType_' + group.providerId"
+                                    [disabled]="(updating$ | async) === true"
+                                  >
+                                    <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">
+                                      Choose...
+                                    </option>
+                                    @for (st of serverTypesForProviderDefault('edit', group); track st.id) {
+                                      <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                                    }
+                                  </select>
+                                </div>
+                              }
+                            </div>
+                          } @else if (editForm.allowCustomerServerTypeSelection !== true) {
+                            <select
+                              [id]="'editProviderConfig_' + key"
+                              class="form-select"
+                              [(ngModel)]="editForm.providerConfigDefaults![key]"
+                              (ngModelChange)="onServerTypeSelectEdit($event)"
+                              [name]="'editProviderConfig_' + key"
+                              [disabled]="(updating$ | async) === true"
+                            >
+                              <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">Choose...</option>
+                              @for (st of currentServerTypes; track st.id) {
+                                <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                              }
+                            </select>
+                          }
+                        }
+                      } @else {
+                        @if (getProviderConfigEnum(schema, key); as enumValues) {
                           <select
                             [id]="'editProviderConfig_' + key"
                             class="form-select"
                             [(ngModel)]="editForm.providerConfigDefaults![key]"
-                            (ngModelChange)="onServerTypeSelectEdit($event)"
                             [name]="'editProviderConfig_' + key"
                             [disabled]="(updating$ | async) === true"
                           >
                             <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">Choose...</option>
-                            @for (st of currentServerTypes; track st.id) {
-                              <option [ngValue]="st.id">{{ formatServerTypeOptionLabel(st) }}</option>
+                            @for (opt of enumValues; track opt) {
+                              <option [ngValue]="opt">{{ formatProviderConfigEnumLabel(key, opt) }}</option>
                             }
                           </select>
+                        } @else if (getProviderConfigPropertyType(schema, key) === 'number') {
+                          <input
+                            type="number"
+                            [id]="'editProviderConfig_' + key"
+                            class="form-control"
+                            [(ngModel)]="editForm.providerConfigDefaults![key]"
+                            [name]="'editProviderConfig_' + key"
+                            [disabled]="(updating$ | async) === true"
+                          />
+                        } @else {
+                          <input
+                            type="text"
+                            [id]="'editProviderConfig_' + key"
+                            class="form-control"
+                            [(ngModel)]="editForm.providerConfigDefaults![key]"
+                            [name]="'editProviderConfig_' + key"
+                            [disabled]="(updating$ | async) === true"
+                          />
                         }
                       }
+                    </div>
+                  }
+                }
+
+                @if (needsPerProviderGeographyDefaults('edit')) {
+                  <div class="border rounded p-3 mt-3">
+                    <div
+                      class="form-text text-body-secondary small mb-2 mt-0"
+                      i18n="@@featureServicePlans-geographyByProviderHelp"
+                    >
+                      Choose a default location or region for each provider.
+                    </div>
+                    @if (providerLocationsLoading) {
+                      <span class="text-body-secondary small">Loading locations...</span>
                     } @else {
-                      @if (getProviderConfigEnum(schema, key); as enumValues) {
-                        <select
-                          [id]="'editProviderConfig_' + key"
-                          class="form-select"
-                          [(ngModel)]="editForm.providerConfigDefaults![key]"
-                          [name]="'editProviderConfig_' + key"
-                          [disabled]="(updating$ | async) === true"
-                        >
-                          <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">Choose...</option>
-                          @for (opt of enumValues; track opt) {
-                            <option [ngValue]="opt">{{ formatProviderConfigEnumLabel(key, opt) }}</option>
-                          }
-                        </select>
-                      } @else if (getProviderConfigPropertyType(schema, key) === 'number') {
-                        <input
-                          type="number"
-                          [id]="'editProviderConfig_' + key"
-                          class="form-control"
-                          [(ngModel)]="editForm.providerConfigDefaults![key]"
-                          [name]="'editProviderConfig_' + key"
-                          [disabled]="(updating$ | async) === true"
-                        />
-                      } @else {
-                        <input
-                          type="text"
-                          [id]="'editProviderConfig_' + key"
-                          class="form-control"
-                          [(ngModel)]="editForm.providerConfigDefaults![key]"
-                          [name]="'editProviderConfig_' + key"
-                          [disabled]="(updating$ | async) === true"
-                        />
+                      @for (group of geographyProviderGroups('edit', data.providerDetails); track group.providerId) {
+                        <div class="mb-2">
+                          <label class="form-label small mb-1" [attr.for]="'editDefaultGeography_' + group.providerId">
+                            Default for {{ group.label }}
+                          </label>
+                          <select
+                            [id]="'editDefaultGeography_' + group.providerId"
+                            class="form-select"
+                            [ngModel]="getDefaultGeographyForProvider('edit', group.providerId)"
+                            (ngModelChange)="onDefaultGeographyForProviderChange('edit', group.providerId, $event)"
+                            [name]="'editDefaultGeography_' + group.providerId"
+                            [disabled]="(updating$ | async) === true"
+                          >
+                            <option [ngValue]="null" i18n="@@featureServicePlans-chooseOption">Choose...</option>
+                            @for (loc of locationsForProvider(group.providerId); track loc.id) {
+                              <option [ngValue]="loc.id">{{ loc.name || loc.id }}</option>
+                            }
+                          </select>
+                        </div>
                       }
                     }
                   </div>
@@ -1494,7 +1922,12 @@
             }
             @if (
               editingPlan &&
-              supportsProvisioningOptionsSelection(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId)
+              supportsProvisioningOptionsSelection(
+                data.serviceTypes,
+                data.providerDetails,
+                editingPlan.serviceTypeId,
+                'edit'
+              )
             ) {
               <div class="mb-3 border rounded p-3 bg-body-secondary">
                 <h6 class="mb-2" i18n="@@featureServicePlans-provisioningOptions">Customer-selectable options</h6>
@@ -1517,7 +1950,8 @@
                     data.serviceTypes,
                     data.providerDetails,
                     editingPlan.serviceTypeId,
-                    'agenstra-controller'
+                    'agenstra-controller',
+                    'edit'
                   )
                 ) {
                   <div class="form-check mb-2">
@@ -1539,7 +1973,8 @@
                     data.serviceTypes,
                     data.providerDetails,
                     editingPlan.serviceTypeId,
-                    'agenstra-manager'
+                    'agenstra-manager',
+                    'edit'
                   )
                 ) {
                   <div class="form-check mb-2">
@@ -1561,7 +1996,8 @@
                     data.serviceTypes,
                     data.providerDetails,
                     editingPlan.serviceTypeId,
-                    'decabill-billing'
+                    'decabill-billing',
+                    'edit'
                   )
                 ) {
                   <div class="form-check mb-2">
@@ -1594,7 +2030,8 @@
               </div>
             }
             @if (
-              editingPlan && getProviderSchema(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId);
+              editingPlan &&
+                getProviderSchema(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId, 'edit');
               as schema
             ) {
               @if (cloudInitConfigs$ | async; as cloudInitConfigs) {
@@ -1798,7 +2235,8 @@
                     addons,
                     data.serviceTypes,
                     data.providerDetails,
-                    editingPlan.serviceTypeId
+                    editingPlan.serviceTypeId,
+                    'edit'
                   );
                 as availableAddons
               ) {
@@ -1856,45 +2294,6 @@
                 context: { mode: 'edit', billInAdvance: editForm.billInAdvance, disabled: (updating$ | async) === true }
               "
             ></ng-container>
-            @if (
-              editingPlan &&
-              supportsCustomerLocationSelection(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId)
-            ) {
-              <div class="form-check mb-3">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="editAllowCustomerLocation"
-                  name="allowCustomerLocationSelection"
-                  [(ngModel)]="editForm.allowCustomerLocationSelection"
-                  [disabled]="(updating$ | async) === true"
-                />
-                <label class="form-check-label" for="editAllowCustomerLocation"> Allow location selection </label>
-                <div class="form-text text-body-secondary small">
-                  Customers may override the plan default region or location when ordering, if the provider supports it.
-                </div>
-              </div>
-            }
-            @if (
-              editingPlan &&
-              supportsCustomerServerTypeSelection(data.serviceTypes, data.providerDetails, editingPlan.serviceTypeId)
-            ) {
-              <div class="form-check mb-3">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="editAllowCustomerServerType"
-                  name="allowCustomerServerTypeSelection"
-                  [(ngModel)]="editForm.allowCustomerServerTypeSelection"
-                  (ngModelChange)="onAllowCustomerServerTypeSelectionChange('edit')"
-                  [disabled]="(updating$ | async) === true"
-                />
-                <label class="form-check-label" for="editAllowCustomerServerType"> Allow server type selection </label>
-                <div class="form-text text-body-secondary small">
-                  Customers may choose a server type from the selected options when ordering.
-                </div>
-              </div>
-            }
             <div class="form-check mb-3">
               <input
                 type="checkbox"

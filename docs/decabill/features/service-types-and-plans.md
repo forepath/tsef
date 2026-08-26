@@ -8,7 +8,7 @@ Service types define which provisioning provider (if any) backs a product. Servi
 
 ## Service Types
 
-A service type links a product name to a provider id (for example `hetzner`, `digital-ocean`) or no provider for non-infrastructure plans.
+A service type links a product name to one or more interchangeable provider ids (for example `hetzner`, `digital-ocean`) that share a registry `compatibilityGroup`, or to **None** (no cloud provider) for non-infrastructure types. See [Customer provider selection](./customer-provider-selection.md).
 
 ### Admin Endpoints
 
@@ -25,10 +25,11 @@ A service type links a product name to a provider id (for example `hetzner`, `di
 `GET /service-types/providers` returns registered provisioning providers with:
 
 - Provider id and display name
+- Optional `compatibilityGroup` for interchangeable multi-provider service types
 - Optional `configSchema` for admin UI and subscription validation
 - Dynamic metadata from `DYNAMIC_BILLING_PROVIDER_METADATA` plugins
 
-First-party Hetzner and DigitalOcean register as **contributor Nest modules** at startup (metadata + provisioning hooks). Additional providers can be registered via [Dynamic Provider Plugins](./dynamic-provider-plugins.md) (`DYNAMIC_BILLING_PROVIDER_METADATA` or full `DYNAMIC_BILLING_PROVIDER_MODULES` with optional `nestModule`).
+First-party Hetzner and DigitalOcean register as **contributor Nest modules** at startup (metadata + provisioning hooks) with `compatibilityGroup: host-cloud-init`. Additional providers can be registered via [Dynamic Provider Plugins](./dynamic-provider-plugins.md) (`DYNAMIC_BILLING_PROVIDER_METADATA` or full `DYNAMIC_BILLING_PROVIDER_MODULES` with optional `nestModule`).
 
 ### Config Schema
 
@@ -117,6 +118,7 @@ No dedicated webhook events are emitted for plan CRUD or for “non-provision fu
 - `billing_day_of_month` for subscription period alignment
 - `allowCustomerLocationSelection` when geography override is supported (not for null `serviceTypeId`)
 - `allowCustomerServerTypeSelection` and `allowedServerTypes` when server-type override is supported (provider schema `basePriceFromField: 'serverType'`; not for null `serviceTypeId`)
+- `allowCustomerProviderSelection` and `allowedProviders` when the service type has multiple interchangeable providers; plan allowlist must be a subset of the type’s `allowedProviders` (see [Customer provider selection](./customer-provider-selection.md))
 - Provider `configSchema.properties` may set `scope: "server"` or `scope: "product"` with optional `productServices` (`agenstra-controller`, `agenstra-manager`, `decabill-billing`) to control the plan editor. Server fields stay under **Provider default config**; product fields appear under **Product defaults** when required by selected customer options.
 
 ### Customer Geography Selection

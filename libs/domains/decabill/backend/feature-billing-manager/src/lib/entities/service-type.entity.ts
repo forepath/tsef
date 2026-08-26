@@ -19,8 +19,16 @@ export class ServiceTypeEntity {
   @Column({ type: 'text', nullable: true, name: 'description' })
   description?: string;
 
-  @Column({ type: 'varchar', length: 100, name: 'provider' })
-  provider!: string;
+  /** Primary provider id (first of allowedProviders); null when None / no cloud provider. */
+  @Column({ type: 'varchar', length: 100, name: 'provider', nullable: true })
+  provider!: string | null;
+
+  /**
+   * Interchangeable provider ids for this service type (order preserved; first is primary).
+   * Empty means None (no cloud provider).
+   */
+  @Column({ type: 'jsonb', name: 'allowed_providers', default: () => "'[]'::jsonb" })
+  allowedProviders!: string[];
 
   @Column({ type: 'jsonb', name: 'config_schema', default: () => "'{}'::jsonb" })
   configSchema!: Record<string, unknown>;

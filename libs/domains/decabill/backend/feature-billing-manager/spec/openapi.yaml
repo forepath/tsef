@@ -6398,6 +6398,12 @@ components:
         displayName:
           type: string
           description: Human-readable display name (e.g. Hetzner Cloud-Init).
+        compatibilityGroup:
+          type: string
+          description: |
+            Compatibility group for interchangeable providers on one service type.
+            Providers sharing the same group may be selected together (e.g. host-cloud-init for Hetzner and DigitalOcean).
+            Omitted or empty means the provider is only compatible with itself.
         configSchema:
           type: object
           description: |
@@ -6503,7 +6509,7 @@ components:
           description: ISO country code when provided by the provider API
     CreateServiceTypeDto:
       type: object
-      required: [key, name, provider]
+      required: [key, name]
       properties:
         key:
           type: string
@@ -6516,7 +6522,16 @@ components:
           description: Optional description
         provider:
           type: string
-          description: Provider identifier (e.g. hetzner, digital-ocean)
+          nullable: true
+          description: |
+            Primary provider id (first of allowedProviders). Null/empty with empty allowedProviders means None (no cloud provider).
+            When omitted, derived from allowedProviders[0].
+        allowedProviders:
+          type: array
+          items: { type: string }
+          description: |
+            Interchangeable provider ids (order preserved; first is primary). Empty means None.
+            All entries must share the same compatibilityGroup from GET /service-types/providers.
         configSchema:
           type: object
           description: JSON schema for provider configuration
@@ -6540,6 +6555,12 @@ components:
           type: string
         provider:
           type: string
+          nullable: true
+          description: Primary provider id; null/empty with empty allowedProviders means None.
+        allowedProviders:
+          type: array
+          items: { type: string }
+          description: Interchangeable provider ids (first is primary). Empty means None.
         configSchema:
           type: object
         isActive:
@@ -6559,7 +6580,14 @@ components:
         key: { type: string }
         name: { type: string }
         description: { type: string, nullable: true }
-        provider: { type: string }
+        provider:
+          type: string
+          nullable: true
+          description: Primary provider id; null when None (no cloud provider).
+        allowedProviders:
+          type: array
+          items: { type: string }
+          description: Interchangeable provider ids (first is primary). Empty means None.
         configSchema: { type: object }
         isActive: { type: boolean }
         disallowStatutoryWithdrawal: { type: boolean }
@@ -6759,6 +6787,13 @@ components:
         allowCustomerServerTypeSelection:
           type: boolean
           description: When true, authenticated checkout may send serverType in subscription requestedConfig; value must be in allowedServerTypes on the plan.
+        allowCustomerProviderSelection:
+          type: boolean
+          description: When true, authenticated checkout may send provider in subscription requestedConfig; value must be in allowedProviders on the plan.
+        allowedProviders:
+          type: array
+          items: { type: string }
+          description: Provider ids available for customer selection when allowCustomerProviderSelection is true.
         withdrawalPolicy:
           $ref: '#/components/schemas/WithdrawalPolicy'
     CreateServicePlanDto:
@@ -6832,6 +6867,18 @@ components:
           type: array
           items: { type: string }
           description: Server type ids customers may choose at checkout when allowCustomerServerTypeSelection is true.
+        allowCustomerProviderSelection:
+          type: boolean
+          description: >
+            When true, the service type must have at least two allowed providers and allowedProviders must list
+            at least two provider ids that are a subset of the service type allowedProviders.
+        allowedProviders:
+          type: array
+          items: { type: string }
+          description: >
+            When allowCustomerProviderSelection is true: subset of service type providers (at least two).
+            When false and the service type has multiple providers: exactly one pinned provider for the plan.
+            When the service type has a single provider: that provider is assumed (may be omitted).
         taxCategory:
           type: string
           enum: [standard, reduced]
@@ -6872,6 +6919,10 @@ components:
         allowCustomerLocationSelection: { type: boolean }
         allowCustomerServerTypeSelection: { type: boolean }
         allowedServerTypes:
+          type: array
+          items: { type: string }
+        allowCustomerProviderSelection: { type: boolean }
+        allowedProviders:
           type: array
           items: { type: string }
         taxCategory:
@@ -6919,6 +6970,15 @@ components:
           type: array
           items: { type: string }
           description: Server type ids available for customer selection when allowCustomerServerTypeSelection is true.
+        allowCustomerProviderSelection:
+          type: boolean
+          description: When true, POST /subscriptions may include provider in requestedConfig; value must be listed in allowedProviders.
+        allowedProviders:
+          type: array
+          items: { type: string }
+          description: >
+            Effective plan provider set. With customer selection: options at checkout.
+            Without customer selection: single pinned provider when the service type has multiple providers.
         taxCategory:
           type: string
           enum: [standard, reduced]
@@ -7217,6 +7277,10 @@ components:
             - CONFIG_CHANGE_FAILED
         reason: { type: string, nullable: true }
         hasPendingChange: { type: boolean }
+        provider:
+          type: string
+          nullable: true
+          description: Effective cloud provider for this subscription (configSnapshot, then service-type primary).
         currentServerType: { type: string, nullable: true }
         allowedServerTypes:
           type: array

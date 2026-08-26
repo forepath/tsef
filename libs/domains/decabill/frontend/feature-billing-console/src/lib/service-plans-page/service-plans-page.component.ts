@@ -17,6 +17,7 @@ import {
   formatServerTypeOption,
   formatServerTypeIdLabel,
   normalizeAllowedServerTypeIds,
+  normalizeAllowedProviders,
   getNestedSchemaProperty,
   getObjectSchemaPropertyKeys,
   getProductProviderConfigKeys,
@@ -69,6 +70,7 @@ import {
   getActiveStatusLabel,
   getActiveStatusTextClass,
   getBillingIntervalLabel,
+  getProviderDisplayName,
   getUnavailableLabel,
 } from '../billing-status-labels';
 import { showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
@@ -86,6 +88,12 @@ interface ConfigSchemaProperty {
 }
 /** Schema properties object: key -> property definition. */
 type ConfigSchemaProperties = Record<string, ConfigSchemaProperty>;
+
+interface ServerTypeProviderGroup {
+  providerId: string;
+  label: string;
+  types: ServerType[];
+}
 
 @Component({
   selector: 'framework-billing-service-plans-page',
@@ -157,10 +165,15 @@ export class ServicePlansPageComponent implements OnInit {
   editingPlan: ServicePlanResponse | null = null;
   /** Server types for the current provider when config has basePriceFromField (e.g. serverType). */
   currentServerTypes: ServerType[] = [];
+  /** When multi-provider + customer server-type selection, groups for optgroup UI. */
+  currentServerTypeGroups: ServerTypeProviderGroup[] = [];
   createAllowedServerTypes: string[] = [];
   editAllowedServerTypes: string[] = [];
+  createAllowedProviders: string[] = [];
+  editAllowedProviders: string[] = [];
   serverTypesLoading = false;
   providerLocationCatalog: ProviderLocationCatalog = new Map();
+  providerLocationCatalogs: Record<string, ProviderLocationCatalog> = {};
   providerLocationsLoading = false;
   createAttachedMeters: AttachedMeterResponse[] = [];
   editAttachedMeters: AttachedMeterResponse[] = [];
@@ -205,7 +218,7 @@ export class ServicePlansPageComponent implements OnInit {
     serviceTypeId: string | null | undefined,
     form: 'create' | 'edit',
   ): void {
-    if (!this.supportsProvisioningOptionsSelection(serviceTypes, providerDetails, serviceTypeId)) {
+    if (!this.supportsProvisioningOptionsSelection(serviceTypes, providerDetails, serviceTypeId, form)) {
       const target = form === 'create' ? this.createProvisioningOptionKeys : this.editProvisioningOptionKeys;
 
       target.clear();
@@ -217,15 +230,15 @@ export class ServicePlansPageComponent implements OnInit {
 
     target.clear();
 
-    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-controller')) {
+    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-controller', form)) {
       target.add('integrated:agenstra-controller');
     }
 
-    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-manager')) {
+    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-manager', form)) {
       target.add('integrated:agenstra-manager');
     }
 
-    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'decabill-billing')) {
+    if (this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'decabill-billing', form)) {
       target.add('integrated:decabill-billing');
     }
   }
@@ -241,21 +254,21 @@ export class ServicePlansPageComponent implements OnInit {
     for (const optionKey of [...target]) {
       if (
         optionKey === 'integrated:agenstra-controller' &&
-        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-controller')
+        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-controller', form)
       ) {
         target.delete(optionKey);
       }
 
       if (
         optionKey === 'integrated:agenstra-manager' &&
-        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-manager')
+        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'agenstra-manager', form)
       ) {
         target.delete(optionKey);
       }
 
       if (
         optionKey === 'integrated:decabill-billing' &&
-        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'decabill-billing')
+        !this.serviceEnumIncludes(serviceTypes, providerDetails, serviceTypeId, 'decabill-billing', form)
       ) {
         target.delete(optionKey);
       }
@@ -292,8 +305,9 @@ export class ServicePlansPageComponent implements OnInit {
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
     serviceTypeId: string | null | undefined,
+    form?: 'create' | 'edit',
   ): boolean {
-    const schema = this.getProviderSchema(serviceTypes, providerDetails, serviceTypeId);
+    const schema = this.getProviderSchema(serviceTypes, providerDetails, serviceTypeId, form);
     const serviceEnum = this.getProviderConfigEnum(schema, 'service');
 
     if (!serviceEnum?.length) {
@@ -316,8 +330,9 @@ export class ServicePlansPageComponent implements OnInit {
     providerDetails: ProviderDetail[] | null,
     serviceTypeId: string | null | undefined,
     value: string,
+    form?: 'create' | 'edit',
   ): boolean {
-    const schema = this.getProviderSchema(serviceTypes, providerDetails, serviceTypeId);
+    const schema = this.getProviderSchema(serviceTypes, providerDetails, serviceTypeId, form);
     const serviceEnum = this.getProviderConfigEnum(schema, 'service');
 
     if (!serviceEnum?.length) {
@@ -474,10 +489,11 @@ export class ServicePlansPageComponent implements OnInit {
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
     serviceTypeId: string | null | undefined,
+    form?: 'create' | 'edit',
   ): AddonResponse[] {
-    if (!this.providerSupportsAddons(serviceTypes, providerDetails, serviceTypeId)) return [];
+    if (!this.providerSupportsAddons(serviceTypes, providerDetails, serviceTypeId, form)) return [];
 
-    const providerId = this.getProviderId(serviceTypes ?? [], serviceTypeId);
+    const providerId = this.getProviderId(serviceTypes ?? [], serviceTypeId, form);
 
     return (addons ?? []).filter(
       (addon) =>
@@ -490,8 +506,9 @@ export class ServicePlansPageComponent implements OnInit {
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
     serviceTypeId: string | null | undefined,
+    form?: 'create' | 'edit',
   ): boolean {
-    const providerId = this.getProviderId(serviceTypes ?? [], serviceTypeId);
+    const providerId = this.getProviderId(serviceTypes ?? [], serviceTypeId, form);
 
     return providerDetails?.find((provider) => provider.id === providerId)?.supportsAddons === true;
   }
@@ -780,14 +797,13 @@ export class ServicePlansPageComponent implements OnInit {
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
     serviceTypeId: string | null | undefined,
+    form?: 'create' | 'edit',
   ): ConfigSchemaProperties | null {
-    if (!serviceTypeId?.trim() || !serviceTypes?.length || !providerDetails?.length) return null;
+    const providerId = this.getProviderId(serviceTypes, serviceTypeId, form);
 
-    const serviceType = serviceTypes.find((st) => st.id === serviceTypeId);
+    if (!providerId || !providerDetails?.length) return null;
 
-    if (!serviceType?.provider) return null;
-
-    const detail = providerDetails.find((p) => p.id === serviceType.provider);
+    const detail = providerDetails.find((p) => p.id === providerId);
     const schema = detail?.configSchema as { properties?: ConfigSchemaProperties } | undefined;
 
     return schema?.properties ?? null;
@@ -801,8 +817,9 @@ export class ServicePlansPageComponent implements OnInit {
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
     serviceTypeId: string | null | undefined,
+    form?: 'create' | 'edit',
   ): boolean {
-    const full = this.getProviderSchemaFull(serviceTypes, providerDetails, serviceTypeId);
+    const full = this.getProviderSchemaFull(serviceTypes, providerDetails, serviceTypeId, form);
     const props = full?.['properties'] as ConfigSchemaProperties | undefined;
 
     if (!props) return false;
@@ -826,22 +843,22 @@ export class ServicePlansPageComponent implements OnInit {
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
     serviceTypeId: string | null | undefined,
+    form?: 'create' | 'edit',
   ): boolean {
-    return this.getBasePriceFromField(serviceTypes, providerDetails, serviceTypeId) === 'serverType';
+    return this.getBasePriceFromField(serviceTypes, providerDetails, serviceTypeId, form) === 'serverType';
   }
 
   getProviderSchemaFull(
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
     serviceTypeId: string | null | undefined,
+    form?: 'create' | 'edit',
   ): Record<string, unknown> | null {
-    if (!serviceTypeId?.trim() || !serviceTypes?.length || !providerDetails?.length) return null;
+    const providerId = this.getProviderId(serviceTypes, serviceTypeId, form);
 
-    const serviceType = serviceTypes.find((st) => st.id === serviceTypeId);
+    if (!providerId || !providerDetails?.length) return null;
 
-    if (!serviceType?.provider) return null;
-
-    const detail = providerDetails.find((p) => p.id === serviceType.provider);
+    const detail = providerDetails.find((p) => p.id === providerId);
 
     return (detail?.configSchema as Record<string, unknown>) ?? null;
   }
@@ -851,20 +868,293 @@ export class ServicePlansPageComponent implements OnInit {
     serviceTypes: ServiceTypeResponse[] | null,
     providerDetails: ProviderDetail[] | null,
     serviceTypeId: string | null | undefined,
+    form?: 'create' | 'edit',
   ): string | null {
-    const schema = this.getProviderSchemaFull(serviceTypes, providerDetails, serviceTypeId);
+    const schema = this.getProviderSchemaFull(serviceTypes, providerDetails, serviceTypeId, form);
     const field = schema?.['basePriceFromField'];
 
     return typeof field === 'string' && field ? field : null;
   }
 
-  /** Provider id for the given service type. */
-  getProviderId(serviceTypes: ServiceTypeResponse[] | null, serviceTypeId: string | null | undefined): string | null {
-    if (!serviceTypeId?.trim() || !serviceTypes?.length) return null;
+  /**
+   * Effective cloud provider for plan form UI.
+   * Customer selection on → first of plan subset (or type primary).
+   * Customer selection off → pinned plan provider (or type primary when only one).
+   */
+  resolveFormProviderId(
+    form: 'create' | 'edit',
+    serviceTypes: ServiceTypeResponse[] | null,
+    serviceTypeId: string | null | undefined,
+  ): string | null {
+    const typeAllowed = this.getServiceTypeAllowedProviders(serviceTypes, serviceTypeId);
 
-    const st = serviceTypes.find((s) => s.id === serviceTypeId);
+    if (typeAllowed.length === 0) {
+      return null;
+    }
 
-    return st?.provider ?? null;
+    const planAllowed = (form === 'create' ? this.createAllowedProviders : this.editAllowedProviders).filter((id) =>
+      typeAllowed.includes(id),
+    );
+
+    return planAllowed[0] ?? typeAllowed[0] ?? null;
+  }
+
+  /** Provider id for the given service type (primary), or the plan form effective provider when form is set. */
+  getProviderId(
+    serviceTypes: ServiceTypeResponse[] | null,
+    serviceTypeId: string | null | undefined,
+    form?: 'create' | 'edit',
+  ): string | null {
+    if (form) {
+      return this.resolveFormProviderId(form, serviceTypes, serviceTypeId);
+    }
+
+    const allowed = this.getServiceTypeAllowedProviders(serviceTypes, serviceTypeId);
+
+    return allowed[0] ?? null;
+  }
+
+  getServiceTypeAllowedProviders(
+    serviceTypes: ServiceTypeResponse[] | null,
+    serviceTypeId: string | null | undefined,
+  ): string[] {
+    if (!serviceTypeId?.trim() || !serviceTypes?.length) {
+      return [];
+    }
+
+    const serviceType = serviceTypes.find((entry) => entry.id === serviceTypeId);
+
+    if (!serviceType) {
+      return [];
+    }
+
+    const fromList = normalizeAllowedProviders(serviceType.allowedProviders);
+
+    if (fromList.length > 0) {
+      return fromList;
+    }
+
+    return normalizeAllowedProviders(serviceType.provider ? [serviceType.provider] : []);
+  }
+
+  supportsCustomerProviderSelection(
+    serviceTypes: ServiceTypeResponse[] | null,
+    serviceTypeId: string | null | undefined,
+  ): boolean {
+    return this.getServiceTypeAllowedProviders(serviceTypes, serviceTypeId).length >= 2;
+  }
+
+  providerLabel(providerId: string, providers: ProviderDetail[] | null | undefined): string {
+    return getProviderDisplayName(providerId, providers);
+  }
+
+  compareProviderId = (left: string | null | undefined, right: string | null | undefined): boolean => left === right;
+
+  onAllowCustomerProviderSelectionChange(
+    form: 'create' | 'edit',
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+  ): void {
+    if (form === 'create') {
+      const typeAllowed = this.getServiceTypeAllowedProviders(serviceTypes, this.createForm.serviceTypeId);
+
+      if (this.createForm.allowCustomerProviderSelection !== true) {
+        const pin = this.createAllowedProviders.find((id) => typeAllowed.includes(id)) ?? typeAllowed[0] ?? null;
+
+        this.onAllowedProvidersChangeCreate(pin ? [pin] : [], serviceTypes, providerDetails);
+
+        return;
+      }
+
+      this.onAllowedProvidersChangeCreate([...typeAllowed], serviceTypes, providerDetails);
+
+      return;
+    }
+
+    const typeAllowed = this.getServiceTypeAllowedProviders(serviceTypes, this.editingPlan?.serviceTypeId);
+
+    if (this.editForm.allowCustomerProviderSelection !== true) {
+      const pin = this.editAllowedProviders.find((id) => typeAllowed.includes(id)) ?? typeAllowed[0] ?? null;
+
+      this.onAllowedProvidersChangeEdit(pin ? [pin] : [], serviceTypes, providerDetails);
+
+      return;
+    }
+
+    this.onAllowedProvidersChangeEdit([...typeAllowed], serviceTypes, providerDetails);
+  }
+
+  onPinnedProviderChangeCreate(
+    providerId: string | null | undefined,
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+  ): void {
+    const pin = typeof providerId === 'string' ? providerId.trim() : '';
+
+    this.onAllowedProvidersChangeCreate(pin ? [pin] : [], serviceTypes, providerDetails);
+  }
+
+  onPinnedProviderChangeEdit(
+    providerId: string | null | undefined,
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+  ): void {
+    const pin = typeof providerId === 'string' ? providerId.trim() : '';
+
+    this.onAllowedProvidersChangeEdit(pin ? [pin] : [], serviceTypes, providerDetails);
+  }
+
+  pinnedProviderId(selected: string[]): string | null {
+    return selected[0] ?? null;
+  }
+
+  onAllowedProvidersChangeCreate(
+    selectedIds: unknown,
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+  ): void {
+    const typeAllowed = new Set(this.getServiceTypeAllowedProviders(serviceTypes, this.createForm.serviceTypeId));
+    const normalized = normalizeAllowedProviders(selectedIds).filter((id) => typeAllowed.has(id));
+
+    this.createAllowedProviders = normalized;
+    this.createForm.allowedProviders = [...normalized];
+    this.refreshPlanProviderDependentUi('create', serviceTypes, providerDetails);
+  }
+
+  onAllowedProvidersChangeEdit(
+    selectedIds: unknown,
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+  ): void {
+    const typeAllowed = new Set(this.getServiceTypeAllowedProviders(serviceTypes, this.editingPlan?.serviceTypeId));
+    const normalized = normalizeAllowedProviders(selectedIds).filter((id) => typeAllowed.has(id));
+
+    this.editAllowedProviders = normalized;
+    this.editForm.allowedProviders = [...normalized];
+    this.refreshPlanProviderDependentUi('edit', serviceTypes, providerDetails);
+  }
+
+  /**
+   * When the effective plan provider changes, refresh schema-driven defaults, server types, and locations.
+   */
+  private refreshPlanProviderDependentUi(
+    form: 'create' | 'edit',
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+  ): void {
+    const serviceTypeId = form === 'create' ? this.createForm.serviceTypeId : this.editingPlan?.serviceTypeId;
+
+    this.syncProviderConfigDefaultsToSchema(form, serviceTypes, providerDetails, serviceTypeId);
+    this.reloadServerTypesForForm(form, serviceTypes, providerDetails);
+    this.loadProviderLocationsForForm(form, serviceTypes, providerDetails, serviceTypeId);
+
+    if (form === 'create') {
+      if (!this.supportsCustomerLocationSelection(serviceTypes, providerDetails, serviceTypeId, 'create')) {
+        this.createForm.allowCustomerLocationSelection = false;
+      }
+
+      if (!this.supportsCustomerServerTypeSelection(serviceTypes, providerDetails, serviceTypeId, 'create')) {
+        this.createForm.allowCustomerServerTypeSelection = false;
+        this.createAllowedServerTypes = [];
+      }
+    } else {
+      if (!this.supportsCustomerLocationSelection(serviceTypes, providerDetails, serviceTypeId, 'edit')) {
+        this.editForm.allowCustomerLocationSelection = false;
+      }
+
+      if (!this.supportsCustomerServerTypeSelection(serviceTypes, providerDetails, serviceTypeId, 'edit')) {
+        this.editForm.allowCustomerServerTypeSelection = false;
+        this.editAllowedServerTypes = [];
+      }
+    }
+
+    this.pruneInvalidProvisioningOptionKeys(serviceTypes, providerDetails, serviceTypeId, form);
+  }
+
+  /** Align providerConfigDefaults keys/enums with the effective provider schema. */
+  private syncProviderConfigDefaultsToSchema(
+    form: 'create' | 'edit',
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+    serviceTypeId: string | null | undefined,
+  ): void {
+    const schema = this.getProviderSchema(serviceTypes, providerDetails, serviceTypeId, form);
+    const target = form === 'create' ? this.createForm : this.editForm;
+
+    target.providerConfigDefaults = target.providerConfigDefaults ?? {};
+
+    if (!schema) {
+      return;
+    }
+
+    const basePriceField = this.getBasePriceFromField(serviceTypes, providerDetails, serviceTypeId, form);
+    const schemaKeys = new Set(
+      Object.keys(schema).filter((key) => !this.isProvisioningConfigKey(key) && key !== 'env'),
+    );
+    const preservedKeys = new Set([
+      'allowedAddonIds',
+      'mandatoryAddonIds',
+      'env',
+      'serverTypeByProvider',
+      'geographyByProvider',
+    ]);
+
+    for (const key of Object.keys(target.providerConfigDefaults)) {
+      if (preservedKeys.has(key) || this.isProvisioningConfigKey(key)) {
+        continue;
+      }
+
+      if (!schemaKeys.has(key)) {
+        delete target.providerConfigDefaults[key];
+      }
+    }
+
+    for (const key of schemaKeys) {
+      if (key === basePriceField) {
+        continue;
+      }
+
+      const enumValues = this.getProviderConfigEnum(schema, key);
+      const current = target.providerConfigDefaults[key];
+
+      if (enumValues && enumValues.length > 0) {
+        if (current === undefined || current === null || !enumValues.includes(current as string | number)) {
+          target.providerConfigDefaults[key] = enumValues[0];
+        }
+
+        continue;
+      }
+
+      if (current !== undefined) {
+        continue;
+      }
+
+      if (this.isProductObjectField(schema, key)) {
+        target.providerConfigDefaults[key] = {};
+      } else if (this.getProviderConfigPropertyType(schema, key) === 'boolean') {
+        target.providerConfigDefaults[key] = false;
+      } else {
+        target.providerConfigDefaults[key] = this.getProviderConfigPropertyType(schema, key) === 'number' ? 0 : '';
+      }
+    }
+  }
+
+  private reloadServerTypesForForm(
+    form: 'create' | 'edit',
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+  ): void {
+    const serviceTypeId = form === 'create' ? this.createForm.serviceTypeId : this.editingPlan?.serviceTypeId;
+    const basePriceField = this.getBasePriceFromField(serviceTypes, providerDetails, serviceTypeId, form);
+
+    if (!basePriceField) {
+      this.currentServerTypes = [];
+      this.currentServerTypeGroups = [];
+
+      return;
+    }
+
+    this.loadServerTypesForPlanForm(form, serviceTypes, providerDetails, serviceTypeId);
   }
 
   getProviderConfigKeys(schema: ConfigSchemaProperties | null): string[] {
@@ -1112,82 +1402,45 @@ export class ServicePlansPageComponent implements OnInit {
       this.createForm.providerConfigDefaults = {};
       this.createForm.allowCustomerLocationSelection = false;
       this.createForm.allowCustomerServerTypeSelection = false;
+      this.createForm.allowCustomerProviderSelection = false;
       this.createForm.autoRecalculatePriceDaily = false;
       this.createAllowedServerTypes = [];
+      this.createAllowedProviders = [];
+      this.createForm.allowedProviders = [];
       this.createProvisioningOptionKeys.clear();
       this.currentServerTypes = [];
+      this.currentServerTypeGroups = [];
       this.providerLocationCatalog = new Map();
 
       return;
     }
 
-    const schema = this.getProviderSchema(serviceTypes, providerDetails, this.createForm.serviceTypeId);
-
     this.createForm.providerConfigDefaults = this.createForm.providerConfigDefaults ?? {};
 
-    if (!this.providerSupportsAddons(serviceTypes, providerDetails, this.createForm.serviceTypeId)) {
+    if (!this.providerSupportsAddons(serviceTypes, providerDetails, this.createForm.serviceTypeId, 'create')) {
       delete this.createForm.providerConfigDefaults['allowedAddonIds'];
       delete this.createForm.providerConfigDefaults['mandatoryAddonIds'];
     }
 
-    if (schema) {
-      const basePriceField = this.getBasePriceFromField(serviceTypes, providerDetails, this.createForm.serviceTypeId);
+    if (!this.supportsCustomerProviderSelection(serviceTypes, this.createForm.serviceTypeId)) {
+      this.createForm.allowCustomerProviderSelection = false;
+      this.createAllowedProviders = [];
+      this.createForm.allowedProviders = [];
+    } else if (this.createForm.allowCustomerProviderSelection !== true) {
+      const typeAllowed = this.getServiceTypeAllowedProviders(serviceTypes, this.createForm.serviceTypeId);
+      const pin = this.createAllowedProviders.find((id) => typeAllowed.includes(id)) ?? typeAllowed[0] ?? null;
 
-      for (const key of Object.keys(schema)) {
-        if (this.isProvisioningConfigKey(key)) {
-          continue;
-        }
-
-        if (this.createForm.providerConfigDefaults[key] === undefined) {
-          if (key === basePriceField) {
-            continue;
-          }
-
-          const enumValues = this.getProviderConfigEnum(schema, key);
-
-          if (enumValues && enumValues.length > 0) {
-            this.createForm.providerConfigDefaults[key] = enumValues[0];
-          } else if (this.isProductObjectField(schema, key)) {
-            this.createForm.providerConfigDefaults[key] = {};
-          } else if (this.getProviderConfigPropertyType(schema, key) === 'boolean') {
-            this.createForm.providerConfigDefaults[key] = false;
-          } else {
-            this.createForm.providerConfigDefaults[key] =
-              this.getProviderConfigPropertyType(schema, key) === 'number' ? 0 : '';
-          }
-        }
-      }
-
-      if (basePriceField) {
-        const providerId = this.getProviderId(serviceTypes, this.createForm.serviceTypeId);
-
-        if (providerId) this.loadServerTypes(providerId, this.createForm.serviceTypeId);
-      } else {
-        this.currentServerTypes = [];
-      }
-
-      const providerId = this.getProviderId(serviceTypes, this.createForm.serviceTypeId);
-
-      if (providerId && this.schemaHasGeographyEnum(schema)) {
-        this.loadProviderLocations(providerId);
-      } else {
-        this.providerLocationCatalog = new Map();
-      }
+      this.createAllowedProviders = pin ? [pin] : [];
+      this.createForm.allowedProviders = [...this.createAllowedProviders];
     } else {
-      this.currentServerTypes = [];
+      const typeAllowed = this.getServiceTypeAllowedProviders(serviceTypes, this.createForm.serviceTypeId);
+
+      this.createAllowedProviders = [...typeAllowed];
+      this.createForm.allowedProviders = [...typeAllowed];
     }
 
-    if (!this.supportsCustomerLocationSelection(serviceTypes, providerDetails, this.createForm.serviceTypeId)) {
-      this.createForm.allowCustomerLocationSelection = false;
-    }
-
-    if (!this.supportsCustomerServerTypeSelection(serviceTypes, providerDetails, this.createForm.serviceTypeId)) {
-      this.createForm.allowCustomerServerTypeSelection = false;
-      this.createAllowedServerTypes = [];
-    }
-
+    this.refreshPlanProviderDependentUi('create', serviceTypes, providerDetails);
     this.applyDefaultProvisioningOptionKeys(serviceTypes, providerDetails, this.createForm.serviceTypeId, 'create');
-    this.pruneInvalidProvisioningOptionKeys(serviceTypes, providerDetails, this.createForm.serviceTypeId, 'create');
   }
 
   private schemaHasGeographyEnum(schema: ConfigSchemaProperties | null): boolean {
@@ -1211,17 +1464,539 @@ export class ServicePlansPageComponent implements OnInit {
     });
   }
 
+  private providersForServerTypeLoad(
+    form: 'create' | 'edit',
+    serviceTypes: ServiceTypeResponse[],
+    serviceTypeId: string | null | undefined,
+  ): string[] {
+    const typeAllowed = this.getServiceTypeAllowedProviders(serviceTypes, serviceTypeId);
+
+    if (typeAllowed.length === 0) {
+      return [];
+    }
+
+    const allowProviderSelection =
+      form === 'create'
+        ? this.createForm.allowCustomerProviderSelection === true
+        : this.editForm.allowCustomerProviderSelection === true;
+    const planAllowed = (form === 'create' ? this.createAllowedProviders : this.editAllowedProviders).filter((id) =>
+      typeAllowed.includes(id),
+    );
+    const effectiveProviders = planAllowed.length > 0 ? planAllowed : typeAllowed;
+
+    if (allowProviderSelection) {
+      // Load every selectable plan provider so serverTypeByProvider defaults can be edited
+      // even when customer server-type selection is off (backend still reads the map at order).
+      if (effectiveProviders.length >= 2) {
+        return effectiveProviders;
+      }
+
+      return effectiveProviders[0] ? [effectiveProviders[0]] : [];
+    }
+
+    // Customer selection off: only the pinned (or sole) plan provider.
+    const pin = effectiveProviders[0];
+
+    return pin ? [pin] : [];
+  }
+
+  private loadServerTypesForPlanForm(
+    form: 'create' | 'edit',
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+    serviceTypeId?: string | null,
+  ): void {
+    const providerIds = this.providersForServerTypeLoad(form, serviceTypes, serviceTypeId);
+
+    if (providerIds.length === 0) {
+      this.currentServerTypes = [];
+      this.currentServerTypeGroups = [];
+      this.serverTypesLoading = false;
+
+      return;
+    }
+
+    this.serverTypesLoading = true;
+    this.currentServerTypes = [];
+    this.currentServerTypeGroups = [];
+
+    forkJoin(
+      providerIds.map((providerId) =>
+        this.serviceTypesService.getProviderServerTypes(providerId, serviceTypeId ?? undefined).pipe(
+          map((types) => ({ providerId, types })),
+          catchError(() => of({ providerId, types: [] as ServerType[] })),
+        ),
+      ),
+    ).subscribe({
+      next: (groups) => {
+        this.currentServerTypeGroups = groups.map((group) => ({
+          providerId: group.providerId,
+          label: this.providerLabel(group.providerId, providerDetails),
+          types: group.types,
+        }));
+        this.currentServerTypes = groups.flatMap((group) => group.types);
+        this.serverTypesLoading = false;
+        this.ensureValidDefaultServerType(form);
+      },
+      error: () => {
+        this.serverTypesLoading = false;
+        this.currentServerTypes = [];
+        this.currentServerTypeGroups = [];
+      },
+    });
+  }
+
+  /** Drop plan default serverType when it is not in the loaded catalog for the effective provider(s). */
+  private ensureValidDefaultServerType(form: 'create' | 'edit'): void {
+    const defaults = form === 'create' ? this.createForm.providerConfigDefaults : this.editForm.providerConfigDefaults;
+
+    if (!defaults) {
+      return;
+    }
+
+    if (this.needsPerProviderServerTypeDefaults(form)) {
+      const map = this.getServerTypeByProviderMap(form);
+      const keep = new Set(this.currentServerTypeGroups.map((group) => group.providerId));
+
+      for (const providerId of Object.keys(map)) {
+        if (!keep.has(providerId)) {
+          delete map[providerId];
+        }
+      }
+
+      for (const group of this.currentServerTypeGroups) {
+        const current = map[group.providerId];
+        const options = this.serverTypesForProviderDefault(form, group);
+
+        if (current && options.some((entry) => entry.id === current)) {
+          continue;
+        }
+
+        const fallback = options[0]?.id ?? null;
+
+        if (fallback) {
+          map[group.providerId] = fallback;
+        } else {
+          delete map[group.providerId];
+        }
+      }
+
+      this.writeServerTypeByProviderMap(form, map);
+      this.syncTopLevelServerTypeFromByProvider(form);
+
+      return;
+    }
+
+    const current = defaults['serverType'];
+
+    if (typeof current !== 'string' || !current.trim()) {
+      return;
+    }
+
+    if (this.currentServerTypes.some((entry) => entry.id === current)) {
+      return;
+    }
+
+    const fallback = this.currentServerTypes[0]?.id ?? null;
+
+    defaults['serverType'] = fallback;
+
+    if (fallback) {
+      if (form === 'create') {
+        this.onServerTypeSelectCreate(fallback);
+      } else {
+        this.onServerTypeSelectEdit(fallback);
+      }
+    }
+  }
+
+  needsPerProviderServerTypeDefaults(form: 'create' | 'edit'): boolean {
+    const allowProviderSelection =
+      form === 'create'
+        ? this.createForm.allowCustomerProviderSelection === true
+        : this.editForm.allowCustomerProviderSelection === true;
+
+    if (!allowProviderSelection) {
+      return false;
+    }
+
+    const planAllowed = form === 'create' ? this.createAllowedProviders : this.editAllowedProviders;
+
+    return planAllowed.length > 1 || this.currentServerTypeGroups.length > 1;
+  }
+
+  getServerTypeByProviderMap(form: 'create' | 'edit'): Record<string, string> {
+    const defaults = form === 'create' ? this.createForm.providerConfigDefaults : this.editForm.providerConfigDefaults;
+    const raw = defaults?.['serverTypeByProvider'];
+
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      return {};
+    }
+
+    const out: Record<string, string> = {};
+
+    for (const [providerId, serverType] of Object.entries(raw as Record<string, unknown>)) {
+      const provider = typeof providerId === 'string' ? providerId.trim() : '';
+      const typeId = typeof serverType === 'string' ? serverType.trim() : '';
+
+      if (provider && typeId) {
+        out[provider] = typeId;
+      }
+    }
+
+    return out;
+  }
+
+  getDefaultServerTypeForProvider(form: 'create' | 'edit', providerId: string): string | null {
+    return this.getServerTypeByProviderMap(form)[providerId] ?? null;
+  }
+
+  serverTypesForProviderDefault(
+    form: 'create' | 'edit',
+    group: { providerId: string; types: ServerType[] },
+  ): ServerType[] {
+    const allowServerTypeSelection =
+      form === 'create'
+        ? this.createForm.allowCustomerServerTypeSelection === true
+        : this.editForm.allowCustomerServerTypeSelection === true;
+
+    if (!allowServerTypeSelection) {
+      return group.types;
+    }
+
+    const allowed = new Set(form === 'create' ? this.createAllowedServerTypes : this.editAllowedServerTypes);
+    const filtered = group.types.filter((entry) => allowed.has(entry.id));
+
+    return filtered.length > 0 ? filtered : group.types;
+  }
+
+  onDefaultServerTypeForProviderChange(
+    form: 'create' | 'edit',
+    providerId: string,
+    serverTypeId: string | null | undefined,
+  ): void {
+    const typeId = typeof serverTypeId === 'string' ? serverTypeId.trim() : '';
+    const map = this.getServerTypeByProviderMap(form);
+
+    if (!typeId) {
+      delete map[providerId];
+    } else {
+      map[providerId] = typeId;
+
+      const allowServerTypeSelection =
+        form === 'create'
+          ? this.createForm.allowCustomerServerTypeSelection === true
+          : this.editForm.allowCustomerServerTypeSelection === true;
+
+      if (allowServerTypeSelection) {
+        if (form === 'create' && !this.createAllowedServerTypes.includes(typeId)) {
+          this.createAllowedServerTypes = [...this.createAllowedServerTypes, typeId];
+          this.createForm.allowedServerTypes = [...this.createAllowedServerTypes];
+        }
+
+        if (form === 'edit' && !this.editAllowedServerTypes.includes(typeId)) {
+          this.editAllowedServerTypes = [...this.editAllowedServerTypes, typeId];
+          this.editForm.allowedServerTypes = [...this.editAllowedServerTypes];
+        }
+      }
+    }
+
+    this.writeServerTypeByProviderMap(form, map);
+    this.syncTopLevelServerTypeFromByProvider(form);
+  }
+
+  private writeServerTypeByProviderMap(form: 'create' | 'edit', map: Record<string, string>): void {
+    const target = form === 'create' ? this.createForm : this.editForm;
+
+    target.providerConfigDefaults = target.providerConfigDefaults ?? {};
+
+    if (Object.keys(map).length === 0) {
+      delete target.providerConfigDefaults['serverTypeByProvider'];
+    } else {
+      target.providerConfigDefaults['serverTypeByProvider'] = { ...map };
+    }
+  }
+
+  private syncTopLevelServerTypeFromByProvider(form: 'create' | 'edit'): void {
+    const map = this.getServerTypeByProviderMap(form);
+    const planAllowed = form === 'create' ? this.createAllowedProviders : this.editAllowedProviders;
+    const providerId = planAllowed[0] ?? this.currentServerTypeGroups[0]?.providerId ?? null;
+    const defaultId = (providerId && map[providerId]) || Object.values(map)[0] || null;
+    const target = form === 'create' ? this.createForm : this.editForm;
+
+    target.providerConfigDefaults = target.providerConfigDefaults ?? {};
+
+    if (defaultId) {
+      target.providerConfigDefaults['serverType'] = defaultId;
+
+      if (form === 'create') {
+        this.onServerTypeSelectCreate(defaultId);
+      } else {
+        this.onServerTypeSelectEdit(defaultId);
+      }
+    }
+  }
+
+  private syncServerTypeByProviderFromAllowed(form: 'create' | 'edit'): void {
+    if (!this.needsPerProviderServerTypeDefaults(form)) {
+      return;
+    }
+
+    const allowed = new Set(form === 'create' ? this.createAllowedServerTypes : this.editAllowedServerTypes);
+    const map = this.getServerTypeByProviderMap(form);
+    const keep = new Set(this.currentServerTypeGroups.map((group) => group.providerId));
+
+    for (const providerId of Object.keys(map)) {
+      if (!keep.has(providerId)) {
+        delete map[providerId];
+      }
+    }
+
+    for (const group of this.currentServerTypeGroups) {
+      const selectedInGroup = group.types.map((entry) => entry.id).filter((id) => allowed.has(id));
+
+      if (selectedInGroup.length === 0) {
+        delete map[group.providerId];
+        continue;
+      }
+
+      if (!map[group.providerId] || !selectedInGroup.includes(map[group.providerId])) {
+        map[group.providerId] = selectedInGroup[0];
+      }
+    }
+
+    this.writeServerTypeByProviderMap(form, map);
+    this.syncTopLevelServerTypeFromByProvider(form);
+  }
+
+  needsPerProviderGeographyDefaults(form: 'create' | 'edit'): boolean {
+    const allowProviderSelection =
+      form === 'create'
+        ? this.createForm.allowCustomerProviderSelection === true
+        : this.editForm.allowCustomerProviderSelection === true;
+
+    return allowProviderSelection && this.providersForPlanGeography(form).length > 1;
+  }
+
+  providersForPlanGeography(form: 'create' | 'edit'): string[] {
+    const planAllowed = form === 'create' ? this.createAllowedProviders : this.editAllowedProviders;
+
+    if (planAllowed.length > 0) {
+      return [...planAllowed];
+    }
+
+    return this.currentServerTypeGroups.map((group) => group.providerId);
+  }
+
+  geographyProviderGroups(
+    form: 'create' | 'edit',
+    providerDetails: ProviderDetail[] | null | undefined,
+  ): Array<{ providerId: string; label: string }> {
+    return this.providersForPlanGeography(form).map((providerId) => ({
+      providerId,
+      label: this.providerLabel(providerId, providerDetails),
+    }));
+  }
+
+  getGeographyByProviderMap(form: 'create' | 'edit'): Record<string, string> {
+    const defaults = form === 'create' ? this.createForm.providerConfigDefaults : this.editForm.providerConfigDefaults;
+    const raw = defaults?.['geographyByProvider'];
+
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      return {};
+    }
+
+    const out: Record<string, string> = {};
+
+    for (const [providerId, geography] of Object.entries(raw as Record<string, unknown>)) {
+      const provider = typeof providerId === 'string' ? providerId.trim() : '';
+      const geo = typeof geography === 'string' ? geography.trim() : '';
+
+      if (provider && geo) {
+        out[provider] = geo;
+      }
+    }
+
+    return out;
+  }
+
+  getDefaultGeographyForProvider(form: 'create' | 'edit', providerId: string): string | null {
+    return this.getGeographyByProviderMap(form)[providerId] ?? null;
+  }
+
+  locationsForProvider(providerId: string): ProviderLocation[] {
+    const catalog = this.providerLocationCatalogs[providerId] ?? this.providerLocationCatalog;
+
+    return [...catalog.values()];
+  }
+
+  onDefaultGeographyForProviderChange(
+    form: 'create' | 'edit',
+    providerId: string,
+    geographyId: string | null | undefined,
+  ): void {
+    const geo = typeof geographyId === 'string' ? geographyId.trim() : '';
+    const map = this.getGeographyByProviderMap(form);
+
+    if (!geo) {
+      delete map[providerId];
+    } else {
+      map[providerId] = geo;
+    }
+
+    this.writeGeographyByProviderMap(form, map);
+    this.syncTopLevelGeographyFromByProvider(form);
+  }
+
+  private writeGeographyByProviderMap(form: 'create' | 'edit', map: Record<string, string>): void {
+    const target = form === 'create' ? this.createForm : this.editForm;
+
+    target.providerConfigDefaults = target.providerConfigDefaults ?? {};
+
+    if (Object.keys(map).length === 0) {
+      delete target.providerConfigDefaults['geographyByProvider'];
+    } else {
+      target.providerConfigDefaults['geographyByProvider'] = { ...map };
+    }
+  }
+
+  private syncTopLevelGeographyFromByProvider(form: 'create' | 'edit'): void {
+    const map = this.getGeographyByProviderMap(form);
+    const planAllowed = form === 'create' ? this.createAllowedProviders : this.editAllowedProviders;
+    const providerId = planAllowed[0] ?? Object.keys(map)[0] ?? null;
+    const defaultId = (providerId && map[providerId]) || Object.values(map)[0] || null;
+    const target = form === 'create' ? this.createForm : this.editForm;
+
+    target.providerConfigDefaults = target.providerConfigDefaults ?? {};
+
+    if (defaultId) {
+      target.providerConfigDefaults['location'] = defaultId;
+      target.providerConfigDefaults['region'] = defaultId;
+    }
+  }
+
+  private ensureValidDefaultGeography(form: 'create' | 'edit'): void {
+    if (!this.needsPerProviderGeographyDefaults(form)) {
+      return;
+    }
+
+    const map = this.getGeographyByProviderMap(form);
+    const keep = new Set(this.providersForPlanGeography(form));
+
+    for (const providerId of Object.keys(map)) {
+      if (!keep.has(providerId)) {
+        delete map[providerId];
+      }
+    }
+
+    for (const providerId of keep) {
+      const current = map[providerId];
+      const options = this.locationsForProvider(providerId);
+
+      if (current && options.some((entry) => entry.id === current)) {
+        continue;
+      }
+
+      const fallback = options[0]?.id ?? null;
+
+      if (fallback) {
+        map[providerId] = fallback;
+      } else {
+        delete map[providerId];
+      }
+    }
+
+    this.writeGeographyByProviderMap(form, map);
+    this.syncTopLevelGeographyFromByProvider(form);
+  }
+
+  private loadProviderLocationsForForm(
+    form: 'create' | 'edit',
+    serviceTypes: ServiceTypeResponse[],
+    providerDetails: ProviderDetail[],
+    serviceTypeId: string | null | undefined,
+  ): void {
+    const schema = this.getProviderSchema(serviceTypes, providerDetails, serviceTypeId, form);
+
+    if (!this.schemaHasGeographyEnum(schema)) {
+      this.providerLocationCatalog = new Map();
+      this.providerLocationCatalogs = {};
+      this.providerLocationsLoading = false;
+
+      return;
+    }
+
+    const providerIds = this.needsPerProviderGeographyDefaults(form)
+      ? this.providersForPlanGeography(form)
+      : (() => {
+          const single = this.getProviderId(serviceTypes, serviceTypeId, form);
+
+          return single ? [single] : [];
+        })();
+
+    if (providerIds.length === 0) {
+      this.providerLocationCatalog = new Map();
+      this.providerLocationCatalogs = {};
+      this.providerLocationsLoading = false;
+
+      return;
+    }
+
+    this.providerLocationsLoading = true;
+    this.providerLocationCatalog = new Map();
+    this.providerLocationCatalogs = {};
+
+    forkJoin(
+      providerIds.map((providerId) =>
+        this.serviceTypesService.getProviderLocations(providerId, serviceTypeId ?? undefined).pipe(
+          map((locations) => ({ providerId, locations })),
+          catchError(() => of({ providerId, locations: [] as ProviderLocation[] })),
+        ),
+      ),
+    ).subscribe({
+      next: (groups) => {
+        const catalogs: Record<string, ProviderLocationCatalog> = {};
+
+        for (const group of groups) {
+          catalogs[group.providerId] = providerLocationCatalogFromList(group.locations);
+        }
+
+        this.providerLocationCatalogs = catalogs;
+        this.providerLocationCatalog = catalogs[providerIds[0]] ?? new Map();
+        this.providerLocationsLoading = false;
+        this.ensureValidDefaultGeography(form);
+      },
+      error: () => {
+        this.providerLocationsLoading = false;
+        this.providerLocationCatalog = new Map();
+        this.providerLocationCatalogs = {};
+      },
+    });
+  }
+
   private loadServerTypes(providerId: string, serviceTypeId?: string | null): void {
     this.serverTypesLoading = true;
     this.currentServerTypes = [];
+    this.currentServerTypeGroups = [];
     this.serviceTypesService.getProviderServerTypes(providerId, serviceTypeId ?? undefined).subscribe({
       next: (list) => {
         this.currentServerTypes = list;
+        this.currentServerTypeGroups =
+          list.length > 0
+            ? [
+                {
+                  providerId,
+                  label: providerId,
+                  types: list,
+                },
+              ]
+            : [];
         this.serverTypesLoading = false;
       },
       error: () => {
         this.serverTypesLoading = false;
         this.currentServerTypes = [];
+        this.currentServerTypeGroups = [];
       },
     });
   }
@@ -1239,6 +2014,12 @@ export class ServicePlansPageComponent implements OnInit {
     const normalized = normalizeAllowedServerTypeIds(selectedIds);
     this.createAllowedServerTypes = normalized;
     this.createForm.allowedServerTypes = [...normalized];
+
+    if (this.needsPerProviderServerTypeDefaults('create')) {
+      this.syncServerTypeByProviderFromAllowed('create');
+
+      return;
+    }
 
     if (normalized.length === 0) {
       return;
@@ -1267,6 +2048,12 @@ export class ServicePlansPageComponent implements OnInit {
     const normalized = normalizeAllowedServerTypeIds(selectedIds);
     this.editAllowedServerTypes = normalized;
     this.editForm.allowedServerTypes = [...normalized];
+
+    if (this.needsPerProviderServerTypeDefaults('edit')) {
+      this.syncServerTypeByProviderFromAllowed('edit');
+
+      return;
+    }
 
     if (normalized.length === 0) {
       return;
@@ -1316,6 +2103,9 @@ export class ServicePlansPageComponent implements OnInit {
       if (this.createForm.allowCustomerServerTypeSelection !== true) {
         this.createAllowedServerTypes = [];
         this.createForm.allowedServerTypes = [];
+        this.typesAndProviders$.pipe(take(1)).subscribe(({ serviceTypes, providerDetails }) => {
+          this.reloadServerTypesForForm('create', serviceTypes, providerDetails);
+        });
 
         return;
       }
@@ -1326,12 +2116,19 @@ export class ServicePlansPageComponent implements OnInit {
         this.onAllowedServerTypesChangeCreate([current.trim()]);
       }
 
+      this.typesAndProviders$.pipe(take(1)).subscribe(({ serviceTypes, providerDetails }) => {
+        this.reloadServerTypesForForm('create', serviceTypes, providerDetails);
+      });
+
       return;
     }
 
     if (this.editForm.allowCustomerServerTypeSelection !== true) {
       this.editAllowedServerTypes = [];
       this.editForm.allowedServerTypes = [];
+      this.typesAndProviders$.pipe(take(1)).subscribe(({ serviceTypes, providerDetails }) => {
+        this.reloadServerTypesForForm('edit', serviceTypes, providerDetails);
+      });
 
       return;
     }
@@ -1341,6 +2138,10 @@ export class ServicePlansPageComponent implements OnInit {
     if (typeof current === 'string' && current.trim()) {
       this.onAllowedServerTypesChangeEdit([current.trim()]);
     }
+
+    this.typesAndProviders$.pipe(take(1)).subscribe(({ serviceTypes, providerDetails }) => {
+      this.reloadServerTypesForForm('edit', serviceTypes, providerDetails);
+    });
   }
 
   formatServerTypeOptionLabel(st: ServerType): string {
@@ -1490,6 +2291,8 @@ export class ServicePlansPageComponent implements OnInit {
       allowCustomerLocationSelection: false,
       allowCustomerServerTypeSelection: false,
       allowedServerTypes: [],
+      allowCustomerProviderSelection: false,
+      allowedProviders: [],
       taxCategory: 'standard',
       isActive: true,
     };
@@ -1516,6 +2319,8 @@ export class ServicePlansPageComponent implements OnInit {
       allowCustomerLocationSelection: false,
       allowCustomerServerTypeSelection: false,
       allowedServerTypes: [],
+      allowCustomerProviderSelection: false,
+      allowedProviders: [],
       taxCategory: 'standard',
       migrateExistingSubscriptions: false,
       isActive: true,
@@ -1556,7 +2361,9 @@ export class ServicePlansPageComponent implements OnInit {
     this.resetPlanMeterAttachForm('create');
     this.planMeterAttachError = null;
     this.currentServerTypes = [];
+    this.currentServerTypeGroups = [];
     this.createAllowedServerTypes = [];
+    this.createAllowedProviders = [];
     this.serverTypesLoading = false;
     this.providerLocationCatalog = new Map();
     this.providerLocationsLoading = false;
@@ -1572,20 +2379,16 @@ export class ServicePlansPageComponent implements OnInit {
     this.editAttachedMeters = plan.meters ?? [];
     this.loadPlanAttachedMeters(plan.id);
     this.currentServerTypes = [];
+    this.currentServerTypeGroups = [];
     this.editAllowedServerTypes = plan.allowCustomerServerTypeSelection
       ? normalizeAllowedServerTypeIds(plan.allowedServerTypes)
       : [];
+    this.editAllowedProviders = normalizeAllowedProviders(plan.allowedProviders);
     this.serverTypesLoading = false;
     this.providerLocationCatalog = new Map();
     this.providerLocationsLoading = false;
     this.editProvisioningOptionKeys = new Set(planProvisioningOptionKeysFromDefaults(plan.providerConfigDefaults));
     this.editStaleCustomConfigIds = [];
-    combineLatest([this.typesAndProviders$, this.cloudInitConfigs$])
-      .pipe(take(1))
-      .subscribe(([{ serviceTypes, providerDetails }, cloudInitConfigs]) => {
-        this.pruneInvalidProvisioningOptionKeys(serviceTypes, providerDetails, plan.serviceTypeId, 'edit');
-        this.editStaleCustomConfigIds = this.pruneInactiveCustomProvisioningOptionKeys(cloudInitConfigs, 'edit');
-      });
     this.editForm = {
       id: plan.id,
       name: plan.name,
@@ -1611,24 +2414,31 @@ export class ServicePlansPageComponent implements OnInit {
       allowCustomerLocationSelection: plan.allowCustomerLocationSelection === true,
       allowCustomerServerTypeSelection: plan.allowCustomerServerTypeSelection === true,
       allowedServerTypes: normalizeAllowedServerTypeIds(plan.allowedServerTypes),
+      allowCustomerProviderSelection: plan.allowCustomerProviderSelection === true,
+      allowedProviders: normalizeAllowedProviders(plan.allowedProviders),
       taxCategory: plan.taxCategory ?? 'standard',
       migrateExistingSubscriptions: false,
       isActive: plan.isActive,
     };
-    this.typesAndProviders$.pipe(take(1)).subscribe((data) => {
-      const basePriceField = this.getBasePriceFromField(data.serviceTypes, data.providerDetails, plan.serviceTypeId);
-      const providerId = this.getProviderId(data.serviceTypes, plan.serviceTypeId);
+    combineLatest([this.typesAndProviders$, this.cloudInitConfigs$])
+      .pipe(take(1))
+      .subscribe(([{ serviceTypes, providerDetails }, cloudInitConfigs]) => {
+        this.pruneInvalidProvisioningOptionKeys(serviceTypes, providerDetails, plan.serviceTypeId, 'edit');
+        this.editStaleCustomConfigIds = this.pruneInactiveCustomProvisioningOptionKeys(cloudInitConfigs, 'edit');
 
-      if (basePriceField && providerId) this.loadServerTypes(providerId, plan.serviceTypeId);
+        if (
+          plan.allowCustomerProviderSelection !== true &&
+          this.supportsCustomerProviderSelection(serviceTypes, plan.serviceTypeId)
+        ) {
+          const typeAllowed = this.getServiceTypeAllowedProviders(serviceTypes, plan.serviceTypeId);
+          const pin = this.editAllowedProviders.find((id) => typeAllowed.includes(id)) ?? typeAllowed[0] ?? null;
 
-      if (providerId) {
-        const schema = this.getProviderSchema(data.serviceTypes, data.providerDetails, plan.serviceTypeId);
-
-        if (this.schemaHasGeographyEnum(schema)) {
-          this.loadProviderLocations(providerId, plan.serviceTypeId);
+          this.editAllowedProviders = pin ? [pin] : [];
+          this.editForm.allowedProviders = [...this.editAllowedProviders];
         }
-      }
-    });
+
+        this.refreshPlanProviderDependentUi('edit', serviceTypes, providerDetails);
+      });
     this.resetProductDefaultsCollapse('edit');
     showBillingModal(this.editModal);
   }
@@ -1660,6 +2470,7 @@ export class ServicePlansPageComponent implements OnInit {
           : this.buildProviderConfigDefaultsForSubmit(
               this.createForm.providerConfigDefaults,
               this.createProvisioningOptionKeys,
+              'create',
             );
         const orderingHighlights = this.sanitizeOrderingHighlights(this.createForm.orderingHighlights);
 
@@ -1686,6 +2497,12 @@ export class ServicePlansPageComponent implements OnInit {
           allowedServerTypes:
             !isNone && this.createForm.allowCustomerServerTypeSelection === true
               ? [...this.createAllowedServerTypes]
+              : undefined,
+          allowCustomerProviderSelection: isNone ? false : this.createForm.allowCustomerProviderSelection === true,
+          allowedProviders: isNone
+            ? undefined
+            : this.supportsCustomerProviderSelection(serviceTypes, this.createForm.serviceTypeId)
+              ? [...this.createAllowedProviders]
               : undefined,
           taxCategory: this.createForm.taxCategory ?? 'standard',
           isActive: this.createForm.isActive ?? true,
@@ -1716,6 +2533,7 @@ export class ServicePlansPageComponent implements OnInit {
           : this.buildProviderConfigDefaultsForSubmit(
               this.editForm.providerConfigDefaults,
               this.editProvisioningOptionKeys,
+              'edit',
             );
         const orderingHighlights = this.sanitizeOrderingHighlights(this.editForm.orderingHighlights);
 
@@ -1740,6 +2558,12 @@ export class ServicePlansPageComponent implements OnInit {
           allowCustomerServerTypeSelection: isNone ? false : this.editForm.allowCustomerServerTypeSelection,
           allowedServerTypes:
             !isNone && this.editForm.allowCustomerServerTypeSelection === true ? [...this.editAllowedServerTypes] : [],
+          allowCustomerProviderSelection: isNone ? false : this.editForm.allowCustomerProviderSelection,
+          allowedProviders: isNone
+            ? []
+            : this.supportsCustomerProviderSelection(serviceTypes, serviceTypeId)
+              ? [...this.editAllowedProviders]
+              : [],
           taxCategory: this.editForm.taxCategory ?? 'standard',
           migrateExistingSubscriptions: this.editForm.migrateExistingSubscriptions === true,
           isActive: this.editForm.isActive,
@@ -1787,6 +2611,44 @@ export class ServicePlansPageComponent implements OnInit {
         continue;
       }
 
+      if (key === 'serverTypeByProvider' && value && typeof value === 'object' && !Array.isArray(value)) {
+        const map: Record<string, string> = {};
+
+        for (const [providerId, serverType] of Object.entries(value as Record<string, unknown>)) {
+          const provider = typeof providerId === 'string' ? providerId.trim() : '';
+          const typeId = typeof serverType === 'string' ? serverType.trim() : '';
+
+          if (provider && typeId) {
+            map[provider] = typeId;
+          }
+        }
+
+        if (Object.keys(map).length > 0) {
+          result[key] = map;
+        }
+
+        continue;
+      }
+
+      if (key === 'geographyByProvider' && value && typeof value === 'object' && !Array.isArray(value)) {
+        const map: Record<string, string> = {};
+
+        for (const [providerId, geography] of Object.entries(value as Record<string, unknown>)) {
+          const provider = typeof providerId === 'string' ? providerId.trim() : '';
+          const geo = typeof geography === 'string' ? geography.trim() : '';
+
+          if (provider && geo) {
+            map[provider] = geo;
+          }
+        }
+
+        if (Object.keys(map).length > 0) {
+          result[key] = map;
+        }
+
+        continue;
+      }
+
       if (value === undefined || value === null || value === '') continue;
 
       const num = Number(value);
@@ -1800,12 +2662,69 @@ export class ServicePlansPageComponent implements OnInit {
   private buildProviderConfigDefaultsForSubmit(
     defaults: Record<string, unknown> | undefined,
     optionKeys: Set<string>,
+    form: 'create' | 'edit',
   ): Record<string, unknown> {
     const result = this.coerceProviderConfigDefaults(defaults);
     const provisioningOptions = buildProvisioningOptionsFromKeys(optionKeys);
 
     if (provisioningOptions.length > 0) {
       result['provisioningOptions'] = provisioningOptions;
+    }
+
+    const allowProviderSelection =
+      form === 'create'
+        ? this.createForm.allowCustomerProviderSelection === true
+        : this.editForm.allowCustomerProviderSelection === true;
+    const planAllowed = form === 'create' ? this.createAllowedProviders : this.editAllowedProviders;
+    const inheritedProviders =
+      this.providersForPlanGeography(form).length > 0
+        ? this.providersForPlanGeography(form)
+        : this.currentServerTypeGroups.map((group) => group.providerId);
+    // Only prune when we know the effective provider set; never wipe maps while catalogs are still loading.
+    const keepProviders = new Set(
+      planAllowed.length > 0 ? planAllowed : allowProviderSelection ? inheritedProviders : planAllowed,
+    );
+
+    if (result['serverTypeByProvider'] && typeof result['serverTypeByProvider'] === 'object') {
+      const raw = result['serverTypeByProvider'] as Record<string, unknown>;
+      const pruned: Record<string, string> = {};
+
+      for (const [providerId, serverType] of Object.entries(raw)) {
+        if (keepProviders.size > 0 && !keepProviders.has(providerId)) {
+          continue;
+        }
+
+        if (typeof serverType === 'string' && serverType.trim()) {
+          pruned[providerId] = serverType.trim();
+        }
+      }
+
+      if (Object.keys(pruned).length > 0) {
+        result['serverTypeByProvider'] = pruned;
+      } else {
+        delete result['serverTypeByProvider'];
+      }
+    }
+
+    if (result['geographyByProvider'] && typeof result['geographyByProvider'] === 'object') {
+      const raw = result['geographyByProvider'] as Record<string, unknown>;
+      const pruned: Record<string, string> = {};
+
+      for (const [providerId, geography] of Object.entries(raw)) {
+        if (keepProviders.size > 0 && !keepProviders.has(providerId)) {
+          continue;
+        }
+
+        if (typeof geography === 'string' && geography.trim()) {
+          pruned[providerId] = geography.trim();
+        }
+      }
+
+      if (Object.keys(pruned).length > 0) {
+        result['geographyByProvider'] = pruned;
+      } else {
+        delete result['geographyByProvider'];
+      }
     }
 
     return result;
@@ -1826,6 +2745,7 @@ export class ServicePlansPageComponent implements OnInit {
     this.createForm = this.getDefaultCreateForm();
     this.createProvisioningOptionKeys = new Set();
     this.createAttachedMeters = [];
+    this.createAllowedProviders = [];
     this.resetPlanMeterAttachForm('create');
     this.planMeterAttachError = null;
   }
@@ -1835,6 +2755,7 @@ export class ServicePlansPageComponent implements OnInit {
     this.editingPlan = null;
     this.editStaleCustomConfigIds = [];
     this.editAttachedMeters = [];
+    this.editAllowedProviders = [];
     this.resetPlanMeterAttachForm('edit');
     this.planMeterAttachError = null;
   }

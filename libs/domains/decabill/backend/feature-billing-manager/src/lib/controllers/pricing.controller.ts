@@ -18,6 +18,8 @@ import { mergeOrderAddonIds, parsePlanAllowedAddonIds } from '../utils/plan-addo
 import { normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
 import { enrichPricingWithTax } from '../utils/pricing-tax.utils';
 import { resolvePlanTaxCategory } from '../utils/plan-tax.utils';
+import { resolveEffectiveProvider } from '../utils/provider-selection.utils';
+import { resolveDefaultServerTypeForProvider } from '../utils/provider-server-type.utils';
 import { resolveServerTypePriceMonthly } from '../utils/server-type-billing.utils';
 
 @Controller('pricing')
@@ -73,23 +75,26 @@ export class PricingController {
 
     if (allowCustomerServerTypeSelection) {
       const requestedServerType = dto.requestedConfig?.['serverType'];
+      const serviceType = plan.serviceTypeId
+        ? await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId)
+        : null;
+      const provider = serviceType ? resolveEffectiveProvider(serviceType, plan, dto.requestedConfig) : null;
 
       serverTypeId =
         typeof requestedServerType === 'string' && requestedServerType.trim()
           ? requestedServerType.trim()
-          : typeof plan.providerConfigDefaults?.['serverType'] === 'string'
-            ? String(plan.providerConfigDefaults['serverType']).trim()
-            : '';
+          : (resolveDefaultServerTypeForProvider(plan.providerConfigDefaults, provider) ?? '');
     }
 
     let planPricing = this.pricingService.calculate(plan);
 
     if (serverTypeId && plan.serviceTypeId) {
       const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
+      const provider = resolveEffectiveProvider(serviceType, plan, dto.requestedConfig);
       const providerDefaults = normalizeStoredProviderDefaults(serviceType.providerDefaults);
       const priceMonthly = await resolveServerTypePriceMonthly(
         this.providerServerTypesService,
-        serviceType.provider,
+        provider,
         serverTypeId,
         providerDefaults,
       );
@@ -112,6 +117,8 @@ export class PricingController {
             plan.serviceTypeId,
             parsePlanAllowedAddonIds(plan.providerConfigDefaults),
             selectedAddonIds,
+            dto.requestedConfig,
+            plan,
           );
     const addonLines = addons.map((addon) => ({
       addonId: addon.id,

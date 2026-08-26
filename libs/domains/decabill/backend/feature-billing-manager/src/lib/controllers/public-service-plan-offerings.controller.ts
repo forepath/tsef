@@ -14,6 +14,7 @@ import { normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.
 import { enrichPricingWithTax } from '../utils/pricing-tax.utils';
 import { resolvePlanTaxCategory } from '../utils/plan-tax.utils';
 import { normalizeAllowedServerTypes } from '../utils/provider-server-type.utils';
+import { normalizeAllowedProviders, resolveServiceTypeAllowedProviders } from '../utils/provider-selection.utils';
 import { resolveLowestServerTypePriceMonthly } from '../utils/server-type-billing.utils';
 
 const DEFAULT_LIMIT = 50;
@@ -98,11 +99,14 @@ export class PublicServicePlanOfferingsController {
     );
     const allowCustomerServerTypeSelection = row.allowCustomerServerTypeSelection === true;
     const allowedServerTypes = normalizeAllowedServerTypes(row.allowedServerTypes);
+    const allowCustomerProviderSelection = row.allowCustomerProviderSelection === true;
+    const allowedProviders = normalizeAllowedProviders(row.allowedProviders);
     let totalPriceFrom: number | undefined;
     let totalGrossFrom: number | undefined;
 
     if (allowCustomerServerTypeSelection && allowedServerTypes.length > 0) {
-      const provider = row.serviceType?.provider;
+      const provider =
+        resolveServiceTypeAllowedProviders(row.serviceType ?? {})[0] ?? row.serviceType?.provider ?? null;
       const providerDefaults = normalizeStoredProviderDefaults(row.serviceType?.providerDefaults);
       const lowestBase = await resolveLowestServerTypePriceMonthly(
         this.providerServerTypesService,
@@ -147,6 +151,8 @@ export class PublicServicePlanOfferingsController {
       orderingHighlights: row.orderingHighlights ?? [],
       allowCustomerLocationSelection: row.allowCustomerLocationSelection === true,
       allowCustomerServerTypeSelection,
+      allowCustomerProviderSelection,
+      allowedProviders,
       withdrawalPolicy: this.withdrawalPolicyService.buildPolicyInfo({
         disallowStatutoryWithdrawal: row.serviceType?.disallowStatutoryWithdrawal ?? false,
       }),

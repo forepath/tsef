@@ -23,6 +23,12 @@ export class ProviderDetailDto {
   displayName!: string;
 
   /**
+   * Compatibility group for interchangeable providers on one service type.
+   * Providers without a group are only compatible with themselves.
+   */
+  compatibilityGroup?: string;
+
+  /**
    * Optional JSON schema for provider-specific configuration when creating subscriptions.
    */
   configSchema?: Record<string, unknown>;

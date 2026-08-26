@@ -62,7 +62,7 @@
                       </span>
                       <span class="me-2">
                         <i class="bi bi-box-seam me-1" aria-hidden="true"></i
-                        >{{ providerLabel(st.provider, listData.providerDetails) }}
+                        >{{ providersListLabel(st, listData.providerDetails) }}
                       </span>
                     </div>
                   </div>
@@ -166,7 +166,7 @@
             />
           </div>
           <div class="mb-3">
-            <label for="createProvider" class="form-label" i18n="@@featureServiceTypes-provider">Provider</label>
+            <label for="createProvider" class="form-label" i18n="@@featureServiceTypes-provider">Providers</label>
             @if (providerDetailsLoading$ | async) {
               <div class="form-control-plaintext text-body-secondary" i18n="@@featureServiceTypes-loadingProviders">
                 Loading providers...
@@ -178,24 +178,34 @@
                     id="createProvider"
                     name="provider"
                     class="form-select"
-                    [(ngModel)]="createForm.provider"
-                    (ngModelChange)="onCreateProviderChange()"
-                    required
+                    multiple
+                    size="6"
+                    [ngModel]="createSelectedProviders"
+                    (ngModelChange)="onProvidersSelectionChange('create', $event, providers)"
+                    [compareWith]="compareProviderId"
                     [disabled]="(creating$ | async) === true"
                   >
-                    <option value="" i18n="@@featureServiceTypes-chooseProvider">Choose a provider</option>
+                    <option [ngValue]="noneProviderValue" i18n="@@featureServiceTypes-noneProvider">None</option>
                     @for (p of providers; track p.id) {
-                      <option [value]="p.id">{{ p.displayName }}</option>
+                      <option [ngValue]="p.id" [disabled]="isProviderOptionDisabled('create', p, providers)">
+                        {{ p.displayName }}
+                      </option>
                     }
                   </select>
+                  <div class="form-text text-body-secondary small" i18n="@@featureServiceTypes-providersMultiHelp">
+                    Hold Ctrl/Cmd to select multiple compatible providers. First selected is primary. Choose None for no
+                    cloud provider.
+                  </div>
                 } @else {
                   <input
                     type="text"
                     class="form-control"
                     id="createProvider"
-                    name="provider"
-                    [(ngModel)]="createForm.provider"
-                    required
+                    name="providerManual"
+                    [ngModel]="createForm.provider ?? ''"
+                    (ngModelChange)="
+                      onProvidersSelectionChange('create', $event?.trim() ? [$event.trim()] : [], providers)
+                    "
                     [disabled]="(creating$ | async) === true"
                     i18n-placeholder="@@featureServiceTypes-providerPlaceholder"
                     placeholder="e.g. hetzner"
@@ -208,7 +218,7 @@
             }
           </div>
           @if (providerDetails$ | async; as providers) {
-            @if (hasProviderDefaultsSection(createForm.provider, providers)) {
+            @if (hasProviderDefaultsSection('create', providers)) {
               <div class="mb-3 border rounded p-3 bg-body-secondary">
                 <div class="d-flex justify-content-between align-items-center gap-2">
                   <h6 class="mb-0" i18n="@@featureServiceTypes-providerDefaults">Provider defaults</h6>
@@ -246,23 +256,58 @@
                     Overrides platform environment variables for this service type. Leave blank to use the environment
                     default.
                   </p>
-                  @for (field of getProviderEnvDefaultFields(createForm.provider, providers); track field.envKey) {
-                    <div class="mb-3">
-                      <label [attr.for]="'createProviderDefault_' + field.envKey" class="form-label">{{
-                        field.label
-                      }}</label>
-                      <input
-                        [type]="field.sensitive ? 'password' : 'text'"
-                        class="form-control"
-                        [id]="'createProviderDefault_' + field.envKey"
-                        [name]="'createProviderDefault_' + field.envKey"
-                        [ngModel]="getProviderDefaultValue('create', field.envKey)"
-                        (ngModelChange)="setProviderDefaultValue('create', field.envKey, $event)"
-                        [disabled]="(creating$ | async) === true"
-                        i18n-placeholder="@@featureServiceTypes-providerDefaultEnvPlaceholder"
-                        placeholder="Using environment default"
-                      />
-                    </div>
+                  @if (getProviderDefaultsGroups('create', providers); as groups) {
+                    @if (groups.length > 1) {
+                      @for (group of groups; track group.providerId) {
+                        <div class="border rounded p-3 mb-3">
+                          <div
+                            class="form-text text-body-secondary small mb-2 mt-0"
+                            i18n="@@featureServiceTypes-providerDefaultsGroupIntro"
+                          >
+                            Defaults for {{ group.label }}
+                          </div>
+                          @for (field of group.fields; track field.envKey) {
+                            <div class="mb-3">
+                              <label
+                                [attr.for]="'createProviderDefault_' + group.providerId + '_' + field.envKey"
+                                class="form-label"
+                                >{{ field.label }}</label
+                              >
+                              <input
+                                [type]="field.sensitive ? 'password' : 'text'"
+                                class="form-control"
+                                [id]="'createProviderDefault_' + group.providerId + '_' + field.envKey"
+                                [name]="'createProviderDefault_' + group.providerId + '_' + field.envKey"
+                                [ngModel]="getProviderDefaultValue('create', field.envKey)"
+                                (ngModelChange)="setProviderDefaultValue('create', field.envKey, $event)"
+                                [disabled]="(creating$ | async) === true"
+                                i18n-placeholder="@@featureServiceTypes-providerDefaultEnvPlaceholder"
+                                placeholder="Using environment default"
+                              />
+                            </div>
+                          }
+                        </div>
+                      }
+                    } @else {
+                      @for (field of getSelectedProvidersEnvDefaultFields('create', providers); track field.envKey) {
+                        <div class="mb-3">
+                          <label [attr.for]="'createProviderDefault_' + field.envKey" class="form-label">{{
+                            field.label
+                          }}</label>
+                          <input
+                            [type]="field.sensitive ? 'password' : 'text'"
+                            class="form-control"
+                            [id]="'createProviderDefault_' + field.envKey"
+                            [name]="'createProviderDefault_' + field.envKey"
+                            [ngModel]="getProviderDefaultValue('create', field.envKey)"
+                            (ngModelChange)="setProviderDefaultValue('create', field.envKey, $event)"
+                            [disabled]="(creating$ | async) === true"
+                            i18n-placeholder="@@featureServiceTypes-providerDefaultEnvPlaceholder"
+                            placeholder="Using environment default"
+                          />
+                        </div>
+                      }
+                    }
                   }
                 </div>
               </div>
@@ -274,7 +319,7 @@
               context: {
                 mode: 'create',
                 disabled: (creating$ | async) === true,
-                providerId: createForm.provider,
+                providerId: primaryProviderId('create'),
               }
             "
           />
@@ -310,12 +355,7 @@
           <button
             type="submit"
             class="btn btn-primary"
-            [disabled]="
-              !createForm.key.trim() ||
-              !createForm.name.trim() ||
-              !createForm.provider.trim() ||
-              (creating$ | async) === true
-            "
+            [disabled]="!createForm.key.trim() || !createForm.name.trim() || (creating$ | async) === true"
             i18n="@@featureServiceTypes-create"
           >
             Create
@@ -374,7 +414,7 @@
             />
           </div>
           <div class="mb-3">
-            <label for="editProvider" class="form-label" i18n="@@featureServiceTypes-provider">Provider</label>
+            <label for="editProvider" class="form-label" i18n="@@featureServiceTypes-provider">Providers</label>
             @if (providerDetailsLoading$ | async) {
               <div class="form-control-plaintext text-body-secondary" i18n="@@featureServiceTypes-loadingProviders">
                 Loading providers...
@@ -386,22 +426,34 @@
                     id="editProvider"
                     name="provider"
                     class="form-select"
-                    [(ngModel)]="editForm.provider"
-                    (ngModelChange)="onEditProviderChange()"
+                    multiple
+                    size="6"
+                    [ngModel]="editSelectedProviders"
+                    (ngModelChange)="onProvidersSelectionChange('edit', $event, providers)"
+                    [compareWith]="compareProviderId"
                     [disabled]="(updating$ | async) === true"
                   >
-                    <option value="" i18n="@@featureServiceTypes-chooseProvider">Choose a provider</option>
+                    <option [ngValue]="noneProviderValue" i18n="@@featureServiceTypes-noneProvider">None</option>
                     @for (p of providers; track p.id) {
-                      <option [value]="p.id">{{ p.displayName }}</option>
+                      <option [ngValue]="p.id" [disabled]="isProviderOptionDisabled('edit', p, providers)">
+                        {{ p.displayName }}
+                      </option>
                     }
                   </select>
+                  <div class="form-text text-body-secondary small" i18n="@@featureServiceTypes-providersMultiHelp">
+                    Hold Ctrl/Cmd to select multiple compatible providers. First selected is primary. Choose None for no
+                    cloud provider.
+                  </div>
                 } @else {
                   <input
                     type="text"
                     class="form-control"
                     id="editProvider"
-                    name="provider"
-                    [(ngModel)]="editForm.provider"
+                    name="providerManual"
+                    [ngModel]="editForm.provider ?? ''"
+                    (ngModelChange)="
+                      onProvidersSelectionChange('edit', $event?.trim() ? [$event.trim()] : [], providers)
+                    "
                     [disabled]="(updating$ | async) === true"
                     i18n-placeholder="@@featureServiceTypes-providerPlaceholder"
                     placeholder="e.g. hetzner"
@@ -414,7 +466,7 @@
             }
           </div>
           @if (providerDetails$ | async; as providers) {
-            @if (hasProviderDefaultsSection(editForm.provider, providers)) {
+            @if (hasProviderDefaultsSection('edit', providers)) {
               <div class="mb-3 border rounded p-3 bg-body-secondary">
                 <div class="d-flex justify-content-between align-items-center gap-2">
                   <h6 class="mb-0" i18n="@@featureServiceTypes-providerDefaults">Provider defaults</h6>
@@ -452,26 +504,64 @@
                     Overrides platform environment variables for this service type. Leave blank to use the environment
                     default.
                   </p>
-                  @for (field of getProviderEnvDefaultFields(editForm.provider, providers); track field.envKey) {
-                    <div class="mb-3">
-                      <label [attr.for]="'editProviderDefault_' + field.envKey" class="form-label">{{
-                        field.label
-                      }}</label>
-                      <input
-                        [type]="field.sensitive ? 'password' : 'text'"
-                        class="form-control"
-                        [id]="'editProviderDefault_' + field.envKey"
-                        [name]="'editProviderDefault_' + field.envKey"
-                        [ngModel]="getProviderDefaultValue('edit', field.envKey)"
-                        (ngModelChange)="setProviderDefaultValue('edit', field.envKey, $event)"
-                        [disabled]="(updating$ | async) === true"
-                        [placeholder]="
-                          isProviderDefaultConfigured('edit', field.envKey)
-                            ? 'Override configured — leave blank to clear'
-                            : 'Using environment default'
-                        "
-                      />
-                    </div>
+                  @if (getProviderDefaultsGroups('edit', providers); as groups) {
+                    @if (groups.length > 1) {
+                      @for (group of groups; track group.providerId) {
+                        <div class="border rounded p-3 mb-3">
+                          <div
+                            class="form-text text-body-secondary small mb-2 mt-0"
+                            i18n="@@featureServiceTypes-providerDefaultsGroupIntro"
+                          >
+                            Defaults for {{ group.label }}
+                          </div>
+                          @for (field of group.fields; track field.envKey) {
+                            <div class="mb-3">
+                              <label
+                                [attr.for]="'editProviderDefault_' + group.providerId + '_' + field.envKey"
+                                class="form-label"
+                                >{{ field.label }}</label
+                              >
+                              <input
+                                [type]="field.sensitive ? 'password' : 'text'"
+                                class="form-control"
+                                [id]="'editProviderDefault_' + group.providerId + '_' + field.envKey"
+                                [name]="'editProviderDefault_' + group.providerId + '_' + field.envKey"
+                                [ngModel]="getProviderDefaultValue('edit', field.envKey)"
+                                (ngModelChange)="setProviderDefaultValue('edit', field.envKey, $event)"
+                                [disabled]="(updating$ | async) === true"
+                                [placeholder]="
+                                  isProviderDefaultConfigured('edit', field.envKey)
+                                    ? 'Override configured — leave blank to clear'
+                                    : 'Using environment default'
+                                "
+                              />
+                            </div>
+                          }
+                        </div>
+                      }
+                    } @else {
+                      @for (field of getSelectedProvidersEnvDefaultFields('edit', providers); track field.envKey) {
+                        <div class="mb-3">
+                          <label [attr.for]="'editProviderDefault_' + field.envKey" class="form-label">{{
+                            field.label
+                          }}</label>
+                          <input
+                            [type]="field.sensitive ? 'password' : 'text'"
+                            class="form-control"
+                            [id]="'editProviderDefault_' + field.envKey"
+                            [name]="'editProviderDefault_' + field.envKey"
+                            [ngModel]="getProviderDefaultValue('edit', field.envKey)"
+                            (ngModelChange)="setProviderDefaultValue('edit', field.envKey, $event)"
+                            [disabled]="(updating$ | async) === true"
+                            [placeholder]="
+                              isProviderDefaultConfigured('edit', field.envKey)
+                                ? 'Override configured — leave blank to clear'
+                                : 'Using environment default'
+                            "
+                          />
+                        </div>
+                      }
+                    }
                   }
                 </div>
               </div>
@@ -483,7 +573,7 @@
               context: {
                 mode: 'edit',
                 disabled: (updating$ | async) === true,
-                providerId: editForm.provider,
+                providerId: primaryProviderId('edit'),
               }
             "
           />

@@ -137,6 +137,51 @@ describe('PricingController', () => {
     expect(result.taxCategory).toBe('standard');
   });
 
+  it('resolves catalog price from requested provider when customer provider selection is enabled', async () => {
+    findPlanById.mockResolvedValue({
+      ...planRow,
+      allowCustomerServerTypeSelection: true,
+      allowCustomerProviderSelection: true,
+      allowedServerTypes: ['cx11', 's-1vcpu-1gb'],
+      allowedProviders: ['hetzner', 'digital-ocean'],
+      providerConfigDefaults: { serverType: 'cx11' },
+    });
+    findServiceTypeById.mockResolvedValue({
+      id: '22222222-2222-4222-8222-222222222222',
+      provider: 'hetzner',
+      allowedProviders: ['hetzner', 'digital-ocean'],
+      providerDefaults: {
+        HETZNER_API_TOKEN: 'tenant-token',
+        DIGITALOCEAN_API_TOKEN: 'do-token',
+      },
+    });
+    getServerTypes.mockImplementation(async (providerId: string) => {
+      if (providerId === 'digital-ocean') {
+        return [{ id: 's-1vcpu-1gb', priceMonthly: 6 }];
+      }
+
+      return [
+        { id: 'cx11', priceMonthly: 4.15 },
+        { id: 'cpx11', priceMonthly: 6.49 },
+      ];
+    });
+
+    const result = await controller.preview(
+      {
+        planId: planRow.id,
+        requestedConfig: { provider: 'digital-ocean', serverType: 's-1vcpu-1gb' },
+      },
+      authReq as never,
+    );
+
+    expect(getServerTypes).toHaveBeenCalledWith('digital-ocean', {
+      HETZNER_API_TOKEN: 'tenant-token',
+      DIGITALOCEAN_API_TOKEN: 'do-token',
+    });
+    expect(calculate).toHaveBeenCalledWith(expect.objectContaining({ allowCustomerProviderSelection: true }), 6);
+    expect(result.totalPrice).toBe(6);
+  });
+
   it('ignores provisioning default server type when customer selection is disabled', async () => {
     findPlanById.mockResolvedValue({
       ...planRow,
