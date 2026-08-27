@@ -207,6 +207,69 @@
       ],
       "@forepath/shared/frontend/ui-lists": [
         "libs/domains/shared/frontend/ui-lists/src/index.ts"
+      ],
+      "@forepath/loadweaver/keycloak": [
+        "libs/domains/loadweaver/keycloak/index.ts"
+      ],
+      "@forepath/loadweaver/shared": [
+        "libs/domains/loadweaver/shared/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli": [
+        "libs/domains/loadweaver/shared/feature-cli/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli/program": [
+        "libs/domains/loadweaver/shared/feature-cli/src/lib/program.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-cluster": [
+        "libs/domains/loadweaver/shared/feature-cli-cluster/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-node": [
+        "libs/domains/loadweaver/shared/feature-cli-node/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-wireguard": [
+        "libs/domains/loadweaver/shared/feature-cli-wireguard/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-swarm": [
+        "libs/domains/loadweaver/shared/feature-cli-swarm/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-ceph": [
+        "libs/domains/loadweaver/shared/feature-cli-ceph/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-volume": [
+        "libs/domains/loadweaver/shared/feature-cli-volume/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-traefik": [
+        "libs/domains/loadweaver/shared/feature-cli-traefik/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-vip": [
+        "libs/domains/loadweaver/shared/feature-cli-vip/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-ssh": [
+        "libs/domains/loadweaver/shared/feature-cli-ssh/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-routing": [
+        "libs/domains/loadweaver/shared/feature-cli-routing/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-host": [
+        "libs/domains/loadweaver/shared/feature-cli-host/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/feature-cli-diag": [
+        "libs/domains/loadweaver/shared/feature-cli-diag/src/index.ts"
+      ],
+      "@forepath/shared/shared/util-shell-executor": [
+        "libs/domains/shared/shared/util-shell-executor/src/index.ts"
+      ],
+      "@forepath/shared/shared/util-ssh": [
+        "libs/domains/shared/shared/util-ssh/src/index.ts"
+      ],
+      "@forepath/shared/shared/util-config-loader": [
+        "libs/domains/shared/shared/util-config-loader/src/index.ts"
+      ],
+      "@forepath/shared/shared/util-logger": [
+        "libs/domains/shared/shared/util-logger/src/index.ts"
+      ],
+      "@forepath/loadweaver/shared/util-cli-core": [
+        "libs/domains/loadweaver/shared/util-cli-core/src/index.ts"
       ]
     }
   },

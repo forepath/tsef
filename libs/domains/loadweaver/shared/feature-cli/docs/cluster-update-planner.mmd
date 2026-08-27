@@ -1,0 +1,33 @@
+flowchart TD
+    Start["cluster update"] --> LoadState["load state.json previous"]
+    LoadState --> Plan["planClusterUpdate previous config"]
+    Plan --> Added{"Nodes added?"}
+    Added -->|yes| Bootstrap["host.bootstrap per node"]
+    Bootstrap --> WgReconcile["wireguard.reconcile + add-peer"]
+    WgReconcile --> SwarmJoin["swarm.join + ceph.mount"]
+    Added -->|no| Removed{"Nodes removed with --yes?"}
+    Removed -->|yes| Leave["node.leave + wireguard.remove-peer"]
+    Removed -->|no| TraefikChg{"Traefik image/mode/acme changed?"}
+    TraefikChg -->|yes| TraefikUpd["traefik.update"]
+    TraefikChg -->|no| VipChg{"VIP added or removed?"}
+    VipChg -->|added| VipInit["vip.init"]
+    VipChg -->|removed| VipDestroy["vip.destroy"]
+    VipChg -->|unchanged| RouteChg{"Routing config changed?"}
+    RouteChg -->|"newly enabled"| RouteInit["routing.init"]
+    RouteChg -->|"disabled"| RouteDestroy["routing.destroy"]
+    RouteChg -->|"hubs peers ASN CIDR"| RouteReconcile["routing.reconcile"]
+    RouteChg -->|no| LabelChg{"Swarm labels changed?"}
+    LabelChg -->|yes| LabelRec["swarm.reconcile-labels"]
+    LabelChg -->|no| Volumes{"New volumes/networks?"}
+    Volumes --> VolNet["volume.create / swarm.network.create"]
+    Volumes --> Done["noop or persist state"]
+    LabelRec --> Done
+    VolNet --> Done
+    RouteInit --> Done
+    RouteReconcile --> Done
+    RouteDestroy --> Done
+    VipInit --> Done
+    VipDestroy --> Done
+    TraefikUpd --> Done
+    Leave --> Done
+    SwarmJoin --> Done

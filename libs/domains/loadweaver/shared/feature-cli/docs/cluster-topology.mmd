@@ -1,0 +1,80 @@
+flowchart TB
+    subgraph External["External"]
+        Users["Users / clients"]
+        Acme["ACME CA"]
+    end
+
+    subgraph SiteA["Site A"]
+        HubA1["node-a1\nmanager + Ceph MON/MDS\nrouting hub optional"]
+        WorkerA2["node-a2\nworker + OSD"]
+        WorkerA3["node-a3\nworker + OSD"]
+    end
+
+    subgraph SiteB["Site B"]
+        HubB1["node-b1\nmanager + Ceph MON/MDS\nrouting hub optional"]
+        WorkerB2["node-b2\nworker + OSD"]
+        WorkerB3["node-b3\nworker + OSD"]
+    end
+
+    subgraph WgMesh["WireGuard wg0 full mesh all nodes"]
+        WgA1["10.200.0.1"]
+        WgA2["10.200.0.2"]
+        WgA3["10.200.0.3"]
+        WgB1["10.200.0.4"]
+        WgB2["10.200.0.5"]
+        WgB3["10.200.0.6"]
+    end
+
+    subgraph SwarmCluster["Single Docker Swarm cluster"]
+        SwarmCtrl["Managers: a1, b1"]
+        SwarmOvl["Overlay networks e.g. traefik-public"]
+        Traefik["Traefik global on every node"]
+    end
+
+    subgraph CephCluster["Single Ceph cluster"]
+        CephMon["MON quorum"]
+        CephMds["MDS + CephFS"]
+        CephOsd["OSDs on all nodes"]
+    end
+
+    subgraph VipLayer["Optional VIP keepalived"]
+        FloatIp["Floating IP"]
+    end
+
+    subgraph RoutingLayer["Optional BIRD on hub nodes only"]
+        BirdA1["BIRD node-a1"]
+        BirdB1["BIRD node-b1"]
+    end
+
+    Users --> FloatIp
+    FloatIp --> Traefik
+    Acme --> Traefik
+
+    HubA1 --- WgA1
+    WorkerA2 --- WgA2
+    WorkerA3 --- WgA3
+    HubB1 --- WgB1
+    WorkerB2 --- WgB2
+    WorkerB3 --- WgB3
+
+    WgA1 --- WgA2
+    WgA1 --- WgA3
+    WgA1 --- WgB1
+    WgA2 --- WgB2
+    WgB1 --- WgB3
+
+    HubA1 --> SwarmCtrl
+    HubB1 --> SwarmCtrl
+    WorkerA2 --> SwarmOvl
+    WorkerB3 --> SwarmOvl
+    Traefik --> SwarmOvl
+
+    CephOsd --> CephMon
+    CephMds --> CephMon
+    HubA1 --> CephMon
+    HubB1 --> CephMon
+    Traefik --> CephMds
+
+    HubA1 --> BirdA1
+    HubB1 --> BirdB1
+    BirdA1 <-->|"iBGP same ASN optional"| BirdB1

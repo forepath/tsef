@@ -1,0 +1,30 @@
+flowchart TB
+    subgraph ClusterA["Cluster A loadweaver.yml localAsn 64512"]
+        AHub["Hub node-a1 BIRD"]
+        AWg0["wg0 mesh 10.200.0.0/24"]
+        ASwarm["Swarm + Ceph + Traefik"]
+        AHub --- AWg0
+        AWg0 --- ASwarm
+    end
+
+    subgraph ClusterB["Cluster B loadweaver.yml localAsn 64513"]
+        BHub["Hub node-b1 BIRD"]
+        BWg0["wg0 mesh 10.201.0.0/24"]
+        BSwarm["Swarm + Ceph + Traefik"]
+        BHub --- BWg0
+        BWg0 --- BSwarm
+    end
+
+    subgraph CrossLink["Optional hub-only cross-cluster link"]
+        Wg1A["wg1 on cluster A hub"]
+        Wg1B["wg1 on cluster B hub"]
+        Wg1A <-->|"WireGuard tunnel"| Wg1B
+    end
+
+    AHub <-->|"eBGP export cluster CIDR"| BHub
+    AHub --> Wg1A
+    BHub --> Wg1B
+
+    WorkersNote["Workers stay on local wg0 mesh only"]
+    WorkersNote --- AWg0
+    WorkersNote --- BWg0

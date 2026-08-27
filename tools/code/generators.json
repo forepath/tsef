@@ -30,6 +30,11 @@
       "schema": "./src/generators/mcp/schema.json",
       "description": "mcp generator"
     },
+    "cli": {
+      "factory": "./src/generators/cli/cli.ts",
+      "schema": "./src/generators/cli/schema.json",
+      "description": "cli generator"
+    },
     "native": {
       "factory": "./src/generators/native/native.ts",
       "schema": "./src/generators/native/schema.json",

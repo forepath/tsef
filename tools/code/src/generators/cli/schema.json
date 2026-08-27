@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "Cli",
+  "title": "CLI Application Generator",
+  "description": "Nx generator for creating a new domain CLI application",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "CLI name without the cli- prefix",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use?"
+    },
+    "domain": {
+      "type": "string",
+      "default": "loadweaver",
+      "description": "Product domain folder and Nx project name prefix",
+      "x-prompt": "Which domain should this app belong to?"
+    },
+    "featureLibImport": {
+      "type": "string",
+      "default": "@forepath/loadweaver/shared/feature-cli/program",
+      "description": "Import path for the createProgram export from the feature CLI library"
+    }
+  },
+  "required": ["name"]
+}

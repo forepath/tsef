@@ -1,0 +1,48 @@
+flowchart TB
+    subgraph LayerHost["Host L3 public / private NICs"]
+        PublicNic["publicIp e.g. SSH endpoint"]
+        PrivateNic["privateIp optional"]
+    end
+
+    subgraph LayerWg0["WireGuard wg0 all nodes always"]
+        Wg0Mesh["Full mesh peers\nstatic AllowedIPs /32"]
+        Wg0Addr["wireguardIp per node"]
+    end
+
+    subgraph LayerRouting["Optional routing.enabled"]
+        BirdHub["BIRD2 on hub nodes only"]
+        Wg1["wg1 cross-cluster tunnel hubs only"]
+        BgpIbgp["iBGP between site hubs"]
+        BgpEbgp["eBGP to remote cluster hubs"]
+    end
+
+    subgraph LayerSwarm["Docker Swarm"]
+        SwarmAdv["advertiseInterface wg0"]
+        Vxlan["VXLAN overlay networks"]
+    end
+
+    subgraph LayerApps["Services"]
+        TraefikIng["Traefik ingress"]
+        UserStacks["User stacks on CephFS volumes"]
+    end
+
+    subgraph LayerVip["Optional vip"]
+        Keepalived["keepalived VRRP"]
+        FloatIp["Floating VIP"]
+    end
+
+    PublicNic --> Wg0Mesh
+    PrivateNic --> Wg0Mesh
+    Wg0Mesh --> Wg0Addr
+    Wg0Addr --> SwarmAdv
+    SwarmAdv --> Vxlan
+    Vxlan --> TraefikIng
+    Vxlan --> UserStacks
+
+    Wg0Addr --> BirdHub
+    BirdHub --> BgpIbgp
+    BirdHub --> BgpEbgp
+    BgpEbgp --> Wg1
+
+    Keepalived --> FloatIp
+    FloatIp --> TraefikIng
