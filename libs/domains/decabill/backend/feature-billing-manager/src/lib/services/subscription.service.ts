@@ -168,16 +168,20 @@ export class SubscriptionService {
 
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
     const selectedAddonIds = mergeOrderAddonIds(addonIds, plan.providerConfigDefaults);
-
-    assertAddonConfigsMatchSelection(selectedAddonIds, addonConfigs);
-
-    const selectedAddons = await this.addonService.assertAddonIdsForOrder(
+    const { compatible: selectedAddons } = await this.addonService.resolveOrderAddonSelection(
       plan.serviceTypeId,
       parsePlanAllowedAddonIds(plan.providerConfigDefaults),
       selectedAddonIds,
       requestedConfig,
       plan,
     );
+    const compatibleAddonIds = new Set(selectedAddons.map((addon) => addon.id));
+    const filteredAddonConfigs =
+      addonConfigs == null
+        ? undefined
+        : Object.fromEntries(Object.entries(addonConfigs).filter(([addonId]) => compatibleAddonIds.has(addonId)));
+
+    assertAddonConfigsMatchSelection([...compatibleAddonIds], filteredAddonConfigs);
     const allowCustomerLocationSelection = plan.allowCustomerLocationSelection === true;
     const allowCustomerServerTypeSelection = plan.allowCustomerServerTypeSelection === true;
     const allowCustomerProviderSelection = plan.allowCustomerProviderSelection === true;
@@ -373,7 +377,7 @@ export class SubscriptionService {
       subscriptionId: subscription.id,
       addons: selectedAddons,
       plan,
-      addonConfigs,
+      addonConfigs: filteredAddonConfigs,
     });
 
     if (promotionCode?.trim()) {

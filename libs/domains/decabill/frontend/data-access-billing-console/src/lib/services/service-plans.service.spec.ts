@@ -222,6 +222,14 @@ describe('ServicePlansService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(options);
     });
+
+    it('should pass provider query param when provided', (done) => {
+      service.getOrderAddons('sp-1', 'digital-ocean').subscribe(() => done());
+
+      const req = httpMock.expectOne(`${apiUrl}/service-plans/sp-1/addons?provider=digital-ocean`);
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
   });
 
   describe('plan meters', () => {

@@ -108,6 +108,9 @@ describe('SubscriptionConfigChangeService', () => {
     });
     providerServerTypesService.getServerTypes.mockResolvedValue(SERVER_TYPES);
     addonService.providerSupportsAddons.mockReturnValue(true);
+    addonsRepository.findByIds.mockResolvedValue([
+      { id: 'addon-1', key: 'backup', isActive: true, compatibleProviders: ['hetzner'] },
+    ]);
   });
 
   it('getEligibility reports the current server type and plan addon offering', async () => {
@@ -121,6 +124,28 @@ describe('SubscriptionConfigChangeService', () => {
     expect(eligibility.allowedServerTypes).toEqual(['cx11', 'cx21', 'cpx11']);
     expect(eligibility.availableAddonIds).toEqual(['addon-1']);
     expect(eligibility.activeAddonIds).toEqual(['addon-2']);
+  });
+
+  it('getEligibility excludes addons incompatible with the subscription provider', async () => {
+    servicePlansRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'plan-1',
+      basePrice: '0',
+      marginPercent: '0',
+      marginFixed: '0',
+      billingIntervalType: BillingIntervalType.MONTH,
+      billingIntervalValue: 1,
+      allowCustomerServerTypeSelection: true,
+      allowedServerTypes: ['cx11', 'cx21', 'cpx11'],
+      providerConfigDefaults: { allowedAddonIds: ['addon-1', 'addon-do'] },
+    });
+    addonsRepository.findByIds.mockResolvedValue([
+      { id: 'addon-1', key: 'backup', isActive: true, compatibleProviders: ['hetzner'] },
+      { id: 'addon-do', key: 'do-only', isActive: true, compatibleProviders: ['digital-ocean'] },
+    ]);
+
+    const eligibility = await service.getEligibility('sub-1', 'user-1');
+
+    expect(eligibility.availableAddonIds).toEqual(['addon-1']);
   });
 
   it('getEligibility prefers configSnapshot.provider over service type primary', async () => {
@@ -347,33 +372,57 @@ describe('SubscriptionConfigChangeService', () => {
   });
 
   it('rejects inactive or incompatible addons', async () => {
-    addonsRepository.findByIds.mockResolvedValueOnce([
-      {
-        id: 'addon-1',
-        key: 'backup',
-        isActive: false,
-        compatibleProviders: ['hetzner'],
-        basePrice: '2',
-        priceIntervalType: BillingIntervalType.MONTH,
-        priceIntervalValue: 1,
-      },
-    ]);
+    addonsRepository.findByIds
+      .mockResolvedValueOnce([
+        {
+          id: 'addon-1',
+          key: 'backup',
+          isActive: false,
+          compatibleProviders: ['hetzner'],
+          basePrice: '2',
+          priceIntervalType: BillingIntervalType.MONTH,
+          priceIntervalValue: 1,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'addon-1',
+          key: 'backup',
+          isActive: false,
+          compatibleProviders: ['hetzner'],
+          basePrice: '2',
+          priceIntervalType: BillingIntervalType.MONTH,
+          priceIntervalValue: 1,
+        },
+      ]);
 
     const inactive = await service.preview('sub-1', 'user-1', { addAddonIds: ['addon-1'] }).catch((caught) => caught);
 
     expect(extractErrorCode(inactive)).toBe('CONFIG_CHANGE_ADDON_INVALID');
 
-    addonsRepository.findByIds.mockResolvedValueOnce([
-      {
-        id: 'addon-1',
-        key: 'backup',
-        isActive: true,
-        compatibleProviders: ['digital-ocean'],
-        basePrice: '2',
-        priceIntervalType: BillingIntervalType.MONTH,
-        priceIntervalValue: 1,
-      },
-    ]);
+    addonsRepository.findByIds
+      .mockResolvedValueOnce([
+        {
+          id: 'addon-1',
+          key: 'backup',
+          isActive: true,
+          compatibleProviders: ['digital-ocean'],
+          basePrice: '2',
+          priceIntervalType: BillingIntervalType.MONTH,
+          priceIntervalValue: 1,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'addon-1',
+          key: 'backup',
+          isActive: true,
+          compatibleProviders: ['digital-ocean'],
+          basePrice: '2',
+          priceIntervalType: BillingIntervalType.MONTH,
+          priceIntervalValue: 1,
+        },
+      ]);
 
     const incompatible = await service
       .preview('sub-1', 'user-1', { addAddonIds: ['addon-1'] })

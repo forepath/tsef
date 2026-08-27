@@ -159,6 +159,7 @@ describe('SubscriptionService', () => {
     processDueBilling: jest.fn(),
   };
   const addonService = {
+    resolveOrderAddonSelection: jest.fn().mockResolvedValue({ compatible: [], incompatible: [] }),
     assertAddonIdsForOrder: jest.fn().mockResolvedValue([]),
     providerSupportsAddons: jest.fn().mockReturnValue(true),
   };
@@ -929,6 +930,66 @@ describe('SubscriptionService', () => {
     });
 
     expect(availabilityService.checkAvailability).toHaveBeenCalledWith('hetzner', 'nbg1', 'cx23', {});
+  });
+
+  it('creates subscription with only provider-compatible addons', async () => {
+    const compatibleAddon = {
+      id: 'addon-1',
+      key: 'backup',
+      name: 'Backup',
+      isActive: true,
+      compatibleProviders: ['hetzner'],
+    };
+    plansRepository.findByIdOrThrow = jest.fn().mockResolvedValue({
+      id: 'plan-1',
+      serviceTypeId: 'stype-1',
+      billingIntervalType: BillingIntervalType.DAY,
+      billingIntervalValue: 1,
+      billingDayOfMonth: undefined,
+      providerConfigDefaults: {
+        ...controllerProvisioningDefaults,
+        allowedAddonIds: ['addon-1', 'addon-2'],
+      },
+    });
+    typesRepository.findByIdOrThrow = jest.fn().mockResolvedValue({
+      id: 'stype-1',
+      provider: 'hetzner',
+      configSchema: { required: ['location'] },
+    });
+    (addonService.resolveOrderAddonSelection as jest.Mock).mockResolvedValue({
+      compatible: [compatibleAddon],
+      incompatible: [
+        { id: 'addon-2', key: 'do-only', name: 'DO only', isActive: true, compatibleProviders: ['digital-ocean'] },
+      ],
+    });
+    subscriptionsRepository.create = jest.fn().mockResolvedValue({
+      id: 'sub-1',
+      userId: 'user-1',
+      planId: 'plan-1',
+      status: SubscriptionStatus.ACTIVE,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    itemsRepository.create = jest.fn().mockResolvedValue({ id: 'item-1' });
+    (availabilityService.checkAvailability as jest.Mock).mockResolvedValue({ isAvailable: true });
+
+    await service.createSubscription(
+      'user-1',
+      'plan-1',
+      { location: 'fsn1', serverType: 'cx23' },
+      true,
+      undefined,
+      undefined,
+      ['addon-1', 'addon-2'],
+      { 'addon-1': { KEY: 'a' }, 'addon-2': { KEY: 'b' } },
+    );
+
+    expect(addonLifecycleService.createPendingSubscriptionAddons).toHaveBeenCalledWith(
+      expect.objectContaining({
+        addons: [compatibleAddon],
+        addonConfigs: { 'addon-1': { KEY: 'a' } },
+      }),
+    );
   });
 
   it('throws BadRequestException when customer profile is null', async () => {

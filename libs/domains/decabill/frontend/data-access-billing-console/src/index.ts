@@ -19,6 +19,7 @@ export * from './lib/utils/service-display-label.util';
 export * from './lib/utils/fill-period-series.util';
 export * from './lib/utils/patch-subscription-item-display-name.util';
 export * from './lib/utils/merge-mandatory-order-addon-ids.util';
+export * from './lib/utils/addon-compatibility.utils';
 export * from './lib/utils/provider-selection.utils';
 // Constants
 export * from './lib/constants/supported-countries';

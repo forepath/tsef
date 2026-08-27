@@ -226,6 +226,34 @@ describe('AddonService', () => {
     ).rejects.toThrow(BadRequestException);
   });
 
+  it('partitions incompatible addons in resolveOrderAddonSelection without throwing', async () => {
+    const compatibleAddon = { id: 'addon-1', key: 'av', isActive: true, compatibleProviders: ['hetzner'] };
+    const incompatibleAddon = { id: 'addon-2', key: 'do-only', isActive: true, compatibleProviders: ['digital-ocean'] };
+    serviceTypesRepository.findByIdOrThrow.mockResolvedValue({
+      id: 'st-1',
+      provider: 'hetzner',
+      allowedProviders: ['hetzner', 'digital-ocean'],
+    });
+    providerRegistry.getProviders.mockReturnValue([
+      { id: 'hetzner', displayName: 'Hetzner', supportsAddons: true },
+      { id: 'digital-ocean', displayName: 'DigitalOcean', supportsAddons: true },
+    ]);
+    addonsRepository.findByIds.mockResolvedValue([compatibleAddon, incompatibleAddon]);
+
+    await expect(
+      service.resolveOrderAddonSelection(
+        'st-1',
+        ['addon-1', 'addon-2'],
+        ['addon-1', 'addon-2'],
+        { provider: 'hetzner' },
+        { allowCustomerProviderSelection: true, allowedProviders: ['hetzner', 'digital-ocean'] },
+      ),
+    ).resolves.toEqual({
+      compatible: [compatibleAddon],
+      incompatible: [incompatibleAddon],
+    });
+  });
+
   it('uses pinned plan provider for order addon checks when customer selection is off', async () => {
     const addon = { id: 'addon-1', key: 'av', isActive: true, compatibleProviders: ['digital-ocean'] };
     serviceTypesRepository.findByIdOrThrow.mockResolvedValue({

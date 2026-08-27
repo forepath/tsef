@@ -16,6 +16,7 @@ import {
   sanitizeAddonConfigFields,
   type SanitizedAddonConfigResult,
 } from '../utils/addon-config.utils';
+import { partitionAddonsByProviderCompatibility } from '../utils/addon-compatibility.utils';
 import { assertNonNegativeAddonPrice } from '../utils/addon-pricing.util';
 import { parsePlanMandatoryAddonIds, planReferencesAddonId } from '../utils/plan-addons.utils';
 import { resolveEffectiveProvider, resolveServiceTypeAllowedProviders } from '../utils/provider-selection.utils';
@@ -23,6 +24,11 @@ import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { ProviderRegistryService } from './provider-registry.service';
 
 const SERVICE_PLAN_REFERENCE_BATCH_SIZE = 100;
+
+export interface OrderAddonSelectionResolution {
+  compatible: AddonEntity[];
+  incompatible: AddonEntity[];
+}
 
 @Injectable()
 export class AddonService {
@@ -215,6 +221,33 @@ export class AddonService {
     }
   }
 
+  async resolveOrderAddonSelection(
+    serviceTypeId: string,
+    planAllowedAddonIds: string[],
+    requestedAddonIds: string[],
+    requestedConfig?: Record<string, unknown>,
+    plan?: {
+      allowCustomerProviderSelection?: boolean | null;
+      allowedProviders?: string[] | null;
+    },
+  ): Promise<OrderAddonSelectionResolution> {
+    if (requestedAddonIds.length === 0) {
+      return { compatible: [], incompatible: [] };
+    }
+
+    const addons = await this.loadValidatedOrderAddons(
+      serviceTypeId,
+      planAllowedAddonIds,
+      requestedAddonIds,
+      requestedConfig,
+      plan,
+    );
+    const providerToCheck = await this.resolveOrderAddonProvider(serviceTypeId, requestedConfig, plan);
+    const { compatible, incompatible } = partitionAddonsByProviderCompatibility(addons, providerToCheck);
+
+    return { compatible, incompatible };
+  }
+
   async assertAddonIdsForOrder(
     serviceTypeId: string,
     planAllowedAddonIds: string[],
@@ -225,15 +258,53 @@ export class AddonService {
       allowedProviders?: string[] | null;
     },
   ): Promise<AddonEntity[]> {
-    if (requestedAddonIds.length === 0) {
-      return [];
+    const { compatible, incompatible } = await this.resolveOrderAddonSelection(
+      serviceTypeId,
+      planAllowedAddonIds,
+      requestedAddonIds,
+      requestedConfig,
+      plan,
+    );
+
+    if (incompatible.length > 0) {
+      const providerToCheck = await this.resolveOrderAddonProvider(serviceTypeId, requestedConfig, plan);
+
+      throw new BadRequestException(
+        `Addon "${incompatible[0].key}" is not compatible with provider "${providerToCheck ?? 'none'}"`,
+      );
     }
 
+    return compatible;
+  }
+
+  private async resolveOrderAddonProvider(
+    serviceTypeId: string,
+    requestedConfig?: Record<string, unknown>,
+    plan?: {
+      allowCustomerProviderSelection?: boolean | null;
+      allowedProviders?: string[] | null;
+    },
+  ): Promise<string | null> {
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(serviceTypeId);
-    const providerToCheck =
+
+    return (
       resolveEffectiveProvider(serviceType, plan ?? {}, requestedConfig) ??
       resolveServiceTypeAllowedProviders(serviceType)[0] ??
-      null;
+      null
+    );
+  }
+
+  private async loadValidatedOrderAddons(
+    serviceTypeId: string,
+    planAllowedAddonIds: string[],
+    requestedAddonIds: string[],
+    requestedConfig?: Record<string, unknown>,
+    plan?: {
+      allowCustomerProviderSelection?: boolean | null;
+      allowedProviders?: string[] | null;
+    },
+  ): Promise<AddonEntity[]> {
+    const providerToCheck = await this.resolveOrderAddonProvider(serviceTypeId, requestedConfig, plan);
 
     if (!this.providerSupportsAddons(providerToCheck)) {
       throw new BadRequestException(`Provider "${providerToCheck ?? 'none'}" does not support addons`);
@@ -256,14 +327,6 @@ export class AddonService {
     for (const addon of addons) {
       if (!addon.isActive) {
         throw new BadRequestException(`Addon "${addon.key}" is not active`);
-      }
-
-      if (
-        providerToCheck &&
-        addon.compatibleProviders.length > 0 &&
-        !addon.compatibleProviders.includes(providerToCheck)
-      ) {
-        throw new BadRequestException(`Addon "${addon.key}" is not compatible with provider "${providerToCheck}"`);
       }
     }
 

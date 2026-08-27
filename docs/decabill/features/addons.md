@@ -84,6 +84,8 @@ Delete/deactivate of a catalog addon is blocked while active plans reference it,
 
 On order create and mid-life addon add, the server merges client `addonIds` with plan `mandatoryAddonIds` (`mergeOrderAddonIds`): mandatory IDs are always included first regardless of the client payload. Clients cannot omit a mandatory addon.
 
+When the effective provider (from customer selection or plan pin) is incompatible with a selected addon, pricing preview marks the line with `invalid: true`, excludes it from totals, and order create silently omits that addon. Mandatory addons incompatible with the chosen provider are omitted as well — operators should avoid configuring plans where a mandatory addon only supports a subset of allowed providers.
+
 ### Integrated stack auto-mandatory
 
 Plans that offer at least one **integrated** (Docker-host) provisioning option automatically ensure the first-party **Container Manager** catalog addon (`key` / `moduleKey`: `container-manager`) is present in both `allowedAddonIds` and `mandatoryAddonIds`. Custom-only plans are left unchanged. See [Container Manager](./container-manager.md).
@@ -130,11 +132,11 @@ Addon responses embed attached meters (optional unit-price override). Module add
 
 ## Customer API
 
-| Method | Path                         | Purpose                                                     |
-| ------ | ---------------------------- | ----------------------------------------------------------- |
-| GET    | `/service-plans/{id}/addons` | Orderable addons (`orderFields` included; no secret values) |
-| POST   | `/pricing/preview`           | Include `addonIds` for live totals                          |
-| POST   | `/subscriptions`             | Include `addonIds` + optional `addonConfigs`                |
+| Method | Path                         | Purpose                                                                                                            |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/service-plans/{id}/addons` | Orderable addons (`orderFields` included; no secret values). Optional `?provider=` filters by compatibility.       |
+| POST   | `/pricing/preview`           | Include `addonIds` for live totals; incompatible addons return `addonLines[].invalid` and are excluded from totals |
+| POST   | `/subscriptions`             | Include `addonIds` + optional `addonConfigs`; incompatible addons are omitted server-side                          |
 
 ## Notifications
 

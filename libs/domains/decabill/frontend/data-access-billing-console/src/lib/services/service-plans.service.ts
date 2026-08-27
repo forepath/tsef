@@ -67,8 +67,10 @@ export class ServicePlansService {
     );
   }
 
-  getOrderAddons(planId: string): Observable<PlanAddonOptionDto[]> {
-    return this.http.get<PlanAddonOptionDto[]>(`${this.apiUrl}/service-plans/${planId}/addons`);
+  getOrderAddons(planId: string, provider?: string): Observable<PlanAddonOptionDto[]> {
+    const params = provider?.trim() ? { provider: provider.trim() } : undefined;
+
+    return this.http.get<PlanAddonOptionDto[]>(`${this.apiUrl}/service-plans/${planId}/addons`, { params });
   }
 
   getCloudInitOrderFields(planId: string, configId: string): Observable<CloudInitConfigOrderField[]> {
