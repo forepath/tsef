@@ -1,0 +1,16 @@
+{
+  "name": "shared-shared-util-config-loader",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domains/shared/shared/util-config-loader/src",
+  "projectType": "library",
+  "tags": ["domain:shared", "scope:shared", "type:util"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/domains/shared/shared/util-config-loader/jest.config.cts"
+      }
+    }
+  }
+}

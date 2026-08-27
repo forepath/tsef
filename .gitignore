@@ -84,3 +84,4 @@ opencode.json
 
 # Environment variables
 *.env
+loadweaver.yml

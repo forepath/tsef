@@ -1,0 +1,29 @@
+flowchart LR
+    subgraph Default["Default routing.enabled false"]
+        DWorkers["All nodes"]
+        DWg0["wg0 static mesh routes"]
+        DWorkers --> DWg0
+    end
+
+    subgraph Enabled["routing.enabled true"]
+        Hubs["Hub nodes\nexplicit hubNodes or first manager per site\nSwarm label loadweaver.role.router"]
+        Workers["Non-hub nodes\nno BIRD package"]
+        Bird["BIRD2 bird.conf"]
+        Kernel["kernel + direct protocols"]
+        StaticRt["static export cluster CIDR optional"]
+        Ibgp["BGP iBGP hub to hub same localAsn"]
+        Ebgp["BGP eBGP routing.peers\nedge peering not OSPF IGP"]
+        Wg1["wg1 optional per peer.wireguardPeer"]
+
+        Hubs --> Bird
+        Bird --> Kernel
+        Bird --> StaticRt
+        Bird --> Ibgp
+        Bird --> Ebgp
+        Ebgp --> Wg1
+        Workers --> DWg0
+        Hubs --> DWg0
+    end
+
+    Config["loadweaver.yml routing block"] --> Enabled
+    Config --> Default

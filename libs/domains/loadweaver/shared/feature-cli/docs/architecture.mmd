@@ -1,0 +1,94 @@
+flowchart TB
+    subgraph External["External"]
+        Users["Users / clients"]
+        Acme["ACME CA"]
+    end
+
+    subgraph Operator["Operator workstation"]
+        CLI["loadweaver CLI"]
+        Config["loadweaver.yml"]
+        Workspace[".loadweaver/ state locks keys"]
+    end
+
+    subgraph SiteA["Site A"]
+        HubA1["node-a1 manager Ceph MON/MDS\noptional routing hub + BIRD"]
+        WorkerA2["node-a2 worker OSD"]
+        WorkerA3["node-a3 worker OSD"]
+    end
+
+    subgraph SiteB["Site B"]
+        HubB1["node-b1 manager Ceph MON/MDS\noptional routing hub + BIRD"]
+        WorkerB2["node-b2 worker OSD"]
+        WorkerB3["node-b3 worker OSD"]
+    end
+
+    subgraph WgMesh["WireGuard wg0 full mesh all nodes"]
+        WgA1["10.200.0.1"]
+        WgA2["10.200.0.2"]
+        WgA3["10.200.0.3"]
+        WgB1["10.200.0.4"]
+        WgB2["10.200.0.5"]
+        WgB3["10.200.0.6"]
+    end
+
+    subgraph SwarmCluster["Single Docker Swarm"]
+        SwarmCtrl["Manager quorum"]
+        Overlay["Overlay networks"]
+        Traefik["Traefik global every node"]
+    end
+
+    subgraph CephCluster["Single Ceph cluster"]
+        CephMon["MON quorum"]
+        CephMds["MDS + CephFS shared storage"]
+        CephOsd["OSDs all nodes"]
+    end
+
+    subgraph VipLayer["Optional VIP keepalived"]
+        FloatIp["Floating IP"]
+    end
+
+    subgraph RoutingOptional["Optional routing.enabled hub nodes only"]
+        BirdHubs["BIRD iBGP between hubs"]
+        RemotePeer["eBGP to remote clusters optional wg1"]
+    end
+
+    CLI --> Config
+    CLI --> Workspace
+    CLI -->|"SSH converge"| HubA1
+    CLI --> WorkerA2
+    CLI --> HubB1
+
+    Users --> FloatIp
+    FloatIp --> Traefik
+    Acme --> Traefik
+
+    HubA1 --- WgA1
+    WorkerA2 --- WgA2
+    WorkerA3 --- WgA3
+    HubB1 --- WgB1
+    WorkerB2 --- WgB2
+    WorkerB3 --- WgB3
+
+    WgA1 --- WgA2
+    WgA1 --- WgA3
+    WgA1 --- WgB1
+    WgA2 --- WgB2
+    WgB1 --- WgB3
+
+    HubA1 --> SwarmCtrl
+    HubB1 --> SwarmCtrl
+    WorkerA2 --> Overlay
+    WorkerB3 --> Overlay
+    Traefik --> Overlay
+    Traefik --> CephMds
+
+    CephOsd --> CephMon
+    CephMds --> CephMon
+    HubA1 --> CephMon
+    HubB1 --> CephMon
+
+    HubA1 --> BirdHubs
+    HubB1 --> BirdHubs
+    BirdHubs --> RemotePeer
+
+    FloatIp --> Traefik

@@ -1,0 +1,78 @@
+flowchart TB
+    subgraph Operator["Operator workstation"]
+        CLI["loadweaver CLI\napps/loadweaver/cli-loadweaver"]
+        Config["loadweaver.yml"]
+        Workspace[".loadweaver/\nstate, locks, keys"]
+    end
+
+    subgraph FeatureCli["feature-cli"]
+        Program["program.ts\nCommander bootstrap"]
+        ConfigCmd["config / hello"]
+    end
+
+    subgraph DomainLibs["Domain feature libraries"]
+        Cluster["feature-cli-cluster\ninit / update / destroy / drift"]
+        Host["feature-cli-host\nbootstrap / verify"]
+        WG["feature-cli-wireguard\nmesh, rotation"]
+        Routing["feature-cli-routing\nBIRD hubs optional"]
+        Swarm["feature-cli-swarm"]
+        Ceph["feature-cli-ceph"]
+        Volume["feature-cli-volume"]
+        Traefik["feature-cli-traefik"]
+        Vip["feature-cli-vip\nkeepalived optional"]
+        Node["feature-cli-node\njoin / leave"]
+        Diag["feature-cli-diag"]
+    end
+
+    subgraph Core["util-cli-core"]
+        Schema["config schema + validate"]
+        SshTarget["resolveSshTarget"]
+        Mutation["mutation guard + cluster lock"]
+        RoutingHubs["resolveRoutingHubNodes"]
+    end
+
+    subgraph Shared["shared utilities"]
+        Ssh["util-ssh"]
+        Shell["util-shell-executor"]
+        ConfigLoader["util-config-loader"]
+    end
+
+    subgraph RemoteNodes["Remote nodes via SSH"]
+        NodeA["node-a1"]
+        NodeB["node-b1"]
+        NodeW["workers ..."]
+    end
+
+    CLI --> Program
+    Config --> Program
+    Program --> ConfigCmd
+    Program --> Cluster
+    Program --> Host
+    Program --> WG
+    Program --> Routing
+    Program --> Swarm
+    Program --> Ceph
+    Program --> Volume
+    Program --> Traefik
+    Program --> Vip
+    Program --> Node
+    Program --> Diag
+
+    Cluster --> Core
+    Host --> Core
+    WG --> Core
+    Routing --> Core
+    Swarm --> Core
+    Ceph --> Core
+    Traefik --> Core
+    Vip --> Core
+    Node --> Core
+
+    Core --> Ssh
+    Core --> Shell
+    Core --> ConfigLoader
+
+    Program --> Workspace
+    Ssh --> NodeA
+    Ssh --> NodeB
+    Ssh --> NodeW

@@ -1,0 +1,16 @@
+{
+  "name": "loadweaver-shared-feature-cli-node",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domains/loadweaver/shared/feature-cli-node/src",
+  "projectType": "library",
+  "tags": ["domain:loadweaver", "scope:shared", "type:feature"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/domains/loadweaver/shared/feature-cli-node/jest.config.cts"
+      }
+    }
+  }
+}

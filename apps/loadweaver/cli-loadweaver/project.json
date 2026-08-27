@@ -1,0 +1,145 @@
+{
+  "name": "loadweaver-cli-loadweaver",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/loadweaver/cli-loadweaver/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:shared", "domain:loadweaver"],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/loadweaver/cli-loadweaver",
+        "format": ["cjs"],
+        "bundle": true,
+        "main": "apps/loadweaver/cli-loadweaver/src/main.ts",
+        "tsConfig": "apps/loadweaver/cli-loadweaver/tsconfig.app.json",
+        "assets": [
+          {
+            "input": "libs/domains/loadweaver/shared/feature-cli-wireguard/src/lib/templates",
+            "glob": "*.tpl",
+            "output": "templates/wireguard"
+          },
+          {
+            "input": "libs/domains/loadweaver/shared/feature-cli-vip/src/lib/templates",
+            "glob": "*.tpl",
+            "output": "templates/vip"
+          },
+          {
+            "input": "libs/domains/loadweaver/shared/feature-cli-traefik/src/lib/templates",
+            "glob": "*.tpl",
+            "output": "templates/traefik"
+          },
+          {
+            "input": "libs/domains/loadweaver/shared/feature-cli-routing/src/lib/templates",
+            "glob": "*.tpl",
+            "output": "templates/routing"
+          }
+        ],
+        "generatePackageJson": true,
+        "thirdParty": true,
+        "esbuildOptions": {
+          "sourcemap": true,
+          "loader": {
+            ".tpl": "text"
+          },
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "prune-lockfile": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "executor": "@nx/js:prune-lockfile",
+      "outputs": [
+        "{workspaceRoot}/dist/apps/loadweaver/cli-loadweaver/package.json",
+        "{workspaceRoot}/dist/apps/loadweaver/cli-loadweaver/package-lock.json"
+      ],
+      "options": {
+        "buildTarget": "build"
+      }
+    },
+    "copy-workspace-modules": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "outputs": [
+        "{workspaceRoot}/dist/apps/loadweaver/cli-loadweaver/workspace_modules"
+      ],
+      "executor": "@nx/js:copy-workspace-modules",
+      "options": {
+        "buildTarget": "build"
+      }
+    },
+    "prune": {
+      "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
+      "executor": "nx:noop"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "loadweaver-cli-loadweaver:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "loadweaver-cli-loadweaver:build:development"
+        },
+        "production": {
+          "buildTarget": "loadweaver-cli-loadweaver:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/loadweaver/cli-loadweaver/jest.config.cts",
+        "passWithNoTests": true
+      }
+    },
+    "run": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node dist/apps/loadweaver/cli-loadweaver/main.js"
+      },
+      "dependsOn": [
+        {
+          "target": "build"
+        }
+      ]
+    },
+    "binary": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "outputs": [
+        "{workspaceRoot}/dist/apps/loadweaver/cli-loadweaver/bin/loadweaver"
+      ],
+      "options": {
+        "commands": [
+          "npx esbuild apps/loadweaver/cli-loadweaver/src/main.ts --bundle --platform=node --format=cjs --loader:.tpl=text --outfile=dist/apps/loadweaver/cli-loadweaver/bin/loadweaver.mjs --banner:js='#!/usr/bin/env node' --tsconfig=apps/loadweaver/cli-loadweaver/tsconfig.app.json",
+          "mv dist/apps/loadweaver/cli-loadweaver/bin/loadweaver.mjs dist/apps/loadweaver/cli-loadweaver/bin/loadweaver",
+          "chmod +x dist/apps/loadweaver/cli-loadweaver/bin/loadweaver"
+        ],
+        "parallel": false
+      }
+    }
+  }
+}

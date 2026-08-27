@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-25T17:44:36.644Z",
+  "generatedAt": "2026-08-27T17:19:09.403Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -326,6 +326,27 @@
       }
     },
     {
+      "id": "project:loadweaver-shared-feature-cli-wireguard",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-wireguard",
+        "root": "libs/domains/loadweaver/shared/feature-cli-wireguard",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
       "id": "project:agenstra-backend-feature-agent-manager",
       "type": "lib",
       "attrs": {
@@ -432,6 +453,69 @@
       }
     },
     {
+      "id": "project:loadweaver-shared-feature-cli-cluster",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-cluster",
+        "root": "libs/domains/loadweaver/shared/feature-cli-cluster",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:loadweaver-shared-feature-cli-routing",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-routing",
+        "root": "libs/domains/loadweaver/shared/feature-cli-routing",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:loadweaver-shared-feature-cli-traefik",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-traefik",
+        "root": "libs/domains/loadweaver/shared/feature-cli-traefik",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
       "id": "project:shared-frontend-feature-notifications",
       "type": "lib",
       "attrs": {
@@ -495,6 +579,27 @@
       }
     },
     {
+      "id": "project:loadweaver-shared-feature-cli-volume",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-volume",
+        "root": "libs/domains/loadweaver/shared/feature-cli-volume",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
       "id": "project:shared-backend-feature-notifications",
       "type": "lib",
       "attrs": {
@@ -512,6 +617,27 @@
         ],
         "domain": "shared",
         "context": "backend",
+        "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:loadweaver-shared-feature-cli-swarm",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-swarm",
+        "root": "libs/domains/loadweaver/shared/feature-cli-swarm",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
         "featureGroup": "feature"
       }
     },
@@ -642,6 +768,89 @@
       }
     },
     {
+      "id": "project:loadweaver-shared-feature-cli-ceph",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-ceph",
+        "root": "libs/domains/loadweaver/shared/feature-cli-ceph",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:loadweaver-shared-feature-cli-diag",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-diag",
+        "root": "libs/domains/loadweaver/shared/feature-cli-diag",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:loadweaver-shared-feature-cli-host",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-host",
+        "root": "libs/domains/loadweaver/shared/feature-cli-host",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:loadweaver-shared-feature-cli-node",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-node",
+        "root": "libs/domains/loadweaver/shared/feature-cli-node",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
       "id": "project:shared-frontend-util-configuration",
       "type": "lib",
       "attrs": {
@@ -684,6 +893,48 @@
       }
     },
     {
+      "id": "project:loadweaver-shared-feature-cli-ssh",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-ssh",
+        "root": "libs/domains/loadweaver/shared/feature-cli-ssh",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:loadweaver-shared-feature-cli-vip",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli-vip",
+        "root": "libs/domains/loadweaver/shared/feature-cli-vip",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
+        "featureGroup": "feature"
+      }
+    },
+    {
       "id": "project:shared-backend-feature-monitoring",
       "type": "lib",
       "attrs": {
@@ -702,6 +953,28 @@
         "domain": "shared",
         "context": "backend",
         "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:shared-shared-util-shell-executor",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-shared-util-shell-executor",
+        "root": "libs/domains/shared/shared/util-shell-executor",
+        "tags": [
+          "npm:private",
+          "domain:shared",
+          "scope:shared",
+          "type:util"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "shared",
+        "featureGroup": "util"
       }
     },
     {
@@ -745,6 +1018,50 @@
         ],
         "domain": "shared",
         "context": "frontend",
+        "featureGroup": "util"
+      }
+    },
+    {
+      "id": "project:shared-shared-util-config-loader",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-shared-util-config-loader",
+        "root": "libs/domains/shared/shared/util-config-loader",
+        "tags": [
+          "npm:private",
+          "domain:shared",
+          "scope:shared",
+          "type:util"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "shared",
+        "featureGroup": "util"
+      }
+    },
+    {
+      "id": "project:loadweaver-shared-util-cli-core",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-util-cli-core",
+        "root": "libs/domains/loadweaver/shared/util-cli-core",
+        "tags": [
+          "npm:private",
+          "domain:loadweaver",
+          "scope:shared",
+          "type:util"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
         "featureGroup": "util"
       }
     },
@@ -871,6 +1188,27 @@
         ],
         "domain": "identity",
         "context": "backend",
+        "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:loadweaver-shared-feature-cli",
+      "type": "lib",
+      "attrs": {
+        "name": "loadweaver-shared-feature-cli",
+        "root": "libs/domains/loadweaver/shared/feature-cli",
+        "tags": [
+          "domain:loadweaver",
+          "scope:shared",
+          "type:feature"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
         "featureGroup": "feature"
       }
     },
@@ -1175,6 +1513,28 @@
       }
     },
     {
+      "id": "project:shared-shared-util-logger",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-shared-util-logger",
+        "root": "libs/domains/shared/shared/util-logger",
+        "tags": [
+          "npm:private",
+          "domain:shared",
+          "scope:shared",
+          "type:util"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "shared",
+        "featureGroup": "util"
+      }
+    },
+    {
       "id": "project:decabill-backend-billing-manager",
       "type": "app",
       "attrs": {
@@ -1372,6 +1732,28 @@
       }
     },
     {
+      "id": "project:shared-shared-util-ssh",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-shared-util-ssh",
+        "root": "libs/domains/shared/shared/util-ssh",
+        "tags": [
+          "npm:private",
+          "domain:shared",
+          "scope:shared",
+          "type:util"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "shared",
+        "featureGroup": "util"
+      }
+    },
+    {
       "id": "project:agenstra-frontend-landingpage",
       "type": "app",
       "attrs": {
@@ -1490,6 +1872,34 @@
         ],
         "domain": "forepath",
         "context": "frontend",
+        "featureGroup": "app"
+      }
+    },
+    {
+      "id": "project:loadweaver-cli-loadweaver",
+      "type": "app",
+      "attrs": {
+        "name": "loadweaver-cli-loadweaver",
+        "root": "apps/loadweaver/cli-loadweaver",
+        "tags": [
+          "type:app",
+          "scope:shared",
+          "domain:loadweaver"
+        ],
+        "type": "app",
+        "targets": [
+          "lint",
+          "build",
+          "prune-lockfile",
+          "copy-workspace-modules",
+          "prune",
+          "serve",
+          "test",
+          "run",
+          "binary"
+        ],
+        "domain": "loadweaver",
+        "context": "shared",
         "featureGroup": "app"
       }
     },
@@ -1746,6 +2156,19 @@
       "attrs": {
         "name": "docs",
         "root": "tools/docs",
+        "tags": [
+          "type:tool"
+        ],
+        "type": "tool",
+        "targets": []
+      }
+    },
+    {
+      "id": "tool:jest",
+      "type": "tool",
+      "attrs": {
+        "name": "jest",
+        "root": "tools/jest",
         "tags": [
           "type:tool"
         ],
@@ -2439,6 +2862,22 @@
       "attrs": {
         "name": "@mlc-ai/web-llm",
         "version": "0.2.84"
+      }
+    },
+    {
+      "id": "package:commander",
+      "type": "package",
+      "attrs": {
+        "name": "commander",
+        "version": "14.0.3"
+      }
+    },
+    {
+      "id": "package:yaml",
+      "type": "package",
+      "attrs": {
+        "name": "yaml",
+        "version": "2.9.0"
       }
     },
     {
@@ -8921,6 +9360,24 @@
       }
     },
     {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-wireguard/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-wireguard/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-wireguard"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-wireguard/src/lib/wireguard.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-wireguard/src/lib/wireguard.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-wireguard"
+      }
+    },
+    {
       "id": "file:libs/domains/agenstra/backend/feature-agent-manager/README.md",
       "type": "readme",
       "attrs": {
@@ -10055,6 +10512,69 @@
       }
     },
     {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-cluster/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-cluster/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-cluster"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-cluster/src/lib/node-inventory.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-cluster/src/lib/node-inventory.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-cluster"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-routing/src/lib/routing-cross-wg.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-routing/src/lib/routing-cross-wg.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-routing"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-routing/src/lib/routing.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-routing/src/lib/routing.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-routing"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-traefik/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-traefik/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-traefik"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-traefik/src/lib/traefik-acme-env.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-traefik/src/lib/traefik-acme-env.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-traefik"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-traefik/src/lib/traefik.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-traefik/src/lib/traefik.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-traefik"
+      }
+    },
+    {
       "id": "file:libs/domains/shared/frontend/feature-notifications/README.md",
       "type": "readme",
       "attrs": {
@@ -10131,6 +10651,24 @@
           "service-plans.reducer.ts",
           "service-plans.selectors.ts"
         ]
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-volume/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-volume/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-volume"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-volume/src/lib/volume.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-volume/src/lib/volume.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-volume"
       }
     },
     {
@@ -10278,6 +10816,24 @@
       }
     },
     {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-swarm/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-swarm/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-swarm"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-swarm/src/lib/swarm.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-swarm/src/lib/swarm.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-swarm"
+      }
+    },
+    {
       "id": "file:libs/domains/shared/backend/util-network-address/README.md",
       "type": "readme",
       "attrs": {
@@ -10393,6 +10949,69 @@
       }
     },
     {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-ceph/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-ceph/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-ceph"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-ceph/src/lib/ceph.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-ceph/src/lib/ceph.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-ceph"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-diag/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-diag/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-diag"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-diag/src/lib/diag.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-diag/src/lib/diag.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-diag"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-host/src/lib/host.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-host/src/lib/host.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-host"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-node/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-node/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-node"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-node/src/lib/node.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-node/src/lib/node.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-node"
+      }
+    },
+    {
       "id": "file:libs/domains/shared/frontend/util-configuration/README.md",
       "type": "readme",
       "attrs": {
@@ -10420,6 +11039,69 @@
       }
     },
     {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-ssh/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-ssh/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-ssh"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-ssh/src/lib/join-remote-command.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-ssh/src/lib/join-remote-command.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-ssh"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-ssh/src/lib/ssh.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-ssh/src/lib/ssh.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-ssh"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-vip/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-vip/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli-vip"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-vip/src/lib/backend-resolution.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-vip/src/lib/backend-resolution.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-vip"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-vip/src/lib/vip-inspection.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-vip/src/lib/vip-inspection.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-vip"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli-vip/src/lib/vip.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli-vip/src/lib/vip.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-feature-cli-vip"
+      }
+    },
+    {
       "id": "file:libs/domains/shared/backend/feature-monitoring/README.md",
       "type": "readme",
       "attrs": {
@@ -10444,6 +11126,15 @@
         "path": "libs/domains/shared/backend/feature-monitoring/src/lib/monitoring.module.ts",
         "languageOrKind": "ts",
         "projectName": "shared-backend-feature-monitoring"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/shared/util-shell-executor/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/shared/util-shell-executor/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-shared-util-shell-executor"
       }
     },
     {
@@ -10498,6 +11189,123 @@
         "path": "libs/domains/shared/frontend/util-docs-parser/src/lib/services/search-index-builder.service.ts",
         "languageOrKind": "ts",
         "projectName": "shared-frontend-util-docs-parser"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/shared/util-config-loader/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/shared/util-config-loader/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-shared-util-config-loader"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/derive-cluster-cidr.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/derive-cluster-cidr.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/derive-osd-devices.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/derive-osd-devices.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/derive-vip-state.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/derive-vip-state.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/expected-swarm-labels.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/expected-swarm-labels.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/node-registry.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/node-registry.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/prerequisite.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/prerequisite.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/remote-exec.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/remote-exec.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/resolve-routing-hubs.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/resolve-routing-hubs.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/routing-state.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/routing-state.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/ssh-config-validation.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/ssh-config-validation.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/ssh-target.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/util-cli-core/src/lib/services/ssh-target.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "loadweaver-shared-util-cli-core"
       }
     },
     {
@@ -11023,6 +11831,96 @@
       }
     },
     {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/README.md",
+        "languageOrKind": "md",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/docs/architecture.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/docs/architecture.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/docs/cli-overview.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/docs/cli-overview.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/docs/cluster-init-sequence.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/docs/cluster-init-sequence.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/docs/cluster-topology.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/docs/cluster-topology.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/docs/cluster-update-planner.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/docs/cluster-update-planner.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/docs/network-layers.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/docs/network-layers.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/docs/routing-architecture.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/docs/routing-architecture.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/docs/routing-inter-cluster.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/docs/routing-inter-cluster.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
+      "id": "file:libs/domains/loadweaver/shared/feature-cli/docs/workspace-state.mmd",
+      "type": "diagram",
+      "attrs": {
+        "path": "libs/domains/loadweaver/shared/feature-cli/docs/workspace-state.mmd",
+        "languageOrKind": "mmd",
+        "projectName": "loadweaver-shared-feature-cli"
+      }
+    },
+    {
       "id": "file:libs/domains/shared/frontend/feature-docs/README.md",
       "type": "readme",
       "attrs": {
@@ -11311,6 +12209,15 @@
       }
     },
     {
+      "id": "file:libs/domains/shared/shared/util-logger/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/shared/util-logger/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-shared-util-logger"
+      }
+    },
+    {
       "id": "file:apps/decabill/backend-billing-manager/src/app/app.module.ts",
       "type": "module",
       "attrs": {
@@ -11416,6 +12323,15 @@
         "path": "apps/shared/platform-authentication/README.md",
         "languageOrKind": "md",
         "projectName": "shared-platform-authentication"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/shared/util-ssh/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/shared/util-ssh/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-shared-util-ssh"
       }
     },
     {
@@ -12916,6 +13832,86 @@
       "type": "doc",
       "attrs": {
         "path": "docs/forepath/features/opentelemetry.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/README.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/README.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/architecture/system-overview.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/architecture/system-overview.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/cli-reference.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/cli-reference.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/configuration.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/configuration.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/deployment/inter-cluster-routing.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/deployment/inter-cluster-routing.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/deployment/lab-guide.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/deployment/lab-guide.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/deployment/production-tls.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/deployment/production-tls.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/deployment/system-requirements.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/deployment/system-requirements.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/getting-started.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/getting-started.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/loadweaver/workspace.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/loadweaver/workspace.md",
         "languageOrKind": "md"
       }
     },
@@ -29817,6 +30813,736 @@
       }
     },
     {
+      "id": "concept:loadweaver-loadweaver",
+      "type": "concept",
+      "attrs": {
+        "title": "Loadweaver",
+        "docPath": "docs/loadweaver/README.md",
+        "sectionAnchor": "loadweaver",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-quick-start",
+      "type": "concept",
+      "attrs": {
+        "title": "Quick start",
+        "docPath": "docs/loadweaver/README.md",
+        "sectionAnchor": "quick-start",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-documentation",
+      "type": "concept",
+      "attrs": {
+        "title": "Documentation",
+        "docPath": "docs/loadweaver/README.md",
+        "sectionAnchor": "documentation",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-architecture-overview",
+      "type": "concept",
+      "attrs": {
+        "title": "Architecture overview",
+        "docPath": "docs/loadweaver/architecture/system-overview.md",
+        "sectionAnchor": "architecture-overview",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-execution-model",
+      "type": "concept",
+      "attrs": {
+        "title": "Execution model",
+        "docPath": "docs/loadweaver/architecture/system-overview.md",
+        "sectionAnchor": "execution-model",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-future-extensions",
+      "type": "concept",
+      "attrs": {
+        "title": "Future extensions",
+        "docPath": "docs/loadweaver/architecture/system-overview.md",
+        "sectionAnchor": "future-extensions",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-cli-reference",
+      "type": "concept",
+      "attrs": {
+        "title": "CLI reference",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "cli-reference",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-commands",
+      "type": "concept",
+      "attrs": {
+        "title": "Commands",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "commands",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-progress-output",
+      "type": "concept",
+      "attrs": {
+        "title": "Progress output",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "progress-output",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-mutation-safety",
+      "type": "concept",
+      "attrs": {
+        "title": "Mutation safety",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "mutation-safety",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-wireguard-key-rotation",
+      "type": "concept",
+      "attrs": {
+        "title": "WireGuard key rotation",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "wireguard-key-rotation",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-rotate-all-node-keys-and-roll-out-updated-peer-configs",
+      "type": "concept",
+      "attrs": {
+        "title": "Rotate all node keys and roll out updated peer configs",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "rotate-all-node-keys-and-roll-out-updated-peer-configs",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-rotate-a-single-node",
+      "type": "concept",
+      "attrs": {
+        "title": "Rotate a single node",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "rotate-a-single-node",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-inspect-key-age-and-due-warning-state",
+      "type": "concept",
+      "attrs": {
+        "title": "Inspect key age and due/warning state",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "inspect-key-age-and-due-warning-state",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-exit-codes-for-monitoring-when-wireguard-keyrotation-enabled-is-true",
+      "type": "concept",
+      "attrs": {
+        "title": "Exit codes for monitoring (when wireguard.keyRotation.enabled is true):",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "exit-codes-for-monitoring-when-wireguard-keyrotation-enabled-is-true",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-0-all-keys-ok-1-at-least-one-key-due-2-warning-window-only",
+      "type": "concept",
+      "attrs": {
+        "title": "0 = all keys ok, 1 = at least one key due, 2 = warning window only",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "0-all-keys-ok-1-at-least-one-key-due-2-warning-window-only",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-rotate-only-overdue-keys-for-cron-systemd-automation",
+      "type": "concept",
+      "attrs": {
+        "title": "Rotate only overdue keys (for cron/systemd automation)",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "rotate-only-overdue-keys-for-cron-systemd-automation",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-print-suggested-cron-systemd-timer-snippets",
+      "type": "concept",
+      "attrs": {
+        "title": "Print suggested cron/systemd timer snippets",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "print-suggested-cron-systemd-timer-snippets",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-swarm-label-reconcile",
+      "type": "concept",
+      "attrs": {
+        "title": "Swarm label reconcile",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "swarm-label-reconcile",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-ad-hoc-ssh",
+      "type": "concept",
+      "attrs": {
+        "title": "Ad-hoc SSH",
+        "docPath": "docs/loadweaver/cli-reference.md",
+        "sectionAnchor": "ad-hoc-ssh",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-configuration",
+      "type": "concept",
+      "attrs": {
+        "title": "Configuration",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "configuration",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-secrets-and-config-overlays",
+      "type": "concept",
+      "attrs": {
+        "title": "Secrets and config overlays",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "secrets-and-config-overlays",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-only-override-keepalived-password-keep-the-rest-from-loadweaver-yml",
+      "type": "concept",
+      "attrs": {
+        "title": "Only override keepalived password; keep the rest from loadweaver.yml",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "only-override-keepalived-password-keep-the-rest-from-loadweaver-yml",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-key-sections",
+      "type": "concept",
+      "attrs": {
+        "title": "Key sections",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "key-sections",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-ssh-access",
+      "type": "concept",
+      "attrs": {
+        "title": "SSH access",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "ssh-access",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-advanced-routing-bird",
+      "type": "concept",
+      "attrs": {
+        "title": "Advanced routing (BIRD)",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "advanced-routing-bird",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-host-bootstrap",
+      "type": "concept",
+      "attrs": {
+        "title": "Host bootstrap",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "host-bootstrap",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-ceph-osd-scale-out",
+      "type": "concept",
+      "attrs": {
+        "title": "Ceph OSD scale-out",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "ceph-osd-scale-out",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-traefik-acme-production-tls",
+      "type": "concept",
+      "attrs": {
+        "title": "Traefik ACME (production TLS)",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "traefik-acme-production-tls",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-on-primary-edit-etc-loadweaver-traefik-acme-env-chmod-600",
+      "type": "concept",
+      "attrs": {
+        "title": "On primary: edit /etc/loadweaver/traefik-acme.env (chmod 600)",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "on-primary-edit-etc-loadweaver-traefik-acme-env-chmod-600",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-vip-failover-verification",
+      "type": "concept",
+      "attrs": {
+        "title": "VIP failover verification",
+        "docPath": "docs/loadweaver/configuration.md",
+        "sectionAnchor": "vip-failover-verification",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-inter-cluster-routing",
+      "type": "concept",
+      "attrs": {
+        "title": "Inter-cluster routing",
+        "docPath": "docs/loadweaver/deployment/inter-cluster-routing.md",
+        "sectionAnchor": "inter-cluster-routing",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-topology",
+      "type": "concept",
+      "attrs": {
+        "title": "Topology",
+        "docPath": "docs/loadweaver/deployment/inter-cluster-routing.md",
+        "sectionAnchor": "topology",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-why-bgp-not-ospf",
+      "type": "concept",
+      "attrs": {
+        "title": "Why BGP (not OSPF)",
+        "docPath": "docs/loadweaver/deployment/inter-cluster-routing.md",
+        "sectionAnchor": "why-bgp-not-ospf",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-configuration-checklist",
+      "type": "concept",
+      "attrs": {
+        "title": "Configuration checklist",
+        "docPath": "docs/loadweaver/deployment/inter-cluster-routing.md",
+        "sectionAnchor": "configuration-checklist",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-converge-order",
+      "type": "concept",
+      "attrs": {
+        "title": "Converge order",
+        "docPath": "docs/loadweaver/deployment/inter-cluster-routing.md",
+        "sectionAnchor": "converge-order",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-safety-notes",
+      "type": "concept",
+      "attrs": {
+        "title": "Safety notes",
+        "docPath": "docs/loadweaver/deployment/inter-cluster-routing.md",
+        "sectionAnchor": "safety-notes",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-lab-guide-3-vms",
+      "type": "concept",
+      "attrs": {
+        "title": "Lab guide (3 VMs)",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "lab-guide-3-vms",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-vm-sizing",
+      "type": "concept",
+      "attrs": {
+        "title": "VM sizing",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "vm-sizing",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-network",
+      "type": "concept",
+      "attrs": {
+        "title": "Network",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "network",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-operator-setup",
+      "type": "concept",
+      "attrs": {
+        "title": "Operator setup",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "operator-setup",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-converge-sequence",
+      "type": "concept",
+      "attrs": {
+        "title": "Converge sequence",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "converge-sequence",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-ssh-to-primary-edit-etc-loadweaver-traefik-acme-env-chmod-600-uncomment-cf-dns-api-token",
+      "type": "concept",
+      "attrs": {
+        "title": "SSH to primary: edit /etc/loadweaver/traefik-acme.env (chmod 600), uncomment CF_DNS_API_TOKEN=",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "ssh-to-primary-edit-etc-loadweaver-traefik-acme-env-chmod-600-uncomment-cf-dns-api-token",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-add-a-4th-node-incremental-update",
+      "type": "concept",
+      "attrs": {
+        "title": "Add a 4th node (incremental update)",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "add-a-4th-node-incremental-update",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-remove-a-node",
+      "type": "concept",
+      "attrs": {
+        "title": "Remove a node",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "remove-a-node",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-troubleshooting",
+      "type": "concept",
+      "attrs": {
+        "title": "Troubleshooting",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "troubleshooting",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-tear-down",
+      "type": "concept",
+      "attrs": {
+        "title": "Tear down",
+        "docPath": "docs/loadweaver/deployment/lab-guide.md",
+        "sectionAnchor": "tear-down",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-production-tls-with-traefik-acme",
+      "type": "concept",
+      "attrs": {
+        "title": "Production TLS with Traefik ACME",
+        "docPath": "docs/loadweaver/deployment/production-tls.md",
+        "sectionAnchor": "production-tls-with-traefik-acme",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-choose-a-challenge-type",
+      "type": "concept",
+      "attrs": {
+        "title": "Choose a challenge type",
+        "docPath": "docs/loadweaver/deployment/production-tls.md",
+        "sectionAnchor": "choose-a-challenge-type",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-dns-01-recommended",
+      "type": "concept",
+      "attrs": {
+        "title": "DNS-01 (recommended)",
+        "docPath": "docs/loadweaver/deployment/production-tls.md",
+        "sectionAnchor": "dns-01-recommended",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-cf-dns-api-token-your-scoped-token",
+      "type": "concept",
+      "attrs": {
+        "title": "CF_DNS_API_TOKEN=your-scoped-token",
+        "docPath": "docs/loadweaver/deployment/production-tls.md",
+        "sectionAnchor": "cf-dns-api-token-your-scoped-token",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-http-01-only-when-port-80-is-public",
+      "type": "concept",
+      "attrs": {
+        "title": "HTTP-01 (only when port 80 is public)",
+        "docPath": "docs/loadweaver/deployment/production-tls.md",
+        "sectionAnchor": "http-01-only-when-port-80-is-public",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-or-your-public-hostname-resolving-to-the-vip",
+      "type": "concept",
+      "attrs": {
+        "title": "or your public hostname resolving to the VIP",
+        "docPath": "docs/loadweaver/deployment/production-tls.md",
+        "sectionAnchor": "or-your-public-hostname-resolving-to-the-vip",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-related-commands",
+      "type": "concept",
+      "attrs": {
+        "title": "Related commands",
+        "docPath": "docs/loadweaver/deployment/production-tls.md",
+        "sectionAnchor": "related-commands",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-system-requirements",
+      "type": "concept",
+      "attrs": {
+        "title": "System requirements",
+        "docPath": "docs/loadweaver/deployment/system-requirements.md",
+        "sectionAnchor": "system-requirements",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-operator-workstation",
+      "type": "concept",
+      "attrs": {
+        "title": "Operator workstation",
+        "docPath": "docs/loadweaver/deployment/system-requirements.md",
+        "sectionAnchor": "operator-workstation",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-target-nodes",
+      "type": "concept",
+      "attrs": {
+        "title": "Target nodes",
+        "docPath": "docs/loadweaver/deployment/system-requirements.md",
+        "sectionAnchor": "target-nodes",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-installed-automatically-by-host-bootstrap",
+      "type": "concept",
+      "attrs": {
+        "title": "Installed automatically by `host bootstrap`",
+        "docPath": "docs/loadweaver/deployment/system-requirements.md",
+        "sectionAnchor": "installed-automatically-by-host-bootstrap",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-ports",
+      "type": "concept",
+      "attrs": {
+        "title": "Ports",
+        "docPath": "docs/loadweaver/deployment/system-requirements.md",
+        "sectionAnchor": "ports",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-getting-started",
+      "type": "concept",
+      "attrs": {
+        "title": "Getting started",
+        "docPath": "docs/loadweaver/getting-started.md",
+        "sectionAnchor": "getting-started",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-prerequisites",
+      "type": "concept",
+      "attrs": {
+        "title": "Prerequisites",
+        "docPath": "docs/loadweaver/getting-started.md",
+        "sectionAnchor": "prerequisites",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-build-the-cli",
+      "type": "concept",
+      "attrs": {
+        "title": "Build the CLI",
+        "docPath": "docs/loadweaver/getting-started.md",
+        "sectionAnchor": "build-the-cli",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-bootstrap-workflow",
+      "type": "concept",
+      "attrs": {
+        "title": "Bootstrap workflow",
+        "docPath": "docs/loadweaver/getting-started.md",
+        "sectionAnchor": "bootstrap-workflow",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-typical-dependency-order",
+      "type": "concept",
+      "attrs": {
+        "title": "Typical dependency order",
+        "docPath": "docs/loadweaver/getting-started.md",
+        "sectionAnchor": "typical-dependency-order",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-workspace-state",
+      "type": "concept",
+      "attrs": {
+        "title": "Workspace state",
+        "docPath": "docs/loadweaver/workspace.md",
+        "sectionAnchor": "workspace-state",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-state-json",
+      "type": "concept",
+      "attrs": {
+        "title": "state.json",
+        "docPath": "docs/loadweaver/workspace.md",
+        "sectionAnchor": "state-json",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-lock-json",
+      "type": "concept",
+      "attrs": {
+        "title": "lock.json",
+        "docPath": "docs/loadweaver/workspace.md",
+        "sectionAnchor": "lock-json",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-host-inventory-and-host-locks",
+      "type": "concept",
+      "attrs": {
+        "title": "Host inventory and host locks",
+        "docPath": "docs/loadweaver/workspace.md",
+        "sectionAnchor": "host-inventory-and-host-locks",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-wireguard-key-rotation-schedule",
+      "type": "concept",
+      "attrs": {
+        "title": "WireGuard key rotation schedule",
+        "docPath": "docs/loadweaver/workspace.md",
+        "sectionAnchor": "wireguard-key-rotation-schedule",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-exit-1-keys-due-exit-2-warning-window",
+      "type": "concept",
+      "attrs": {
+        "title": "exit 1 = keys due, exit 2 = warning window",
+        "docPath": "docs/loadweaver/workspace.md",
+        "sectionAnchor": "exit-1-keys-due-exit-2-warning-window",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-wireguard-keys-json",
+      "type": "concept",
+      "attrs": {
+        "title": "wireguard/keys.json",
+        "docPath": "docs/loadweaver/workspace.md",
+        "sectionAnchor": "wireguard-keys-json",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-drift-detection",
+      "type": "concept",
+      "attrs": {
+        "title": "Drift detection",
+        "docPath": "docs/loadweaver/workspace.md",
+        "sectionAnchor": "drift-detection",
+        "domain": "loadweaver"
+      }
+    },
+    {
+      "id": "concept:loadweaver-yes-semantics",
+      "type": "concept",
+      "attrs": {
+        "title": "--yes semantics",
+        "docPath": "docs/loadweaver/workspace.md",
+        "sectionAnchor": "yes-semantics",
+        "domain": "loadweaver"
+      }
+    },
+    {
       "id": "domain:shared",
       "type": "domain",
       "attrs": {
@@ -29907,10 +31633,10 @@
       }
     },
     {
-      "id": "domain:identity",
+      "id": "domain:loadweaver",
       "type": "domain",
       "attrs": {
-        "name": "identity",
+        "name": "loadweaver",
         "kind": "domain",
         "label": "domain",
         "source": "tag"
@@ -29923,6 +31649,16 @@
         "name": "shared",
         "kind": "context",
         "label": "bounded context",
+        "source": "tag"
+      }
+    },
+    {
+      "id": "domain:identity",
+      "type": "domain",
+      "attrs": {
+        "name": "identity",
+        "kind": "domain",
+        "label": "domain",
         "source": "tag"
       }
     },
@@ -30179,6 +31915,11 @@
       "type": "depends_on"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-wireguard",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "project:shared-backend-util-dynamic-provider-registry",
       "type": "depends_on"
@@ -30249,6 +31990,66 @@
       "type": "depends_on"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-feature-cli-ceph",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-feature-cli-host",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-feature-cli-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-feature-cli-swarm",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-feature-cli-traefik",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-feature-cli-vip",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-feature-cli-routing",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-feature-cli-volume",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "project:loadweaver-shared-feature-cli-wireguard",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-routing",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-traefik",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
       "from": "project:shared-frontend-feature-notifications",
       "to": "project:shared-frontend-data-access-notifications",
       "type": "depends_on"
@@ -30266,6 +32067,11 @@
     {
       "from": "project:decabill-frontend-data-access-portal",
       "to": "project:shared-frontend-util-configuration",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-volume",
+      "to": "project:loadweaver-shared-util-cli-core",
       "type": "depends_on"
     },
     {
@@ -30294,6 +32100,11 @@
       "type": "depends_on"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-swarm",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
       "from": "project:shared-frontend-feature-landingpage",
       "to": "project:shared-frontend-data-access-communication",
       "type": "depends_on"
@@ -30319,13 +32130,128 @@
       "type": "depends_on"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-ceph",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "project:loadweaver-shared-feature-cli-host",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "project:loadweaver-shared-feature-cli-ceph",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "project:loadweaver-shared-feature-cli-swarm",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "project:loadweaver-shared-feature-cli-traefik",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "project:loadweaver-shared-feature-cli-vip",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "project:loadweaver-shared-feature-cli-volume",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "project:loadweaver-shared-feature-cli-wireguard",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-host",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "project:loadweaver-shared-feature-cli-host",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "project:loadweaver-shared-feature-cli-ceph",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "project:loadweaver-shared-feature-cli-swarm",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "project:loadweaver-shared-feature-cli-volume",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "project:loadweaver-shared-feature-cli-wireguard",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ssh",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-vip",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
       "from": "project:shared-backend-feature-monitoring",
       "to": "project:identity-backend-util-auth",
       "type": "depends_on"
     },
     {
+      "from": "project:shared-shared-util-shell-executor",
+      "to": "project:shared-shared-util-logger",
+      "type": "depends_on"
+    },
+    {
       "from": "project:shared-backend-util-http-context",
       "to": "project:shared-backend-util-otel",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "project:shared-shared-util-config-loader",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "project:shared-shared-util-logger",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "project:shared-shared-util-shell-executor",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "project:shared-shared-util-ssh",
       "type": "depends_on"
     },
     {
@@ -30371,6 +32297,91 @@
     {
       "from": "project:identity-backend-feature-auth",
       "to": "project:identity-backend-util-auth",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:shared-shared-util-config-loader",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-util-cli-core",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:shared-shared-util-logger",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:shared-shared-util-shell-executor",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:shared-shared-util-ssh",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-host",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-cluster",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-ceph",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-diag",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-node",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-swarm",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-traefik",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-vip",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-ssh",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-routing",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-volume",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "project:loadweaver-shared-feature-cli-wireguard",
       "type": "depends_on"
     },
     {
@@ -30654,6 +32665,11 @@
       "type": "depends_on"
     },
     {
+      "from": "project:shared-shared-util-ssh",
+      "to": "project:shared-shared-util-shell-executor",
+      "type": "depends_on"
+    },
+    {
       "from": "project:agenstra-frontend-landingpage",
       "to": "project:shared-frontend-util-cookie-consent",
       "type": "depends_on"
@@ -30726,6 +32742,11 @@
     {
       "from": "project:forepath-frontend-landingpage",
       "to": "project:shared-frontend-util-express-server",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-cli-loadweaver",
+      "to": "project:loadweaver-shared-feature-cli",
       "type": "depends_on"
     },
     {
@@ -32514,6 +34535,21 @@
       "type": "depends_on"
     },
     {
+      "from": "project:loadweaver-cli-loadweaver",
+      "to": "package:commander",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-cli-loadweaver",
+      "to": "package:yaml",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-cli-loadweaver",
+      "to": "package:zod",
+      "type": "depends_on"
+    },
+    {
       "from": "project:agenstra-frontend-docs",
       "to": "package:@angular/animations",
       "type": "depends_on"
@@ -32764,6 +34800,311 @@
       "type": "depends_on"
     },
     {
+      "from": "project:forepath-frontend-data-access-project-estimator",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-feature-communication-manager",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-data-access-billing-console",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-dynamic-provider-registry",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-data-access-agent-console",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-util-provisioning-geography",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-provisioning-geography",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-util-runtime-config-server",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-controller",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-feature-billing-console",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-data-access-communication",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-data-access-notifications",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-feature-agent-console",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-wireguard",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-feature-agent-manager",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-util-loading-indicator",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-feature-landingpage",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-feature-landingpage",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-frontend-feature-landingpage",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-routing",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-traefik",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-feature-notifications",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-data-access-portal",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-data-access-portal",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-volume",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-feature-notifications",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-swarm",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-network-address",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-data-access-updates",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-feature-landingpage",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-util-cookie-consent",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-util-express-server",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:identity-frontend-data-access-auth",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ceph",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-host",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-util-configuration",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-shared-util-network-address",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ssh",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-vip",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-feature-monitoring",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-shared-util-shell-executor",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-http-context",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-util-docs-parser",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-shared-util-config-loader",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-redis-cache",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-feature-updates",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:identity-frontend-feature-auth",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-feature-updates",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-opensearch",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:identity-backend-feature-auth",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-feature-docs",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:identity-frontend-util-auth",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-webhook",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:identity-backend-util-auth",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-crypto",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
       "from": "project:agenstra-backend-agent-controller",
       "to": "project:sbom",
       "type": "depends_on"
@@ -32771,6 +35112,11 @@
     {
       "from": "project:agenstra-backend-agent-controller",
       "to": "tool:ci",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
+      "to": "tool:jest",
       "type": "depends_on"
     },
     {
@@ -32784,6 +35130,11 @@
       "type": "depends_on"
     },
     {
+      "from": "project:agenstra-frontend-billing-console",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
       "from": "project:decabill-frontend-billing-console",
       "to": "project:sbom",
       "type": "depends_on"
@@ -32791,6 +35142,11 @@
     {
       "from": "project:decabill-frontend-billing-console",
       "to": "tool:ci",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-billing-console",
+      "to": "tool:jest",
       "type": "depends_on"
     },
     {
@@ -32804,6 +35160,31 @@
       "type": "depends_on"
     },
     {
+      "from": "project:forepath-frontend-billing-console",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-email",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-queue",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-util-meta",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-shared-util-logger",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
       "from": "project:decabill-backend-billing-manager",
       "to": "project:sbom",
       "type": "depends_on"
@@ -32811,6 +35192,21 @@
     {
       "from": "project:decabill-backend-billing-manager",
       "to": "tool:ci",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-backend-util-otel",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-ui-lists",
+      "to": "tool:jest",
       "type": "depends_on"
     },
     {
@@ -32824,6 +35220,11 @@
       "type": "depends_on"
     },
     {
+      "from": "project:agenstra-frontend-agent-console",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
       "from": "project:agenstra-backend-agent-manager",
       "to": "project:sbom",
       "type": "depends_on"
@@ -32831,6 +35232,11 @@
     {
       "from": "project:agenstra-backend-agent-manager",
       "to": "tool:ci",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
+      "to": "tool:jest",
       "type": "depends_on"
     },
     {
@@ -32839,8 +35245,23 @@
       "type": "depends_on"
     },
     {
+      "from": "project:forepath-backend-communication",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-shared-util-ssh",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
       "from": "project:agenstra-frontend-landingpage",
       "to": "project:sbom",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-frontend-landingpage",
+      "to": "tool:jest",
       "type": "depends_on"
     },
     {
@@ -32854,6 +35275,21 @@
       "type": "depends_on"
     },
     {
+      "from": "project:decabill-frontend-landingpage",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-frontend-landingpage",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:loadweaver-cli-loadweaver",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
       "from": "project:agenstra-frontend-docs",
       "to": "project:sbom",
       "type": "depends_on"
@@ -32864,6 +35300,11 @@
       "type": "depends_on"
     },
     {
+      "from": "project:agenstra-frontend-docs",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
       "from": "project:decabill-frontend-docs",
       "to": "project:sbom",
       "type": "depends_on"
@@ -32871,6 +35312,16 @@
     {
       "from": "project:decabill-frontend-docs",
       "to": "tool:docs",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-frontend-docs",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-frontend-docs",
+      "to": "tool:jest",
       "type": "depends_on"
     },
     {
@@ -32879,8 +35330,18 @@
       "type": "depends_on"
     },
     {
+      "from": "project:shared-mcp-devkit",
+      "to": "tool:jest",
+      "type": "depends_on"
+    },
+    {
       "from": "project:shared-mcp-proxy",
       "to": "project:sbom",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:shared-mcp-proxy",
+      "to": "tool:jest",
       "type": "depends_on"
     },
     {
@@ -36219,6 +38680,16 @@
       "type": "contains"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-wireguard",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-wireguard/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-wireguard",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-wireguard/src/lib/wireguard.service.ts",
+      "type": "contains"
+    },
+    {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "file:libs/domains/agenstra/backend/feature-agent-manager/README.md",
       "type": "contains"
@@ -36849,6 +39320,41 @@
       "type": "contains"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-cluster/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-cluster/src/lib/node-inventory.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-routing",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-routing/src/lib/routing-cross-wg.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-routing",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-routing/src/lib/routing.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-traefik",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-traefik/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-traefik",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-traefik/src/lib/traefik-acme-env.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-traefik",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-traefik/src/lib/traefik.service.ts",
+      "type": "contains"
+    },
+    {
       "from": "project:shared-frontend-feature-notifications",
       "to": "file:libs/domains/shared/frontend/feature-notifications/README.md",
       "type": "contains"
@@ -36881,6 +39387,16 @@
     {
       "from": "project:decabill-frontend-data-access-portal",
       "to": "file:libs/domains/decabill/frontend/data-access-portal/src/lib/state/service-plans",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-volume",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-volume/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-volume",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-volume/src/lib/volume.service.ts",
       "type": "contains"
     },
     {
@@ -36964,6 +39480,16 @@
       "type": "contains"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-swarm",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-swarm/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-swarm",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-swarm/src/lib/swarm.service.ts",
+      "type": "contains"
+    },
+    {
       "from": "project:shared-backend-util-network-address",
       "to": "file:libs/domains/shared/backend/util-network-address/README.md",
       "type": "contains"
@@ -37014,6 +39540,41 @@
       "type": "contains"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-ceph",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-ceph/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ceph",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-ceph/src/lib/ceph.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-diag/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-diag/src/lib/diag.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-host",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-host/src/lib/host.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-node/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-node/src/lib/node.service.ts",
+      "type": "contains"
+    },
+    {
       "from": "project:shared-frontend-util-configuration",
       "to": "file:libs/domains/shared/frontend/util-configuration/README.md",
       "type": "contains"
@@ -37029,6 +39590,41 @@
       "type": "contains"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-ssh",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-ssh/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ssh",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-ssh/src/lib/join-remote-command.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ssh",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-ssh/src/lib/ssh.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-vip",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-vip/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-vip",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-vip/src/lib/backend-resolution.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-vip",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-vip/src/lib/vip-inspection.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-vip",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli-vip/src/lib/vip.service.ts",
+      "type": "contains"
+    },
+    {
       "from": "project:shared-backend-feature-monitoring",
       "to": "file:libs/domains/shared/backend/feature-monitoring/README.md",
       "type": "contains"
@@ -37041,6 +39637,11 @@
     {
       "from": "project:shared-backend-feature-monitoring",
       "to": "file:libs/domains/shared/backend/feature-monitoring/src/lib/monitoring.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-shared-util-shell-executor",
+      "to": "file:libs/domains/shared/shared/util-shell-executor/README.md",
       "type": "contains"
     },
     {
@@ -37071,6 +39672,71 @@
     {
       "from": "project:shared-frontend-util-docs-parser",
       "to": "file:libs/domains/shared/frontend/util-docs-parser/src/lib/services/search-index-builder.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-shared-util-config-loader",
+      "to": "file:libs/domains/shared/shared/util-config-loader/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/derive-cluster-cidr.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/derive-osd-devices.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/derive-vip-state.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/expected-swarm-labels.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/node-registry.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/prerequisite.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/remote-exec.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/resolve-routing-hubs.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/routing-state.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/ssh-config-validation.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "file:libs/domains/loadweaver/shared/util-cli-core/src/lib/services/ssh-target.service.ts",
       "type": "contains"
     },
     {
@@ -37364,6 +40030,56 @@
       "type": "contains"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/docs/architecture.mmd",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/docs/cli-overview.mmd",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/docs/cluster-init-sequence.mmd",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/docs/cluster-topology.mmd",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/docs/cluster-update-planner.mmd",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/docs/network-layers.mmd",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/docs/routing-architecture.mmd",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/docs/routing-inter-cluster.mmd",
+      "type": "contains"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "file:libs/domains/loadweaver/shared/feature-cli/docs/workspace-state.mmd",
+      "type": "contains"
+    },
+    {
       "from": "project:shared-frontend-feature-docs",
       "to": "file:libs/domains/shared/frontend/feature-docs/README.md",
       "type": "contains"
@@ -37524,6 +40240,11 @@
       "type": "contains"
     },
     {
+      "from": "project:shared-shared-util-logger",
+      "to": "file:libs/domains/shared/shared/util-logger/README.md",
+      "type": "contains"
+    },
+    {
       "from": "project:decabill-backend-billing-manager",
       "to": "file:apps/decabill/backend-billing-manager/src/app/app.module.ts",
       "type": "contains"
@@ -37581,6 +40302,11 @@
     {
       "from": "project:shared-platform-authentication",
       "to": "file:apps/shared/platform-authentication/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-shared-util-ssh",
+      "to": "file:libs/domains/shared/shared/util-ssh/README.md",
       "type": "contains"
     },
     {
@@ -48116,6 +50842,386 @@
     {
       "from": "file:docs/forepath/features/opentelemetry.md",
       "to": "concept:forepath-api-reference",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/README.md",
+      "to": "concept:loadweaver-loadweaver",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/README.md",
+      "to": "concept:loadweaver-quick-start",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/README.md",
+      "to": "concept:loadweaver-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/architecture/system-overview.md",
+      "to": "concept:loadweaver-architecture-overview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/architecture/system-overview.md",
+      "to": "concept:loadweaver-execution-model",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/architecture/system-overview.md",
+      "to": "concept:loadweaver-future-extensions",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-cli-reference",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-commands",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-progress-output",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-mutation-safety",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-wireguard-key-rotation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-rotate-all-node-keys-and-roll-out-updated-peer-configs",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-rotate-a-single-node",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-inspect-key-age-and-due-warning-state",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-exit-codes-for-monitoring-when-wireguard-keyrotation-enabled-is-true",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-0-all-keys-ok-1-at-least-one-key-due-2-warning-window-only",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-rotate-only-overdue-keys-for-cron-systemd-automation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-print-suggested-cron-systemd-timer-snippets",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-swarm-label-reconcile",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "concept:loadweaver-ad-hoc-ssh",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-configuration",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-secrets-and-config-overlays",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-only-override-keepalived-password-keep-the-rest-from-loadweaver-yml",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-key-sections",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-ssh-access",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-advanced-routing-bird",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-host-bootstrap",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-ceph-osd-scale-out",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-traefik-acme-production-tls",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-on-primary-edit-etc-loadweaver-traefik-acme-env-chmod-600",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "concept:loadweaver-vip-failover-verification",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/inter-cluster-routing.md",
+      "to": "concept:loadweaver-inter-cluster-routing",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/inter-cluster-routing.md",
+      "to": "concept:loadweaver-topology",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/inter-cluster-routing.md",
+      "to": "concept:loadweaver-why-bgp-not-ospf",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/inter-cluster-routing.md",
+      "to": "concept:loadweaver-configuration-checklist",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/inter-cluster-routing.md",
+      "to": "concept:loadweaver-converge-order",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/inter-cluster-routing.md",
+      "to": "concept:loadweaver-safety-notes",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-lab-guide-3-vms",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-vm-sizing",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-network",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-operator-setup",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-configuration",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-converge-sequence",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-ssh-to-primary-edit-etc-loadweaver-traefik-acme-env-chmod-600-uncomment-cf-dns-api-token",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-add-a-4th-node-incremental-update",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-remove-a-node",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-troubleshooting",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "concept:loadweaver-tear-down",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/production-tls.md",
+      "to": "concept:loadweaver-production-tls-with-traefik-acme",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/production-tls.md",
+      "to": "concept:loadweaver-choose-a-challenge-type",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/production-tls.md",
+      "to": "concept:loadweaver-dns-01-recommended",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/production-tls.md",
+      "to": "concept:loadweaver-cf-dns-api-token-your-scoped-token",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/production-tls.md",
+      "to": "concept:loadweaver-http-01-only-when-port-80-is-public",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/production-tls.md",
+      "to": "concept:loadweaver-or-your-public-hostname-resolving-to-the-vip",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/production-tls.md",
+      "to": "concept:loadweaver-troubleshooting",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/production-tls.md",
+      "to": "concept:loadweaver-related-commands",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/system-requirements.md",
+      "to": "concept:loadweaver-system-requirements",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/system-requirements.md",
+      "to": "concept:loadweaver-operator-workstation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/system-requirements.md",
+      "to": "concept:loadweaver-target-nodes",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/system-requirements.md",
+      "to": "concept:loadweaver-installed-automatically-by-host-bootstrap",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/system-requirements.md",
+      "to": "concept:loadweaver-network",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/system-requirements.md",
+      "to": "concept:loadweaver-ports",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/getting-started.md",
+      "to": "concept:loadweaver-getting-started",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/getting-started.md",
+      "to": "concept:loadweaver-prerequisites",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/getting-started.md",
+      "to": "concept:loadweaver-build-the-cli",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/getting-started.md",
+      "to": "concept:loadweaver-bootstrap-workflow",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/getting-started.md",
+      "to": "concept:loadweaver-typical-dependency-order",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "concept:loadweaver-workspace-state",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "concept:loadweaver-state-json",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "concept:loadweaver-lock-json",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "concept:loadweaver-host-inventory-and-host-locks",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "concept:loadweaver-wireguard-key-rotation-schedule",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "concept:loadweaver-exit-1-keys-due-exit-2-warning-window",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "concept:loadweaver-wireguard-keys-json",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "concept:loadweaver-drift-detection",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "concept:loadweaver-yes-semantics",
       "type": "contains"
     },
     {
@@ -68589,6 +71695,96 @@
       "type": "documents"
     },
     {
+      "from": "concept:loadweaver-quick-start",
+      "to": "project:loadweaver-cli-loadweaver",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-documentation",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-future-extensions",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-configuration",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-secrets-and-config-overlays",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-only-override-keepalived-password-keep-the-rest-from-loadweaver-yml",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-key-sections",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-ssh-access",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-advanced-routing-bird",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-host-bootstrap",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-ceph-osd-scale-out",
+      "to": "api:HTTP:POST:/auth/register",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-ceph-osd-scale-out",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-traefik-acme-production-tls",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-on-primary-edit-etc-loadweaver-traefik-acme-env-chmod-600",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-vip-failover-verification",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-operator-setup",
+      "to": "project:loadweaver-cli-loadweaver",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-prerequisites",
+      "to": "api:HTTP:GET:/config",
+      "type": "documents"
+    },
+    {
+      "from": "concept:loadweaver-build-the-cli",
+      "to": "project:loadweaver-cli-loadweaver",
+      "type": "documents"
+    },
+    {
       "from": "project:@forepath/test/mounted-plugin-fixture",
       "to": "domain:shared",
       "type": "belongs_to"
@@ -68809,6 +72005,21 @@
       "type": "belongs_to"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-wireguard",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-wireguard",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-wireguard",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
       "from": "project:agenstra-backend-feature-agent-manager",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -68884,6 +72095,51 @@
       "type": "belongs_to"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-cluster",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-routing",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-routing",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-routing",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-traefik",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-traefik",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-traefik",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
       "from": "project:shared-frontend-feature-notifications",
       "to": "domain:shared",
       "type": "belongs_to"
@@ -68929,6 +72185,21 @@
       "type": "belongs_to"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-volume",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-volume",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-volume",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
       "from": "project:shared-backend-feature-notifications",
       "to": "domain:shared",
       "type": "belongs_to"
@@ -68940,6 +72211,21 @@
     },
     {
       "from": "project:shared-backend-feature-notifications",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-swarm",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-swarm",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-swarm",
       "to": "feature-group:feature",
       "type": "belongs_to"
     },
@@ -69031,6 +72317,66 @@
     {
       "from": "project:identity-frontend-data-access-auth",
       "to": "feature-group:data-access",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ceph",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ceph",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ceph",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-diag",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-host",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-host",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-host",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-node",
+      "to": "feature-group:feature",
       "type": "belongs_to"
     },
     {
@@ -69064,6 +72410,36 @@
       "type": "belongs_to"
     },
     {
+      "from": "project:loadweaver-shared-feature-cli-ssh",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ssh",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-ssh",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-vip",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-vip",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli-vip",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
       "from": "project:shared-backend-feature-monitoring",
       "to": "domain:shared",
       "type": "belongs_to"
@@ -69076,6 +72452,21 @@
     {
       "from": "project:shared-backend-feature-monitoring",
       "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-shell-executor",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-shell-executor",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-shell-executor",
+      "to": "feature-group:util",
       "type": "belongs_to"
     },
     {
@@ -69105,6 +72496,36 @@
     },
     {
       "from": "project:shared-frontend-util-docs-parser",
+      "to": "feature-group:util",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-config-loader",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-config-loader",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-config-loader",
+      "to": "feature-group:util",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-util-cli-core",
       "to": "feature-group:util",
       "type": "belongs_to"
     },
@@ -69195,6 +72616,21 @@
     },
     {
       "from": "project:identity-backend-feature-auth",
+      "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-shared-feature-cli",
       "to": "feature-group:feature",
       "type": "belongs_to"
     },
@@ -69375,6 +72811,21 @@
     },
     {
       "from": "project:shared-frontend-util-meta",
+      "to": "feature-group:util",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-logger",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-logger",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-logger",
       "to": "feature-group:util",
       "type": "belongs_to"
     },
@@ -69484,6 +72935,21 @@
       "type": "belongs_to"
     },
     {
+      "from": "project:shared-shared-util-ssh",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-ssh",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-shared-util-ssh",
+      "to": "feature-group:util",
+      "type": "belongs_to"
+    },
+    {
       "from": "project:agenstra-frontend-landingpage",
       "to": "domain:agenstra",
       "type": "belongs_to"
@@ -69540,6 +73006,21 @@
     },
     {
       "from": "project:forepath-frontend-landingpage",
+      "to": "feature-group:app",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-cli-loadweaver",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-cli-loadweaver",
+      "to": "context:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:loadweaver-cli-loadweaver",
       "to": "feature-group:app",
       "type": "belongs_to"
     },
@@ -70291,6 +73772,56 @@
     {
       "from": "file:docs/forepath/features/opentelemetry.md",
       "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/README.md",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/architecture/system-overview.md",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/cli-reference.md",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/configuration.md",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/inter-cluster-routing.md",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/lab-guide.md",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/production-tls.md",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/deployment/system-requirements.md",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/getting-started.md",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/loadweaver/workspace.md",
+      "to": "domain:loadweaver",
       "type": "belongs_to"
     },
     {
@@ -75286,6 +78817,371 @@
     {
       "from": "concept:forepath-api-reference",
       "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-loadweaver",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-quick-start",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-documentation",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-architecture-overview",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-execution-model",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-future-extensions",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-cli-reference",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-commands",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-progress-output",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-mutation-safety",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-wireguard-key-rotation",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-rotate-all-node-keys-and-roll-out-updated-peer-configs",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-rotate-a-single-node",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-inspect-key-age-and-due-warning-state",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-exit-codes-for-monitoring-when-wireguard-keyrotation-enabled-is-true",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-0-all-keys-ok-1-at-least-one-key-due-2-warning-window-only",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-rotate-only-overdue-keys-for-cron-systemd-automation",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-print-suggested-cron-systemd-timer-snippets",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-swarm-label-reconcile",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-ad-hoc-ssh",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-configuration",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-secrets-and-config-overlays",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-only-override-keepalived-password-keep-the-rest-from-loadweaver-yml",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-key-sections",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-ssh-access",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-advanced-routing-bird",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-host-bootstrap",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-ceph-osd-scale-out",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-traefik-acme-production-tls",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-on-primary-edit-etc-loadweaver-traefik-acme-env-chmod-600",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-vip-failover-verification",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-inter-cluster-routing",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-topology",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-why-bgp-not-ospf",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-configuration-checklist",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-converge-order",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-safety-notes",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-lab-guide-3-vms",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-vm-sizing",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-network",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-operator-setup",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-converge-sequence",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-ssh-to-primary-edit-etc-loadweaver-traefik-acme-env-chmod-600-uncomment-cf-dns-api-token",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-add-a-4th-node-incremental-update",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-remove-a-node",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-troubleshooting",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-tear-down",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-production-tls-with-traefik-acme",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-choose-a-challenge-type",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-dns-01-recommended",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-cf-dns-api-token-your-scoped-token",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-http-01-only-when-port-80-is-public",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-or-your-public-hostname-resolving-to-the-vip",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-related-commands",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-system-requirements",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-operator-workstation",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-target-nodes",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-installed-automatically-by-host-bootstrap",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-ports",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-getting-started",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-prerequisites",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-build-the-cli",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-bootstrap-workflow",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-typical-dependency-order",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-workspace-state",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-state-json",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-lock-json",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-host-inventory-and-host-locks",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-wireguard-key-rotation-schedule",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-exit-1-keys-due-exit-2-warning-window",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-wireguard-keys-json",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-drift-detection",
+      "to": "domain:loadweaver",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:loadweaver-yes-semantics",
+      "to": "domain:loadweaver",
       "type": "belongs_to"
     }
   ]

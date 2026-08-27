@@ -1,0 +1,32 @@
+flowchart TB
+    subgraph OperatorDir["Directory of loadweaver.yml"]
+        ConfigYml["loadweaver.yml"]
+        subgraph DotLoadweaver[".loadweaver/"]
+            State["state.json\ninventory serial desired fingerprint"]
+            Lock["lock.json\noperator mutex"]
+            subgraph WireguardDir["wireguard/"]
+                WgKeys["keys.json\nper-node key pairs rotatedAt"]
+            end
+            subgraph RoutingDir["routing/"]
+                CrossKeys["cross-wg-keys.json\nhub wg1 keys optional"]
+            end
+        end
+    end
+
+    subgraph HostDir["Each managed node /etc/loadweaver/"]
+        HostInv["inventory.json\nserial node fingerprint"]
+        HostLock["lock.json\nhost mutex"]
+    end
+
+    ConfigYml --> State
+    GuardedMutation["guarded mutations"] --> State
+    GuardedMutation --> Lock
+    GuardedMutation --> HostLock
+    GuardedMutation --> HostInv
+    WireguardInit["wireguard init/rotate"] --> WgKeys
+    RoutingInit["routing init/reconcile"] --> CrossKeys
+
+    State --> UpdatePlan["planClusterUpdate diff"]
+    State --> Drift["inspectRemoteDrift"]
+    HostInv --> Drift
+    Lock --> MutationGuard["runGuardedMutation blocks concurrent writes"]

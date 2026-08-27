@@ -1,0 +1,8 @@
+import { createProgram } from '<%= featureLibImport %>';
+
+const program = createProgram();
+
+program.parseAsync(process.argv).catch((err: Error) => {
+  console.error(err.message);
+  process.exit(1);
+});

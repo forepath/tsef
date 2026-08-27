@@ -1,0 +1,35 @@
+sequenceDiagram
+    participant Op as Operator
+    participant CLI as loadweaver CLI
+    participant Orch as ClusterOrchestrator
+    participant Host as HostService
+    participant WG as WireguardService
+    participant RT as RoutingService
+    participant Swarm as SwarmService
+    participant Ceph as CephService
+    participant Traefik as TraefikService
+    participant Vip as VipService
+    participant Node as Remote node SSH
+
+    Op->>CLI: cluster init
+    CLI->>Orch: runGuardedMutation cluster.init
+    Orch->>Host: host.bootstrap all nodes
+    Host->>Node: apt docker wireguard keepalived bird2 on hubs cephadm
+    Orch->>Host: verify prerequisites
+    Orch->>WG: wireguard.init
+    WG->>Node: deploy wg0.conf keys peers
+    alt routing.enabled
+        Orch->>RT: routing.init
+        RT->>Node: wg1 cross peers optional bird.conf
+    end
+    Orch->>Swarm: swarm.init + joinAll
+    Swarm->>Node: docker swarm init/join on wg0
+    Orch->>Ceph: ceph.init cephfs mount
+    Ceph->>Node: cephadm bootstrap mount
+    Orch->>Traefik: traefik.deploy
+    Traefik->>Node: stack deploy CephFS volumes
+    opt vip configured
+        Orch->>Vip: vip.init
+        Vip->>Node: keepalived.conf
+    end
+    Orch->>Orch: persist state.json
