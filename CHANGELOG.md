@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.27.0](https://github.com/forepath/one/compare/v2.26.1...v2.27.0) (2026-08-27)
+
+
+### Features
+
+* **decabill:** multi-provider plans ([#581](https://github.com/forepath/one/issues/581)) ([f436301](https://github.com/forepath/one/commit/f436301208d4e1bbe387c53cc30dc92f8f0aebaa))
+
+
+### Bug Fixes
+
+* **decabill:** addon compatibility marker ([#582](https://github.com/forepath/one/issues/582)) ([685a42b](https://github.com/forepath/one/commit/685a42baded76c8623bf139f18fe3bfde0e30ef3))
+
 ## [2.26.1](https://github.com/forepath/one/compare/v2.26.0...v2.26.1) (2026-08-25)
 
 
