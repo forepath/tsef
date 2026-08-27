@@ -48,6 +48,7 @@ import {
   isNoneServiceTypeId,
   isSubscriptionItemDetailEligible,
   mergeMandatoryOrderAddonIds,
+  isAddonCompatibleWithProvider,
   normalizeAllowedProviders,
   normalizeAllowedServerTypeIds,
   providerLocationCatalogFromList,
@@ -228,6 +229,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   /** Per-addon order field values, keyed by addon id then env key. */
   orderAddonConfigs: Record<string, Record<string, string>> = {};
   orderAddonsLoading = false;
+  readonly orderInvalidAddonLabel = $localize`:@@featureSubscriptions-orderInvalidAddonLabel:Not available for the selected provider`;
   orderPromotionCode = signal('');
   readonly orderPromotionValidationPreview = toSignal(this.promotionsFacade.getValidationPreview$('new'), {
     initialValue: null,
@@ -874,6 +876,22 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return this.orderAddons.find((addon) => addon.id === addonId)?.mandatory === true;
   }
 
+  isOrderAddonInvalid(addonId: string): boolean {
+    const addon = this.orderAddons.find((entry) => entry.id === addonId);
+
+    if (!addon || !this.isOrderAddonSelected(addonId)) {
+      return false;
+    }
+
+    const provider = this.orderHasProviderSelection() ? this.orderProvisioningProvider : '';
+
+    return !isAddonCompatibleWithProvider(addon, provider);
+  }
+
+  hasInvalidSelectedOrderAddons(): boolean {
+    return this.orderAddons.some((addon) => this.isOrderAddonInvalid(addon.id));
+  }
+
   toggleOrderAddon(addonId: string, checked: boolean): void {
     if (!checked && this.isOrderAddonMandatory(addonId)) {
       return;
@@ -1285,6 +1303,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
             ...addon,
             orderFields: addon.orderFields ?? [],
             mandatory: addon.mandatory === true,
+            compatibleProviders: addon.compatibleProviders ?? [],
           }));
           this.syncMandatoryOrderAddonSelection();
           this.orderAddonsLoading = false;
@@ -2071,7 +2090,6 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     this.subscriptionToModify = sub;
     this.configChangeFacade.reset();
     this.configChangeFacade.loadEligibility(sub.id);
-    this.loadConfigChangeAddons(sub.planId);
 
     this.configChangeFacade
       .getEligibility$()
@@ -2087,6 +2105,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
 
         this.configChangeServerType = eligibility.currentServerType?.trim() ?? '';
         this.configChangeSelectedAddonIds = new Set(eligibility.activeAddonIds);
+        this.loadConfigChangeAddons(sub.planId, eligibility.provider);
         this.loadConfigChangeServerTypes(sub.planId, eligibility.allowedServerTypes, eligibility.provider);
         this.cdr.detectChanges();
       });
@@ -2120,14 +2139,14 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return planId ? (this.servicePlans().find((plan) => plan.id === planId) ?? null) : null;
   }
 
-  private loadConfigChangeAddons(planId: string): void {
+  private loadConfigChangeAddons(planId: string, provider?: string | null): void {
     const requestId = ++this.configChangeAddonsRequestId;
 
     this.configChangeAddons = [];
     this.configChangeAddonsLoading = true;
 
     this.servicePlansService
-      .getOrderAddons(planId)
+      .getOrderAddons(planId, provider ?? undefined)
       .pipe(take(1))
       .subscribe({
         next: (addons) => {
@@ -2135,7 +2154,11 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
             return;
           }
 
-          this.configChangeAddons = addons.map((addon) => ({ ...addon, orderFields: addon.orderFields ?? [] }));
+          this.configChangeAddons = addons.map((addon) => ({
+            ...addon,
+            orderFields: addon.orderFields ?? [],
+            compatibleProviders: addon.compatibleProviders ?? [],
+          }));
           this.configChangeAddonsLoading = false;
           this.cdr.detectChanges();
         },

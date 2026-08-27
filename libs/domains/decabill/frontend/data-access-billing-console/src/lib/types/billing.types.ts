@@ -471,6 +471,8 @@ export interface PlanAddonOptionDto {
   meters?: AttachedMeterResponse[];
   /** When true, the addon is required for this plan and cannot be deselected. */
   mandatory: boolean;
+  /** Provider ids this addon supports; empty means all addon-capable providers. */
+  compatibleProviders: string[];
 }
 
 export interface CreateAddonDto {
@@ -960,6 +962,8 @@ export interface PricingPreviewAddonLine {
   addonId: string;
   name: string;
   periodPrice: number;
+  /** When true, the addon is incompatible with the selected provider and excluded from totals. */
+  invalid?: boolean;
 }
 
 export interface PricingPreviewResponse {

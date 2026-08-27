@@ -78,6 +78,7 @@ describe('ServicePlansController', () => {
   const addonServiceStub = {
     assertAllowedAddonIdsForPlan: jest.fn().mockResolvedValue(undefined),
     providerSupportsAddons: jest.fn().mockReturnValue(true),
+    getOrderFieldsForAddon: jest.fn().mockReturnValue([]),
   };
   const addonsRepositoryStub = {
     findByIds: jest.fn().mockResolvedValue([]),
@@ -754,5 +755,50 @@ describe('ServicePlansController', () => {
 
     await expect(controller.remove(basePlanRow.id)).resolves.toBeUndefined();
     expect(deleteFn).toHaveBeenCalledWith(basePlanRow.id);
+  });
+
+  it('listOrderAddons filters by provider query param', async () => {
+    const planWithAddons = {
+      ...basePlanRow,
+      providerConfigDefaults: { allowedAddonIds: ['addon-1', 'addon-2'] },
+    };
+    addonsRepositoryStub.findByIds.mockResolvedValue([
+      {
+        id: 'addon-1',
+        key: 'hetzner-only',
+        name: 'Hetzner only',
+        isActive: true,
+        compatibleProviders: ['hetzner'],
+        implementationType: 'module',
+        basePrice: '5',
+        priceIntervalType: BillingIntervalType.MONTH,
+        priceIntervalValue: 1,
+      },
+      {
+        id: 'addon-2',
+        key: 'do-only',
+        name: 'DO only',
+        isActive: true,
+        compatibleProviders: ['digital-ocean'],
+        implementationType: 'module',
+        basePrice: '3',
+        priceIntervalType: BillingIntervalType.MONTH,
+        priceIntervalValue: 1,
+      },
+    ]);
+    const moduleRef = await setupRepositoryMock({
+      findAll: jest.fn(),
+      findByIdOrThrow: jest.fn().mockResolvedValue(planWithAddons),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    });
+    const controller = moduleRef.get(ServicePlansController);
+
+    const result = await controller.listOrderAddons(planWithAddons.id, 'digital-ocean');
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('addon-2');
+    expect(result[0].compatibleProviders).toEqual(['digital-ocean']);
   });
 });

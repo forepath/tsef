@@ -33,6 +33,7 @@ import { SubscriptionConfigChangesRepository } from '../repositories/subscriptio
 import { SubscriptionItemsRepository } from '../repositories/subscription-items.repository';
 import { SubscriptionsRepository } from '../repositories/subscriptions.repository';
 import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
+import { isAddonCompatibleWithProvider } from '../utils/addon-compatibility.utils';
 import { parsePlanAllowedAddonIds, parsePlanMandatoryAddonIds } from '../utils/plan-addons.utils';
 import { roundMoney } from '../utils/promotion-advantage.util';
 import { normalizeStoredProviderDefaults } from '../utils/provider-env-defaults.utils';
@@ -103,7 +104,7 @@ export class SubscriptionConfigChangeService {
   async getEligibility(subscriptionId: string, userId: string): Promise<ConfigChangeEligibilityDto> {
     const context = await this.loadContext(subscriptionId, userId);
 
-    return this.buildEligibility(context);
+    return await this.buildEligibility(context);
   }
 
   async preview(
@@ -116,7 +117,7 @@ export class SubscriptionConfigChangeService {
     const amounts = await this.computeAmounts(context, resolved);
 
     return {
-      eligibility: this.buildEligibility(context),
+      eligibility: await this.buildEligibility(context),
       amounts,
       disclaimer: this.buildDisclaimer(amounts, resolved, context.plan),
       discounts: await this.loadDiscounts(subscriptionId),
@@ -221,12 +222,19 @@ export class SubscriptionConfigChangeService {
     return undefined;
   }
 
-  private buildEligibility(context: ConfigChangeContext): ConfigChangeEligibilityDto {
+  private async buildEligibility(context: ConfigChangeContext): Promise<ConfigChangeEligibilityDto> {
     const detail = context.provider ? this.providerRegistry.getProvider(context.provider) : undefined;
     const hasPendingChange =
       context.latestChange?.status === 'pending' || context.latestChange?.status === 'processing';
     const activeAddonIds = context.activeAddons.map((row) => row.addonId);
     const planAddonIds = parsePlanAllowedAddonIds(context.plan.providerConfigDefaults);
+    const planAddons = planAddonIds.length > 0 ? await this.addonsRepository.findByIds(planAddonIds) : [];
+    const providerCompatibleAddonIds = new Set(
+      planAddons
+        .filter((addon) => addon.isActive)
+        .filter((addon) => isAddonCompatibleWithProvider(addon, context.provider))
+        .map((addon) => addon.id),
+    );
     let reasonCode: ConfigChangeErrorCode | undefined;
     let reason: string | undefined;
 
@@ -254,7 +262,9 @@ export class SubscriptionConfigChangeService {
           : [],
       supportsServerTypeUpgrade: detail?.supportsServerTypeUpgrade === true,
       supportsServerTypeDowngrade: detail?.supportsServerTypeDowngrade === true,
-      availableAddonIds: planAddonIds.filter((id) => !activeAddonIds.includes(id)),
+      availableAddonIds: planAddonIds.filter(
+        (id) => !activeAddonIds.includes(id) && providerCompatibleAddonIds.has(id),
+      ),
       activeAddonIds,
     };
   }
@@ -276,7 +286,7 @@ export class SubscriptionConfigChangeService {
     context: ConfigChangeContext,
     dto: ConfigChangeRequestDto,
   ): Promise<ResolvedConfigChange> {
-    const eligibility = this.buildEligibility(context);
+    const eligibility = await this.buildEligibility(context);
 
     if (!eligibility.canRequestChange) {
       throwConfigChangeBadRequest(

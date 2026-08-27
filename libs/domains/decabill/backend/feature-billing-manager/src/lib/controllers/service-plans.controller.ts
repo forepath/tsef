@@ -45,6 +45,7 @@ import {
   type PlanPriceMigrateEnqueuePort,
 } from '../queue/plan-price-migrate-enqueue.token';
 import { convertAddonPriceToPlanPeriod } from '../utils/addon-pricing.util';
+import { isAddonCompatibleWithProvider } from '../utils/addon-compatibility.utils';
 import { normalizePlanProviderConfigDefaults } from '../utils/cloud-init/plan-provisioning-options.utils';
 import { parsePlanAllowedAddonIds, parsePlanMandatoryAddonIds } from '../utils/plan-addons.utils';
 import { commercialPricingFieldsChanged, snapshotCommercialPricing } from '../utils/plan-commercial-pricing.utils';
@@ -165,7 +166,10 @@ export class ServicePlansController {
 
   @RequireScopes('subscriptions:read')
   @Get(':id/addons')
-  async listOrderAddons(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<PlanAddonOptionDto[]> {
+  async listOrderAddons(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Query('provider') provider?: string,
+  ): Promise<PlanAddonOptionDto[]> {
     const plan = await this.servicePlansRepository.findByIdOrThrow(id);
 
     if (!plan.serviceTypeId) {
@@ -173,9 +177,12 @@ export class ServicePlansController {
     }
 
     const serviceType = await this.serviceTypesRepository.findByIdOrThrow(plan.serviceTypeId);
-    const primaryProvider = resolveServiceTypeAllowedProviders(serviceType)[0] ?? serviceType.provider ?? null;
+    const filterProvider =
+      typeof provider === 'string' && provider.trim()
+        ? provider.trim()
+        : (resolveServiceTypeAllowedProviders(serviceType)[0] ?? serviceType.provider ?? null);
 
-    if (!primaryProvider || !this.addonService.providerSupportsAddons(primaryProvider)) {
+    if (!filterProvider || !this.addonService.providerSupportsAddons(filterProvider)) {
       return [];
     }
 
@@ -190,7 +197,7 @@ export class ServicePlansController {
 
     const compatible = addons
       .filter((addon) => addon.isActive)
-      .filter((addon) => addon.compatibleProviders.length === 0 || addon.compatibleProviders.includes(primaryProvider));
+      .filter((addon) => isAddonCompatibleWithProvider(addon, filterProvider));
 
     return await Promise.all(
       compatible.map(async (addon) => ({
@@ -206,6 +213,7 @@ export class ServicePlansController {
         orderFields: this.addonService.getOrderFieldsForAddon(addon),
         meters: await this.meterService.listAddonMeters(addon.id),
         mandatory: mandatoryIds.has(addon.id),
+        compatibleProviders: addon.compatibleProviders ?? [],
       })),
     );
   }

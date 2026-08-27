@@ -932,6 +932,8 @@
       <trans-unit id="featureSubscriptions-addonsTotal" datatype="html"><source>Addons total</source><target>Add-ons gesamt</target></trans-unit>
       <trans-unit id="featureSubscriptions-mandatoryAddonBadge" datatype="html"><source>Required</source><target>Erforderlich</target></trans-unit>
       <trans-unit id="featureSubscriptions-mandatoryAddonHint" datatype="html"><source>Included with this plan and cannot be removed.</source><target>In diesem Plan enthalten und kann nicht entfernt werden.</target></trans-unit>
+      <trans-unit id="featureSubscriptions-orderInvalidAddonLabel" datatype="html"><source>Not available for the selected provider</source><target>Für den gewählten Anbieter nicht verfügbar</target></trans-unit>
+      <trans-unit id="featureSubscriptions-orderInvalidAddonsHint" datatype="html"><source>Some selected addons are not available for the chosen provider and will be omitted from the order.</source><target>Einige ausgewählte Add-ons sind für den gewählten Anbieter nicht verfügbar und werden aus der Bestellung entfernt.</target></trans-unit>
       <trans-unit id="featureSubscriptions-grandTotal" datatype="html"><source>Plan and addons</source><target>Plan und Add-ons</target></trans-unit>
       <trans-unit id="featureSubscriptions-orderStepPlanAddons" datatype="html"><source>Plan &amp; addons</source><target>Plan &amp; Add-ons</target></trans-unit>
       <trans-unit id="featureCloudInitConfigs-title" datatype="html">

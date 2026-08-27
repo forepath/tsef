@@ -110,22 +110,31 @@ export class PricingController {
       throw new BadRequestException('Addons are not supported for plans without a service type');
     }
 
-    const addons =
+    const { compatible, incompatible } =
       plan.serviceTypeId == null
-        ? []
-        : await this.addonService.assertAddonIdsForOrder(
+        ? { compatible: [], incompatible: [] }
+        : await this.addonService.resolveOrderAddonSelection(
             plan.serviceTypeId,
             parsePlanAllowedAddonIds(plan.providerConfigDefaults),
             selectedAddonIds,
             dto.requestedConfig,
             plan,
           );
-    const addonLines = addons.map((addon) => ({
-      addonId: addon.id,
-      name: addon.name,
-      periodPrice: convertAddonPriceToPlanPeriod(addon, plan),
-    }));
-    const addonsTotal = Math.round(addonLines.reduce((sum, line) => sum + line.periodPrice, 0) * 100) / 100;
+    const addonLines = [
+      ...compatible.map((addon) => ({
+        addonId: addon.id,
+        name: addon.name,
+        periodPrice: convertAddonPriceToPlanPeriod(addon, plan),
+      })),
+      ...incompatible.map((addon) => ({
+        addonId: addon.id,
+        name: addon.name,
+        periodPrice: convertAddonPriceToPlanPeriod(addon, plan),
+        invalid: true,
+      })),
+    ];
+    const addonsTotal =
+      Math.round(compatible.reduce((sum, addon) => sum + convertAddonPriceToPlanPeriod(addon, plan), 0) * 100) / 100;
     const grandTotal = Math.round((planPricing.totalPrice + addonsTotal) * 100) / 100;
     const taxed = enrichPricingWithTax(
       { ...planPricing, totalPrice: grandTotal },

@@ -55,6 +55,7 @@ Webhook: `service_plan.allowed_providers_changed`.
 2. If true, client-supplied `provider` is kept (or the plan default is used) and must be in `plan.allowedProviders`.
 3. The resolved provider is written to `configSnapshot.provider` and drives availability, geography, server-type catalogs, pricing snapshots, and provisioning.
 4. Config schema validation uses the **resolved** provider’s registered schema (Hetzner `location` vs DigitalOcean `region`).
+5. Selected addons incompatible with the resolved provider are marked invalid in pricing preview and omitted from the created subscription.
 
 ## Availability (`POST /availability/check`)
 

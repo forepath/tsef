@@ -1330,6 +1330,11 @@ paths:
           in: path
           required: true
           schema: { type: string, format: uuid }
+        - name: provider
+          in: query
+          required: false
+          schema: { type: string }
+          description: Filter addons by provider compatibility; defaults to the service type primary provider.
       responses:
         '200':
           description: Plan addon options (empty when provider does not support addons)
@@ -7758,6 +7763,12 @@ components:
               addonId: { type: string, format: uuid }
               name: { type: string }
               periodPrice: { type: number }
+              invalid:
+                {
+                  type: boolean,
+                  description: When true,
+                  the addon is incompatible with the selected provider and excluded from totals,
+                }
         addonsTotal: { type: number, description: Sum of addon period prices }
         grandTotal:
           {
@@ -7855,6 +7866,10 @@ components:
             description: When true,
             the addon is required for this plan and cannot be deselected,
           }
+        compatibleProviders:
+          type: array
+          items: { type: string }
+          description: Provider ids this addon supports; empty means all addon-capable providers.
     CreateAddonDto:
       type: object
       required: [key, name, implementationType]

@@ -3321,6 +3321,12 @@
       <trans-unit id="featureSubscriptions-mandatoryAddonHint" datatype="html">
         <source>Included with this plan and cannot be removed.</source>
         </trans-unit>
+      <trans-unit id="featureSubscriptions-orderInvalidAddonLabel" datatype="html">
+        <source>Not available for the selected provider</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-orderInvalidAddonsHint" datatype="html">
+        <source>Some selected addons are not available for the chosen provider and will be omitted from the order.</source>
+        </trans-unit>
       <trans-unit id="featureSubscriptions-planMeters" datatype="html">
         <source> Plan usage meters </source>
         </trans-unit>

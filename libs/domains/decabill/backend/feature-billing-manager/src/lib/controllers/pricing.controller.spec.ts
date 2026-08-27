@@ -37,7 +37,7 @@ describe('PricingController', () => {
   let findServiceTypeById: jest.Mock;
   let calculate: jest.Mock;
   let getServerTypes: jest.Mock;
-  let assertAddonIdsForOrder: jest.Mock;
+  let resolveOrderAddonSelection: jest.Mock;
 
   beforeEach(async () => {
     findPlanById = jest.fn().mockResolvedValue(planRow);
@@ -56,7 +56,7 @@ describe('PricingController', () => {
       { id: 'cx11', priceMonthly: 4.15 },
       { id: 'cpx11', priceMonthly: 6.49 },
     ]);
-    assertAddonIdsForOrder = jest.fn().mockResolvedValue([]);
+    resolveOrderAddonSelection = jest.fn().mockResolvedValue({ compatible: [], incompatible: [] });
 
     const moduleRef = await Test.createTestingModule({
       controllers: [PricingController],
@@ -87,7 +87,7 @@ describe('PricingController', () => {
           provide: TaxPreviewService,
           useValue: { preview: jest.fn() },
         },
-        { provide: AddonService, useValue: { assertAddonIdsForOrder } },
+        { provide: AddonService, useValue: { resolveOrderAddonSelection } },
         { provide: AddonsRepository, useValue: { findByIds: jest.fn().mockResolvedValue([]) } },
       ],
     }).compile();
@@ -236,5 +236,48 @@ describe('PricingController', () => {
     expect(result.taxCategory).toBe('reduced');
     expect(result.taxRate).toBe(7);
     expect(result.totalGross).toBeCloseTo(10.7, 2);
+  });
+
+  it('marks incompatible addons invalid and excludes them from totals', async () => {
+    findPlanById.mockResolvedValue({
+      ...planRow,
+      providerConfigDefaults: { allowedAddonIds: ['addon-1', 'addon-2'] },
+    });
+    resolveOrderAddonSelection.mockResolvedValue({
+      compatible: [
+        {
+          id: 'addon-1',
+          name: 'Compatible',
+          basePrice: '5',
+          priceIntervalType: BillingIntervalType.MONTH,
+          priceIntervalValue: 1,
+        },
+      ],
+      incompatible: [
+        {
+          id: 'addon-2',
+          name: 'Incompatible',
+          basePrice: '3',
+          priceIntervalType: BillingIntervalType.MONTH,
+          priceIntervalValue: 1,
+        },
+      ],
+    });
+
+    const result = await controller.preview(
+      {
+        planId: planRow.id,
+        addonIds: ['addon-1', 'addon-2'],
+        requestedConfig: { provider: 'digital-ocean' },
+      },
+      authReq as never,
+    );
+
+    expect(result.addonLines).toEqual([
+      { addonId: 'addon-1', name: 'Compatible', periodPrice: 5 },
+      { addonId: 'addon-2', name: 'Incompatible', periodPrice: 3, invalid: true },
+    ]);
+    expect(result.addonsTotal).toBe(5);
+    expect(result.grandTotal).toBe(15);
   });
 });

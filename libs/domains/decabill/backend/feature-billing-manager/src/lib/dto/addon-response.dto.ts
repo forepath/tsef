@@ -43,4 +43,6 @@ export class PlanAddonOptionDto {
   meters!: AttachedMeterResponseDto[];
   /** When true, the addon is required for this plan and cannot be deselected. */
   mandatory!: boolean;
+  /** Provider ids this addon supports; empty means all addon-capable providers. */
+  compatibleProviders!: string[];
 }

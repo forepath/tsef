@@ -579,6 +579,14 @@
                                     <label class="form-check-label w-100" [for]="'orderAddon_' + addon.id">
                                       <span class="d-flex justify-content-between gap-3">
                                         <span>
+                                          @if (isOrderAddonInvalid(addon.id)) {
+                                            <i
+                                              class="bi bi-exclamation-circle text-danger me-1"
+                                              aria-hidden="true"
+                                              [title]="orderInvalidAddonLabel"
+                                            ></i>
+                                            <span class="visually-hidden">{{ orderInvalidAddonLabel }}</span>
+                                          }
                                           {{ addon.name }}
                                           @if (addon.mandatory) {
                                             <span
@@ -588,7 +596,12 @@
                                             >
                                           }
                                         </span>
-                                        <span class="text-nowrap">{{ formatCurrencyAmount(addon.periodPrice) }}</span>
+                                        <span
+                                          class="text-nowrap"
+                                          [class.text-decoration-line-through]="isOrderAddonInvalid(addon.id)"
+                                          [class.text-body-secondary]="isOrderAddonInvalid(addon.id)"
+                                          >{{ formatCurrencyAmount(addon.periodPrice) }}</span
+                                        >
                                       </span>
                                       @if (addon.description) {
                                         <span class="d-block small text-body-secondary">{{ addon.description }}</span>
@@ -618,6 +631,15 @@
                                 </div>
                               }
                             </fieldset>
+                            @if (hasInvalidSelectedOrderAddons()) {
+                              <p
+                                class="small text-danger mt-2 mb-0"
+                                i18n="@@featureSubscriptions-orderInvalidAddonsHint"
+                              >
+                                Some selected addons are not available for the chosen provider and will be omitted from
+                                the order.
+                              </p>
+                            }
                           }
                           @if (selectedPlan?.description?.trim()) {
                             <div
@@ -1776,8 +1798,22 @@
                               </div>
                               @for (line of pricing.addonLines ?? []; track line.addonId) {
                                 <div class="d-flex justify-content-between gap-3">
-                                  <dt class="text-body-secondary fw-normal">{{ line.name }}</dt>
-                                  <dd class="mb-2 text-nowrap fw-normal">
+                                  <dt class="text-body-secondary fw-normal">
+                                    @if (line.invalid) {
+                                      <i
+                                        class="bi bi-exclamation-circle text-danger me-1"
+                                        aria-hidden="true"
+                                        [title]="orderInvalidAddonLabel"
+                                      ></i>
+                                      <span class="visually-hidden">{{ orderInvalidAddonLabel }}</span>
+                                    }
+                                    {{ line.name }}
+                                  </dt>
+                                  <dd
+                                    class="mb-2 text-nowrap fw-normal"
+                                    [class.text-decoration-line-through]="line.invalid === true"
+                                    [class.text-body-secondary]="line.invalid === true"
+                                  >
                                     {{ formatCurrencyAmount(line.periodPrice) }}
                                   </dd>
                                 </div>
@@ -1850,8 +1886,22 @@
                               </div>
                               @for (line of pricing.addonLines ?? []; track line.addonId) {
                                 <div class="d-flex justify-content-between gap-3">
-                                  <dt class="text-body-secondary fw-normal">{{ line.name }}</dt>
-                                  <dd class="mb-2 text-nowrap fw-normal">
+                                  <dt class="text-body-secondary fw-normal">
+                                    @if (line.invalid) {
+                                      <i
+                                        class="bi bi-exclamation-circle text-danger me-1"
+                                        aria-hidden="true"
+                                        [title]="orderInvalidAddonLabel"
+                                      ></i>
+                                      <span class="visually-hidden">{{ orderInvalidAddonLabel }}</span>
+                                    }
+                                    {{ line.name }}
+                                  </dt>
+                                  <dd
+                                    class="mb-2 text-nowrap fw-normal"
+                                    [class.text-decoration-line-through]="line.invalid === true"
+                                    [class.text-body-secondary]="line.invalid === true"
+                                  >
                                     {{ formatCurrencyAmount(line.periodPrice) }}
                                   </dd>
                                 </div>
