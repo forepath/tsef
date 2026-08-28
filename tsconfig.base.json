@@ -207,6 +207,9 @@
       ],
       "@forepath/shared/frontend/ui-lists": [
         "libs/domains/shared/frontend/ui-lists/src/index.ts"
+      ],
+      "@forepath/shared/backend/util-file-storage": [
+        "libs/domains/shared/backend/util-file-storage/src/index.ts"
       ]
     }
   },

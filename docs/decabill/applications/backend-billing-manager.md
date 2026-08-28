@@ -100,7 +100,7 @@ docker compose up -d
 
 Compose services: `postgres`, `redis`, `backend-billing-manager`, `backend-billing-manager-worker`, `backend-billing-manager-scheduler`, `mailhog`.
 
-Volumes include `invoice_pdf_data` mounted at `/data/invoices` and optional `./provider-plugins` for dynamic providers.
+Volumes include `billing_file_data` mounted at `/data` (with `invoices/` and `datev-exports/` subdirs) and optional `./provider-plugins` for dynamic providers.
 
 ## Authentication
 

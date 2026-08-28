@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-25T17:44:36.644Z",
+  "generatedAt": "2026-08-28T08:32:29.548Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -702,6 +702,27 @@
         "domain": "shared",
         "context": "backend",
         "featureGroup": "feature"
+      }
+    },
+    {
+      "id": "project:shared-backend-util-file-storage",
+      "type": "lib",
+      "attrs": {
+        "name": "shared-backend-util-file-storage",
+        "root": "libs/domains/shared/backend/util-file-storage",
+        "tags": [
+          "domain:shared",
+          "scope:backend",
+          "type:util"
+        ],
+        "type": "lib",
+        "targets": [
+          "lint",
+          "test"
+        ],
+        "domain": "shared",
+        "context": "backend",
+        "featureGroup": "util"
       }
     },
     {
@@ -8246,15 +8267,6 @@
       }
     },
     {
-      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export-storage.service.ts",
-      "type": "service",
-      "attrs": {
-        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export-storage.service.ts",
-        "languageOrKind": "ts",
-        "projectName": "decabill-backend-feature-billing-manager"
-      }
-    },
-    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.job-handler.ts",
       "type": "job",
       "attrs": {
@@ -10444,6 +10456,60 @@
         "path": "libs/domains/shared/backend/feature-monitoring/src/lib/monitoring.module.ts",
         "languageOrKind": "ts",
         "projectName": "shared-backend-feature-monitoring"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/util-file-storage/README.md",
+      "type": "readme",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-file-storage/README.md",
+        "languageOrKind": "md",
+        "projectName": "shared-backend-util-file-storage"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage-legacy-migration.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-file-storage/src/lib/file-storage-legacy-migration.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-util-file-storage"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.module.ts",
+      "type": "module",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-file-storage/src/lib/file-storage.module.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-util-file-storage"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-util-file-storage"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/util-file-storage/src/lib/providers/local-file-storage.provider.ts",
+      "type": "provider",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-file-storage/src/lib/providers/local-file-storage.provider.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-util-file-storage"
+      }
+    },
+    {
+      "id": "file:libs/domains/shared/backend/util-file-storage/src/lib/providers/s3-file-storage.provider.ts",
+      "type": "provider",
+      "attrs": {
+        "path": "libs/domains/shared/backend/util-file-storage/src/lib/providers/s3-file-storage.provider.ts",
+        "languageOrKind": "ts",
+        "projectName": "shared-backend-util-file-storage"
       }
     },
     {
@@ -30115,6 +30181,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "project:shared-backend-util-file-storage",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "project:shared-backend-util-opensearch",
       "type": "depends_on"
     },
@@ -35845,11 +35916,6 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export-storage.service.ts",
-      "type": "contains"
-    },
-    {
-      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.job-handler.ts",
       "type": "contains"
     },
@@ -37041,6 +37107,36 @@
     {
       "from": "project:shared-backend-feature-monitoring",
       "to": "file:libs/domains/shared/backend/feature-monitoring/src/lib/monitoring.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-file-storage",
+      "to": "file:libs/domains/shared/backend/util-file-storage/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-file-storage",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage-legacy-migration.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-file-storage",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.module.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-file-storage",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-file-storage",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/providers/local-file-storage.provider.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:shared-backend-util-file-storage",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/providers/s3-file-storage.provider.ts",
       "type": "contains"
     },
     {
@@ -55674,6 +55770,11 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/project-time-report-pdf.service.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/project-time-report.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/repositories/projects.repository.ts",
       "type": "injects"
@@ -56190,7 +56291,7 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-document-archive.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-pdf.service.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
       "type": "injects"
     },
     {
@@ -56205,7 +56306,7 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export-admin.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export-storage.service.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
       "type": "injects"
     },
     {
@@ -56270,7 +56371,7 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.service.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export-storage.service.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
       "type": "injects"
     },
     {
@@ -56511,6 +56612,11 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-pdf.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/invoice-promotion-applications.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-pdf.service.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
       "type": "injects"
     },
     {
@@ -59820,11 +59926,6 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
-      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export-storage.service.ts",
-      "type": "provides"
-    },
-    {
-      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-booking-mapper.service.ts",
       "type": "provides"
     },
@@ -60311,6 +60412,26 @@
     {
       "from": "file:libs/domains/shared/backend/feature-monitoring/src/lib/monitoring.module.ts",
       "to": "file:libs/domains/shared/backend/feature-monitoring/src/lib/health.controller.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.module.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/providers/local-file-storage.provider.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.module.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/providers/s3-file-storage.provider.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.module.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.module.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage-legacy-migration.service.ts",
       "type": "provides"
     },
     {
@@ -69076,6 +69197,21 @@
     {
       "from": "project:shared-backend-feature-monitoring",
       "to": "feature-group:feature",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-util-file-storage",
+      "to": "domain:shared",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-util-file-storage",
+      "to": "context:backend",
+      "type": "belongs_to"
+    },
+    {
+      "from": "project:shared-backend-util-file-storage",
+      "to": "feature-group:util",
       "type": "belongs_to"
     },
     {

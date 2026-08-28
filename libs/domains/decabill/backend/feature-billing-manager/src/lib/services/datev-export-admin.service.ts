@@ -1,4 +1,5 @@
 import { DEFAULT_TENANT, getTenantIdOrDefault } from '@forepath/shared/backend';
+import { FileStorageService } from '@forepath/shared/backend/util-file-storage';
 import {
   BadRequestException,
   ForbiddenException,
@@ -20,14 +21,12 @@ import type { DatevExportEntity } from '../entities/datev-export.entity';
 import { DATEV_EXPORT_ENQUEUE, type DatevExportEnqueuePort } from '../queue/datev-export-enqueue.token';
 import { DatevExportRepository } from '../repositories/datev-export.repository';
 import { DatevExportConfigService } from './datev-export-config.service';
-import { DatevExportStorageService } from './datev-export-storage.service';
-
 @Injectable()
 export class DatevExportAdminService {
   constructor(
     private readonly configService: DatevExportConfigService,
     private readonly exportRepository: DatevExportRepository,
-    private readonly storageService: DatevExportStorageService,
+    private readonly fileStorage: FileStorageService,
     @Optional() @Inject(DATEV_EXPORT_ENQUEUE) private readonly enqueuePort?: DatevExportEnqueuePort,
   ) {}
 
@@ -81,7 +80,7 @@ export class DatevExportAdminService {
       throw new NotFoundException('Export file is not available');
     }
 
-    const buffer = await this.storageService.readFile(entity.storageKey);
+    const buffer = await this.fileStorage.readDatevExportFile(entity.storageKey);
 
     return { buffer, fileName: entity.fileName };
   }

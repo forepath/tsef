@@ -4,6 +4,7 @@
   "license": "LicenseRef-Source-Available-No-Permission-Except-Viewing",
   "private": true,
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1115.0",
     "@nestjs/common": "11.1.6",
     "@nestjs/core": "11.1.6",
     "@nestjs/platform-express": "11.1.6",

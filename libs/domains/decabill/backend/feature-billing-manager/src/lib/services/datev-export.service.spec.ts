@@ -70,8 +70,8 @@ describe('DatevExportService', () => {
       }),
     ),
   };
-  const storageService = {
-    writeFile: jest.fn(),
+  const fileStorage = {
+    writeDatevExportFile: jest.fn(),
   };
   const extfCsvService = {
     buildBookingBatchCsv: jest.fn().mockReturnValue(Buffer.from('csv')),
@@ -108,7 +108,7 @@ describe('DatevExportService', () => {
     creditDocumentsRepository as never,
     invoicePdfService as never,
     exportRepository as never,
-    storageService as never,
+    fileStorage as never,
     bookingMapper as never,
     debtorMapper as never,
     debtorAccountService as never,
@@ -167,7 +167,7 @@ describe('DatevExportService', () => {
     );
 
     expect(result.id).toBe('existing');
-    expect(storageService.writeFile).not.toHaveBeenCalled();
+    expect(fileStorage.writeDatevExportFile).not.toHaveBeenCalled();
     expect(billingNotificationPublisher.publishDatevExport).not.toHaveBeenCalled();
   });
 
@@ -185,7 +185,7 @@ describe('DatevExportService', () => {
     );
 
     expect(result.status).toBe(DatevExportStatus.COMPLETED);
-    expect(storageService.writeFile).toHaveBeenCalled();
+    expect(fileStorage.writeDatevExportFile).toHaveBeenCalled();
     expect(extfCsvService.buildBookingBatchCsv).toHaveBeenCalled();
     expect(billingNotificationPublisher.publishDatevExport).toHaveBeenCalledWith(
       'datev_export.started',

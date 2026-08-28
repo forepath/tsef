@@ -23,6 +23,7 @@ import {
   registerDynamicProviders,
 } from '@forepath/shared/backend/util-dynamic-provider-registry';
 import { RedisCacheModule } from '@forepath/shared/backend/util-redis-cache';
+import { FileStorageModule } from '@forepath/shared/backend/util-file-storage';
 import { DynamicModule, Module, OnModuleInit } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -238,7 +239,6 @@ import { DatevExportAdminService } from './services/datev-export-admin.service';
 import { DatevExportConfigService } from './services/datev-export-config.service';
 import { DatevExportJobHandler } from './services/datev-export.job-handler';
 import { DatevExportService } from './services/datev-export.service';
-import { DatevExportStorageService } from './services/datev-export-storage.service';
 import { DatevExtfCsvService } from './services/datev-extf-csv.service';
 import { EInvoiceEmbedService } from './services/e-invoice-embed.service';
 import { EInvoiceXmlService } from './services/e-invoice-xml.service';
@@ -366,6 +366,7 @@ const authMethod = getAuthenticationMethod();
       PublicWithdrawalRequestEntity,
     ]),
     RedisCacheModule,
+    FileStorageModule,
     BillingIdentityEmailBridgeModule,
     ...(authMethod === 'keycloak' ? [KeycloakConnectModule.registerAsync({ useExisting: KeycloakService })] : []),
   ],
@@ -618,7 +619,6 @@ const authMethod = getAuthenticationMethod();
     DatevExportRepository,
     DatevDebtorAccountsRepository,
     DatevExportConfigService,
-    DatevExportStorageService,
     DatevBookingMapperService,
     DatevDebtorMapperService,
     DatevDebtorAccountService,

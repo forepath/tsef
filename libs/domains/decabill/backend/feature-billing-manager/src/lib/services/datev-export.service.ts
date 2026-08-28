@@ -2,6 +2,7 @@ import { ZipArchive } from 'archiver';
 import { PassThrough } from 'stream';
 
 import { DEFAULT_TENANT, runWithTenantId } from '@forepath/shared/backend';
+import { FileStorageService } from '@forepath/shared/backend/util-file-storage';
 import { Injectable, Logger } from '@nestjs/common';
 
 import { DatevExportScope, DatevExportStatus } from '../constants/datev-export.constants';
@@ -20,7 +21,6 @@ import { DatevDebtorMapperService } from './datev-debtor-mapper.service';
 import { DatevDocumentArchiveService } from './datev-document-archive.service';
 import type { DatevTenantExportConfig } from './datev-export-config.service';
 import { DatevExportConfigService } from './datev-export-config.service';
-import { DatevExportStorageService } from './datev-export-storage.service';
 import { DatevExtfCsvService } from './datev-extf-csv.service';
 import { BillingTenantService } from './billing-tenant.service';
 import { InvoicePdfService } from './invoice-pdf.service';
@@ -65,7 +65,7 @@ export class DatevExportService {
     private readonly creditDocumentsRepository: InvoiceCreditDocumentsRepository,
     private readonly invoicePdfService: InvoicePdfService,
     private readonly exportRepository: DatevExportRepository,
-    private readonly storageService: DatevExportStorageService,
+    private readonly fileStorage: FileStorageService,
     private readonly bookingMapper: DatevBookingMapperService,
     private readonly debtorMapper: DatevDebtorMapperService,
     private readonly debtorAccountService: DatevDebtorAccountService,
@@ -120,7 +120,7 @@ export class DatevExportService {
       const storageKey = buildDatevStorageKey(params.scope, storageOwnerTenantId, params.year, params.month, fileName);
       const zipBuffer = await this.createZipBuffer(result.zipEntries);
 
-      await this.storageService.writeFile(storageKey, zipBuffer);
+      await this.fileStorage.writeDatevExportFile(storageKey, zipBuffer);
 
       const updated = await this.exportRepository.update(exportRecord.id, {
         status: DatevExportStatus.COMPLETED,

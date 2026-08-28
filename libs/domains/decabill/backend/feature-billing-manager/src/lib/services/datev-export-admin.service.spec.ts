@@ -17,8 +17,8 @@ describe('DatevExportAdminService', () => {
     findById: jest.fn(),
     findByPeriod: jest.fn(),
   };
-  const storageService = {
-    readFile: jest.fn(),
+  const fileStorage = {
+    readDatevExportFile: jest.fn(),
   };
   const enqueuePort = {
     enqueueUnit: jest.fn(),
@@ -27,7 +27,7 @@ describe('DatevExportAdminService', () => {
   const service = new DatevExportAdminService(
     configService as never,
     exportRepository as never,
-    storageService as never,
+    fileStorage as never,
     enqueuePort as never,
   );
 
@@ -99,7 +99,7 @@ describe('DatevExportAdminService', () => {
       storageKey: 'default/2026/01/export.zip',
       fileName: 'datev-export-2026-01.zip',
     });
-    storageService.readFile.mockResolvedValue(Buffer.from('zip'));
+    fileStorage.readDatevExportFile.mockResolvedValue(Buffer.from('zip'));
 
     const result = await runWithTenantId('default', () => service.downloadExport('exp-1'));
 

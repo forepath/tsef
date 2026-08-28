@@ -141,11 +141,12 @@ Browser clients need a modern evergreen browser. The billing console initial bun
 
 Mount and size these paths on API, worker, and scheduler containers when the feature is enabled:
 
-| Volume           | Path                                                          | Sizing guidance                              |
-| ---------------- | ------------------------------------------------------------- | -------------------------------------------- |
-| Invoice PDFs     | `BILLING_INVOICE_PDF_STORAGE_PATH` (default `/data/invoices`) | Plan per invoice PDF size × retention policy |
-| DATEV exports    | `BILLING_DATEV_EXPORT_STORAGE_PATH`                           | Monthly ZIP archives per tenant              |
-| Provider plugins | `DYNAMIC_PROVIDER_PLUGIN_PATH`                                | Small; optional mount                        |
+| Volume           | Path                                  | Sizing guidance                                                        |
+| ---------------- | ------------------------------------- | ---------------------------------------------------------------------- |
+| Billing files    | `FILE_STORAGE_ROOT` (default `/data`) | Includes `invoices/` and `datev-exports/` subdirs; plan PDF + ZIP size |
+| Provider plugins | `DYNAMIC_PROVIDER_PLUGIN_PATH`        | Small; optional mount                                                  |
+
+The local file storage provider requires the same `FILE_STORAGE_ROOT` volume on api, worker, and scheduler. When `FILE_STORAGE_PROVIDER=s3`, shared filesystem mounts for billing files are not required.
 
 ## Mixed and Local Development Host
 

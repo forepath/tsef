@@ -1,7 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
 import { Injectable } from '@nestjs/common';
+import { FileStorageService } from '@forepath/shared/backend/util-file-storage';
 
 import type { InvoiceEntity } from '../../entities/invoice.entity';
 import { InvoicePdfHtmlRendererService } from '../../services/invoice-pdf-html-renderer.service';
@@ -15,22 +13,8 @@ export class ProjectTimeReportPdfService {
   constructor(
     private readonly templateService: ProjectTimeReportPdfTemplateService,
     private readonly htmlRenderer: InvoicePdfHtmlRendererService,
+    private readonly fileStorage: FileStorageService,
   ) {}
-
-  getStorageRoot(): string {
-    return process.env.BILLING_INVOICE_PDF_STORAGE_PATH ?? path.join(process.cwd(), 'data', 'invoices');
-  }
-
-  resolveAbsolutePath(storageKey: string): string {
-    const root = path.resolve(this.getStorageRoot());
-    const absolute = path.resolve(root, storageKey);
-
-    if (!absolute.startsWith(root + path.sep) && absolute !== root) {
-      throw new Error('Invalid time report PDF path');
-    }
-
-    return absolute;
-  }
 
   async renderPdf(viewModel: ProjectTimeReportViewModel): Promise<Uint8Array> {
     const html = this.templateService.buildHtml(viewModel);
@@ -41,17 +25,13 @@ export class ProjectTimeReportPdfService {
   async generateAndStore(invoice: InvoiceEntity, viewModel: ProjectTimeReportViewModel): Promise<string> {
     const pdfBytes = await this.renderPdf(viewModel);
     const storageKey = buildProjectTimeReportStorageKey(invoice);
-    const absolute = this.resolveAbsolutePath(storageKey);
 
-    await fs.promises.mkdir(path.dirname(absolute), { recursive: true });
-    await fs.promises.writeFile(absolute, pdfBytes);
+    await this.fileStorage.writeInvoiceFile(storageKey, Buffer.from(pdfBytes));
 
     return storageKey;
   }
 
   async readPdf(storageKey: string): Promise<Buffer> {
-    const absolute = this.resolveAbsolutePath(storageKey);
-
-    return await fs.promises.readFile(absolute);
+    return await this.fileStorage.readInvoiceFile(storageKey);
   }
 }
