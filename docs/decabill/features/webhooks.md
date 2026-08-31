@@ -53,6 +53,12 @@ Events are published from the **billing** service after successful mutations.
 - `payment_method.attached`
 - `customer_trust.level_changed`
 - `customer_profile.custom_data_added`, `customer_profile.custom_data_updated`, `customer_profile.custom_data_deleted`
+- `supplier_profile.created`, `supplier_profile.updated`, `supplier_profile.deleted`
+- `supplier_profile.custom_data_added`, `supplier_profile.custom_data_updated`, `supplier_profile.custom_data_deleted`
+- `supplier_invoice.created`, `supplier_invoice.issued`, `supplier_invoice.voided`
+- `supplier_invoice.marked_paid`, `supplier_invoice.marked_unpaid`, `supplier_invoice.document_uploaded`
+- `datev.creditor_range_exhausted`
+- `supplier_creditor.allocated`
 - `subscription.created`, `subscription.updated`, `subscription.cancel_scheduled`, `subscription.canceled`, `subscription.resumed`, `subscription.period_charged`
 - `subscription.config_change_requested`, `subscription.config_changed`, `subscription.config_change_failed`
 - `subscription.provisioned`, `subscription.provision_failed` (itemId plus hostname/service/providerReference or errorMessage; never secrets)
@@ -82,6 +88,12 @@ Payment success/failure payloads may include `mode` (`checkout` | `auto`). Auto-
 `customer_trust.level_changed` only includes identifiers plus level and score metadata; it never includes billing-profile address fields or other PII.
 `customer_profile.custom_data_*` events include `profileId`, `userId`, and `key` only — custom data values are never included in webhook payloads.
 
+`supplier_profile.*` and `supplier_invoice.*` events are tenant-scoped admin operations; `client_id` is omitted. Custom data values are never included. See [Supplier profiles](./supplier-profiles.md) and [Supplier invoices](./supplier-invoices.md).
+
+`supplier_creditor.allocated` includes `tenantId`, `supplierId`, `profileId`, `supplierNumber`, and `creditorNumber` (no address fields).
+
+`supplier_profile.custom_data_*` events include `profileId` and `key` only (no values).
+
 ### Projects
 
 - `project.created`, `project.updated`, `project.deleted`
@@ -108,13 +120,15 @@ Ticket payloads include metadata only; full ticket body content is not included 
 ### DATEV exports
 
 - `datev_export.started`, `datev_export.completed`, `datev_export.failed`
-- `datev.debtor_range_exhausted`
+- `datev.debtor_range_exhausted`, `datev.creditor_range_exhausted`
 - `vat_id.validation_succeeded`, `vat_id.validation_failed`, `vat_id.validation_pending`, `vat_id.validation_unavailable`
 - `oss.threshold_exceeded`
 
 DATEV export events are tenant-scoped admin operations; `client_id` is omitted. Export file contents and storage paths are never included in webhook payloads.
 
 `datev.debtor_range_exhausted` fires when DATEV debtor number allocation cannot assign the next account because the configured range (`debtorAccountStart`–`debtorAccountEnd`) is full. Payload fields: `tenantId`, `nextCandidate`, `rangeStart`, `rangeEnd`, `allocationScope` (no customer PII).
+
+`datev.creditor_range_exhausted` fires when DATEV **creditor** (supplier AP) allocation cannot assign the next account because the configured range (`creditorAccountStart`–`creditorAccountEnd`) is full. Same payload shape as debtor exhaustion with creditor range fields.
 
 ### Application updates
 

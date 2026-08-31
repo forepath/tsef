@@ -58,6 +58,9 @@ describe('DatevExportConfigService', () => {
 
     expect(config?.consultantNumber).toBe('1234567');
     expect(config?.clientNumber).toBe('56789');
+    expect(config?.expenseAccountStandard).toBeTruthy();
+    expect(config?.creditorAccountStart).toBeGreaterThan(0);
+    expect(config?.creditorAccountEnd).toBeGreaterThan(config?.creditorAccountStart ?? 0);
   });
 
   it('isUnifiedExportEnabled respects unified export flag', () => {

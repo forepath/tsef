@@ -1085,7 +1085,7 @@ export interface CustomerProfileDto {
 // Invoices
 export type InvoiceStatus = 'draft' | 'issued' | 'paid' | 'partially_paid' | 'overdue' | 'void';
 
-export type TaxCategory = 'standard' | 'reduced';
+export type TaxCategory = 'standard' | 'reduced' | 'custom';
 
 export interface InvoiceResponse {
   id: string;

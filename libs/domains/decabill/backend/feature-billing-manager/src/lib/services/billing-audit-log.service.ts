@@ -55,6 +55,19 @@ export class BillingAuditLogService {
     };
   }
 
+  async listForSupplierInvoice(
+    supplierInvoiceId: string,
+    limit: number,
+    offset: number,
+  ): Promise<{ items: BillingAuditLogResponseDto[]; total: number }> {
+    const result = await this.auditLogsRepository.findBySupplierInvoiceId(supplierInvoiceId, limit, offset);
+
+    return {
+      items: result.items.map((row) => this.mapToResponse(row)),
+      total: result.total,
+    };
+  }
+
   private mapToResponse(entity: BillingAuditLogEntity): BillingAuditLogResponseDto {
     return {
       id: entity.id,

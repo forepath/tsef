@@ -1,7 +1,15 @@
 import type { TaxCategory, TaxPreviewRates } from '../types/billing.types';
 
 export function rateForTaxCategory(rates: TaxPreviewRates, taxCategory: TaxCategory = 'standard'): number {
-  return taxCategory === 'reduced' ? rates.reduced : rates.standard;
+  if (taxCategory === 'reduced') {
+    return rates.reduced;
+  }
+
+  if (taxCategory === 'custom') {
+    return 0;
+  }
+
+  return rates.standard;
 }
 
 export function computeLineTotalsFromRate(

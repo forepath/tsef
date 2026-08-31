@@ -6,6 +6,8 @@ import { DatevExportScope, DATEV_BOOKING_ROW_FIELD_COUNT } from '../constants/da
 import type { InvoiceCreditDocumentEntity } from '../entities/invoice-credit-document.entity';
 import type { InvoiceLineItemEntity } from '../entities/invoice-line-item.entity';
 import type { InvoiceEntity } from '../entities/invoice.entity';
+import type { SupplierInvoiceLineItemEntity } from '../entities/supplier-invoice-line-item.entity';
+import type { SupplierInvoiceEntity } from '../entities/supplier-invoice.entity';
 import { formatDatevAmount, formatDatevDate, truncateDatevText } from '../utils/datev-format.util';
 import { buildCreditNoteNumber } from './e-invoice-document-options';
 import type { DatevTenantExportConfig } from './datev-export-config.service';
@@ -15,6 +17,18 @@ export interface DatevBookingRowInput {
   debitCredit: 'S' | 'H';
   debtorAccount: number;
   revenueAccount: string;
+  buKey: string;
+  documentDate: Date;
+  documentNumber: string;
+  bookingText: string;
+  documentLink?: string;
+}
+
+export interface DatevSupplierBookingRowInput {
+  amountGross: number;
+  debitCredit: 'S' | 'H';
+  creditorAccount: number;
+  expenseAccount: string;
   buKey: string;
   documentDate: Date;
   documentNumber: string;
@@ -133,6 +147,132 @@ export class DatevBookingMapperService {
     }
 
     return fields;
+  }
+
+  mapIssuedSupplierLineItem(params: {
+    line: SupplierInvoiceLineItemEntity;
+    invoice: SupplierInvoiceEntity;
+    creditorAccount: number;
+    config: DatevTenantExportConfig;
+    scope: DatevExportScope;
+    tenantSlug?: string;
+    documentLink?: string;
+  }): string[] {
+    const { expenseAccount, buKey } = this.resolveExpenseAccounts(
+      params.invoice,
+      params.line.taxCategory,
+      params.config,
+    );
+    const documentDate = params.invoice.issueDate
+      ? new Date(params.invoice.issueDate)
+      : (params.invoice.issuedAt ?? params.invoice.createdAt);
+
+    return this.toSupplierRow({
+      amountGross: Number(params.line.lineGross),
+      debitCredit: 'H',
+      creditorAccount: params.creditorAccount,
+      expenseAccount,
+      buKey,
+      documentDate,
+      documentNumber: params.invoice.invoiceNumber ?? params.invoice.id,
+      bookingText: this.buildBookingText(
+        params.line.description,
+        params.scope,
+        params.tenantSlug,
+        params.invoice.supplierVatId,
+      ),
+      documentLink: params.documentLink,
+    });
+  }
+
+  mapVoidedSupplierLineItem(params: {
+    line: SupplierInvoiceLineItemEntity;
+    invoice: SupplierInvoiceEntity;
+    creditorAccount: number;
+    config: DatevTenantExportConfig;
+    scope: DatevExportScope;
+    tenantSlug?: string;
+    voidedAt: Date;
+    documentLink?: string;
+  }): string[] {
+    const { expenseAccount, buKey } = this.resolveExpenseAccounts(
+      params.invoice,
+      params.line.taxCategory,
+      params.config,
+    );
+    const creditNoteNumber = params.invoice.invoiceNumber
+      ? `${params.invoice.invoiceNumber}-VOID`
+      : `${params.invoice.id}-VOID`;
+
+    return this.toSupplierRow({
+      amountGross: Number(params.line.lineGross),
+      debitCredit: 'S',
+      creditorAccount: params.creditorAccount,
+      expenseAccount,
+      buKey,
+      documentDate: params.voidedAt,
+      documentNumber: creditNoteNumber,
+      bookingText: this.buildBookingText(
+        params.line.description,
+        params.scope,
+        params.tenantSlug,
+        params.invoice.supplierVatId,
+      ),
+      documentLink: params.documentLink,
+    });
+  }
+
+  toSupplierRow(input: DatevSupplierBookingRowInput): string[] {
+    const fields = Array.from({ length: DATEV_BOOKING_ROW_FIELD_COUNT }, () => '');
+
+    fields[0] = formatDatevAmount(input.amountGross);
+    fields[1] = input.debitCredit;
+    fields[2] = 'EUR';
+    fields[6] = String(input.creditorAccount);
+    fields[7] = input.expenseAccount;
+    fields[8] = input.buKey;
+    fields[9] = formatDatevDate(input.documentDate);
+    fields[10] = input.documentNumber;
+    fields[13] = truncateDatevText(input.bookingText, 60);
+
+    if (input.documentLink) {
+      fields[19] = input.documentLink;
+    }
+
+    return fields;
+  }
+
+  private resolveExpenseAccounts(
+    invoice: SupplierInvoiceEntity,
+    taxCategory: TaxCategory | string,
+    config: DatevTenantExportConfig,
+  ): { expenseAccount: string; buKey: string } {
+    const mode = invoice.taxMode;
+
+    if (mode === TaxMode.EU_REVERSE_CHARGE) {
+      return { expenseAccount: config.expenseAccountReverseCharge, buKey: config.buKeyReverseCharge };
+    }
+
+    if (mode === TaxMode.EU_B2C_OSS || mode === TaxMode.NON_EU_ISSUER_EU_B2C) {
+      return { expenseAccount: config.expenseAccountOss, buKey: config.buKeyOss };
+    }
+
+    if (
+      mode === TaxMode.THIRD_COUNTRY_B2B_NO_VAT ||
+      mode === TaxMode.THIRD_COUNTRY_B2C_NO_DOMESTIC_VAT ||
+      mode === TaxMode.NON_EU_ISSUER_EU_B2B
+    ) {
+      return { expenseAccount: config.expenseAccountThirdCountry, buKey: config.buKeyThirdCountry };
+    }
+
+    if (taxCategory === TaxCategory.REDUCED) {
+      return { expenseAccount: config.expenseAccountReduced, buKey: config.expenseBuKeyReduced || config.buKeyReduced };
+    }
+
+    return {
+      expenseAccount: config.expenseAccountStandard,
+      buKey: config.expenseBuKeyStandard || config.buKeyStandard,
+    };
   }
 
   private resolveAccounts(

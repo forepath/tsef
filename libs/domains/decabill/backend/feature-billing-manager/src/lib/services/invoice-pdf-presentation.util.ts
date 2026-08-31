@@ -12,16 +12,56 @@ export interface InvoicePdfPresentationOptions {
   creditGross?: number;
 }
 
+export interface BuildInvoicePdfPresentationOptions {
+  zeroBalancePromotional?: boolean;
+  /** Calendar document issue date (YYYY-MM-DD or Date). Preferred over lifecycle issuedAt. */
+  documentIssueDate?: Date | string | null;
+}
+
+/**
+ * Resolves the date printed on invoice PDFs as "Issue date".
+ * Prefer an explicit calendar issue date (supplier expenses) over lifecycle issuedAt.
+ */
+export function resolveInvoicePdfIssueDate(invoice: InvoiceEntity, documentIssueDate?: Date | string | null): Date {
+  if (documentIssueDate instanceof Date && !Number.isNaN(documentIssueDate.getTime())) {
+    return documentIssueDate;
+  }
+
+  if (typeof documentIssueDate === 'string' && documentIssueDate.trim()) {
+    return parseCalendarDate(documentIssueDate);
+  }
+
+  const calendarIssueDate = (invoice as InvoiceEntity & { issueDate?: string | Date | null }).issueDate;
+
+  if (calendarIssueDate instanceof Date && !Number.isNaN(calendarIssueDate.getTime())) {
+    return calendarIssueDate;
+  }
+
+  if (typeof calendarIssueDate === 'string' && calendarIssueDate.trim()) {
+    return parseCalendarDate(calendarIssueDate);
+  }
+
+  return invoice.issuedAt ?? invoice.createdAt;
+}
+
+function parseCalendarDate(value: string): Date {
+  const dateOnly = value.trim().slice(0, 10);
+
+  return new Date(`${dateOnly}T12:00:00.000Z`);
+}
+
 export function buildInvoicePdfPresentation(
   invoice: InvoiceEntity,
-  options?: { zeroBalancePromotional?: boolean },
+  options?: BuildInvoicePdfPresentationOptions,
 ): InvoicePdfPresentationOptions {
+  const issueDate = resolveInvoicePdfIssueDate(invoice, options?.documentIssueDate);
+
   if (options?.zeroBalancePromotional) {
     return {
       documentTitle: 'Invoice',
       documentNumber: invoice.invoiceNumber ?? invoice.id,
       documentNumberLabel: 'Invoice number',
-      issueDate: invoice.issuedAt ?? invoice.createdAt,
+      issueDate,
       showDueDate: false,
       showBalanceDue: false,
       includePaymentDetails: false,
@@ -32,7 +72,7 @@ export function buildInvoicePdfPresentation(
     documentTitle: 'Invoice',
     documentNumber: invoice.invoiceNumber ?? invoice.id,
     documentNumberLabel: 'Invoice number',
-    issueDate: invoice.issuedAt ?? invoice.createdAt,
+    issueDate,
     showDueDate: true,
     showBalanceDue: true,
     includePaymentDetails: true,

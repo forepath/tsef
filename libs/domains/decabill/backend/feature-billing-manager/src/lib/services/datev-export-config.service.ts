@@ -13,13 +13,22 @@ export interface DatevTenantExportConfig {
   revenueAccountReverseCharge: string;
   revenueAccountOss: string;
   revenueAccountThirdCountry: string;
+  expenseAccountStandard: string;
+  expenseAccountReduced: string;
+  expenseAccountReverseCharge: string;
+  expenseAccountOss: string;
+  expenseAccountThirdCountry: string;
   debtorAccountStart: number;
   debtorAccountEnd: number;
+  creditorAccountStart: number;
+  creditorAccountEnd: number;
   buKeyStandard: string;
   buKeyReduced: string;
   buKeyReverseCharge: string;
   buKeyOss: string;
   buKeyThirdCountry: string;
+  expenseBuKeyStandard: string;
+  expenseBuKeyReduced: string;
   includeDocuments: boolean;
   dictationAbbr: string;
   fiscalYearStartMonth: number;
@@ -35,13 +44,22 @@ interface DatevTenantConfigOverrides {
   revenueAccountReverseCharge?: string;
   revenueAccountOss?: string;
   revenueAccountThirdCountry?: string;
+  expenseAccountStandard?: string;
+  expenseAccountReduced?: string;
+  expenseAccountReverseCharge?: string;
+  expenseAccountOss?: string;
+  expenseAccountThirdCountry?: string;
   debtorAccountStart?: number;
   debtorAccountEnd?: number;
+  creditorAccountStart?: number;
+  creditorAccountEnd?: number;
   buKeyStandard?: string;
   buKeyReduced?: string;
   buKeyReverseCharge?: string;
   buKeyOss?: string;
   buKeyThirdCountry?: string;
+  expenseBuKeyStandard?: string;
+  expenseBuKeyReduced?: string;
   includeDocuments?: boolean;
   dictationAbbr?: string;
   fiscalYearStartMonth?: number;
@@ -128,6 +146,36 @@ export class DatevExportConfigService implements OnModuleInit {
         'BILLING_DATEV_REVENUE_ACCOUNT_THIRD_COUNTRY',
         chartOfAccounts === 'SKR04' ? '4338' : '8338',
       ),
+      expenseAccountStandard: this.resolveString(
+        tenantId,
+        'expenseAccountStandard',
+        'BILLING_DATEV_EXPENSE_ACCOUNT_STANDARD',
+        chartOfAccounts === 'SKR04' ? '5900' : '4900',
+      ),
+      expenseAccountReduced: this.resolveString(
+        tenantId,
+        'expenseAccountReduced',
+        'BILLING_DATEV_EXPENSE_ACCOUNT_REDUCED',
+        chartOfAccounts === 'SKR04' ? '5900' : '4900',
+      ),
+      expenseAccountReverseCharge: this.resolveString(
+        tenantId,
+        'expenseAccountReverseCharge',
+        'BILLING_DATEV_EXPENSE_ACCOUNT_REVERSE_CHARGE',
+        chartOfAccounts === 'SKR04' ? '5900' : '4900',
+      ),
+      expenseAccountOss: this.resolveString(
+        tenantId,
+        'expenseAccountOss',
+        'BILLING_DATEV_EXPENSE_ACCOUNT_OSS',
+        chartOfAccounts === 'SKR04' ? '5900' : '4900',
+      ),
+      expenseAccountThirdCountry: this.resolveString(
+        tenantId,
+        'expenseAccountThirdCountry',
+        'BILLING_DATEV_EXPENSE_ACCOUNT_THIRD_COUNTRY',
+        chartOfAccounts === 'SKR04' ? '5900' : '4900',
+      ),
       debtorAccountStart: this.resolveNumber(
         tenantId,
         'debtorAccountStart',
@@ -135,11 +183,35 @@ export class DatevExportConfigService implements OnModuleInit {
         10_000,
       ),
       debtorAccountEnd: this.resolveNumber(tenantId, 'debtorAccountEnd', 'BILLING_DATEV_DEBTOR_ACCOUNT_END', 69_999),
+      creditorAccountStart: this.resolveNumber(
+        tenantId,
+        'creditorAccountStart',
+        'BILLING_DATEV_CREDITOR_ACCOUNT_START',
+        70_000,
+      ),
+      creditorAccountEnd: this.resolveNumber(
+        tenantId,
+        'creditorAccountEnd',
+        'BILLING_DATEV_CREDITOR_ACCOUNT_END',
+        99_999,
+      ),
       buKeyStandard: this.resolveString(tenantId, 'buKeyStandard', 'BILLING_DATEV_BU_KEY_STANDARD', ''),
       buKeyReduced: this.resolveString(tenantId, 'buKeyReduced', 'BILLING_DATEV_BU_KEY_REDUCED', ''),
       buKeyReverseCharge: this.resolveString(tenantId, 'buKeyReverseCharge', 'BILLING_DATEV_BU_KEY_REVERSE_CHARGE', ''),
       buKeyOss: this.resolveString(tenantId, 'buKeyOss', 'BILLING_DATEV_BU_KEY_OSS', ''),
       buKeyThirdCountry: this.resolveString(tenantId, 'buKeyThirdCountry', 'BILLING_DATEV_BU_KEY_THIRD_COUNTRY', ''),
+      expenseBuKeyStandard: this.resolveString(
+        tenantId,
+        'expenseBuKeyStandard',
+        'BILLING_DATEV_EXPENSE_BU_KEY_STANDARD',
+        '',
+      ),
+      expenseBuKeyReduced: this.resolveString(
+        tenantId,
+        'expenseBuKeyReduced',
+        'BILLING_DATEV_EXPENSE_BU_KEY_REDUCED',
+        '',
+      ),
       includeDocuments: this.resolveBoolean(
         tenantId,
         'includeDocuments',

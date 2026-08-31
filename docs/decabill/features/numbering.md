@@ -1,6 +1,6 @@
 # Numbering
 
-How Decabill assigns invoice, subscription, customer, and DATEV debtor numbers across tenants.
+How Decabill assigns invoice, subscription, customer, supplier, and DATEV debtor/creditor numbers across tenants.
 
 ## Overview
 
@@ -17,19 +17,25 @@ Credit notes and void documents derive their document numbers from the invoice n
 
 ## Formats
 
-| Kind         | Format               | Notes                                                                         |
-| ------------ | -------------------- | ----------------------------------------------------------------------------- |
-| Invoice      | `INV-{year}-{nnnnn}` | Yearly counter; five-digit pad                                                |
-| Subscription | `SUB-{nnnnnn}`       | Six-digit pad; used in public withdrawal                                      |
-| Customer     | `CUS-{nnnnnn}`       | Six-digit pad; allocated once on billing profile create                       |
-| DATEV debtor | integer              | Allocated within tenant DATEV range (`debtorAccountStart`–`debtorAccountEnd`) |
+| Kind           | Format                | Notes                                                                               |
+| -------------- | --------------------- | ----------------------------------------------------------------------------------- |
+| Invoice        | `INV-{year}-{nnnnn}`  | Yearly counter; five-digit pad                                                      |
+| Subscription   | `SUB-{nnnnnn}`        | Six-digit pad; used in public withdrawal                                            |
+| Customer       | `CUS-{nnnnnn}`        | Six-digit pad; allocated once on billing profile create                             |
+| Supplier       | `SUP-{nnnnnn}`        | Six-digit pad; allocated once on supplier profile create                            |
+| Supplier inv   | `SINV-{year}-{nnnnn}` | Yearly counter; five-digit pad; allocated at issue                                  |
+| DATEV debtor   | integer               | Allocated within tenant DATEV range (`debtorAccountStart`–`debtorAccountEnd`)       |
+| DATEV creditor | integer               | Allocated within (`creditorAccountStart`–`creditorAccountEnd`, default 70000–99999) |
 
 ## Storage
 
 - Invoice counters: `billing_invoice_number_sequences` keyed by `(scope, year)` (`tenant_id` column holds the scope key)
 - Subscription counters: `billing_subscription_number_sequences` keyed by `scope_key`; subscriptions store `number_scope` with a unique `(number_scope, number)`
 - Customer counters: `billing_customer_number_sequences` keyed by `scope_key`; profiles store `number_scope` with a unique `(number_scope, customer_number)`
+- Supplier counters: `billing_supplier_number_sequences` keyed by `scope_key`; profiles store `number_scope` with a unique `(number_scope, supplier_number)`
+- Supplier invoice counters: `billing_supplier_invoice_number_sequences` keyed by `(scope, year)`; invoices store `number_scope` with issued `invoice_number`
 - Debtors: `billing_datev_debtor_accounts.allocation_scope` with unique `(allocation_scope, debtor_number)`
+- Creditors: `billing_datev_creditor_accounts.allocation_scope` with unique `(allocation_scope, creditor_number)`
 
 Shared mode uses the sentinel scope `__shared__`. Tenant-scoped mode uses the current `X-Tenant` id as the scope.
 
@@ -37,7 +43,7 @@ Shared mode uses the sentinel scope `__shared__`. Tenant-scoped mode uses the cu
 
 Per-tenant DATEV debtor ranges still apply for start/end of allocation. When numbers are **shared**, overlapping ranges across tenants are expected and do not produce uniqueness collisions. When numbers are **tenant-scoped**, overlapping ranges can collide in **unified** DATEV exports; the billing manager logs a warning at startup in that mode.
 
-If the configured range is exhausted, allocation fails and emits webhook `datev.debtor_range_exhausted` (see [Webhooks](./webhooks.md)).
+If the configured range is exhausted, allocation fails and emits webhook `datev.debtor_range_exhausted` or `datev.creditor_range_exhausted` (see [Webhooks](./webhooks.md)).
 
 ## Operator guidance
 
@@ -50,4 +56,6 @@ If the configured range is exhausted, allocation fails and emits webhook `datev.
 - [Multi-tenancy](./multi-tenancy.md)
 - [Environment configuration](../deployment/environment-configuration.md)
 - [Customer profiles](./customer-profiles.md)
+- [Supplier profiles](./supplier-profiles.md)
+- [Supplier invoices](./supplier-invoices.md)
 - [Webhooks](./webhooks.md)

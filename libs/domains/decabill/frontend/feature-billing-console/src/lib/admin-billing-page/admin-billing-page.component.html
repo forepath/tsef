@@ -18,6 +18,8 @@
         type="button"
         class="btn btn-primary btn-sm"
         (click)="openBillNowModal()"
+        [class.d-none]="billingPerspective() === 'supplier'"
+        [disabled]="billingPerspective() === 'supplier'"
         i18n-title="@@featureAdminBilling-billNow"
         title="Bill now"
         i18n-aria-label="@@featureAdminBilling-billNow"
@@ -26,6 +28,29 @@
         <i class="bi bi-cash-coin" aria-hidden="true"></i>
       </button>
     </div>
+  </div>
+
+  <div class="d-flex align-items-center gap-0 border-bottom btn-group-options">
+    <button
+      type="button"
+      class="btn btn-sm btn-options"
+      [class.btn-outline-secondary]="billingPerspective() !== 'customer'"
+      [class.btn-primary]="billingPerspective() === 'customer'"
+      (click)="onBillingPerspectiveChange('customer')"
+      i18n="@@featureAdminBilling-customerTab"
+    >
+      Customer
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-options"
+      [class.btn-outline-secondary]="billingPerspective() !== 'supplier'"
+      [class.btn-primary]="billingPerspective() === 'supplier'"
+      (click)="onBillingPerspectiveChange('supplier')"
+      i18n="@@featureAdminBilling-supplierTab"
+    >
+      Supplier
+    </button>
   </div>
 
   <div class="d-flex align-items-center gap-0 d-md-none border-bottom btn-group-options">
@@ -43,478 +68,908 @@
   </div>
 
   <div class="section__container flex-grow-1 d-flex flex-column min-h-0">
-    @if (summaryError$ | async; as err) {
-      <div class="alert alert-danger mb-0 rounded-0 border-0 border-bottom" role="alert">{{ err }}</div>
-    }
+    @if (billingPerspective() === 'customer') {
+      @if (summaryError$ | async; as err) {
+        <div class="alert alert-danger mb-0 rounded-0 border-0 border-bottom" role="alert">{{ err }}</div>
+      }
 
-    <div class="admin-billing__summary-bar flex-shrink-0">
-      <div class="row g-0 admin-billing__summary-grid">
-        <div class="col-6 col-md-3">
-          <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--first">
-            <div class="card-body">
-              <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-activeSubscriptions">
-                Active subscriptions
-              </h6>
-              @if (summaryLoading$ | async) {
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              } @else if (summary$ | async; as summary) {
-                <p class="card-title mb-0 fs-4 fw-bold">{{ summary.activeSubscriptionsCount }}</p>
-              }
+      <div class="admin-billing__summary-bar flex-shrink-0">
+        <div class="row g-0 admin-billing__summary-grid">
+          <div class="col-6 col-md-3">
+            <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--first">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-activeSubscriptions">
+                  Active subscriptions
+                </h6>
+                @if (summaryLoading$ | async) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else if (summary$ | async; as summary) {
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ summary.activeSubscriptionsCount }}</p>
+                }
+              </div>
             </div>
           </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--second">
-            <div class="card-body">
-              <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-openOverdueCount">
-                Open and overdue invoices
-              </h6>
-              @if (summaryLoading$ | async) {
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              } @else if (summary$ | async; as summary) {
-                <p class="card-title mb-0 fs-4 fw-bold">{{ summary.openOverdueCount }}</p>
-              }
+          <div class="col-6 col-md-3">
+            <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--second">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-openOverdueCount">
+                  Open and overdue invoices
+                </h6>
+                @if (summaryLoading$ | async) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else if (summary$ | async; as summary) {
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ summary.openOverdueCount }}</p>
+                }
+              </div>
             </div>
           </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--third">
-            <div class="card-body">
-              <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-openOverdueTotal">
-                Open total amount
-              </h6>
-              @if (summaryLoading$ | async) {
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              } @else if (summary$ | async; as summary) {
-                <p class="card-title mb-0 fs-4 fw-bold">{{ summary.openOverdueTotal | number: '1.2-2' }}€</p>
-              }
+          <div class="col-6 col-md-3">
+            <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--third">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-openOverdueTotal">
+                  Open total amount
+                </h6>
+                @if (summaryLoading$ | async) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else if (summary$ | async; as summary) {
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ summary.openOverdueTotal | number: '1.2-2' }}€</p>
+                }
+              </div>
             </div>
           </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--fourth">
-            <div class="card-body">
-              <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-unbilledTotal">
-                Unbilled amount
-              </h6>
-              @if (summaryLoading$ | async) {
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              } @else if (summary$ | async; as summary) {
-                <p class="card-title mb-0 fs-4 fw-bold">{{ summary.unbilledTotal | number: '1.2-2' }}€</p>
-              }
+          <div class="col-6 col-md-3">
+            <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--fourth">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-unbilledTotal">
+                  Unbilled amount
+                </h6>
+                @if (summaryLoading$ | async) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else if (summary$ | async; as summary) {
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ summary.unbilledTotal | number: '1.2-2' }}€</p>
+                }
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="section__row flex-grow-1 min-h-0">
-      <div
-        class="section__column section__column--overview d-flex flex-column min-h-0"
-        [class.d-none]="mobilePanel() !== 'overview'"
-      >
-        @if (statisticsError$ | async; as err) {
-          <div class="alert alert-danger mb-0 rounded-0 border-0 border-bottom" role="alert">{{ err }}</div>
-        }
+      <div class="section__row flex-grow-1 min-h-0">
+        <div
+          class="section__column section__column--overview d-flex flex-column min-h-0"
+          [class.d-none]="mobilePanel() !== 'overview'"
+        >
+          @if (statisticsError$ | async; as err) {
+            <div class="alert alert-danger mb-0 rounded-0 border-0 border-bottom" role="alert">{{ err }}</div>
+          }
 
-        <div class="admin-billing__statistics-lane card flex-grow-1 border-0 d-flex flex-column min-h-0">
-          <div
-            class="card-header admin-billing__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center flex-shrink-0"
-          >
-            <span i18n="@@featureAdminBilling-statisticsTitle">Statistics</span>
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-secondary"
-              (click)="onToggleFilters()"
-              [attr.aria-expanded]="!filtersCollapsed()"
-              aria-controls="adminBillingFilters"
-              i18n-title="@@featureAdminBilling-filters"
-              title="Filters"
-              i18n-aria-label="@@featureAdminBilling-filters"
-              aria-label="Filters"
+          <div class="admin-billing__statistics-lane card flex-grow-1 border-0 d-flex flex-column min-h-0">
+            <div
+              class="card-header admin-billing__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center flex-shrink-0"
             >
-              <i class="bi bi-funnel" aria-hidden="true"></i>
-              <i
-                class="bi ms-1"
-                [class.bi-chevron-down]="filtersCollapsed()"
-                [class.bi-chevron-up]="!filtersCollapsed()"
-                aria-hidden="true"
-              ></i>
-            </button>
-          </div>
-          <div
-            id="adminBillingFilters"
-            class="admin-billing__statistics-filters border-bottom collapse flex-shrink-0"
-            [class.show]="!filtersCollapsed()"
-          >
-            <div class="p-3">
-              <div class="row g-3 mb-0">
-                <div class="col-12">
-                  <label class="form-label small" for="adminBillingUser" i18n="@@featureAdminBilling-userFilter"
-                    >User</label
-                  >
-                  <select
-                    id="adminBillingUser"
-                    class="form-select form-select-sm"
-                    [ngModel]="selectedUserId()"
-                    (ngModelChange)="selectedUserId.set($event)"
-                  >
-                    <option [ngValue]="null" i18n="@@featureAdminBilling-allUsers">All users</option>
-                    @for (user of users(); track user.id) {
-                      <option [ngValue]="user.id">{{ user.email }}</option>
-                    }
-                  </select>
-                </div>
-                <div class="col-6">
-                  <label class="form-label small" for="adminBillingFrom" i18n="@@featureAdminBilling-fromDate"
-                    >From</label
-                  >
-                  <input
-                    id="adminBillingFrom"
-                    type="date"
-                    class="form-control form-control-sm"
-                    [ngModel]="fromDate()"
-                    (ngModelChange)="fromDate.set($event)"
-                  />
-                </div>
-                <div class="col-6">
-                  <label class="form-label small" for="adminBillingTo" i18n="@@featureAdminBilling-toDate">To</label>
-                  <input
-                    id="adminBillingTo"
-                    type="date"
-                    class="form-control form-control-sm"
-                    [ngModel]="toDate()"
-                    (ngModelChange)="toDate.set($event)"
-                  />
-                </div>
-                <div class="col-12">
-                  <label class="form-label small" for="adminBillingGroupBy" i18n="@@featureAdminBilling-groupBy"
-                    >Group by</label
-                  >
-                  <select
-                    id="adminBillingGroupBy"
-                    class="form-select form-select-sm"
-                    [ngModel]="groupBy()"
-                    (ngModelChange)="groupBy.set($event)"
-                  >
-                    <option value="day" i18n="@@featureAdminBilling-groupByDay">Day</option>
-                    <option value="month" i18n="@@featureAdminBilling-groupByMonth">Month</option>
-                  </select>
-                </div>
-                <div class="col-12 d-flex gap-2">
-                  <button
-                    type="button"
-                    class="btn btn-primary btn-sm"
-                    (click)="onApplyFilters()"
-                    i18n="@@featureAdminBilling-apply"
-                  >
-                    Apply
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-outline-secondary btn-sm"
-                    (click)="onResetFilters()"
-                    i18n="@@featureAdminBilling-reset"
-                  >
-                    Reset
-                  </button>
+              <span i18n="@@featureAdminBilling-statisticsTitle">Statistics</span>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                (click)="onToggleFilters()"
+                [attr.aria-expanded]="!filtersCollapsed()"
+                aria-controls="adminBillingFilters"
+                i18n-title="@@featureAdminBilling-filters"
+                title="Filters"
+                i18n-aria-label="@@featureAdminBilling-filters"
+                aria-label="Filters"
+              >
+                <i class="bi bi-funnel" aria-hidden="true"></i>
+                <i
+                  class="bi ms-1"
+                  [class.bi-chevron-down]="filtersCollapsed()"
+                  [class.bi-chevron-up]="!filtersCollapsed()"
+                  aria-hidden="true"
+                ></i>
+              </button>
+            </div>
+            <div
+              id="adminBillingFilters"
+              class="admin-billing__statistics-filters border-bottom collapse flex-shrink-0"
+              [class.show]="!filtersCollapsed()"
+            >
+              <div class="p-3">
+                <div class="row g-3 mb-0">
+                  <div class="col-12">
+                    <label class="form-label small" for="adminBillingUser" i18n="@@featureAdminBilling-userFilter"
+                      >User</label
+                    >
+                    <select
+                      id="adminBillingUser"
+                      class="form-select form-select-sm"
+                      [ngModel]="selectedUserId()"
+                      (ngModelChange)="selectedUserId.set($event)"
+                    >
+                      <option [ngValue]="null" i18n="@@featureAdminBilling-allUsers">All users</option>
+                      @for (user of users(); track user.id) {
+                        <option [ngValue]="user.id">{{ user.email }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small" for="adminBillingFrom" i18n="@@featureAdminBilling-fromDate"
+                      >From</label
+                    >
+                    <input
+                      id="adminBillingFrom"
+                      type="date"
+                      class="form-control form-control-sm"
+                      [ngModel]="fromDate()"
+                      (ngModelChange)="fromDate.set($event)"
+                    />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small" for="adminBillingTo" i18n="@@featureAdminBilling-toDate">To</label>
+                    <input
+                      id="adminBillingTo"
+                      type="date"
+                      class="form-control form-control-sm"
+                      [ngModel]="toDate()"
+                      (ngModelChange)="toDate.set($event)"
+                    />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label small" for="adminBillingGroupBy" i18n="@@featureAdminBilling-groupBy"
+                      >Group by</label
+                    >
+                    <select
+                      id="adminBillingGroupBy"
+                      class="form-select form-select-sm"
+                      [ngModel]="groupBy()"
+                      (ngModelChange)="groupBy.set($event)"
+                    >
+                      <option value="day" i18n="@@featureAdminBilling-groupByDay">Day</option>
+                      <option value="month" i18n="@@featureAdminBilling-groupByMonth">Month</option>
+                    </select>
+                  </div>
+                  <div class="col-12 d-flex gap-2">
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      (click)="onApplyFilters()"
+                      i18n="@@featureAdminBilling-apply"
+                    >
+                      Apply
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary btn-sm"
+                      (click)="onResetFilters()"
+                      i18n="@@featureAdminBilling-reset"
+                    >
+                      Reset
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="admin-billing__statistics-body">
-            <div class="d-flex flex-column gap-3 p-3">
-              <div class="card">
-                <div class="card-body">
-                  @if (seriesChartOptions(); as chart) {
-                    <apx-chart
-                      [series]="chart.series"
-                      [chart]="chart.chart"
-                      [colors]="chart.colors"
-                      [stroke]="chart.stroke"
-                      [fill]="chart.fill"
-                      [dataLabels]="chart.dataLabels"
-                      [xaxis]="chart.xaxis"
-                      [yaxis]="chart.yaxis"
-                      [grid]="chart.grid"
-                      [title]="chart.title"
-                    ></apx-chart>
-                  } @else if (statisticsSummaryLoading$ | async) {
-                    <div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span></div>
-                  } @else {
-                    <p class="text-muted small mb-0" i18n="@@featureAdminBilling-noChartData">
-                      No turnover data for selected period.
-                    </p>
-                  }
+            <div class="admin-billing__statistics-body">
+              <div class="d-flex flex-column gap-3 p-3">
+                <div class="card">
+                  <div class="card-body">
+                    @if (seriesChartOptions(); as chart) {
+                      <apx-chart
+                        [series]="chart.series"
+                        [chart]="chart.chart"
+                        [colors]="chart.colors"
+                        [stroke]="chart.stroke"
+                        [fill]="chart.fill"
+                        [dataLabels]="chart.dataLabels"
+                        [xaxis]="chart.xaxis"
+                        [yaxis]="chart.yaxis"
+                        [grid]="chart.grid"
+                        [title]="chart.title"
+                      ></apx-chart>
+                    } @else if (statisticsSummaryLoading$ | async) {
+                      <div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span></div>
+                    } @else {
+                      <p class="text-muted small mb-0" i18n="@@featureAdminBilling-noChartData">
+                        No turnover data for selected period.
+                      </p>
+                    }
+                  </div>
                 </div>
-              </div>
-              <div class="card">
-                <div class="card-body">
-                  @if (donutChartOptions(); as chart) {
-                    <apx-chart
-                      [series]="chart.series"
-                      [chart]="chart.chart"
-                      [labels]="chart.labels"
-                      [colors]="chart.colors"
-                      [dataLabels]="chart.dataLabels"
-                      [legend]="chart.legend"
-                      [tooltip]="chart.tooltip"
-                      [title]="chart.title"
-                    ></apx-chart>
-                  } @else if (statisticsByProductLoading$ | async) {
-                    <div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span></div>
-                  } @else {
-                    <p class="text-muted small mb-0" i18n="@@featureAdminBilling-noProductData">
-                      No product breakdown for selected period.
-                    </p>
-                  }
+                <div class="card">
+                  <div class="card-body">
+                    @if (donutChartOptions(); as chart) {
+                      <apx-chart
+                        [series]="chart.series"
+                        [chart]="chart.chart"
+                        [labels]="chart.labels"
+                        [colors]="chart.colors"
+                        [dataLabels]="chart.dataLabels"
+                        [legend]="chart.legend"
+                        [tooltip]="chart.tooltip"
+                        [title]="chart.title"
+                      ></apx-chart>
+                    } @else if (statisticsByProductLoading$ | async) {
+                      <div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span></div>
+                    } @else {
+                      <p class="text-muted small mb-0" i18n="@@featureAdminBilling-noProductData">
+                        No product breakdown for selected period.
+                      </p>
+                    }
+                  </div>
                 </div>
-              </div>
-              <div class="card">
-                <div class="card-body">
-                  @if (countryDonutChartOptions(); as chart) {
-                    <apx-chart
-                      [series]="chart.series"
-                      [chart]="chart.chart"
-                      [labels]="chart.labels"
-                      [colors]="chart.colors"
-                      [dataLabels]="chart.dataLabels"
-                      [legend]="chart.legend"
-                      [tooltip]="chart.tooltip"
-                      [title]="chart.title"
-                    ></apx-chart>
-                  } @else if (statisticsByCountryLoading$ | async) {
-                    <div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span></div>
-                  } @else {
-                    <p class="text-muted small mb-0" i18n="@@featureAdminBilling-noCountryData">
-                      No country breakdown for selected period.
-                    </p>
-                  }
+                <div class="card">
+                  <div class="card-body">
+                    @if (countryDonutChartOptions(); as chart) {
+                      <apx-chart
+                        [series]="chart.series"
+                        [chart]="chart.chart"
+                        [labels]="chart.labels"
+                        [colors]="chart.colors"
+                        [dataLabels]="chart.dataLabels"
+                        [legend]="chart.legend"
+                        [tooltip]="chart.tooltip"
+                        [title]="chart.title"
+                      ></apx-chart>
+                    } @else if (statisticsByCountryLoading$ | async) {
+                      <div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span></div>
+                    } @else {
+                      <p class="text-muted small mb-0" i18n="@@featureAdminBilling-noCountryData">
+                        No country breakdown for selected period.
+                      </p>
+                    }
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div
-        class="section__column section__column--invoices d-md-flex flex-column border-start"
-        [class.d-none]="mobilePanel() !== 'invoices'"
-      >
-        <div class="admin-billing__invoices-lane card h-100 border-0 d-flex flex-column">
-          <div
-            class="card-header admin-billing__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center flex-shrink-0 d-none d-md-flex"
-          >
-            <span i18n="@@featureAdminBilling-invoicesTitle">Invoices</span>
-            <span class="btn btn-sm btn-outline-secondary invisible" aria-hidden="true">
-              Filters
-              <i class="bi bi-chevron-down ms-1" aria-hidden="true"></i>
-            </span>
-          </div>
-          <form class="admin-billing__invoices-search" (ngSubmit)="$event.preventDefault()">
-            <label for="invoiceSearchInput" class="visually-hidden" i18n="@@featureAdminInvoices-searchPlaceholder">
-              Search invoices
-            </label>
-            <div class="input-group search-input-container border-bottom">
-              <i class="bi bi-search" aria-hidden="true"></i>
-              <input
-                id="invoiceSearchInput"
-                type="search"
-                class="form-control border-0 search-input"
-                placeholder="Search invoices"
-                i18n-placeholder="@@featureAdminInvoices-searchPlaceholder"
-                [ngModel]="invoiceSearch()"
-                (ngModelChange)="invoiceSearch.set($event)"
-                name="invoiceSearch"
-              />
+        <div
+          class="section__column section__column--invoices d-md-flex flex-column border-start"
+          [class.d-none]="mobilePanel() !== 'invoices'"
+        >
+          <div class="admin-billing__invoices-lane card h-100 border-0 d-flex flex-column">
+            <div
+              class="card-header admin-billing__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center flex-shrink-0 d-none d-md-flex"
+            >
+              <span i18n="@@featureAdminBilling-invoicesTitle">Invoices</span>
+              <span class="btn btn-sm btn-outline-secondary invisible" aria-hidden="true">
+                <i class="bi bi-funnel" aria-hidden="true"></i>
+                <i class="bi bi-chevron-down ms-1" aria-hidden="true"></i>
+              </span>
             </div>
-          </form>
-
-          <div #invoicesScrollRoot class="admin-billing__invoices-list list-group list-group-flush flex-grow-1">
-            @if (invoicesLoading$ | async) {
-              <div class="d-flex justify-content-center align-items-center p-4">
-                <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden" i18n="@@featureAdminInvoices-loading">Loading invoices...</span>
-                </div>
+            <form class="admin-billing__invoices-search" (ngSubmit)="$event.preventDefault()">
+              <label for="invoiceSearchInput" class="visually-hidden" i18n="@@featureAdminInvoices-searchPlaceholder">
+                Search invoices
+              </label>
+              <div class="input-group search-input-container border-bottom">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input
+                  id="invoiceSearchInput"
+                  type="search"
+                  class="form-control border-0 search-input"
+                  placeholder="Search invoices"
+                  i18n-placeholder="@@featureAdminInvoices-searchPlaceholder"
+                  [ngModel]="invoiceSearch()"
+                  (ngModelChange)="invoiceSearch.set($event)"
+                  name="invoiceSearch"
+                />
               </div>
-            } @else {
-              @if (invoicesError$ | async; as error) {
-                <div class="alert alert-danger m-3" role="alert">{{ error }}</div>
-              }
-              @if (invoices().length === 0) {
-                <div class="d-flex justify-content-center align-items-center p-4 text-muted">
-                  <div class="text-center">
-                    <i class="bi bi-receipt fs-1 d-block mb-2"></i>
-                    <p class="mb-0" i18n="@@featureAdminInvoices-empty">No invoices found</p>
+            </form>
+
+            <div #invoicesScrollRoot class="admin-billing__invoices-list list-group list-group-flush flex-grow-1">
+              @if (invoicesLoading$ | async) {
+                <div class="d-flex justify-content-center align-items-center p-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden" i18n="@@featureAdminInvoices-loading">Loading invoices...</span>
                   </div>
                 </div>
               } @else {
-                @for (invoice of invoices(); track invoice.id) {
-                  <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
-                    <div class="min-w-0 flex-grow-1">
-                      <div class="fw-semibold mb-1">{{ invoiceDisplayTitle(invoice) }}</div>
-                      <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
-                        <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
-                          <span
-                            class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
-                            [ngClass]="invoiceStatusBadgeClass(invoice.status)"
-                            [attr.title]="invoice.status ?? undefined"
-                          >
-                            {{ invoiceStatusLabel(invoice.status) }}
-                          </span>
-                          <span class="me-2">
-                            <i class="bi bi-envelope me-1" aria-hidden="true"></i>{{ invoiceUserLabel(invoice) }}
-                          </span>
-                          <span class="me-2">
-                            <i class="bi bi-cash-stack me-1" aria-hidden="true"></i
-                            >{{ invoice.totalGross ?? invoice.balance ?? 0 | number: '1.2-2' }} EUR
-                          </span>
-                          <span class="me-2">
-                            <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>{{ formatDate(invoice.createdAt) }}
-                          </span>
+                @if (invoicesError$ | async; as error) {
+                  <div class="alert alert-danger m-3" role="alert">{{ error }}</div>
+                }
+                @if (invoices().length === 0) {
+                  <div class="d-flex justify-content-center align-items-center p-4 text-muted">
+                    <div class="text-center">
+                      <i class="bi bi-receipt fs-1 d-block mb-2"></i>
+                      <p class="mb-0" i18n="@@featureAdminInvoices-empty">No invoices found</p>
+                    </div>
+                  </div>
+                } @else {
+                  @for (invoice of invoices(); track invoice.id) {
+                    <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
+                      <div class="min-w-0 flex-grow-1">
+                        <div class="fw-semibold mb-1">{{ invoiceDisplayTitle(invoice) }}</div>
+                        <div class="small text-muted d-flex align-items-center gap-3 row-gap-0 flex-wrap">
+                          <div class="d-flex align-items-center gap-1 row-gap-0 flex-wrap">
+                            <span
+                              class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded me-2"
+                              [ngClass]="invoiceStatusBadgeClass(invoice.status)"
+                              [attr.title]="invoice.status ?? undefined"
+                            >
+                              {{ invoiceStatusLabel(invoice.status) }}
+                            </span>
+                            <span class="me-2">
+                              <i class="bi bi-envelope me-1" aria-hidden="true"></i>{{ invoiceUserLabel(invoice) }}
+                            </span>
+                            <span class="me-2">
+                              <i class="bi bi-cash-stack me-1" aria-hidden="true"></i
+                              >{{ invoice.totalGross ?? invoice.balance ?? 0 | number: '1.2-2' }} EUR
+                            </span>
+                            <span class="me-2">
+                              <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>{{ formatDate(invoice.createdAt) }}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div
-                      class="btn-group btn-group-sm flex-shrink-0"
-                      role="group"
-                      aria-label="Invoice actions"
-                      i18n-aria-label="@@featureAdminInvoices-invoiceActionsAria"
-                    >
-                      @if (isDraft(invoice)) {
-                        <button
-                          type="button"
-                          class="btn btn-outline-primary"
-                          (click)="openEditModal(invoice)"
-                          title="Edit draft"
-                          i18n-title="@@featureAdminInvoices-editButtonTitle"
-                        >
-                          <i class="bi bi-pencil" aria-hidden="true"></i>
-                        </button>
-                        <button
-                          type="button"
-                          class="btn btn-outline-success"
-                          (click)="openIssueModal(invoice)"
-                          title="Issue invoice"
-                          i18n-title="@@featureAdminInvoices-issueButtonTitle"
-                        >
-                          <i class="bi bi-send" aria-hidden="true"></i>
-                        </button>
-                        <button
-                          type="button"
-                          class="btn btn-outline-danger"
-                          (click)="openDeleteModal(invoice)"
-                          title="Delete draft"
-                          i18n-title="@@featureAdminInvoices-deleteButtonTitle"
-                        >
-                          <i class="bi bi-trash" aria-hidden="true"></i>
-                        </button>
-                      } @else {
-                        @if (canVoid(invoice)) {
+                      <div
+                        class="btn-group btn-group-sm flex-shrink-0"
+                        role="group"
+                        aria-label="Invoice actions"
+                        i18n-aria-label="@@featureAdminInvoices-invoiceActionsAria"
+                      >
+                        @if (isDraft(invoice)) {
                           <button
                             type="button"
-                            class="btn btn-outline-danger"
-                            (click)="openActionModal('void', invoice)"
-                            title="Void invoice"
-                            i18n-title="@@featureAdminInvoices-voidButtonTitle"
+                            class="btn btn-outline-primary"
+                            (click)="openEditModal(invoice)"
+                            title="Edit draft"
+                            i18n-title="@@featureAdminInvoices-editButtonTitle"
                           >
-                            <i class="bi bi-x-circle" aria-hidden="true"></i>
+                            <i class="bi bi-pencil" aria-hidden="true"></i>
                           </button>
-                        }
-                        @if (canMarkPaid(invoice)) {
                           <button
                             type="button"
                             class="btn btn-outline-success"
-                            (click)="openActionModal('markPaid', invoice)"
-                            title="Mark as paid"
-                            i18n-title="@@featureAdminInvoices-markPaidButtonTitle"
+                            (click)="openIssueModal(invoice)"
+                            title="Issue invoice"
+                            i18n-title="@@featureAdminInvoices-issueButtonTitle"
                           >
-                            <i class="bi bi-check-circle" aria-hidden="true"></i>
+                            <i class="bi bi-send" aria-hidden="true"></i>
                           </button>
-                        }
-                        @if (canMarkUnpaid(invoice)) {
                           <button
                             type="button"
-                            class="btn btn-outline-warning"
-                            (click)="openActionModal('markUnpaid', invoice)"
-                            title="Mark as unpaid"
-                            i18n-title="@@featureAdminInvoices-markUnpaidButtonTitle"
+                            class="btn btn-outline-danger"
+                            (click)="openDeleteModal(invoice)"
+                            title="Delete draft"
+                            i18n-title="@@featureAdminInvoices-deleteButtonTitle"
                           >
-                            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                           </button>
-                        }
-                        @if (invoice.canDownload) {
+                        } @else {
+                          @if (canPreviewInvoice(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary"
+                              (click)="openPreview(invoice)"
+                              title="Preview invoice"
+                              i18n-title="@@featureInvoices-previewButtonTitle"
+                            >
+                              <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (canVoid(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-danger"
+                              (click)="openActionModal('void', invoice)"
+                              title="Void invoice"
+                              i18n-title="@@featureAdminInvoices-voidButtonTitle"
+                            >
+                              <i class="bi bi-x-circle" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (canMarkPaid(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-success"
+                              (click)="openActionModal('markPaid', invoice)"
+                              title="Mark as paid"
+                              i18n-title="@@featureAdminInvoices-markPaidButtonTitle"
+                            >
+                              <i class="bi bi-check-circle" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (canMarkUnpaid(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-warning"
+                              (click)="openActionModal('markUnpaid', invoice)"
+                              title="Mark as unpaid"
+                              i18n-title="@@featureAdminInvoices-markUnpaidButtonTitle"
+                            >
+                              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (invoice.canDownload) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary"
+                              (click)="downloadInvoice(invoice)"
+                              title="Download PDF"
+                              i18n-title="@@featureAdminInvoices-downloadPdfButtonTitle"
+                            >
+                              <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (invoice.canDownloadVoidDocument) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary"
+                              (click)="downloadVoidDocument(invoice)"
+                              title="Download void PDF"
+                              i18n-title="@@featureAdminInvoices-downloadVoidPdfButtonTitle"
+                            >
+                              <i class="bi bi-file-earmark-x" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (invoice.canDownloadTimeReport) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary"
+                              (click)="downloadTimeReport(invoice)"
+                              title="Download time report"
+                              i18n-title="@@featureAdminInvoices-downloadTimeReportButtonTitle"
+                            >
+                              <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                            </button>
+                          }
                           <button
                             type="button"
                             class="btn btn-outline-secondary"
-                            (click)="downloadInvoice(invoice)"
-                            title="Download PDF"
-                            i18n-title="@@featureAdminInvoices-downloadPdfButtonTitle"
+                            (click)="openAuditHistory(invoice)"
+                            title="View history"
+                            i18n-title="@@featureAdminInvoices-historyButtonTitle"
                           >
-                            <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                            <i class="bi bi-clock-history" aria-hidden="true"></i>
                           </button>
                         }
-                        @if (invoice.canDownloadVoidDocument) {
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary"
-                            (click)="downloadVoidDocument(invoice)"
-                            title="Download void PDF"
-                            i18n-title="@@featureAdminInvoices-downloadVoidPdfButtonTitle"
-                          >
-                            <i class="bi bi-file-earmark-x" aria-hidden="true"></i>
-                          </button>
-                        }
-                        @if (invoice.canDownloadTimeReport) {
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary"
-                            (click)="downloadTimeReport(invoice)"
-                            title="Download time report"
-                            i18n-title="@@featureAdminInvoices-downloadTimeReportButtonTitle"
-                          >
-                            <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
-                          </button>
-                        }
-                        <button
-                          type="button"
-                          class="btn btn-outline-secondary"
-                          (click)="openAuditHistory(invoice)"
-                          title="View history"
-                          i18n-title="@@featureAdminInvoices-historyButtonTitle"
-                        >
-                          <i class="bi bi-clock-history" aria-hidden="true"></i>
-                        </button>
-                      }
+                      </div>
                     </div>
-                  </div>
+                  }
                 }
               }
-            }
-            @if ((invoicesAppendLoading$ | async) || (invoicesAppendError$ | async)) {
-              <shared-list-append-footer
-                [loading]="!!(invoicesAppendLoading$ | async)"
-                [error]="!!(invoicesAppendError$ | async)"
-                (retry)="invoiceManagerFacade.loadMore()"
-              />
-            }
-            <div
-              sharedInfiniteScroll
-              [root]="invoicesScrollRoot"
-              [paused]="!!(invoicesAppendError$ | async)"
-              [disabled]="
-                (invoicesHasMore$ | async) === false ||
-                !!(invoicesAppendLoading$ | async) ||
-                !!(invoicesLoading$ | async)
-              "
-              (reachedEnd)="invoiceManagerFacade.loadMore()"
-              aria-hidden="true"
-              style="height: 1px; width: 100%; flex-shrink: 0"
-            ></div>
+              @if ((invoicesAppendLoading$ | async) || (invoicesAppendError$ | async)) {
+                <shared-list-append-footer
+                  [loading]="!!(invoicesAppendLoading$ | async)"
+                  [error]="!!(invoicesAppendError$ | async)"
+                  (retry)="invoiceManagerFacade.loadMore()"
+                />
+              }
+              <div
+                sharedInfiniteScroll
+                [root]="invoicesScrollRoot"
+                [paused]="!!(invoicesAppendError$ | async)"
+                [disabled]="
+                  (invoicesHasMore$ | async) === false ||
+                  !!(invoicesAppendLoading$ | async) ||
+                  !!(invoicesLoading$ | async)
+                "
+                (reachedEnd)="invoiceManagerFacade.loadMore()"
+                aria-hidden="true"
+                style="height: 1px; width: 100%; flex-shrink: 0"
+              ></div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    } @else {
+      @if (supplierSummaryError$ | async; as err) {
+        <div class="alert alert-danger mb-0 rounded-0 border-0 border-bottom" role="alert">{{ err }}</div>
+      }
+
+      <div class="admin-billing__summary-bar flex-shrink-0">
+        <div class="row g-0 admin-billing__summary-grid">
+          <div class="col-6 col-md-3">
+            <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--first">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-supplierInvoiceCount">
+                  Supplier invoices
+                </h6>
+                @if (supplierSummaryLoading$ | async) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else if (supplierSummary(); as summary) {
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ summary.invoiceCount }}</p>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--second">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-supplierOpenCount">
+                  Open expenses
+                </h6>
+                @if (supplierSummaryLoading$ | async) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else if (supplierSummary(); as summary) {
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ summary.openCount }}</p>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--third">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-supplierOpenTotal">
+                  Open total amount
+                </h6>
+                @if (supplierSummaryLoading$ | async) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else if (supplierSummary(); as summary) {
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ summary.openGross | number: '1.2-2' }}€</p>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card h-100 rounded-0 admin-billing__summary-card admin-billing__summary-card--fourth">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted small" i18n="@@featureAdminBilling-supplierExpenseTotal">
+                  Total expenses
+                </h6>
+                @if (supplierSummaryLoading$ | async) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else if (supplierSummary(); as summary) {
+                  <p class="card-title mb-0 fs-4 fw-bold">{{ summary.totalGross | number: '1.2-2' }}€</p>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section__row flex-grow-1 min-h-0">
+        <div
+          class="section__column section__column--overview d-flex flex-column min-h-0"
+          [class.d-none]="mobilePanel() !== 'overview'"
+        >
+          <div class="admin-billing__statistics-lane card flex-grow-1 border-0 d-flex flex-column min-h-0">
+            <div
+              class="card-header admin-billing__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center flex-shrink-0"
+            >
+              <span i18n="@@featureAdminBilling-statisticsTitle">Statistics</span>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                (click)="onToggleFilters()"
+                [attr.aria-expanded]="!filtersCollapsed()"
+                aria-controls="adminSupplierBillingFilters"
+                i18n-title="@@featureAdminBilling-filters"
+                title="Filters"
+                i18n-aria-label="@@featureAdminBilling-filters"
+                aria-label="Filters"
+              >
+                <i class="bi bi-funnel" aria-hidden="true"></i>
+                <i
+                  class="bi ms-1"
+                  [class.bi-chevron-down]="filtersCollapsed()"
+                  [class.bi-chevron-up]="!filtersCollapsed()"
+                  aria-hidden="true"
+                ></i>
+              </button>
+            </div>
+            <div
+              id="adminSupplierBillingFilters"
+              class="admin-billing__statistics-filters border-bottom collapse flex-shrink-0"
+              [class.show]="!filtersCollapsed()"
+            >
+              <div class="p-3">
+                <div class="row g-3 mb-0">
+                  <div class="col-12">
+                    <label
+                      class="form-label small"
+                      for="adminSupplierBillingSupplier"
+                      i18n="@@featureAdminBilling-supplierFilter"
+                      >Supplier</label
+                    >
+                    <select
+                      id="adminSupplierBillingSupplier"
+                      class="form-select form-select-sm"
+                      [ngModel]="selectedSupplierId()"
+                      (ngModelChange)="selectedSupplierId.set($event)"
+                    >
+                      <option [ngValue]="null" i18n="@@featureAdminBilling-allSuppliers">All suppliers</option>
+                      @for (supplier of supplierFilterOptions(); track supplier.id) {
+                        <option [ngValue]="supplier.id">{{ supplierFilterOptionLabel(supplier) }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small" for="adminSupplierBillingFrom" i18n="@@featureAdminBilling-fromDate"
+                      >From</label
+                    >
+                    <input
+                      id="adminSupplierBillingFrom"
+                      type="date"
+                      class="form-control form-control-sm"
+                      [ngModel]="fromDate()"
+                      (ngModelChange)="fromDate.set($event)"
+                    />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small" for="adminSupplierBillingTo" i18n="@@featureAdminBilling-toDate"
+                      >To</label
+                    >
+                    <input
+                      id="adminSupplierBillingTo"
+                      type="date"
+                      class="form-control form-control-sm"
+                      [ngModel]="toDate()"
+                      (ngModelChange)="toDate.set($event)"
+                    />
+                  </div>
+                  <div class="col-12">
+                    <label
+                      class="form-label small"
+                      for="adminSupplierBillingGroupBy"
+                      i18n="@@featureAdminBilling-groupBy"
+                      >Group by</label
+                    >
+                    <select
+                      id="adminSupplierBillingGroupBy"
+                      class="form-select form-select-sm"
+                      [ngModel]="groupBy()"
+                      (ngModelChange)="groupBy.set($event)"
+                    >
+                      <option value="day" i18n="@@featureAdminBilling-groupByDay">Day</option>
+                      <option value="month" i18n="@@featureAdminBilling-groupByMonth">Month</option>
+                    </select>
+                  </div>
+                  <div class="col-12 d-flex gap-2">
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      (click)="onApplyFilters()"
+                      i18n="@@featureAdminBilling-apply"
+                    >
+                      Apply
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary btn-sm"
+                      (click)="onResetFilters()"
+                      i18n="@@featureAdminBilling-reset"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="admin-billing__statistics-body">
+              <div class="d-flex flex-column gap-3 p-3">
+                <div class="card">
+                  <div class="card-body">
+                    @if (expenseSeriesChartOptions(); as chart) {
+                      <apx-chart
+                        [series]="chart.series"
+                        [chart]="chart.chart"
+                        [colors]="chart.colors"
+                        [stroke]="chart.stroke"
+                        [fill]="chart.fill"
+                        [dataLabels]="chart.dataLabels"
+                        [xaxis]="chart.xaxis"
+                        [yaxis]="chart.yaxis"
+                        [grid]="chart.grid"
+                        [title]="chart.title"
+                      ></apx-chart>
+                    } @else if (supplierSummaryLoading$ | async) {
+                      <div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span></div>
+                    } @else {
+                      <p class="text-muted small mb-0" i18n="@@featureAdminBilling-noExpenseSeries">
+                        No expense data for selected period.
+                      </p>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="section__column section__column--invoices d-md-flex flex-column border-start"
+          [class.d-none]="mobilePanel() !== 'invoices'"
+          [class.d-flex]="mobilePanel() === 'invoices'"
+        >
+          <div class="admin-billing__invoices-lane card h-100 border-0 d-flex flex-column">
+            <div
+              class="card-header admin-billing__lane-header py-2 small fw-semibold d-flex justify-content-between align-items-center flex-shrink-0 d-none d-md-flex"
+            >
+              <span i18n="@@featureAdminBilling-invoicesTitle">Invoices</span>
+              <span class="btn btn-sm btn-outline-secondary invisible" aria-hidden="true">
+                <i class="bi bi-funnel" aria-hidden="true"></i>
+                <i class="bi bi-chevron-down ms-1" aria-hidden="true"></i>
+              </span>
+            </div>
+            <form class="admin-billing__invoices-search" (ngSubmit)="$event.preventDefault()">
+              <div class="input-group search-input-container border-bottom">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input
+                  type="search"
+                  class="form-control border-0 search-input"
+                  placeholder="Search supplier invoices"
+                  i18n-placeholder="@@featureAdminSupplierInvoices-searchPlaceholder"
+                  [ngModel]="supplierInvoiceSearch()"
+                  (ngModelChange)="supplierInvoiceSearch.set($event)"
+                  name="supplierInvoiceSearch"
+                />
+              </div>
+            </form>
+            <div
+              #supplierInvoicesScrollRoot
+              class="admin-billing__invoices-list list-group list-group-flush flex-grow-1 overflow-auto"
+            >
+              @if (supplierInvoicesLoading$ | async) {
+                <div class="d-flex justify-content-center align-items-center p-4">
+                  <div class="spinner-border text-primary" role="status"></div>
+                </div>
+              } @else {
+                @if (supplierInvoicesError$ | async; as error) {
+                  <div class="alert alert-danger m-3" role="alert">{{ error }}</div>
+                }
+                @if (supplierInvoices().length === 0) {
+                  <div class="d-flex justify-content-center align-items-center p-4 text-muted">
+                    <p class="mb-0" i18n="@@featureAdminSupplierInvoices-empty">No supplier invoices found</p>
+                  </div>
+                } @else {
+                  @for (invoice of supplierInvoices(); track invoice.id) {
+                    <div class="list-group-item d-flex justify-content-between align-items-center border-bottom gap-2">
+                      <div class="min-w-0 flex-grow-1">
+                        <div class="fw-semibold mb-1">{{ supplierInvoiceDisplayTitle(invoice) }}</div>
+                        <div class="small text-muted d-flex flex-wrap gap-3 align-items-center">
+                          <span
+                            class="info-badge text-muted bg-body-tertiary py-1 px-2 rounded"
+                            [ngClass]="invoiceStatusBadgeClass(invoice.status)"
+                          >
+                            {{ invoiceStatusLabel(invoice.status) }}
+                          </span>
+                          <span
+                            ><i class="bi bi-truck me-1" aria-hidden="true"></i
+                            >{{ supplierInvoiceLabel(invoice) }}</span
+                          >
+                          <span
+                            ><i class="bi bi-cash-stack me-1" aria-hidden="true"></i
+                            >{{ invoice.totalGross | number: '1.2-2' }} EUR</span
+                          >
+                          @if (invoice.issueDate) {
+                            <span title="Issue date" i18n-title="@@featureAdminSupplierInvoices-issueDate"
+                              ><i class="bi bi-calendar-event me-1" aria-hidden="true"></i
+                              >{{ formatDate(invoice.issueDate) }}</span
+                            >
+                          }
+                          @if (invoice.dueDate) {
+                            <span title="Due date" i18n-title="@@featureAdminSupplierInvoices-dueDate"
+                              ><i class="bi bi-calendar3 me-1" aria-hidden="true"></i
+                              >{{ formatDate(invoice.dueDate) }}</span
+                            >
+                          }
+                        </div>
+                      </div>
+                      <div class="btn-group btn-group-sm flex-shrink-0" role="group">
+                        @if (isDraft(invoice)) {
+                          <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            (click)="openEditSupplierModal(invoice)"
+                          >
+                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-outline-success"
+                            (click)="openIssueSupplierModal(invoice)"
+                            title="Archive expense"
+                            i18n-title="@@featureAdminSupplierInvoices-archiveButtonTitle"
+                          >
+                            <i class="bi bi-archive" aria-hidden="true"></i>
+                          </button>
+                          @if (canDownloadSupplierInvoice(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary"
+                              (click)="downloadSupplierInvoice(invoice)"
+                              title="Download document"
+                              i18n-title="@@featureAdminSupplierInvoices-downloadButtonTitle"
+                            >
+                              <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                            </button>
+                          }
+                          <button
+                            type="button"
+                            class="btn btn-outline-danger"
+                            (click)="openDeleteSupplierModal(invoice)"
+                          >
+                            <i class="bi bi-trash" aria-hidden="true"></i>
+                          </button>
+                        } @else {
+                          @if (canPreviewSupplierInvoice(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary"
+                              (click)="openSupplierPreview(invoice)"
+                              title="Preview invoice"
+                              i18n-title="@@featureInvoices-previewButtonTitle"
+                            >
+                              <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (canVoid(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-danger"
+                              (click)="openSupplierActionModal('void', invoice)"
+                            >
+                              <i class="bi bi-x-circle" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (canMarkPaid(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-success"
+                              (click)="openSupplierActionModal('markPaid', invoice)"
+                            >
+                              <i class="bi bi-check-circle" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (canMarkUnpaid(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-warning"
+                              (click)="openSupplierActionModal('markUnpaid', invoice)"
+                            >
+                              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                            </button>
+                          }
+                          @if (canDownloadSupplierInvoice(invoice)) {
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary"
+                              (click)="downloadSupplierInvoice(invoice)"
+                              title="Download document"
+                              i18n-title="@@featureAdminSupplierInvoices-downloadButtonTitle"
+                            >
+                              <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                            </button>
+                          }
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            (click)="openSupplierAuditHistory(invoice)"
+                          >
+                            <i class="bi bi-clock-history" aria-hidden="true"></i>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              }
+              @if ((supplierInvoicesAppendLoading$ | async) || (supplierInvoicesAppendError$ | async)) {
+                <shared-list-append-footer
+                  [loading]="!!(supplierInvoicesAppendLoading$ | async)"
+                  [error]="!!(supplierInvoicesAppendError$ | async)"
+                  (retry)="supplierInvoiceManagerFacade.loadMore()"
+                />
+              }
+              <div
+                sharedInfiniteScroll
+                [root]="supplierInvoicesScrollRoot"
+                [paused]="!!(supplierInvoicesAppendError$ | async)"
+                [disabled]="
+                  (supplierInvoicesHasMore$ | async) === false ||
+                  !!(supplierInvoicesAppendLoading$ | async) ||
+                  !!(supplierInvoicesLoading$ | async)
+                "
+                (reachedEnd)="supplierInvoiceManagerFacade.loadMore()"
+                aria-hidden="true"
+                style="height: 1px; width: 100%; flex-shrink: 0"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
   </div>
 </div>
 
@@ -615,7 +1070,7 @@
           [ngModel]="actionReason()"
           (ngModelChange)="actionReason.set($event)"
         ></textarea>
-        @if (actionError$ | async; as err) {
+        @if (pendingSupplierInvoice() ? (supplierInvoicesError$ | async) : (actionError$ | async); as err) {
           <div class="alert alert-danger mt-2 mb-0" role="alert">{{ err }}</div>
         }
       </div>
@@ -624,7 +1079,7 @@
           type="button"
           class="btn btn-primary"
           (click)="confirmAction()"
-          [disabled]="(actionLoading$ | async) === true"
+          [disabled]="(pendingSupplierInvoice() ? (supplierActionLoading$ | async) : (actionLoading$ | async)) === true"
           i18n="@@featureAdminBilling-confirm"
         >
           Confirm
@@ -642,9 +1097,14 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        @if (auditLogsLoading$ | async) {
+        @if (auditLogsLoading$ | async; as loading) {
+          @if (loading && !supplierAuditInvoiceId()) {
+            <div class="text-center py-3"><span class="spinner-border spinner-border-sm"></span></div>
+          }
+        }
+        @if (supplierAuditLogsLoading()) {
           <div class="text-center py-3"><span class="spinner-border spinner-border-sm"></span></div>
-        } @else {
+        } @else if ((auditLogsLoading$ | async) === false || supplierAuditInvoiceId()) {
           <ul class="list-group list-group-flush">
             @for (log of selectedAuditLogs(); track log.id) {
               <li class="list-group-item px-0">
@@ -664,6 +1124,143 @@
   </div>
 </div>
 
+<div
+  #previewInvoiceModal
+  class="modal fade"
+  tabindex="-1"
+  aria-labelledby="adminPreviewInvoiceModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-xl modal-dialog-scrollable invoice-preview-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="adminPreviewInvoiceModalLabel" i18n="@@featureInvoices-previewTitle">
+          Invoice preview
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        @if (previewLoading()) {
+          <div class="invoice-preview-modal__loading">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span i18n="@@featureInvoices-loadingDetails">Loading invoice details…</span>
+          </div>
+        } @else if (previewDetail(); as detail) {
+          <article class="invoice-preview d-flex flex-column gap-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                  <div>
+                    <h6 class="card-title fs-5 mb-2">{{ detail.title }}</h6>
+                    <span
+                      class="info-badge py-1 px-2 rounded d-inline-flex align-self-start"
+                      [ngClass]="invoiceStatusBadgeClass(detail.status)"
+                    >
+                      {{ invoiceStatusLabel(detail.status) }}
+                    </span>
+                  </div>
+                  <div class="row g-3 mb-0">
+                    <div class="col-auto">
+                      <div class="small text-muted text-uppercase" i18n="@@featureInvoices-issuedAt">Issued</div>
+                      <div class="fw-medium">{{ formatDate(detail.issueDate ?? undefined) }}</div>
+                    </div>
+                    <div class="col-auto">
+                      <div class="small text-muted text-uppercase" i18n="@@featureInvoices-dueDate">Due date</div>
+                      <div class="fw-medium">{{ formatDate(detail.dueDate ?? undefined) }}</div>
+                    </div>
+                    <div class="col-auto">
+                      <div class="small text-muted text-uppercase" i18n="@@featureInvoices-currency">Currency</div>
+                      <div class="fw-medium">{{ detail.currency }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header py-2 small fw-semibold" i18n="@@featureInvoices-lineItems">Line items</div>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead>
+                    <tr class="small text-muted">
+                      <th scope="col" i18n="@@featureInvoices-lineDescription">Description</th>
+                      <th scope="col" class="text-end text-nowrap" i18n="@@featureInvoices-lineQty">Qty</th>
+                      <th scope="col" class="text-end text-nowrap" i18n="@@featureInvoices-lineUnitNet">Unit (net)</th>
+                      <th scope="col" class="text-end text-nowrap" i18n="@@featureInvoices-lineNet">Net</th>
+                      <th scope="col" class="text-end text-nowrap" i18n="@@featureInvoices-lineTax">Tax</th>
+                      <th scope="col" class="text-end text-nowrap" i18n="@@featureInvoices-lineGross">Gross</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (line of detail.lineItems; track $index) {
+                      <tr>
+                        <td class="text-break">{{ line.description }}</td>
+                        <td class="text-end text-nowrap">{{ line.quantity | number: '1.0-2' }}</td>
+                        <td class="text-end text-nowrap">{{ line.unitPriceNet | number: '1.2-2' }} €</td>
+                        <td class="text-end text-nowrap">{{ line.lineNet | number: '1.2-2' }} €</td>
+                        <td class="text-end">
+                          <span class="text-nowrap">{{ line.lineTax | number: '1.2-2' }} €</span>
+                          <br />
+                          <small class="text-muted">{{ line.taxRate | number: '1.0-1' }}%</small>
+                        </td>
+                        <td class="text-end text-nowrap">{{ line.lineGross | number: '1.2-2' }} €</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="row g-3 justify-content-end">
+              @if (detail.taxBreakdown.length > 0) {
+                <div class="col-md-6 col-lg-5">
+                  <div class="card bg-body-tertiary h-100">
+                    <div class="card-header py-2 small fw-semibold" i18n="@@featureInvoices-taxBreakdown">
+                      Tax breakdown
+                    </div>
+                    <ul class="list-group list-group-flush">
+                      @for (tax of detail.taxBreakdown; track $index) {
+                        <li class="list-group-item d-flex justify-content-between bg-transparent text-nowrap">
+                          <span>{{ tax.taxRate | number: '1.0-1' }}%</span>
+                          <span class="fw-medium">{{ tax.taxAmount | number: '1.2-2' }} €</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                </div>
+              }
+
+              <div class="col-md-6 col-lg-4">
+                <div class="card bg-body-tertiary h-100">
+                  <div class="card-header py-2 small fw-semibold" i18n="@@featureInvoices-summary">Summary</div>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between bg-transparent">
+                      <span i18n="@@featureInvoices-subtotalNet">Subtotal (net)</span>
+                      <span class="text-nowrap">{{ detail.subtotalNet | number: '1.2-2' }} €</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between bg-transparent">
+                      <span i18n="@@featureInvoices-taxTotal">Tax total</span>
+                      <span class="text-nowrap">{{ detail.taxTotal | number: '1.2-2' }} €</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between fw-semibold border-top">
+                      <span i18n="@@featureInvoices-totalGross">Total</span>
+                      <span class="text-nowrap">{{ detail.totalGross | number: '1.2-2' }} €</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between text-muted small bg-transparent">
+                      <span i18n="@@featureInvoices-balanceDue">Balance due</span>
+                      <span class="text-nowrap">{{ detail.balanceDue | number: '1.2-2' }} €</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
 <div #createModal class="modal fade" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
@@ -673,61 +1270,192 @@
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label" for="createInvoiceUser" i18n="@@featureAdminInvoices-user">User</label>
-          <framework-billing-admin-user-select
-            #createInvoiceUserSelect
-            inputId="createInvoiceUser"
-            [users]="users()"
-            [(selectedUserId)]="createUserId"
-            (selectedUserIdChange)="onCreateInvoiceUserChanged($event)"
-            [required]="true"
-          />
-        </div>
-        <div class="mb-3">
-          <label class="form-label" for="createInvoiceSubscription" i18n="@@featureAdminInvoices-subscriptionOptional"
-            >Subscription (optional)</label
-          >
-          @if (!createUserId) {
+          <span class="form-label d-block" i18n="@@featureAdminInvoices-invoiceType">Invoice type</span>
+          <div class="form-check form-check-inline">
             <input
-              id="createInvoiceSubscription"
+              type="radio"
+              class="form-check-input"
+              id="createInvoiceTypeCustomer"
+              name="createInvoiceType"
+              value="customer"
+              [(ngModel)]="createInvoiceType"
+            />
+            <label class="form-check-label" for="createInvoiceTypeCustomer" i18n="@@featureAdminBilling-customerTab"
+              >Customer</label
+            >
+          </div>
+          <div class="form-check form-check-inline">
+            <input
+              type="radio"
+              class="form-check-input"
+              id="createInvoiceTypeSupplier"
+              name="createInvoiceType"
+              value="supplier"
+              [(ngModel)]="createInvoiceType"
+            />
+            <label class="form-check-label" for="createInvoiceTypeSupplier" i18n="@@featureAdminBilling-supplierTab"
+              >Supplier</label
+            >
+          </div>
+        </div>
+
+        @if (createInvoiceType === 'customer') {
+          <div class="mb-3">
+            <label class="form-label" for="createInvoiceUser" i18n="@@featureAdminInvoices-user">User</label>
+            <framework-billing-admin-user-select
+              #createInvoiceUserSelect
+              inputId="createInvoiceUser"
+              [users]="users()"
+              [(selectedUserId)]="createUserId"
+              (selectedUserIdChange)="onCreateInvoiceUserChanged($event)"
+              [required]="true"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="createInvoiceSubscription" i18n="@@featureAdminInvoices-subscriptionOptional"
+              >Subscription (optional)</label
+            >
+            @if (!createUserId) {
+              <input
+                id="createInvoiceSubscription"
+                type="text"
+                class="form-control"
+                disabled
+                i18n-placeholder="@@featureAdminInvoices-selectUserFirst"
+                placeholder="Select a user first"
+              />
+            } @else {
+              <framework-billing-admin-subscription-select
+                #createInvoiceSubscriptionSelect
+                inputId="createInvoiceSubscription"
+                [subscriptions]="createInvoiceSubscriptions()"
+                [loading]="createInvoiceSubscriptionsLoading()"
+                [(selectedSubscriptionId)]="createSubscriptionId"
+              />
+            }
+          </div>
+          @for (line of createLineItems; track $index; let i = $index) {
+            <ng-container
+              *ngTemplateOutlet="
+                manualInvoiceLineItem;
+                context: { line: line, index: i, prefix: 'create', target: 'create', itemCount: createLineItems.length }
+              "
+            ></ng-container>
+          }
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addLineItem('create')">
+            <i class="bi bi-plus" aria-hidden="true"></i>
+          </button>
+        } @else {
+          <div class="mb-3">
+            <label class="form-label" for="createSupplier" i18n="@@featureAdminSupplierInvoices-supplier"
+              >Supplier</label
+            >
+            <framework-billing-admin-supplier-select
+              #createInvoiceSupplierSelect
+              inputId="createSupplier"
+              [(selectedSupplierId)]="createSupplierId"
+              [required]="true"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="createContract" i18n="@@featureAdminSupplierInvoices-contractOptional"
+              >Contract (optional)</label
+            >
+            <framework-billing-admin-supplier-contract-select
+              #createInvoiceContractSelect
+              inputId="createContract"
+              [supplierId]="createSupplierId"
+              [(selectedContractNumber)]="createContractNumber"
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              class="form-label"
+              for="createSupplierInvoiceNumber"
+              i18n="@@featureAdminSupplierInvoices-invoiceNumberOptional"
+              >Invoice number (optional)</label
+            >
+            <input
+              id="createSupplierInvoiceNumber"
               type="text"
               class="form-control"
-              disabled
-              i18n-placeholder="@@featureAdminInvoices-selectUserFirst"
-              placeholder="Select a user first"
+              maxlength="64"
+              [(ngModel)]="createInvoiceNumber"
+              name="createSupplierInvoiceNumber"
+              i18n-placeholder="@@featureAdminSupplierInvoices-invoiceNumberPlaceholder"
+              placeholder="Leave blank to auto-assign on archive"
             />
-          } @else {
-            <framework-billing-admin-subscription-select
-              #createInvoiceSubscriptionSelect
-              inputId="createInvoiceSubscription"
-              [subscriptions]="createInvoiceSubscriptions()"
-              [loading]="createInvoiceSubscriptionsLoading()"
-              [(selectedSubscriptionId)]="createSubscriptionId"
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="createIssueDate" i18n="@@featureAdminSupplierInvoices-issueDate"
+                >Issue date</label
+              >
+              <input
+                id="createIssueDate"
+                type="date"
+                class="form-control"
+                [(ngModel)]="createIssueDate"
+                name="createIssueDate"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="createDueDate" i18n="@@featureAdminSupplierInvoices-dueDate"
+                >Due date</label
+              >
+              <input
+                id="createDueDate"
+                type="date"
+                class="form-control"
+                [(ngModel)]="createDueDate"
+                name="createDueDate"
+              />
+            </div>
+          </div>
+          <div class="mb-3">
+            <label
+              class="form-label"
+              for="createSupplierDocument"
+              i18n="@@featureAdminSupplierInvoices-documentOptional"
+              >Document (optional)</label
+            >
+            <input
+              id="createSupplierDocument"
+              type="file"
+              class="form-control"
+              accept=".pdf,.xml,application/pdf,application/xml,text/xml"
+              (change)="onCreateSupplierFileSelected($event)"
             />
+            @if (supplierInvoicesParsing$ | async) {
+              <div class="form-text" i18n="@@featureAdminSupplierInvoices-parsingDocument">Parsing document...</div>
+            }
+            @if (supplierParseError$ | async; as parseErr) {
+              <div class="alert alert-warning mt-2 mb-0 py-2 small" role="alert">{{ parseErr }}</div>
+            }
+          </div>
+          @for (line of createSupplierLineItems; track $index; let i = $index) {
+            <ng-container
+              *ngTemplateOutlet="
+                manualInvoiceLineItem;
+                context: {
+                  line: line,
+                  index: i,
+                  prefix: 'createSupplier',
+                  target: 'createSupplier',
+                  itemCount: createSupplierLineItems.length,
+                }
+              "
+            ></ng-container>
           }
-        </div>
-        @for (line of createLineItems; track $index; let i = $index) {
-          <ng-container
-            *ngTemplateOutlet="
-              manualInvoiceLineItem;
-              context: { line: line, index: i, prefix: 'create', target: 'create', itemCount: createLineItems.length }
-            "
-          ></ng-container>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addLineItem('createSupplier')">
+            <i class="bi bi-plus" aria-hidden="true"></i>
+          </button>
         }
-        <button
-          type="button"
-          class="btn btn-sm btn-outline-secondary"
-          (click)="addLineItem('create')"
-          title="Add line item"
-          i18n-title="@@featureAdminInvoices-addLineItem"
-          aria-label="Add line item"
-          i18n-aria-label="@@featureAdminInvoices-addLineItem"
-        >
-          <i class="bi bi-plus" aria-hidden="true"></i>
-        </button>
         <p class="small text-body-secondary mb-0 mt-3">
           <span i18n="@@featureAdminInvoices-draftTotal">Draft total</span>:
-          <strong class="ms-1">{{ formatDraftTotals(createLineItems) }}</strong>
+          <strong class="ms-1">{{
+            formatDraftTotals(createInvoiceType === 'supplier' ? createSupplierLineItems : createLineItems)
+          }}</strong>
         </p>
       </div>
       <div class="modal-footer">
@@ -735,7 +1463,7 @@
           type="button"
           class="btn btn-primary"
           (click)="submitCreate()"
-          [disabled]="(invoicesCreating$ | async) === true"
+          [disabled]="(invoicesCreating$ | async) === true || (supplierInvoicesCreating$ | async) === true"
           i18n="@@featureAdminInvoices-create"
         >
           Create
@@ -753,36 +1481,115 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        @for (line of editLineItems; track $index; let i = $index) {
-          <ng-container
-            *ngTemplateOutlet="
-              manualInvoiceLineItem;
-              context: { line: line, index: i, prefix: 'edit', target: 'edit', itemCount: editLineItems.length }
-            "
-          ></ng-container>
+        @if (editSupplierInvoiceId) {
+          <div class="mb-3">
+            <label class="form-label" for="editSupplierContract" i18n="@@featureAdminSupplierInvoices-contractOptional"
+              >Contract (optional)</label
+            >
+            <input
+              id="editSupplierContract"
+              class="form-control"
+              [(ngModel)]="editSupplierContractNumber"
+              name="editSupplierContract"
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              class="form-label"
+              for="editSupplierInvoiceNumber"
+              i18n="@@featureAdminSupplierInvoices-invoiceNumberOptional"
+              >Invoice number (optional)</label
+            >
+            <input
+              id="editSupplierInvoiceNumber"
+              type="text"
+              class="form-control"
+              maxlength="64"
+              [(ngModel)]="editSupplierInvoiceNumber"
+              name="editSupplierInvoiceNumber"
+              i18n-placeholder="@@featureAdminSupplierInvoices-invoiceNumberPlaceholder"
+              placeholder="Leave blank to auto-assign on archive"
+            />
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="editSupplierIssueDate" i18n="@@featureAdminSupplierInvoices-issueDate"
+                >Issue date</label
+              >
+              <input
+                id="editSupplierIssueDate"
+                type="date"
+                class="form-control"
+                [(ngModel)]="editSupplierIssueDate"
+                name="editSupplierIssueDate"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="editSupplierDueDate" i18n="@@featureAdminSupplierInvoices-dueDate"
+                >Due date</label
+              >
+              <input
+                id="editSupplierDueDate"
+                type="date"
+                class="form-control"
+                [(ngModel)]="editSupplierDueDate"
+                name="editSupplierDueDate"
+              />
+            </div>
+          </div>
+          @for (line of editSupplierLineItems; track $index; let i = $index) {
+            <ng-container
+              *ngTemplateOutlet="
+                manualInvoiceLineItem;
+                context: {
+                  line: line,
+                  index: i,
+                  prefix: 'editSupplier',
+                  target: 'editSupplier',
+                  itemCount: editSupplierLineItems.length,
+                }
+              "
+            ></ng-container>
+          }
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addLineItem('editSupplier')">
+            <i class="bi bi-plus" aria-hidden="true"></i>
+          </button>
+          <p class="small text-body-secondary mb-0 mt-3">
+            <span i18n="@@featureAdminInvoices-draftTotal">Draft total</span>:
+            <strong class="ms-1">{{ formatDraftTotals(editSupplierLineItems) }}</strong>
+          </p>
+        } @else {
+          @for (line of editLineItems; track $index; let i = $index) {
+            <ng-container
+              *ngTemplateOutlet="
+                manualInvoiceLineItem;
+                context: { line: line, index: i, prefix: 'edit', target: 'edit', itemCount: editLineItems.length }
+              "
+            ></ng-container>
+          }
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="addLineItem('edit')"
+            title="Add line item"
+            i18n-title="@@featureAdminInvoices-addLineItem"
+            aria-label="Add line item"
+            i18n-aria-label="@@featureAdminInvoices-addLineItem"
+          >
+            <i class="bi bi-plus" aria-hidden="true"></i>
+          </button>
+          <p class="small text-body-secondary mb-0 mt-3">
+            <span i18n="@@featureAdminInvoices-draftTotal">Draft total</span>:
+            <strong class="ms-1">{{ formatDraftTotals(editLineItems) }}</strong>
+          </p>
         }
-        <button
-          type="button"
-          class="btn btn-sm btn-outline-secondary"
-          (click)="addLineItem('edit')"
-          title="Add line item"
-          i18n-title="@@featureAdminInvoices-addLineItem"
-          aria-label="Add line item"
-          i18n-aria-label="@@featureAdminInvoices-addLineItem"
-        >
-          <i class="bi bi-plus" aria-hidden="true"></i>
-        </button>
-        <p class="small text-body-secondary mb-0 mt-3">
-          <span i18n="@@featureAdminInvoices-draftTotal">Draft total</span>:
-          <strong class="ms-1">{{ formatDraftTotals(editLineItems) }}</strong>
-        </p>
       </div>
       <div class="modal-footer">
         <button
           type="button"
           class="btn btn-primary"
           (click)="submitEdit()"
-          [disabled]="(invoicesUpdating$ | async) === true"
+          [disabled]="(invoicesUpdating$ | async) === true || (supplierInvoicesUpdating$ | async) === true"
           i18n="@@featureAdminInvoices-save"
         >
           Save
@@ -800,15 +1607,62 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <label class="form-label" i18n="@@featureAdminInvoices-dueInDays">Due in days</label>
-        <input type="number" class="form-control" [(ngModel)]="issueDueInDays" name="issueDueInDays" min="1" />
+        @if (issueSupplierInvoiceId) {
+          <div class="mb-3">
+            <label
+              class="form-label"
+              for="issueSupplierInvoiceNumber"
+              i18n="@@featureAdminSupplierInvoices-invoiceNumberOptional"
+              >Invoice number (optional)</label
+            >
+            <input
+              id="issueSupplierInvoiceNumber"
+              type="text"
+              class="form-control"
+              maxlength="64"
+              [(ngModel)]="issueSupplierInvoiceNumber"
+              name="issueSupplierInvoiceNumber"
+              i18n-placeholder="@@featureAdminSupplierInvoices-invoiceNumberPlaceholder"
+              placeholder="Leave blank to auto-assign on archive"
+            />
+          </div>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="form-label" for="issueSupplierIssueDate" i18n="@@featureAdminSupplierInvoices-issueDate"
+                >Issue date</label
+              >
+              <input
+                id="issueSupplierIssueDate"
+                type="date"
+                class="form-control"
+                [(ngModel)]="issueSupplierIssueDate"
+                name="issueSupplierIssueDate"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="issueSupplierDueDate" i18n="@@featureAdminSupplierInvoices-dueDate"
+                >Due date</label
+              >
+              <input
+                id="issueSupplierDueDate"
+                type="date"
+                class="form-control"
+                [(ngModel)]="issueSupplierDueDate"
+                name="issueSupplierDueDate"
+              />
+            </div>
+          </div>
+        } @else {
+          <label class="form-label" i18n="@@featureAdminInvoices-dueInDays">Due in days</label>
+          <input type="number" class="form-control" [(ngModel)]="issueDueInDays" name="issueDueInDays" min="1" />
+        }
       </div>
       <div class="modal-footer">
         <button
           type="button"
           class="btn btn-success"
           (click)="submitIssue()"
-          [disabled]="(invoicesIssuing$ | async) === true"
+          [disabled]="(invoicesIssuing$ | async) === true || (supplierInvoicesIssuing$ | async) === true"
           i18n="@@featureAdminInvoices-issue"
         >
           Issue
@@ -837,7 +1691,7 @@
           type="button"
           class="btn btn-primary"
           (click)="confirmDelete()"
-          [disabled]="(invoicesDeleting$ | async) === true"
+          [disabled]="(invoicesDeleting$ | async) === true || (supplierInvoicesDeleting$ | async) === true"
           i18n="@@featureAdminInvoices-delete"
         >
           Delete
@@ -897,7 +1751,7 @@
     </div>
     <div class="mt-2">
       <span class="form-label d-block" i18n="@@featureAdminInvoices-lineTaxCategory">VAT rate</span>
-      @for (option of taxCategoryOptions(); track option.value) {
+      @for (option of taxOptionsForTarget(target); track option.value) {
         <div class="form-check form-check-inline">
           <input
             type="radio"
@@ -906,11 +1760,29 @@
             [id]="prefix + 'Tax' + i + '_' + option.value"
             [value]="option.value"
             [checked]="line.taxCategory === option.value"
-            (change)="line.taxCategory = option.value"
+            (change)="onTaxCategoryChange(line, option.value)"
           />
           <label class="form-check-label" [attr.for]="prefix + 'Tax' + i + '_' + option.value">{{
             option.label
           }}</label>
+        </div>
+      }
+      @if (isCustomTaxLine(line)) {
+        <div class="row g-2 mt-2">
+          <div class="col-sm-6">
+            <label class="form-label" [for]="prefix + 'LineTaxRate' + i" i18n="@@featureAdminInvoices-lineTaxRateCustom"
+              >Rate (%)</label
+            >
+            <input
+              type="number"
+              class="form-control"
+              [id]="prefix + 'LineTaxRate' + i"
+              [(ngModel)]="line.taxRate"
+              [name]="prefix + 'TaxRate' + i"
+              min="0"
+              step="any"
+            />
+          </div>
         </div>
       }
     </div>

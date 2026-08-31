@@ -236,6 +236,12 @@
       <trans-unit id="featureAdminBilling-allUsers" datatype="html">
         <source>All users</source>
         </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierFilter" datatype="html">
+        <source>Supplier</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-allSuppliers" datatype="html">
+        <source>All suppliers</source>
+        </trans-unit>
       <trans-unit id="featureAdminBilling-fromDate" datatype="html">
         <source>From</source>
         </trans-unit>
@@ -401,6 +407,12 @@
       <trans-unit id="featureAdminInvoices-lineTaxCategory" datatype="html">
         <source>VAT rate</source>
         </trans-unit>
+      <trans-unit id="featureAdminInvoices-lineTaxCategoryCustom" datatype="html">
+        <source>Custom</source>
+        </trans-unit>
+      <trans-unit id="featureAdminInvoices-lineTaxRateCustom" datatype="html">
+        <source>Rate (%)</source>
+        </trans-unit>
       <trans-unit id="featureAdminInvoices-lineTotal" datatype="html">
         <source>Line total</source>
         </trans-unit>
@@ -415,6 +427,18 @@
         </trans-unit>
       <trans-unit id="featureAdminBilling-chartTurnoverTitle" datatype="html">
         <source>Turnover over time</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-chartTurnoverSeries" datatype="html">
+        <source>Turnover</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-chartExpensesTitle" datatype="html">
+        <source>Expenses over time</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-chartExpensesSeries" datatype="html">
+        <source>Expenses</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-noExpenseSeries" datatype="html">
+        <source>No expense data for selected period.</source>
         </trans-unit>
       <trans-unit id="featureAdminBilling-chartProductTitle" datatype="html">
         <source>Turnover by product</source>
@@ -1052,6 +1076,9 @@
       <trans-unit id="featureContainer-adminProfilesPage" datatype="html">
         <source>Billing Profiles</source>
         </trans-unit>
+      <trans-unit id="featureContainer-adminSupplierProfilesPage" datatype="html">
+        <source>Supplier Profiles</source>
+        </trans-unit>
       <trans-unit id="featureContainer-adminSubscriptionsPage" datatype="html">
         <source>Contracts</source>
         </trans-unit>
@@ -1518,7 +1545,241 @@
         <source>Billing Profiles</source>
         </trans-unit>
       <trans-unit id="featureContainer-adminProfiles" datatype="html">
-        <source>Profiles</source>
+        <source>Customers</source>
+        </trans-unit>
+      <trans-unit id="featureContainer-adminSupplierProfilesTitle" datatype="html">
+        <source>Supplier Profiles</source>
+        </trans-unit>
+      <trans-unit id="featureContainer-adminSupplierProfiles" datatype="html">
+        <source>Suppliers</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-customerTab" datatype="html">
+        <source>Customer</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierTab" datatype="html">
+        <source>Supplier</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierInvoiceCount" datatype="html">
+        <source>Supplier invoices</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierExpenseTotal" datatype="html">
+        <source>Total expenses</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierOpenCount" datatype="html">
+        <source>Open expenses</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierOpenTotal" datatype="html">
+        <source>Open total amount</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierStatisticsTitle" datatype="html">
+        <source>Expense statistics</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierStatusBreakdown" datatype="html">
+        <source>By status</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierStatDraft" datatype="html">
+        <source>Draft</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierStatOpen" datatype="html">
+        <source>Open</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierStatPaid" datatype="html">
+        <source>Paid</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierStatArchivedTotal" datatype="html">
+        <source>Archived total</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierStatsHint" datatype="html">
+        <source>Product and country charts are not available for supplier expenses.</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierNoStats" datatype="html">
+        <source>No expense statistics available.</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-supplierInvoicesTitle" datatype="html">
+        <source>Supplier invoices</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-title" datatype="html">
+        <source>Supplier Profiles</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-add" datatype="html">
+        <source>Add</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-searchPlaceholder" datatype="html">
+        <source>Search supplier profiles</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-empty" datatype="html">
+        <source>No supplier profiles found</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-profileActionsAria" datatype="html">
+        <source>Supplier profile actions</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customDataButtonTitle" datatype="html">
+        <source>Edit custom data</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-editButtonTitle" datatype="html">
+        <source>Edit profile</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-deleteButtonTitle" datatype="html">
+        <source>Delete profile</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-createTitle" datatype="html">
+        <source>Create supplier profile</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-editTitle" datatype="html">
+        <source>Edit supplier profile</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-deleteTitle" datatype="html">
+        <source>Delete supplier profile</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-supplierNumber" datatype="html">
+        <source>Supplier number</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-datevCreditorNumber" datatype="html">
+        <source>DATEV creditor number</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-datevCreditorNotAssigned" datatype="html">
+        <source>Not assigned yet</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-create" datatype="html">
+        <source>Create</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-save" datatype="html">
+        <source>Save</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-delete" datatype="html">
+        <source>Delete</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-deleteConfirm" datatype="html">
+        <source>Delete this supplier profile?</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-cannotUndo" datatype="html">
+        <source>This action cannot be undone.</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customDataTitle" datatype="html">
+        <source>Custom data</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customDataHelp" datatype="html">
+        <source>Admin-only key/value pairs for linking this supplier to external systems. Values are stored encrypted.</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customDataFor" datatype="html">
+        <source>Custom data for</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customDataEmpty" datatype="html">
+        <source>No custom data entries yet.</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customDataKeyPlaceholder" datatype="html">
+        <source>Key</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customDataValuePlaceholder" datatype="html">
+        <source>Value</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customDataAdd" datatype="html">
+        <source>Add line</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customDataSave" datatype="html">
+        <source>Save</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-firstName" datatype="html">
+        <source>First name</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-lastName" datatype="html">
+        <source>Last name</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-company" datatype="html">
+        <source>Company</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-customerType" datatype="html">
+        <source>Type</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-vatId" datatype="html">
+        <source>VAT ID</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-vatIdValidationStatus" datatype="html">
+        <source>VAT ID validation</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-email" datatype="html">
+        <source>Email</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-addressLine1" datatype="html">
+        <source>Address line 1</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-addressLine2" datatype="html">
+        <source>Address line 2</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-postalCode" datatype="html">
+        <source>Postal code</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-city" datatype="html">
+        <source>City</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-state" datatype="html">
+        <source>State / Region</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-country" datatype="html">
+        <source>Country</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierProfiles-phone" datatype="html">
+        <source>Phone</source>
+        </trans-unit>
+      <trans-unit id="featureBillingAdminSupplierSelect-placeholder" datatype="html">
+        <source>Search by name, number, or email</source>
+        </trans-unit>
+      <trans-unit id="featureBillingAdminSupplierSelect-clearSelectionAria" datatype="html">
+        <source>Clear selected supplier</source>
+        </trans-unit>
+      <trans-unit id="featureBillingAdminSupplierSelect-noSuppliers" datatype="html">
+        <source>No suppliers found.</source>
+        </trans-unit>
+      <trans-unit id="featureBillingAdminSupplierContractSelect-placeholder" datatype="html">
+        <source>Search contract number</source>
+        </trans-unit>
+      <trans-unit id="featureBillingAdminSupplierContractSelect-loadingPlaceholder" datatype="html">
+        <source>Select a supplier first</source>
+        </trans-unit>
+      <trans-unit id="featureBillingAdminSupplierContractSelect-clearSelectionAria" datatype="html">
+        <source>Clear selected contract</source>
+        </trans-unit>
+      <trans-unit id="featureBillingAdminSupplierContractSelect-noContracts" datatype="html">
+        <source>No contracts found.</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-searchPlaceholder" datatype="html">
+        <source>Search supplier invoices</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-empty" datatype="html">
+        <source>No supplier invoices found</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-supplier" datatype="html">
+        <source>Supplier</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-contractOptional" datatype="html">
+        <source>Contract (optional)</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-invoiceNumberOptional" datatype="html">
+        <source>Invoice number (optional)</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-invoiceNumberPlaceholder" datatype="html">
+        <source>Leave blank to auto-assign on archive</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-issueDate" datatype="html">
+        <source>Issue date</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-dueDate" datatype="html">
+        <source>Due date</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-documentOptional" datatype="html">
+        <source>Document (optional)</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-parsingDocument" datatype="html">
+        <source>Parsing document...</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-archiveButtonTitle" datatype="html">
+        <source>Archive expense</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSupplierInvoices-downloadButtonTitle" datatype="html">
+        <source>Download document</source>
+        </trans-unit>
+      <trans-unit id="featureAdminInvoices-invoiceType" datatype="html">
+        <source>Invoice type</source>
         </trans-unit>
       <trans-unit id="featureContainer-adminProjectsTitle" datatype="html">
         <source>Projects</source>

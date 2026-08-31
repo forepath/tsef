@@ -443,9 +443,16 @@ export class BillingConsoleContainerComponent implements OnInit, OnDestroy {
       {
         routerLink: ['/administration/customer-profiles'],
         activePaths: ['/administration/customer-profiles'],
-        icon: 'bi-person-vcard',
+        icon: 'bi-person-badge',
         title: $localize`:@@featureContainer-adminProfilesTitle:Billing Profiles`,
-        label: $localize`:@@featureContainer-adminProfiles:Profiles`,
+        label: $localize`:@@featureContainer-adminProfiles:Customers`,
+      },
+      {
+        routerLink: ['/administration/supplier-profiles'],
+        activePaths: ['/administration/supplier-profiles'],
+        icon: 'bi-truck',
+        title: $localize`:@@featureContainer-adminSupplierProfilesTitle:Supplier Profiles`,
+        label: $localize`:@@featureContainer-adminSupplierProfiles:Suppliers`,
       },
       {
         routerLink: ['/administration/projects'],

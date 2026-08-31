@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 
 export interface BillingIssuerConfig {
   name: string;
@@ -56,7 +56,7 @@ export class BillingIssuerConfigService implements OnModuleInit {
     const { name, vatId, addressLine1, postalCode, city } = this.config;
 
     if (!name || !vatId || !addressLine1 || !postalCode || !city) {
-      throw new Error('Billing issuer is not configured');
+      throw new BadRequestException('Billing issuer is not configured');
     }
   }
 }

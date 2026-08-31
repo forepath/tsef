@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-31T10:10:50.366Z",
+  "generatedAt": "2026-08-31T22:00:41.405Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -2694,6 +2694,24 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-frontend-data-access-billing-console"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-frontend-data-access-billing-console"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/availability.service.ts",
       "type": "service",
       "attrs": {
@@ -2971,6 +2989,40 @@
           "admin-subscriptions.facade.ts",
           "admin-subscriptions.reducer.ts",
           "admin-subscriptions.selectors.ts"
+        ]
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/admin-supplier-invoice-manager",
+      "type": "state",
+      "attrs": {
+        "path": "libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/admin-supplier-invoice-manager",
+        "languageOrKind": "ts",
+        "projectName": "decabill-frontend-data-access-billing-console",
+        "sliceName": "admin-supplier-invoice-manager",
+        "memberFiles": [
+          "admin-supplier-invoice-manager.actions.ts",
+          "admin-supplier-invoice-manager.effects.ts",
+          "admin-supplier-invoice-manager.facade.ts",
+          "admin-supplier-invoice-manager.reducer.ts",
+          "admin-supplier-invoice-manager.selectors.ts"
+        ]
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/admin-supplier-profiles",
+      "type": "state",
+      "attrs": {
+        "path": "libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/admin-supplier-profiles",
+        "languageOrKind": "ts",
+        "projectName": "decabill-frontend-data-access-billing-console",
+        "sliceName": "admin-supplier-profiles",
+        "memberFiles": [
+          "admin-supplier-profiles.actions.ts",
+          "admin-supplier-profiles.effects.ts",
+          "admin-supplier-profiles.facade.ts",
+          "admin-supplier-profiles.reducer.ts",
+          "admin-supplier-profiles.selectors.ts"
         ]
       }
     },
@@ -6133,6 +6185,24 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "type": "controller",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-usage.controller.ts",
       "type": "controller",
       "attrs": {
@@ -6326,6 +6396,15 @@
       "type": "dto",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/admin-datev-export.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/admin-supplier-profile.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/admin-supplier-profile.dto.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -6754,6 +6833,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/supplier-invoice.dto.ts",
+      "type": "dto",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/supplier-invoice.dto.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/tax-preview.dto.ts",
       "type": "dto",
       "attrs": {
@@ -6938,6 +7026,15 @@
       "type": "entity",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/customer-profile.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/datev-creditor-account.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/datev-creditor-account.entity.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -7190,6 +7287,60 @@
       "type": "entity",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-contract.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-contract.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-invoice-line-item.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-invoice-line-item.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-invoice-number-sequence.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-invoice-number-sequence.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-invoice.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-invoice.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-number-sequence.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-number-sequence.entity.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-profile.entity.ts",
+      "type": "entity",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-profile.entity.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -7699,6 +7850,15 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-creditor-accounts.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-creditor-accounts.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-debtor-accounts.repository.ts",
       "type": "repository",
       "attrs": {
@@ -7946,6 +8106,60 @@
       "type": "repository",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-contracts.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-contracts.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-line-items.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-line-items.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-number-sequences.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-number-sequences.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoices.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoices.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-number-sequences.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-number-sequences.repository.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-profiles.repository.ts",
+      "type": "repository",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-profiles.repository.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -8230,6 +8444,24 @@
       }
     },
     {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-account.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-account.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-mapper.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-mapper.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
       "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-debtor-account.service.ts",
       "type": "service",
       "attrs": {
@@ -8306,6 +8538,15 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/e-invoice-embed.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/e-invoice-inbound-parse.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/e-invoice-inbound-parse.service.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -8765,6 +9006,51 @@
       "type": "service",
       "attrs": {
         "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-contracts.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-contracts.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoice-pdf.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoice-pdf.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles-admin.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles-admin.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "decabill-backend-feature-billing-manager"
+      }
+    },
+    {
+      "id": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles.service.ts",
         "languageOrKind": "ts",
         "projectName": "decabill-backend-feature-billing-manager"
       }
@@ -12862,6 +13148,22 @@
       "type": "doc",
       "attrs": {
         "path": "docs/decabill/features/subscriptions.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/decabill/features/supplier-invoices.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/supplier-invoices.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/decabill/features/supplier-profiles.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/decabill/features/supplier-profiles.md",
         "languageOrKind": "md"
       }
     },
@@ -18089,6 +18391,281 @@
       }
     },
     {
+      "id": "api:HTTP:GET:/admin/billing/supplier-profiles",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/supplier-profiles",
+        "operationId": "listAdminSupplierProfiles",
+        "summary": "List supplier billing profiles (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-profiles",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-profiles",
+        "operationId": "createAdminSupplierProfile",
+        "summary": "Create supplier billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{id}",
+        "operationId": "getAdminSupplierProfile",
+        "summary": "Get supplier billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{id}",
+        "operationId": "updateAdminSupplierProfile",
+        "summary": "Update supplier billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{id}",
+        "operationId": "deleteAdminSupplierProfile",
+        "summary": "Delete supplier billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/revalidate",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{id}/vat-id/revalidate",
+        "operationId": "revalidateAdminSupplierProfileVatId",
+        "summary": "Revalidate supplier VAT ID via VIES (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/mark-validated",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{id}/vat-id/mark-validated",
+        "operationId": "markAdminSupplierProfileVatIdValidated",
+        "summary": "Mark supplier VAT ID validated by admin (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{id}/data",
+        "operationId": "addAdminSupplierProfileCustomData",
+        "summary": "Add custom data key on supplier billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{id}/data/{key}",
+        "operationId": "updateAdminSupplierProfileCustomData",
+        "summary": "Update custom data value on supplier billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{id}/data/{key}",
+        "operationId": "deleteAdminSupplierProfileCustomData",
+        "summary": "Delete custom data key on supplier billing profile (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/supplier-profiles/{supplierId}/contracts",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{supplierId}/contracts",
+        "operationId": "listAdminSupplierContracts",
+        "summary": "Search supplier contracts (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-profiles/{supplierId}/contracts/get-or-create",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-profiles/{supplierId}/contracts/get-or-create",
+        "operationId": "getOrCreateAdminSupplierContract",
+        "summary": "Get or create supplier contract by number (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/supplier-invoices/statistics",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/supplier-invoices/statistics",
+        "operationId": "getAdminSupplierExpenseStatistics",
+        "summary": "Supplier expense statistics (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/supplier-invoices",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/supplier-invoices",
+        "operationId": "listAdminSupplierInvoices",
+        "summary": "List supplier invoices (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-invoices",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-invoices",
+        "operationId": "createAdminSupplierInvoice",
+        "summary": "Create supplier invoice draft (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-invoices/parse-document",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-invoices/parse-document",
+        "operationId": "parseSupplierInvoiceDocument",
+        "summary": "Parse supplier invoice document preview (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/supplier-invoices/{id}",
+        "operationId": "getAdminSupplierInvoice",
+        "summary": "Get supplier invoice (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-invoices/{id}",
+        "operationId": "updateAdminSupplierInvoice",
+        "summary": "Update supplier invoice draft (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:DELETE:/admin/billing/supplier-invoices/{id}",
+      "type": "endpoint",
+      "attrs": {
+        "method": "DELETE",
+        "pathOrChannel": "/admin/billing/supplier-invoices/{id}",
+        "operationId": "deleteAdminSupplierInvoice",
+        "summary": "Delete supplier invoice draft (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/issue",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-invoices/{id}/issue",
+        "operationId": "issueAdminSupplierInvoice",
+        "summary": "Issue supplier invoice draft (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/void",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-invoices/{id}/void",
+        "operationId": "voidAdminSupplierInvoice",
+        "summary": "Void issued supplier invoice (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-paid",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-invoices/{id}/mark-paid",
+        "operationId": "markAdminSupplierInvoicePaid",
+        "summary": "Mark supplier invoice paid manually (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-unpaid",
+      "type": "endpoint",
+      "attrs": {
+        "method": "POST",
+        "pathOrChannel": "/admin/billing/supplier-invoices/{id}/mark-unpaid",
+        "operationId": "markAdminSupplierInvoiceUnpaid",
+        "summary": "Mark supplier invoice unpaid manually (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/document",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/supplier-invoices/{id}/document",
+        "operationId": "downloadAdminSupplierInvoiceDocument",
+        "summary": "Download supplier invoice document (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
+      "id": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/audit-logs",
+      "type": "endpoint",
+      "attrs": {
+        "method": "GET",
+        "pathOrChannel": "/admin/billing/supplier-invoices/{id}/audit-logs",
+        "operationId": "listAdminSupplierInvoiceAuditLogs",
+        "summary": "Audit history for supplier invoice (admin only)",
+        "specKind": "openapi"
+      }
+    },
+    {
       "id": "webhook-event:decabill-backend-feature-billing-manager:addon.activated",
       "type": "webhook-event",
       "attrs": {
@@ -18273,6 +18850,15 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "datev_export.started",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:datev.creditor_range_exhausted",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "datev.creditor_range_exhausted",
         "projectName": "decabill-backend-feature-billing-manager",
         "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
       }
@@ -18750,6 +19336,123 @@
       "type": "webhook-event",
       "attrs": {
         "eventName": "subscription.updated",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_creditor.allocated",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_creditor.allocated",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.created",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_invoice.created",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.document_uploaded",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_invoice.document_uploaded",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.issued",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_invoice.issued",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.marked_paid",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_invoice.marked_paid",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.marked_unpaid",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_invoice.marked_unpaid",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.voided",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_invoice.voided",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.created",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_profile.created",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.custom_data_added",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_profile.custom_data_added",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.custom_data_deleted",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_profile.custom_data_deleted",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.custom_data_updated",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_profile.custom_data_updated",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.deleted",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_profile.deleted",
+        "projectName": "decabill-backend-feature-billing-manager",
+        "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
+      }
+    },
+    {
+      "id": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.updated",
+      "type": "webhook-event",
+      "attrs": {
+        "eventName": "supplier_profile.updated",
         "projectName": "decabill-backend-feature-billing-manager",
         "catalogPath": "libs/domains/decabill/backend/feature-billing-manager/src/lib/notifications/billing-notification.events.ts"
       }
@@ -26831,6 +27534,36 @@
       }
     },
     {
+      "id": "concept:decabill-supplier-billing-profiles-admin",
+      "type": "concept",
+      "attrs": {
+        "title": "Supplier Billing Profiles (Admin)",
+        "docPath": "docs/decabill/features/billing-administration.md",
+        "sectionAnchor": "supplier-billing-profiles-admin",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-supplier-invoices-accounts-payable",
+      "type": "concept",
+      "attrs": {
+        "title": "Supplier Invoices (Accounts Payable)",
+        "docPath": "docs/decabill/features/billing-administration.md",
+        "sectionAnchor": "supplier-invoices-accounts-payable",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-datev-accounts-payable",
+      "type": "concept",
+      "attrs": {
+        "title": "DATEV Accounts Payable",
+        "docPath": "docs/decabill/features/billing-administration.md",
+        "sectionAnchor": "datev-accounts-payable",
+        "domain": "decabill"
+      }
+    },
+    {
       "id": "concept:decabill-admin-projects",
       "type": "concept",
       "attrs": {
@@ -28597,6 +29330,86 @@
         "title": "Availability",
         "docPath": "docs/decabill/features/subscriptions.md",
         "sectionAnchor": "availability",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-workflow",
+      "type": "concept",
+      "attrs": {
+        "title": "Workflow",
+        "docPath": "docs/decabill/features/supplier-invoices.md",
+        "sectionAnchor": "workflow",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-api-summary",
+      "type": "concept",
+      "attrs": {
+        "title": "API Summary",
+        "docPath": "docs/decabill/features/supplier-invoices.md",
+        "sectionAnchor": "api-summary",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-document-sources",
+      "type": "concept",
+      "attrs": {
+        "title": "Document Sources",
+        "docPath": "docs/decabill/features/supplier-invoices.md",
+        "sectionAnchor": "document-sources",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-tax-treatment",
+      "type": "concept",
+      "attrs": {
+        "title": "Tax Treatment",
+        "docPath": "docs/decabill/features/supplier-invoices.md",
+        "sectionAnchor": "tax-treatment",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-datev-export",
+      "type": "concept",
+      "attrs": {
+        "title": "DATEV Export",
+        "docPath": "docs/decabill/features/supplier-invoices.md",
+        "sectionAnchor": "datev-export",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-supplier-profiles",
+      "type": "concept",
+      "attrs": {
+        "title": "Supplier Profiles",
+        "docPath": "docs/decabill/features/supplier-profiles.md",
+        "sectionAnchor": "supplier-profiles",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-supplier-contracts",
+      "type": "concept",
+      "attrs": {
+        "title": "Supplier Contracts",
+        "docPath": "docs/decabill/features/supplier-profiles.md",
+        "sectionAnchor": "supplier-contracts",
+        "domain": "decabill"
+      }
+    },
+    {
+      "id": "concept:decabill-datev-creditor-accounts",
+      "type": "concept",
+      "attrs": {
+        "title": "DATEV Creditor Accounts",
+        "docPath": "docs/decabill/features/supplier-profiles.md",
+        "sectionAnchor": "datev-creditor-accounts",
         "domain": "decabill"
       }
     },
@@ -33094,6 +33907,16 @@
     },
     {
       "from": "project:decabill-frontend-data-access-billing-console",
+      "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-frontend-data-access-billing-console",
+      "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-frontend-data-access-billing-console",
       "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/availability.service.ts",
       "type": "contains"
     },
@@ -33215,6 +34038,16 @@
     {
       "from": "project:decabill-frontend-data-access-billing-console",
       "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/admin-subscriptions",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-frontend-data-access-billing-console",
+      "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/admin-supplier-invoice-manager",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-frontend-data-access-billing-console",
+      "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/admin-supplier-profiles",
       "type": "contains"
     },
     {
@@ -34754,6 +35587,16 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-usage.controller.ts",
       "type": "contains"
     },
@@ -34860,6 +35703,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/admin-datev-export.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/admin-supplier-profile.dto.ts",
       "type": "contains"
     },
     {
@@ -35099,6 +35947,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/supplier-invoice.dto.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/dto/tax-preview.dto.ts",
       "type": "contains"
     },
@@ -35200,6 +36053,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/customer-profile.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/datev-creditor-account.entity.ts",
       "type": "contains"
     },
     {
@@ -35340,6 +36198,36 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/subscription.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-contract.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-invoice-line-item.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-invoice-number-sequence.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-invoice.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-number-sequence.entity.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/entities/supplier-profile.entity.ts",
       "type": "contains"
     },
     {
@@ -35624,6 +36512,11 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-creditor-accounts.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-debtor-accounts.repository.ts",
       "type": "contains"
     },
@@ -35760,6 +36653,36 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/subscriptions.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-contracts.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-line-items.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-number-sequences.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoices.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-number-sequences.repository.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-profiles.repository.ts",
       "type": "contains"
     },
     {
@@ -35919,6 +36842,16 @@
     },
     {
       "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-account.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-mapper.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-debtor-account.service.ts",
       "type": "contains"
     },
@@ -35960,6 +36893,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/e-invoice-embed.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/e-invoice-inbound-parse.service.ts",
       "type": "contains"
     },
     {
@@ -36215,6 +37153,31 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-contracts.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoice-pdf.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles-admin.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles.service.ts",
       "type": "contains"
     },
     {
@@ -40373,6 +41336,131 @@
       "type": "contains"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/revalidate",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/mark-validated",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{supplierId}/contracts",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{supplierId}/contracts/get-or-create",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/statistics",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/parse-document",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-invoices/{id}",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/issue",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/void",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-paid",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-unpaid",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/document",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/spec/openapi.yaml",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/audit-logs",
+      "type": "contains"
+    },
+    {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:addon.activated",
       "type": "contains"
@@ -40475,6 +41563,11 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:datev_export.started",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:datev.creditor_range_exhausted",
       "type": "contains"
     },
     {
@@ -40740,6 +41833,71 @@
     {
       "from": "project:decabill-backend-feature-billing-manager",
       "to": "webhook-event:decabill-backend-feature-billing-manager:subscription.updated",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_creditor.allocated",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.created",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.document_uploaded",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.issued",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.marked_paid",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.marked_unpaid",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_invoice.voided",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.created",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.custom_data_added",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.custom_data_deleted",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.custom_data_updated",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.deleted",
+      "type": "contains"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "webhook-event:decabill-backend-feature-billing-manager:supplier_profile.updated",
       "type": "contains"
     },
     {
@@ -46224,6 +47382,21 @@
     },
     {
       "from": "file:docs/decabill/features/billing-administration.md",
+      "to": "concept:decabill-supplier-billing-profiles-admin",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/billing-administration.md",
+      "to": "concept:decabill-supplier-invoices-accounts-payable",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/billing-administration.md",
+      "to": "concept:decabill-datev-accounts-payable",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/billing-administration.md",
       "to": "concept:decabill-admin-projects",
       "type": "contains"
     },
@@ -47460,6 +48633,96 @@
     {
       "from": "file:docs/decabill/features/subscriptions.md",
       "to": "concept:decabill-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-supplier-invoices-accounts-payable",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-overview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-access-control",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-workflow",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-api-summary",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-document-sources",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-tax-treatment",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-datev-export",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-webhook-events",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "concept:decabill-related",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-profiles.md",
+      "to": "concept:decabill-supplier-profiles",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-profiles.md",
+      "to": "concept:decabill-overview",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-profiles.md",
+      "to": "concept:decabill-admin-management",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-profiles.md",
+      "to": "concept:decabill-custom-data-admin-only",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-profiles.md",
+      "to": "concept:decabill-supplier-contracts",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-profiles.md",
+      "to": "concept:decabill-datev-creditor-accounts",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-profiles.md",
+      "to": "concept:decabill-webhook-events",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-profiles.md",
+      "to": "concept:decabill-related",
       "type": "contains"
     },
     {
@@ -50603,6 +51866,256 @@
       "type": "implements"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/revalidate",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/revalidate",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/mark-validated",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/mark-validated",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{supplierId}/contracts",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{supplierId}/contracts",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{supplierId}/contracts/get-or-create",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{supplierId}/contracts/get-or-create",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/statistics",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/statistics",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/parse-document",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/parse-document",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-invoices/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-invoices/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/issue",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/issue",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/void",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/void",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-paid",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-paid",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-unpaid",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-unpaid",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/document",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/document",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-billing.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/audit-logs",
+      "type": "implements"
+    },
+    {
+      "from": "project:decabill-backend-feature-billing-manager",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/audit-logs",
+      "type": "implements"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-customer-profiles.controller.ts",
       "to": "api:HTTP:GET:/admin/billing/customer-profiles",
       "type": "implements"
@@ -50825,6 +52338,626 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-subscription-meters.controller.ts",
       "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/resume",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters/history",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/display-name",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/server-info",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/ssh-access-key",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/stats-history",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/containers/{containerId}/logs",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/container-manager/networks",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/start",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/stop",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/items/{itemId}/actions/restart",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meters",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions/{subscriptionId}/meter-entries",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/meter-entries",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/meter-entries/{entryId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/subscriptions/{subscriptionId}/meter-entries/{entryId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/summary",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/bill-now",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/subscriptions",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/cancel",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/withdraw",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/instant-cancel",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/subscriptions/{subscriptionId}/resume",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/users/{userId}/subscriptions",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/invoices",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/invoices/open-overdue",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/invoices/manual",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/invoices/{invoiceRefId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/invoices/{invoiceRefId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/invoices/{invoiceRefId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/invoices/{invoiceRefId}/issue",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/invoices/{invoiceRefId}/pdf",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/invoices/{invoiceRefId}/void-document/pdf",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/invoices/{invoiceRefId}/time-report/pdf",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/promotions",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/promotions",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/promotions/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:PUT:/admin/billing/promotions/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/promotions/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/promotions/{id}/redemptions",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/customer-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}/trust-score",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/trust-score/recompute",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/auto-billing/setup",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/auto-billing/enable",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/auto-billing/disable",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/invoices/{invoiceRefId}/void",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/invoices/{invoiceRefId}/mark-paid",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/invoices/{invoiceRefId}/mark-unpaid",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/invoices/{invoiceRefId}/audit-logs",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/statistics/summary",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/statistics/by-product",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/statistics/by-country",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/capabilities",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/tax/preview",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/datev-exports",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/datev-exports",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/datev-exports/{exportId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/datev-exports/{exportId}/download",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/projects",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/projects",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/projects/{projectId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/projects/{projectId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/projects/{projectId}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/summary",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/projects/{projectId}/unbilled-time-bounds",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/projects/{projectId}/bill-time",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/projects/{projectId}/time-report",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/webhooks/event-types",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/webhooks",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/webhooks",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/webhooks/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:PUT:/admin/billing/webhooks/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/webhooks/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/webhooks/{id}/test",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/webhooks/{id}/deliveries",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/updates",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/updates/status",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/updates/check",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/revalidate",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/mark-validated",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{supplierId}/contracts",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{supplierId}/contracts/get-or-create",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/statistics",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/parse-document",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-invoices/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/issue",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/void",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-paid",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-unpaid",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/document",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/audit-logs",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/revalidate",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/mark-validated",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{supplierId}/contracts",
+      "type": "implements"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{supplierId}/contracts/get-or-create",
       "type": "implements"
     },
     {
@@ -55253,6 +57386,31 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-contracts.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/e-invoice-inbound-parse.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-audit-log.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles-admin.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-usage.controller.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/usage.service.ts",
       "type": "injects"
@@ -56308,6 +58466,16 @@
       "type": "injects"
     },
     {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-account.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-creditor-accounts.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-mapper.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-account.service.ts",
+      "type": "injects"
+    },
+    {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-debtor-account.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-debtor-accounts.repository.ts",
       "type": "injects"
@@ -56379,6 +58547,16 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoices.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-profiles.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/invoice-void-documents.repository.ts",
       "type": "injects"
     },
@@ -56415,6 +58593,16 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-debtor-account.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-account.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-export.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-mapper.service.ts",
       "type": "injects"
     },
     {
@@ -57765,6 +59953,121 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/subscription.service.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/provider-registry.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-contracts.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-contracts.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-contracts.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-profiles.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoice-pdf.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-pdf-template.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoice-pdf.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/invoice-pdf-html-renderer.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoice-pdf.service.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoices.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-line-items.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-profiles.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-contracts.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-number-sequences.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/tax-calculation.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-issuer-config.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoice-pdf.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/shared/backend/util-file-storage/src/lib/file-storage.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/billing-audit-log.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-profiles.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles.service.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoices.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles-admin.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-creditor-accounts.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-profiles.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-number-sequences.repository.ts",
+      "type": "injects"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles.service.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/vat-id-validation.service.ts",
       "type": "injects"
     },
     {
@@ -59144,6 +61447,16 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-profiles.controller.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-supplier-invoices.controller.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/controllers/admin-customer-auto-billing.controller.ts",
       "type": "provides"
     },
@@ -59604,6 +61917,36 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-profiles-admin.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-contracts.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoices-admin.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/supplier-invoice-pdf.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/e-invoice-inbound-parse.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/projects/services/projects.service.ts",
       "type": "provides"
     },
@@ -59939,12 +62282,47 @@
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-profiles.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-contracts.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoices.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-line-items.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-number-sequences.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/supplier-invoice-number-sequences.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-export.repository.ts",
       "type": "provides"
     },
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-debtor-accounts.repository.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/repositories/datev-creditor-accounts.repository.ts",
       "type": "provides"
     },
     {
@@ -59965,6 +62343,16 @@
     {
       "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
       "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-debtor-account.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-account.service.ts",
+      "type": "provides"
+    },
+    {
+      "from": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/billing.module.ts",
+      "to": "file:libs/domains/decabill/backend/feature-billing-manager/src/lib/services/datev-creditor-mapper.service.ts",
       "type": "provides"
     },
     {
@@ -60895,6 +63283,116 @@
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-promotions.service.ts",
       "to": "api:HTTP:GET:/admin/billing/promotions/{id}/redemptions",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/statistics",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/parse-document",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-invoices/{id}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/issue",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/void",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-paid",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-unpaid",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/document",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-invoices.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/audit-logs",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{supplierId}/contracts",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data/{key}",
+      "type": "calls"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}/data/{key}",
       "type": "calls"
     },
     {
@@ -62030,6 +64528,11 @@
     {
       "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/admin-promotions",
       "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-promotions.service.ts",
+      "type": "contains"
+    },
+    {
+      "from": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/state/admin-supplier-profiles",
+      "to": "file:libs/domains/decabill/frontend/data-access-billing-console/src/lib/services/admin-supplier-profiles.service.ts",
       "type": "contains"
     },
     {
@@ -65868,6 +68371,16 @@
       "type": "documents"
     },
     {
+      "from": "concept:decabill-access-control",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-access-control",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices",
+      "type": "documents"
+    },
+    {
       "from": "concept:decabill-billing-dashboard",
       "to": "api:HTTP:GET:/statistics/summary",
       "type": "documents"
@@ -66060,6 +68573,31 @@
     {
       "from": "concept:decabill-customer-billing-profiles-admin",
       "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/trust-score/recompute",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-supplier-billing-profiles-admin",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-supplier-billing-profiles-admin",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-supplier-billing-profiles-admin",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-supplier-billing-profiles-admin",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-supplier-billing-profiles-admin",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
       "type": "documents"
     },
     {
@@ -66333,26 +68871,6 @@
       "type": "documents"
     },
     {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:GET:/addons",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:POST:/addons",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:GET:/subscriptions",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-related",
-      "to": "api:HTTP:POST:/subscriptions",
-      "type": "documents"
-    },
-    {
       "from": "concept:decabill-customer-profiles",
       "to": "api:HTTP:GET:/customer-profile",
       "type": "documents"
@@ -66409,11 +68927,6 @@
     },
     {
       "from": "concept:decabill-admin-management",
-      "to": "api:HTTP:POST:/auth/register",
-      "type": "documents"
-    },
-    {
-      "from": "concept:decabill-admin-management",
       "to": "api:HTTP:GET:/customer-profile",
       "type": "documents"
     },
@@ -66424,27 +68937,37 @@
     },
     {
       "from": "concept:decabill-admin-management",
-      "to": "api:HTTP:GET:/admin/billing/customer-profiles",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
       "type": "documents"
     },
     {
       "from": "concept:decabill-admin-management",
-      "to": "api:HTTP:POST:/admin/billing/customer-profiles",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
       "type": "documents"
     },
     {
       "from": "concept:decabill-admin-management",
-      "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
       "type": "documents"
     },
     {
       "from": "concept:decabill-admin-management",
-      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
       "type": "documents"
     },
     {
       "from": "concept:decabill-admin-management",
-      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-management",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/revalidate",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-admin-management",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/vat-id/mark-validated",
       "type": "documents"
     },
     {
@@ -66459,42 +68982,42 @@
     },
     {
       "from": "concept:decabill-custom-data-admin-only",
-      "to": "api:HTTP:GET:/admin/billing/customer-profiles",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
       "type": "documents"
     },
     {
       "from": "concept:decabill-custom-data-admin-only",
-      "to": "api:HTTP:POST:/admin/billing/customer-profiles",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
       "type": "documents"
     },
     {
       "from": "concept:decabill-custom-data-admin-only",
-      "to": "api:HTTP:GET:/admin/billing/customer-profiles/{id}",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{id}",
       "type": "documents"
     },
     {
       "from": "concept:decabill-custom-data-admin-only",
-      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}",
       "type": "documents"
     },
     {
       "from": "concept:decabill-custom-data-admin-only",
-      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}",
       "type": "documents"
     },
     {
       "from": "concept:decabill-custom-data-admin-only",
-      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data",
       "type": "documents"
     },
     {
       "from": "concept:decabill-custom-data-admin-only",
-      "to": "api:HTTP:POST:/admin/billing/customer-profiles/{id}/data/{key}",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{id}/data/{key}",
       "type": "documents"
     },
     {
       "from": "concept:decabill-custom-data-admin-only",
-      "to": "api:HTTP:DELETE:/admin/billing/customer-profiles/{id}/data/{key}",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-profiles/{id}/data/{key}",
       "type": "documents"
     },
     {
@@ -68165,6 +70688,121 @@
     {
       "from": "concept:decabill-availability",
       "to": "api:HTTP:POST:/subscriptions",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-workflow",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-workflow",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-workflow",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/parse-document",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-workflow",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-workflow",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-workflow",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-invoices/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-workflow",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/issue",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/statistics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/parse-document",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:DELETE:/admin/billing/supplier-invoices/{id}",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/issue",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/void",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-paid",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:POST:/admin/billing/supplier-invoices/{id}/mark-unpaid",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "api:HTTP:GET:/admin/billing/supplier-invoices/{id}/document",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-supplier-contracts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-supplier-contracts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-supplier-contracts",
+      "to": "api:HTTP:GET:/admin/billing/supplier-profiles/{supplierId}/contracts",
+      "type": "documents"
+    },
+    {
+      "from": "concept:decabill-supplier-contracts",
+      "to": "api:HTTP:POST:/admin/billing/supplier-profiles/{supplierId}/contracts/get-or-create",
       "type": "documents"
     },
     {
@@ -70374,6 +73012,16 @@
     },
     {
       "from": "file:docs/decabill/features/subscriptions.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-invoices.md",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "file:docs/decabill/features/supplier-profiles.md",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
@@ -73923,6 +76571,21 @@
       "type": "belongs_to"
     },
     {
+      "from": "concept:decabill-supplier-billing-profiles-admin",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-supplier-invoices-accounts-payable",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-datev-accounts-payable",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
       "from": "concept:decabill-admin-projects",
       "to": "domain:decabill",
       "type": "belongs_to"
@@ -74804,6 +77467,46 @@
     },
     {
       "from": "concept:decabill-availability",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-workflow",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-api-summary",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-document-sources",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-tax-treatment",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-datev-export",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-supplier-profiles",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-supplier-contracts",
+      "to": "domain:decabill",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:decabill-datev-creditor-accounts",
       "to": "domain:decabill",
       "type": "belongs_to"
     },
