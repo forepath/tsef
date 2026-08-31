@@ -40,7 +40,9 @@ describe('BillingMeterRealtimeService', () => {
         aggregator: 'sum',
         attachmentType: 'plan',
         effectiveUnitPriceNet: 0.01,
+        effectiveIncludedUsage: 0,
         aggregatedValue: 42,
+        billableValue: 42,
         estimatedChargeNet: 0.42,
         entryCount: 1,
       },
@@ -55,7 +57,15 @@ describe('BillingMeterRealtimeService', () => {
       'meterSummaryUpdate',
       expect.objectContaining({
         subscriptionId: 'sub-1',
-        meters: expect.arrayContaining([expect.objectContaining({ meterId: 'meter-1' })]),
+        meters: expect.arrayContaining([
+          expect.objectContaining({
+            meterId: 'meter-1',
+            effectiveIncludedUsage: 0,
+            billableValue: 42,
+            aggregatedValue: 42,
+            estimatedChargeNet: 0.42,
+          }),
+        ]),
       }),
     );
   });

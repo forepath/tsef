@@ -76,7 +76,7 @@ export class ServicePlanMetersRepository {
 
   async replaceForPlan(
     servicePlanId: string,
-    attachments: Array<{ meterId: string; unitPriceNet?: string | null }>,
+    attachments: Array<{ meterId: string; unitPriceNet?: string | null; includedUsage?: string | null }>,
   ): Promise<ServicePlanMeterEntity[]> {
     await this.repository.delete({ servicePlanId });
 
@@ -89,6 +89,7 @@ export class ServicePlanMetersRepository {
         servicePlanId,
         meterId: item.meterId,
         unitPriceNet: item.unitPriceNet ?? null,
+        includedUsage: item.includedUsage ?? null,
       }),
     );
 

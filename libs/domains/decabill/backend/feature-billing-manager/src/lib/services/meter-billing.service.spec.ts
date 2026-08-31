@@ -13,6 +13,7 @@ describe('MeterBillingService buildSubscriptionMeterHistory', () => {
     unitLabel: 'calls',
     aggregator: 'sum' as const,
     defaultUnitPriceNet: '0.01',
+    defaultIncludedUsage: '0',
     isActive: true,
   };
 
@@ -234,5 +235,222 @@ describe('MeterBillingService buildSubscriptionMeterHistory', () => {
     expect(result.meters[0]?.attachmentType).toBe('addon');
     expect(result.meters[0]?.addonId).toBe(addonId);
     expect(result.meters[0]?.totalValue).toBe(8);
+  });
+});
+
+describe('MeterBillingService charges and summaries', () => {
+  const meterId = '11111111-1111-4111-8111-111111111111';
+  const planId = '22222222-2222-4222-8222-222222222222';
+  const subscriptionId = '33333333-3333-4333-8333-333333333333';
+
+  const meter = {
+    id: meterId,
+    key: 'api_calls',
+    name: 'API Calls',
+    unitLabel: 'calls',
+    aggregator: 'sum' as const,
+    defaultUnitPriceNet: '1',
+    defaultIncludedUsage: '100',
+    isActive: true,
+  };
+
+  const servicePlansRepository = { findById: jest.fn() };
+  const servicePlanMetersRepository = { findByPlanId: jest.fn() };
+  const serviceTypeMetersRepository = { findByServiceTypeId: jest.fn() };
+  const addonMetersRepository = { findByAddonIds: jest.fn() };
+  const subscriptionAddonsRepository = { findBillableBySubscriptionId: jest.fn() };
+  const usageRecordsRepository = {
+    findMeteredForSubscription: jest.fn(),
+    findMeteredForSubscriptionInRange: jest.fn(),
+  };
+
+  const service = new MeterBillingService(
+    servicePlansRepository as never,
+    servicePlanMetersRepository as never,
+    serviceTypeMetersRepository as never,
+    addonMetersRepository as never,
+    subscriptionAddonsRepository as never,
+    usageRecordsRepository as never,
+  );
+
+  const subscription = {
+    id: subscriptionId,
+    planId,
+    createdAt: new Date('2026-01-01T00:00:00Z'),
+    currentPeriodStart: new Date('2026-01-01T00:00:00Z'),
+    currentPeriodEnd: new Date('2026-01-31T00:00:00Z'),
+  };
+
+  const plan = {
+    id: planId,
+    serviceTypeId: null,
+    billInAdvance: false,
+  };
+
+  const periodStart = new Date('2026-01-01T00:00:00Z');
+  const periodEnd = new Date('2026-01-31T00:00:00Z');
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    servicePlanMetersRepository.findByPlanId.mockResolvedValue([
+      { meterId, meter, unitPriceNet: null, includedUsage: null },
+    ]);
+    serviceTypeMetersRepository.findByServiceTypeId.mockResolvedValue([]);
+    subscriptionAddonsRepository.findBillableBySubscriptionId.mockResolvedValue([]);
+    addonMetersRepository.findByAddonIds.mockResolvedValue([]);
+  });
+
+  it('buildMeterChargeLines subtracts included usage before pricing', async () => {
+    usageRecordsRepository.findMeteredForSubscription.mockResolvedValue([
+      {
+        id: 'entry-1',
+        meterId,
+        value: '150',
+        attachmentType: 'plan',
+        addonId: null,
+        periodStart,
+        periodEnd: new Date('2026-01-15T00:00:00Z'),
+        createdAt: new Date('2026-01-15T00:00:00Z'),
+      },
+    ]);
+
+    const lines = await service.buildMeterChargeLines({
+      subscription: subscription as never,
+      plan: plan as never,
+      periodStart,
+      periodEnd,
+    });
+
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toEqual(
+      expect.objectContaining({
+        aggregatedValue: 150,
+        billableValue: 50,
+        effectiveIncludedUsage: 100,
+        effectiveUnitPriceNet: 1,
+        unitPriceNet: 50,
+      }),
+    );
+  });
+
+  it('buildMeterChargeLines omits lines when usage is fully included', async () => {
+    usageRecordsRepository.findMeteredForSubscription.mockResolvedValue([
+      {
+        id: 'entry-1',
+        meterId,
+        value: '40',
+        attachmentType: 'plan',
+        addonId: null,
+        periodStart,
+        periodEnd: new Date('2026-01-15T00:00:00Z'),
+        createdAt: new Date('2026-01-15T00:00:00Z'),
+      },
+    ]);
+
+    const lines = await service.buildMeterChargeLines({
+      subscription: subscription as never,
+      plan: plan as never,
+      periodStart,
+      periodEnd,
+    });
+
+    expect(lines).toEqual([]);
+  });
+
+  it('buildMeterChargeLines bills full usage when included usage is zero', async () => {
+    const zeroIncludedMeter = { ...meter, defaultIncludedUsage: '0' };
+    servicePlanMetersRepository.findByPlanId.mockResolvedValue([
+      { meterId, meter: zeroIncludedMeter, unitPriceNet: null, includedUsage: null },
+    ]);
+    usageRecordsRepository.findMeteredForSubscription.mockResolvedValue([
+      {
+        id: 'entry-1',
+        meterId,
+        value: '75',
+        attachmentType: 'plan',
+        addonId: null,
+        periodStart,
+        periodEnd: new Date('2026-01-15T00:00:00Z'),
+        createdAt: new Date('2026-01-15T00:00:00Z'),
+      },
+    ]);
+
+    const lines = await service.buildMeterChargeLines({
+      subscription: subscription as never,
+      plan: plan as never,
+      periodStart,
+      periodEnd,
+    });
+
+    expect(lines[0]).toEqual(
+      expect.objectContaining({
+        aggregatedValue: 75,
+        billableValue: 75,
+        effectiveIncludedUsage: 0,
+        unitPriceNet: 75,
+      }),
+    );
+  });
+
+  it('buildMeterChargeLines uses attachment includedUsage override', async () => {
+    servicePlanMetersRepository.findByPlanId.mockResolvedValue([
+      { meterId, meter, unitPriceNet: null, includedUsage: '20' },
+    ]);
+    usageRecordsRepository.findMeteredForSubscription.mockResolvedValue([
+      {
+        id: 'entry-1',
+        meterId,
+        value: '50',
+        attachmentType: 'plan',
+        addonId: null,
+        periodStart,
+        periodEnd: new Date('2026-01-15T00:00:00Z'),
+        createdAt: new Date('2026-01-15T00:00:00Z'),
+      },
+    ]);
+
+    const lines = await service.buildMeterChargeLines({
+      subscription: subscription as never,
+      plan: plan as never,
+      periodStart,
+      periodEnd,
+    });
+
+    expect(lines[0]).toEqual(
+      expect.objectContaining({
+        aggregatedValue: 50,
+        billableValue: 30,
+        effectiveIncludedUsage: 20,
+        unitPriceNet: 30,
+      }),
+    );
+  });
+
+  it('buildSubscriptionMeterSummaries expose billableValue and estimatedChargeNet', async () => {
+    usageRecordsRepository.findMeteredForSubscription.mockResolvedValue([
+      {
+        id: 'entry-1',
+        meterId,
+        value: '120',
+        attachmentType: 'plan',
+        addonId: null,
+        periodStart,
+        periodEnd: new Date('2026-01-15T00:00:00Z'),
+        createdAt: new Date('2026-01-15T00:00:00Z'),
+      },
+    ]);
+
+    const summaries = await service.buildSubscriptionMeterSummaries({
+      subscription: subscription as never,
+    });
+
+    expect(summaries[0]).toEqual(
+      expect.objectContaining({
+        aggregatedValue: 120,
+        billableValue: 20,
+        effectiveIncludedUsage: 100,
+        estimatedChargeNet: 20,
+      }),
+    );
   });
 });

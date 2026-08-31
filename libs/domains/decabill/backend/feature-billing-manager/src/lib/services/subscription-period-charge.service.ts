@@ -128,6 +128,8 @@ export class SubscriptionPeriodChargeService {
       addonId: line.addonId ?? null,
       description: line.description,
       aggregatedValue: line.aggregatedValue,
+      billableValue: line.billableValue,
+      effectiveIncludedUsage: line.effectiveIncludedUsage,
       effectiveUnitPriceNet: line.effectiveUnitPriceNet,
       unitPriceNet: line.unitPriceNet,
     }));

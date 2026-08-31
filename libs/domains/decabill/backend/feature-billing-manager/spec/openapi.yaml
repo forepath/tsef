@@ -6455,6 +6455,7 @@ components:
             enum: [max, min, avg, first, last, sum, sum_positive_deltas],
           }
         defaultUnitPriceNet: { type: number }
+        defaultIncludedUsage: { type: number, minimum: 0, default: 0 }
     AddonModuleDetail:
       type: object
       required: [key, displayName, meters]
@@ -8222,6 +8223,7 @@ components:
           name,
           aggregator,
           defaultUnitPriceNet,
+          defaultIncludedUsage,
           isActive,
           createdAt,
           updatedAt,
@@ -8238,6 +8240,7 @@ components:
             enum: [max, min, avg, first, last, sum, sum_positive_deltas],
           }
         defaultUnitPriceNet: { type: number }
+        defaultIncludedUsage: { type: number, minimum: 0 }
         isActive: { type: boolean }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -8255,6 +8258,7 @@ components:
             enum: [max, min, avg, first, last, sum, sum_positive_deltas],
           }
         defaultUnitPriceNet: { type: number }
+        defaultIncludedUsage: { type: number, minimum: 0 }
         isActive: { type: boolean }
     UpdateMeterDto:
       type: object
@@ -8268,6 +8272,7 @@ components:
             enum: [max, min, avg, first, last, sum, sum_positive_deltas],
           }
         defaultUnitPriceNet: { type: number }
+        defaultIncludedUsage: { type: number, minimum: 0 }
         isActive: { type: boolean }
     AttachMeterDto:
       type: object
@@ -8275,10 +8280,12 @@ components:
       properties:
         meterId: { type: string, format: uuid }
         unitPriceNet: { type: number, nullable: true }
+        includedUsage: { type: number, nullable: true, minimum: 0 }
     UpdateAttachedMeterDto:
       type: object
       properties:
         unitPriceNet: { type: number, nullable: true }
+        includedUsage: { type: number, nullable: true, minimum: 0 }
     AttachedMeterResponse:
       type: object
       required:
@@ -8289,6 +8296,8 @@ components:
           aggregator,
           defaultUnitPriceNet,
           effectiveUnitPriceNet,
+          defaultIncludedUsage,
+          effectiveIncludedUsage,
           isActive,
           source,
           required,
@@ -8307,6 +8316,9 @@ components:
         defaultUnitPriceNet: { type: number }
         unitPriceNetOverride: { type: number, nullable: true }
         effectiveUnitPriceNet: { type: number }
+        defaultIncludedUsage: { type: number, minimum: 0 }
+        includedUsageOverride: { type: number, nullable: true, minimum: 0 }
+        effectiveIncludedUsage: { type: number, minimum: 0 }
         isActive: { type: boolean }
         source:
           type: string
@@ -8330,7 +8342,9 @@ components:
           aggregator,
           attachmentType,
           effectiveUnitPriceNet,
+          effectiveIncludedUsage,
           aggregatedValue,
+          billableValue,
           estimatedChargeNet,
           entryCount,
         ]
@@ -8348,7 +8362,9 @@ components:
         addonId: { type: string, format: uuid, nullable: true }
         addonName: { type: string, nullable: true }
         effectiveUnitPriceNet: { type: number }
+        effectiveIncludedUsage: { type: number, minimum: 0 }
         aggregatedValue: { type: number }
+        billableValue: { type: number, minimum: 0 }
         estimatedChargeNet: { type: number }
         entryCount: { type: integer }
         periodStart: { type: string, format: date-time, nullable: true }

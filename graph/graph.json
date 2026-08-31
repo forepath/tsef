@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-28T08:32:29.548Z",
+  "generatedAt": "2026-08-31T10:10:50.366Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -1780,6 +1780,14 @@
       "attrs": {
         "name": "@agentclientprotocol/sdk",
         "version": "0.23.0"
+      }
+    },
+    {
+      "id": "package:@aws-sdk/client-s3",
+      "type": "package",
+      "attrs": {
+        "name": "@aws-sdk/client-s3",
+        "version": "3.1115.0"
       }
     },
     {
@@ -30856,6 +30864,11 @@
     },
     {
       "from": "project:agenstra-backend-agent-controller",
+      "to": "package:@aws-sdk/client-s3",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-controller",
       "to": "package:@bull-board/api",
       "type": "depends_on"
     },
@@ -31506,6 +31519,11 @@
     },
     {
       "from": "project:decabill-backend-billing-manager",
+      "to": "package:@aws-sdk/client-s3",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:decabill-backend-billing-manager",
       "to": "package:@bull-board/api",
       "type": "depends_on"
     },
@@ -31906,6 +31924,11 @@
     },
     {
       "from": "project:agenstra-backend-agent-manager",
+      "to": "package:@aws-sdk/client-s3",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:agenstra-backend-agent-manager",
       "to": "package:@bull-board/api",
       "type": "depends_on"
     },
@@ -32132,6 +32155,11 @@
     {
       "from": "project:agenstra-backend-agent-manager",
       "to": "package:zod",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-backend-communication",
+      "to": "package:@aws-sdk/client-s3",
       "type": "depends_on"
     },
     {

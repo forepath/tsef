@@ -14,6 +14,7 @@ Tenant-scoped usage meters drive arrear usage billing for service plans and addo
     on counter reset (value decreases), treat the new value as a fresh series and add it
     (Prometheus-style). Useful for cumulative provider counters.
 - `default_unit_price_net`
+- `default_included_usage` (default `0`) — free allowance per charge period before metered billing applies
 - `is_active`
 
 Admin API: `GET/POST /meters`, `GET/POST/DELETE /meters/{id}` (`catalog:read` / `catalog:write`).
@@ -22,17 +23,19 @@ Hard-delete is blocked while plan, addon, service-type, or usage rows reference 
 
 ## Attachments
 
-Meters attach to plans, addons, and service types via join tables with an optional unit-price override:
+Meters attach to plans, addons, and service types via join tables with optional overrides for unit price and included usage:
 
 - `billing_service_plan_meters` — unique `(service_plan_id, meter_id)`
 - `billing_addon_meters` — unique `(addon_id, meter_id)`
 - `billing_service_type_meters` — unique `(service_type_id, meter_id)`
 
-Each link stores `source` (`manual` | `module` | `provider`) and `required` (boolean). Required links cannot be detached; price overrides remain allowed.
+Each link stores `source` (`manual` | `module` | `provider`) and `required` (boolean). Required links cannot be detached; price and included-usage overrides remain allowed.
 
 **Effective price:** `coalesce(link.unit_price_net, meter.default_unit_price_net)`.
 
-The same catalog meter may be attached to a plan and to one or more addons. Each attachment keeps its own effective price. Usage and invoice lines are **attachment-scoped**, not merged by `meterId`.
+**Effective included usage:** `coalesce(link.included_usage, meter.default_included_usage)` — same inheritance as unit price; null link override falls back to the catalog default.
+
+The same catalog meter may be attached to a plan and to one or more addons. Each attachment keeps its own effective price and included allowance. Usage and invoice lines are **attachment-scoped**, not merged by `meterId`.
 
 ### Declared / required meters
 
@@ -97,7 +100,7 @@ Built-in Hetzner / DigitalOcean register stub collectors (empty samples) until r
 ## Subscription views
 
 - `GET /subscriptions/{id}/meters` and admin twin under `/admin/billing/subscriptions/{id}/meters` (`billing_admin:read`)
-- `SubscriptionResponse.meters` embeds the same summaries (effective price, period aggregate, estimated charge)
+- `SubscriptionResponse.meters` embeds the same summaries (effective price, effective included usage, aggregated value, billable value, estimated charge)
 - `GET /subscriptions/{id}/meters/history?from&to&groupBy=day|month` (admin twin under `/admin/billing/subscriptions/{id}/meters/history`, `billing_admin:read`) — per-meter time series for the service details UI
 - WebSocket `meterSummaryUpdate` on room `subscription:{id}` after usage mutations; ADMIN may subscribe without ownership (see [Service details](./service-details.md))
 
@@ -110,6 +113,13 @@ For each charge period:
 3. Same catalog meter on plan + addon A + addon B can produce up to three lines
 4. If there are no plan/addon meter attachments at all → legacy `extractUsageCost` on the subscription base line
 
+Per attachment line:
+
+- `aggregatedValue` — in-window aggregate from the meter’s catalog aggregator
+- `effectiveIncludedUsage` — `coalesce(link.included_usage, meter.default_included_usage)`
+- `billableValue` — `max(0, aggregatedValue - effectiveIncludedUsage)`
+- Line net amount — `billableValue × effectiveUnitPriceNet` (same coalesce pricing as attachments)
+
 Period inclusion: a record settles into the charge period that contains its `periodEnd`
 (left-open start, inclusive end). Spanning intervals are billed once, in the period where
 the sample ends — not in both adjacent periods. Collector samples clamp `periodEnd` to the
@@ -119,7 +129,7 @@ billing tick), and arrear schedule advances anchor the next `currentPeriodStart`
 schedule-aligned `meterPeriodStart` (not lagged `invoice.createdAt`) so open-position
 invoicing cannot skip post-boundary collector rows.
 
-Empty aggregates become `0` and omit the line when below the minimum billable amount. Prepaid plans skip meter costs.
+Empty aggregates and usage fully covered by included allowance (`billableValue = 0`) omit the line when below the minimum billable amount. Prepaid plans skip meter costs.
 
 ## Notifications
 
@@ -131,7 +141,7 @@ Empty aggregates become `0` and omit the line when below the minimum billable am
 | `service_type.meter_attached` / `meter_updated` / `meter_detached` | Service-type link               |
 | `usage.recorded` / `updated` / `deleted`                           | Entries (no email; high volume) |
 
-`subscription.period_charged` includes `meterCharges[]` with `attachmentType` and optional `addonId`.
+No new webhook event types. Existing meter and attachment events gain `defaultIncludedUsage` (catalog) and nullable `includedUsage` (link attach/update). `subscription.period_charged` `meterCharges[]` entries include `attachmentType`, optional `addonId`, `aggregatedValue`, `effectiveIncludedUsage`, `billableValue`, and charge amounts.
 
 ## Related docs
 

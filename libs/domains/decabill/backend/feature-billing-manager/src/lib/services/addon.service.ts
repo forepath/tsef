@@ -57,6 +57,7 @@ export class AddonService {
       unitLabel?: string;
       aggregator: string;
       defaultUnitPriceNet: number;
+      defaultIncludedUsage: number;
     }>;
   }> {
     return this.addonModuleRegistry.list().map((module) => ({
@@ -69,6 +70,7 @@ export class AddonService {
         unitLabel: meter.unitLabel,
         aggregator: meter.aggregator,
         defaultUnitPriceNet: meter.defaultUnitPriceNet,
+        defaultIncludedUsage: meter.defaultIncludedUsage ?? 0,
       })),
     }));
   }

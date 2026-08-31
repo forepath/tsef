@@ -71,6 +71,14 @@
                         <i class="bi bi-cash-stack me-1" aria-hidden="true"></i
                         >{{ formatUnitPrice(meter.defaultUnitPriceNet) }}
                       </span>
+                      @if (meter.defaultIncludedUsage > 0) {
+                        <span class="me-2">
+                          <i class="bi bi-gift me-1" aria-hidden="true"></i>{{ meter.defaultIncludedUsage }}
+                          @if (meter.unitLabel) {
+                            <span>{{ meter.unitLabel }}</span>
+                          }
+                        </span>
+                      }
                     </div>
                   </div>
                 </div>
@@ -238,6 +246,21 @@
         [name]="prefix + 'MeterDefaultPrice'"
         [disabled]="disabled"
         required
+      />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" [for]="prefix + 'MeterDefaultIncludedUsage'" i18n="@@featureMeters-defaultIncludedUsage"
+        >Default included usage</label
+      >
+      <input
+        type="number"
+        min="0"
+        step="1"
+        class="form-control"
+        [id]="prefix + 'MeterDefaultIncludedUsage'"
+        [(ngModel)]="form.defaultIncludedUsage"
+        [name]="prefix + 'MeterDefaultIncludedUsage'"
+        [disabled]="disabled"
       />
     </div>
     <div class="col-12">

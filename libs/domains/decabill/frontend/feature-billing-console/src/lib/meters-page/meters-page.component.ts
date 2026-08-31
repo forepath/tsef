@@ -21,6 +21,7 @@ interface MeterForm {
   unitLabel: string;
   aggregator: MeterAggregator;
   defaultUnitPriceNet: number;
+  defaultIncludedUsage: number;
   isActive: boolean;
 }
 
@@ -80,6 +81,7 @@ export class MetersPageComponent implements OnInit {
       unitLabel: meter.unitLabel ?? '',
       aggregator: meter.aggregator,
       defaultUnitPriceNet: meter.defaultUnitPriceNet,
+      defaultIncludedUsage: meter.defaultIncludedUsage ?? 0,
       isActive: meter.isActive,
     };
     showBillingModal(this.editModal);
@@ -123,7 +125,9 @@ export class MetersPageComponent implements OnInit {
   }
 
   private isValid(form: MeterForm): boolean {
-    return Boolean(form.key.trim() && form.name.trim() && form.defaultUnitPriceNet >= 0);
+    return Boolean(
+      form.key.trim() && form.name.trim() && form.defaultUnitPriceNet >= 0 && form.defaultIncludedUsage >= 0,
+    );
   }
 
   private buildCreateDto(form: MeterForm): CreateMeterDto {
@@ -134,6 +138,7 @@ export class MetersPageComponent implements OnInit {
       unitLabel: form.unitLabel.trim() || undefined,
       aggregator: form.aggregator,
       defaultUnitPriceNet: Number(form.defaultUnitPriceNet) || 0,
+      defaultIncludedUsage: Number(form.defaultIncludedUsage) || 0,
       isActive: form.isActive,
     };
   }
@@ -145,6 +150,7 @@ export class MetersPageComponent implements OnInit {
       unitLabel: form.unitLabel.trim() || null,
       aggregator: form.aggregator,
       defaultUnitPriceNet: Number(form.defaultUnitPriceNet) || 0,
+      defaultIncludedUsage: Number(form.defaultIncludedUsage) || 0,
       isActive: form.isActive,
     };
   }
@@ -157,6 +163,7 @@ export class MetersPageComponent implements OnInit {
       unitLabel: '',
       aggregator: 'max',
       defaultUnitPriceNet: 0,
+      defaultIncludedUsage: 0,
       isActive: true,
     };
   }

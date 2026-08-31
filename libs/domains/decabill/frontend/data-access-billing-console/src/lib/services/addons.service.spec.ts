@@ -142,6 +142,8 @@ describe('AddonsService', () => {
       aggregator: 'max' as const,
       defaultUnitPriceNet: 0.01,
       effectiveUnitPriceNet: 0.01,
+      defaultIncludedUsage: 0,
+      effectiveIncludedUsage: 0,
       isActive: true,
     };
 
@@ -157,26 +159,27 @@ describe('AddonsService', () => {
     });
 
     it('attaches an addon meter', (done) => {
-      service.attachAddonMeter('addon-1', { meterId: 'meter-1' }).subscribe((meter) => {
-        expect(meter).toEqual(attachedMeter);
+      service.attachAddonMeter('addon-1', { meterId: 'meter-1', includedUsage: 10 }).subscribe((meter) => {
+        expect(meter).toEqual({ ...attachedMeter, effectiveIncludedUsage: 10 });
         done();
       });
 
       const req = httpMock.expectOne(`${apiUrl}/addons/addon-1/meters`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ meterId: 'meter-1' });
-      req.flush(attachedMeter);
+      expect(req.request.body).toEqual({ meterId: 'meter-1', includedUsage: 10 });
+      req.flush({ ...attachedMeter, effectiveIncludedUsage: 10 });
     });
 
     it('updates an addon meter override', (done) => {
-      service.updateAddonMeter('addon-1', 'meter-1', { unitPriceNet: 0.05 }).subscribe((meter) => {
+      service.updateAddonMeter('addon-1', 'meter-1', { unitPriceNet: 0.05, includedUsage: 5 }).subscribe((meter) => {
         expect(meter.effectiveUnitPriceNet).toBe(0.05);
         done();
       });
 
       const req = httpMock.expectOne(`${apiUrl}/addons/addon-1/meters/meter-1`);
       expect(req.request.method).toBe('POST');
-      req.flush({ ...attachedMeter, effectiveUnitPriceNet: 0.05 });
+      expect(req.request.body).toEqual({ unitPriceNet: 0.05, includedUsage: 5 });
+      req.flush({ ...attachedMeter, effectiveUnitPriceNet: 0.05, effectiveIncludedUsage: 5 });
     });
 
     it('detaches an addon meter', (done) => {

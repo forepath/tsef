@@ -34,6 +34,7 @@ import {
   SubscriptionItemsService,
   SubscriptionServerInfoFacade,
   type MeterHistorySeries,
+  type SubscriptionMeterSummary,
   type ProviderDetail,
   type ProviderLocationCatalog,
   type ServerInfoResponse,
@@ -176,6 +177,9 @@ export class ServiceDetailPageComponent implements OnInit {
   readonly history = toSignal(this.facade.history$, { initialValue: null });
   readonly loadingHistory = toSignal(this.facade.loadingHistory$, { initialValue: false });
   readonly detail = toSignal(this.facade.detail$, { initialValue: null as SubscriptionItemDetailResponse | null });
+  readonly metersFromSocket = toSignal(this.facade.metersFromSocket$, {
+    initialValue: null as SubscriptionMeterSummary[] | null,
+  });
 
   readonly sortedTabs = computed(() => sortServiceDetailTabs(this.detail()?.tabs));
   readonly showServiceTabs = computed(() => this.sortedTabs().length > 1);
@@ -195,11 +199,23 @@ export class ServiceDetailPageComponent implements OnInit {
     adminMode: this.isAdminView(),
   }));
 
+  readonly meterSummaryLookup = computed(() => {
+    const summaries = this.metersFromSocket();
+
+    if (!summaries?.length) {
+      return new Map<string, SubscriptionMeterSummary>();
+    }
+
+    return new Map(summaries.map((summary) => [this.meterSummaryKey(summary), summary]));
+  });
+
   readonly meterCharts = computed(() => {
     const meters = this.history()?.meters ?? [];
+    const lookup = this.meterSummaryLookup();
 
     return meters.map((meter, index) => ({
       meter,
+      summary: lookup.get(this.meterSummaryKey(meter)) ?? null,
       options: this.buildMeterChart(meter, index),
     }));
   });
@@ -731,6 +747,31 @@ export class ServiceDetailPageComponent implements OnInit {
     const unit = meter.unitLabel ? ` ${meter.unitLabel}` : '';
 
     return `${meter.totalValue}${unit}`;
+  }
+
+  formatMeterBillingDetails(summary: SubscriptionMeterSummary): string {
+    const unit = summary.unitLabel ? ` ${summary.unitLabel}` : '';
+    const parts: string[] = [];
+
+    if (summary.effectiveIncludedUsage > 0) {
+      parts.push(
+        $localize`:@@featureServiceDetail-meterIncludedAllowance:${summary.effectiveIncludedUsage}${unit}:value: included`,
+      );
+    }
+
+    if (summary.billableValue !== summary.aggregatedValue) {
+      parts.push($localize`:@@featureServiceDetail-meterBillableValue:${summary.billableValue}${unit}:value: billable`);
+    }
+
+    return parts.join(' · ');
+  }
+
+  hasMeterBillingDetails(summary: SubscriptionMeterSummary): boolean {
+    return summary.effectiveIncludedUsage > 0 || summary.billableValue !== summary.aggregatedValue;
+  }
+
+  private meterSummaryKey(meter: Pick<SubscriptionMeterSummary, 'meterId' | 'attachmentType' | 'addonId'>): string {
+    return `${meter.meterId}:${meter.attachmentType}:${meter.addonId ?? ''}`;
   }
 
   private readServiceContext(): {

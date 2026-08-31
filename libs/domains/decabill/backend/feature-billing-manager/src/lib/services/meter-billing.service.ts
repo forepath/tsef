@@ -14,7 +14,9 @@ import { SubscriptionAddonsRepository } from '../repositories/subscription-addon
 import { UsageRecordsRepository } from '../repositories/usage-records.repository';
 import {
   aggregateMeterValues,
+  computeBillableMeterValue,
   filterEntriesForAttachment,
+  resolveEffectiveIncludedUsage,
   resolveEffectiveUnitPriceNet,
   type MeterUsageEntry,
 } from '../utils/meter-aggregation.util';
@@ -28,6 +30,8 @@ export type MeterChargeLine = {
   attachmentType: 'plan' | 'addon';
   addonId?: string | null;
   aggregatedValue: number;
+  billableValue: number;
+  effectiveIncludedUsage: number;
   effectiveUnitPriceNet: number;
 };
 
@@ -36,6 +40,7 @@ const MIN_BILLABLE_AMOUNT = 0.01;
 type EffectivePlanMeterLink = {
   meterId: string;
   unitPriceNet?: string | null;
+  includedUsage?: string | null;
   meter?: {
     id: string;
     key: string;
@@ -43,6 +48,7 @@ type EffectivePlanMeterLink = {
     unitLabel?: string | null;
     aggregator: import('../entities/meter.entity').MeterAggregator;
     defaultUnitPriceNet: string;
+    defaultIncludedUsage?: string;
     isActive: boolean;
   };
 };
@@ -151,7 +157,9 @@ export class MeterBillingService {
       });
       const aggregatedValue = aggregateMeterValues(matching, meter.aggregator);
       const effectiveUnitPriceNet = resolveEffectiveUnitPriceNet(link.unitPriceNet, meter.defaultUnitPriceNet);
-      const unitPriceNet = Math.round(aggregatedValue * effectiveUnitPriceNet * 100) / 100;
+      const effectiveIncludedUsage = resolveEffectiveIncludedUsage(link.includedUsage, meter.defaultIncludedUsage ?? 0);
+      const billableValue = computeBillableMeterValue(aggregatedValue, effectiveIncludedUsage);
+      const unitPriceNet = Math.round(billableValue * effectiveUnitPriceNet * 100) / 100;
 
       if (unitPriceNet < MIN_BILLABLE_AMOUNT) {
         continue;
@@ -167,6 +175,8 @@ export class MeterBillingService {
         attachmentType: 'plan',
         addonId: null,
         aggregatedValue,
+        billableValue,
+        effectiveIncludedUsage,
         effectiveUnitPriceNet,
       });
     }
@@ -200,7 +210,12 @@ export class MeterBillingService {
         });
         const aggregatedValue = aggregateMeterValues(matching, meter.aggregator);
         const effectiveUnitPriceNet = resolveEffectiveUnitPriceNet(link.unitPriceNet, meter.defaultUnitPriceNet);
-        const unitPriceNet = Math.round(aggregatedValue * effectiveUnitPriceNet * 100) / 100;
+        const effectiveIncludedUsage = resolveEffectiveIncludedUsage(
+          link.includedUsage,
+          meter.defaultIncludedUsage ?? 0,
+        );
+        const billableValue = computeBillableMeterValue(aggregatedValue, effectiveIncludedUsage);
+        const unitPriceNet = Math.round(billableValue * effectiveUnitPriceNet * 100) / 100;
 
         if (unitPriceNet < MIN_BILLABLE_AMOUNT) {
           continue;
@@ -217,6 +232,8 @@ export class MeterBillingService {
           attachmentType: 'addon',
           addonId: subscriptionAddon.addonId,
           aggregatedValue,
+          billableValue,
+          effectiveIncludedUsage,
           effectiveUnitPriceNet,
         });
       }
@@ -262,6 +279,8 @@ export class MeterBillingService {
       });
       const aggregatedValue = aggregateMeterValues(matching, meter.aggregator);
       const effectiveUnitPriceNet = resolveEffectiveUnitPriceNet(link.unitPriceNet, meter.defaultUnitPriceNet);
+      const effectiveIncludedUsage = resolveEffectiveIncludedUsage(link.includedUsage, meter.defaultIncludedUsage ?? 0);
+      const billableValue = computeBillableMeterValue(aggregatedValue, effectiveIncludedUsage);
 
       summaries.push({
         meterId: meter.id,
@@ -273,8 +292,10 @@ export class MeterBillingService {
         addonId: null,
         addonName: null,
         effectiveUnitPriceNet,
+        effectiveIncludedUsage,
         aggregatedValue,
-        estimatedChargeNet: Math.round(aggregatedValue * effectiveUnitPriceNet * 100) / 100,
+        billableValue,
+        estimatedChargeNet: Math.round(billableValue * effectiveUnitPriceNet * 100) / 100,
         entryCount: matching.length,
         periodStart,
         periodEnd,
@@ -310,6 +331,11 @@ export class MeterBillingService {
         });
         const aggregatedValue = aggregateMeterValues(matching, meter.aggregator);
         const effectiveUnitPriceNet = resolveEffectiveUnitPriceNet(link.unitPriceNet, meter.defaultUnitPriceNet);
+        const effectiveIncludedUsage = resolveEffectiveIncludedUsage(
+          link.includedUsage,
+          meter.defaultIncludedUsage ?? 0,
+        );
+        const billableValue = computeBillableMeterValue(aggregatedValue, effectiveIncludedUsage);
 
         summaries.push({
           meterId: meter.id,
@@ -321,8 +347,10 @@ export class MeterBillingService {
           addonId: subscriptionAddon.addonId,
           addonName: subscriptionAddon.addonNameSnapshot,
           effectiveUnitPriceNet,
+          effectiveIncludedUsage,
           aggregatedValue,
-          estimatedChargeNet: Math.round(aggregatedValue * effectiveUnitPriceNet * 100) / 100,
+          billableValue,
+          estimatedChargeNet: Math.round(billableValue * effectiveUnitPriceNet * 100) / 100,
           entryCount: matching.length,
           periodStart,
           periodEnd,

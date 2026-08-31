@@ -28,7 +28,9 @@ describe('subscriptionMetersReducer', () => {
     aggregator: 'max',
     attachmentType: 'plan',
     effectiveUnitPriceNet: 0.01,
+    effectiveIncludedUsage: 10,
     aggregatedValue: 100,
+    billableValue: 90,
     estimatedChargeNet: 1,
     entryCount: 2,
   };

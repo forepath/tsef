@@ -37,6 +37,10 @@ export class ServiceTypeMeterEntity {
   @Column({ type: 'numeric', precision: 12, scale: 4, nullable: true, name: 'unit_price_net' })
   unitPriceNet?: string | null;
 
+  /** Null ⇒ use catalog default_included_usage. */
+  @Column({ type: 'numeric', precision: 18, scale: 6, nullable: true, name: 'included_usage' })
+  includedUsage?: string | null;
+
   @Column({ type: 'varchar', length: 16, name: 'source', default: 'manual' })
   source!: MeterAttachmentSource;
 

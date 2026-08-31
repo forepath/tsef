@@ -102,7 +102,7 @@ Issued invoices (and credit notes) also enqueue customer emails via BullMQ; see 
 
 ## Usage on Invoices
 
-When the subscription’s plan or billable addons have meter attachments, invoice creation emits a **separate line per attachment** (plan vs each addon) using that attachment’s in-window aggregate × effective unit price. Same catalog meter on plan and addons does not merge into one line. See [Usage meters](./usage-meters.md).
+When the subscription’s plan or billable addons have meter attachments, invoice creation emits a **separate line per attachment** (plan vs each addon). Each line bills `max(0, aggregatedValue - effectiveIncludedUsage) × effectiveUnitPriceNet`. Same catalog meter on plan and addons does not merge into one line. See [Usage meters](./usage-meters.md).
 
 Legacy: if there are no meter attachments, usage cost is taken from the latest `usagePayload` (`totalCost` / `usageCost` / `units`×`unitPrice`) on the subscription base line.
 

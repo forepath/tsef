@@ -400,6 +400,9 @@
                         <p class="small text-muted mb-0 mt-2">
                           <span i18n="@@featureServiceDetail-meterTotalLabel">Total:</span>
                           {{ formatMeterTotal(entry.meter) }}
+                          @if (entry.summary && hasMeterBillingDetails(entry.summary)) {
+                            <span class="ms-1">{{ formatMeterBillingDetails(entry.summary) }}</span>
+                          }
                         </p>
                       </div>
                     </div>

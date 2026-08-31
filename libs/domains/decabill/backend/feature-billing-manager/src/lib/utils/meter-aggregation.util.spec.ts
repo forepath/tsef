@@ -1,7 +1,9 @@
 import {
   aggregateMeterValues,
+  computeBillableMeterValue,
   filterEntriesForAttachment,
   isUsageInChargeWindow,
+  resolveEffectiveIncludedUsage,
   resolveEffectiveUnitPriceNet,
   type MeterUsageEntry,
 } from './meter-aggregation.util';
@@ -27,6 +29,34 @@ describe('meter-aggregation.util', () => {
 
     it('falls back to default when override is null', () => {
       expect(resolveEffectiveUnitPriceNet(null, '1.25')).toBe(1.25);
+    });
+  });
+
+  describe('resolveEffectiveIncludedUsage', () => {
+    it('uses override when present', () => {
+      expect(resolveEffectiveIncludedUsage(100, 0)).toBe(100);
+    });
+
+    it('falls back to default when override is null', () => {
+      expect(resolveEffectiveIncludedUsage(null, '50')).toBe(50);
+    });
+
+    it('falls back to zero when default is missing', () => {
+      expect(resolveEffectiveIncludedUsage(undefined, undefined as unknown as number)).toBe(0);
+    });
+  });
+
+  describe('computeBillableMeterValue', () => {
+    it('subtracts included usage from aggregated value', () => {
+      expect(computeBillableMeterValue(120, 100)).toBe(20);
+    });
+
+    it('never goes below zero', () => {
+      expect(computeBillableMeterValue(40, 100)).toBe(0);
+    });
+
+    it('returns full aggregate when included is zero', () => {
+      expect(computeBillableMeterValue(40, 0)).toBe(40);
     });
   });
 

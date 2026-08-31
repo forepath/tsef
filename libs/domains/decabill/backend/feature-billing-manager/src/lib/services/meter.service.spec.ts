@@ -73,6 +73,7 @@ describe('MeterService', () => {
     unitLabel: 'GB',
     aggregator: 'max' as const,
     defaultUnitPriceNet: '0.01',
+    defaultIncludedUsage: '100',
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -106,8 +107,19 @@ describe('MeterService', () => {
 
     expect(billingNotificationPublisher.publish).toHaveBeenCalledWith(
       'meter.created',
-      expect.objectContaining({ meterId: 'meter-1', key: 'traffic' }),
+      expect.objectContaining({
+        meterId: 'meter-1',
+        key: 'traffic',
+        defaultIncludedUsage: 100,
+      }),
     );
+  });
+
+  it('mapMeterToResponse exposes defaultIncludedUsage', () => {
+    const mapped = service.mapMeterToResponse(catalogMeter as never);
+
+    expect(mapped.defaultIncludedUsage).toBe(100);
+    expect(mapped.defaultUnitPriceNet).toBe(0.01);
   });
 
   it('ensureCatalogMeter returns existing meter without clobbering defaults', async () => {
@@ -141,9 +153,70 @@ describe('MeterService', () => {
         name: 'Traffic',
         aggregator: 'max',
         defaultUnitPriceNet: '0.01',
+        defaultIncludedUsage: '0',
         isActive: true,
       }),
     );
+  });
+
+  it('mapAttachedMeter resolves included usage override like unit price', () => {
+    const mapped = service.mapAttachedMeter(
+      {
+        unitPriceNet: '0.02',
+        includedUsage: '50',
+        source: 'manual',
+        required: false,
+      } as never,
+      catalogMeter as never,
+    );
+
+    expect(mapped.defaultIncludedUsage).toBe(100);
+    expect(mapped.includedUsageOverride).toBe(50);
+    expect(mapped.effectiveIncludedUsage).toBe(50);
+    expect(mapped.effectiveUnitPriceNet).toBe(0.02);
+  });
+
+  it('mapAttachedMeter inherits catalog included usage when override is null', () => {
+    const mapped = service.mapAttachedMeter(
+      {
+        unitPriceNet: null,
+        includedUsage: null,
+        source: 'manual',
+        required: false,
+      } as never,
+      catalogMeter as never,
+    );
+
+    expect(mapped.includedUsageOverride).toBeNull();
+    expect(mapped.effectiveIncludedUsage).toBe(100);
+  });
+
+  it('attachPlanMeter stores includedUsage and publishes it', async () => {
+    metersRepository.findByIdOrThrow.mockResolvedValue(catalogMeter);
+    servicePlanMetersRepository.findByPlanAndMeter.mockResolvedValue(null);
+    servicePlanMetersRepository.create.mockResolvedValue({
+      id: 'link-1',
+      servicePlanId: 'plan-1',
+      meterId: 'meter-1',
+      unitPriceNet: '0.02',
+      includedUsage: '25',
+      source: 'manual',
+      required: false,
+    });
+
+    const result = await service.attachPlanMeter('plan-1', 'meter-1', 0.02, 25);
+
+    expect(servicePlanMetersRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        unitPriceNet: '0.02',
+        includedUsage: '25',
+      }),
+    );
+    expect(billingNotificationPublisher.publish).toHaveBeenCalledWith(
+      'service_plan.meter_attached',
+      expect.objectContaining({ includedUsage: 25, unitPriceNet: 0.02 }),
+    );
+    expect(result.effectiveIncludedUsage).toBe(25);
   });
 
   it('syncAddonModuleMeters sideloads required module meters', async () => {
@@ -185,6 +258,7 @@ describe('MeterService', () => {
         meterId: 'meter-1',
         source: 'module',
         required: true,
+        includedUsage: null,
       }),
     );
     expect(result).toHaveLength(1);

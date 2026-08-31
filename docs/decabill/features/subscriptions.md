@@ -181,7 +181,7 @@ The **subscription-item-update** scheduler refreshes bundled agenstra-controller
 
 ## Usage Records
 
-Prefer first-class [usage meters](./usage-meters.md) attached to plans and addons. Metered records require `meterId`, `value`, and attachment scope (`plan` or `addon` + `addonId`). Invoice lines are emitted per attachment.
+Prefer first-class [usage meters](./usage-meters.md) attached to plans and addons. Metered records require `meterId`, `value`, and attachment scope (`plan` or `addon` + `addonId`). Invoice lines are emitted per attachment; billable usage is `max(0, aggregatedValue - effectiveIncludedUsage)`.
 
 Legacy payload-only recording (`usagePayload` with `totalCost` / `usageCost` / `units`×`unitPrice`) remains when the subscription has **no** plan or billable addon meter attachments. Usage is posted via `POST /admin/usage/record` (billing admin or `STATIC_API_KEY` only; not customer self-service). Customers may read summaries at `GET /usage/summary/{subscriptionId}` and `GET /subscriptions/{id}/meters`.
 
