@@ -4,6 +4,7 @@
   "license": "BUSL-1.1-or-later",
   "private": true,
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1115.0",
     "@nestjs/common": "11.1.6",
     "@nestjs/core": "11.1.6",
     "@nestjs/jwt": "11.0.2",

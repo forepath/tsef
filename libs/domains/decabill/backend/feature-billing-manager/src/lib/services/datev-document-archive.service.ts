@@ -1,11 +1,10 @@
-import * as fs from 'fs';
 import * as path from 'path';
 
 import { Injectable } from '@nestjs/common';
+import { FileStorageService } from '@forepath/shared/backend/util-file-storage';
 
 import { DatevExportScope } from '../constants/datev-export.constants';
 import type { InvoiceEntity } from '../entities/invoice.entity';
-import { InvoicePdfService } from './invoice-pdf.service';
 
 export interface DatevDocumentArchiveEntry {
   relativePath: string;
@@ -15,7 +14,7 @@ export interface DatevDocumentArchiveEntry {
 
 @Injectable()
 export class DatevDocumentArchiveService {
-  constructor(private readonly invoicePdfService: InvoicePdfService) {}
+  constructor(private readonly fileStorage: FileStorageService) {}
 
   buildDocumentXml(entries: DatevDocumentArchiveEntry[]): string {
     const documents = entries
@@ -50,20 +49,12 @@ export class DatevDocumentArchiveService {
       return null;
     }
 
-    try {
-      const absolute = this.invoicePdfService.resolveAbsolutePath(invoice.pdfStorageKey);
-
-      return await fs.promises.readFile(absolute);
-    } catch {
-      return null;
-    }
+    return await this.readPdfByStorageKey(invoice.pdfStorageKey);
   }
 
   async readPdfByStorageKey(storageKey: string): Promise<Buffer | null> {
     try {
-      const absolute = this.invoicePdfService.resolveAbsolutePath(storageKey);
-
-      return await fs.promises.readFile(absolute);
+      return await this.fileStorage.readInvoiceFile(storageKey);
     } catch {
       return null;
     }

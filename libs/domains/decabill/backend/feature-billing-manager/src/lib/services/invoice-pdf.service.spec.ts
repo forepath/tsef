@@ -1,7 +1,3 @@
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
-
 import { TaxCategory } from '../constants/tax-category.constants';
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
 import type { InvoiceLineItemEntity } from '../entities/invoice-line-item.entity';
@@ -13,19 +9,6 @@ import { InvoicePdfHtmlRendererService } from './invoice-pdf-html-renderer.servi
 import { InvoicePdfTemplateService } from './invoice-pdf-template.service';
 import { InvoicePdfService } from './invoice-pdf.service';
 
-jest.mock('fs', () => {
-  const actualFs = jest.requireActual<typeof import('fs')>('fs');
-
-  return {
-    ...actualFs,
-    promises: {
-      mkdir: jest.fn().mockResolvedValue(undefined),
-      writeFile: jest.fn().mockResolvedValue(undefined),
-      readFile: jest.fn(),
-    },
-  };
-});
-
 describe('InvoicePdfService', () => {
   const eInvoiceXmlService = new EInvoiceXmlService();
   const eInvoiceEmbedService = new EInvoiceEmbedService();
@@ -36,12 +19,17 @@ describe('InvoicePdfService', () => {
   const invoicePromotionApplicationsRepository = {
     hasApplicationsForInvoice: jest.fn().mockResolvedValue(false),
   };
+  const fileStorage = {
+    writeInvoiceFile: jest.fn().mockResolvedValue(undefined),
+    readInvoiceFile: jest.fn(),
+  };
   const service = new InvoicePdfService(
     eInvoiceXmlService,
     eInvoiceEmbedService,
     invoicePdfTemplateService,
     invoicePdfHtmlRendererService,
     invoicePromotionApplicationsRepository as never,
+    fileStorage as never,
   );
   const purchaseOrderReference = 'SUB-2026-00001';
   const invoicingPeriod = {
@@ -97,32 +85,8 @@ describe('InvoicePdfService', () => {
     jest.spyOn(eInvoiceEmbedService, 'embedXmlInPdf').mockImplementation(async (pdfBytes) => pdfBytes);
   });
 
-  describe('resolveAbsolutePath', () => {
-    it('rejects path traversal outside storage root', () => {
-      const root = path.join(os.tmpdir(), 'billing-pdf-test');
-
-      process.env.BILLING_INVOICE_PDF_STORAGE_PATH = root;
-
-      expect(() => service.resolveAbsolutePath('../escape.pdf')).toThrow('Invalid invoice PDF path');
-    });
-
-    it('accepts paths under storage root', () => {
-      const root = path.join(os.tmpdir(), 'billing-pdf-safe');
-
-      process.env.BILLING_INVOICE_PDF_STORAGE_PATH = root;
-
-      const resolved = service.resolveAbsolutePath('sub-1/inv.pdf');
-
-      expect(resolved.startsWith(path.resolve(root))).toBe(true);
-    });
-  });
-
   describe('generateAndStore', () => {
     it('handles decimal columns returned as strings from the database', async () => {
-      const tmpRoot = path.join(os.tmpdir(), `billing-pdf-strings-${Date.now()}`);
-
-      process.env.BILLING_INVOICE_PDF_STORAGE_PATH = tmpRoot;
-
       const stringLineItems = [
         {
           position: 0,
@@ -154,14 +118,10 @@ describe('InvoicePdfService', () => {
 
       expect(storageKey).toBe('sub-1/inv-1.pdf');
       expect(invoicePdfHtmlRendererService.renderHtmlToPdf).toHaveBeenCalled();
-      expect(fs.promises.writeFile).toHaveBeenCalled();
+      expect(fileStorage.writeInvoiceFile).toHaveBeenCalledWith('sub-1/inv-1.pdf', expect.any(Buffer));
     });
 
-    it('writes PDF with embedded XML to subscription folder', async () => {
-      const tmpRoot = path.join(os.tmpdir(), `billing-pdf-${Date.now()}`);
-
-      process.env.BILLING_INVOICE_PDF_STORAGE_PATH = tmpRoot;
-
+    it('writes PDF with embedded XML via file storage', async () => {
       const storageKey = await service.generateAndStore(
         invoice,
         lineItems,
@@ -172,21 +132,13 @@ describe('InvoicePdfService', () => {
       );
 
       expect(storageKey).toBe('sub-1/inv-1.pdf');
-      expect(fs.promises.mkdir).toHaveBeenCalled();
       expect(invoicePdfHtmlRendererService.renderHtmlToPdf).toHaveBeenCalledWith(
         expect.stringContaining('INV-2026-00001'),
       );
-      expect(fs.promises.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining(path.join('sub-1', 'inv-1.pdf')),
-        expect.any(Uint8Array),
-      );
+      expect(fileStorage.writeInvoiceFile).toHaveBeenCalledWith('sub-1/inv-1.pdf', expect.any(Buffer));
     });
 
     it('writes manual invoice PDF under manual user folder when subscription is missing', async () => {
-      const tmpRoot = path.join(os.tmpdir(), `billing-pdf-manual-${Date.now()}`);
-
-      process.env.BILLING_INVOICE_PDF_STORAGE_PATH = tmpRoot;
-
       const manualInvoice = {
         ...invoice,
         subscriptionId: undefined,
@@ -195,18 +147,12 @@ describe('InvoicePdfService', () => {
       const storageKey = await service.generateAndStore(manualInvoice, lineItems, issuer, buyer, '', invoicingPeriod);
 
       expect(storageKey).toBe('manual/user-1/inv-1.pdf');
-      expect(fs.promises.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining(path.join('manual', 'user-1', 'inv-1.pdf')),
-        expect.any(Uint8Array),
-      );
+      expect(fileStorage.writeInvoiceFile).toHaveBeenCalledWith('manual/user-1/inv-1.pdf', expect.any(Buffer));
     });
   });
 
   describe('generateVoidDocumentAndStore', () => {
     it('writes credit note PDF with embedded XML to separate storage key', async () => {
-      const tmpRoot = path.join(os.tmpdir(), `billing-void-pdf-${Date.now()}`);
-
-      process.env.BILLING_INVOICE_PDF_STORAGE_PATH = tmpRoot;
       const voidedAt = new Date('2026-06-10T12:00:00Z');
       const result = await service.generateVoidDocumentAndStore(
         invoice,
@@ -228,24 +174,20 @@ describe('InvoicePdfService', () => {
       expect(invoicePdfHtmlRendererService.renderHtmlToPdf).toHaveBeenCalledWith(
         expect.not.stringContaining('Payment details'),
       );
-      expect(fs.promises.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining(path.join('sub-1', 'inv-1-void.pdf')),
-        expect.any(Uint8Array),
-      );
+      expect(fileStorage.writeInvoiceFile).toHaveBeenCalledWith('sub-1/inv-1-void.pdf', expect.any(Buffer));
     });
   });
 
   describe('readPdf', () => {
-    it('reads file from resolved storage path', async () => {
+    it('reads file via file storage', async () => {
       const buffer = Buffer.from('pdf');
 
-      (fs.promises.readFile as jest.Mock).mockResolvedValue(buffer);
-      process.env.BILLING_INVOICE_PDF_STORAGE_PATH = os.tmpdir();
+      fileStorage.readInvoiceFile.mockResolvedValue(buffer);
 
       const result = await service.readPdf('sub-1/inv-1.pdf');
 
       expect(result).toBe(buffer);
-      expect(fs.promises.readFile).toHaveBeenCalled();
+      expect(fileStorage.readInvoiceFile).toHaveBeenCalledWith('sub-1/inv-1.pdf');
     });
   });
 });

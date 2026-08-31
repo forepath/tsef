@@ -36,7 +36,7 @@ Volumes:
 
 - `postgres_data` - Database files
 - `redis_data` - Redis AOF data
-- `invoice_pdf_data` - Invoice PDF storage at `/data/invoices`
+- `billing_file_data` - Shared file storage at `/data` (`invoices/` and `datev-exports/` subdirs)
 - `./provider-plugins` - Optional dynamic provider plugins mount
 
 Image: `ghcr.io/forepath/decabill-billing-api:latest`

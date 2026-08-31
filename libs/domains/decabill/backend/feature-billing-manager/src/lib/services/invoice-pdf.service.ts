@@ -1,7 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
 import { Injectable } from '@nestjs/common';
+import { FileStorageService } from '@forepath/shared/backend/util-file-storage';
 
 import type { CustomerProfileEntity } from '../entities/customer-profile.entity';
 import type { InvoiceLineItemEntity } from '../entities/invoice-line-item.entity';
@@ -43,22 +41,8 @@ export class InvoicePdfService {
     private readonly invoicePdfTemplateService: InvoicePdfTemplateService,
     private readonly invoicePdfHtmlRendererService: InvoicePdfHtmlRendererService,
     private readonly invoicePromotionApplicationsRepository: InvoicePromotionApplicationsRepository,
+    private readonly fileStorage: FileStorageService,
   ) {}
-
-  getStorageRoot(): string {
-    return process.env.BILLING_INVOICE_PDF_STORAGE_PATH ?? path.join(process.cwd(), 'data', 'invoices');
-  }
-
-  resolveAbsolutePath(storageKey: string): string {
-    const root = path.resolve(this.getStorageRoot());
-    const absolute = path.resolve(root, storageKey);
-
-    if (!absolute.startsWith(root + path.sep) && absolute !== root) {
-      throw new Error('Invalid invoice PDF path');
-    }
-
-    return absolute;
-  }
 
   async generateAndStore(
     invoice: InvoiceEntity,
@@ -93,10 +77,8 @@ export class InvoicePdfService {
     );
     const embedded = await this.eInvoiceEmbedService.embedXmlInPdf(pdfBytes, xml);
     const storageKey = buildInvoicePdfStorageKey(invoice, '.pdf');
-    const absolute = this.resolveAbsolutePath(storageKey);
 
-    await fs.promises.mkdir(path.dirname(absolute), { recursive: true });
-    await fs.promises.writeFile(absolute, embedded);
+    await this.fileStorage.writeInvoiceFile(storageKey, Buffer.from(embedded));
 
     return storageKey;
   }
@@ -131,10 +113,8 @@ export class InvoicePdfService {
     const pdfBytes = await this.renderPdf(invoice, lineItems, issuer, buyer, presentation);
     const embedded = await this.eInvoiceEmbedService.embedXmlInPdf(pdfBytes, xml);
     const storageKey = buildInvoicePdfStorageKey(invoice, '-void.pdf');
-    const absolute = this.resolveAbsolutePath(storageKey);
 
-    await fs.promises.mkdir(path.dirname(absolute), { recursive: true });
-    await fs.promises.writeFile(absolute, embedded);
+    await this.fileStorage.writeInvoiceFile(storageKey, Buffer.from(embedded));
 
     return { storageKey, documentNumber };
   }
@@ -196,18 +176,14 @@ export class InvoicePdfService {
     const pdfBytes = await this.renderPdf(invoice, [syntheticLine], issuer, buyer, presentation);
     const embedded = await this.eInvoiceEmbedService.embedXmlInPdf(pdfBytes, xml);
     const storageKey = buildInvoicePdfStorageKey(invoice, `-credit-${suffix}.pdf`);
-    const absolute = this.resolveAbsolutePath(storageKey);
 
-    await fs.promises.mkdir(path.dirname(absolute), { recursive: true });
-    await fs.promises.writeFile(absolute, embedded);
+    await this.fileStorage.writeInvoiceFile(storageKey, Buffer.from(embedded));
 
     return { storageKey, documentNumber };
   }
 
   async readPdf(storageKey: string): Promise<Buffer> {
-    const absolute = this.resolveAbsolutePath(storageKey);
-
-    return await fs.promises.readFile(absolute);
+    return await this.fileStorage.readInvoiceFile(storageKey);
   }
 
   private async renderPdf(

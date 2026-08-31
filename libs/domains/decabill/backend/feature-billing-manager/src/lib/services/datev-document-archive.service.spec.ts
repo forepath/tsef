@@ -1,15 +1,17 @@
-import * as fs from 'fs';
-
 import { DatevExportScope } from '../constants/datev-export.constants';
 import type { InvoiceEntity } from '../entities/invoice.entity';
 
 import { DatevDocumentArchiveService } from './datev-document-archive.service';
 
 describe('DatevDocumentArchiveService', () => {
-  const invoicePdfService = {
-    resolveAbsolutePath: jest.fn(),
+  const fileStorage = {
+    readInvoiceFile: jest.fn(),
   };
-  const service = new DatevDocumentArchiveService(invoicePdfService as never);
+  const service = new DatevDocumentArchiveService(fileStorage as never);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('builds document.xml with escaped content', () => {
     const xml = service.buildDocumentXml([
@@ -54,36 +56,27 @@ describe('DatevDocumentArchiveService', () => {
 
   it('returns null when invoice has no pdf storage key', async () => {
     await expect(service.readInvoicePdf({ pdfStorageKey: null } as InvoiceEntity)).resolves.toBeNull();
-    expect(invoicePdfService.resolveAbsolutePath).not.toHaveBeenCalled();
+    expect(fileStorage.readInvoiceFile).not.toHaveBeenCalled();
   });
 
-  it('reads invoice pdf from storage', async () => {
-    const readFile = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from('pdf'));
-    invoicePdfService.resolveAbsolutePath.mockReturnValue('/tmp/invoice.pdf');
+  it('reads invoice pdf from file storage', async () => {
+    fileStorage.readInvoiceFile.mockResolvedValue(Buffer.from('pdf'));
 
     await expect(service.readInvoicePdf({ pdfStorageKey: 'invoice.pdf' } as InvoiceEntity)).resolves.toEqual(
       Buffer.from('pdf'),
     );
-    expect(readFile).toHaveBeenCalledWith('/tmp/invoice.pdf');
-
-    readFile.mockRestore();
+    expect(fileStorage.readInvoiceFile).toHaveBeenCalledWith('invoice.pdf');
   });
 
   it('returns null when invoice pdf cannot be read', async () => {
-    const readFile = jest.spyOn(fs.promises, 'readFile').mockRejectedValue(new Error('missing'));
-    invoicePdfService.resolveAbsolutePath.mockReturnValue('/tmp/missing.pdf');
+    fileStorage.readInvoiceFile.mockRejectedValue(new Error('missing'));
 
     await expect(service.readInvoicePdf({ pdfStorageKey: 'missing.pdf' } as InvoiceEntity)).resolves.toBeNull();
-
-    readFile.mockRestore();
   });
 
   it('reads pdf by storage key', async () => {
-    const readFile = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from('archive'));
-    invoicePdfService.resolveAbsolutePath.mockReturnValue('/tmp/archive.pdf');
+    fileStorage.readInvoiceFile.mockResolvedValue(Buffer.from('archive'));
 
     await expect(service.readPdfByStorageKey('archive.pdf')).resolves.toEqual(Buffer.from('archive'));
-
-    readFile.mockRestore();
   });
 });

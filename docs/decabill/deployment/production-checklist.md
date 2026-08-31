@@ -45,7 +45,8 @@ Comprehensive checklist for deploying Decabill to production.
 - [ ] Database connections use SSL/TLS where supported
 - [ ] Invoice PDF volume backed up and access-controlled
 - [ ] DATEV export configured when used (`BILLING_DATEV_CONSULTANT_NUMBER`, `BILLING_DATEV_CLIENT_NUMBER`)
-- [ ] `BILLING_DATEV_EXPORT_STORAGE_PATH` volume mounted on api, worker, and scheduler
+- [ ] `FILE_STORAGE_ROOT` volume mounted on api, worker, and scheduler (when `FILE_STORAGE_PROVIDER=local`)
+- [ ] Or S3-compatible storage configured (`FILE_STORAGE_PROVIDER=s3` plus `FILE_STORAGE_S3_*`)
 - [ ] `BILLING_DATEV_EXPORT_ENABLED=false` verified if DATEV export is not required (UI hidden via capabilities)
 - [ ] Unified DATEV export allowlist reviewed (`BILLING_DATEV_UNIFIED_EXPORT_ALLOWED_TENANTS`)
 - [ ] Sample DATEV export validated with DatevFormatPruefProgramm before accountant handoff
@@ -129,7 +130,7 @@ Comprehensive checklist for deploying Decabill to production.
 - Postgres connections and disk usage
 - Redis memory and persistence health
 - Invoice PDF volume disk usage
-- DATEV export volume disk usage (`BILLING_DATEV_EXPORT_STORAGE_PATH`)
+- Billing file volume disk usage (`FILE_STORAGE_ROOT`, including DATEV exports)
 
 ### Logging
 
@@ -145,16 +146,11 @@ Comprehensive checklist for deploying Decabill to production.
 - Test restore before production cutover
 - Include tenant-scoped data verification after restore
 
-### Invoice PDF Backups
+### Billing File Backups
 
-- Backup `BILLING_INVOICE_PDF_STORAGE_PATH` volume or object storage mirror
-- Align retention with legal and tax requirements
-
-### DATEV Export Backups
-
-- Backup `BILLING_DATEV_EXPORT_STORAGE_PATH` volume alongside invoice PDFs
-- Retain exports per statutory accounting retention periods
-- Document whether per-tenant or unified exports are used in production
+- Backup `FILE_STORAGE_ROOT` volume (invoice PDFs under `invoices/`, DATEV ZIPs under `datev-exports/`) when using `local`, or the S3-compatible bucket when using `s3`
+- Align PDF and DATEV retention with legal and tax requirements
+- Document whether per-tenant or unified DATEV exports are used in production
 
 ### Configuration Backups
 

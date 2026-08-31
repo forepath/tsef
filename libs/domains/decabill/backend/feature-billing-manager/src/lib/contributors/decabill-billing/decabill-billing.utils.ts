@@ -218,9 +218,10 @@ export function buildDecabillBillingCloudInitUserData(config: DecabillBillingClo
     `BILLING_ISSUER_COUNTRY: DE`,
     `BILLING_TAX_RATE_STANDARD: 19`,
     `BILLING_TAX_RATE_REDUCED: 7`,
-    `BILLING_INVOICE_PDF_STORAGE_PATH: /data/invoices`,
+    `FILE_STORAGE_PROVIDER: local`,
+    `FILE_STORAGE_ROOT: /data`,
+    `FILE_STORAGE_LEGACY_MIGRATION_ENABLED: true`,
     `BILLING_DATEV_EXPORT_ENABLED: false`,
-    `BILLING_DATEV_EXPORT_STORAGE_PATH: /data/datev-exports`,
     `TENANTS_ALLOW_DEFAULT: true`,
     `DNS_BASE_DOMAIN: ${config.host?.fqdn?.split('.').slice(1).join('.') || 'spirde.com'}`,
   ];
@@ -284,8 +285,7 @@ ${buildOpenSearchComposeService({
     environment:
 ${backendApiEnv}
     volumes:
-      - invoice_pdf_data:/data/invoices
-      - datev_export_data:/data/datev-exports
+      - billing_file_data:/data
     ports:
       - '${config.backend?.port ?? '3200'}:${config.backend?.port ?? '3200'}'
       - '${config.backend?.websocketPort ?? '8082'}:${config.backend?.websocketPort ?? '8082'}'
@@ -304,8 +304,7 @@ ${OPENSEARCH_COMPOSE_DEPENDS_ON}
     environment:
 ${backendWorkerEnv}
     volumes:
-      - invoice_pdf_data:/data/invoices
-      - datev_export_data:/data/datev-exports
+      - billing_file_data:/data
     depends_on:
 ${POSTGRES_COMPOSE_DEPENDS_ON}
 ${REDIS_COMPOSE_DEPENDS_ON}
@@ -321,8 +320,7 @@ ${OPENSEARCH_COMPOSE_DEPENDS_ON}
     environment:
 ${backendSchedulerEnv}
     volumes:
-      - invoice_pdf_data:/data/invoices
-      - datev_export_data:/data/datev-exports
+      - billing_file_data:/data
     depends_on:
 ${POSTGRES_COMPOSE_DEPENDS_ON}
 ${REDIS_COMPOSE_DEPENDS_ON}
@@ -354,7 +352,7 @@ ${buildNginxComposeService({
   dependsOn: ['frontend-billing-console-server', 'backend-billing-manager'],
 })}
 
-${buildComposeNamedVolumes(['postgres_data', 'redis_data', 'opensearch_data', 'invoice_pdf_data', 'datev_export_data'])}
+${buildComposeNamedVolumes(['postgres_data', 'redis_data', 'opensearch_data', 'billing_file_data'])}
 
 ${buildComposeBridgeNetwork('decabill-billing-network')}
 `;

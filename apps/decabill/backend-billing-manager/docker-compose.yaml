@@ -69,9 +69,19 @@ x-backend-billing-manager-environment: &backend-billing-manager-environment
   BILLING_ISSUER_BIC: ${BILLING_ISSUER_BIC:-}
   BILLING_TAX_RATE_STANDARD: ${BILLING_TAX_RATE_STANDARD:-19}
   BILLING_TAX_RATE_REDUCED: ${BILLING_TAX_RATE_REDUCED:-7}
-  BILLING_INVOICE_PDF_STORAGE_PATH: ${BILLING_INVOICE_PDF_STORAGE_PATH:-/data/invoices}
+  FILE_STORAGE_PROVIDER: ${FILE_STORAGE_PROVIDER:-local}
+  FILE_STORAGE_ROOT: ${FILE_STORAGE_ROOT:-/data}
+  FILE_STORAGE_LEGACY_MIGRATION_ENABLED: ${FILE_STORAGE_LEGACY_MIGRATION_ENABLED:-true}
+  FILE_STORAGE_S3_BUCKET: ${FILE_STORAGE_S3_BUCKET:-}
+  FILE_STORAGE_S3_ACCESS_KEY_ID: ${FILE_STORAGE_S3_ACCESS_KEY_ID:-}
+  FILE_STORAGE_S3_SECRET_ACCESS_KEY: ${FILE_STORAGE_S3_SECRET_ACCESS_KEY:-}
+  FILE_STORAGE_S3_REGION: ${FILE_STORAGE_S3_REGION:-auto}
+  FILE_STORAGE_S3_ENDPOINT: ${FILE_STORAGE_S3_ENDPOINT:-}
+  FILE_STORAGE_S3_FORCE_PATH_STYLE: ${FILE_STORAGE_S3_FORCE_PATH_STYLE:-}
+  FILE_STORAGE_S3_KEY_PREFIX: ${FILE_STORAGE_S3_KEY_PREFIX:-}
+  BILLING_INVOICE_PDF_STORAGE_PATH: ${BILLING_INVOICE_PDF_STORAGE_PATH:-}
   BILLING_DATEV_EXPORT_ENABLED: ${BILLING_DATEV_EXPORT_ENABLED:-true}
-  BILLING_DATEV_EXPORT_STORAGE_PATH: ${BILLING_DATEV_EXPORT_STORAGE_PATH:-/data/datev-exports}
+  BILLING_DATEV_EXPORT_STORAGE_PATH: ${BILLING_DATEV_EXPORT_STORAGE_PATH:-}
   BILLING_DATEV_EXPORT_CRON: ${BILLING_DATEV_EXPORT_CRON:-0 0 1 * *}
   BILLING_DATEV_EXPORT_TIMEZONE: ${BILLING_DATEV_EXPORT_TIMEZONE:-Europe/Berlin}
   BILLING_DATEV_CONSULTANT_NUMBER: ${BILLING_DATEV_CONSULTANT_NUMBER:-}
@@ -201,8 +211,7 @@ services:
       QUEUE_ROLE: ${QUEUE_ROLE:-api}
       QUEUE_BULL_BOARD_ENABLED: ${QUEUE_BULL_BOARD_ENABLED:-true}
     volumes:
-      - invoice_pdf_data:/data/invoices
-      - datev_export_data:/data/datev-exports
+      - billing_file_data:/data
       - ./provider-plugins:/var/lib/forepath/provider-plugins
     ports:
       - '${PORT:-3200}:${PORT:-3200}'
@@ -229,8 +238,7 @@ services:
       QUEUE_ROLE: worker
       QUEUE_BULL_BOARD_ENABLED: false
     volumes:
-      - invoice_pdf_data:/data/invoices
-      - datev_export_data:/data/datev-exports
+      - billing_file_data:/data
       - ./provider-plugins:/var/lib/forepath/provider-plugins
     depends_on:
       backend-billing-manager:
@@ -256,8 +264,7 @@ services:
       QUEUE_ROLE: scheduler
       QUEUE_BULL_BOARD_ENABLED: false
     volumes:
-      - invoice_pdf_data:/data/invoices
-      - datev_export_data:/data/datev-exports
+      - billing_file_data:/data
       - ./provider-plugins:/var/lib/forepath/provider-plugins
     depends_on:
       backend-billing-manager:
@@ -288,8 +295,7 @@ volumes:
   postgres_data:
   redis_data:
   opensearch_data:
-  invoice_pdf_data:
-  datev_export_data:
+  billing_file_data:
 
 networks:
   billing-network:
