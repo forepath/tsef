@@ -108,6 +108,7 @@ export interface IssueSupplierInvoiceDto {
 
 export interface MarkSupplierInvoicePaymentStatusDto {
   reason?: string;
+  paidAt?: string;
 }
 
 export interface SupplierInvoiceLineItemResponse {
@@ -141,6 +142,7 @@ export interface AdminSupplierInvoiceListItem {
   dueDate?: string | null;
   hasUploadedDocument: boolean;
   createdAt: string;
+  paidAt?: string | null;
   canDownload: boolean;
   canPreview: boolean;
   documentSource?: string | null;
@@ -152,6 +154,7 @@ export interface SupplierInvoiceDetailResponse extends AdminSupplierInvoiceListI
   taxNote?: string | null;
   issuedAt?: string | null;
   voidedAt?: string | null;
+  paidAt?: string | null;
   documentSource?: string | null;
   lineItems: SupplierInvoiceLineItemResponse[];
 }

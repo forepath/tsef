@@ -536,6 +536,7 @@ export class AutoBillingService {
     const paid = await this.invoicesRepository.update(invoice.id, {
       status: InvoiceStatus.PAID,
       balanceDue: 0,
+      paidAt: new Date(),
       autoPaymentStatus: AutoPaymentStatus.SUCCEEDED,
       autoPaymentNextRetryAt: null,
     });

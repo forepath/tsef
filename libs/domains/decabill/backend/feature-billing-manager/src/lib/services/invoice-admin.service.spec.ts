@@ -54,11 +54,12 @@ describe('InvoiceAdminService', () => {
     expect(invoicesRepository.update).toHaveBeenCalledWith('inv-1', {
       status: InvoiceStatus.PAID,
       balanceDue: 0,
+      paidAt: expect.any(Date),
     });
     expect(auditLog.log).toHaveBeenCalledWith(
       expect.objectContaining({
         process: 'invoice.mark_paid_manual',
-        context: expect.objectContaining({ adminUserId: 'admin-1' }),
+        context: expect.objectContaining({ adminUserId: 'admin-1', paidAt: expect.any(String) }),
       }),
     );
     expect(customerTrustScoreService.triggerRecomputeForUser).toHaveBeenCalledWith('user-1');
@@ -84,6 +85,7 @@ describe('InvoiceAdminService', () => {
     expect(invoicesRepository.update).toHaveBeenCalledWith('inv-1', {
       status: InvoiceStatus.ISSUED,
       balanceDue: 50,
+      paidAt: null,
     });
     expect(customerTrustScoreService.triggerRecomputeForUser).toHaveBeenCalledWith('user-1');
   });

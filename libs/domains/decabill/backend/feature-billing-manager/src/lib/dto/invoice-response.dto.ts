@@ -11,6 +11,7 @@ export class InvoiceResponseDto {
   subscriptionNumber?: string;
   createdAt!: Date;
   dueDate?: Date;
+  paidAt?: Date | null;
   canPay!: boolean;
   canDownload!: boolean;
   canPreview!: boolean;

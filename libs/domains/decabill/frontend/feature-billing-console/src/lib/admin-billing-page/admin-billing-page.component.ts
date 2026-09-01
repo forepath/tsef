@@ -206,9 +206,10 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   billNowUserId = '';
 
   readonly pendingAction = signal<'void' | 'markPaid' | 'markUnpaid' | null>(null);
+  readonly actionReason = signal('');
+  readonly actionPaidAt = signal('');
   readonly pendingInvoice = signal<AdminInvoiceListItem | null>(null);
   readonly pendingSupplierInvoice = signal<AdminSupplierInvoiceListItem | null>(null);
-  readonly actionReason = signal('');
   readonly auditInvoiceId = signal<string | null>(null);
   readonly supplierAuditInvoiceId = signal<string | null>(null);
   readonly supplierAuditLogs = signal<BillingAuditLogResponse[]>([]);
@@ -603,6 +604,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     this.pendingSupplierInvoice.set(invoice);
     this.pendingInvoice.set(null);
     this.actionReason.set('');
+    this.actionPaidAt.set(action === 'markPaid' ? this.defaultPaidAtLocalInput() : '');
     showBillingModal(this.actionConfirmModal);
   }
 
@@ -617,7 +619,10 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     if (action === 'void') {
       this.supplierInvoiceManagerFacade.voidInvoice(invoice.id);
     } else if (action === 'markPaid') {
-      this.supplierInvoiceManagerFacade.markPaid(invoice.id, { reason });
+      this.supplierInvoiceManagerFacade.markPaid(invoice.id, {
+        reason,
+        paidAt: this.toPaidAtIso(this.actionPaidAt()),
+      });
     } else {
       this.supplierInvoiceManagerFacade.markUnpaid(invoice.id, { reason });
     }
@@ -767,7 +772,9 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   openActionModal(action: 'void' | 'markPaid' | 'markUnpaid', invoice: AdminInvoiceListItem): void {
     this.pendingAction.set(action);
     this.pendingInvoice.set(invoice);
+    this.pendingSupplierInvoice.set(null);
     this.actionReason.set('');
+    this.actionPaidAt.set(action === 'markPaid' ? this.defaultPaidAtLocalInput() : '');
     showBillingModal(this.actionConfirmModal);
   }
 
@@ -787,7 +794,10 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     if (action === 'void') {
       this.invoiceManagerFacade.voidInvoice(invoice.id);
     } else if (action === 'markPaid') {
-      this.invoiceManagerFacade.markPaid(invoice.id, { reason });
+      this.invoiceManagerFacade.markPaid(invoice.id, {
+        reason,
+        paidAt: this.toPaidAtIso(this.actionPaidAt()),
+      });
     } else {
       this.invoiceManagerFacade.markUnpaid(invoice.id, { reason });
     }
@@ -1335,6 +1345,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
         this.pendingInvoice.set(null);
         this.pendingSupplierInvoice.set(null);
         this.actionReason.set('');
+        this.actionPaidAt.set('');
         refreshDashboard();
       },
     });
@@ -1348,9 +1359,29 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
         this.pendingInvoice.set(null);
         this.pendingSupplierInvoice.set(null);
         this.actionReason.set('');
+        this.actionPaidAt.set('');
         refreshDashboard();
       },
     });
+  }
+
+  private defaultPaidAtLocalInput(): string {
+    const now = new Date();
+    const pad = (value: number) => String(value).padStart(2, '0');
+
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  }
+
+  private toPaidAtIso(localValue: string): string {
+    const trimmed = localValue.trim();
+
+    if (!trimmed) {
+      return new Date().toISOString();
+    }
+
+    const parsed = new Date(trimmed);
+
+    return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
   }
 
   private downloadPdfBlob(source: Observable<Blob>, filename: string): void {

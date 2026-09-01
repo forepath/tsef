@@ -24,6 +24,7 @@ import { SupplierInvoicesRepository } from '../repositories/supplier-invoices.re
 import { SupplierProfilesRepository } from '../repositories/supplier-profiles.repository';
 import { mapSupplierInvoiceLineItemsToInputs } from '../utils/map-supplier-invoice-line-items.util';
 import { fillMeterHistoryPeriodSeries } from '../utils/meter-history-date.util';
+import { resolvePaymentReceivedAt } from '../utils/resolve-payment-received-at.util';
 import { assertSupplierInvoiceDraftEditable } from '../utils/supplier-invoice-mutability.util';
 import { buildSupplierInvoicePdfStorageKey } from '../utils/supplier-invoice-pdf-storage.util';
 
@@ -356,16 +357,18 @@ export class SupplierInvoicesAdminService {
       throw new BadRequestException(`Cannot mark supplier invoice as paid from status ${invoice.status}`);
     }
 
+    const paidAt = resolvePaymentReceivedAt(dto?.paidAt);
     const updated = await this.supplierInvoicesRepository.update(id, {
       status: InvoiceStatus.PAID,
       balanceDue: 0,
+      paidAt,
     });
 
     await this.auditLog.log({
       process: 'supplier_invoice.mark_paid',
       level: 'info',
       message: 'Admin marked supplier invoice as paid',
-      context: { supplierInvoiceId: id, reason: dto?.reason, adminUserId },
+      context: { supplierInvoiceId: id, reason: dto?.reason, paidAt: paidAt.toISOString(), adminUserId },
     });
 
     this.billingNotificationPublisher.publishSupplierInvoicePaid({
@@ -399,6 +402,7 @@ export class SupplierInvoicesAdminService {
     const updated = await this.supplierInvoicesRepository.update(id, {
       status: newStatus,
       balanceDue: Number(invoice.totalGross),
+      paidAt: null,
     });
 
     await this.auditLog.log({
@@ -654,6 +658,7 @@ export class SupplierInvoicesAdminService {
       dueDate: full.dueDate ?? null,
       issuedAt: full.issuedAt ?? null,
       voidedAt: full.voidedAt ?? null,
+      paidAt: full.paidAt ?? null,
       documentSource: full.documentSource ?? null,
       hasUploadedDocument: full.hasUploadedDocument,
       canDownload: this.canDownloadDocument(full),

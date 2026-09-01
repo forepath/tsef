@@ -155,14 +155,14 @@ export class WithdrawalRefundService {
 
       await this.invoicesRepository.update(invoice.id, {
         balanceDue: newBalanceDue,
-        ...(newBalanceDue <= 0 ? { status: InvoiceStatus.PAID } : {}),
+        ...(newBalanceDue <= 0 ? { status: InvoiceStatus.PAID, paidAt: invoice.paidAt ?? new Date() } : {}),
       });
     } else if (invoice.status === InvoiceStatus.ISSUED || invoice.status === InvoiceStatus.OVERDUE) {
       const newBalanceDue = Math.max(0, Math.round((Number(invoice.balanceDue) - creditApplied) * 100) / 100);
 
       await this.invoicesRepository.update(invoice.id, {
         balanceDue: newBalanceDue,
-        ...(newBalanceDue <= 0 ? { status: InvoiceStatus.PAID } : {}),
+        ...(newBalanceDue <= 0 ? { status: InvoiceStatus.PAID, paidAt: invoice.paidAt ?? new Date() } : {}),
       });
     }
 

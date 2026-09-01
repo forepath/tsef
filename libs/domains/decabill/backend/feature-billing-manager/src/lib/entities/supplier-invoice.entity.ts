@@ -92,6 +92,9 @@ export class SupplierInvoiceEntity {
   @Column({ type: 'timestamp', nullable: true, name: 'voided_at' })
   voidedAt?: Date | null;
 
+  @Column({ type: 'timestamp', nullable: true, name: 'paid_at' })
+  paidAt?: Date | null;
+
   @Column({ type: 'varchar', length: 512, nullable: true, name: 'document_storage_key' })
   documentStorageKey?: string | null;
 

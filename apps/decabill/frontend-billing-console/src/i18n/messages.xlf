@@ -338,6 +338,12 @@
       <trans-unit id="featureAdminBilling-reasonOptional" datatype="html">
         <source>Reason (optional)</source>
         </trans-unit>
+      <trans-unit id="featureAdminBilling-paidAtLabel" datatype="html">
+        <source>Payment received at</source>
+        </trans-unit>
+      <trans-unit id="featureAdminBilling-paidAtHelp" datatype="html">
+        <source>Defaults to now. Change this if payment was received on a different date or time.</source>
+        </trans-unit>
       <trans-unit id="featureAdminBilling-confirm" datatype="html">
         <source> Confirm </source>
         </trans-unit>

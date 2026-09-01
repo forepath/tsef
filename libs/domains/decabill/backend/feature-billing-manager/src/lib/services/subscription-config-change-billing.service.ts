@@ -395,6 +395,7 @@ export class SubscriptionConfigChangeBillingService {
 
     if (newBalanceDue <= 0) {
       invoice.status = InvoiceStatus.PAID;
+      invoice.paidAt = invoice.paidAt ?? new Date();
     }
 
     await manager.getRepository(InvoiceEntity).save(invoice);

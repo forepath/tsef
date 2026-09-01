@@ -33,11 +33,11 @@ import type {
   BillingStatisticsByCountryDto,
   BillingStatisticsByProductDto,
   BillingStatisticsSummaryDto,
-  MarkInvoicePaymentStatusDto,
   PaginatedAdminInvoicesResponseDto,
   PaginatedBillingAuditLogsResponseDto,
   PaginatedAdminSubscriptionsResponseDto,
 } from '../dto/admin-billing.dto';
+import { MarkInvoicePaymentStatusDto } from '../dto/admin-billing.dto';
 import type { BillingCapabilitiesResponseDto } from '../dto/admin-datev-export.dto';
 import type { AdminInvoiceListItemDto } from '../dto/admin-billing.dto';
 import type {

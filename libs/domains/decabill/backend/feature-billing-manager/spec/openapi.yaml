@@ -8588,6 +8588,7 @@ components:
         subscriptionNumber: { type: string, nullable: true }
         createdAt: { type: string, format: date-time }
         dueDate: { type: string, format: date, nullable: true }
+        paidAt: { type: string, format: date-time, nullable: true }
         canPay: { type: boolean }
         canDownload: { type: boolean }
         canPreview: { type: boolean }
@@ -8631,6 +8632,7 @@ components:
             $ref: '#/components/schemas/InvoiceTaxBreakdown'
         issuedAt: { type: string, format: date-time, nullable: true }
         dueDate: { type: string, format: date, nullable: true }
+        paidAt: { type: string, format: date-time, nullable: true }
         createdAt: { type: string, format: date-time }
         canPay: { type: boolean }
         canDownload: { type: boolean }
@@ -9159,6 +9161,12 @@ components:
       type: object
       properties:
         reason: { type: string }
+        paidAt:
+          {
+            type: string,
+            format: date-time,
+            description: When payment was received; defaults to now when omitted,
+          }
     BillingAuditLogResponse:
       type: object
       properties:
@@ -9530,6 +9538,12 @@ components:
       type: object
       properties:
         reason: { type: string }
+        paidAt:
+          {
+            type: string,
+            format: date-time,
+            description: When payment was received; defaults to now when omitted,
+          }
     SupplierInvoiceLineItemResponse:
       type: object
       properties:
@@ -9568,6 +9582,7 @@ components:
         dueDate: { type: string, format: date, nullable: true }
         issuedAt: { type: string, format: date-time, nullable: true }
         voidedAt: { type: string, format: date-time, nullable: true }
+        paidAt: { type: string, format: date-time, nullable: true }
         documentSource:
           { type: string, enum: [uploaded, generated], nullable: true }
         hasUploadedDocument: { type: boolean }

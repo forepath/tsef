@@ -1060,6 +1060,24 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        @if (pendingAction() === 'markPaid') {
+          <div class="mb-3">
+            <label class="form-label small" for="actionPaidAt" i18n="@@featureAdminBilling-paidAtLabel"
+              >Payment received at</label
+            >
+            <input
+              id="actionPaidAt"
+              type="datetime-local"
+              class="form-control form-control-sm"
+              [ngModel]="actionPaidAt()"
+              (ngModelChange)="actionPaidAt.set($event)"
+              required
+            />
+            <div class="form-text" i18n="@@featureAdminBilling-paidAtHelp">
+              Defaults to now. Change this if payment was received on a different date or time.
+            </div>
+          </div>
+        }
         <label class="form-label small" for="actionReason" i18n="@@featureAdminBilling-reasonOptional"
           >Reason (optional)</label
         >
