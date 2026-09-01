@@ -10,6 +10,8 @@ export interface DeclaredMeterDefinition {
   unitLabel?: string;
   aggregator: MeterAggregator;
   defaultUnitPriceNet: number;
+  /** Catalog default free usage per period when creating a missing meter row. */
+  defaultIncludedUsage?: number;
   /**
    * When set (> 0), the meter-collect job pulls samples on this interval.
    * Omitted meters stay push-only (admin / API key recording).

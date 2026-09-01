@@ -9,6 +9,7 @@ export class MeterResponseDto {
   unitLabel?: string | null;
   aggregator!: MeterAggregator;
   defaultUnitPriceNet!: number;
+  defaultIncludedUsage!: number;
   isActive!: boolean;
   createdAt!: Date;
   updatedAt!: Date;
@@ -24,6 +25,9 @@ export class AttachedMeterResponseDto {
   defaultUnitPriceNet!: number;
   unitPriceNetOverride?: number | null;
   effectiveUnitPriceNet!: number;
+  defaultIncludedUsage!: number;
+  includedUsageOverride?: number | null;
+  effectiveIncludedUsage!: number;
   isActive!: boolean;
   source!: 'manual' | 'module' | 'provider';
   required!: boolean;
@@ -41,7 +45,9 @@ export class SubscriptionMeterSummaryDto {
   addonId?: string | null;
   addonName?: string | null;
   effectiveUnitPriceNet!: number;
+  effectiveIncludedUsage!: number;
   aggregatedValue!: number;
+  billableValue!: number;
   estimatedChargeNet!: number;
   entryCount!: number;
   periodStart?: Date | null;

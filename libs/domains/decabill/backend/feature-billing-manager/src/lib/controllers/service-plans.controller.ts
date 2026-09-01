@@ -134,7 +134,7 @@ export class ServicePlansController {
   ): Promise<AttachedMeterResponseDto> {
     await this.servicePlansRepository.findByIdOrThrow(id);
 
-    return await this.meterService.attachPlanMeter(id, dto.meterId, dto.unitPriceNet);
+    return await this.meterService.attachPlanMeter(id, dto.meterId, dto.unitPriceNet, dto.includedUsage);
   }
 
   @RequireScopes('catalog:write')
@@ -148,7 +148,7 @@ export class ServicePlansController {
   ): Promise<AttachedMeterResponseDto> {
     await this.servicePlansRepository.findByIdOrThrow(id);
 
-    return await this.meterService.updatePlanMeter(id, meterId, dto.unitPriceNet);
+    return await this.meterService.updatePlanMeter(id, meterId, dto.unitPriceNet, dto.includedUsage);
   }
 
   @RequireScopes('catalog:write')

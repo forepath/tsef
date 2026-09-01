@@ -126,13 +126,16 @@
         <source>Usage meters</source>
         </trans-unit>
       <trans-unit id="featureAddons-metersHelp" datatype="html">
-        <source> Attach usage meters to this addon with optional unit price overrides. </source>
+        <source> Attach usage meters to this addon with optional unit price and included usage overrides. </source>
         </trans-unit>
       <trans-unit id="featureAddons-metersLoading" datatype="html">
         <source>Loading meters…</source>
         </trans-unit>
       <trans-unit id="featureAddons-meterUnitPriceOverride" datatype="html">
         <source>Unit price override (net)</source>
+        </trans-unit>
+      <trans-unit id="featureAddons-meterIncludedUsageOverride" datatype="html">
+        <source>Included usage override</source>
         </trans-unit>
       <trans-unit id="featureAddons-updateMeterPrice" datatype="html">
         <source>Update price</source>
@@ -154,6 +157,9 @@
         </trans-unit>
       <trans-unit id="featureAddons-attachMeterPrice" datatype="html">
         <source>Override price (optional)</source>
+        </trans-unit>
+      <trans-unit id="featureAddons-attachMeterIncludedUsage" datatype="html">
+        <source>Override included usage (optional)</source>
         </trans-unit>
       <trans-unit id="featureAddons-attachMeterAction" datatype="html">
         <source>Attach meter</source>
@@ -865,6 +871,12 @@
         </trans-unit>
       <trans-unit id="featureAdminSubscriptions-usageMeters" datatype="html">
         <source>Usage meters</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-meterIncludedAllowance" datatype="html">
+        <source><x id="value" equiv-text="${summary.effectiveIncludedUsage}${unit}"/> included</source>
+        </trans-unit>
+      <trans-unit id="featureAdminSubscriptions-meterBillableValue" datatype="html">
+        <source><x id="value" equiv-text="${summary.billableValue}${unit}"/> billable</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-cancelSubscriptionTitle" datatype="html">
         <source>Cancel subscription?</source>
@@ -1723,6 +1735,9 @@
         </trans-unit>
       <trans-unit id="featureMeters-defaultUnitPriceNet" datatype="html">
         <source>Default unit price (net)</source>
+        </trans-unit>
+      <trans-unit id="featureMeters-defaultIncludedUsage" datatype="html">
+        <source>Default included usage</source>
         </trans-unit>
       <trans-unit id="featureMeters-active" datatype="html">
         <source>Active</source>
@@ -2622,6 +2637,12 @@
       <trans-unit id="featureServiceDetail-meterTotalLabel" datatype="html">
         <source>Total:</source>
         </trans-unit>
+      <trans-unit id="featureServiceDetail-meterIncludedAllowance" datatype="html">
+        <source><x id="value" equiv-text="${summary.effectiveIncludedUsage}${unit}"/> included</source>
+        </trans-unit>
+      <trans-unit id="featureServiceDetail-meterBillableValue" datatype="html">
+        <source><x id="value" equiv-text="${summary.billableValue}${unit}"/> billable</source>
+        </trans-unit>
       <trans-unit id="featureServiceDetail-serviceInfoTitle" datatype="html">
         <source>Service info</source>
         </trans-unit>
@@ -3013,7 +3034,7 @@
         <source>Usage meters</source>
         </trans-unit>
       <trans-unit id="featureServicePlans-metersHelp" datatype="html">
-        <source> Attach usage meters billed in arrears. Optional unit price overrides the catalog default. </source>
+        <source> Attach usage meters billed in arrears. Optional unit price and included usage override catalog defaults. </source>
         </trans-unit>
       <trans-unit id="featureServicePlans-metersPrepaidWarning" datatype="html">
         <source> Prepaid plans cannot record or bill metered usage. Detach meters or disable bill-in-advance before using meters. </source>
@@ -3026,6 +3047,9 @@
         </trans-unit>
       <trans-unit id="featureServicePlans-meterUnitPriceOverride" datatype="html">
         <source>Unit price override (net)</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-meterIncludedUsageOverride" datatype="html">
+        <source>Included usage override</source>
         </trans-unit>
       <trans-unit id="featureServicePlans-updateMeterPrice" datatype="html">
         <source>Update price</source>
@@ -3044,6 +3068,9 @@
         </trans-unit>
       <trans-unit id="featureServicePlans-attachMeterPrice" datatype="html">
         <source>Override price (optional)</source>
+        </trans-unit>
+      <trans-unit id="featureServicePlans-attachMeterIncludedUsage" datatype="html">
+        <source>Override included usage (optional)</source>
         </trans-unit>
       <trans-unit id="featureServicePlans-attachMeterAction" datatype="html">
         <source>Attach meter</source>
@@ -3160,7 +3187,7 @@
         <source>Usage meters</source>
         </trans-unit>
       <trans-unit id="featureServiceTypes-metersHelp" datatype="html">
-        <source> Provider-declared meters are required. Attach extra catalog meters with optional unit price overrides. </source>
+        <source> Provider-declared meters are required. Attach extra catalog meters with optional unit price and included usage overrides. </source>
         </trans-unit>
       <trans-unit id="featureServiceTypes-requiredMeter" datatype="html">
         <source>Required</source>
@@ -3170,6 +3197,9 @@
         </trans-unit>
       <trans-unit id="featureServiceTypes-meterUnitPriceOverride" datatype="html">
         <source>Unit price override (net)</source>
+        </trans-unit>
+      <trans-unit id="featureServiceTypes-meterIncludedUsageOverride" datatype="html">
+        <source>Included usage override</source>
         </trans-unit>
       <trans-unit id="featureServiceTypes-updateMeterPrice" datatype="html">
         <source>Update price</source>
@@ -3188,6 +3218,9 @@
         </trans-unit>
       <trans-unit id="featureServiceTypes-attachMeterPrice" datatype="html">
         <source>Override price (optional)</source>
+        </trans-unit>
+      <trans-unit id="featureServiceTypes-attachMeterIncludedUsage" datatype="html">
+        <source>Override included usage (optional)</source>
         </trans-unit>
       <trans-unit id="featureServiceTypes-attachMeterAction" datatype="html">
         <source>Attach meter</source>
@@ -3281,6 +3314,12 @@
         </trans-unit>
       <trans-unit id="featureSubscriptions-usageMeters" datatype="html">
         <source>Usage meters</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-meterIncludedAllowance" datatype="html">
+        <source><x id="value" equiv-text="${meter.effectiveIncludedUsage}${unit}"/> included</source>
+        </trans-unit>
+      <trans-unit id="featureSubscriptions-meterBillableValue" datatype="html">
+        <source><x id="value" equiv-text="${meter.billableValue}${unit}"/> billable</source>
         </trans-unit>
       <trans-unit id="featureSubscriptions-backorderActionsAria" datatype="html">
         <source>Backorder actions</source>

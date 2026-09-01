@@ -218,6 +218,29 @@ export class AdminSubscriptionsPageComponent implements OnInit {
     return `${summary.aggregatedValue}${unit}`;
   }
 
+  formatMeterBillingDetails(summary: SubscriptionMeterSummary): string {
+    const unit = summary.unitLabel ? ` ${summary.unitLabel}` : '';
+    const parts: string[] = [];
+
+    if (summary.effectiveIncludedUsage > 0) {
+      parts.push(
+        $localize`:@@featureAdminSubscriptions-meterIncludedAllowance:${summary.effectiveIncludedUsage}${unit}:value: included`,
+      );
+    }
+
+    if (summary.billableValue !== summary.aggregatedValue) {
+      parts.push(
+        $localize`:@@featureAdminSubscriptions-meterBillableValue:${summary.billableValue}${unit}:value: billable`,
+      );
+    }
+
+    return parts.join(' · ');
+  }
+
+  hasMeterBillingDetails(summary: SubscriptionMeterSummary): boolean {
+    return summary.effectiveIncludedUsage > 0 || summary.billableValue !== summary.aggregatedValue;
+  }
+
   attachmentTypeLabel(type: UsageAttachmentType): string {
     return type === 'addon'
       ? $localize`:@@featureAdminSubscriptions-attachmentAddon:Addon`

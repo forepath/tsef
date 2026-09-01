@@ -2435,7 +2435,7 @@
   <div class="mb-3 border rounded p-3 bg-body-secondary">
     <h6 class="mb-2" i18n="@@featureServicePlans-meters">Usage meters</h6>
     <p class="form-text text-body-secondary small mb-3" i18n="@@featureServicePlans-metersHelp">
-      Attach usage meters billed in arrears. Optional unit price overrides the catalog default.
+      Attach usage meters billed in arrears. Optional unit price and included usage override catalog defaults.
     </p>
     @if (billInAdvance) {
       <div class="alert alert-warning py-2 small" i18n="@@featureServicePlans-metersPrepaidWarning">
@@ -2463,29 +2463,51 @@
           }
         </div>
         <div class="col-12 col-md-5">
-          <label
-            class="form-label small mb-0"
-            [for]="mode + 'PlanMeterOverride' + attached.meterId"
-            i18n="@@featureServicePlans-meterUnitPriceOverride"
-            >Unit price override (net)</label
-          >
-          <input
-            type="number"
-            min="0"
-            step="0.0001"
-            class="form-control form-control-sm"
-            [id]="mode + 'PlanMeterOverride' + attached.meterId"
-            #planMeterOverride
-            [value]="attachedMeterOverrideInput(attached)"
-            [disabled]="disabled || attached.inherited === true || (mode === 'edit' && planMeterAttachLoading)"
-          />
+          <div class="row g-2">
+            <div class="col-6">
+              <label
+                class="form-label small mb-0"
+                [for]="mode + 'PlanMeterOverride' + attached.meterId"
+                i18n="@@featureServicePlans-meterUnitPriceOverride"
+                >Unit price override (net)</label
+              >
+              <input
+                type="number"
+                min="0"
+                step="0.0001"
+                class="form-control form-control-sm"
+                [id]="mode + 'PlanMeterOverride' + attached.meterId"
+                #planMeterOverride
+                [value]="attachedMeterOverrideInput(attached)"
+                [disabled]="disabled || attached.inherited === true || (mode === 'edit' && planMeterAttachLoading)"
+              />
+            </div>
+            <div class="col-6">
+              <label
+                class="form-label small mb-0"
+                [for]="mode + 'PlanMeterIncludedUsage' + attached.meterId"
+                i18n="@@featureServicePlans-meterIncludedUsageOverride"
+                >Included usage override</label
+              >
+              <input
+                type="number"
+                min="0"
+                step="1"
+                class="form-control form-control-sm"
+                [id]="mode + 'PlanMeterIncludedUsage' + attached.meterId"
+                #planMeterIncludedUsage
+                [value]="attachedMeterIncludedUsageOverrideInput(attached)"
+                [disabled]="disabled || attached.inherited === true || (mode === 'edit' && planMeterAttachLoading)"
+              />
+            </div>
+          </div>
         </div>
         <div class="col-12 col-md-3 d-flex gap-1 flex-wrap justify-content-md-end">
           @if (!attached.inherited) {
             <button
               type="button"
               class="btn btn-sm btn-outline-primary"
-              (click)="updateAttachedPlanMeter(mode, attached, planMeterOverride.value)"
+              (click)="updateAttachedPlanMeter(mode, attached, planMeterOverride.value, planMeterIncludedUsage.value)"
               [disabled]="disabled || (mode === 'edit' && planMeterAttachLoading)"
               title="Update price"
               i18n-title="@@featureServicePlans-updateMeterPrice"
@@ -2553,35 +2575,70 @@
               }
             </div>
             <div class="col-12 col-md-5">
-              <label
-                class="form-label small mb-0"
-                [for]="mode + 'AttachMeterPrice'"
-                i18n="@@featureServicePlans-attachMeterPrice"
-                >Override price (optional)</label
-              >
-              @if (mode === 'create') {
-                <input
-                  [id]="mode + 'AttachMeterPrice'"
-                  type="number"
-                  min="0"
-                  step="0.0001"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="createPlanMeterAttachUnitPrice"
-                  [name]="mode + 'AttachMeterPrice'"
-                  [disabled]="disabled"
-                />
-              } @else {
-                <input
-                  [id]="mode + 'AttachMeterPrice'"
-                  type="number"
-                  min="0"
-                  step="0.0001"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="editPlanMeterAttachUnitPrice"
-                  [name]="mode + 'AttachMeterPrice'"
-                  [disabled]="disabled || planMeterAttachLoading"
-                />
-              }
+              <div class="row g-2">
+                <div class="col-6">
+                  <label
+                    class="form-label small mb-0"
+                    [for]="mode + 'AttachMeterPrice'"
+                    i18n="@@featureServicePlans-attachMeterPrice"
+                    >Override price (optional)</label
+                  >
+                  @if (mode === 'create') {
+                    <input
+                      [id]="mode + 'AttachMeterPrice'"
+                      type="number"
+                      min="0"
+                      step="0.0001"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="createPlanMeterAttachUnitPrice"
+                      [name]="mode + 'AttachMeterPrice'"
+                      [disabled]="disabled"
+                    />
+                  } @else {
+                    <input
+                      [id]="mode + 'AttachMeterPrice'"
+                      type="number"
+                      min="0"
+                      step="0.0001"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="editPlanMeterAttachUnitPrice"
+                      [name]="mode + 'AttachMeterPrice'"
+                      [disabled]="disabled || planMeterAttachLoading"
+                    />
+                  }
+                </div>
+                <div class="col-6">
+                  <label
+                    class="form-label small mb-0"
+                    [for]="mode + 'AttachMeterIncludedUsage'"
+                    i18n="@@featureServicePlans-attachMeterIncludedUsage"
+                    >Override included usage (optional)</label
+                  >
+                  @if (mode === 'create') {
+                    <input
+                      [id]="mode + 'AttachMeterIncludedUsage'"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="createPlanMeterAttachIncludedUsage"
+                      [name]="mode + 'AttachMeterIncludedUsage'"
+                      [disabled]="disabled"
+                    />
+                  } @else {
+                    <input
+                      [id]="mode + 'AttachMeterIncludedUsage'"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="editPlanMeterAttachIncludedUsage"
+                      [name]="mode + 'AttachMeterIncludedUsage'"
+                      [disabled]="disabled || planMeterAttachLoading"
+                    />
+                  }
+                </div>
+              </div>
             </div>
             <div class="col-12 col-md-2 d-flex justify-content-md-end">
               <button

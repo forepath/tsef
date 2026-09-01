@@ -240,6 +240,8 @@ describe('ServicePlansService', () => {
       aggregator: 'max' as const,
       defaultUnitPriceNet: 0.01,
       effectiveUnitPriceNet: 0.01,
+      defaultIncludedUsage: 0,
+      effectiveIncludedUsage: 0,
       isActive: true,
     };
 
@@ -255,27 +257,29 @@ describe('ServicePlansService', () => {
     });
 
     it('attaches a plan meter', (done) => {
-      service.attachPlanMeter('sp-1', { meterId: 'meter-1', unitPriceNet: 0.02 }).subscribe((meter) => {
-        expect(meter).toEqual({ ...attachedMeter, effectiveUnitPriceNet: 0.02 });
-        done();
-      });
+      service
+        .attachPlanMeter('sp-1', { meterId: 'meter-1', unitPriceNet: 0.02, includedUsage: 100 })
+        .subscribe((meter) => {
+          expect(meter).toEqual({ ...attachedMeter, effectiveUnitPriceNet: 0.02, effectiveIncludedUsage: 100 });
+          done();
+        });
 
       const req = httpMock.expectOne(`${apiUrl}/service-plans/sp-1/meters`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ meterId: 'meter-1', unitPriceNet: 0.02 });
-      req.flush({ ...attachedMeter, effectiveUnitPriceNet: 0.02 });
+      expect(req.request.body).toEqual({ meterId: 'meter-1', unitPriceNet: 0.02, includedUsage: 100 });
+      req.flush({ ...attachedMeter, effectiveUnitPriceNet: 0.02, effectiveIncludedUsage: 100 });
     });
 
     it('updates a plan meter override', (done) => {
-      service.updatePlanMeter('sp-1', 'meter-1', { unitPriceNet: 0.03 }).subscribe((meter) => {
+      service.updatePlanMeter('sp-1', 'meter-1', { unitPriceNet: 0.03, includedUsage: 50 }).subscribe((meter) => {
         expect(meter.effectiveUnitPriceNet).toBe(0.03);
         done();
       });
 
       const req = httpMock.expectOne(`${apiUrl}/service-plans/sp-1/meters/meter-1`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ unitPriceNet: 0.03 });
-      req.flush({ ...attachedMeter, effectiveUnitPriceNet: 0.03 });
+      expect(req.request.body).toEqual({ unitPriceNet: 0.03, includedUsage: 50 });
+      req.flush({ ...attachedMeter, effectiveUnitPriceNet: 0.03, effectiveIncludedUsage: 50 });
     });
 
     it('detaches a plan meter', (done) => {

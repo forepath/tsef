@@ -128,7 +128,7 @@ Ops checklist for mid-life addon remove and related env knobs: [Subscription Con
 | POST/DELETE     | `/addons/{id}/meters/{meterId}` | Update override / detach             |
 | GET             | `/addons/modules`               | Registered modules + declared meters |
 
-Addon responses embed attached meters (optional unit-price override). Module addons sync declared meters as required (`source=module`) on create/update; required meters cannot be detached. See [Usage meters](./usage-meters.md).
+Addon responses embed attached meters (optional unit-price and included-usage overrides). Module addons sync declared meters as required (`source=module`) on create/update; required meters cannot be detached. See [Usage meters](./usage-meters.md).
 
 ## Customer API
 

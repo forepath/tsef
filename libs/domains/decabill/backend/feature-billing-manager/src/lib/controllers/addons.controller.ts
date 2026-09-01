@@ -63,6 +63,7 @@ export class AddonsController {
         unitLabel?: string;
         aggregator: string;
         defaultUnitPriceNet: number;
+        defaultIncludedUsage: number;
       }>;
     }>
   > {
@@ -88,7 +89,7 @@ export class AddonsController {
   ): Promise<AttachedMeterResponseDto> {
     await this.addonsRepository.findByIdOrThrow(id);
 
-    return await this.meterService.attachAddonMeter(id, dto.meterId, dto.unitPriceNet);
+    return await this.meterService.attachAddonMeter(id, dto.meterId, dto.unitPriceNet, dto.includedUsage);
   }
 
   @Post(':id/meters/:meterId')
@@ -101,7 +102,7 @@ export class AddonsController {
   ): Promise<AttachedMeterResponseDto> {
     await this.addonsRepository.findByIdOrThrow(id);
 
-    return await this.meterService.updateAddonMeter(id, meterId, dto.unitPriceNet);
+    return await this.meterService.updateAddonMeter(id, meterId, dto.unitPriceNet, dto.includedUsage);
   }
 
   @Delete(':id/meters/:meterId')

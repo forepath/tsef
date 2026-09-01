@@ -39,6 +39,10 @@ export class MeterEntity {
   @Column({ type: 'numeric', precision: 12, scale: 4, name: 'default_unit_price_net', default: 0 })
   defaultUnitPriceNet!: string;
 
+  /** Usage included free of charge per billing period (catalog default). */
+  @Column({ type: 'numeric', precision: 18, scale: 6, name: 'default_included_usage', default: 0 })
+  defaultIncludedUsage!: string;
+
   @Column({ type: 'boolean', name: 'is_active', default: true })
   isActive!: boolean;
 

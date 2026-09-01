@@ -190,7 +190,7 @@ export class ServiceTypesController {
   ): Promise<AttachedMeterResponseDto> {
     await this.serviceTypesRepository.findByIdOrThrow(id);
 
-    return await this.meterService.attachServiceTypeMeter(id, dto.meterId, dto.unitPriceNet);
+    return await this.meterService.attachServiceTypeMeter(id, dto.meterId, dto.unitPriceNet, dto.includedUsage);
   }
 
   @RequireScopes('catalog:write')
@@ -204,7 +204,7 @@ export class ServiceTypesController {
   ): Promise<AttachedMeterResponseDto> {
     await this.serviceTypesRepository.findByIdOrThrow(id);
 
-    return await this.meterService.updateServiceTypeMeter(id, meterId, dto.unitPriceNet);
+    return await this.meterService.updateServiceTypeMeter(id, meterId, dto.unitPriceNet, dto.includedUsage);
   }
 
   @RequireScopes('catalog:write')

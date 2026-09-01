@@ -674,6 +674,27 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
     return `${meter.aggregatedValue}${unit}`;
   }
 
+  formatMeterBillingDetails(meter: SubscriptionMeterSummary): string {
+    const unit = meter.unitLabel ? ` ${meter.unitLabel}` : '';
+    const parts: string[] = [];
+
+    if (meter.effectiveIncludedUsage > 0) {
+      parts.push(
+        $localize`:@@featureSubscriptions-meterIncludedAllowance:${meter.effectiveIncludedUsage}${unit}:value: included`,
+      );
+    }
+
+    if (meter.billableValue !== meter.aggregatedValue) {
+      parts.push($localize`:@@featureSubscriptions-meterBillableValue:${meter.billableValue}${unit}:value: billable`);
+    }
+
+    return parts.join(' · ');
+  }
+
+  hasMeterBillingDetails(meter: SubscriptionMeterSummary): boolean {
+    return meter.effectiveIncludedUsage > 0 || meter.billableValue !== meter.aggregatedValue;
+  }
+
   meterAggregatorLabel(aggregator: string | null | undefined): string {
     return getMeterAggregatorLabel(aggregator);
   }

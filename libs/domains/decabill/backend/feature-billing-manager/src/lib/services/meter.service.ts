@@ -15,7 +15,7 @@ import { MetersRepository } from '../repositories/meters.repository';
 import { ServicePlanMetersRepository } from '../repositories/service-plan-meters.repository';
 import { ServiceTypeMetersRepository } from '../repositories/service-type-meters.repository';
 import { UsageRecordsRepository } from '../repositories/usage-records.repository';
-import { resolveEffectiveUnitPriceNet } from '../utils/meter-aggregation.util';
+import { resolveEffectiveIncludedUsage, resolveEffectiveUnitPriceNet } from '../utils/meter-aggregation.util';
 import { resolveServiceTypeAllowedProviders } from '../utils/provider-selection.utils';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { mapMeterToSearchDocument } from '../search/billing-search-document.mapper';
@@ -24,6 +24,29 @@ import { AddonModuleRegistryService } from './addon-module-registry.service';
 import { ProviderRegistryService } from './provider-registry.service';
 
 type MeterLinkEntity = ServicePlanMeterEntity | AddonMeterEntity | ServiceTypeMeterEntity;
+
+function toNullableNumericColumn(value: number | null | undefined): string | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  return String(value);
+}
+
+function patchNullableNumericColumn(
+  value: number | null | undefined,
+  existing: string | null | undefined,
+): string | null {
+  if (value === undefined) {
+    return existing ?? null;
+  }
+
+  if (value === null) {
+    return null;
+  }
+
+  return String(value);
+}
 
 @Injectable()
 export class MeterService {
@@ -48,6 +71,7 @@ export class MeterService {
       unitLabel: row.unitLabel ?? null,
       aggregator: row.aggregator,
       defaultUnitPriceNet: Number(row.defaultUnitPriceNet),
+      defaultIncludedUsage: Number(row.defaultIncludedUsage ?? 0),
       isActive: row.isActive,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -62,6 +86,9 @@ export class MeterService {
     const defaultUnitPriceNet = Number(meter.defaultUnitPriceNet);
     const unitPriceNetOverride =
       link.unitPriceNet === null || link.unitPriceNet === undefined ? null : Number(link.unitPriceNet);
+    const defaultIncludedUsage = Number(meter.defaultIncludedUsage ?? 0);
+    const includedUsageOverride =
+      link.includedUsage === null || link.includedUsage === undefined ? null : Number(link.includedUsage);
 
     return {
       meterId: meter.id,
@@ -73,6 +100,9 @@ export class MeterService {
       defaultUnitPriceNet,
       unitPriceNetOverride,
       effectiveUnitPriceNet: resolveEffectiveUnitPriceNet(unitPriceNetOverride, defaultUnitPriceNet),
+      defaultIncludedUsage,
+      includedUsageOverride,
+      effectiveIncludedUsage: resolveEffectiveIncludedUsage(includedUsageOverride, defaultIncludedUsage),
       isActive: meter.isActive,
       source: link.source ?? 'manual',
       required: link.required === true,
@@ -97,6 +127,7 @@ export class MeterService {
       unitLabel: def.unitLabel?.trim() || null,
       aggregator: def.aggregator,
       defaultUnitPriceNet: String(def.defaultUnitPriceNet),
+      defaultIncludedUsage: String(def.defaultIncludedUsage ?? 0),
       isActive: true,
     });
   }
@@ -120,6 +151,7 @@ export class MeterService {
           addonId: addon.id,
           meterId: meter.id,
           unitPriceNet: null,
+          includedUsage: null,
           source: 'module',
           required: true,
         });
@@ -127,6 +159,7 @@ export class MeterService {
           addonId: addon.id,
           meterId: meter.id,
           unitPriceNet: null,
+          includedUsage: null,
           source: 'module',
           required: true,
         });
@@ -172,6 +205,7 @@ export class MeterService {
           serviceTypeId: serviceType.id,
           meterId: meter.id,
           unitPriceNet: null,
+          includedUsage: null,
           source: 'provider',
           required: true,
         });
@@ -179,6 +213,7 @@ export class MeterService {
           serviceTypeId: serviceType.id,
           meterId: meter.id,
           unitPriceNet: null,
+          includedUsage: null,
           source: 'provider',
           required: true,
         });
@@ -223,6 +258,7 @@ export class MeterService {
       unitLabel: dto.unitLabel?.trim() || null,
       aggregator: dto.aggregator,
       defaultUnitPriceNet: String(dto.defaultUnitPriceNet),
+      defaultIncludedUsage: String(dto.defaultIncludedUsage ?? 0),
       isActive: dto.isActive ?? true,
     });
 
@@ -231,6 +267,8 @@ export class MeterService {
       key: row.key,
       name: row.name,
       aggregator: row.aggregator,
+      defaultUnitPriceNet: Number(row.defaultUnitPriceNet),
+      defaultIncludedUsage: Number(row.defaultIncludedUsage ?? 0),
     });
     this.billingSearchIndexService.scheduleUpsert('meters', mapMeterToSearchDocument(row));
 
@@ -260,6 +298,10 @@ export class MeterService {
       patch.defaultUnitPriceNet = String(dto.defaultUnitPriceNet);
     }
 
+    if (dto.defaultIncludedUsage !== undefined) {
+      patch.defaultIncludedUsage = String(dto.defaultIncludedUsage);
+    }
+
     if (dto.isActive !== undefined) {
       patch.isActive = dto.isActive;
     }
@@ -272,6 +314,8 @@ export class MeterService {
       name: row.name,
       aggregator: row.aggregator,
       isActive: row.isActive,
+      defaultUnitPriceNet: Number(row.defaultUnitPriceNet),
+      defaultIncludedUsage: Number(row.defaultIncludedUsage ?? 0),
     });
     this.billingSearchIndexService.scheduleUpsert('meters', mapMeterToSearchDocument(row));
 
@@ -332,6 +376,7 @@ export class MeterService {
     servicePlanId: string,
     meterId: string,
     unitPriceNet?: number | null,
+    includedUsage?: number | null,
   ): Promise<AttachedMeterResponseDto> {
     const meter = await this.metersRepository.findByIdOrThrow(meterId);
 
@@ -348,7 +393,8 @@ export class MeterService {
     const link = await this.servicePlanMetersRepository.create({
       servicePlanId,
       meterId,
-      unitPriceNet: unitPriceNet === undefined ? null : unitPriceNet === null ? null : String(unitPriceNet),
+      unitPriceNet: toNullableNumericColumn(unitPriceNet),
+      includedUsage: toNullableNumericColumn(includedUsage),
       source: 'manual',
       required: false,
     });
@@ -357,6 +403,7 @@ export class MeterService {
       servicePlanId,
       meterId,
       unitPriceNet: unitPriceNet ?? null,
+      includedUsage: includedUsage ?? null,
     });
 
     return this.mapAttachedMeter(link, meter);
@@ -366,18 +413,30 @@ export class MeterService {
     servicePlanId: string,
     meterId: string,
     unitPriceNet?: number | null,
+    includedUsage?: number | null,
   ): Promise<AttachedMeterResponseDto> {
     const link = await this.servicePlanMetersRepository.findByPlanAndMeterOrThrow(servicePlanId, meterId);
     const meter = link.meter ?? (await this.metersRepository.findByIdOrThrow(meterId));
     const updated = await this.servicePlanMetersRepository.update(link.id, {
-      unitPriceNet:
-        unitPriceNet === undefined ? link.unitPriceNet : unitPriceNet === null ? null : String(unitPriceNet),
+      unitPriceNet: patchNullableNumericColumn(unitPriceNet, link.unitPriceNet),
+      includedUsage: patchNullableNumericColumn(includedUsage, link.includedUsage),
     });
 
     this.billingNotificationPublisher.publish('service_plan.meter_updated', {
       servicePlanId,
       meterId,
-      unitPriceNet: unitPriceNet ?? null,
+      unitPriceNet:
+        unitPriceNet !== undefined
+          ? (unitPriceNet ?? null)
+          : link.unitPriceNet != null
+            ? Number(link.unitPriceNet)
+            : null,
+      includedUsage:
+        includedUsage !== undefined
+          ? (includedUsage ?? null)
+          : link.includedUsage != null
+            ? Number(link.includedUsage)
+            : null,
     });
 
     return this.mapAttachedMeter(updated, meter);
@@ -408,6 +467,7 @@ export class MeterService {
     addonId: string,
     meterId: string,
     unitPriceNet?: number | null,
+    includedUsage?: number | null,
   ): Promise<AttachedMeterResponseDto> {
     const meter = await this.metersRepository.findByIdOrThrow(meterId);
 
@@ -424,7 +484,8 @@ export class MeterService {
     const link = await this.addonMetersRepository.create({
       addonId,
       meterId,
-      unitPriceNet: unitPriceNet === undefined ? null : unitPriceNet === null ? null : String(unitPriceNet),
+      unitPriceNet: toNullableNumericColumn(unitPriceNet),
+      includedUsage: toNullableNumericColumn(includedUsage),
       source: 'manual',
       required: false,
     });
@@ -433,6 +494,7 @@ export class MeterService {
       addonId,
       meterId,
       unitPriceNet: unitPriceNet ?? null,
+      includedUsage: includedUsage ?? null,
     });
 
     return this.mapAttachedMeter(link, meter);
@@ -442,18 +504,30 @@ export class MeterService {
     addonId: string,
     meterId: string,
     unitPriceNet?: number | null,
+    includedUsage?: number | null,
   ): Promise<AttachedMeterResponseDto> {
     const link = await this.addonMetersRepository.findByAddonAndMeterOrThrow(addonId, meterId);
     const meter = link.meter ?? (await this.metersRepository.findByIdOrThrow(meterId));
     const updated = await this.addonMetersRepository.update(link.id, {
-      unitPriceNet:
-        unitPriceNet === undefined ? link.unitPriceNet : unitPriceNet === null ? null : String(unitPriceNet),
+      unitPriceNet: patchNullableNumericColumn(unitPriceNet, link.unitPriceNet),
+      includedUsage: patchNullableNumericColumn(includedUsage, link.includedUsage),
     });
 
     this.billingNotificationPublisher.publish('addon.meter_updated', {
       addonId,
       meterId,
-      unitPriceNet: unitPriceNet ?? null,
+      unitPriceNet:
+        unitPriceNet !== undefined
+          ? (unitPriceNet ?? null)
+          : link.unitPriceNet != null
+            ? Number(link.unitPriceNet)
+            : null,
+      includedUsage:
+        includedUsage !== undefined
+          ? (includedUsage ?? null)
+          : link.includedUsage != null
+            ? Number(link.includedUsage)
+            : null,
     });
 
     return this.mapAttachedMeter(updated, meter);
@@ -484,6 +558,7 @@ export class MeterService {
     serviceTypeId: string,
     meterId: string,
     unitPriceNet?: number | null,
+    includedUsage?: number | null,
   ): Promise<AttachedMeterResponseDto> {
     const meter = await this.metersRepository.findByIdOrThrow(meterId);
 
@@ -500,7 +575,8 @@ export class MeterService {
     const link = await this.serviceTypeMetersRepository.create({
       serviceTypeId,
       meterId,
-      unitPriceNet: unitPriceNet === undefined ? null : unitPriceNet === null ? null : String(unitPriceNet),
+      unitPriceNet: toNullableNumericColumn(unitPriceNet),
+      includedUsage: toNullableNumericColumn(includedUsage),
       source: 'manual' satisfies MeterAttachmentSource,
       required: false,
     });
@@ -509,6 +585,7 @@ export class MeterService {
       serviceTypeId,
       meterId,
       unitPriceNet: unitPriceNet ?? null,
+      includedUsage: includedUsage ?? null,
     });
 
     return this.mapAttachedMeter(link, meter);
@@ -518,18 +595,30 @@ export class MeterService {
     serviceTypeId: string,
     meterId: string,
     unitPriceNet?: number | null,
+    includedUsage?: number | null,
   ): Promise<AttachedMeterResponseDto> {
     const link = await this.serviceTypeMetersRepository.findByServiceTypeAndMeterOrThrow(serviceTypeId, meterId);
     const meter = link.meter ?? (await this.metersRepository.findByIdOrThrow(meterId));
     const updated = await this.serviceTypeMetersRepository.update(link.id, {
-      unitPriceNet:
-        unitPriceNet === undefined ? link.unitPriceNet : unitPriceNet === null ? null : String(unitPriceNet),
+      unitPriceNet: patchNullableNumericColumn(unitPriceNet, link.unitPriceNet),
+      includedUsage: patchNullableNumericColumn(includedUsage, link.includedUsage),
     });
 
     this.billingNotificationPublisher.publish('service_type.meter_updated', {
       serviceTypeId,
       meterId,
-      unitPriceNet: unitPriceNet ?? null,
+      unitPriceNet:
+        unitPriceNet !== undefined
+          ? (unitPriceNet ?? null)
+          : link.unitPriceNet != null
+            ? Number(link.unitPriceNet)
+            : null,
+      includedUsage:
+        includedUsage !== undefined
+          ? (includedUsage ?? null)
+          : link.includedUsage != null
+            ? Number(link.includedUsage)
+            : null,
     });
 
     return this.mapAttachedMeter(updated, meter);

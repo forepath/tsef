@@ -50,6 +50,7 @@ export interface DeclaredMeterDefinition {
   unitLabel?: string;
   aggregator: MeterAggregator;
   defaultUnitPriceNet: number;
+  defaultIncludedUsage?: number;
   /** When set, the meter-collect job pulls on this interval (ms). */
   collectionIntervalMs?: number;
 }
@@ -313,6 +314,7 @@ export interface MeterResponse {
   unitLabel?: string | null;
   aggregator: MeterAggregator;
   defaultUnitPriceNet: number;
+  defaultIncludedUsage: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -325,6 +327,7 @@ export interface CreateMeterDto {
   unitLabel?: string;
   aggregator: MeterAggregator;
   defaultUnitPriceNet: number;
+  defaultIncludedUsage?: number;
   isActive?: boolean;
 }
 
@@ -334,6 +337,7 @@ export interface UpdateMeterDto {
   unitLabel?: string | null;
   aggregator?: MeterAggregator;
   defaultUnitPriceNet?: number;
+  defaultIncludedUsage?: number;
   isActive?: boolean;
 }
 
@@ -347,6 +351,9 @@ export interface AttachedMeterResponse {
   defaultUnitPriceNet: number;
   unitPriceNetOverride?: number | null;
   effectiveUnitPriceNet: number;
+  defaultIncludedUsage: number;
+  includedUsageOverride?: number | null;
+  effectiveIncludedUsage: number;
   isActive: boolean;
   source?: 'manual' | 'module' | 'provider';
   required?: boolean;
@@ -357,10 +364,12 @@ export interface AttachedMeterResponse {
 export interface AttachMeterDto {
   meterId: string;
   unitPriceNet?: number | null;
+  includedUsage?: number | null;
 }
 
 export interface UpdateAttachedMeterDto {
   unitPriceNet?: number | null;
+  includedUsage?: number | null;
 }
 
 export interface SubscriptionMeterSummary {
@@ -373,7 +382,9 @@ export interface SubscriptionMeterSummary {
   addonId?: string | null;
   addonName?: string | null;
   effectiveUnitPriceNet: number;
+  effectiveIncludedUsage: number;
   aggregatedValue: number;
+  billableValue: number;
   estimatedChargeNet: number;
   entryCount: number;
   periodStart?: string | null;

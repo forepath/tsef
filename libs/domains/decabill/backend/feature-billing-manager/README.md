@@ -88,8 +88,9 @@ profile. The backend returns 400 if the profile is missing or incomplete. Requir
 address line, city, country. See `docs/billing-profile-required-for-order-spec.md` and `docs/sequence-subscription-order.mmd`.
 
 Usage meters (catalog + plan/addon attachments) are documented in `docs/decabill/features/usage-meters.md`.
-Records are posted to `POST /admin/usage/record` (admin JWT or `STATIC_API_KEY` only; customers cannot
-self-report). With meter attachments, provide `meterId`/`value`/`attachmentType`/`addonId`. Without attachments,
+Catalog fields include `defaultUnitPriceNet` and `defaultIncludedUsage` (default 0). Attachments accept nullable
+`unitPriceNet` and `includedUsage` overrides. Records are posted to `POST /admin/usage/record` (admin JWT or
+`STATIC_API_KEY` only; customers cannot self-report). With meter attachments, provide `meterId`/`value`/`attachmentType`/`addonId`. Without attachments,
 legacy `usagePayload` with `totalCost` or `usageCost` (or `units` and `unitPrice`) still applies.
 Declared meters may set `collectionIntervalMs`; the `meter-collect` BullMQ job (every minute by default) pulls
 samples via provider/addon `collectMeters` into usage history with `usageSource: collector`.

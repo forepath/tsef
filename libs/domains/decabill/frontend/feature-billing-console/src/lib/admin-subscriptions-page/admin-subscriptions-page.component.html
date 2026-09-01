@@ -220,6 +220,9 @@
                                 meter.name
                               }}</span>
                               <span>{{ formatMeterValue(meter) }}</span>
+                              @if (hasMeterBillingDetails(meter)) {
+                                <span class="text-muted small">{{ formatMeterBillingDetails(meter) }}</span>
+                              }
                               <span class="ms-auto">{{ formatMeterCharge(meter.estimatedChargeNet) }}</span>
                             </div>
                           }
@@ -383,6 +386,9 @@
                   <div class="list-group-item d-flex flex-wrap align-items-center gap-2">
                     <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{ summary.name }}</span>
                     <span class="small text-muted">{{ formatMeterValue(summary) }}</span>
+                    @if (hasMeterBillingDetails(summary)) {
+                      <span class="small text-muted">{{ formatMeterBillingDetails(summary) }}</span>
+                    }
                     <span class="small text-muted ms-auto">{{ formatMeterCharge(summary.estimatedChargeNet) }}</span>
                   </div>
                 }

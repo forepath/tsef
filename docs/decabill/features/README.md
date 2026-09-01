@@ -81,12 +81,12 @@ Order service plans, manage lifecycle (cancel, resume), and provision cloud inst
 
 ### [Usage meters](./usage-meters.md)
 
-Reusable tenant meters attached to plans and addons with optional unit-price overrides. Usage is recorded per attachment and billed as separate invoice lines.
+Reusable tenant meters attached to plans and addons with optional unit-price and included-usage overrides. Usage is recorded per attachment and billed as separate invoice lines.
 
 **Key Capabilities**:
 
 - Meter catalog CRUD (`max` / `min` / `avg` / `first` / `last` aggregators)
-- Plan and addon attachments with coalesce pricing
+- Plan and addon attachments with coalesce pricing and included usage
 - Attachment-scoped recording and admin meter-entry CRUD
 - Separate invoice lines per plan/addon attachment; legacy payload fallback when no meters
 

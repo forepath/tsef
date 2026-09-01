@@ -30,6 +30,11 @@ export class CreateMeterDto {
   defaultUnitPriceNet!: number;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  defaultIncludedUsage?: number;
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }
@@ -60,6 +65,11 @@ export class UpdateMeterDto {
   defaultUnitPriceNet?: number;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  defaultIncludedUsage?: number;
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }
@@ -72,6 +82,11 @@ export class AttachMeterDto {
   @IsNumber()
   @Min(0)
   unitPriceNet?: number | null;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  includedUsage?: number | null;
 }
 
 export class UpdateAttachedMeterDto {
@@ -79,6 +94,11 @@ export class UpdateAttachedMeterDto {
   @IsNumber()
   @Min(0)
   unitPriceNet?: number | null;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  includedUsage?: number | null;
 }
 
 export class MeterAttachmentInputDto {
@@ -89,4 +109,9 @@ export class MeterAttachmentInputDto {
   @IsNumber()
   @Min(0)
   unitPriceNet?: number | null;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  includedUsage?: number | null;
 }

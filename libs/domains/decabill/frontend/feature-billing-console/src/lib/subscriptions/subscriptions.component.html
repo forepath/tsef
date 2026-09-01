@@ -408,6 +408,9 @@
                   <div class="d-flex flex-wrap align-items-center gap-2">
                     <span class="info-badge text-muted bg-body-secondary py-1 px-2 rounded">{{ meter.name }}</span>
                     <span>{{ formatMeterValue(meter) }}</span>
+                    @if (hasMeterBillingDetails(meter)) {
+                      <span class="text-muted small">{{ formatMeterBillingDetails(meter) }}</span>
+                    }
                     <span class="ms-auto">{{ formatMeterCharge(meter.estimatedChargeNet) }}</span>
                   </div>
                 }

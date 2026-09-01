@@ -323,7 +323,9 @@ components:
                   aggregator,
                   attachmentType,
                   effectiveUnitPriceNet,
+                  effectiveIncludedUsage,
                   aggregatedValue,
+                  billableValue,
                   estimatedChargeNet,
                   entryCount,
                 ]
@@ -341,7 +343,9 @@ components:
                 addonId: { type: string, format: uuid, nullable: true }
                 addonName: { type: string, nullable: true }
                 effectiveUnitPriceNet: { type: number }
+                effectiveIncludedUsage: { type: number }
                 aggregatedValue: { type: number }
+                billableValue: { type: number }
                 estimatedChargeNet: { type: number }
                 entryCount: { type: integer }
                 periodStart: { type: string, format: date-time, nullable: true }

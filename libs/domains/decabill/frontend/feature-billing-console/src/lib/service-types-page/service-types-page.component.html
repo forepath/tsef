@@ -624,7 +624,8 @@
   <div class="mb-3 border rounded p-3 bg-body-secondary">
     <h6 class="mb-2" i18n="@@featureServiceTypes-meters">Usage meters</h6>
     <p class="form-text text-body-secondary small mb-3" i18n="@@featureServiceTypes-metersHelp">
-      Provider-declared meters are required. Attach extra catalog meters with optional unit price overrides.
+      Provider-declared meters are required. Attach extra catalog meters with optional unit price and included usage
+      overrides.
     </p>
     @if (mode === 'edit' && meterAttachError) {
       <div class="alert alert-danger py-2">{{ meterAttachError }}</div>
@@ -665,28 +666,57 @@
           }
         </div>
         <div class="col-12 col-md-5">
-          <label
-            class="form-label small mb-0"
-            [for]="mode + 'ServiceTypeMeterOverride' + attached.meterId"
-            i18n="@@featureServiceTypes-meterUnitPriceOverride"
-            >Unit price override (net)</label
-          >
-          <input
-            type="number"
-            min="0"
-            step="0.0001"
-            class="form-control form-control-sm"
-            [id]="mode + 'ServiceTypeMeterOverride' + attached.meterId"
-            #serviceTypeMeterOverride
-            [value]="attachedMeterOverrideInput(attached)"
-            [disabled]="disabled || (mode === 'edit' && meterAttachLoading)"
-          />
+          <div class="row g-2">
+            <div class="col-6">
+              <label
+                class="form-label small mb-0"
+                [for]="mode + 'ServiceTypeMeterOverride' + attached.meterId"
+                i18n="@@featureServiceTypes-meterUnitPriceOverride"
+                >Unit price override (net)</label
+              >
+              <input
+                type="number"
+                min="0"
+                step="0.0001"
+                class="form-control form-control-sm"
+                [id]="mode + 'ServiceTypeMeterOverride' + attached.meterId"
+                #serviceTypeMeterOverride
+                [value]="attachedMeterOverrideInput(attached)"
+                [disabled]="disabled || (mode === 'edit' && meterAttachLoading)"
+              />
+            </div>
+            <div class="col-6">
+              <label
+                class="form-label small mb-0"
+                [for]="mode + 'ServiceTypeMeterIncludedUsage' + attached.meterId"
+                i18n="@@featureServiceTypes-meterIncludedUsageOverride"
+                >Included usage override</label
+              >
+              <input
+                type="number"
+                min="0"
+                step="1"
+                class="form-control form-control-sm"
+                [id]="mode + 'ServiceTypeMeterIncludedUsage' + attached.meterId"
+                #serviceTypeMeterIncludedUsage
+                [value]="attachedMeterIncludedUsageOverrideInput(attached)"
+                [disabled]="disabled || (mode === 'edit' && meterAttachLoading)"
+              />
+            </div>
+          </div>
         </div>
         <div class="col-12 col-md-3 d-flex gap-1 flex-wrap justify-content-md-end">
           <button
             type="button"
             class="btn btn-sm btn-outline-primary"
-            (click)="updateAttachedServiceTypeMeter(mode, attached, serviceTypeMeterOverride.value)"
+            (click)="
+              updateAttachedServiceTypeMeter(
+                mode,
+                attached,
+                serviceTypeMeterOverride.value,
+                serviceTypeMeterIncludedUsage.value
+              )
+            "
             [disabled]="disabled || (mode === 'edit' && meterAttachLoading)"
             title="Update price"
             i18n-title="@@featureServiceTypes-updateMeterPrice"
@@ -759,35 +789,70 @@
                 }
               </div>
               <div class="col-12 col-md-5">
-                <label
-                  class="form-label small mb-0"
-                  [for]="mode + 'AttachServiceTypeMeterPrice'"
-                  i18n="@@featureServiceTypes-attachMeterPrice"
-                  >Override price (optional)</label
-                >
-                @if (mode === 'create') {
-                  <input
-                    [id]="mode + 'AttachServiceTypeMeterPrice'"
-                    type="number"
-                    min="0"
-                    step="0.0001"
-                    class="form-control form-control-sm"
-                    [(ngModel)]="createMeterAttachUnitPrice"
-                    [name]="mode + 'AttachServiceTypeMeterPrice'"
-                    [disabled]="disabled"
-                  />
-                } @else {
-                  <input
-                    [id]="mode + 'AttachServiceTypeMeterPrice'"
-                    type="number"
-                    min="0"
-                    step="0.0001"
-                    class="form-control form-control-sm"
-                    [(ngModel)]="editMeterAttachUnitPrice"
-                    [name]="mode + 'AttachServiceTypeMeterPrice'"
-                    [disabled]="disabled || meterAttachLoading"
-                  />
-                }
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label
+                      class="form-label small mb-0"
+                      [for]="mode + 'AttachServiceTypeMeterPrice'"
+                      i18n="@@featureServiceTypes-attachMeterPrice"
+                      >Override price (optional)</label
+                    >
+                    @if (mode === 'create') {
+                      <input
+                        [id]="mode + 'AttachServiceTypeMeterPrice'"
+                        type="number"
+                        min="0"
+                        step="0.0001"
+                        class="form-control form-control-sm"
+                        [(ngModel)]="createMeterAttachUnitPrice"
+                        [name]="mode + 'AttachServiceTypeMeterPrice'"
+                        [disabled]="disabled"
+                      />
+                    } @else {
+                      <input
+                        [id]="mode + 'AttachServiceTypeMeterPrice'"
+                        type="number"
+                        min="0"
+                        step="0.0001"
+                        class="form-control form-control-sm"
+                        [(ngModel)]="editMeterAttachUnitPrice"
+                        [name]="mode + 'AttachServiceTypeMeterPrice'"
+                        [disabled]="disabled || meterAttachLoading"
+                      />
+                    }
+                  </div>
+                  <div class="col-6">
+                    <label
+                      class="form-label small mb-0"
+                      [for]="mode + 'AttachServiceTypeMeterIncludedUsage'"
+                      i18n="@@featureServiceTypes-attachMeterIncludedUsage"
+                      >Override included usage (optional)</label
+                    >
+                    @if (mode === 'create') {
+                      <input
+                        [id]="mode + 'AttachServiceTypeMeterIncludedUsage'"
+                        type="number"
+                        min="0"
+                        step="1"
+                        class="form-control form-control-sm"
+                        [(ngModel)]="createMeterAttachIncludedUsage"
+                        [name]="mode + 'AttachServiceTypeMeterIncludedUsage'"
+                        [disabled]="disabled"
+                      />
+                    } @else {
+                      <input
+                        [id]="mode + 'AttachServiceTypeMeterIncludedUsage'"
+                        type="number"
+                        min="0"
+                        step="1"
+                        class="form-control form-control-sm"
+                        [(ngModel)]="editMeterAttachIncludedUsage"
+                        [name]="mode + 'AttachServiceTypeMeterIncludedUsage'"
+                        [disabled]="disabled || meterAttachLoading"
+                      />
+                    }
+                  </div>
+                </div>
               </div>
               <div class="col-12 col-md-2 d-flex justify-content-md-end">
                 <button

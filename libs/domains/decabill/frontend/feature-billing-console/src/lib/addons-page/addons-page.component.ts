@@ -102,8 +102,10 @@ export class AddonsPageComponent implements OnInit {
   editAttachedMeters: AttachedMeterResponse[] = [];
   createAddonMeterAttachMeterId = '';
   createAddonMeterAttachUnitPrice: string | number | null = '';
+  createAddonMeterAttachIncludedUsage: string | number | null = '';
   editAddonMeterAttachMeterId = '';
   editAddonMeterAttachUnitPrice: string | number | null = '';
+  editAddonMeterAttachIncludedUsage: string | number | null = '';
   addonMeterAttachLoading = false;
   addonMeterAttachError: string | null = null;
 
@@ -214,17 +216,22 @@ export class AddonsPageComponent implements OnInit {
     if (mode === 'create') {
       this.createAddonMeterAttachMeterId = '';
       this.createAddonMeterAttachUnitPrice = '';
+      this.createAddonMeterAttachIncludedUsage = '';
       return;
     }
 
     this.editAddonMeterAttachMeterId = '';
     this.editAddonMeterAttachUnitPrice = '';
+    this.editAddonMeterAttachIncludedUsage = '';
   }
 
   attachAddonMeter(mode: string): void {
     const meterId = mode === 'create' ? this.createAddonMeterAttachMeterId : this.editAddonMeterAttachMeterId;
     const unitPriceRaw = optionalNumberInputValue(
       mode === 'create' ? this.createAddonMeterAttachUnitPrice : this.editAddonMeterAttachUnitPrice,
+    );
+    const includedUsageRaw = optionalNumberInputValue(
+      mode === 'create' ? this.createAddonMeterAttachIncludedUsage : this.editAddonMeterAttachIncludedUsage,
     );
 
     if (!meterId) return;
@@ -240,10 +247,15 @@ export class AddonsPageComponent implements OnInit {
         }
 
         const override = unitPriceRaw ? Number(unitPriceRaw) : null;
+        const includedOverride = includedUsageRaw ? Number(includedUsageRaw) : null;
 
         this.createAttachedMeters = [
           ...this.createAttachedMeters,
-          this.toPendingAttachedMeter(meter, Number.isFinite(override as number) ? override : null),
+          this.toPendingAttachedMeter(
+            meter,
+            Number.isFinite(override as number) ? override : null,
+            Number.isFinite(includedOverride as number) ? includedOverride : null,
+          ),
         ];
         this.resetAddonMeterAttachForm('create');
       });
@@ -259,6 +271,7 @@ export class AddonsPageComponent implements OnInit {
       .attachAddonMeter(this.editForm.id, {
         meterId,
         unitPriceNet: unitPriceRaw ? Number(unitPriceRaw) : undefined,
+        includedUsage: includedUsageRaw ? Number(includedUsageRaw) : undefined,
       })
       .pipe(take(1))
       .subscribe({
@@ -274,9 +287,16 @@ export class AddonsPageComponent implements OnInit {
       });
   }
 
-  updateAttachedAddonMeter(mode: string, meter: AttachedMeterResponse, unitPriceInput: string): void {
+  updateAttachedAddonMeter(
+    mode: string,
+    meter: AttachedMeterResponse,
+    unitPriceInput: string,
+    includedUsageInput: string,
+  ): void {
     const trimmed = unitPriceInput.trim();
     const override = trimmed ? Number(trimmed) : null;
+    const includedTrimmed = includedUsageInput.trim();
+    const includedOverride = includedTrimmed ? Number(includedTrimmed) : null;
 
     if (mode === 'create') {
       this.createAttachedMeters = this.createAttachedMeters.map((item) =>
@@ -286,6 +306,11 @@ export class AddonsPageComponent implements OnInit {
               unitPriceNetOverride: Number.isFinite(override as number) ? override : null,
               effectiveUnitPriceNet:
                 Number.isFinite(override as number) && override != null ? override : item.defaultUnitPriceNet,
+              includedUsageOverride: Number.isFinite(includedOverride as number) ? includedOverride : null,
+              effectiveIncludedUsage:
+                Number.isFinite(includedOverride as number) && includedOverride != null
+                  ? includedOverride
+                  : item.defaultIncludedUsage,
             }
           : item,
       );
@@ -300,6 +325,7 @@ export class AddonsPageComponent implements OnInit {
     this.addonsService
       .updateAddonMeter(this.editForm.id, meter.meterId, {
         unitPriceNet: trimmed ? Number(trimmed) : null,
+        includedUsage: includedTrimmed ? Number(includedTrimmed) : null,
       })
       .pipe(take(1))
       .subscribe({
@@ -344,11 +370,19 @@ export class AddonsPageComponent implements OnInit {
     return meter.unitPriceNetOverride != null ? String(meter.unitPriceNetOverride) : '';
   }
 
+  attachedMeterIncludedUsageOverrideInput(meter: AttachedMeterResponse): string {
+    return meter.includedUsageOverride != null ? String(meter.includedUsageOverride) : '';
+  }
+
   addonMeterCount(addon: AddonResponse): number {
     return addon.meters?.length ?? 0;
   }
 
-  private toPendingAttachedMeter(meter: MeterResponse, unitPriceNetOverride: number | null): AttachedMeterResponse {
+  private toPendingAttachedMeter(
+    meter: MeterResponse,
+    unitPriceNetOverride: number | null,
+    includedUsageOverride: number | null,
+  ): AttachedMeterResponse {
     return {
       meterId: meter.id,
       key: meter.key,
@@ -359,6 +393,9 @@ export class AddonsPageComponent implements OnInit {
       defaultUnitPriceNet: meter.defaultUnitPriceNet,
       unitPriceNetOverride,
       effectiveUnitPriceNet: unitPriceNetOverride != null ? unitPriceNetOverride : meter.defaultUnitPriceNet,
+      defaultIncludedUsage: meter.defaultIncludedUsage ?? 0,
+      includedUsageOverride,
+      effectiveIncludedUsage: includedUsageOverride != null ? includedUsageOverride : (meter.defaultIncludedUsage ?? 0),
       isActive: meter.isActive,
       source: 'manual',
       required: false,
@@ -387,6 +424,7 @@ export class AddonsPageComponent implements OnInit {
                 .attachAddonMeter(addon.id, {
                   meterId: meter.meterId,
                   unitPriceNet: meter.unitPriceNetOverride ?? undefined,
+                  includedUsage: meter.includedUsageOverride ?? undefined,
                 })
                 .pipe(catchError(() => of(null))),
             ),

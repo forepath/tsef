@@ -179,8 +179,10 @@ export class ServicePlansPageComponent implements OnInit {
   editAttachedMeters: AttachedMeterResponse[] = [];
   createPlanMeterAttachMeterId = '';
   createPlanMeterAttachUnitPrice: string | number | null = '';
+  createPlanMeterAttachIncludedUsage: string | number | null = '';
   editPlanMeterAttachMeterId = '';
   editPlanMeterAttachUnitPrice: string | number | null = '';
+  editPlanMeterAttachIncludedUsage: string | number | null = '';
   planMeterAttachLoading = false;
   planMeterAttachError: string | null = null;
 
@@ -545,17 +547,22 @@ export class ServicePlansPageComponent implements OnInit {
     if (mode === 'create') {
       this.createPlanMeterAttachMeterId = '';
       this.createPlanMeterAttachUnitPrice = '';
+      this.createPlanMeterAttachIncludedUsage = '';
       return;
     }
 
     this.editPlanMeterAttachMeterId = '';
     this.editPlanMeterAttachUnitPrice = '';
+    this.editPlanMeterAttachIncludedUsage = '';
   }
 
   attachPlanMeter(mode: string): void {
     const meterId = mode === 'create' ? this.createPlanMeterAttachMeterId : this.editPlanMeterAttachMeterId;
     const unitPriceRaw = optionalNumberInputValue(
       mode === 'create' ? this.createPlanMeterAttachUnitPrice : this.editPlanMeterAttachUnitPrice,
+    );
+    const includedUsageRaw = optionalNumberInputValue(
+      mode === 'create' ? this.createPlanMeterAttachIncludedUsage : this.editPlanMeterAttachIncludedUsage,
     );
 
     if (!meterId) return;
@@ -571,10 +578,15 @@ export class ServicePlansPageComponent implements OnInit {
         }
 
         const override = unitPriceRaw ? Number(unitPriceRaw) : null;
+        const includedOverride = includedUsageRaw ? Number(includedUsageRaw) : null;
 
         this.createAttachedMeters = [
           ...this.createAttachedMeters,
-          this.toPendingAttachedMeter(meter, Number.isFinite(override as number) ? override : null),
+          this.toPendingAttachedMeter(
+            meter,
+            Number.isFinite(override as number) ? override : null,
+            Number.isFinite(includedOverride as number) ? includedOverride : null,
+          ),
         ];
         this.resetPlanMeterAttachForm('create');
       });
@@ -590,6 +602,7 @@ export class ServicePlansPageComponent implements OnInit {
       .attachPlanMeter(this.editForm.id, {
         meterId,
         unitPriceNet: unitPriceRaw ? Number(unitPriceRaw) : undefined,
+        includedUsage: includedUsageRaw ? Number(includedUsageRaw) : undefined,
       })
       .pipe(take(1))
       .subscribe({
@@ -605,9 +618,16 @@ export class ServicePlansPageComponent implements OnInit {
       });
   }
 
-  updateAttachedPlanMeter(mode: string, meter: AttachedMeterResponse, unitPriceInput: string): void {
+  updateAttachedPlanMeter(
+    mode: string,
+    meter: AttachedMeterResponse,
+    unitPriceInput: string,
+    includedUsageInput: string,
+  ): void {
     const trimmed = unitPriceInput.trim();
     const override = trimmed ? Number(trimmed) : null;
+    const includedTrimmed = includedUsageInput.trim();
+    const includedOverride = includedTrimmed ? Number(includedTrimmed) : null;
 
     if (mode === 'create') {
       this.createAttachedMeters = this.createAttachedMeters.map((item) =>
@@ -617,6 +637,11 @@ export class ServicePlansPageComponent implements OnInit {
               unitPriceNetOverride: Number.isFinite(override as number) ? override : null,
               effectiveUnitPriceNet:
                 Number.isFinite(override as number) && override != null ? override : item.defaultUnitPriceNet,
+              includedUsageOverride: Number.isFinite(includedOverride as number) ? includedOverride : null,
+              effectiveIncludedUsage:
+                Number.isFinite(includedOverride as number) && includedOverride != null
+                  ? includedOverride
+                  : item.defaultIncludedUsage,
             }
           : item,
       );
@@ -631,6 +656,7 @@ export class ServicePlansPageComponent implements OnInit {
     this.servicePlansService
       .updatePlanMeter(this.editForm.id, meter.meterId, {
         unitPriceNet: trimmed ? Number(trimmed) : null,
+        includedUsage: includedTrimmed ? Number(includedTrimmed) : null,
       })
       .pipe(take(1))
       .subscribe({
@@ -675,11 +701,19 @@ export class ServicePlansPageComponent implements OnInit {
     return meter.unitPriceNetOverride != null ? String(meter.unitPriceNetOverride) : '';
   }
 
+  attachedMeterIncludedUsageOverrideInput(meter: AttachedMeterResponse): string {
+    return meter.includedUsageOverride != null ? String(meter.includedUsageOverride) : '';
+  }
+
   planMeterCount(plan: ServicePlanResponse): number {
     return plan.meters?.length ?? 0;
   }
 
-  private toPendingAttachedMeter(meter: MeterResponse, unitPriceNetOverride: number | null): AttachedMeterResponse {
+  private toPendingAttachedMeter(
+    meter: MeterResponse,
+    unitPriceNetOverride: number | null,
+    includedUsageOverride: number | null,
+  ): AttachedMeterResponse {
     return {
       meterId: meter.id,
       key: meter.key,
@@ -690,6 +724,9 @@ export class ServicePlansPageComponent implements OnInit {
       defaultUnitPriceNet: meter.defaultUnitPriceNet,
       unitPriceNetOverride,
       effectiveUnitPriceNet: unitPriceNetOverride != null ? unitPriceNetOverride : meter.defaultUnitPriceNet,
+      defaultIncludedUsage: meter.defaultIncludedUsage ?? 0,
+      includedUsageOverride,
+      effectiveIncludedUsage: includedUsageOverride != null ? includedUsageOverride : (meter.defaultIncludedUsage ?? 0),
       isActive: meter.isActive,
       source: 'manual',
       required: false,
@@ -718,6 +755,7 @@ export class ServicePlansPageComponent implements OnInit {
                 .attachPlanMeter(plan.id, {
                   meterId: meter.meterId,
                   unitPriceNet: meter.unitPriceNetOverride ?? undefined,
+                  includedUsage: meter.includedUsageOverride ?? undefined,
                 })
                 .pipe(catchError(() => of(null))),
             ),

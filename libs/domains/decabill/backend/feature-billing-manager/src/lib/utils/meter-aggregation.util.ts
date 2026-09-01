@@ -25,6 +25,24 @@ export function resolveEffectiveUnitPriceNet(
   return parseNumeric(defaultUnitPriceNet) ?? 0;
 }
 
+export function resolveEffectiveIncludedUsage(
+  overrideIncludedUsage: string | number | null | undefined,
+  defaultIncludedUsage: string | number,
+): number {
+  const override = parseNumeric(overrideIncludedUsage);
+
+  if (override !== null) {
+    return override;
+  }
+
+  return parseNumeric(defaultIncludedUsage) ?? 0;
+}
+
+/** Usage billed after subtracting the free included allowance for the period. */
+export function computeBillableMeterValue(aggregatedValue: number, effectiveIncludedUsage: number): number {
+  return Math.max(0, aggregatedValue - effectiveIncludedUsage);
+}
+
 /**
  * Assigns each usage record to exactly one charge period by `periodEnd`.
  * Spanning intervals must not bill in both adjacent periods (avoids double charges).

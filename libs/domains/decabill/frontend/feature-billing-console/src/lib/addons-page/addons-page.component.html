@@ -548,7 +548,7 @@
       <div class="border rounded p-3 bg-body-secondary">
         <h6 class="mb-2" i18n="@@featureAddons-meters">Usage meters</h6>
         <p class="form-text text-body-secondary small mb-3" i18n="@@featureAddons-metersHelp">
-          Attach usage meters to this addon with optional unit price overrides.
+          Attach usage meters to this addon with optional unit price and included usage overrides.
         </p>
         @if (prefix === 'edit' && addonMeterAttachError) {
           <div class="alert alert-danger py-2">{{ addonMeterAttachError }}</div>
@@ -568,28 +568,52 @@
               </div>
             </div>
             <div class="col-12 col-md-5">
-              <label
-                class="form-label small mb-0"
-                [for]="prefix + 'AddonMeterOverride' + attached.meterId"
-                i18n="@@featureAddons-meterUnitPriceOverride"
-                >Unit price override (net)</label
-              >
-              <input
-                type="number"
-                min="0"
-                step="0.0001"
-                class="form-control form-control-sm"
-                [id]="prefix + 'AddonMeterOverride' + attached.meterId"
-                #addonMeterOverride
-                [value]="attachedMeterOverrideInput(attached)"
-                [disabled]="disabled || (prefix === 'edit' && addonMeterAttachLoading)"
-              />
+              <div class="row g-2">
+                <div class="col-6">
+                  <label
+                    class="form-label small mb-0"
+                    [for]="prefix + 'AddonMeterOverride' + attached.meterId"
+                    i18n="@@featureAddons-meterUnitPriceOverride"
+                    >Unit price override (net)</label
+                  >
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.0001"
+                    class="form-control form-control-sm"
+                    [id]="prefix + 'AddonMeterOverride' + attached.meterId"
+                    #addonMeterOverride
+                    [value]="attachedMeterOverrideInput(attached)"
+                    [disabled]="disabled || (prefix === 'edit' && addonMeterAttachLoading)"
+                  />
+                </div>
+                <div class="col-6">
+                  <label
+                    class="form-label small mb-0"
+                    [for]="prefix + 'AddonMeterIncludedUsage' + attached.meterId"
+                    i18n="@@featureAddons-meterIncludedUsageOverride"
+                    >Included usage override</label
+                  >
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    class="form-control form-control-sm"
+                    [id]="prefix + 'AddonMeterIncludedUsage' + attached.meterId"
+                    #addonMeterIncludedUsage
+                    [value]="attachedMeterIncludedUsageOverrideInput(attached)"
+                    [disabled]="disabled || (prefix === 'edit' && addonMeterAttachLoading)"
+                  />
+                </div>
+              </div>
             </div>
             <div class="col-12 col-md-3 d-flex gap-1 flex-wrap justify-content-md-end">
               <button
                 type="button"
                 class="btn btn-sm btn-outline-primary"
-                (click)="updateAttachedAddonMeter(prefix, attached, addonMeterOverride.value)"
+                (click)="
+                  updateAttachedAddonMeter(prefix, attached, addonMeterOverride.value, addonMeterIncludedUsage.value)
+                "
                 [disabled]="disabled || (prefix === 'edit' && addonMeterAttachLoading)"
                 title="Update price"
                 i18n-title="@@featureAddons-updateMeterPrice"
@@ -663,35 +687,70 @@
                   }
                 </div>
                 <div class="col-12 col-md-5">
-                  <label
-                    class="form-label small mb-0"
-                    [for]="prefix + 'AttachAddonMeterPrice'"
-                    i18n="@@featureAddons-attachMeterPrice"
-                    >Override price (optional)</label
-                  >
-                  @if (prefix === 'create') {
-                    <input
-                      [id]="prefix + 'AttachAddonMeterPrice'"
-                      type="number"
-                      min="0"
-                      step="0.0001"
-                      class="form-control form-control-sm"
-                      [(ngModel)]="createAddonMeterAttachUnitPrice"
-                      [name]="prefix + 'AttachAddonMeterPrice'"
-                      [disabled]="disabled"
-                    />
-                  } @else {
-                    <input
-                      [id]="prefix + 'AttachAddonMeterPrice'"
-                      type="number"
-                      min="0"
-                      step="0.0001"
-                      class="form-control form-control-sm"
-                      [(ngModel)]="editAddonMeterAttachUnitPrice"
-                      [name]="prefix + 'AttachAddonMeterPrice'"
-                      [disabled]="disabled || addonMeterAttachLoading"
-                    />
-                  }
+                  <div class="row g-2">
+                    <div class="col-6">
+                      <label
+                        class="form-label small mb-0"
+                        [for]="prefix + 'AttachAddonMeterPrice'"
+                        i18n="@@featureAddons-attachMeterPrice"
+                        >Override price (optional)</label
+                      >
+                      @if (prefix === 'create') {
+                        <input
+                          [id]="prefix + 'AttachAddonMeterPrice'"
+                          type="number"
+                          min="0"
+                          step="0.0001"
+                          class="form-control form-control-sm"
+                          [(ngModel)]="createAddonMeterAttachUnitPrice"
+                          [name]="prefix + 'AttachAddonMeterPrice'"
+                          [disabled]="disabled"
+                        />
+                      } @else {
+                        <input
+                          [id]="prefix + 'AttachAddonMeterPrice'"
+                          type="number"
+                          min="0"
+                          step="0.0001"
+                          class="form-control form-control-sm"
+                          [(ngModel)]="editAddonMeterAttachUnitPrice"
+                          [name]="prefix + 'AttachAddonMeterPrice'"
+                          [disabled]="disabled || addonMeterAttachLoading"
+                        />
+                      }
+                    </div>
+                    <div class="col-6">
+                      <label
+                        class="form-label small mb-0"
+                        [for]="prefix + 'AttachAddonMeterIncludedUsage'"
+                        i18n="@@featureAddons-attachMeterIncludedUsage"
+                        >Override included usage (optional)</label
+                      >
+                      @if (prefix === 'create') {
+                        <input
+                          [id]="prefix + 'AttachAddonMeterIncludedUsage'"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="form-control form-control-sm"
+                          [(ngModel)]="createAddonMeterAttachIncludedUsage"
+                          [name]="prefix + 'AttachAddonMeterIncludedUsage'"
+                          [disabled]="disabled"
+                        />
+                      } @else {
+                        <input
+                          [id]="prefix + 'AttachAddonMeterIncludedUsage'"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="form-control form-control-sm"
+                          [(ngModel)]="editAddonMeterAttachIncludedUsage"
+                          [name]="prefix + 'AttachAddonMeterIncludedUsage'"
+                          [disabled]="disabled || addonMeterAttachLoading"
+                        />
+                      }
+                    </div>
+                  </div>
                 </div>
                 <div class="col-12 col-md-2 d-flex justify-content-md-end">
                   <button

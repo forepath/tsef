@@ -100,7 +100,7 @@ Billing namespace (`/billing`):
 
 - `dashboardStatusUpdate` — live status (includes `displayName`); customer-owned subscriptions only
 - `subscribeSubscriptionMeters` / `unsubscribeSubscriptionMeters` — room `subscription:{id}`
-- `meterSummaryUpdate` — current meter summaries after usage mutations
+- `meterSummaryUpdate` — current meter summaries after usage mutations (includes aggregated, billable, and estimated charge values)
 
 Customers must own the subscription to join the meter room. **ADMIN** sockets may join any tenant subscription after an existence check (no ownership required).
 
