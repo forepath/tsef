@@ -66,6 +66,10 @@ export class DatevExtfCsvService {
     return encodeDatevCsv(joinDatevLines(lines));
   }
 
+  buildCreditorBatchCsv(params: DatevExtfDebtorBatchParams): Buffer {
+    return this.buildDebtorBatchCsv(params);
+  }
+
   buildDebtorBatchCsv(params: DatevExtfDebtorBatchParams): Buffer {
     const headerFields = [
       'EXTF',

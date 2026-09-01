@@ -16,15 +16,23 @@ import {
   AdminBillingFacade,
   AdminBillingService,
   AdminInvoiceManagerFacade,
+  AdminSupplierInvoiceManagerFacade,
+  AdminSupplierInvoicesService,
+  AdminSupplierProfilesService,
   InvoicesFacade,
   computeLineTotalsFromRate,
   fillPeriodSeriesPoints,
   rateForTaxCategory,
   type AdminInvoiceListItem,
+  type AdminSupplierInvoiceListItem,
+  type AdminSupplierProfileListItem,
   type BillingAuditLogResponse,
   type BillingStatisticsSeriesPoint,
+  type ManualInvoiceDetailResponse,
   type ManualInvoiceLineItemDto,
   type SubscriptionResponse,
+  type SupplierInvoiceDetailResponse,
+  type SupplierInvoiceLineItemDto,
   type TaxPreviewRates,
 } from '@forepath/decabill/frontend/data-access-billing-console';
 import { AuthenticationFacade, type UserResponseDto } from '@forepath/identity/frontend';
@@ -42,6 +50,8 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { debounceTime, distinctUntilChanged, filter, finalize, Observable, pairwise, skip, Subscription } from 'rxjs';
 
 import { BillingAdminSubscriptionSelectComponent } from '../billing-admin-subscription-select/billing-admin-subscription-select.component';
+import { BillingAdminSupplierContractSelectComponent } from '../billing-admin-supplier-contract-select/billing-admin-supplier-contract-select.component';
+import { BillingAdminSupplierSelectComponent } from '../billing-admin-supplier-select/billing-admin-supplier-select.component';
 import { BillingAdminUserSelectComponent } from '../billing-admin-user-select/billing-admin-user-select.component';
 import { getInvoiceStatusBadgeClass, getInvoiceStatusLabel, getUnavailableLabel } from '../billing-status-labels';
 import { hideBillingModal, showBillingModal, watchBillingMutationModalClose } from '../billing-modal';
@@ -53,11 +63,51 @@ interface AdminBillingFiltersStorage {
   toDate: string;
   groupBy: 'day' | 'month';
   userId: string | null;
+  supplierId: string | null;
   filtersCollapsed: boolean;
 }
 
 interface InvoiceFormLineItem extends ManualInvoiceLineItemDto {
-  taxCategory: 'standard' | 'reduced';
+  taxCategory: 'standard' | 'reduced' | 'custom';
+  taxRate?: number;
+}
+
+interface SupplierInvoiceFormLineItem extends SupplierInvoiceLineItemDto {
+  taxCategory: 'standard' | 'reduced' | 'custom';
+  taxRate?: number;
+}
+
+type AdminBillingTab = 'customer' | 'supplier';
+type CreateInvoiceType = 'customer' | 'supplier';
+type ActionInvoiceKind = 'customer' | 'supplier';
+
+interface InvoicePreviewLineItem {
+  description: string;
+  quantity: number;
+  unitPriceNet: number;
+  lineNet: number;
+  lineTax: number;
+  taxRate: number;
+  lineGross: number;
+}
+
+interface InvoicePreviewTaxBreakdown {
+  taxRate: number;
+  taxAmount: number;
+}
+
+interface InvoicePreviewView {
+  title: string;
+  status: string;
+  issueDate?: string | Date | null;
+  dueDate?: string | Date | null;
+  currency: string;
+  lineItems: InvoicePreviewLineItem[];
+  taxBreakdown: InvoicePreviewTaxBreakdown[];
+  subtotalNet: number;
+  taxTotal: number;
+  totalGross: number;
+  balanceDue: number;
 }
 
 const BS_CHART_COLORS = [
@@ -70,6 +120,7 @@ const BS_CHART_COLORS = [
 ] as const;
 
 type AdminBillingMobilePanel = 'overview' | 'invoices';
+type AdminBillingPerspective = 'customer' | 'supplier';
 
 @Component({
   selector: 'framework-admin-billing-page',
@@ -80,6 +131,8 @@ type AdminBillingMobilePanel = 'overview' | 'invoices';
     NgApexchartsModule,
     BillingAdminUserSelectComponent,
     BillingAdminSubscriptionSelectComponent,
+    BillingAdminSupplierSelectComponent,
+    BillingAdminSupplierContractSelectComponent,
     InfiniteScrollDirective,
     ListAppendFooterComponent,
   ],
@@ -95,28 +148,40 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   @ViewChild('editModal', { static: false }) private editModal!: ElementRef<HTMLDivElement>;
   @ViewChild('issueModal', { static: false }) private issueModal!: ElementRef<HTMLDivElement>;
   @ViewChild('deleteModal', { static: false }) private deleteModal!: ElementRef<HTMLDivElement>;
+  @ViewChild('previewInvoiceModal', { static: false }) private previewInvoiceModal!: ElementRef<HTMLDivElement>;
   @ViewChild('createInvoiceUserSelect') private createInvoiceUserSelect?: BillingAdminUserSelectComponent;
   @ViewChild('createInvoiceSubscriptionSelect')
   private createInvoiceSubscriptionSelect?: BillingAdminSubscriptionSelectComponent;
+  @ViewChild('createInvoiceSupplierSelect') private createInvoiceSupplierSelect?: BillingAdminSupplierSelectComponent;
+  @ViewChild('createInvoiceContractSelect')
+  private createInvoiceContractSelect?: BillingAdminSupplierContractSelectComponent;
   @ViewChild('billNowUserSelect') private billNowUserSelect?: BillingAdminUserSelectComponent;
 
   private createInvoiceSubscriptionsRequest?: Subscription;
 
   private readonly adminBillingFacade = inject(AdminBillingFacade);
   readonly invoiceManagerFacade = inject(AdminInvoiceManagerFacade);
+  readonly supplierInvoiceManagerFacade = inject(AdminSupplierInvoiceManagerFacade);
   private readonly adminBillingService = inject(AdminBillingService);
+  private readonly supplierInvoicesService = inject(AdminSupplierInvoicesService);
+  private readonly supplierProfilesService = inject(AdminSupplierProfilesService);
   private readonly invoicesFacade = inject(InvoicesFacade);
   private readonly authFacade = inject(AuthenticationFacade);
   private readonly datePipe = inject(DatePipe);
   private readonly destroyRef = inject(DestroyRef);
 
+  readonly billingPerspective = signal<AdminBillingPerspective>('customer');
   readonly filtersCollapsed = signal(true);
   readonly fromDate = signal('');
   readonly toDate = signal('');
   readonly groupBy = signal<'day' | 'month'>('day');
   readonly selectedUserId = signal<string | null>(null);
+  readonly selectedSupplierId = signal<string | null>(null);
+  readonly supplierFilterOptions = signal<AdminSupplierProfileListItem[]>([]);
   readonly invoiceSearch = signal('');
+  readonly supplierInvoiceSearch = signal('');
   readonly invoiceSearch$ = toObservable(this.invoiceSearch);
+  readonly supplierInvoiceSearch$ = toObservable(this.supplierInvoiceSearch);
 
   readonly mobilePanels: AdminBillingMobilePanel[] = ['overview', 'invoices'];
   readonly mobilePanel = signal<AdminBillingMobilePanel>('overview');
@@ -129,14 +194,27 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       { value: 'reduced' as const, label: `Reduced (${rates.reduced}%)` },
     ];
   });
+  readonly supplierTaxCategoryOptions = computed(() => [
+    ...this.taxCategoryOptions(),
+    {
+      value: 'custom' as const,
+      label: $localize`:@@featureAdminInvoices-lineTaxCategoryCustom:Custom`,
+    },
+  ]);
 
   readonly billNowScope = signal<'all' | 'user'>('all');
   billNowUserId = '';
 
   readonly pendingAction = signal<'void' | 'markPaid' | 'markUnpaid' | null>(null);
   readonly pendingInvoice = signal<AdminInvoiceListItem | null>(null);
+  readonly pendingSupplierInvoice = signal<AdminSupplierInvoiceListItem | null>(null);
   readonly actionReason = signal('');
   readonly auditInvoiceId = signal<string | null>(null);
+  readonly supplierAuditInvoiceId = signal<string | null>(null);
+  readonly supplierAuditLogs = signal<BillingAuditLogResponse[]>([]);
+  readonly supplierAuditLogsLoading = signal(false);
+  readonly previewLoading = signal(false);
+  readonly previewDetail = signal<InvoicePreviewView | null>(null);
 
   readonly summary$ = this.adminBillingFacade.summary$;
   readonly summaryLoading$ = this.adminBillingFacade.summaryLoading$;
@@ -168,6 +246,24 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
 
   readonly invoices$ = this.invoiceManagerFacade.invoices$;
 
+  readonly supplierSummary$ = this.supplierInvoiceManagerFacade.summary$;
+  readonly supplierSummaryLoading$ = this.supplierInvoiceManagerFacade.summaryLoading$;
+  readonly supplierSummaryError$ = this.supplierInvoiceManagerFacade.summaryError$;
+  readonly supplierInvoicesLoading$ = this.supplierInvoiceManagerFacade.loading$;
+  readonly supplierInvoicesCreating$ = this.supplierInvoiceManagerFacade.creating$;
+  readonly supplierInvoicesUpdating$ = this.supplierInvoiceManagerFacade.updating$;
+  readonly supplierInvoicesIssuing$ = this.supplierInvoiceManagerFacade.issuing$;
+  readonly supplierInvoicesDeleting$ = this.supplierInvoiceManagerFacade.deleting$;
+  readonly supplierInvoicesParsing$ = this.supplierInvoiceManagerFacade.parsing$;
+  readonly supplierParsePreview$ = this.supplierInvoiceManagerFacade.parsePreview$;
+  readonly supplierParseError$ = this.supplierInvoiceManagerFacade.parseError$;
+  readonly supplierActionLoading$ = this.supplierInvoiceManagerFacade.actionLoading$;
+  readonly supplierInvoicesError$ = this.supplierInvoiceManagerFacade.error$;
+  readonly supplierInvoicesHasMore$ = this.supplierInvoiceManagerFacade.hasMore$;
+  readonly supplierInvoicesAppendLoading$ = this.supplierInvoiceManagerFacade.appendLoading$;
+  readonly supplierInvoicesAppendError$ = this.supplierInvoiceManagerFacade.appendError$;
+  readonly supplierInvoices$ = this.supplierInvoiceManagerFacade.invoices$;
+
   readonly users = toSignal(this.authFacade.users$, { initialValue: [] as UserResponseDto[] });
   readonly statisticsSummary = toSignal(this.statisticsSummary$, { initialValue: null });
   readonly statisticsByProduct = toSignal(this.statisticsByProduct$, { initialValue: null });
@@ -176,11 +272,19 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     initialValue: {} as Record<string, BillingAuditLogResponse[]>,
   });
   readonly invoices = toSignal(this.invoices$, { initialValue: [] as AdminInvoiceListItem[] });
+  readonly supplierInvoices = toSignal(this.supplierInvoices$, { initialValue: [] as AdminSupplierInvoiceListItem[] });
+  readonly supplierSummary = toSignal(this.supplierSummary$, { initialValue: null });
 
   readonly createInvoiceSubscriptions = signal<SubscriptionResponse[]>([]);
   readonly createInvoiceSubscriptionsLoading = signal(false);
 
   readonly selectedAuditLogs = computed(() => {
+    const supplierId = this.supplierAuditInvoiceId();
+
+    if (supplierId) {
+      return this.supplierAuditLogs();
+    }
+
     const id = this.auditInvoiceId();
 
     if (!id) return [] as BillingAuditLogResponse[];
@@ -189,6 +293,12 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   });
 
   readonly seriesChartOptions = computed(() => this.buildSeriesChart(this.statisticsSummary()?.series ?? []));
+  readonly expenseSeriesChartOptions = computed(() =>
+    this.buildSeriesChart(this.supplierSummary()?.series ?? [], {
+      seriesName: $localize`:@@featureAdminBilling-chartExpensesSeries:Expenses`,
+      title: $localize`:@@featureAdminBilling-chartExpensesTitle:Expenses over time`,
+    }),
+  );
   readonly donutChartOptions = computed(() => this.buildDonutChart(this.statisticsByProduct()?.items ?? []));
   readonly countryDonutChartOptions = computed(() =>
     this.buildCountryDonutChart(this.statisticsByCountry()?.items ?? []),
@@ -196,6 +306,25 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
 
   createUserId = '';
   createSubscriptionId = '';
+  createInvoiceType: AdminBillingPerspective = 'customer';
+  createSupplierId = '';
+  createContractNumber = '';
+  createInvoiceNumber = '';
+  createIssueDate = '';
+  createDueDate = '';
+  createSupplierFile: File | null = null;
+  createSupplierLineItems: SupplierInvoiceFormLineItem[] = [this.emptySupplierLineItem()];
+  editSupplierInvoiceId = '';
+  editSupplierLineItems: SupplierInvoiceFormLineItem[] = [this.emptySupplierLineItem()];
+  editSupplierContractNumber = '';
+  editSupplierInvoiceNumber = '';
+  editSupplierIssueDate = '';
+  editSupplierDueDate = '';
+  issueSupplierInvoiceId = '';
+  issueSupplierInvoiceNumber = '';
+  issueSupplierIssueDate = '';
+  issueSupplierDueDate = '';
+  deleteSupplierInvoice: AdminSupplierInvoiceListItem | null = null;
   createLineItems: InvoiceFormLineItem[] = [this.emptyLineItem()];
   editInvoiceId = '';
   editLineItems: InvoiceFormLineItem[] = [this.emptyLineItem()];
@@ -216,6 +345,29 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((search) => {
         this.invoiceManagerFacade.loadInvoices({ search: search.trim() || undefined });
+      });
+
+    this.supplierInvoiceSearch$
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => {
+        this.supplierInvoiceManagerFacade.loadInvoices({ search: search.trim() || undefined });
+      });
+
+    this.supplierParsePreview$
+      .pipe(
+        filter((preview) => !!preview),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((preview) => {
+        if (!preview) return;
+
+        if (preview.issueDate) this.createIssueDate = preview.issueDate.slice(0, 10);
+
+        if (preview.dueDate) this.createDueDate = preview.dueDate.slice(0, 10);
+
+        if (preview.lineItems.length > 0) {
+          this.createSupplierLineItems = preview.lineItems.map((line) => this.mapParsedSupplierLine(line));
+        }
       });
 
     this.billNowResult$
@@ -248,15 +400,16 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
 
   onApplyFilters(): void {
     this.persistFilters();
-    this.loadStatistics();
+    this.reloadActiveStatistics();
   }
 
   onResetFilters(): void {
     this.setDefaultDates();
     this.groupBy.set('day');
     this.selectedUserId.set(null);
+    this.selectedSupplierId.set(null);
     this.persistFilters();
-    this.loadStatistics();
+    this.reloadActiveStatistics();
   }
 
   openBillNowModal(): void {
@@ -266,13 +419,24 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     queueMicrotask(() => this.billNowUserSelect?.reset());
   }
 
+  onBillingPerspectiveChange(perspective: AdminBillingPerspective): void {
+    this.billingPerspective.set(perspective);
+
+    if (perspective === 'supplier') {
+      this.loadSupplierDashboard();
+    }
+  }
+
   openCreateModal(): void {
     this.resetCreateForm();
+    this.createInvoiceType = this.billingPerspective();
     this.refreshTaxRates();
     showBillingModal(this.createModal);
     queueMicrotask(() => {
       this.createInvoiceUserSelect?.reset();
       this.createInvoiceSubscriptionSelect?.reset();
+      this.createInvoiceSupplierSelect?.reset();
+      this.createInvoiceContractSelect?.reset();
     });
   }
 
@@ -284,6 +448,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   }
 
   openEditModal(invoice: AdminInvoiceListItem): void {
+    this.editSupplierInvoiceId = '';
     this.editInvoiceId = invoice.id;
     this.refreshTaxRates(invoice.userId);
     this.adminBillingService.getManualInvoiceDetail(invoice.id).subscribe({
@@ -309,6 +474,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   }
 
   openDeleteModal(invoice: AdminInvoiceListItem): void {
+    this.deleteSupplierInvoice = null;
     this.deleteInvoice = invoice;
     showBillingModal(this.deleteModal);
   }
@@ -320,6 +486,35 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   }
 
   submitCreate(): void {
+    if (this.createInvoiceType === 'supplier') {
+      if (!this.createSupplierId || !this.hasValidSupplierLineItems(this.createSupplierLineItems)) return;
+
+      const formData = new FormData();
+
+      formData.append('supplierId', this.createSupplierId);
+
+      if (this.createContractNumber.trim()) {
+        formData.append('contractNumber', this.createContractNumber.trim());
+      }
+
+      if (this.createInvoiceNumber.trim()) {
+        formData.append('invoiceNumber', this.createInvoiceNumber.trim());
+      }
+
+      if (this.createIssueDate) formData.append('issueDate', this.createIssueDate);
+
+      if (this.createDueDate) formData.append('dueDate', this.createDueDate);
+
+      formData.append('lineItems', JSON.stringify(this.mapSupplierLineItemsForSubmit(this.createSupplierLineItems)));
+
+      if (this.createSupplierFile) {
+        formData.append('document', this.createSupplierFile);
+      }
+
+      this.supplierInvoiceManagerFacade.createInvoice(formData);
+      return;
+    }
+
     if (!this.createUserId || !this.hasValidLineItems(this.createLineItems)) return;
 
     this.invoiceManagerFacade.createManualInvoice({
@@ -329,7 +524,217 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     });
   }
 
+  onCreateSupplierFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+
+    this.createSupplierFile = file;
+
+    if (file) {
+      this.supplierInvoiceManagerFacade.parseDocument(file);
+    } else {
+      this.supplierInvoiceManagerFacade.clearParsePreview();
+    }
+  }
+
+  openEditSupplierModal(invoice: AdminSupplierInvoiceListItem): void {
+    this.editInvoiceId = '';
+    this.editSupplierInvoiceId = invoice.id;
+    this.supplierInvoicesService.getById(invoice.id).subscribe({
+      next: (detail) => {
+        this.editSupplierContractNumber = detail.contractNumber ?? '';
+        this.editSupplierInvoiceNumber = detail.invoiceNumber ?? '';
+        this.editSupplierIssueDate = detail.issueDate?.slice(0, 10) ?? '';
+        this.editSupplierDueDate = detail.dueDate?.slice(0, 10) ?? '';
+        this.editSupplierLineItems =
+          detail.lineItems.length > 0
+            ? detail.lineItems.map((line) => this.mapSupplierDetailLine(line))
+            : [this.emptySupplierLineItem()];
+        showBillingModal(this.editModal);
+      },
+    });
+  }
+
+  submitEditSupplier(): void {
+    if (!this.editSupplierInvoiceId || !this.hasValidSupplierLineItems(this.editSupplierLineItems)) return;
+
+    this.supplierInvoiceManagerFacade.updateInvoice(this.editSupplierInvoiceId, {
+      contractNumber: this.editSupplierContractNumber.trim() || null,
+      invoiceNumber: this.editSupplierInvoiceNumber.trim() || null,
+      issueDate: this.editSupplierIssueDate || null,
+      dueDate: this.editSupplierDueDate || null,
+      lineItems: this.mapSupplierLineItemsForSubmit(this.editSupplierLineItems),
+    });
+  }
+
+  openIssueSupplierModal(invoice: AdminSupplierInvoiceListItem): void {
+    this.issueInvoiceId = '';
+    this.issueSupplierInvoiceId = invoice.id;
+    this.issueSupplierInvoiceNumber = invoice.invoiceNumber ?? '';
+    this.issueSupplierIssueDate = invoice.issueDate?.slice(0, 10) ?? '';
+    this.issueSupplierDueDate = invoice.dueDate?.slice(0, 10) ?? '';
+    showBillingModal(this.issueModal);
+  }
+
+  submitIssueSupplier(): void {
+    if (!this.issueSupplierInvoiceId) return;
+
+    this.supplierInvoiceManagerFacade.issueInvoice(this.issueSupplierInvoiceId, {
+      invoiceNumber: this.issueSupplierInvoiceNumber.trim(),
+      issueDate: this.issueSupplierIssueDate || undefined,
+      dueDate: this.issueSupplierDueDate || undefined,
+    });
+  }
+
+  openDeleteSupplierModal(invoice: AdminSupplierInvoiceListItem): void {
+    this.deleteInvoice = null;
+    this.deleteSupplierInvoice = invoice;
+    showBillingModal(this.deleteModal);
+  }
+
+  confirmDeleteSupplier(): void {
+    if (!this.deleteSupplierInvoice) return;
+
+    this.supplierInvoiceManagerFacade.deleteInvoice(this.deleteSupplierInvoice.id);
+  }
+
+  openSupplierActionModal(action: 'void' | 'markPaid' | 'markUnpaid', invoice: AdminSupplierInvoiceListItem): void {
+    this.pendingAction.set(action);
+    this.pendingSupplierInvoice.set(invoice);
+    this.pendingInvoice.set(null);
+    this.actionReason.set('');
+    showBillingModal(this.actionConfirmModal);
+  }
+
+  confirmSupplierAction(): void {
+    const invoice = this.pendingSupplierInvoice();
+    const action = this.pendingAction();
+
+    if (!invoice || !action) return;
+
+    const reason = this.actionReason().trim() || undefined;
+
+    if (action === 'void') {
+      this.supplierInvoiceManagerFacade.voidInvoice(invoice.id);
+    } else if (action === 'markPaid') {
+      this.supplierInvoiceManagerFacade.markPaid(invoice.id, { reason });
+    } else {
+      this.supplierInvoiceManagerFacade.markUnpaid(invoice.id, { reason });
+    }
+  }
+
+  openSupplierAuditHistory(invoice: AdminSupplierInvoiceListItem): void {
+    this.supplierAuditInvoiceId.set(invoice.id);
+    this.supplierAuditLogsLoading.set(true);
+    this.supplierAuditLogs.set([]);
+    showBillingModal(this.auditHistoryModal);
+    this.supplierInvoicesService.listAuditLogs(invoice.id).subscribe({
+      next: (response) => {
+        this.supplierAuditLogs.set(response.items);
+        this.supplierAuditLogsLoading.set(false);
+      },
+      error: () => {
+        this.supplierAuditLogsLoading.set(false);
+      },
+    });
+  }
+
+  downloadSupplierInvoice(invoice: AdminSupplierInvoiceListItem): void {
+    if (!invoice.canDownload) return;
+
+    this.downloadPdfBlob(
+      this.supplierInvoicesService.downloadDocument(invoice.id),
+      `${invoice.invoiceNumber ?? invoice.id}.pdf`,
+    );
+  }
+
+  canDownloadSupplierInvoice(invoice: AdminSupplierInvoiceListItem): boolean {
+    return invoice.canDownload === true;
+  }
+
+  canPreviewInvoice(invoice: AdminInvoiceListItem): boolean {
+    return !this.isDraft(invoice);
+  }
+
+  canPreviewSupplierInvoice(invoice: AdminSupplierInvoiceListItem): boolean {
+    return !this.isDraft(invoice);
+  }
+
+  openPreview(invoice: AdminInvoiceListItem): void {
+    if (!this.canPreviewInvoice(invoice)) return;
+
+    this.previewLoading.set(true);
+    this.previewDetail.set(null);
+    showBillingModal(this.previewInvoiceModal);
+    this.adminBillingService
+      .getManualInvoiceDetail(invoice.id)
+      .pipe(finalize(() => this.previewLoading.set(false)))
+      .subscribe({
+        next: (detail) => this.previewDetail.set(this.mapCustomerPreview(detail)),
+        error: () => this.previewDetail.set(null),
+      });
+  }
+
+  openSupplierPreview(invoice: AdminSupplierInvoiceListItem): void {
+    if (!this.canPreviewSupplierInvoice(invoice)) return;
+
+    this.previewLoading.set(true);
+    this.previewDetail.set(null);
+    showBillingModal(this.previewInvoiceModal);
+    this.supplierInvoicesService
+      .getById(invoice.id)
+      .pipe(finalize(() => this.previewLoading.set(false)))
+      .subscribe({
+        next: (detail) => this.previewDetail.set(this.mapSupplierPreview(detail)),
+        error: () => this.previewDetail.set(null),
+      });
+  }
+
+  taxOptionsForTarget(target: string) {
+    return target === 'createSupplier' || target === 'editSupplier'
+      ? this.supplierTaxCategoryOptions()
+      : this.taxCategoryOptions();
+  }
+
+  isCustomTaxLine(line: InvoiceFormLineItem | SupplierInvoiceFormLineItem): boolean {
+    return line.taxCategory === 'custom';
+  }
+
+  onTaxCategoryChange(
+    line: InvoiceFormLineItem | SupplierInvoiceFormLineItem,
+    value: 'standard' | 'reduced' | 'custom',
+  ): void {
+    line.taxCategory = value;
+
+    if (value !== 'custom') {
+      line.taxRate = undefined;
+    } else if (line.taxRate == null) {
+      line.taxRate = 0;
+    }
+  }
+
+  supplierInvoiceDisplayTitle(invoice: AdminSupplierInvoiceListItem): string {
+    if (invoice.invoiceNumber) return invoice.invoiceNumber;
+
+    return getInvoiceStatusLabel('draft');
+  }
+
+  supplierInvoiceLabel(invoice: AdminSupplierInvoiceListItem): string {
+    return invoice.supplierName?.trim() || invoice.supplierNumber?.trim() || getUnavailableLabel();
+  }
+
+  supplierFilterOptionLabel(supplier: AdminSupplierProfileListItem): string {
+    const name = supplier.company?.trim() || [supplier.firstName, supplier.lastName].filter(Boolean).join(' ').trim();
+
+    return name ? `${name} (${supplier.supplierNumber})` : supplier.supplierNumber;
+  }
+
   submitEdit(): void {
+    if (this.editSupplierInvoiceId) {
+      this.submitEditSupplier();
+      return;
+    }
+
     if (!this.editInvoiceId || !this.hasValidLineItems(this.editLineItems)) return;
 
     this.invoiceManagerFacade.updateManualInvoice(this.editInvoiceId, {
@@ -338,12 +743,22 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   }
 
   submitIssue(): void {
+    if (this.issueSupplierInvoiceId) {
+      this.submitIssueSupplier();
+      return;
+    }
+
     if (!this.issueInvoiceId) return;
 
     this.invoiceManagerFacade.issueManualInvoice(this.issueInvoiceId, { dueInDays: this.issueDueInDays });
   }
 
   confirmDelete(): void {
+    if (this.deleteSupplierInvoice) {
+      this.confirmDeleteSupplier();
+      return;
+    }
+
     if (!this.deleteInvoice) return;
 
     this.invoiceManagerFacade.deleteManualInvoice(this.deleteInvoice.id);
@@ -357,6 +772,11 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   }
 
   confirmAction(): void {
+    if (this.pendingSupplierInvoice()) {
+      this.confirmSupplierAction();
+      return;
+    }
+
     const invoice = this.pendingInvoice();
     const action = this.pendingAction();
 
@@ -374,6 +794,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   }
 
   openAuditHistory(invoice: AdminInvoiceListItem): void {
+    this.supplierAuditInvoiceId.set(null);
     this.auditInvoiceId.set(invoice.id);
     this.adminBillingFacade.loadAuditLogs(invoice.id);
     showBillingModal(this.auditHistoryModal);
@@ -409,17 +830,29 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     this.downloadPdfBlob(source, `time-report-${invoice.invoiceNumber ?? invoice.id}.pdf`);
   }
 
-  addLineItem(target: 'create' | 'edit'): void {
+  addLineItem(target: 'create' | 'edit' | 'createSupplier' | 'editSupplier'): void {
     if (target === 'create') {
       this.createLineItems = [...this.createLineItems, this.emptyLineItem()];
+    } else if (target === 'createSupplier') {
+      this.createSupplierLineItems = [...this.createSupplierLineItems, this.emptySupplierLineItem()];
+    } else if (target === 'editSupplier') {
+      this.editSupplierLineItems = [...this.editSupplierLineItems, this.emptySupplierLineItem()];
     } else {
       this.editLineItems = [...this.editLineItems, this.emptyLineItem()];
     }
   }
 
-  removeLineItem(target: 'create' | 'edit', index: number): void {
+  removeLineItem(target: 'create' | 'edit' | 'createSupplier' | 'editSupplier', index: number): void {
     if (target === 'create' && this.createLineItems.length > 1) {
       this.createLineItems = this.createLineItems.filter((_, i) => i !== index);
+    }
+
+    if (target === 'createSupplier' && this.createSupplierLineItems.length > 1) {
+      this.createSupplierLineItems = this.createSupplierLineItems.filter((_, i) => i !== index);
+    }
+
+    if (target === 'editSupplier' && this.editSupplierLineItems.length > 1) {
+      this.editSupplierLineItems = this.editSupplierLineItems.filter((_, i) => i !== index);
     }
 
     if (target === 'edit' && this.editLineItems.length > 1) {
@@ -427,19 +860,19 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     }
   }
 
-  isDraft(invoice: AdminInvoiceListItem): boolean {
+  isDraft(invoice: Pick<AdminInvoiceListItem, 'status'> | Pick<AdminSupplierInvoiceListItem, 'status'>): boolean {
     return invoice.status === 'draft';
   }
 
-  canMarkPaid(invoice: AdminInvoiceListItem): boolean {
+  canMarkPaid(invoice: Pick<AdminInvoiceListItem, 'status'> | Pick<AdminSupplierInvoiceListItem, 'status'>): boolean {
     return ['issued', 'partially_paid', 'overdue'].includes(invoice.status ?? '');
   }
 
-  canMarkUnpaid(invoice: AdminInvoiceListItem): boolean {
+  canMarkUnpaid(invoice: Pick<AdminInvoiceListItem, 'status'> | Pick<AdminSupplierInvoiceListItem, 'status'>): boolean {
     return invoice.status === 'paid';
   }
 
-  canVoid(invoice: AdminInvoiceListItem): boolean {
+  canVoid(invoice: Pick<AdminInvoiceListItem, 'status'> | Pick<AdminSupplierInvoiceListItem, 'status'>): boolean {
     return invoice.status !== 'void' && invoice.status !== 'paid' && invoice.status !== 'draft';
   }
 
@@ -481,8 +914,44 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   }
 
   private refreshDashboard(): void {
+    if (this.billingPerspective() === 'supplier') {
+      this.loadSupplierDashboard();
+      return;
+    }
+
     this.adminBillingFacade.loadSummary();
     this.invoiceManagerFacade.loadInvoices({ search: this.invoiceSearch().trim() || undefined });
+  }
+
+  private loadSupplierDashboard(): void {
+    this.loadSupplierFilterOptions();
+    this.loadSupplierStatistics();
+    this.supplierInvoiceManagerFacade.loadInvoices({ search: this.supplierInvoiceSearch().trim() || undefined });
+  }
+
+  private reloadActiveStatistics(): void {
+    if (this.billingPerspective() === 'supplier') {
+      this.loadSupplierStatistics();
+      return;
+    }
+
+    this.loadStatistics();
+  }
+
+  private loadSupplierStatistics(): void {
+    this.supplierInvoiceManagerFacade.loadSummary({
+      from: this.fromDate(),
+      to: this.toDate(),
+      groupBy: this.groupBy(),
+      supplierId: this.selectedSupplierId() ?? undefined,
+    });
+  }
+
+  private loadSupplierFilterOptions(): void {
+    this.supplierProfilesService.list({ limit: 200, offset: 0 }).subscribe({
+      next: (response) => this.supplierFilterOptions.set(response.items),
+      error: () => this.supplierFilterOptions.set([]),
+    });
   }
 
   private loadStatistics(): void {
@@ -500,9 +969,9 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
 
   private setDefaultDates(): void {
     const to = new Date();
-    const from = new Date();
+    const from = new Date(Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), to.getUTCDate()));
 
-    from.setDate(from.getDate() - 30);
+    from.setUTCDate(from.getUTCDate() - 30);
     this.toDate.set(to.toISOString().slice(0, 10));
     this.fromDate.set(from.toISOString().slice(0, 10));
   }
@@ -523,6 +992,8 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
 
       if (stored.userId !== undefined) this.selectedUserId.set(stored.userId);
 
+      if (stored.supplierId !== undefined) this.selectedSupplierId.set(stored.supplierId);
+
       if (stored.filtersCollapsed !== undefined) this.filtersCollapsed.set(stored.filtersCollapsed);
     } catch {
       // ignore invalid storage
@@ -535,13 +1006,14 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       toDate: this.toDate(),
       groupBy: this.groupBy(),
       userId: this.selectedUserId(),
+      supplierId: this.selectedSupplierId(),
       filtersCollapsed: this.filtersCollapsed(),
     };
 
     localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(payload));
   }
 
-  formatLineItemTotal(line: InvoiceFormLineItem): string {
+  formatLineItemTotal(line: InvoiceFormLineItem | SupplierInvoiceFormLineItem): string {
     const totals = this.computeLineItemTotals(line);
 
     if (!totals) return '—';
@@ -549,7 +1021,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     return `€${this.formatPrice(totals.net)} + €${this.formatPrice(totals.tax)} VAT (${totals.taxRate}%) = €${this.formatPrice(totals.gross)}`;
   }
 
-  formatDraftTotals(items: InvoiceFormLineItem[]): string {
+  formatDraftTotals(items: Array<InvoiceFormLineItem | SupplierInvoiceFormLineItem>): string {
     const totals = this.computeDraftTotals(items);
 
     if (!totals) return '—';
@@ -561,8 +1033,26 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     return { description: '', quantity: 1, unitPriceNet: 0, taxCategory: 'standard' };
   }
 
+  private emptySupplierLineItem(): SupplierInvoiceFormLineItem {
+    return { description: '', quantity: 1, unitPriceNet: 0, taxCategory: 'standard' };
+  }
+
   private hasValidLineItems(items: InvoiceFormLineItem[]): boolean {
     return items.every((item) => item.description.trim().length > 0 && item.quantity > 0 && item.unitPriceNet >= 0);
+  }
+
+  private hasValidSupplierLineItems(items: SupplierInvoiceFormLineItem[]): boolean {
+    return items.every((item) => {
+      if (!item.description.trim() || item.quantity <= 0 || item.unitPriceNet < 0) {
+        return false;
+      }
+
+      if (item.taxCategory === 'custom') {
+        return item.taxRate != null && Number.isFinite(Number(item.taxRate)) && Number(item.taxRate) >= 0;
+      }
+
+      return true;
+    });
   }
 
   private mapLineItemsForSubmit(items: InvoiceFormLineItem[]): ManualInvoiceLineItemDto[] {
@@ -570,12 +1060,85 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       description: item.description.trim(),
       quantity: Number(item.quantity),
       unitPriceNet: Number(item.unitPriceNet),
-      taxCategory: item.taxCategory ?? 'standard',
+      taxCategory: item.taxCategory === 'custom' ? 'standard' : (item.taxCategory ?? 'standard'),
     }));
   }
 
+  private mapSupplierLineItemsForSubmit(items: SupplierInvoiceFormLineItem[]): SupplierInvoiceLineItemDto[] {
+    return items.map((item) => ({
+      description: item.description.trim(),
+      quantity: Number(item.quantity),
+      unitPriceNet: Number(item.unitPriceNet),
+      taxCategory: item.taxCategory ?? 'standard',
+      taxRate: item.taxCategory === 'custom' ? Number(item.taxRate ?? 0) : undefined,
+    }));
+  }
+
+  private mapParsedSupplierLine(line: {
+    description: string;
+    quantity: number;
+    unitPriceNet: number;
+    taxRate?: number;
+  }): SupplierInvoiceFormLineItem {
+    const rates = this.taxRates();
+    const taxRate = line.taxRate;
+
+    if (taxRate == null || !Number.isFinite(taxRate)) {
+      return {
+        description: line.description,
+        quantity: line.quantity,
+        unitPriceNet: line.unitPriceNet,
+        taxCategory: 'standard',
+      };
+    }
+
+    if (Math.abs(taxRate - rates.standard) < 0.001) {
+      return {
+        description: line.description,
+        quantity: line.quantity,
+        unitPriceNet: line.unitPriceNet,
+        taxCategory: 'standard',
+      };
+    }
+
+    if (Math.abs(taxRate - rates.reduced) < 0.001) {
+      return {
+        description: line.description,
+        quantity: line.quantity,
+        unitPriceNet: line.unitPriceNet,
+        taxCategory: 'reduced',
+      };
+    }
+
+    return {
+      description: line.description,
+      quantity: line.quantity,
+      unitPriceNet: line.unitPriceNet,
+      taxCategory: 'custom',
+      taxRate,
+    };
+  }
+
+  private mapSupplierDetailLine(line: {
+    description: string;
+    quantity: number;
+    unitPriceNet: number;
+    taxCategory: string;
+    taxRate: number;
+  }): SupplierInvoiceFormLineItem {
+    const category = line.taxCategory === 'reduced' || line.taxCategory === 'custom' ? line.taxCategory : 'standard';
+
+    return {
+      description: line.description,
+      quantity: line.quantity,
+      unitPriceNet: line.unitPriceNet,
+      taxCategory: category,
+      ...(category === 'custom' ? { taxRate: line.taxRate } : {}),
+    };
+  }
+
   private computeLineItemTotals(
-    line: InvoiceFormLineItem,
+    line: InvoiceFormLineItem | SupplierInvoiceFormLineItem,
   ): { net: number; tax: number; gross: number; taxRate: number } | null {
     const quantity = Number(line.quantity);
     const unitPriceNet = Number(line.unitPriceNet);
@@ -584,7 +1147,14 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       return null;
     }
 
-    const taxRate = rateForTaxCategory(this.taxRates(), line.taxCategory ?? 'standard');
+    const taxRate =
+      line.taxCategory === 'custom'
+        ? Number(line.taxRate ?? 0)
+        : rateForTaxCategory(this.taxRates(), line.taxCategory === 'reduced' ? 'reduced' : 'standard');
+
+    if (!Number.isFinite(taxRate) || taxRate < 0) {
+      return null;
+    }
 
     return computeLineTotalsFromRate(quantity, unitPriceNet, taxRate);
   }
@@ -599,7 +1169,9 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       });
   }
 
-  private computeDraftTotals(items: InvoiceFormLineItem[]): { net: number; tax: number; gross: number } | null {
+  private computeDraftTotals(
+    items: Array<InvoiceFormLineItem | SupplierInvoiceFormLineItem>,
+  ): { net: number; tax: number; gross: number } | null {
     let net = 0;
     let tax = 0;
 
@@ -628,7 +1200,15 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
   private resetCreateForm(): void {
     this.createUserId = '';
     this.createSubscriptionId = '';
+    this.createSupplierId = '';
+    this.createContractNumber = '';
+    this.createInvoiceNumber = '';
+    this.createIssueDate = '';
+    this.createDueDate = '';
+    this.createSupplierFile = null;
     this.createLineItems = [this.emptyLineItem()];
+    this.createSupplierLineItems = [this.emptySupplierLineItem()];
+    this.supplierInvoiceManagerFacade.clearParsePreview();
     this.createInvoiceSubscriptions.set([]);
     this.createInvoiceSubscriptionsLoading.set(false);
     this.createInvoiceSubscriptionsRequest?.unsubscribe();
@@ -675,12 +1255,33 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       },
     });
     watchBillingMutationModalClose({
+      loading$: this.supplierInvoicesCreating$,
+      error$: this.supplierInvoiceManagerFacade.error$,
+      modal: () => this.createModal,
+      destroyRef: this.destroyRef,
+      onSuccess: () => {
+        this.resetCreateForm();
+        refreshDashboard();
+      },
+    });
+    watchBillingMutationModalClose({
       loading$: this.invoicesUpdating$,
       error$: this.invoiceManagerFacade.error$,
       modal: () => this.editModal,
       destroyRef: this.destroyRef,
       onSuccess: () => {
         this.resetEditForm();
+        refreshDashboard();
+      },
+    });
+    watchBillingMutationModalClose({
+      loading$: this.supplierInvoicesUpdating$,
+      error$: this.supplierInvoiceManagerFacade.error$,
+      modal: () => this.editModal,
+      destroyRef: this.destroyRef,
+      onSuccess: () => {
+        this.editSupplierInvoiceId = '';
+        this.editSupplierLineItems = [this.emptySupplierLineItem()];
         refreshDashboard();
       },
     });
@@ -695,12 +1296,32 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       },
     });
     watchBillingMutationModalClose({
+      loading$: this.supplierInvoicesIssuing$,
+      error$: this.supplierInvoiceManagerFacade.error$,
+      modal: () => this.issueModal,
+      destroyRef: this.destroyRef,
+      onSuccess: () => {
+        this.issueSupplierInvoiceId = '';
+        refreshDashboard();
+      },
+    });
+    watchBillingMutationModalClose({
       loading$: this.invoicesDeleting$,
       error$: this.invoiceManagerFacade.error$,
       modal: () => this.deleteModal,
       destroyRef: this.destroyRef,
       onSuccess: () => {
         this.deleteInvoice = null;
+        refreshDashboard();
+      },
+    });
+    watchBillingMutationModalClose({
+      loading$: this.supplierInvoicesDeleting$,
+      error$: this.supplierInvoiceManagerFacade.error$,
+      modal: () => this.deleteModal,
+      destroyRef: this.destroyRef,
+      onSuccess: () => {
+        this.deleteSupplierInvoice = null;
         refreshDashboard();
       },
     });
@@ -712,6 +1333,20 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       onSuccess: () => {
         this.pendingAction.set(null);
         this.pendingInvoice.set(null);
+        this.pendingSupplierInvoice.set(null);
+        this.actionReason.set('');
+        refreshDashboard();
+      },
+    });
+    watchBillingMutationModalClose({
+      loading$: this.supplierActionLoading$,
+      error$: this.supplierInvoicesError$,
+      modal: () => this.actionConfirmModal,
+      destroyRef: this.destroyRef,
+      onSuccess: () => {
+        this.pendingAction.set(null);
+        this.pendingInvoice.set(null);
+        this.pendingSupplierInvoice.set(null);
         this.actionReason.set('');
         refreshDashboard();
       },
@@ -732,7 +1367,7 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private buildSeriesChart(series: BillingStatisticsSeriesPoint[]) {
+  private buildSeriesChart(series: BillingStatisticsSeriesPoint[], labels?: { seriesName: string; title: string }) {
     const filled = fillPeriodSeriesPoints(series, this.fromDate(), this.toDate(), this.groupBy(), (period) => ({
       period,
       totalGross: 0,
@@ -742,10 +1377,11 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       return null;
     }
 
-    const axisDateFormat = this.groupBy() === 'month' ? 'mediumDate' : 'shortDate';
+    const seriesName = labels?.seriesName ?? $localize`:@@featureAdminBilling-chartTurnoverSeries:Turnover`;
+    const title = labels?.title ?? $localize`:@@featureAdminBilling-chartTurnoverTitle:Turnover over time`;
 
     return {
-      series: [{ name: 'Turnover', data: filled.map((p) => p.totalGross) }] as ApexAxisChartSeries,
+      series: [{ name: seriesName, data: filled.map((p) => p.totalGross) }] as ApexAxisChartSeries,
       chart: {
         type: 'area',
         height: 240,
@@ -758,7 +1394,8 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       fill: { colors: [BS_CHART_COLORS[0]] },
       dataLabels: { enabled: false } as ApexDataLabels,
       xaxis: {
-        categories: filled.map((p) => this.datePipe.transform(p.period, axisDateFormat) ?? p.period),
+        type: 'category',
+        categories: filled.map((p) => this.formatChartPeriodLabel(p.period)),
         labels: {
           style: { colors: 'var(--bs-body-color)', fontFamily: 'var(--bs-body-font-family)' },
         },
@@ -772,10 +1409,17 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
       },
       grid: { borderColor: 'var(--bs-border-color)' },
       title: {
-        text: $localize`:@@featureAdminBilling-chartTurnoverTitle:Turnover over time`,
+        text: title,
         style: { color: 'var(--bs-body-color)', fontFamily: 'var(--bs-body-font-family)' },
       } as ApexTitleSubtitle,
     };
+  }
+
+  /** Format YYYY-MM-DD period keys in UTC so chart labels match calendar issue/issued dates. */
+  private formatChartPeriodLabel(period: string): string {
+    const format = this.groupBy() === 'month' ? 'MMM y' : 'mediumDate';
+
+    return this.datePipe.transform(`${period}T12:00:00.000Z`, format, 'UTC') ?? period;
   }
 
   private buildDonutChart(items: { planName: string; totalGross: number }[]) {
@@ -827,5 +1471,67 @@ export class AdminBillingPageComponent implements OnInit, AfterViewInit {
         style: { color: 'var(--bs-body-color)', fontFamily: 'var(--bs-body-font-family)' },
       } as ApexTitleSubtitle,
     };
+  }
+
+  private mapCustomerPreview(detail: ManualInvoiceDetailResponse): InvoicePreviewView {
+    return {
+      title: detail.invoiceNumber ?? detail.id,
+      status: String(detail.status),
+      issueDate: detail.issuedAt ?? detail.createdAt,
+      dueDate: detail.dueDate,
+      currency: detail.currency,
+      lineItems: detail.lineItems.map((line) => ({
+        description: line.description,
+        quantity: line.quantity,
+        unitPriceNet: line.unitPriceNet,
+        lineNet: line.lineNet,
+        lineTax: line.lineTax,
+        taxRate: line.taxRate,
+        lineGross: line.lineGross,
+      })),
+      taxBreakdown: (detail.taxBreakdown ?? []).map((tax) => ({
+        taxRate: tax.taxRate,
+        taxAmount: tax.taxAmount,
+      })),
+      subtotalNet: detail.subtotalNet,
+      taxTotal: detail.taxTotal,
+      totalGross: detail.totalGross,
+      balanceDue: detail.balanceDue,
+    };
+  }
+
+  private mapSupplierPreview(detail: SupplierInvoiceDetailResponse): InvoicePreviewView {
+    return {
+      title: detail.invoiceNumber ?? detail.id,
+      status: String(detail.status),
+      // Prefer calendar issue date over lifecycle issuedAt (archive timestamp).
+      issueDate: detail.issueDate ?? detail.issuedAt ?? detail.createdAt,
+      dueDate: detail.dueDate,
+      currency: detail.currency,
+      lineItems: detail.lineItems.map((line) => ({
+        description: line.description,
+        quantity: line.quantity,
+        unitPriceNet: line.unitPriceNet,
+        lineNet: line.lineNet,
+        lineTax: line.lineTax,
+        taxRate: line.taxRate,
+        lineGross: line.lineGross,
+      })),
+      taxBreakdown: this.buildTaxBreakdownFromLines(detail.lineItems),
+      subtotalNet: detail.subtotalNet,
+      taxTotal: detail.taxTotal,
+      totalGross: detail.totalGross,
+      balanceDue: detail.balanceDue,
+    };
+  }
+
+  private buildTaxBreakdownFromLines(lines: Array<{ taxRate: number; lineTax: number }>): InvoicePreviewTaxBreakdown[] {
+    const byRate = new Map<number, number>();
+
+    for (const line of lines) {
+      byRate.set(line.taxRate, (byRate.get(line.taxRate) ?? 0) + line.lineTax);
+    }
+
+    return [...byRate.entries()].sort((a, b) => a[0] - b[0]).map(([taxRate, taxAmount]) => ({ taxRate, taxAmount }));
   }
 }

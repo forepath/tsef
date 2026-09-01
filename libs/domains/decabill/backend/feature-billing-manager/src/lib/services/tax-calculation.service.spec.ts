@@ -69,4 +69,34 @@ describe('TaxCalculationService with tax treatment', () => {
 
     expect(totals.lines[0].taxRate).toBe(25);
   });
+
+  it('uses explicit taxRate for custom supplier lines', () => {
+    const treatment: TaxTreatmentResult = {
+      taxMode: TaxMode.DOMESTIC_VAT,
+      taxCountryCode: 'DE',
+      chargeVat: true,
+      einvoiceTaxCategoryCode: EinvoiceTaxCategoryCode.STANDARD,
+      invoiceNoteKey: 'domestic_vat',
+      invoiceNote: '',
+      issuerIsInEu: true,
+    };
+
+    const totals = service.computeLines(
+      [
+        {
+          description: 'Mixed rate',
+          quantity: 1,
+          unitPriceNet: 100,
+          taxCategory: TaxCategory.CUSTOM,
+          taxRate: 12.5,
+        },
+      ],
+      { taxTreatment: treatment },
+    );
+
+    expect(totals.lines[0].taxCategory).toBe(TaxCategory.CUSTOM);
+    expect(totals.lines[0].taxRate).toBe(12.5);
+    expect(totals.taxTotal).toBe(12.5);
+    expect(totals.totalGross).toBe(112.5);
+  });
 });

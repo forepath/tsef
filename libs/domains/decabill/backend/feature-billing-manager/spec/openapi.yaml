@@ -6048,6 +6048,555 @@ paths:
                 type: string
         '401':
           description: Missing or invalid Basic auth credentials
+  /admin/billing/supplier-profiles:
+    get:
+      tags: [Admin Billing]
+      summary: List supplier billing profiles (admin only)
+      description: >
+        Requires ADMIN role. PAT callers need `supplier_profile:admin`.
+      operationId: listAdminSupplierProfiles
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Paginated supplier profiles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminSupplierProfilesResponse'
+    post:
+      tags: [Admin Billing]
+      summary: Create supplier billing profile (admin only)
+      description: >
+        Allocates a read-only supplier number (`SUP-######`) on create. Requires ADMIN role.
+        PAT callers need `supplier_profile:admin`.
+      operationId: createAdminSupplierProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminSupplierProfileDto'
+      responses:
+        '201':
+          description: Created supplier profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSupplierProfileDetailResponse'
+  /admin/billing/supplier-profiles/{id}:
+    get:
+      tags: [Admin Billing]
+      summary: Get supplier billing profile (admin only)
+      operationId: getAdminSupplierProfile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Supplier profile detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSupplierProfileDetailResponse'
+    post:
+      tags: [Admin Billing]
+      summary: Update supplier billing profile (admin only)
+      operationId: updateAdminSupplierProfile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierProfileFieldsDto'
+      responses:
+        '200':
+          description: Updated supplier profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSupplierProfileDetailResponse'
+    delete:
+      tags: [Admin Billing]
+      summary: Delete supplier billing profile (admin only)
+      description: Blocked when the supplier has existing supplier invoices.
+      operationId: deleteAdminSupplierProfile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Supplier profile deleted
+  /admin/billing/supplier-profiles/{id}/vat-id/revalidate:
+    post:
+      tags: [Admin Billing]
+      summary: Revalidate supplier VAT ID via VIES (admin only)
+      operationId: revalidateAdminSupplierProfileVatId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Updated supplier profile with VAT validation status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSupplierProfileDetailResponse'
+  /admin/billing/supplier-profiles/{id}/vat-id/mark-validated:
+    post:
+      tags: [Admin Billing]
+      summary: Mark supplier VAT ID validated by admin (admin only)
+      operationId: markAdminSupplierProfileVatIdValidated
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Updated supplier profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSupplierProfileDetailResponse'
+  /admin/billing/supplier-profiles/{id}/data:
+    post:
+      tags: [Admin Billing]
+      summary: Add custom data key on supplier billing profile (admin only)
+      operationId: addAdminSupplierProfileCustomData
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddSupplierProfileCustomDataDto'
+      responses:
+        '200':
+          description: Updated supplier profile detail including customData
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSupplierProfileDetailResponse'
+        '409':
+          description: Custom data key already exists
+  /admin/billing/supplier-profiles/{id}/data/{key}:
+    post:
+      tags: [Admin Billing]
+      summary: Update custom data value on supplier billing profile (admin only)
+      operationId: updateAdminSupplierProfileCustomData
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+            pattern: '^[a-zA-Z0-9._-]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSupplierProfileCustomDataDto'
+      responses:
+        '200':
+          description: Updated supplier profile detail including customData
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSupplierProfileDetailResponse'
+        '404':
+          description: Custom data key not found
+    delete:
+      tags: [Admin Billing]
+      summary: Delete custom data key on supplier billing profile (admin only)
+      operationId: deleteAdminSupplierProfileCustomData
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+            pattern: '^[a-zA-Z0-9._-]+$'
+      responses:
+        '200':
+          description: Updated supplier profile detail including customData
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSupplierProfileDetailResponse'
+        '404':
+          description: Custom data key not found
+  /admin/billing/supplier-profiles/{supplierId}/contracts:
+    get:
+      tags: [Admin Billing]
+      summary: Search supplier contracts (admin only)
+      description: >
+        Requires ADMIN role. PAT callers need `supplier_profile:admin`.
+      operationId: listAdminSupplierContracts
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Matching supplier contracts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupplierContractResponse'
+  /admin/billing/supplier-profiles/{supplierId}/contracts/get-or-create:
+    post:
+      tags: [Admin Billing]
+      summary: Get or create supplier contract by number (admin only)
+      operationId: getOrCreateAdminSupplierContract
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contractNumber]
+              properties:
+                contractNumber: { type: string }
+      responses:
+        '200':
+          description: Supplier contract
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierContractResponse'
+  /admin/billing/supplier-invoices/statistics:
+    get:
+      tags: [Admin Billing]
+      summary: Supplier expense statistics (admin only)
+      description: >
+        Requires ADMIN role. PAT callers need `billing_admin:read`.
+        Returns KPI totals plus an archived-expense time series for the selected period.
+        Product and country breakdowns are not included for supplier expenses.
+      operationId: getAdminSupplierExpenseStatistics
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+        - name: groupBy
+          in: query
+          schema: { type: string, enum: [day, month], default: day }
+        - name: supplierId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Expense KPIs and expenses-over-time series
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierExpenseStatisticsResponse'
+  /admin/billing/supplier-invoices:
+    get:
+      tags: [Admin Billing]
+      summary: List supplier invoices (admin only)
+      description: >
+        Requires ADMIN role. PAT callers need `billing_admin:read`.
+      operationId: listAdminSupplierInvoices
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Search'
+        - name: supplierId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, issued, paid, partially_paid, overdue, void]
+      responses:
+        '200':
+          description: Paginated supplier invoices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSupplierInvoicesResponse'
+    post:
+      tags: [Admin Billing]
+      summary: Create supplier invoice draft (admin only)
+      description: >
+        Multipart form with DTO fields and optional `document` PDF/XML upload.
+        Requires ADMIN role. PAT callers need `billing_admin:write`.
+      operationId: createAdminSupplierInvoice
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CreateSupplierInvoiceDto'
+                - type: object
+                  properties:
+                    document:
+                      type: string
+                      format: binary
+                      description: Optional supplier invoice PDF or EN16931 XML
+      responses:
+        '201':
+          description: Created supplier invoice draft
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierInvoiceDetailResponse'
+  /admin/billing/supplier-invoices/parse-document:
+    post:
+      tags: [Admin Billing]
+      summary: Parse supplier invoice document preview (admin only)
+      description: >
+        Accepts PDF or EN16931 XML in multipart field `document`. Returns line-item preview and warnings.
+        Requires ADMIN role. PAT callers need `billing_admin:write`.
+      operationId: parseSupplierInvoiceDocument
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [document]
+              properties:
+                document:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Parsed preview (line items and warnings; no persistence)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierInvoiceParsePreviewResponse'
+  /admin/billing/supplier-invoices/{id}:
+    get:
+      tags: [Admin Billing]
+      summary: Get supplier invoice (admin only)
+      operationId: getAdminSupplierInvoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Supplier invoice detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierInvoiceDetailResponse'
+    post:
+      tags: [Admin Billing]
+      summary: Update supplier invoice draft (admin only)
+      description: >
+        Draft only. Optional multipart `document` replaces or sets the uploaded PDF.
+        Requires ADMIN role. PAT callers need `billing_admin:write`.
+      operationId: updateAdminSupplierInvoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/UpdateSupplierInvoiceDto'
+                - type: object
+                  properties:
+                    document:
+                      type: string
+                      format: binary
+      responses:
+        '200':
+          description: Updated supplier invoice draft
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierInvoiceDetailResponse'
+    delete:
+      tags: [Admin Billing]
+      summary: Delete supplier invoice draft (admin only)
+      operationId: deleteAdminSupplierInvoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Draft deleted
+  /admin/billing/supplier-invoices/{id}/issue:
+    post:
+      tags: [Admin Billing]
+      summary: Issue supplier invoice draft (admin only)
+      description: >
+        Assigns `SINV-{year}-{nnnnn}` number. Generates PDF when no uploaded document exists.
+        Requires ADMIN role. PAT callers need `billing_admin:write`.
+      operationId: issueAdminSupplierInvoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueSupplierInvoiceDto'
+      responses:
+        '200':
+          description: Issued supplier invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierInvoiceDetailResponse'
+  /admin/billing/supplier-invoices/{id}/void:
+    post:
+      tags: [Admin Billing]
+      summary: Void issued supplier invoice (admin only)
+      operationId: voidAdminSupplierInvoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Voided supplier invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierInvoiceDetailResponse'
+  /admin/billing/supplier-invoices/{id}/mark-paid:
+    post:
+      tags: [Admin Billing]
+      summary: Mark supplier invoice paid manually (admin only)
+      operationId: markAdminSupplierInvoicePaid
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkSupplierInvoicePaymentStatusDto'
+      responses:
+        '200':
+          description: Updated supplier invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierInvoiceDetailResponse'
+  /admin/billing/supplier-invoices/{id}/mark-unpaid:
+    post:
+      tags: [Admin Billing]
+      summary: Mark supplier invoice unpaid manually (admin only)
+      operationId: markAdminSupplierInvoiceUnpaid
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkSupplierInvoicePaymentStatusDto'
+      responses:
+        '200':
+          description: Updated supplier invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierInvoiceDetailResponse'
+  /admin/billing/supplier-invoices/{id}/document:
+    get:
+      tags: [Admin Billing]
+      summary: Download supplier invoice document (admin only)
+      operationId: downloadAdminSupplierInvoiceDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: PDF document (uploaded or generated at issue)
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+  /admin/billing/supplier-invoices/{id}/audit-logs:
+    get:
+      tags: [Admin Billing]
+      summary: Audit history for supplier invoice (admin only)
+      operationId: listAdminSupplierInvoiceAuditLogs
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Paginated audit logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBillingAuditLogsResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -8814,6 +9363,275 @@ components:
         value:
           type: string
           maxLength: 4096
+    SupplierProfileFieldsDto:
+      type: object
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        company: { type: string }
+        customerType: { type: string, enum: [business, consumer] }
+        vatId: { type: string, nullable: true, maxLength: 32 }
+        addressLine1: { type: string }
+        addressLine2: { type: string }
+        postalCode: { type: string }
+        city: { type: string }
+        state: { type: string }
+        country: { type: string, minLength: 2, maxLength: 2 }
+        email: { type: string, format: email }
+        phone: { type: string }
+    CreateAdminSupplierProfileDto:
+      allOf:
+        - $ref: '#/components/schemas/SupplierProfileFieldsDto'
+    AdminSupplierProfileListItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        supplierNumber: { type: string }
+        firstName: { type: string, nullable: true }
+        lastName: { type: string, nullable: true }
+        company: { type: string, nullable: true }
+        email: { type: string, format: email, nullable: true }
+        country: { type: string, nullable: true }
+        isComplete: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    PaginatedAdminSupplierProfilesResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminSupplierProfileListItem'
+        total: { type: integer }
+        limit: { type: integer }
+        offset: { type: integer }
+    AdminSupplierProfileDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/SupplierProfileFieldsDto'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            supplierNumber: { type: string }
+            numberScope:
+              {
+                type: string,
+                description: Number pool scope (__shared__ or tenant id); admin only,
+              }
+            datevCreditorNumber:
+              {
+                type: integer,
+                nullable: true,
+                description: DATEV creditor account when allocated; null until first DATEV export assigns one. Admin only.,
+              }
+            isComplete: { type: boolean }
+            vatIdValidationStatus: { type: string, nullable: true }
+            vatIdValidatedAt:
+              { type: string, format: date-time, nullable: true }
+            vatIdValidationSource: { type: string, nullable: true }
+            customData:
+              type: object
+              description: Admin-only encrypted custom key/value map. Values never included in webhook payloads.
+              additionalProperties:
+                type: string
+              default: {}
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+    AddSupplierProfileCustomDataDto:
+      type: object
+      required: [key, value]
+      properties:
+        key:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: '^[a-zA-Z0-9._-]+$'
+        value:
+          type: string
+          maxLength: 4096
+    UpdateSupplierProfileCustomDataDto:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: string
+          maxLength: 4096
+    SupplierContractResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        supplierId: { type: string, format: uuid }
+        contractNumber: { type: string }
+        createdAt: { type: string, format: date-time }
+    SupplierInvoiceLineItemDto:
+      type: object
+      required: [description, quantity, unitPriceNet]
+      properties:
+        description: { type: string }
+        quantity: { type: number, minimum: 0.0001 }
+        unitPriceNet: { type: number }
+        taxCategory: { type: string, enum: [standard, reduced, custom] }
+        taxRate:
+          {
+            type: number,
+            minimum: 0,
+            description: Required when taxCategory is custom,
+          }
+    CreateSupplierInvoiceDto:
+      type: object
+      required: [supplierId, lineItems]
+      properties:
+        supplierId: { type: string, format: uuid }
+        contractNumber: { type: string }
+        invoiceNumber:
+          {
+            type: string,
+            maxLength: 64,
+            description: Optional supplier invoice number; auto-assigned on issue when omitted,
+          }
+        issueDate: { type: string, format: date }
+        dueDate: { type: string, format: date }
+        currency: { type: string, default: EUR }
+        lineItems:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/SupplierInvoiceLineItemDto'
+    UpdateSupplierInvoiceDto:
+      type: object
+      required: [lineItems]
+      properties:
+        contractNumber: { type: string, nullable: true }
+        invoiceNumber:
+          {
+            type: string,
+            nullable: true,
+            maxLength: 64,
+            description: Optional supplier invoice number; null clears a previously set number,
+          }
+        issueDate: { type: string, format: date, nullable: true }
+        dueDate: { type: string, format: date, nullable: true }
+        lineItems:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/SupplierInvoiceLineItemDto'
+    IssueSupplierInvoiceDto:
+      type: object
+      properties:
+        invoiceNumber:
+          {
+            type: string,
+            maxLength: 64,
+            description: Optional supplier invoice number; auto-assigned when omitted and draft has none,
+          }
+        issueDate: { type: string, format: date }
+        dueDate: { type: string, format: date }
+    MarkSupplierInvoicePaymentStatusDto:
+      type: object
+      properties:
+        reason: { type: string }
+    SupplierInvoiceLineItemResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        position: { type: integer }
+        description: { type: string }
+        quantity: { type: number }
+        unitPriceNet: { type: number }
+        taxCategory: { type: string, enum: [standard, reduced, custom] }
+        taxRate: { type: number }
+        lineNet: { type: number }
+        lineTax: { type: number }
+        lineGross: { type: number }
+    SupplierInvoiceDetailResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        supplierId: { type: string, format: uuid }
+        supplierNumber: { type: string, nullable: true }
+        supplierName: { type: string, nullable: true }
+        contractId: { type: string, format: uuid, nullable: true }
+        contractNumber: { type: string, nullable: true }
+        invoiceNumber: { type: string, nullable: true }
+        status:
+          type: string
+          enum: [draft, issued, paid, partially_paid, overdue, void]
+        currency: { type: string }
+        subtotalNet: { type: number }
+        taxTotal: { type: number }
+        totalGross: { type: number }
+        balanceDue: { type: number }
+        taxMode: { type: string, nullable: true }
+        taxCountryCode: { type: string, nullable: true }
+        taxNote: { type: string, nullable: true }
+        issueDate: { type: string, format: date, nullable: true }
+        dueDate: { type: string, format: date, nullable: true }
+        issuedAt: { type: string, format: date-time, nullable: true }
+        voidedAt: { type: string, format: date-time, nullable: true }
+        documentSource:
+          { type: string, enum: [uploaded, generated], nullable: true }
+        hasUploadedDocument: { type: boolean }
+        canDownload: { type: boolean }
+        canPreview: { type: boolean }
+        lineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierInvoiceLineItemResponse'
+        createdAt: { type: string, format: date-time }
+    PaginatedSupplierInvoicesResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierInvoiceDetailResponse'
+        total: { type: integer }
+        limit: { type: integer }
+        offset: { type: integer }
+    SupplierInvoiceParsePreviewLine:
+      type: object
+      properties:
+        description: { type: string }
+        quantity: { type: number }
+        unitPriceNet: { type: number }
+        taxRate: { type: number }
+        lineNet: { type: number }
+        lineTax: { type: number }
+        lineGross: { type: number }
+    SupplierInvoiceParsePreviewResponse:
+      type: object
+      properties:
+        issueDate: { type: string, format: date, nullable: true }
+        dueDate: { type: string, format: date, nullable: true }
+        currency: { type: string, nullable: true }
+        subtotalNet: { type: number, nullable: true }
+        taxTotal: { type: number, nullable: true }
+        totalGross: { type: number, nullable: true }
+        lineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierInvoiceParsePreviewLine'
+        warnings:
+          type: array
+          items:
+            type: string
+    SupplierExpenseStatisticsResponse:
+      type: object
+      properties:
+        totalGross: { type: number }
+        invoiceCount: { type: integer }
+        openCount: { type: integer }
+        openGross: { type: number }
+        paidCount: { type: integer }
+        paidGross: { type: number }
+        draftCount: { type: integer }
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingStatisticsSeriesPoint'
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        groupBy: { type: string, enum: [day, month] }
     CustomerTrustScoreFactor:
       type: object
       properties:

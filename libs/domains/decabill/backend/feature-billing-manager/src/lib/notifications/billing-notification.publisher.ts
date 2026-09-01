@@ -395,6 +395,77 @@ export class BillingNotificationPublisher implements IIdentityNotificationPublis
     });
   }
 
+  publishCreditorRangeExhausted(payload: {
+    tenantId: string;
+    nextCandidate: number;
+    rangeStart: number;
+    rangeEnd: number;
+    allocationScope: string;
+  }): void {
+    this.publish('datev.creditor_range_exhausted', {
+      tenantId: payload.tenantId,
+      nextCandidate: payload.nextCandidate,
+      rangeStart: payload.rangeStart,
+      rangeEnd: payload.rangeEnd,
+      allocationScope: payload.allocationScope,
+    });
+  }
+
+  publishSupplierProfileCreated(payload: { profileId: string; supplierNumber: string }): void {
+    this.publish('supplier_profile.created', payload);
+  }
+
+  publishSupplierProfileUpdated(payload: { profileId: string; supplierNumber: string }): void {
+    this.publish('supplier_profile.updated', payload);
+  }
+
+  publishSupplierProfileDeleted(payload: { profileId: string; supplierNumber: string }): void {
+    this.publish('supplier_profile.deleted', payload);
+  }
+
+  publishSupplierProfileCustomDataAdded(payload: { profileId: string; key: string }): void {
+    this.publish('supplier_profile.custom_data_added', payload);
+  }
+
+  publishSupplierProfileCustomDataUpdated(payload: { profileId: string; key: string }): void {
+    this.publish('supplier_profile.custom_data_updated', payload);
+  }
+
+  publishSupplierProfileCustomDataDeleted(payload: { profileId: string; key: string }): void {
+    this.publish('supplier_profile.custom_data_deleted', payload);
+  }
+
+  publishSupplierInvoiceCreated(payload: { invoiceId: string; supplierId: string }): void {
+    this.publish('supplier_invoice.created', payload);
+  }
+
+  publishSupplierInvoiceIssued(payload: { invoiceId: string; supplierId: string; invoiceNumber?: string }): void {
+    this.publish('supplier_invoice.issued', payload);
+  }
+
+  publishSupplierInvoiceVoided(payload: { invoiceId: string; supplierId: string; invoiceNumber?: string }): void {
+    this.publish('supplier_invoice.voided', payload);
+  }
+
+  publishSupplierInvoicePaid(payload: { invoiceId: string; supplierId: string }): void {
+    this.publish('supplier_invoice.marked_paid', payload);
+  }
+
+  publishSupplierInvoiceUnpaid(payload: { invoiceId: string; supplierId: string }): void {
+    this.publish('supplier_invoice.marked_unpaid', payload);
+  }
+
+  publishSupplierInvoiceDocumentUploaded(payload: { invoiceId: string; supplierId?: string }): void {
+    this.publish('supplier_invoice.document_uploaded', {
+      invoiceId: payload.invoiceId,
+      supplierId: payload.supplierId ?? null,
+    });
+  }
+
+  publishSupplierCreditorAllocated(payload: { tenantId: string; supplierId: string; creditorNumber: number }): void {
+    this.publish('supplier_creditor.allocated', payload);
+  }
+
   publishServicePlanPriceRecalculated(
     servicePlan: Pick<ServicePlanEntity, 'id' | 'name'>,
     context: {

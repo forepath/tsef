@@ -40,6 +40,8 @@ import { SearchReindexJobHandler } from './search/search-reindex.job-handler';
 import { AdminBillingController } from './controllers/admin-billing.controller';
 import { AdminPromotionsController } from './controllers/admin-promotions.controller';
 import { PromotionsController } from './controllers/promotions.controller';
+import { AdminSupplierProfilesController } from './controllers/admin-supplier-profiles.controller';
+import { AdminSupplierInvoicesController } from './controllers/admin-supplier-invoices.controller';
 import { AdminCustomerProfilesController } from './controllers/admin-customer-profiles.controller';
 import { AdminCustomerAutoBillingController } from './controllers/admin-customer-auto-billing.controller';
 import { AdminDatevExportsController } from './controllers/admin-datev-exports.controller';
@@ -106,6 +108,7 @@ import { CustomerNumberSequenceEntity } from './entities/customer-number-sequenc
 import { CustomerProfileEntity } from './entities/customer-profile.entity';
 import { OssThresholdLedgerEntity } from './entities/oss-threshold-ledger.entity';
 import { DatevDebtorAccountEntity } from './entities/datev-debtor-account.entity';
+import { DatevCreditorAccountEntity } from './entities/datev-creditor-account.entity';
 import { DatevExportEntity } from './entities/datev-export.entity';
 import { InvoiceLineItemEntity } from './entities/invoice-line-item.entity';
 import { InvoiceNumberSequenceEntity } from './entities/invoice-number-sequence.entity';
@@ -136,6 +139,12 @@ import { ServicePlanMeterEntity } from './entities/service-plan-meter.entity';
 import { ServiceTypeMeterEntity } from './entities/service-type-meter.entity';
 import { ServiceTypeEntity } from './entities/service-type.entity';
 import { SubscriptionItemEntity } from './entities/subscription-item.entity';
+import { SupplierProfileEntity } from './entities/supplier-profile.entity';
+import { SupplierContractEntity } from './entities/supplier-contract.entity';
+import { SupplierInvoiceEntity } from './entities/supplier-invoice.entity';
+import { SupplierInvoiceLineItemEntity } from './entities/supplier-invoice-line-item.entity';
+import { SupplierNumberSequenceEntity } from './entities/supplier-number-sequence.entity';
+import { SupplierInvoiceNumberSequenceEntity } from './entities/supplier-invoice-number-sequence.entity';
 import { SubscriptionEntity } from './entities/subscription.entity';
 import { MeterEntity } from './entities/meter.entity';
 import { UsageRecordEntity } from './entities/usage-record.entity';
@@ -161,6 +170,7 @@ import { CustomerNumberSequencesRepository } from './repositories/customer-numbe
 import { CustomerProfilesRepository } from './repositories/customer-profiles.repository';
 import { OssThresholdLedgersRepository } from './repositories/oss-threshold-ledgers.repository';
 import { DatevDebtorAccountsRepository } from './repositories/datev-debtor-accounts.repository';
+import { DatevCreditorAccountsRepository } from './repositories/datev-creditor-accounts.repository';
 import { DatevExportRepository } from './repositories/datev-export.repository';
 import { InvoiceLineItemsRepository } from './repositories/invoice-line-items.repository';
 import { InvoiceNumberSequencesRepository } from './repositories/invoice-number-sequences.repository';
@@ -229,10 +239,24 @@ import type { IntegratedStackModule } from './services/integrated-stack-registry
 import { IntegratedStackRegistryService } from './services/integrated-stack-registry.service';
 import type { BillingProviderModule } from './services/provider-module-registry.service';
 import { CloudflareDnsService } from './services/cloudflare-dns.service';
+import { SupplierProfilesRepository } from './repositories/supplier-profiles.repository';
+import { SupplierContractsRepository } from './repositories/supplier-contracts.repository';
+import { SupplierInvoicesRepository } from './repositories/supplier-invoices.repository';
+import { SupplierInvoiceLineItemsRepository } from './repositories/supplier-invoice-line-items.repository';
+import { SupplierNumberSequencesRepository } from './repositories/supplier-number-sequences.repository';
+import { SupplierInvoiceNumberSequencesRepository } from './repositories/supplier-invoice-number-sequences.repository';
 import { CustomerProfilesService } from './services/customer-profiles.service';
 import { CustomerProfilesAdminService } from './services/customer-profiles-admin.service';
+import { SupplierProfilesService } from './services/supplier-profiles.service';
+import { SupplierProfilesAdminService } from './services/supplier-profiles-admin.service';
+import { SupplierContractsService } from './services/supplier-contracts.service';
+import { SupplierInvoicesAdminService } from './services/supplier-invoices-admin.service';
+import { SupplierInvoicePdfService } from './services/supplier-invoice-pdf.service';
+import { EInvoiceInboundParseService } from './services/e-invoice-inbound-parse.service';
 import { DatevBookingMapperService } from './services/datev-booking-mapper.service';
 import { DatevDebtorAccountService } from './services/datev-debtor-account.service';
+import { DatevCreditorAccountService } from './services/datev-creditor-account.service';
+import { DatevCreditorMapperService } from './services/datev-creditor-mapper.service';
 import { DatevDebtorMapperService } from './services/datev-debtor-mapper.service';
 import { DatevDocumentArchiveService } from './services/datev-document-archive.service';
 import { DatevExportAdminService } from './services/datev-export-admin.service';
@@ -357,6 +381,13 @@ const authMethod = getAuthenticationMethod();
       UserPersonalAccessTokenEntity,
       DatevExportEntity,
       DatevDebtorAccountEntity,
+      DatevCreditorAccountEntity,
+      SupplierProfileEntity,
+      SupplierContractEntity,
+      SupplierInvoiceEntity,
+      SupplierInvoiceLineItemEntity,
+      SupplierNumberSequenceEntity,
+      SupplierInvoiceNumberSequenceEntity,
       ProjectEntity,
       ProjectMilestoneEntity,
       ProjectTicketEntity,
@@ -390,6 +421,8 @@ const authMethod = getAuthenticationMethod();
     AdminSubscriptionItemsController,
     AdminSubscriptionMetersController,
     AdminCustomerProfilesController,
+    AdminSupplierProfilesController,
+    AdminSupplierInvoicesController,
     AdminCustomerAutoBillingController,
     AdminDatevExportsController,
     PaymentsWebhookController,
@@ -548,6 +581,12 @@ const authMethod = getAuthenticationMethod();
     UsageService,
     CustomerProfilesService,
     CustomerProfilesAdminService,
+    SupplierProfilesService,
+    SupplierProfilesAdminService,
+    SupplierContractsService,
+    SupplierInvoicesAdminService,
+    SupplierInvoicePdfService,
+    EInvoiceInboundParseService,
     ProjectsService,
     ProjectsAdminService,
     ProjectMilestonesService,
@@ -616,12 +655,21 @@ const authMethod = getAuthenticationMethod();
     MetersRepository,
     UsageRecordsRepository,
     CustomerProfilesRepository,
+    SupplierProfilesRepository,
+    SupplierContractsRepository,
+    SupplierInvoicesRepository,
+    SupplierInvoiceLineItemsRepository,
+    SupplierNumberSequencesRepository,
+    SupplierInvoiceNumberSequencesRepository,
     DatevExportRepository,
     DatevDebtorAccountsRepository,
+    DatevCreditorAccountsRepository,
     DatevExportConfigService,
     DatevBookingMapperService,
     DatevDebtorMapperService,
     DatevDebtorAccountService,
+    DatevCreditorAccountService,
+    DatevCreditorMapperService,
     DatevExtfCsvService,
     DatevDocumentArchiveService,
     DatevExportService,

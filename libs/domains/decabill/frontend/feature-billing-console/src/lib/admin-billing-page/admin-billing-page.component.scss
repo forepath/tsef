@@ -133,3 +133,16 @@
     }
   }
 }
+
+.invoice-preview-modal {
+  max-width: 56rem;
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 12rem;
+    color: var(--bs-secondary-color);
+  }
+}

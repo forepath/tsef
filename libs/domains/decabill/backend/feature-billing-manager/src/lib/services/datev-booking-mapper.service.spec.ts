@@ -18,13 +18,22 @@ describe('DatevBookingMapperService', () => {
     revenueAccountReverseCharge: '8336',
     revenueAccountOss: '8400',
     revenueAccountThirdCountry: '8338',
+    expenseAccountStandard: '4900',
+    expenseAccountReduced: '4800',
+    expenseAccountReverseCharge: '4836',
+    expenseAccountOss: '4900',
+    expenseAccountThirdCountry: '4838',
     debtorAccountStart: 10_000,
     debtorAccountEnd: 69_999,
+    creditorAccountStart: 70_000,
+    creditorAccountEnd: 99_999,
     buKeyStandard: '',
     buKeyReduced: '',
     buKeyReverseCharge: '',
     buKeyOss: '',
     buKeyThirdCountry: '',
+    expenseBuKeyStandard: '',
+    expenseBuKeyReduced: '',
     includeDocuments: true,
     dictationAbbr: 'DEC',
     fiscalYearStartMonth: 1,
@@ -150,5 +159,30 @@ describe('DatevBookingMapperService', () => {
     });
 
     expect(row[19]).toBe('BEDI "belege/INV-2026-00001.pdf"');
+  });
+
+  it('maps issued supplier line item with AP polarity (H on creditor)', () => {
+    const supplierLine = line();
+    const supplierInvoice = {
+      id: 'sinv-1',
+      invoiceNumber: 'SINV-2026-00001',
+      issueDate: '2026-01-15',
+      issuedAt: new Date('2026-01-15T12:00:00Z'),
+      createdAt: new Date('2026-01-15T12:00:00Z'),
+      taxMode: undefined,
+    } as never;
+
+    const row = service.mapIssuedSupplierLineItem({
+      line: supplierLine as never,
+      invoice: supplierInvoice,
+      creditorAccount: 70_001,
+      config,
+      scope: DatevExportScope.TENANT,
+    });
+
+    expect(row[1]).toBe('H');
+    expect(row[6]).toBe('70001');
+    expect(row[7]).toBe('4900');
+    expect(row[10]).toBe('SINV-2026-00001');
   });
 });

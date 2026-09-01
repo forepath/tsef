@@ -52,6 +52,20 @@ export class DatevDocumentArchiveService {
     return await this.readPdfByStorageKey(invoice.pdfStorageKey);
   }
 
+  async readSupplierInvoicePdf(
+    invoice: import('../entities/supplier-invoice.entity').SupplierInvoiceEntity,
+  ): Promise<Buffer | null> {
+    if (!invoice.documentStorageKey) {
+      return null;
+    }
+
+    try {
+      return await this.fileStorage.readSupplierInvoiceFile(invoice.documentStorageKey);
+    } catch {
+      return null;
+    }
+  }
+
   async readPdfByStorageKey(storageKey: string): Promise<Buffer | null> {
     try {
       return await this.fileStorage.readInvoiceFile(storageKey);

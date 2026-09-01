@@ -39,13 +39,22 @@ describe('DatevExportService', () => {
       revenueAccountReverseCharge: '8336',
       revenueAccountOss: '8400',
       revenueAccountThirdCountry: '8338',
+      expenseAccountStandard: '4900',
+      expenseAccountReduced: '4800',
+      expenseAccountReverseCharge: '4836',
+      expenseAccountOss: '4900',
+      expenseAccountThirdCountry: '4838',
       debtorAccountStart: 10_000,
       debtorAccountEnd: 69_999,
+      creditorAccountStart: 70_000,
+      creditorAccountEnd: 99_999,
       buKeyStandard: '',
       buKeyReduced: '',
       buKeyReverseCharge: '',
       buKeyOss: '',
       buKeyThirdCountry: '',
+      expenseBuKeyStandard: '',
+      expenseBuKeyReduced: '',
       includeDocuments: false,
       dictationAbbr: 'DEC',
       fiscalYearStartMonth: 1,
@@ -59,6 +68,11 @@ describe('DatevExportService', () => {
     findIssuedInPeriod: jest.fn().mockResolvedValue([]),
     findVoidedInPeriod: jest.fn().mockResolvedValue([]),
   };
+  const supplierInvoicesRepository = {
+    findIssuedInPeriod: jest.fn().mockResolvedValue([]),
+    findVoidedInPeriod: jest.fn().mockResolvedValue([]),
+  };
+  const supplierProfilesRepository = { findById: jest.fn() };
   const exportRepository = {
     findByPeriod: jest.fn().mockResolvedValue(null),
     create: jest.fn().mockResolvedValue({ id: 'exp-1', status: DatevExportStatus.PENDING }),
@@ -81,9 +95,13 @@ describe('DatevExportService', () => {
     mapIssuedLineItem: jest.fn(),
     mapVoidedLineItem: jest.fn(),
     mapPartialCreditDocument: jest.fn(),
+    mapIssuedSupplierLineItem: jest.fn(),
+    mapVoidedSupplierLineItem: jest.fn(),
   };
   const debtorMapper = { mapDebtorRow: jest.fn() };
   const debtorAccountService = { resolveDebtorNumber: jest.fn() };
+  const creditorAccountService = { resolveCreditorNumber: jest.fn() };
+  const creditorMapper = { mapCreditorRow: jest.fn() };
   const documentArchiveService = {
     buildDocumentRelativePath: jest.fn(),
     buildBeleglink: jest.fn(),
@@ -104,6 +122,8 @@ describe('DatevExportService', () => {
     billingTenantService as never,
     invoicesRepository as never,
     customerProfilesRepository as never,
+    supplierInvoicesRepository as never,
+    supplierProfilesRepository as never,
     voidDocumentsRepository as never,
     creditDocumentsRepository as never,
     invoicePdfService as never,
@@ -112,6 +132,8 @@ describe('DatevExportService', () => {
     bookingMapper as never,
     debtorMapper as never,
     debtorAccountService as never,
+    creditorAccountService as never,
+    creditorMapper as never,
     extfCsvService as never,
     documentArchiveService as never,
     billingNotificationPublisher as never,
@@ -122,6 +144,8 @@ describe('DatevExportService', () => {
     exportRepository.findByPeriod.mockResolvedValue(null);
     invoicesRepository.findIssuedInPeriod.mockResolvedValue([]);
     invoicesRepository.findVoidedInPeriod.mockResolvedValue([]);
+    supplierInvoicesRepository.findIssuedInPeriod.mockResolvedValue([]);
+    supplierInvoicesRepository.findVoidedInPeriod.mockResolvedValue([]);
     creditDocumentsRepository.findWithdrawnInPeriod.mockResolvedValue([]);
     billingTenantService.getConfiguredTenants.mockReturnValue(['default']);
     configService.isEnabled.mockReturnValue(true);
@@ -135,13 +159,22 @@ describe('DatevExportService', () => {
       revenueAccountReverseCharge: '8336',
       revenueAccountOss: '8400',
       revenueAccountThirdCountry: '8338',
+      expenseAccountStandard: '4900',
+      expenseAccountReduced: '4800',
+      expenseAccountReverseCharge: '4836',
+      expenseAccountOss: '4900',
+      expenseAccountThirdCountry: '4838',
       debtorAccountStart: 10_000,
       debtorAccountEnd: 69_999,
+      creditorAccountStart: 70_000,
+      creditorAccountEnd: 99_999,
       buKeyStandard: '',
       buKeyReduced: '',
       buKeyReverseCharge: '',
       buKeyOss: '',
       buKeyThirdCountry: '',
+      expenseBuKeyStandard: '',
+      expenseBuKeyReduced: '',
       includeDocuments: false,
       dictationAbbr: 'DEC',
       fiscalYearStartMonth: 1,

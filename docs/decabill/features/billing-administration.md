@@ -121,6 +121,30 @@ Trust ranking remains admin-only. See [Customer Trust Score](./customer-trust-sc
 
 **Frontend:** `/administration/customer-profiles` in the billing console.
 
+## Supplier Billing Profiles (Admin)
+
+AP supplier metadata is stored in `billing_supplier_profiles` (one profile per supplier, not linked to a user account).
+
+| Method | Path                                    | Purpose                                               |
+| ------ | --------------------------------------- | ----------------------------------------------------- |
+| GET    | `/admin/billing/supplier-profiles`      | Paginated list                                        |
+| GET    | `/admin/billing/supplier-profiles/{id}` | Full profile detail (includes encrypted `customData`) |
+| POST   | `/admin/billing/supplier-profiles`      | Create supplier                                       |
+| POST   | `/admin/billing/supplier-profiles/{id}` | Update                                                |
+| DELETE | `/admin/billing/supplier-profiles/{id}` | Delete (blocked when supplier has invoices)           |
+
+PAT scope: `supplier_profile:admin`. See [Supplier profiles](./supplier-profiles.md).
+
+## Supplier Invoices (Accounts Payable)
+
+Inbound expense invoices under `/admin/billing/supplier-invoices`. PAT scopes: `billing_admin:read` / `billing_admin:write`.
+
+Draft → issue workflow mirrors manual AR invoices; supports document upload, EN16931 parse preview, void, and manual paid status. See [Supplier invoices](./supplier-invoices.md).
+
+## DATEV Accounts Payable
+
+Monthly DATEV exports include **both** AR customer invoices and AP supplier invoices. Supplier line items book to configured expense accounts with **H** (credit) on the supplier creditor account. Creditor numbers are allocated lazily from `BILLING_DATEV_CREDITOR_ACCOUNT_START`–`END` (defaults `70000`–`99999`). Configure expense GL accounts via `BILLING_DATEV_EXPENSE_ACCOUNT_*` and optional `BILLING_DATEV_EXPENSE_BU_KEY_*`. See [Environment configuration](../deployment/environment-configuration.md) and [Supplier invoices](./supplier-invoices.md).
+
 ## Admin Projects
 
 Projects are managed under `/admin/billing/projects`. Admins assign each project to a customer user, track time, and bill unbilled hours to an invoice.
@@ -161,6 +185,8 @@ See **[Webhooks](./webhooks.md)** for payload envelope, signing, and event types
 
 - **[Dashboard and server control](./dashboard-and-server-control.md)** Billing dashboard KPIs, charts, and bill-now (`/administration/billing`)
 - **[Customer profiles](./customer-profiles.md)** Admin customer profile CRUD (`/administration/customer-profiles`)
+- **[Supplier profiles](./supplier-profiles.md)** Admin supplier profile CRUD (AP)
+- **[Supplier invoices](./supplier-invoices.md)** Admin supplier expense invoices (AP)
 - **[Customer trust score](./customer-trust-score.md)** Admin-only traffic-light ranking inside customer profiles
 - **[Projects](./projects.md)** Admin project CRUD and bill-time (`/administration/projects`)
 - **[Webhooks](./webhooks.md)** Tenant-scoped outbound notification endpoints (`/webhooks`)

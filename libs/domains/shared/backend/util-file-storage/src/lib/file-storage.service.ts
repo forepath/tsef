@@ -58,4 +58,16 @@ export class FileStorageService {
   async datevExportFileExists(storageKey: string): Promise<boolean> {
     return await this.fileExists(FileStorageScope.datevExports, storageKey);
   }
+
+  async writeSupplierInvoiceFile(storageKey: string, content: Buffer): Promise<void> {
+    await this.writeFile(FileStorageScope.supplierInvoices, storageKey, content);
+  }
+
+  async readSupplierInvoiceFile(storageKey: string): Promise<Buffer> {
+    return await this.readFile(FileStorageScope.supplierInvoices, storageKey);
+  }
+
+  async supplierInvoiceFileExists(storageKey: string): Promise<boolean> {
+    return await this.fileExists(FileStorageScope.supplierInvoices, storageKey);
+  }
 }

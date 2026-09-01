@@ -32,4 +32,22 @@ export class BillingAuditLogsRepository {
 
     return { items, total };
   }
+
+  async findBySupplierInvoiceId(
+    supplierInvoiceId: string,
+    limit: number,
+    offset: number,
+  ): Promise<{ items: BillingAuditLogEntity[]; total: number }> {
+    const qb = this.repository
+      .createQueryBuilder('log')
+      .where('log.tenant_id = :tenantId', { tenantId: getRequiredTenantId() })
+      .andWhere(`log.context->>'supplierInvoiceId' = :supplierInvoiceId`, { supplierInvoiceId })
+      .orderBy('log.created_at', 'DESC')
+      .take(limit)
+      .skip(offset);
+
+    const [items, total] = await qb.getManyAndCount();
+
+    return { items, total };
+  }
 }

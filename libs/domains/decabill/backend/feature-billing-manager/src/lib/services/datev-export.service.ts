@@ -13,9 +13,13 @@ import { DatevExportRepository } from '../repositories/datev-export.repository';
 import { InvoiceCreditDocumentsRepository } from '../repositories/invoice-credit-documents.repository';
 import { InvoiceVoidDocumentsRepository } from '../repositories/invoice-void-documents.repository';
 import { InvoicesRepository } from '../repositories/invoices.repository';
+import { SupplierInvoicesRepository } from '../repositories/supplier-invoices.repository';
+import { SupplierProfilesRepository } from '../repositories/supplier-profiles.repository';
 import { buildDatevExportFileName, buildDatevStorageKey, formatDatevHeaderDate } from '../utils/datev-format.util';
 import { BillingNotificationPublisher } from '../notifications/billing-notification.publisher';
 import { DatevBookingMapperService } from './datev-booking-mapper.service';
+import { DatevCreditorAccountService } from './datev-creditor-account.service';
+import { DatevCreditorMapperService } from './datev-creditor-mapper.service';
 import { DatevDebtorAccountService } from './datev-debtor-account.service';
 import { DatevDebtorMapperService } from './datev-debtor-mapper.service';
 import { DatevDocumentArchiveService } from './datev-document-archive.service';
@@ -47,6 +51,12 @@ interface TaggedInvoice {
   isVoid: boolean;
 }
 
+interface TaggedSupplierInvoice {
+  invoice: import('../entities/supplier-invoice.entity').SupplierInvoiceEntity;
+  tenantId: string;
+  isVoid: boolean;
+}
+
 interface TaggedCreditDocument {
   credit: import('../entities/invoice-credit-document.entity').InvoiceCreditDocumentEntity;
   tenantId: string;
@@ -61,6 +71,8 @@ export class DatevExportService {
     private readonly billingTenantService: BillingTenantService,
     private readonly invoicesRepository: InvoicesRepository,
     private readonly customerProfilesRepository: CustomerProfilesRepository,
+    private readonly supplierInvoicesRepository: SupplierInvoicesRepository,
+    private readonly supplierProfilesRepository: SupplierProfilesRepository,
     private readonly voidDocumentsRepository: InvoiceVoidDocumentsRepository,
     private readonly creditDocumentsRepository: InvoiceCreditDocumentsRepository,
     private readonly invoicePdfService: InvoicePdfService,
@@ -69,6 +81,8 @@ export class DatevExportService {
     private readonly bookingMapper: DatevBookingMapperService,
     private readonly debtorMapper: DatevDebtorMapperService,
     private readonly debtorAccountService: DatevDebtorAccountService,
+    private readonly creditorAccountService: DatevCreditorAccountService,
+    private readonly creditorMapper: DatevCreditorMapperService,
     private readonly extfCsvService: DatevExtfCsvService,
     private readonly documentArchiveService: DatevDocumentArchiveService,
     private readonly billingNotificationPublisher: BillingNotificationPublisher,
@@ -191,6 +205,14 @@ export class DatevExportService {
     const issued = await this.invoicesRepository.findIssuedInPeriod(params.periodStart, params.periodEnd);
     const voided = await this.invoicesRepository.findVoidedInPeriod(params.periodStart, params.periodEnd);
     const credits = await this.creditDocumentsRepository.findWithdrawnInPeriod(params.periodStart, params.periodEnd);
+    const supplierIssued = await this.supplierInvoicesRepository.findIssuedInPeriod(
+      params.periodStart,
+      params.periodEnd,
+    );
+    const supplierVoided = await this.supplierInvoicesRepository.findVoidedInPeriod(
+      params.periodStart,
+      params.periodEnd,
+    );
 
     return await this.composeBundle({
       scope: DatevExportScope.TENANT,
@@ -201,6 +223,10 @@ export class DatevExportService {
       taggedInvoices: [
         ...issued.map((invoice) => ({ invoice, tenantId: params.tenantId, isVoid: false as const })),
         ...voided.map((invoice) => ({ invoice, tenantId: params.tenantId, isVoid: true as const })),
+      ],
+      taggedSupplierInvoices: [
+        ...supplierIssued.map((invoice) => ({ invoice, tenantId: params.tenantId, isVoid: false as const })),
+        ...supplierVoided.map((invoice) => ({ invoice, tenantId: params.tenantId, isVoid: true as const })),
       ],
       taggedCredits: credits.map((credit) => ({ credit, tenantId: params.tenantId })),
       includedTenantIds: [params.tenantId],
@@ -222,12 +248,21 @@ export class DatevExportService {
 
     const tenantIds = [...this.billingTenantService.getConfiguredTenants()];
     const taggedInvoices: TaggedInvoice[] = [];
+    const taggedSupplierInvoices: TaggedSupplierInvoice[] = [];
     const taggedCredits: TaggedCreditDocument[] = [];
 
     for (const tenantId of tenantIds) {
       await runWithTenantId(tenantId, async () => {
         const issuedBatch = await this.invoicesRepository.findIssuedInPeriod(params.periodStart, params.periodEnd);
         const voidedBatch = await this.invoicesRepository.findVoidedInPeriod(params.periodStart, params.periodEnd);
+        const supplierIssuedBatch = await this.supplierInvoicesRepository.findIssuedInPeriod(
+          params.periodStart,
+          params.periodEnd,
+        );
+        const supplierVoidedBatch = await this.supplierInvoicesRepository.findVoidedInPeriod(
+          params.periodStart,
+          params.periodEnd,
+        );
         const creditsBatch = await this.creditDocumentsRepository.findWithdrawnInPeriod(
           params.periodStart,
           params.periodEnd,
@@ -239,6 +274,14 @@ export class DatevExportService {
 
         for (const invoice of voidedBatch) {
           taggedInvoices.push({ invoice, tenantId, isVoid: true });
+        }
+
+        for (const invoice of supplierIssuedBatch) {
+          taggedSupplierInvoices.push({ invoice, tenantId, isVoid: false });
+        }
+
+        for (const invoice of supplierVoidedBatch) {
+          taggedSupplierInvoices.push({ invoice, tenantId, isVoid: true });
         }
 
         for (const credit of creditsBatch) {
@@ -254,6 +297,7 @@ export class DatevExportService {
       periodStart: params.periodStart,
       periodEnd: params.periodEnd,
       taggedInvoices,
+      taggedSupplierInvoices,
       taggedCredits,
       includedTenantIds: tenantIds,
     });
@@ -266,6 +310,7 @@ export class DatevExportService {
     periodStart: Date;
     periodEnd: Date;
     taggedInvoices: TaggedInvoice[];
+    taggedSupplierInvoices?: TaggedSupplierInvoice[];
     taggedCredits: TaggedCreditDocument[];
     includedTenantIds: string[];
   }): Promise<{
@@ -277,11 +322,14 @@ export class DatevExportService {
   }> {
     const bookingRows: string[][] = [];
     const debtorRows: string[][] = [];
+    const creditorRows: string[][] = [];
     const debtorNumbers = new Map<string, number>();
+    const creditorNumbers = new Map<string, number>();
     const zipEntries: DatevZipEntry[] = [];
     const documentEntries: { relativePath: string; invoiceNumber: string; documentDate: Date }[] = [];
     const invoiceIds = new Set<string>();
     const missingProfileInvoiceIds: string[] = [];
+    const missingSupplierProfileIds: string[] = [];
 
     for (const tagged of input.taggedInvoices) {
       const { invoice, tenantId: invoiceTenantId, isVoid } = tagged;
@@ -374,6 +422,92 @@ export class DatevExportService {
       });
     }
 
+    for (const tagged of input.taggedSupplierInvoices ?? []) {
+      const { invoice, tenantId: invoiceTenantId, isVoid } = tagged;
+
+      await runWithTenantId(invoiceTenantId, async () => {
+        const profile = invoice.supplier ?? (await this.supplierProfilesRepository.findByIdOrThrow(invoice.supplierId));
+
+        const tenantConfig =
+          input.scope === DatevExportScope.UNIFIED
+            ? (this.configService.resolveForTenant(invoiceTenantId) ?? input.config)
+            : input.config;
+
+        const creditorKey = `${invoiceTenantId}:${invoice.supplierId}`;
+        let creditorNumber = creditorNumbers.get(creditorKey);
+
+        if (creditorNumber == null) {
+          creditorNumber = await this.creditorAccountService.resolveCreditorNumber(
+            invoiceTenantId,
+            invoice.supplierId,
+            tenantConfig,
+          );
+          creditorNumbers.set(creditorKey, creditorNumber);
+          creditorRows.push(this.creditorMapper.mapCreditorRow(profile, creditorNumber));
+        }
+
+        for (const line of invoice.lineItems ?? []) {
+          const pdfFileName = isVoid
+            ? `${invoice.invoiceNumber ?? invoice.id}-void.pdf`
+            : `${invoice.invoiceNumber ?? invoice.id}.pdf`;
+          const relativePath = this.documentArchiveService.buildDocumentRelativePath(
+            input.scope,
+            invoiceTenantId,
+            pdfFileName,
+          );
+          const documentLink = tenantConfig.includeDocuments
+            ? this.documentArchiveService.buildBeleglink(relativePath)
+            : undefined;
+
+          if (isVoid) {
+            bookingRows.push(
+              this.bookingMapper.mapVoidedSupplierLineItem({
+                line,
+                invoice,
+                creditorAccount: creditorNumber,
+                config: tenantConfig,
+                scope: input.scope,
+                tenantSlug: input.scope === DatevExportScope.UNIFIED ? invoiceTenantId : undefined,
+                voidedAt: invoice.voidedAt ?? new Date(),
+                documentLink,
+              }),
+            );
+          } else {
+            bookingRows.push(
+              this.bookingMapper.mapIssuedSupplierLineItem({
+                line,
+                invoice,
+                creditorAccount: creditorNumber,
+                config: tenantConfig,
+                scope: input.scope,
+                tenantSlug: input.scope === DatevExportScope.UNIFIED ? invoiceTenantId : undefined,
+                documentLink,
+              }),
+            );
+          }
+
+          if (tenantConfig.includeDocuments) {
+            const pdfBuffer = await this.documentArchiveService.readSupplierInvoicePdf(invoice);
+
+            if (pdfBuffer) {
+              zipEntries.push({ name: relativePath, content: pdfBuffer });
+              documentEntries.push({
+                relativePath,
+                invoiceNumber: invoice.invoiceNumber ?? invoice.id,
+                documentDate: isVoid
+                  ? (invoice.voidedAt ?? new Date())
+                  : invoice.issueDate
+                    ? new Date(invoice.issueDate)
+                    : (invoice.issuedAt ?? invoice.createdAt),
+              });
+            }
+          }
+        }
+
+        invoiceIds.add(invoice.id);
+      });
+    }
+
     for (const tagged of input.taggedCredits) {
       const { credit, tenantId: creditTenantId } = tagged;
       const invoice = credit.invoice;
@@ -455,6 +589,10 @@ export class DatevExportService {
       throw new Error(`Customer profile missing for invoice(s): ${missingProfileInvoiceIds.join(', ')}`);
     }
 
+    if (missingSupplierProfileIds.length > 0) {
+      throw new Error(`Supplier profile missing for invoice(s): ${missingSupplierProfileIds.join(', ')}`);
+    }
+
     const batchLabel = `${input.periodStart.getUTCFullYear()}-${String(input.periodStart.getUTCMonth() + 1).padStart(2, '0')}`;
     const bookingCsv = this.extfCsvService.buildBookingBatchCsv({
       config: input.config,
@@ -475,6 +613,16 @@ export class DatevExportService {
         content: this.extfCsvService.buildDebtorBatchCsv({
           config: input.config,
           debtorRows,
+        }),
+      });
+    }
+
+    if (creditorRows.length > 0) {
+      zipEntries.splice(debtorRows.length > 0 ? 2 : 1, 0, {
+        name: `EXTF_Kreditoren_${formatDatevHeaderDate(input.periodStart)}_${formatDatevHeaderDate(input.periodEnd)}.csv`,
+        content: this.extfCsvService.buildCreditorBatchCsv({
+          config: input.config,
+          debtorRows: creditorRows,
         }),
       });
     }

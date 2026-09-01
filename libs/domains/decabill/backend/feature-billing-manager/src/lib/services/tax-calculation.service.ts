@@ -11,6 +11,8 @@ export interface LineItemInput {
   quantity: number;
   unitPriceNet: number;
   taxCategory?: TaxCategory;
+  /** When set, overrides catalog rates (used for supplier custom VAT). */
+  taxRate?: number;
 }
 
 export interface ComputedLineItem {
@@ -54,12 +56,14 @@ export class TaxCalculationService {
       const taxRate =
         treatment && !treatment.chargeVat
           ? 0
-          : this.taxRateConfig.resolveRate({
-              countryCode: taxCountryCode,
-              taxCategory,
-              taxMode,
-              forceChargeNonEuIssuerEuB2b: forceCharge,
-            });
+          : input.taxRate != null && Number.isFinite(input.taxRate)
+            ? Number(input.taxRate)
+            : this.taxRateConfig.resolveRate({
+                countryCode: taxCountryCode,
+                taxCategory: taxCategory === TaxCategory.CUSTOM ? TaxCategory.STANDARD : taxCategory,
+                taxMode,
+                forceChargeNonEuIssuerEuB2b: forceCharge,
+              });
       const lineNet = this.round(input.quantity * input.unitPriceNet);
       const lineTax = this.round(lineNet * (taxRate / 100));
       const lineGross = this.round(lineNet + lineTax);
