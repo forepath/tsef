@@ -256,6 +256,7 @@ export class PaymentOrchestrationService {
       const paid = await this.invoicesRepository.update(invoice.id, {
         status: InvoiceStatus.PAID,
         balanceDue: 0,
+        paidAt: new Date(),
       });
 
       if (attempt) {

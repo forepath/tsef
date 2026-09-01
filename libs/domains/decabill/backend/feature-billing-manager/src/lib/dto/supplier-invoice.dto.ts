@@ -138,6 +138,10 @@ export class MarkSupplierInvoicePaymentStatusDto {
   @IsOptional()
   @IsString({ message: 'Reason must be a string' })
   reason?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'Paid at must be an ISO 8601 datetime' })
+  paidAt?: string;
 }
 
 export class SupplierInvoiceLineItemResponseDto {
@@ -174,6 +178,7 @@ export class SupplierInvoiceDetailResponseDto {
   dueDate?: string | null;
   issuedAt?: Date | null;
   voidedAt?: Date | null;
+  paidAt?: Date | null;
   documentSource?: SupplierDocumentSource | null;
   hasUploadedDocument!: boolean;
   canDownload!: boolean;

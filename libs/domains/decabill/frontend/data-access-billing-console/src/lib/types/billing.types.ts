@@ -1097,6 +1097,7 @@ export interface InvoiceResponse {
   subscriptionNumber?: string | null;
   createdAt: string;
   dueDate?: string | null;
+  paidAt?: string | null;
   canPay: boolean;
   canDownload: boolean;
   canPreview: boolean;
@@ -1137,6 +1138,7 @@ export interface InvoiceDetailResponse {
   taxBreakdown: InvoiceTaxBreakdown[];
   issuedAt?: string | null;
   dueDate?: string | null;
+  paidAt?: string | null;
   createdAt: string;
   canPay: boolean;
   canDownload: boolean;
@@ -1344,6 +1346,7 @@ export interface PaginatedAdminSubscriptionsResponse {
 
 export interface MarkInvoicePaymentStatusDto {
   reason?: string;
+  paidAt?: string;
 }
 
 export interface BillingAuditLogResponse {

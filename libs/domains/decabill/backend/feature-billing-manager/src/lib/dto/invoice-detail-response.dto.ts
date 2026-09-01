@@ -38,6 +38,7 @@ export class InvoiceDetailResponseDto {
   taxBreakdown!: InvoiceTaxBreakdownDto[];
   issuedAt?: Date;
   dueDate?: Date;
+  paidAt?: Date | null;
   createdAt!: Date;
   canPay!: boolean;
   canDownload!: boolean;

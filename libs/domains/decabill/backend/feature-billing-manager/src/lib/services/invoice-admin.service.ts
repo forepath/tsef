@@ -13,6 +13,7 @@ import { CustomerTrustScoreService } from '../trust-score/customer-trust-score.s
 
 import { BillingAuditLogService } from './billing-audit-log.service';
 import { InvoiceService } from './invoice.service';
+import { resolvePaymentReceivedAt } from '../utils/resolve-payment-received-at.util';
 
 const MARK_PAID_ALLOWED: InvoiceStatus[] = [InvoiceStatus.ISSUED, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE];
 
@@ -80,9 +81,11 @@ export class InvoiceAdminService {
 
     const previousStatus = invoice.status;
     const previousBalanceDue = Number(invoice.balanceDue);
+    const paidAt = resolvePaymentReceivedAt(dto?.paidAt);
     const updated = await this.invoicesRepository.update(invoiceRefId, {
       status: InvoiceStatus.PAID,
       balanceDue: 0,
+      paidAt,
     });
 
     await this.auditLog.log({
@@ -95,6 +98,7 @@ export class InvoiceAdminService {
         previousStatus,
         previousBalanceDue,
         reason: dto?.reason,
+        paidAt: paidAt.toISOString(),
         adminUserId,
       },
     });
@@ -129,6 +133,7 @@ export class InvoiceAdminService {
     const updated = await this.invoicesRepository.update(invoiceRefId, {
       status: newStatus,
       balanceDue: Number(invoice.totalGross),
+      paidAt: null,
     });
 
     await this.auditLog.log({

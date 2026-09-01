@@ -298,6 +298,7 @@ export class InvoiceService {
       taxBreakdown: Array.from(taxByKey.values()),
       issuedAt: invoice.issuedAt,
       dueDate: invoice.dueDate,
+      paidAt: invoice.paidAt ?? null,
       createdAt: invoice.createdAt,
       autoPaymentStatus: invoice.autoPaymentStatus,
       ...this.capabilityFlags(invoice),
@@ -494,6 +495,7 @@ export class InvoiceService {
       subscriptionNumber,
       createdAt: invoice.createdAt,
       dueDate: invoice.dueDate,
+      paidAt: invoice.paidAt ?? null,
       ...this.capabilityFlags(invoice),
     };
   }

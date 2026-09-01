@@ -288,6 +288,7 @@ describe('PaymentOrchestrationService', () => {
       expect(invoicesRepository.update).toHaveBeenCalledWith('inv-1', {
         status: InvoiceStatus.PAID,
         balanceDue: 0,
+        paidAt: expect.any(Date),
       });
     });
 

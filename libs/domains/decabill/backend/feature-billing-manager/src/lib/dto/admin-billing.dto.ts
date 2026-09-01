@@ -1,3 +1,5 @@
+import { IsDateString, IsOptional, IsString } from 'class-validator';
+
 import { InvoiceStatus } from '../constants/invoice-status.constants';
 
 import { InvoiceResponseDto } from './invoice-response.dto';
@@ -46,7 +48,13 @@ export class PaginatedAdminSubscriptionsResponseDto {
 }
 
 export class MarkInvoicePaymentStatusDto {
+  @IsOptional()
+  @IsString({ message: 'Reason must be a string' })
   reason?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'Paid at must be an ISO 8601 datetime' })
+  paidAt?: string;
 }
 
 export class BillingAuditLogResponseDto {

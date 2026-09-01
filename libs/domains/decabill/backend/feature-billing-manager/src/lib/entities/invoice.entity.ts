@@ -92,6 +92,9 @@ export class InvoiceEntity {
   @Column({ type: 'timestamp', nullable: true, name: 'voided_at' })
   voidedAt?: Date;
 
+  @Column({ type: 'timestamp', nullable: true, name: 'paid_at' })
+  paidAt?: Date | null;
+
   @Column({ type: 'varchar', length: 512, nullable: true, name: 'pdf_storage_key' })
   pdfStorageKey?: string;
 

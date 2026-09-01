@@ -80,6 +80,7 @@ export class InvoiceIssuanceService {
       invoiceNumber,
       status: isPromotionalZeroBalance ? InvoiceStatus.PAID : InvoiceStatus.ISSUED,
       issuedAt,
+      paidAt: isPromotionalZeroBalance ? issuedAt : undefined,
       dueDate: isPromotionalZeroBalance ? undefined : dueDate,
       balanceDue,
       paymentProcessor: isPromotionalZeroBalance
