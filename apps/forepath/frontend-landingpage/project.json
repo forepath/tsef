@@ -49,6 +49,7 @@
         ],
         "localize": true,
         "i18nMissingTranslation": "warning",
+        "allowedCommonJsDependencies": ["@tryghost/content-api", "axios"],
         "security": {
           "allowedHosts": [
             "localhost",

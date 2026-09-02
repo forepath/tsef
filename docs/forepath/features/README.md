@@ -15,6 +15,16 @@ Optional Prometheus metrics scrape and OTLP export for the communication service
 - HTTP Basic auth for scrapers
 - Chatwoot configuration health gauge
 
+### [Blog](./blog.md)
+
+Marketing blog pages on the ForePath landing site, fed by the Ghost Content API at `blog.forepath.io`.
+
+**Key capabilities:**
+
+- `/blog` browse and title search
+- `/blog/:slug` post pages with SEO meta from Ghost
+- Content API key configured via `environment.blog`
+
 ## Related documentation
 
 - **Library:** `libs/domains/shared/backend/util-otel/README.md`

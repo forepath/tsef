@@ -272,6 +272,9 @@
       <trans-unit id="featureForepath-navOne" datatype="html">
         <source>One</source>
         </trans-unit>
+      <trans-unit id="featureForepath-navBlog" datatype="html">
+        <source>Blog</source>
+        </trans-unit>
       <trans-unit id="featureForepath-contactUsButton" datatype="html">
         <source>Contact us</source>
         </trans-unit>
@@ -1739,6 +1742,9 @@
       <trans-unit id="featureForepathHome-heroEstimate" datatype="html">
         <source>Get an instant quote</source>
         </trans-unit>
+      <trans-unit id="featureForepathHome-blogTeaserLabel" datatype="html">
+        <source>Latest from the blog</source>
+        </trans-unit>
       <trans-unit id="featureForepathHome-processRegionLabel" datatype="html">
         <source>How a ForePath engagement comes together</source>
         </trans-unit>
@@ -1894,6 +1900,75 @@
         </trans-unit>
       <trans-unit id="sharedFeatureLandingpageContact-detailsWebLabel" datatype="html">
         <source>Web</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-metaTitle" datatype="html">
+        <source>Blog :: ForePath</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-metaDescription" datatype="html">
+        <source>Insights from ForePath on consulting, software engineering, IT systems, and shipping reliable platforms.</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-metaKeywords" datatype="html">
+        <source>ForePath blog, consulting, software engineering, IT systems, cloud, DevOps</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-heroTitle" datatype="html">
+        <source>Blog</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-heroLead" datatype="html">
+        <source> Practical notes on consulting, engineering, and operating modern IT. </source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-searchLabel" datatype="html">
+        <source>Search posts</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-searchPlaceholder" datatype="html">
+        <source>Search posts</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-loading" datatype="html">
+        <source>Loading posts…</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-loadError" datatype="html">
+        <source>We could not load blog posts right now. Please try again later.</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-empty" datatype="html">
+        <source> No posts found. Check back soon. </source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-loadingMore" datatype="html">
+        <source>Loading…</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-loadMore" datatype="html">
+        <source>Load more</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-readMore" datatype="html">
+        <source>Read more</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-backToBlog" datatype="html">
+        <source>Back to blog</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-loading" datatype="html">
+        <source>Loading post…</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundTitle" datatype="html">
+        <source>Post not found</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundBody" datatype="html">
+        <source> This article may have been moved or is no longer published. </source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundCta" datatype="html">
+        <source>Browse all posts</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-loadError" datatype="html">
+        <source>We could not load this post right now. Please try again later.</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-fallbackDescription" datatype="html">
+        <source>Article from the ForePath blog.</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundMetaTitle" datatype="html">
+        <source>Post not found :: ForePath</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundMetaDescription" datatype="html">
+        <source>The requested ForePath blog post could not be found.</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlogPost-readingTimeUnit" datatype="html">
+        <source>min read</source>
         </trans-unit>
     </body>
   </file>

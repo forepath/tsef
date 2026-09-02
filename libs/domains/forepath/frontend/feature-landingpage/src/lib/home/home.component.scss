@@ -11,6 +11,25 @@
   line-height: 1.6;
 }
 
+.home-blog-teaser {
+  width: 100%;
+  flex-direction: row;
+  padding: 0.875rem 1.25rem;
+  text-align: start;
+  transition: border-color 0.2s ease;
+}
+
+.home-blog-teaser:hover {
+  border-color: rgba(255, 107, 53, 0.45);
+}
+
+.home-blog-teaser__title {
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  min-width: 0;
+  color: var(--bs-body-emphasis-color);
+}
+
 .home-process__stage {
   position: relative;
 }
@@ -395,7 +414,7 @@
   height: auto;
   display: block;
   filter: grayscale(1);
-  opacity: 0.2;
+  opacity: 0.25;
   transition:
     filter 0.5s ease,
     opacity 0.5s ease;

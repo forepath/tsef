@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-31T22:00:41.405Z",
+  "generatedAt": "2026-09-02T15:52:04.159Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -2468,6 +2468,14 @@
       "attrs": {
         "name": "@mlc-ai/web-llm",
         "version": "0.2.84"
+      }
+    },
+    {
+      "id": "package:@tryghost/content-api",
+      "type": "package",
+      "attrs": {
+        "name": "@tryghost/content-api",
+        "version": "1.12.10"
       }
     },
     {
@@ -10361,6 +10369,15 @@
       }
     },
     {
+      "id": "file:libs/domains/forepath/frontend/feature-landingpage/src/lib/blog/ghost-content-api.service.ts",
+      "type": "service",
+      "attrs": {
+        "path": "libs/domains/forepath/frontend/feature-landingpage/src/lib/blog/ghost-content-api.service.ts",
+        "languageOrKind": "ts",
+        "projectName": "forepath-frontend-feature-landingpage"
+      }
+    },
+    {
       "id": "file:libs/domains/shared/frontend/feature-notifications/README.md",
       "type": "readme",
       "attrs": {
@@ -13284,6 +13301,14 @@
       "type": "doc",
       "attrs": {
         "path": "docs/forepath/features/README.md",
+        "languageOrKind": "md"
+      }
+    },
+    {
+      "id": "file:docs/forepath/features/blog.md",
+      "type": "doc",
+      "attrs": {
+        "path": "docs/forepath/features/blog.md",
         "languageOrKind": "md"
       }
     },
@@ -30624,6 +30649,46 @@
       }
     },
     {
+      "id": "concept:forepath-blog-ghost-cms",
+      "type": "concept",
+      "attrs": {
+        "title": "Blog (Ghost CMS)",
+        "docPath": "docs/forepath/features/blog.md",
+        "sectionAnchor": "blog-ghost-cms",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-routes",
+      "type": "concept",
+      "attrs": {
+        "title": "Routes",
+        "docPath": "docs/forepath/features/blog.md",
+        "sectionAnchor": "routes",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-configuration",
+      "type": "concept",
+      "attrs": {
+        "title": "Configuration",
+        "docPath": "docs/forepath/features/blog.md",
+        "sectionAnchor": "configuration",
+        "domain": "forepath"
+      }
+    },
+    {
+      "id": "concept:forepath-implementation",
+      "type": "concept",
+      "attrs": {
+        "title": "Implementation",
+        "docPath": "docs/forepath/features/blog.md",
+        "sectionAnchor": "implementation",
+        "domain": "forepath"
+      }
+    },
+    {
       "id": "concept:forepath-opentelemetry",
       "type": "concept",
       "attrs": {
@@ -33393,6 +33458,11 @@
     {
       "from": "project:forepath-frontend-landingpage",
       "to": "package:@ngrx/store",
+      "type": "depends_on"
+    },
+    {
+      "from": "project:forepath-frontend-landingpage",
+      "to": "package:@tryghost/content-api",
       "type": "depends_on"
     },
     {
@@ -37903,6 +37973,11 @@
     {
       "from": "project:forepath-frontend-feature-landingpage",
       "to": "file:libs/domains/forepath/frontend/feature-landingpage/README.md",
+      "type": "contains"
+    },
+    {
+      "from": "project:forepath-frontend-feature-landingpage",
+      "to": "file:libs/domains/forepath/frontend/feature-landingpage/src/lib/blog/ghost-content-api.service.ts",
       "type": "contains"
     },
     {
@@ -49458,6 +49533,26 @@
     {
       "from": "file:docs/forepath/features/README.md",
       "to": "concept:forepath-related-documentation",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/blog.md",
+      "to": "concept:forepath-blog-ghost-cms",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/blog.md",
+      "to": "concept:forepath-routes",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/blog.md",
+      "to": "concept:forepath-configuration",
+      "type": "contains"
+    },
+    {
+      "from": "file:docs/forepath/features/blog.md",
+      "to": "concept:forepath-implementation",
       "type": "contains"
     },
     {
@@ -73101,6 +73196,11 @@
       "type": "belongs_to"
     },
     {
+      "from": "file:docs/forepath/features/blog.md",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
       "from": "file:docs/forepath/features/opentelemetry.md",
       "to": "domain:forepath",
       "type": "belongs_to"
@@ -78112,6 +78212,26 @@
     },
     {
       "from": "concept:forepath-related-documentation",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-blog-ghost-cms",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-routes",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-configuration",
+      "to": "domain:forepath",
+      "type": "belongs_to"
+    },
+    {
+      "from": "concept:forepath-implementation",
       "to": "domain:forepath",
       "type": "belongs_to"
     },

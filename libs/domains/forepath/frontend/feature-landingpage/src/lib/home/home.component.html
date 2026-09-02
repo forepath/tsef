@@ -28,6 +28,25 @@
             ><i class="bi bi-calculator" aria-hidden="true"></i>Get an instant quote</a
           >
         </div>
+        @if (latestBlogPost(); as post) {
+          <a
+            [routerLink]="['/blog', post.slug]"
+            class="home-blog-teaser card border rounded-pill shadow-sm bg-white text-decoration-none text-body mt-5 d-flex flex-row align-items-center gap-3"
+          >
+            <span
+              class="home-blog-teaser__label small fw-semibold text-primary text-nowrap"
+              i18n="@@featureForepathHome-blogTeaserLabel"
+              >Latest from the blog</span
+            >
+            @if (post.published_at) {
+              <time class="home-blog-teaser__date small text-muted text-nowrap" [attr.datetime]="post.published_at">
+                {{ post.published_at | date: 'mediumDate' }}
+              </time>
+            }
+            <span class="home-blog-teaser__title fw-semibold text-truncate">{{ post.title }}</span>
+            <i class="bi bi-arrow-right ms-auto text-primary flex-shrink-0" aria-hidden="true"></i>
+          </a>
+        }
       </div>
     </div>
   </div>
@@ -507,7 +526,7 @@
   <div class="container grid-section__container">
     <div class="row align-items-center g-4 g-lg-5">
       <div class="col-lg-4 col-xl-3 text-center">
-        <figure class="home-roots-crest mb-0">
+        <figure class="home-roots-crest mb-0 p-5 rounded-3 border shadow-sm">
           <img
             src="/assets/images/nrw-buergerwappen.png"
             width="1000"

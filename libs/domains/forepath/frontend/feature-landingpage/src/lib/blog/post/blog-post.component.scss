@@ -1,0 +1,102 @@
+@import '../../page.component.scss';
+
+// Page hosts default to display:inline; keep the outlet sibling block-level above the footer.
+:host {
+  display: block;
+}
+
+.grid-section {
+  // Let rails paint through the footer's 1px border-top.
+  overflow: visible;
+  margin-bottom: -1px;
+}
+
+// Contain Ghost article margins inside the container height. Collapsed margins otherwise
+// sit below the container while ::before/::after still use height:100%, so the rails
+// stop short of the footer as soon as post HTML renders.
+.grid-section > .grid-section__container {
+  display: flow-root;
+}
+
+// Stretch rails to the section padding edges (avoids undershoot from height:100% + padding).
+.grid-section > .grid-section__container::before,
+.grid-section > .grid-section__container::after {
+  top: calc(-1 * var(--grid-section-padding-top, var(--grid-section-padding-y)));
+  bottom: calc(-1 * var(--grid-section-padding-bottom, var(--grid-section-padding-y)) - 1px);
+  height: auto;
+}
+
+.blog-post {
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
+.blog-post__feature-image {
+  width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  display: block;
+}
+
+.blog-post__tag {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.35rem;
+  background: rgba(255, 107, 53, 0.1);
+}
+
+.ghost-content {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--bs-body-color);
+
+  :where(h1, h2, h3, h4, h5, h6) {
+    letter-spacing: -0.01em;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  :where(p, ul, ol, blockquote, pre, figure) {
+    margin-bottom: 1.25rem;
+  }
+
+  // Keep the last block's margin inside the article box (Ghost HTML almost always ends with one).
+  > :last-child {
+    margin-bottom: 0;
+  }
+
+  :where(a) {
+    color: var(--bs-primary);
+  }
+
+  :where(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    display: block;
+  }
+
+  :where(blockquote) {
+    border-left: 3px solid var(--bs-primary);
+    padding-left: 1rem;
+    color: var(--bs-secondary-color);
+  }
+
+  :where(pre) {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: var(--bs-tertiary-bg);
+    overflow-x: auto;
+  }
+
+  :where(code) {
+    font-size: 0.92em;
+  }
+
+  :where(figcaption) {
+    font-size: 0.875rem;
+    color: var(--bs-secondary-color);
+    margin-top: 0.5rem;
+  }
+}

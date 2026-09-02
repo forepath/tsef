@@ -1,0 +1,82 @@
+<section class="py-10 bg-body-tertiary grid-section border-top-0">
+  <div class="container grid-section__container">
+    @if (loading()) {
+      <p class="text-center text-muted mb-0" i18n="@@featureForepathBlogPost-loading">Loading post…</p>
+    } @else if (notFound()) {
+      <div class="text-center py-5">
+        <h1 class="h3 fw-semibold mb-3" i18n="@@featureForepathBlogPost-notFoundTitle">Post not found</h1>
+        <p class="text-muted mb-4" i18n="@@featureForepathBlogPost-notFoundBody">
+          This article may have been moved or is no longer published.
+        </p>
+        <a routerLink="/blog" class="btn btn-primary rounded-3" i18n="@@featureForepathBlogPost-notFoundCta"
+          >Browse all posts</a
+        >
+      </div>
+    } @else if (errorMessage()) {
+      <p class="text-danger mb-0" role="alert">{{ errorMessage() }}</p>
+    } @else if (post(); as currentPost) {
+      <article class="blog-post">
+        <header class="blog-post__header mb-4">
+          <p class="mb-3">
+            <a routerLink="/blog" class="small fw-semibold text-primary text-decoration-none">
+              <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+              <span i18n="@@featureForepathBlogPost-backToBlog">Back to blog</span>
+            </a>
+          </p>
+          @if (currentPost.primary_tag) {
+            <p class="blog-post__eyebrow small text-primary fw-semibold mb-2">
+              {{ currentPost.primary_tag.name }}
+            </p>
+          }
+          <h1 class="display-5 fw-semibold hero-title mb-3">{{ currentPost.title }}</h1>
+          <div class="blog-post__meta text-muted small d-flex flex-wrap gap-3">
+            @if (currentPost.published_at) {
+              <time [attr.datetime]="currentPost.published_at">
+                {{ currentPost.published_at | date: 'longDate' }}
+              </time>
+            }
+            @if (currentPost.primary_author?.name) {
+              <span>{{ currentPost.primary_author?.name }}</span>
+            }
+            @if (currentPost.reading_time) {
+              <span
+                >{{ currentPost.reading_time }}
+                <span i18n="@@featureForepathBlogPost-readingTimeUnit">min read</span></span
+              >
+            }
+          </div>
+        </header>
+
+        @if (currentPost.feature_image) {
+          <figure class="blog-post__feature mb-5">
+            <img
+              [src]="currentPost.feature_image"
+              [alt]="currentPost.feature_image_alt || currentPost.title"
+              class="blog-post__feature-image"
+            />
+            @if (currentPost.feature_image_caption) {
+              <figcaption
+                class="blog-post__feature-caption small text-muted mt-2"
+                [innerHTML]="currentPost.feature_image_caption"
+              ></figcaption>
+            }
+          </figure>
+        }
+
+        @if (safeHtml(); as html) {
+          <div class="ghost-content" [innerHTML]="html"></div>
+        }
+
+        @if (currentPost.tags?.length) {
+          <ul class="blog-post__tags list-unstyled d-flex flex-wrap gap-2 mt-5 mb-0">
+            @for (tag of currentPost.tags; track tag.id) {
+              <li>
+                <span class="blog-post__tag small">{{ tag.name }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </article>
+    }
+  </div>
+</section>

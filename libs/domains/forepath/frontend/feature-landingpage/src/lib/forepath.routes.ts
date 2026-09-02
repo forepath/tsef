@@ -21,6 +21,8 @@ import { createForepathLocalLlmWorker } from './workers/create-forepath-local-ll
 
 import { createSharedContactRoute, createBrandContactDetails } from '@forepath/shared/frontend/feature-landingpage';
 
+import { ForepathBlogComponent } from './blog/blog.component';
+import { ForepathBlogPostComponent } from './blog/post/blog-post.component';
 import { ForepathConsultingComponent } from './consulting/consulting.component';
 import { ForepathContainerComponent } from './container/container.component';
 import { ForepathHomeComponent } from './home/home.component';
@@ -106,6 +108,14 @@ export const forepathRoutes: Route[] = [
           websiteUrl: 'https://forepath.io',
         }),
       }),
+      {
+        path: 'blog',
+        component: ForepathBlogComponent,
+      },
+      {
+        path: 'blog/:slug',
+        component: ForepathBlogPostComponent,
+      },
       {
         path: '**',
         redirectTo: '',
