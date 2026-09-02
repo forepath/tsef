@@ -1386,6 +1386,10 @@
         <source>Privacy Policy</source>
         <target> Datenschutzerklärung </target>
       </trans-unit>
+      <trans-unit id="featurePortal-withdrawalLink" datatype="html">
+        <source>Right of Withdrawal</source>
+        <target> Widerruf </target>
+      </trans-unit>
       <trans-unit id="featurePortal-footerCopyright" datatype="html">
         <source>© 2025 IPvX UG (haftungsbeschränkt). All rights reserved.</source>
         <target> © 2025 IPvX UG (haftungsbeschränkt). Alle Rechte vorbehalten. </target>

@@ -108,7 +108,7 @@
               </a>
             </li>
             <li class="nav-item ms-md-3">
-              <a routerLink="/contact" class="btn btn-primary py-2 px-3 px-md-4" (click)="closeMobileMenu()">
+              <a routerLink="/contact" class="btn btn-primary" (click)="closeMobileMenu()">
                 <span i18n="@@featureDecabillPortal-bookDemoButton">Book a Demo</span>
               </a>
             </li>
@@ -140,16 +140,16 @@
         <div class="d-flex align-items-center gap-3 mt-4 fs-3">
           <a
             href="https://github.com/forepath/one"
-            class="text-decoration-none text-white small d-inline-flex align-items-center gap-1"
+            class="text-decoration-none footer-link small d-inline-flex align-items-center gap-1"
             target="_blank"
             rel="noopener noreferrer"
           >
             <i class="bi bi-github"></i>
           </a>
         </div>
-        <div class="dropdown mt-4">
+        <div class="dropdown dropup portal-nav-dropdown mt-4">
           <button
-            class="btn btn-outline-secondary btn-sm dropdown-toggle"
+            class="btn btn-dark btn-sm dropdown-toggle"
             type="button"
             id="footerLanguageDropdown"
             data-bs-toggle="dropdown"
@@ -157,14 +157,14 @@
             i18n-aria-label="@@featureDecabillPortal-languageSwitcherAriaLabel"
             aria-label="Select language"
           >
-            <i class="bi bi-globe me-1"></i>
+            <i class="bi bi-globe" aria-hidden="true"></i>
             <span i18n="@@featureDecabillPortal-language">Language</span>
           </button>
-          <ul class="dropdown-menu" aria-labelledby="footerLanguageDropdown">
+          <ul class="dropdown-menu portal-nav-dropdown-menu" aria-labelledby="footerLanguageDropdown">
             @for (locale of localeService.getAvailableLocales(); track locale.code) {
               <li>
                 <a
-                  class="dropdown-item"
+                  class="dropdown-item portal-nav-dropdown-item"
                   [class.active]="localeService.getCurrentLocale() === locale.code"
                   [href]="localeService.getLanguageSwitchUrl(locale.code)"
                   >{{ locale.label }}</a
@@ -178,14 +178,14 @@
         <h6 class="fw-bold mb-3" i18n="@@featureDecabillPortal-footerProduct">Product</h6>
         <ul class="list-unstyled mb-0">
           <li class="mb-2">
-            <a routerLink="/" class="text-decoration-none text-white small" i18n="@@featureDecabillPortal-navPlatform"
+            <a routerLink="/" class="text-decoration-none footer-link small" i18n="@@featureDecabillPortal-navPlatform"
               >Platform</a
             >
           </li>
           <li class="mb-2">
             <a
               routerLink="/pricing"
-              class="text-decoration-none text-white small"
+              class="text-decoration-none footer-link small"
               i18n="@@featureDecabillPortal-footerPricingLink"
               >Pricing</a
             >
@@ -193,7 +193,7 @@
           <li class="mb-2">
             <a
               href="https://docs.decabill.com"
-              class="text-decoration-none text-white small"
+              class="text-decoration-none footer-link small"
               target="_blank"
               rel="noopener noreferrer"
               i18n="@@featureDecabillPortal-footerDocumentation"
@@ -205,7 +205,7 @@
         <ul class="list-unstyled mb-0">
           @for (item of comparisonNavItems; track item.slug) {
             <li class="mb-2">
-              <a [routerLink]="item.routerLink" class="text-decoration-none text-white small">{{ item.label }}</a>
+              <a [routerLink]="item.routerLink" class="text-decoration-none footer-link small">{{ item.label }}</a>
             </li>
           }
         </ul>
@@ -216,7 +216,7 @@
           <li class="mb-2">
             <a
               routerLink="/contact"
-              class="text-decoration-none text-white small"
+              class="text-decoration-none footer-link small"
               i18n="@@sharedFeatureLandingpageContact-footerLink"
               >Contact</a
             >
@@ -227,7 +227,7 @@
           <li class="mb-2">
             <a
               routerLink="/legal/disclosure"
-              class="text-decoration-none text-white small"
+              class="text-decoration-none footer-link small"
               i18n="@@featureDecabillPortal-legalDisclosureLink"
               >Legal Disclosure</a
             >
@@ -235,7 +235,7 @@
           <li class="mb-2">
             <a
               routerLink="/legal/terms"
-              class="text-decoration-none text-white small"
+              class="text-decoration-none footer-link small"
               i18n="@@featureDecabillPortal-termsOfServiceLink"
               >Terms of Service</a
             >
@@ -243,9 +243,17 @@
           <li class="mb-2">
             <a
               routerLink="/legal/privacy"
-              class="text-decoration-none text-white small"
+              class="text-decoration-none footer-link small"
               i18n="@@featureDecabillPortal-privacyPolicyLink"
               >Privacy Policy</a
+            >
+          </li>
+          <li class="mb-2">
+            <a
+              [href]="withdrawalUrl"
+              class="text-decoration-none footer-link small"
+              i18n="@@featureDecabillPortal-withdrawalLink"
+              >Right of Withdrawal</a
             >
           </li>
         </ul>

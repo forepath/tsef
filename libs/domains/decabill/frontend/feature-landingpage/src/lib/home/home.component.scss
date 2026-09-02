@@ -206,7 +206,7 @@
       display: none;
     }
 
-    .intent-card-progress {
+    .intent-card-indicators {
       display: none;
     }
   }
@@ -222,29 +222,43 @@
   > .intent-card {
     position: relative;
     z-index: 3;
+    display: block;
   }
 
-  .intent-card-progress {
-    position: relative;
-    width: 75px;
-    height: 10px;
-    margin: 0 auto;
-    border-radius: 5px;
-    overflow: hidden;
-    margin-top: -10px;
+  .intent-card-indicators {
+    position: absolute;
+    left: 50%;
+    bottom: 0.75rem;
     z-index: 4;
-    top: -1rem;
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    transform: translateX(-50%);
+  }
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: var(--progress);
-      height: 100%;
+  .intent-card-indicator {
+    box-sizing: content-box;
+    width: 0.5rem;
+    height: 0.5rem;
+    padding: 0.625rem;
+    border: 0;
+    border-radius: 50%;
+    background-clip: content-box;
+    background-color: rgba(var(--bs-body-color-rgb), 0.28);
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      background-color: rgba(var(--bs-body-color-rgb), 0.45);
+      outline: none;
+    }
+
+    &--active {
       background-color: var(--bs-primary);
-      transition: width 0.3s ease;
+      transform: scale(1.15);
     }
   }
 }

@@ -1,6 +1,6 @@
 <!-- Hero -->
-<section id="hero" class="py-10 py-lg-6 bg-body-tertiary grid-section">
-  <div class="container grid-section__container">
+<section id="hero" class="py-10 bg-body-tertiary grid-section">
+  <div class="container hero-content grid-section__container">
     <div class="row justify-content-center">
       <div class="col-12 text-center hero-container">
         <h1 class="display-4 fw-semibold mb-4 hero-title" i18n="@@featureForepathHome-heroTitle">
@@ -17,20 +17,313 @@
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <a
             routerLink="/contact"
-            class="btn btn-primary btn-lg px-4 py-3 rounded-3 cta-btn cta-btn-primary"
+            class="btn btn-primary btn-lg rounded-3 cta-btn cta-btn-primary"
             i18n="@@featureForepathHome-heroContact"
+            ><i class="bi bi-envelope" aria-hidden="true"></i>Start a conversation</a
           >
-            <i class="bi bi-envelope me-2" aria-hidden="true"></i>
-            Start a conversation
-          </a>
           <a
             routerLink="/pricing/estimate"
-            class="btn btn-outline-primary btn-lg px-4 py-3 rounded-3 cta-btn"
+            class="btn btn-dark btn-lg rounded-3 cta-btn"
             i18n="@@featureForepathHome-heroEstimate"
+            ><i class="bi bi-calculator" aria-hidden="true"></i>Get an instant quote</a
           >
-            <i class="bi bi-calculator me-2" aria-hidden="true"></i>
-            Get an instant quote
-          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section id="process" class="py-10 bg-body-tertiary grid-section">
+  <div class="container grid-section__container">
+    <div
+      class="home-process"
+      role="navigation"
+      i18n-aria-label="@@featureForepathHome-processRegionLabel"
+      aria-label="How a ForePath engagement comes together"
+    >
+      <div class="home-process__stage">
+        <div class="home-process__funnel" aria-hidden="true">
+          <svg
+            class="home-process__funnel-svg home-process__funnel-svg--horizontal"
+            viewBox="0 0 200 100"
+            preserveAspectRatio="none"
+            focusable="false"
+          >
+            <defs>
+              <linearGradient id="homeProcessFunnelFillX" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <stop offset="18%" stop-color="rgb(255, 107, 53)" stop-opacity="0.2" />
+                <stop offset="50%" stop-color="rgb(255, 107, 53)" stop-opacity="0.26" />
+                <stop offset="82%" stop-color="rgb(255, 107, 53)" stop-opacity="0.14" />
+                <stop offset="100%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+              </linearGradient>
+              <linearGradient id="homeProcessFunnelBulbX" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <stop offset="28%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <stop offset="50%" stop-color="rgb(255, 107, 53)" stop-opacity="0.5">
+                  <animate
+                    attributeName="stop-opacity"
+                    values="0;0;0.55;0.55;0;0"
+                    keyTimes="0;0.08;0.16;0.51;0.82;1"
+                    calcMode="spline"
+                    keySplines="0.4 0 0.2 1; 0.42 0 0.2 1; 0 0 1 1; 0.4 0 0.2 1; 0 0 1 1"
+                    dur="7s"
+                    repeatCount="indefinite"
+                  />
+                </stop>
+                <stop offset="72%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <stop offset="100%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <animateTransform
+                  attributeName="gradientTransform"
+                  type="translate"
+                  values="-0.45 0; 0.035 0; 0.52 0; 0.52 0"
+                  keyTimes="0; 0.18; 0.51; 1"
+                  calcMode="spline"
+                  keySplines="0.3 0.4 0.4 1; 0.45 0 0.7 0.5; 0 0 1 1"
+                  dur="7s"
+                  repeatCount="indefinite"
+                />
+              </linearGradient>
+            </defs>
+            <path
+              class="home-process__funnel-body"
+              fill="url(#homeProcessFunnelFillX)"
+              d="M0 18 C52 18, 108 40, 142 47.5 C146 48.6, 148.5 49.3, 150 50 C148.5 50.7, 146 51.4, 142 52.5 C108 60, 52 82, 0 82 Z"
+            >
+              <animate
+                attributeName="d"
+                dur="7s"
+                repeatCount="indefinite"
+                calcMode="spline"
+                keyTimes="0; 0.1; 0.18; 0.4; 0.51; 0.82; 1"
+                keySplines="0.3 0.4 0.4 1; 0.35 0 0.65 1; 0.45 0 0.7 0.5; 0.42 0 0.58 1; 0.42 0 1 1; 0 0 1 1"
+                values="
+                  M0 18 C52 18, 108 40, 142 47.5 C146 48.6, 148.5 49.3, 150 50 C148.5 50.7, 146 51.4, 142 52.5 C108 60, 52 82, 0 82 Z;
+                  M0 6 C32 0, 68 16, 110 38 C128 45, 142 48.5, 150 50 C142 51.5, 128 55, 110 62 C68 84, 32 100, 0 94 Z;
+                  M0 30 C38 32, 62 12, 96 30 C118 40, 138 47, 150 50 C138 53, 118 60, 96 70 C62 88, 38 68, 0 70 Z;
+                  M0 28 C48 30, 78 20, 110 36 C128 44, 142 48.5, 150 50 C142 51.5, 128 56, 110 64 C78 80, 48 70, 0 72 Z;
+                  M0 26 C52 28, 92 32, 122 42 C136 46.5, 145 49, 150 50 C145 51, 136 53.5, 122 58 C92 68, 52 72, 0 74 Z;
+                  M0 18 C52 18, 108 40, 142 47.5 C146 48.6, 148.5 49.3, 150 50 C148.5 50.7, 146 51.4, 142 52.5 C108 60, 52 82, 0 82 Z;
+                  M0 18 C52 18, 108 40, 142 47.5 C146 48.6, 148.5 49.3, 150 50 C148.5 50.7, 146 51.4, 142 52.5 C108 60, 52 82, 0 82 Z
+                "
+              />
+            </path>
+            <path
+              class="home-process__funnel-body home-process__funnel-body--bulb"
+              fill="url(#homeProcessFunnelBulbX)"
+              d="M0 18 C52 18, 108 40, 142 47.5 C146 48.6, 148.5 49.3, 150 50 C148.5 50.7, 146 51.4, 142 52.5 C108 60, 52 82, 0 82 Z"
+            >
+              <animate
+                attributeName="d"
+                dur="7s"
+                repeatCount="indefinite"
+                calcMode="spline"
+                keyTimes="0; 0.1; 0.18; 0.4; 0.51; 0.82; 1"
+                keySplines="0.3 0.4 0.4 1; 0.35 0 0.65 1; 0.45 0 0.7 0.5; 0.42 0 0.58 1; 0.42 0 1 1; 0 0 1 1"
+                values="
+                  M0 18 C52 18, 108 40, 142 47.5 C146 48.6, 148.5 49.3, 150 50 C148.5 50.7, 146 51.4, 142 52.5 C108 60, 52 82, 0 82 Z;
+                  M0 6 C32 0, 68 16, 110 38 C128 45, 142 48.5, 150 50 C142 51.5, 128 55, 110 62 C68 84, 32 100, 0 94 Z;
+                  M0 30 C38 32, 62 12, 96 30 C118 40, 138 47, 150 50 C138 53, 118 60, 96 70 C62 88, 38 68, 0 70 Z;
+                  M0 28 C48 30, 78 20, 110 36 C128 44, 142 48.5, 150 50 C142 51.5, 128 56, 110 64 C78 80, 48 70, 0 72 Z;
+                  M0 26 C52 28, 92 32, 122 42 C136 46.5, 145 49, 150 50 C145 51, 136 53.5, 122 58 C92 68, 52 72, 0 74 Z;
+                  M0 18 C52 18, 108 40, 142 47.5 C146 48.6, 148.5 49.3, 150 50 C148.5 50.7, 146 51.4, 142 52.5 C108 60, 52 82, 0 82 Z;
+                  M0 18 C52 18, 108 40, 142 47.5 C146 48.6, 148.5 49.3, 150 50 C148.5 50.7, 146 51.4, 142 52.5 C108 60, 52 82, 0 82 Z
+                "
+              />
+            </path>
+          </svg>
+          <svg
+            class="home-process__funnel-svg home-process__funnel-svg--vertical"
+            viewBox="0 0 100 200"
+            preserveAspectRatio="none"
+            focusable="false"
+          >
+            <defs>
+              <linearGradient id="homeProcessFunnelFillY" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <stop offset="18%" stop-color="rgb(255, 107, 53)" stop-opacity="0.2" />
+                <stop offset="50%" stop-color="rgb(255, 107, 53)" stop-opacity="0.26" />
+                <stop offset="82%" stop-color="rgb(255, 107, 53)" stop-opacity="0.14" />
+                <stop offset="100%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+              </linearGradient>
+              <linearGradient id="homeProcessFunnelBulbY" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <stop offset="28%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <stop offset="50%" stop-color="rgb(255, 107, 53)" stop-opacity="0.5">
+                  <animate
+                    attributeName="stop-opacity"
+                    values="0;0;0.55;0.55;0;0"
+                    keyTimes="0;0.08;0.16;0.51;0.82;1"
+                    calcMode="spline"
+                    keySplines="0.4 0 0.2 1; 0.42 0 0.2 1; 0 0 1 1; 0.4 0 0.2 1; 0 0 1 1"
+                    dur="7s"
+                    repeatCount="indefinite"
+                  />
+                </stop>
+                <stop offset="72%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <stop offset="100%" stop-color="rgb(255, 107, 53)" stop-opacity="0" />
+                <animateTransform
+                  attributeName="gradientTransform"
+                  type="translate"
+                  values="0 -0.45; 0 0.035; 0 0.52; 0 0.52"
+                  keyTimes="0; 0.18; 0.51; 1"
+                  calcMode="spline"
+                  keySplines="0.3 0.4 0.4 1; 0.45 0 0.7 0.5; 0 0 1 1"
+                  dur="7s"
+                  repeatCount="indefinite"
+                />
+              </linearGradient>
+            </defs>
+            <path
+              class="home-process__funnel-body"
+              fill="url(#homeProcessFunnelFillY)"
+              d="M18 0 C18 52, 40 108, 47.5 142 C48.6 146, 49.3 148.5, 50 150 C50.7 148.5, 51.4 146, 52.5 142 C60 108, 82 52, 82 0 Z"
+            >
+              <animate
+                attributeName="d"
+                dur="7s"
+                repeatCount="indefinite"
+                calcMode="spline"
+                keyTimes="0; 0.1; 0.18; 0.4; 0.51; 0.82; 1"
+                keySplines="0.3 0.4 0.4 1; 0.35 0 0.65 1; 0.45 0 0.7 0.5; 0.42 0 0.58 1; 0.42 0 1 1; 0 0 1 1"
+                values="
+                  M18 0 C18 52, 40 108, 47.5 142 C48.6 146, 49.3 148.5, 50 150 C50.7 148.5, 51.4 146, 52.5 142 C60 108, 82 52, 82 0 Z;
+                  M6 0 C0 32, 16 68, 38 110 C45 128, 48.5 142, 50 150 C51.5 142, 55 128, 62 110 C84 68, 100 32, 94 0 Z;
+                  M30 0 C32 38, 12 62, 30 96 C40 118, 47 138, 50 150 C53 138, 60 118, 70 96 C88 62, 68 38, 70 0 Z;
+                  M28 0 C30 48, 20 78, 36 110 C44 128, 48.5 142, 50 150 C51.5 142, 56 128, 64 110 C80 78, 70 48, 72 0 Z;
+                  M26 0 C28 52, 32 92, 42 122 C46.5 136, 49 145, 50 150 C51 145, 53.5 136, 58 122 C68 92, 72 52, 74 0 Z;
+                  M18 0 C18 52, 40 108, 47.5 142 C48.6 146, 49.3 148.5, 50 150 C50.7 148.5, 51.4 146, 52.5 142 C60 108, 82 52, 82 0 Z;
+                  M18 0 C18 52, 40 108, 47.5 142 C48.6 146, 49.3 148.5, 50 150 C50.7 148.5, 51.4 146, 52.5 142 C60 108, 82 52, 82 0 Z
+                "
+              />
+            </path>
+            <path
+              class="home-process__funnel-body home-process__funnel-body--bulb"
+              fill="url(#homeProcessFunnelBulbY)"
+              d="M18 0 C18 52, 40 108, 47.5 142 C48.6 146, 49.3 148.5, 50 150 C50.7 148.5, 51.4 146, 52.5 142 C60 108, 82 52, 82 0 Z"
+            >
+              <animate
+                attributeName="d"
+                dur="7s"
+                repeatCount="indefinite"
+                calcMode="spline"
+                keyTimes="0; 0.1; 0.18; 0.4; 0.51; 0.82; 1"
+                keySplines="0.3 0.4 0.4 1; 0.35 0 0.65 1; 0.45 0 0.7 0.5; 0.42 0 0.58 1; 0.42 0 1 1; 0 0 1 1"
+                values="
+                  M18 0 C18 52, 40 108, 47.5 142 C48.6 146, 49.3 148.5, 50 150 C50.7 148.5, 51.4 146, 52.5 142 C60 108, 82 52, 82 0 Z;
+                  M6 0 C0 32, 16 68, 38 110 C45 128, 48.5 142, 50 150 C51.5 142, 55 128, 62 110 C84 68, 100 32, 94 0 Z;
+                  M30 0 C32 38, 12 62, 30 96 C40 118, 47 138, 50 150 C53 138, 60 118, 70 96 C88 62, 68 38, 70 0 Z;
+                  M28 0 C30 48, 20 78, 36 110 C44 128, 48.5 142, 50 150 C51.5 142, 56 128, 64 110 C80 78, 70 48, 72 0 Z;
+                  M26 0 C28 52, 32 92, 42 122 C46.5 136, 49 145, 50 150 C51 145, 53.5 136, 58 122 C68 92, 72 52, 74 0 Z;
+                  M18 0 C18 52, 40 108, 47.5 142 C48.6 146, 49.3 148.5, 50 150 C50.7 148.5, 51.4 146, 52.5 142 C60 108, 82 52, 82 0 Z;
+                  M18 0 C18 52, 40 108, 47.5 142 C48.6 146, 49.3 148.5, 50 150 C50.7 148.5, 51.4 146, 52.5 142 C60 108, 82 52, 82 0 Z
+                "
+              />
+            </path>
+          </svg>
+        </div>
+        <div class="row gx-4 gx-lg-5 gy-4 gy-lg-0 align-items-stretch home-process__content">
+          <div class="col-lg-6">
+            <ul class="list-unstyled mb-0 row gx-3 gy-3 gx-lg-4 gy-lg-4">
+              <li class="col-12 col-lg-6">
+                <article class="card border rounded-3 shadow-sm p-4 h-100 bg-white">
+                  <i class="bi bi-compass text-primary icon-md mb-3 d-block" aria-hidden="true"></i>
+                  <h3 class="h6 fw-semibold mb-2" i18n="@@featureForepathHome-processStep1Verb">Advise</h3>
+                  <p class="small text-muted mb-3" i18n="@@featureForepathHome-processStep1Caption">
+                    Direction, architecture, and constraints your team can execute
+                  </p>
+                  <a
+                    routerLink="/consulting"
+                    class="small fw-semibold text-primary text-decoration-none"
+                    i18n="@@featureForepathHome-processStep1Link"
+                    >View consulting <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i
+                  ></a>
+                </article>
+              </li>
+              <li class="col-12 col-lg-6">
+                <article class="card border rounded-3 shadow-sm p-4 h-100 bg-white">
+                  <i class="bi bi-code-slash text-primary icon-md mb-3 d-block" aria-hidden="true"></i>
+                  <h3 class="h6 fw-semibold mb-2" i18n="@@featureForepathHome-processStep2Verb">Build</h3>
+                  <p class="small text-muted mb-3" i18n="@@featureForepathHome-processStep2Caption">
+                    Ship software on stacks your engineers can own after handover
+                  </p>
+                  <a
+                    routerLink="/software-development"
+                    class="small fw-semibold text-primary text-decoration-none"
+                    i18n="@@featureForepathHome-processStep2Link"
+                    >View development <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i
+                  ></a>
+                </article>
+              </li>
+              <li class="col-12 col-lg-6">
+                <article class="card border rounded-3 shadow-sm p-4 h-100 bg-white">
+                  <i class="bi bi-hdd-stack text-primary icon-md mb-3 d-block" aria-hidden="true"></i>
+                  <h3 class="h6 fw-semibold mb-2" i18n="@@featureForepathHome-processStep3Verb">Operate</h3>
+                  <p class="small text-muted mb-3" i18n="@@featureForepathHome-processStep3Caption">
+                    Steady-state ownership with monitoring, SLAs, and on-call reality
+                  </p>
+                  <a
+                    routerLink="/it-systems"
+                    class="small fw-semibold text-primary text-decoration-none"
+                    i18n="@@featureForepathHome-processStep3Link"
+                    >View IT systems <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i
+                  ></a>
+                </article>
+              </li>
+              <li class="col-12 col-lg-6">
+                <article class="card border rounded-3 shadow-sm p-4 h-100 bg-white">
+                  <i class="bi bi-boxes text-primary icon-md mb-3 d-block" aria-hidden="true"></i>
+                  <h3 class="h6 fw-semibold mb-2" i18n="@@featureForepathHome-processStep4Verb">Extend</h3>
+                  <p class="small text-muted mb-3" i18n="@@featureForepathHome-processStep4Caption">
+                    Production tooling that stays on the same standards as the services
+                  </p>
+                  <a
+                    routerLink="/one"
+                    class="small fw-semibold text-primary text-decoration-none"
+                    i18n="@@featureForepathHome-processStep4Link"
+                    >View ForePath One <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i
+                  ></a>
+                </article>
+              </li>
+            </ul>
+          </div>
+          <div class="col-lg-6 d-none d-lg-block">
+            <div class="home-process__mark h-100">
+              <ul class="home-process__orbit" aria-hidden="true">
+                <li class="home-process__orbit-item" style="--i: 0; --orbit-step: 1">
+                  <span class="home-process__orbit-chip"><i class="bi bi-cloud"></i></span>
+                </li>
+                <li class="home-process__orbit-item" style="--i: 1; --orbit-step: 2">
+                  <span class="home-process__orbit-chip"><i class="bi bi-git"></i></span>
+                </li>
+                <li class="home-process__orbit-item" style="--i: 2; --orbit-step: 3">
+                  <span class="home-process__orbit-chip"><i class="bi bi-hdd-stack"></i></span>
+                </li>
+                <li class="home-process__orbit-item" style="--i: 3; --orbit-step: 2">
+                  <span class="home-process__orbit-chip"><i class="bi bi-code-slash"></i></span>
+                </li>
+                <li class="home-process__orbit-item" style="--i: 4; --orbit-step: 1">
+                  <span class="home-process__orbit-chip"><i class="bi bi-shield-lock"></i></span>
+                </li>
+                <li class="home-process__orbit-item" style="--i: 5; --orbit-step: 0">
+                  <span class="home-process__orbit-chip"><i class="bi bi-cpu"></i></span>
+                </li>
+                <li class="home-process__orbit-item" style="--i: 7; --orbit-step: 0">
+                  <span class="home-process__orbit-chip"><i class="bi bi-boxes"></i></span>
+                </li>
+              </ul>
+              <img
+                src="assets/images/favicon.svg"
+                width="128"
+                height="128"
+                class="home-process__favicon bg-body-tertiary"
+                i18n-alt="@@featureForepathHome-processFaviconAlt"
+                alt="ForePath"
+                loading="lazy"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -134,32 +427,42 @@
           We advise, build, and operate the systems organizations depend on. That spans cloud foundations, software
           delivery, and day-to-day IT operations.
         </p>
-        <ul class="list-unstyled mb-4">
-          <li class="mb-2 d-flex gap-2">
-            <i class="bi bi-check-circle-fill text-success flex-shrink-0" aria-hidden="true"></i>
-            <span i18n="@@featureForepathHome-humanMeetsItem1"
-              >Consulting spans infrastructure, cloud, DevOps, security, and AI adoption. Architecture is shaped so your
-              teams can implement it.</span
-            >
+        <ul class="list-unstyled mb-4 row g-3">
+          <li class="col-12 col-sm-6">
+            <article class="card border rounded-3 shadow-sm p-4 bg-white h-100">
+              <i class="bi bi-compass text-primary icon-md mb-3 d-block" aria-hidden="true"></i>
+              <p class="mb-0 small" i18n="@@featureForepathHome-humanMeetsItem1">
+                Consulting spans infrastructure, cloud, DevOps, security, and AI adoption. Architecture is shaped so
+                your teams can implement it.
+              </p>
+            </article>
           </li>
-          <li class="mb-2 d-flex gap-2">
-            <i class="bi bi-check-circle-fill text-success flex-shrink-0" aria-hidden="true"></i>
-            <span i18n="@@featureForepathHome-humanMeetsItem2"
-              >Software is delivered on modern stacks your engineers can own after handover.</span
-            >
+          <li class="col-12 col-sm-6">
+            <article class="card border rounded-3 shadow-sm p-4 bg-white h-100">
+              <i class="bi bi-code-slash text-primary icon-md mb-3 d-block" aria-hidden="true"></i>
+              <p class="mb-0 small" i18n="@@featureForepathHome-humanMeetsItem2">
+                Software is delivered on modern stacks your engineers can own after handover. Pairing and clear
+                documentation keep ownership with your team.
+              </p>
+            </article>
           </li>
-          <li class="mb-2 d-flex gap-2">
-            <i class="bi bi-check-circle-fill text-success flex-shrink-0" aria-hidden="true"></i>
-            <span i18n="@@featureForepathHome-humanMeetsItem3"
-              >IT systems and managed operations are built for on-call reality.</span
-            >
+          <li class="col-12 col-sm-6">
+            <article class="card border rounded-3 shadow-sm p-4 bg-white h-100">
+              <i class="bi bi-hdd-stack text-primary icon-md mb-3 d-block" aria-hidden="true"></i>
+              <p class="mb-0 small" i18n="@@featureForepathHome-humanMeetsItem3">
+                IT systems and managed operations are built for on-call reality. Monitoring and runbooks stay practical
+                for the people who run production.
+              </p>
+            </article>
           </li>
-          <li class="d-flex gap-2">
-            <i class="bi bi-check-circle-fill text-success flex-shrink-0" aria-hidden="true"></i>
-            <span i18n="@@featureForepathHome-humanMeetsItem4"
-              >Automation, CI/CD, and agent workflows remove toil where machines excel. Judgment stays with your
-              team.</span
-            >
+          <li class="col-12 col-sm-6">
+            <article class="card border rounded-3 shadow-sm p-4 bg-white h-100">
+              <i class="bi bi-cpu text-primary icon-md mb-3 d-block" aria-hidden="true"></i>
+              <p class="mb-0 small" i18n="@@featureForepathHome-humanMeetsItem4">
+                Automation, CI/CD, and agent workflows remove toil where machines excel. Judgment stays with your team
+                on every critical decision.
+              </p>
+            </article>
           </li>
         </ul>
         <p class="text-muted mb-4" i18n="@@featureForepathHome-humanMeetsClosing">
@@ -274,11 +577,8 @@
         Tell us where you are stuck. That might be migration, delivery, AI adoption, or all three. We will propose a
         practical path and the team to execute it.
       </p>
-      <a
-        routerLink="/contact"
-        class="btn btn-light btn-lg px-5 py-3 rounded-3 fw-semibold cta-btn"
-        i18n="@@featureForepathHome-ctaButton"
-        >Contact us</a
+      <a routerLink="/contact" class="btn btn-primary btn-lg rounded-3 cta-btn" i18n="@@featureForepathHome-ctaButton"
+        ><i class="bi bi-envelope" aria-hidden="true"></i>Contact us</a
       >
     </div>
   </div>

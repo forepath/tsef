@@ -6,7 +6,7 @@
         <h1 class="display-4 fw-semibold mb-4 hero-title" i18n="@@featureDecabillHome-heroTitle">
           <span class="text-primary">Billing for agencies</span> and digital products
         </h1>
-        <p class="hero-lead lead fs-5 mb-4 mx-auto" i18n="@@featureDecabillHome-heroLead">
+        <p class="hero-lead lead fs-5 mb-5 mx-auto" i18n="@@featureDecabillHome-heroLead">
           Decabill is one platform for agencies and digital product teams. Bill client services and projects, SaaS
           subscriptions, and managed hosting without stitching together separate tools.
         </p>
@@ -41,21 +41,17 @@
             href="https://docs.decabill.com/en/docs/getting-started"
             target="_blank"
             rel="noopener noreferrer"
-            class="btn btn-primary btn-lg px-4 py-3 rounded-3 cta-btn cta-btn-primary"
+            class="btn btn-primary btn-lg rounded-3 cta-btn cta-btn-primary"
             i18n="@@featureDecabillHome-getStartedHero"
+            ><i class="bi bi-rocket-takeoff" aria-hidden="true"></i>Get started</a
           >
-            <i class="bi bi-rocket-takeoff me-2" aria-hidden="true"></i>
-            Get started
-          </a>
           <a
             routerLink="."
             fragment="solution"
-            class="btn btn-outline-light btn-lg px-4 py-3 rounded-3 cta-btn cta-btn-secondary"
+            class="btn btn-dark btn-lg rounded-3 cta-btn cta-btn-secondary"
             i18n="@@featureDecabillHome-productTour"
+            ><i class="bi bi-play-circle" aria-hidden="true"></i>View product tour</a
           >
-            <i class="bi bi-trophy me-2" aria-hidden="true"></i>
-            View product tour
-          </a>
         </div>
       </div>
     </div>
@@ -92,10 +88,23 @@
           i18n-alt="@@featureDecabillHome-heroSlideAdmin"
         />
         <div
-          class="intent-card-progress bg-body-tertiary"
-          style="--progress: {{ (activeSlide() / 4) * 75 }}px"
-          (click)="scrollToIntent($event)"
-        ></div>
+          class="intent-card-indicators"
+          role="tablist"
+          i18n-aria-label="@@featureDecabillHome-heroSlideIndicatorsAriaLabel"
+          aria-label="Hero screenshot slides"
+        >
+          @for (slide of [1, 2, 3, 4]; track slide) {
+            <button
+              type="button"
+              class="intent-card-indicator"
+              [class.intent-card-indicator--active]="activeSlide() === slide"
+              role="tab"
+              [attr.aria-selected]="activeSlide() === slide"
+              [attr.aria-label]="'Go to slide ' + slide"
+              (click)="selectSlide(slide)"
+            ></button>
+          }
+        </div>
       </div>
     </div>
   </div>
@@ -981,17 +990,17 @@
       <div class="d-flex gap-3 justify-content-center flex-wrap">
         <a
           routerLink="/contact"
-          class="btn btn-light btn-lg px-5 py-3 rounded-3 fw-semibold cta-btn"
+          class="btn btn-primary btn-lg rounded-3 cta-btn"
           i18n="@@featureDecabillHome-ctaBookDemo"
-          >Book a demo</a
+          ><i class="bi bi-calendar-check" aria-hidden="true"></i>Book a demo</a
         >
         <a
           href="https://docs.decabill.com/en/docs/getting-started"
-          class="btn btn-outline-light btn-lg px-5 py-3 rounded-3 cta-btn"
+          class="btn btn-primary btn-lg rounded-3 cta-btn"
           target="_blank"
           rel="noopener noreferrer"
           i18n="@@featureDecabillHome-ctaDocs"
-          >Read the docs</a
+          ><i class="bi bi-book" aria-hidden="true"></i>Read the docs</a
         >
       </div>
     </div>

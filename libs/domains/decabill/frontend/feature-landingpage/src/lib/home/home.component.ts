@@ -121,15 +121,8 @@ export class PortalHomeComponent implements OnInit {
     );
   }
 
-  scrollToIntent(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const slideWidth = rect.width / 4;
-    let slideNum = Math.floor(clickX / slideWidth) + 1;
-
-    slideNum = Math.max(1, Math.min(4, slideNum));
-    this.activeSlide.set(slideNum);
+  selectSlide(slide: number): void {
+    this.activeSlide.set(Math.max(1, Math.min(4, slide)));
   }
 
   pauseAutoplay() {
