@@ -1,0 +1,94 @@
+<section id="hero" class="py-10 bg-body-tertiary grid-section">
+  <div class="container hero-content grid-section__container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 text-center">
+        <h1 class="display-4 fw-semibold mb-4 hero-title" i18n="@@featureForepathBlog-heroTitle">Blog</h1>
+        <p class="hero-lead lead fs-5 mb-5 mx-auto max-w-700" i18n="@@featureForepathBlog-heroLead">
+          Practical notes on consulting, engineering, and operating modern IT.
+        </p>
+        <label class="visually-hidden" for="blog-search" i18n="@@featureForepathBlog-searchLabel">Search posts</label>
+        <div class="blog-search mx-auto">
+          <i class="bi bi-search blog-search__icon" aria-hidden="true"></i>
+          <input
+            id="blog-search"
+            type="search"
+            class="form-control form-control-lg blog-search__input"
+            [formControl]="searchControl"
+            i18n-placeholder="@@featureForepathBlog-searchPlaceholder"
+            placeholder="Search posts"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-10 bg-body-tertiary grid-section">
+  <div class="container grid-section__container">
+    @if (loading() && posts().length === 0) {
+      <p class="text-center text-muted mb-0" i18n="@@featureForepathBlog-loading">Loading posts…</p>
+    } @else if (errorMessage()) {
+      <p class="text-center text-danger mb-0" role="alert">{{ errorMessage() }}</p>
+    } @else if (posts().length === 0) {
+      <p class="text-center text-muted mb-0" i18n="@@featureForepathBlog-empty">No posts found. Check back soon.</p>
+    } @else {
+      <div class="row g-4">
+        @for (post of posts(); track post.id) {
+          <div class="col-md-6 col-lg-4">
+            <article class="blog-card card border rounded-3 shadow-sm bg-white h-100">
+              <a [routerLink]="['/blog', post.slug]" class="blog-card__link text-decoration-none text-body">
+                @if (post.feature_image) {
+                  <div class="blog-card__media">
+                    <img
+                      [src]="post.feature_image"
+                      [alt]="post.feature_image_alt || post.title"
+                      class="blog-card__image"
+                      loading="lazy"
+                    />
+                  </div>
+                }
+                <div class="blog-card__body">
+                  @if (post.published_at) {
+                    <time class="blog-card__date small text-muted" [attr.datetime]="post.published_at">
+                      {{ post.published_at | date: 'mediumDate' }}
+                    </time>
+                  }
+                  <h2 class="blog-card__title h5 fw-semibold mt-2 mb-2">{{ post.title }}</h2>
+                  @if (post.excerpt) {
+                    <p class="blog-card__excerpt text-muted mb-3">{{ post.excerpt }}</p>
+                  }
+                  @if (post.tags?.length) {
+                    <ul class="blog-card__tags list-unstyled d-flex flex-wrap gap-2 mb-3">
+                      @for (tag of post.tags; track tag.id) {
+                        <li>
+                          <span class="blog-card__tag small">{{ tag.name }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
+                  <span class="blog-card__read-more small fw-semibold text-primary mt-auto">
+                    <span i18n="@@featureForepathBlog-readMore">Read more</span>
+                    <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+                  </span>
+                </div>
+              </a>
+            </article>
+          </div>
+        }
+      </div>
+
+      @if (pagination()?.next) {
+        <div class="text-center mt-5">
+          <button type="button" class="btn btn-dark rounded-3" [disabled]="loadingMore()" (click)="loadMore()">
+            @if (loadingMore()) {
+              <span i18n="@@featureForepathBlog-loadingMore">Loading…</span>
+            } @else {
+              <span i18n="@@featureForepathBlog-loadMore">Load more</span>
+            }
+          </button>
+        </div>
+      }
+    }
+  </div>
+</section>

@@ -46,4 +46,8 @@ export const environment: Environment = {
     restApiUrl: 'http://localhost:3300/api',
     turnstileSiteKey: CLOUDFLARE_TURNSTILE_TEST_SITE_KEY,
   },
+  blog: {
+    contentApiUrl: 'https://blog.forepath.io',
+    contentApiKey: '851c4d770ec5fbc780ba2fc925',
+  },
 };

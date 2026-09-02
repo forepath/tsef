@@ -77,4 +77,14 @@ export interface Environment {
     restApiUrl: string;
     turnstileSiteKey: string;
   };
+  /**
+   * Ghost Content API (public, read-only). When set, enables the marketing blog pages.
+   * Content API keys are designed for browser use.
+   */
+  blog?: {
+    /** Ghost site origin, e.g. https://blog.forepath.io */
+    contentApiUrl: string;
+    /** Ghost Content API key */
+    contentApiKey: string;
+  };
 }

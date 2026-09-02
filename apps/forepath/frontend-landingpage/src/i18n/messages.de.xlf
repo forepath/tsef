@@ -362,6 +362,10 @@
         <source>One</source>
         <target>ForePath One</target>
       </trans-unit>
+      <trans-unit id="featureForepath-navBlog" datatype="html">
+        <source>Blog</source>
+        <target>Blog</target>
+      </trans-unit>
       <trans-unit id="featureForepath-navPricing" datatype="html">
         <source>Pricing</source>
         <target>Preise</target>
@@ -2333,6 +2337,10 @@
         <source>Get an instant quote</source>
         <target>Sofortangebot erhalten</target>
       </trans-unit>
+      <trans-unit id="featureForepathHome-blogTeaserLabel" datatype="html">
+        <source>Latest from the blog</source>
+        <target>Aktuelles aus dem Blog</target>
+      </trans-unit>
       <trans-unit id="featureForepathHome-processRegionLabel" datatype="html">
         <source>How a ForePath engagement comes together</source>
         <target>So fügt sich ein ForePath-Engagement zusammen</target>
@@ -2520,6 +2528,98 @@
       <trans-unit id="sharedFeatureLandingpageContact-detailsWebLabel" datatype="html">
         <source>Web</source>
         <target>Web</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-metaTitle" datatype="html">
+        <source>Blog :: ForePath</source>
+        <target>Blog :: ForePath</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-metaDescription" datatype="html">
+        <source>Insights from ForePath on consulting, software engineering, IT systems, and shipping reliable platforms.</source>
+        <target>Einblicke von ForePath zu Consulting, Software Engineering, IT-Systemen und zuverlässigen Plattformen.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-metaKeywords" datatype="html">
+        <source>ForePath blog, consulting, software engineering, IT systems, cloud, DevOps</source>
+        <target>ForePath Blog, Consulting, Software Engineering, IT-Systeme, Cloud, DevOps</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-heroTitle" datatype="html">
+        <source>Blog</source>
+        <target>Blog</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-heroLead" datatype="html">
+        <source> Practical notes on consulting, engineering, and operating modern IT. </source>
+        <target>Praxisnahe Beiträge zu Consulting, Engineering und dem Betrieb moderner IT.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-searchLabel" datatype="html">
+        <source>Search posts</source>
+        <target>Beiträge suchen</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-searchPlaceholder" datatype="html">
+        <source>Search posts</source>
+        <target>Beiträge suchen</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-loading" datatype="html">
+        <source>Loading posts…</source>
+        <target>Beiträge werden geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-loadError" datatype="html">
+        <source>We could not load blog posts right now. Please try again later.</source>
+        <target>Blogbeiträge konnten gerade nicht geladen werden. Bitte versuchen Sie es später erneut.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-empty" datatype="html">
+        <source> No posts found. Check back soon. </source>
+        <target>Keine Beiträge gefunden. Schauen Sie bald wieder vorbei.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-loadingMore" datatype="html">
+        <source>Loading…</source>
+        <target>Wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-loadMore" datatype="html">
+        <source>Load more</source>
+        <target>Mehr laden</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-readMore" datatype="html">
+        <source>Read more</source>
+        <target>Weiterlesen</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-backToBlog" datatype="html">
+        <source>Back to blog</source>
+        <target>Zurück zum Blog</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-loading" datatype="html">
+        <source>Loading post…</source>
+        <target>Beitrag wird geladen…</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundTitle" datatype="html">
+        <source>Post not found</source>
+        <target>Beitrag nicht gefunden</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundBody" datatype="html">
+        <source> This article may have been moved or is no longer published. </source>
+        <target>Dieser Artikel wurde möglicherweise verschoben oder ist nicht mehr veröffentlicht.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundCta" datatype="html">
+        <source>Browse all posts</source>
+        <target>Alle Beiträge ansehen</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-loadError" datatype="html">
+        <source>We could not load this post right now. Please try again later.</source>
+        <target>Dieser Beitrag konnte gerade nicht geladen werden. Bitte versuchen Sie es später erneut.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-fallbackDescription" datatype="html">
+        <source>Article from the ForePath blog.</source>
+        <target>Artikel aus dem ForePath-Blog.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundMetaTitle" datatype="html">
+        <source>Post not found :: ForePath</source>
+        <target>Beitrag nicht gefunden :: ForePath</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-notFoundMetaDescription" datatype="html">
+        <source>The requested ForePath blog post could not be found.</source>
+        <target>Der angeforderte ForePath-Blogbeitrag konnte nicht gefunden werden.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlogPost-readingTimeUnit" datatype="html">
+        <source>min read</source>
+        <target>Min. Lesezeit</target>
       </trans-unit>
       <trans-unit id="utilCookieConsent-message" datatype="html">
         <source>This website uses cookies to ensure you get the best experience on our website.</source>

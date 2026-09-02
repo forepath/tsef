@@ -1,4 +1,4 @@
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,10 +10,15 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { ENVIRONMENT, type Environment } from '@forepath/shared/frontend/util-configuration';
 import { addPageMetaTags, buildPageMetaTags } from '@forepath/shared/frontend/util-meta';
+import { catchError, of } from 'rxjs';
+
+import { GhostContentApiService } from '../blog/ghost-content-api.service';
+import type { GhostPost } from '../blog/ghost.types';
 
 interface PlatformLogo {
   id: string;
@@ -51,7 +56,7 @@ const PLATFORM_LOGO_SLOTS: readonly (readonly PlatformLogo[])[] = [
 
 @Component({
   selector: 'framework-forepath-home',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, DatePipe],
   styleUrls: ['./home.component.scss'],
   templateUrl: './home.component.html',
   standalone: true,
@@ -68,6 +73,7 @@ export class ForepathHomeComponent implements OnInit {
       };
     }),
   );
+  readonly latestBlogPost = signal<GhostPost | null>(null);
 
   private readonly titleService = inject(Title);
   private readonly metaService = inject(Meta);
@@ -75,6 +81,7 @@ export class ForepathHomeComponent implements OnInit {
   private readonly locale = inject(LOCALE_ID);
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly ghostApi = inject(GhostContentApiService);
   private platformLogoRotationIntervalId: ReturnType<typeof setInterval> | undefined;
 
   ngOnInit(): void {
@@ -100,10 +107,23 @@ export class ForepathHomeComponent implements OnInit {
       ),
     );
 
+    this.loadLatestBlogPost();
     this.startPlatformLogoRotation();
     this.destroyRef.onDestroy(() => {
       clearInterval(this.platformLogoRotationIntervalId);
     });
+  }
+
+  private loadLatestBlogPost(): void {
+    this.ghostApi
+      .browsePosts({ page: 1, limit: 1 })
+      .pipe(
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((result) => {
+        this.latestBlogPost.set(result?.posts[0] ?? null);
+      });
   }
 
   private startPlatformLogoRotation(): void {

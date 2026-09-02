@@ -1,6 +1,6 @@
-import { Environment } from './environment.interface';
 import { forepathAuthMarketing } from './auth-marketing.forepath';
 import { CLOUDFLARE_TURNSTILE_TEST_SITE_KEY } from './communication.constants';
+import { Environment } from './environment.interface';
 
 export const environment: Environment = {
   production: true,
@@ -44,5 +44,9 @@ export const environment: Environment = {
   communication: {
     restApiUrl: 'http://host.docker.internal:3300/api',
     turnstileSiteKey: CLOUDFLARE_TURNSTILE_TEST_SITE_KEY,
+  },
+  blog: {
+    contentApiUrl: 'https://blog.forepath.io',
+    contentApiKey: '851c4d770ec5fbc780ba2fc925',
   },
 };
