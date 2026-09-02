@@ -37,12 +37,12 @@
           </p>
           <button
             type="button"
-            class="btn btn-primary btn-lg px-5 py-3 rounded-3 cta-btn"
+            class="btn btn-primary btn-lg rounded-3 cta-btn"
             (click)="requestGpuAccess()"
             [disabled]="isRequestingGpuAccess()"
             i18n="@@featureForepathProjectEstimate-gpuPermissionButton"
           >
-            Continue securely
+            <i class="bi bi-shield-lock" aria-hidden="true"></i>Continue securely
           </button>
         </div>
       } @else if (isDeviceUnsupported()) {
@@ -58,11 +58,10 @@
           </p>
           <a
             routerLink="/contact"
-            class="btn btn-primary btn-lg px-5 py-3 rounded-3 cta-btn"
+            class="btn btn-primary btn-lg rounded-3 cta-btn"
             i18n="@@featureForepathProjectEstimate-contactButton"
+            ><i class="bi bi-envelope" aria-hidden="true"></i>Contact us</a
           >
-            Contact us
-          </a>
         </div>
       } @else if (showOverlay()) {
         <framework-forepath-project-estimate-loading-panel [mode]="overlayKind()!" />
@@ -251,7 +250,7 @@
             <div class="d-grid d-md-flex justify-content-md-end mt-3">
               <button
                 type="button"
-                class="btn btn-primary px-4"
+                class="btn btn-primary"
                 (click)="submitPrompt()"
                 [disabled]="!canSubmit() || !prompt().trim()"
                 i18n-aria-label="@@featureForepathProjectEstimate-sendAriaLabel"
@@ -279,11 +278,10 @@
       </p>
       <a
         routerLink="/contact"
-        class="btn btn-light btn-lg px-5 py-3 rounded-3 fw-semibold cta-btn"
+        class="btn btn-primary btn-lg rounded-3 cta-btn"
         i18n="@@featureForepathProjectEstimate-ctaButton"
+        ><i class="bi bi-envelope" aria-hidden="true"></i>Contact us</a
       >
-        Contact us
-      </a>
     </div>
   </div>
 </section>

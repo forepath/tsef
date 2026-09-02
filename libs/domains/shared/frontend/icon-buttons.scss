@@ -1,5 +1,6 @@
-$icon-button-size: 2.375rem;
-$icon-button-size-sm: 2rem;
+// Match default / btn-sm control height from $input-btn-padding-* (font 0.875rem, lh 1.5, 1px border).
+$icon-button-size: 2.5625rem;
+$icon-button-size-sm: 2.025rem;
 // Compact inline actions (file tree hover, chat session switcher, etc.): use `.py-0` (often with `.px-1`).
 $icon-button-size-xs: 1.5rem;
 
@@ -12,7 +13,7 @@ $icon-button-size-xs: 1.5rem;
 
 // Bootstrap icon-only buttons (square): one Bootstrap icon, or icon + screen-reader-only text.
 // :only-child ignores text nodes, so exclude labeled CTAs and buttons with visible element labels.
-$icon-button-selector: '.btn:not(.btn-close):not(.btn-options):not(.btn-link):not(.cta-btn):not(:has(> i.bi + :not(.visually-hidden))):is(:has(> i.bi:only-child), :has(> i.bi:first-child + .visually-hidden:last-child))';
+$icon-button-selector: '.btn:not(.btn-close):not(.btn-options):not(.btn-link):not(.cta-btn):not(.home-cta-btn):not(:has(> i.bi + :not(.visually-hidden))):is(:has(> i.bi:only-child), :has(> i.bi:first-child + .visually-hidden:last-child))';
 
 #{$icon-button-selector} {
   display: inline-flex;

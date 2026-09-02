@@ -53,21 +53,17 @@
             href="https://docs.agenstra.com/en/docs/getting-started"
             target="_blank"
             rel="noopener noreferrer"
-            class="btn btn-primary btn-lg px-4 py-3 rounded-3 cta-btn cta-btn-primary"
+            class="btn btn-primary btn-lg rounded-3 cta-btn cta-btn-primary"
             i18n="@@featurePortalHome-getStartedHero"
+            ><i class="bi bi-rocket-takeoff" aria-hidden="true"></i>Get started</a
           >
-            <i class="bi bi-rocket-takeoff me-2" aria-hidden="true"></i>
-            Get started
-          </a>
           <a
             routerLink="."
             fragment="solution"
-            class="btn btn-outline-light btn-lg px-4 py-3 rounded-3 cta-btn cta-btn-secondary"
+            class="btn btn-dark btn-lg rounded-3 cta-btn cta-btn-secondary"
             i18n="@@featurePortalHome-productTour"
+            ><i class="bi bi-play-circle" aria-hidden="true"></i>View product tour</a
           >
-            <i class="bi bi-trophy me-2" aria-hidden="true"></i>
-            View product tour
-          </a>
         </div>
       </div>
     </div>
@@ -104,10 +100,23 @@
           i18n-alt="@@featurePortalHome-heroSlideAudit"
         />
         <div
-          class="intent-card-progress bg-body-tertiary"
-          style="--progress: {{ (activeSlide() / 4) * 75 }}px"
-          (click)="scrollToIntent($event)"
-        ></div>
+          class="intent-card-indicators"
+          role="tablist"
+          i18n-aria-label="@@featurePortalHome-heroSlideIndicatorsAriaLabel"
+          aria-label="Hero screenshot slides"
+        >
+          @for (slide of [1, 2, 3, 4]; track slide) {
+            <button
+              type="button"
+              class="intent-card-indicator"
+              [class.intent-card-indicator--active]="activeSlide() === slide"
+              role="tab"
+              [attr.aria-selected]="activeSlide() === slide"
+              [attr.aria-label]="'Go to slide ' + slide"
+              (click)="selectSlide(slide)"
+            ></button>
+          }
+        </div>
       </div>
     </div>
   </div>
@@ -1252,18 +1261,16 @@
               href="https://docs.agenstra.com/en/docs/getting-started"
               target="_blank"
               rel="noopener noreferrer"
-              class="btn btn-light btn-lg px-5 py-3 rounded-3 fw-semibold home-cta-btn cta-btn-primary"
+              class="btn btn-primary btn-lg rounded-3 home-cta-btn cta-btn-primary"
               i18n="@@featurePortalHome-getStarted"
+              ><i class="bi bi-rocket-takeoff" aria-hidden="true"></i>Get started</a
             >
-              Get started
-            </a>
             <a
               routerLink="/contact"
-              class="btn btn-outline-light btn-lg px-5 py-3 rounded-3 home-cta-btn cta-btn-secondary"
+              class="btn btn-primary btn-lg rounded-3 home-cta-btn cta-btn-secondary"
               i18n="@@featurePortalHome-talkToTeam"
+              ><i class="bi bi-chat-dots" aria-hidden="true"></i>Talk to the team</a
             >
-              Talk to the team
-            </a>
           </div>
         </div>
       </div>

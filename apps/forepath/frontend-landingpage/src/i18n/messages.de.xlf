@@ -426,6 +426,10 @@
         <source>Privacy Policy</source>
         <target>Datenschutzerklärung</target>
       </trans-unit>
+      <trans-unit id="featureForepath-withdrawalLink" datatype="html">
+        <source>Right of Withdrawal</source>
+        <target>Widerruf</target>
+      </trans-unit>
       <trans-unit id="featureForepath-footerCopyright" datatype="html">
         <source> © 2025 IPvX UG (haftungsbeschränkt). All rights reserved. </source>
         <target>© 2025 IPvX UG (haftungsbeschränkt). Alle Rechte vorbehalten.</target>
@@ -515,16 +519,16 @@
         <target>Beratung umfasst Infrastruktur, Cloud, DevOps, Sicherheit und KI-Einführung. Architektur wird so gestaltet, dass Ihre Teams sie umsetzen können.</target>
       </trans-unit>
       <trans-unit id="featureForepathHome-humanMeetsItem2" datatype="html">
-        <source>Software is delivered on modern stacks your engineers can own after handover.</source>
-        <target> Software entsteht auf modernen Stacks, die Ihre Entwickler nach der Übergabe selbst betreiben können. </target>
+        <source>Software is delivered on modern stacks your engineers can own after handover. Pairing and clear documentation keep ownership with your team.</source>
+        <target>Software entsteht auf modernen Stacks, die Ihre Entwickler nach der Übergabe selbst betreiben können. Pairing und klare Dokumentation halten die Verantwortung bei Ihrem Team.</target>
       </trans-unit>
       <trans-unit id="featureForepathHome-humanMeetsItem3" datatype="html">
-        <source>IT systems and managed operations are built for on-call reality.</source>
-        <target>IT-Systeme und Managed Operations werden für den echten Produktionsbetrieb aufgebaut.</target>
+        <source>IT systems and managed operations are built for on-call reality. Monitoring and runbooks stay practical for the people who run production.</source>
+        <target>IT-Systeme und Managed Operations werden für den echten Produktionsbetrieb aufgebaut. Monitoring und Runbooks bleiben praxistauglich für die Menschen, die Produktion betreiben.</target>
       </trans-unit>
       <trans-unit id="featureForepathHome-humanMeetsItem4" datatype="html">
-        <source>Automation, CI/CD, and agent workflows remove toil where machines excel. Judgment stays with your team.</source>
-        <target>Automatisierung, CI/CD und Agent-Workflows übernehmen repetitive Arbeit dort, wo Maschinen stark sind. Urteilsvermögen bleibt bei Ihrem Team.</target>
+        <source>Automation, CI/CD, and agent workflows remove toil where machines excel. Judgment stays with your team on every critical decision.</source>
+        <target>Automatisierung, CI/CD und Agent-Workflows übernehmen repetitive Arbeit dort, wo Maschinen stark sind. Urteilsvermögen bleibt bei Ihrem Team bei jeder kritischen Entscheidung.</target>
       </trans-unit>
       <trans-unit id="featureForepathHome-humanMeetsClosing" datatype="html">
         <source> Human review, pairing, and explicit guardrails are part of every engagement. The goal is more capability with the same control. You get faster delivery, clearer operations, and technology your team still understands. </source>
@@ -605,205 +609,125 @@
         <source> Reliable infrastructure comes from open technologies, clear processes, and partners who treat operations and security as one discipline. We run the systems your business depends on, from the office floor to the data centre, so your teams stay productive without constant firefighting. </source>
         <target>Zuverlässige Infrastrukturen entstehen durch offene Technologien, klare Prozesse und Partner, die Betrieb und Sicherheit zusammen denken. Wir betreiben die Systeme, von denen Ihr Unternehmen abhängt, vom Arbeitsplatz bis zur Cloud.</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catNetworkTitle" datatype="html">
-        <source>Network</source>
-        <target>Netzwerk</target>
+      <trans-unit id="featureForepathItSystems-domainNetworkTitle" datatype="html">
+        <source>Network and connectivity</source>
+        <target>Netzwerk und Konnektivität</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catNetworkDesc" datatype="html">
-        <source> We design, operate, and maintain your LAN, WAN, Wi-Fi, and firewall estate with documented changes and clear capacity planning. </source>
-        <target> Wir planen, betreiben und warten Ihr LAN-, WAN-, WLAN- und Firewall-Umfeld mit dokumentierten Änderungen und klarer Kapazitätsplanung. </target>
+      <trans-unit id="featureForepathItSystems-domainNetworkDesc" datatype="html">
+        <source>We design and operate LAN, WAN, Wi-Fi, firewalls, and unified communications so connectivity stays reliable from the office floor to remote sites.</source>
+        <target>Wir planen und betreiben LAN, WAN, WLAN, Firewalls und Unified Communications, damit Konnektivität vom Arbeitsplatz bis zu entfernten Standorten zuverlässig bleibt.</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catNetworkItem1" datatype="html">
-        <source>Firewall rule management with scheduled change windows</source>
-        <target>Firewall-Regelverwaltung mit geplanten Änderungsfenstern</target>
+      <trans-unit id="featureForepathItSystems-domainNetworkItem1" datatype="html">
+        <source>Firewall and WAN changes with scheduled windows and failover testing</source>
+        <target>Firewall- und WAN-Änderungen mit geplanten Fenstern und Failover-Tests</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catNetworkItem2" datatype="html">
-        <source>Wi-Fi coverage surveys and ongoing performance tuning</source>
-        <target>WLAN-Abdeckungsanalysen und laufendes Performance-Tuning</target>
+      <trans-unit id="featureForepathItSystems-domainNetworkItem2" datatype="html">
+        <source>Wi-Fi coverage surveys with ongoing performance tuning</source>
+        <target>WLAN-Abdeckungsanalysen mit laufendem Performance-Tuning</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catNetworkItem3" datatype="html">
-        <source>WAN link monitoring with regular failover testing</source>
-        <target>WAN-Link-Überwachung mit regelmäßigen Failover-Tests</target>
+      <trans-unit id="featureForepathItSystems-domainNetworkItem3" datatype="html">
+        <source>Voice, Teams, and dial plan support with call quality monitoring</source>
+        <target>Support für Telefonie, Teams und Wählpläne mit Überwachung der Gesprächsqualität</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catServersTitle" datatype="html">
-        <source>Servers</source>
-        <target>Server</target>
+      <trans-unit id="featureForepathItSystems-domainComputeTitle" datatype="html">
+        <source>Compute and platforms</source>
+        <target>Compute und Plattformen</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catServersDesc" datatype="html">
-        <source>Physical and virtual servers stay patched, monitored, and rightsized throughout their full lifecycle.</source>
-        <target>Physische und virtuelle Server bleiben über ihren gesamten Lifecycle gepatcht, überwacht und passend dimensioniert.</target>
+      <trans-unit id="featureForepathItSystems-domainComputeDesc" datatype="html">
+        <source>Physical and virtual servers plus hypervisors stay patched, monitored, and rightsized across their full lifecycle.</source>
+        <target>Physische und virtuelle Server sowie Hypervisoren bleiben über ihren gesamten Lifecycle gepatcht, überwacht und passend dimensioniert.</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catServersItem1" datatype="html">
+      <trans-unit id="featureForepathItSystems-domainComputeItem1" datatype="html">
         <source>Operating system patching and vulnerability remediation</source>
         <target>Betriebssystem-Patching und Behebung von Schwachstellen</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catServersItem2" datatype="html">
-        <source>Performance baselining with regular capacity reviews</source>
-        <target>Performance-Baselining mit regelmäßigen Kapazitätsprüfungen</target>
+      <trans-unit id="featureForepathItSystems-domainComputeItem2" datatype="html">
+        <source>Cluster health monitoring with coordinated patching and failover procedures</source>
+        <target>Cluster-Health-Monitoring mit abgestimmtem Patching und Failover-Verfahren</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catServersItem3" datatype="html">
-        <source>Hardware warranty tracking and lifecycle reporting</source>
-        <target>Garantieverfolgung und Lifecycle-Reporting für Hardware</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkstationsTitle" datatype="html">
-        <source>Workstations</source>
-        <target>Arbeitsplätze</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkstationsDesc" datatype="html">
-        <source>Laptops and desktops are provisioned consistently and supported through refresh cycles at every location.</source>
-        <target>Laptops und Desktops werden einheitlich bereitgestellt und über Refresh-Zyklen an allen Standorten betreut.</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkstationsItem1" datatype="html">
-        <source>Standardized imaging with approved software baselines</source>
-        <target>Standardisiertes Imaging mit freigegebenen Software-Baselines</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkstationsItem2" datatype="html">
-        <source>Remote and on-site support with defined response targets</source>
-        <target>Remote- und Vor-Ort-Support mit definierten Reaktionszeiten</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkstationsItem3" datatype="html">
-        <source>Asset tracking including lease return and disposal processes</source>
-        <target>Asset-Tracking inklusive Leasingrückgabe und Entsorgungsprozesse</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catAccessTitle" datatype="html">
-        <source>Access &amp; entry control</source>
-        <target>Zugriffs- &amp; Zutrittskontrolle</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catAccessDesc" datatype="html">
-        <source> Digital and physical access policies are enforced so the right people reach the right resources at the right time. </source>
-        <target> Digitale und physische Zugriffsrichtlinien stellen sicher, dass die richtigen Personen zur richtigen Zeit auf die richtigen Ressourcen zugreifen. </target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catAccessItem1" datatype="html">
-        <source>Identity reviews and role based access administration</source>
-        <target>Identitätsprüfungen und rollenbasierte Zugriffsverwaltung</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catAccessItem2" datatype="html">
-        <source>Badge and door access provisioning with audit trails</source>
-        <target>Bereitstellung von Badges und Türzugängen mit Audit-Trails</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catAccessItem3" datatype="html">
-        <source>Privileged account monitoring and periodic recertification</source>
-        <target>Überwachung privilegierter Konten und regelmäßige Rezertifizierung</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catTelephonyTitle" datatype="html">
-        <source>Telephony &amp; communication</source>
-        <target>Telefonie &amp; Kommunikation</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catTelephonyDesc" datatype="html">
-        <source> Voice, Teams, and unified communication platforms stay integrated, correctly licensed, and ready for everyday use. </source>
-        <target> Telefonie, Teams und Unified-Communication-Plattformen bleiben integriert, korrekt lizenziert und für den täglichen Einsatz bereit. </target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catTelephonyItem1" datatype="html">
-        <source>Number porting, trunk configuration, and dial plan maintenance</source>
-        <target>Rufnummernportierung, Trunk-Konfiguration und Wartung von Wählplänen</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catTelephonyItem2" datatype="html">
-        <source>Microsoft Teams policies plus meeting room support</source>
-        <target>Microsoft-Teams-Richtlinien und Support für Besprechungsräume</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catTelephonyItem3" datatype="html">
-        <source>Call quality monitoring with a clear escalation path</source>
-        <target>Überwachung der Gesprächsqualität mit klar definiertem Eskalationsweg</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catBackupTitle" datatype="html">
-        <source>Backup &amp; archiving</source>
-        <target>Backup &amp; Datenarchivierung</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catBackupDesc" datatype="html">
-        <source> Backup jobs, retention policies, and restore procedures are tested against your compliance and recovery targets. </source>
-        <target> Backup-Jobs, Aufbewahrungsrichtlinien und Wiederherstellungsverfahren werden an Ihre Compliance- und Recovery-Ziele geprüft. </target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catBackupItem1" datatype="html">
-        <source>Backup success monitoring with proactive alerting</source>
-        <target>Überwachung erfolgreicher Backups mit proaktivem Alerting</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catBackupItem2" datatype="html">
-        <source>Scheduled restore drills with documented outcomes</source>
-        <target>Geplante Restore-Übungen mit dokumentierten Ergebnissen</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catBackupItem3" datatype="html">
-        <source>Retention and archival policy enforcement across systems</source>
-        <target>Durchsetzung von Aufbewahrungs- und Archivierungsrichtlinien systemübergreifend</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catSecurityTitle" datatype="html">
-        <source>Security &amp; endpoint protection</source>
-        <target> Sicherheit &amp; Endpoint-Schutz </target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catSecurityDesc" datatype="html">
-        <source>Endpoints and users are protected through layered controls and a documented response process.</source>
-        <target>Endpoints und Nutzer werden durch mehrschichtige Kontrollen und einen dokumentierten Reaktionsprozess geschützt.</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catSecurityItem1" datatype="html">
-        <source>Endpoint detection and antivirus policy management</source>
-        <target>Endpoint Detection und Verwaltung von Antivirus-Richtlinien</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catSecurityItem2" datatype="html">
-        <source>Security patch compliance with regular reporting</source>
-        <target> Patch-Compliance mit regelmäßigem Reporting </target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catSecurityItem3" datatype="html">
-        <source>Phishing triage and incident response runbooks</source>
-        <target>Phishing-Triage und Incident-Response-Runbooks</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkplaceTitle" datatype="html">
-        <source>Digital workplace</source>
-        <target>Digitaler Arbeitsplatz</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkplaceDesc" datatype="html">
-        <source> Collaboration tools and productivity platforms are kept current so employees can work without daily IT friction. </source>
-        <target> Kollaborationstools und Produktivitätsplattformen bleiben aktuell, damit Mitarbeitende ohne tägliche IT-Hürden arbeiten können. </target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkplaceItem1" datatype="html">
-        <source>Microsoft 365 tenant administration and policy updates</source>
-        <target>Microsoft-365-Tenant-Administration und Richtlinien-Updates</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkplaceItem2" datatype="html">
-        <source>License optimisation with periodic entitlement reviews</source>
-        <target>Lizenzoptimierung mit regelmäßigen Berechtigungsprüfungen</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catWorkplaceItem3" datatype="html">
-        <source>Shared workspace and file access governance</source>
-        <target>Governance für gemeinsame Arbeitsbereiche und Dateizugriffe</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catVirtualizationTitle" datatype="html">
-        <source>Virtualization</source>
-        <target>Virtualisierung</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catVirtualizationDesc" datatype="html">
-        <source>VMware, Hyper-V, Proxmox, and container hosts run with resilience planning and documented recovery steps.</source>
-        <target>VMware-, Hyper-V-, Proxmox- und Container-Hosts laufen mit Ausfallsicherheitsplanung und dokumentierten Recovery-Schritten.</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catVirtualizationItem1" datatype="html">
-        <source>Cluster health monitoring with coordinated patching</source>
-        <target>Cluster-Health-Monitoring mit abgestimmtem Patching</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catVirtualizationItem2" datatype="html">
-        <source>Snapshot, migration, and failover procedures</source>
-        <target>Snapshot-, Migrations- und Failover-Verfahren</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catVirtualizationItem3" datatype="html">
+      <trans-unit id="featureForepathItSystems-domainComputeItem3" datatype="html">
         <source>Capacity planning for seasonal and project driven peaks</source>
         <target>Kapazitätsplanung für saisonale und projektbedingte Lastspitzen</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catMonitoringTitle" datatype="html">
-        <source>Monitoring &amp; management</source>
-        <target> Monitoring &amp; Verwaltung </target>
+      <trans-unit id="featureForepathItSystems-domainEndpointsTitle" datatype="html">
+        <source>Endpoints and workplace</source>
+        <target>Endpoints und Arbeitsplatz</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catMonitoringDesc" datatype="html">
-        <source>Dashboards, alerts, and ticket workflows are tuned so issues surface early and teams resolve them faster.</source>
-        <target>Dashboards, Alerts und Ticket-Workflows werden so abgestimmt, dass Probleme früh sichtbar werden und Teams schneller reagieren.</target>
+      <trans-unit id="featureForepathItSystems-domainEndpointsDesc" datatype="html">
+        <source>Workstations and collaboration platforms are provisioned consistently so employees can work without daily IT friction.</source>
+        <target>Arbeitsplätze und Kollaborationsplattformen werden einheitlich bereitgestellt, damit Mitarbeitende ohne tägliche IT-Hürden arbeiten können.</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catMonitoringItem1" datatype="html">
+      <trans-unit id="featureForepathItSystems-domainEndpointsItem1" datatype="html">
+        <source>Standardized imaging with approved software baselines</source>
+        <target>Standardisiertes Imaging mit freigegebenen Software-Baselines</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainEndpointsItem2" datatype="html">
+        <source>Microsoft 365 administration, licensing reviews, and workspace governance</source>
+        <target>Microsoft-365-Administration, Lizenzprüfungen und Governance für Arbeitsbereiche</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainEndpointsItem3" datatype="html">
+        <source>Remote and on-site support through refresh and disposal cycles</source>
+        <target>Remote- und Vor-Ort-Support über Refresh- und Entsorgungszyklen hinweg</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainIdentityTitle" datatype="html">
+        <source>Identity and access</source>
+        <target>Identität und Zugriff</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainIdentityDesc" datatype="html">
+        <source>Digital and physical access policies are enforced so the right people reach the right resources at the right time.</source>
+        <target>Digitale und physische Zugriffsrichtlinien stellen sicher, dass die richtigen Personen zur richtigen Zeit auf die richtigen Ressourcen zugreifen.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainIdentityItem1" datatype="html">
+        <source>Identity reviews and role based access administration</source>
+        <target>Identitätsprüfungen und rollenbasierte Zugriffsverwaltung</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainIdentityItem2" datatype="html">
+        <source>Badge and door access provisioning with audit trails</source>
+        <target>Bereitstellung von Badges und Türzugängen mit Audit-Trails</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainIdentityItem3" datatype="html">
+        <source>Privileged account monitoring and periodic recertification</source>
+        <target>Überwachung privilegierter Konten und regelmäßige Rezertifizierung</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainSecurityTitle" datatype="html">
+        <source>Security and protection</source>
+        <target>Sicherheit und Schutz</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainSecurityDesc" datatype="html">
+        <source>Endpoints and users are protected through layered controls and a documented response process.</source>
+        <target>Endpoints und Nutzer werden durch mehrschichtige Kontrollen und einen dokumentierten Reaktionsprozess geschützt.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainSecurityItem1" datatype="html">
+        <source>Endpoint detection and antivirus policy management</source>
+        <target>Endpoint Detection und Verwaltung von Antivirus-Richtlinien</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainSecurityItem2" datatype="html">
+        <source>Security patch compliance with regular reporting</source>
+        <target>Patch-Compliance mit regelmäßigem Reporting</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainSecurityItem3" datatype="html">
+        <source>Phishing triage and incident response runbooks</source>
+        <target>Phishing-Triage und Incident-Response-Runbooks</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainResilienceTitle" datatype="html">
+        <source>Resilience and operations</source>
+        <target>Resilienz und Betrieb</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainResilienceDesc" datatype="html">
+        <source>Backup, recovery, and monitoring are tuned so issues surface early and recovery targets stay achievable.</source>
+        <target>Backup, Recovery und Monitoring werden so abgestimmt, dass Probleme früh sichtbar werden und Recovery-Ziele erreichbar bleiben.</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainResilienceItem1" datatype="html">
+        <source>Backup monitoring with scheduled restore drills</source>
+        <target>Backup-Monitoring mit geplanten Restore-Übungen</target>
+      </trans-unit>
+      <trans-unit id="featureForepathItSystems-domainResilienceItem2" datatype="html">
         <source>Alert threshold tuning to reduce noise and fatigue</source>
         <target>Feinabstimmung von Alert-Schwellenwerten zur Reduktion von Rauschen und Ermüdung</target>
       </trans-unit>
-      <trans-unit id="featureForepathItSystems-catMonitoringItem2" datatype="html">
-        <source>SLA aligned ticket routing with clear escalation paths</source>
-        <target>SLA-konformes Ticket-Routing mit klaren Eskalationspfaden</target>
-      </trans-unit>
-      <trans-unit id="featureForepathItSystems-catMonitoringItem3" datatype="html">
-        <source>Monthly operational health reports for stakeholders</source>
-        <target> Monatliche Betriebsberichte für Stakeholder </target>
+      <trans-unit id="featureForepathItSystems-domainResilienceItem3" datatype="html">
+        <source>SLA aligned ticket routing with monthly operational health reports</source>
+        <target>SLA-konformes Ticket-Routing mit monatlichen Betriebsberichten</target>
       </trans-unit>
       <trans-unit id="featureForepathItSystems-topiTitle" datatype="html">
         <source>Rent the hardware you need, month by month</source>
@@ -814,20 +738,20 @@
         <target> Über unsere Partnerschaft mit topi mieten Sie Laptops, Server, Netzwerktechnik und Zubehör monatlich, statt alles sofort zu finanzieren. Kommt die Hardware mit ForePath Managed Services, können sogar die Servicekosten in dieselbe Monatsrate einfließen. </target>
       </trans-unit>
       <trans-unit id="featureForepathItSystems-topiItem1" datatype="html">
-        <source>Predictable monthly rates that keep capital free for other priorities</source>
-        <target>Planbare Monatsraten, damit Kapital für andere Vorhaben frei bleibt</target>
+        <source>Predictable monthly rates keep capital free for other priorities. You pay for the hardware you need without locking budget into large upfront purchases.</source>
+        <target>Planbare Monatsraten halten Kapital für andere Vorhaben frei. Sie zahlen für die Hardware, die Sie brauchen, ohne Budget in großen Einmalkäufen zu binden.</target>
       </trans-unit>
       <trans-unit id="featureForepathItSystems-topiItem2" datatype="html">
-        <source>A digital rental flow with warranty coverage on every device</source>
-        <target>Digitaler Mietprozess mit Garantieabdeckung für jedes Gerät</target>
+        <source>A digital rental flow covers procurement end to end. Warranty coverage is included on every device so support stays straightforward.</source>
+        <target>Ein digitaler Mietprozess deckt die Beschaffung durchgängig ab. Garantieabdeckung ist auf jedem Gerät enthalten, damit Support unkompliziert bleibt.</target>
       </trans-unit>
       <trans-unit id="featureForepathItSystems-topiItem3" datatype="html">
-        <source>Optional topi Care packages for repair or faster device exchange</source>
-        <target>Optionale topi-Care-Pakete für Reparatur oder schnelleren Geräteaustausch</target>
+        <source>Optional topi Care packages cover repair and faster device exchange. When something breaks, your team gets a clear path back to productive hardware.</source>
+        <target>Optionale topi Care Pakete decken Reparatur und schnelleren Geräteaustausch ab. Wenn etwas ausfällt, hat Ihr Team einen klaren Weg zurück zu produktiver Hardware.</target>
       </trans-unit>
       <trans-unit id="featureForepathItSystems-topiItem4" datatype="html">
-        <source>Scale up or refresh equipment as your team and projects evolve</source>
-        <target>Ausbau und Austausch der Ausstattung, wenn Team und Projekte wachsen</target>
+        <source>Scale up or refresh equipment as your team and projects evolve. Add devices for new hires or replace aging kits without restarting a capital cycle.</source>
+        <target>Bauen Sie die Ausstattung aus oder erneuern Sie sie, wenn Team und Projekte wachsen. Ergänzen Sie Geräte für neue Mitarbeitende oder ersetzen Sie ältere Kits, ohne einen neuen Investitionszyklus zu starten.</target>
       </trans-unit>
       <trans-unit id="featureForepathItSystems-topiClosing" datatype="html">
         <source> From first deployments to refresh cycles, we help you choose hardware that fits your environment and wrap it in an operating model your teams can rely on. </source>
@@ -2408,6 +2332,62 @@
       <trans-unit id="featureForepathHome-heroEstimate" datatype="html">
         <source>Get an instant quote</source>
         <target>Sofortangebot erhalten</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processRegionLabel" datatype="html">
+        <source>How a ForePath engagement comes together</source>
+        <target>So fügt sich ein ForePath-Engagement zusammen</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processFaviconAlt" datatype="html">
+        <source>ForePath</source>
+        <target>ForePath</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep1Verb" datatype="html">
+        <source>Advise</source>
+        <target>Beraten</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep1Caption" datatype="html">
+        <source>Direction, architecture, and constraints your team can execute</source>
+        <target>Richtung, Architektur und Rahmenbedingungen, die Ihr Team umsetzen kann</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep1Link" datatype="html">
+        <source>View consulting <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/></source>
+        <target>Beratung ansehen <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep2Verb" datatype="html">
+        <source>Build</source>
+        <target>Bauen</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep2Caption" datatype="html">
+        <source>Ship software on stacks your engineers can own after handover</source>
+        <target>Software auf Stacks liefern, die Ihre Engineers nach der Übergabe besitzen können</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep2Link" datatype="html">
+        <source>View development <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/></source>
+        <target>Entwicklung ansehen <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep3Verb" datatype="html">
+        <source>Operate</source>
+        <target>Betreiben</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep3Caption" datatype="html">
+        <source>Steady-state ownership with monitoring, SLAs, and on-call reality</source>
+        <target>Dauerhafter Betrieb mit Monitoring, SLAs und On-Call-Realität</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep3Link" datatype="html">
+        <source>View IT systems <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/></source>
+        <target>IT-Systeme ansehen <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep4Verb" datatype="html">
+        <source>Extend</source>
+        <target>Erweitern</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep4Caption" datatype="html">
+        <source>Production tooling that stays on the same standards as the services</source>
+        <target>Produktions-Tooling, das denselben Standards folgt wie die Services</target>
+      </trans-unit>
+      <trans-unit id="featureForepathHome-processStep4Link" datatype="html">
+        <source>View ForePath One <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/></source>
+        <target>ForePath One ansehen <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i class=&quot;bi bi-arrow-right ms-1&quot; aria-hidden=&quot;true&quot;&gt;"/><x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/></target>
       </trans-unit>
       <trans-unit id="featureForepathPricing-heroEstimateCta" datatype="html">
         <source>Get an instant quote</source>

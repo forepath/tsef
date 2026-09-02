@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
-import { LocaleService } from '@forepath/shared/frontend/util-configuration';
+import { ENVIRONMENT, LocaleService, type Environment } from '@forepath/shared/frontend/util-configuration';
 import { filter, map, startWith } from 'rxjs';
 import { FOREPATH_CONTACT, FOREPATH_SOCIAL_LINKS } from '../forepath-contact.config';
 
@@ -39,7 +39,13 @@ export class ForepathContainerComponent {
   protected readonly contact = FOREPATH_CONTACT;
   protected readonly socialLinks = FOREPATH_SOCIAL_LINKS;
 
+  private readonly environment = inject<Environment>(ENVIRONMENT);
+  private readonly locale = inject(LOCALE_ID);
   private readonly router = inject(Router);
+
+  readonly withdrawalUrl = this.environment.production
+    ? `${this.environment.billing.frontendUrl}/${this.locale}/withdrawal`
+    : `${this.environment.billing.frontendUrl}/withdrawal`;
 
   private readonly navUrl = toSignal(
     this.router.events.pipe(

@@ -1043,6 +1043,9 @@
       <trans-unit id="featurePortal-privacyPolicyLink" datatype="html">
         <source>Privacy Policy</source>
         </trans-unit>
+      <trans-unit id="featurePortal-withdrawalLink" datatype="html">
+        <source>Right of Withdrawal</source>
+        </trans-unit>
       <trans-unit id="featurePortal-footerCopyright" datatype="html">
         <source> © 2025 IPvX UG (haftungsbeschränkt). All rights reserved. </source>
         </trans-unit>
