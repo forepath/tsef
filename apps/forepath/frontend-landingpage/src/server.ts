@@ -6,11 +6,16 @@ import { createSsrExpressApp } from '@forepath/shared/frontend/util-express-serv
 
 import bootstrap from './main.server';
 
+function shouldBypassStatic(pathname: string): boolean {
+  return pathname === '/' || pathname === '/blog' || pathname.startsWith('/blog/');
+}
+
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const { app, warmStaticCache } = createSsrExpressApp({
   apexDomains: ['forepath.io'],
   bootstrap,
   serverDistFolder,
+  shouldBypassStatic,
 });
 
 /**
