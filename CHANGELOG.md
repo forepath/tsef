@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.28.1](https://github.com/forepath/one/compare/v2.28.0...v2.28.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* **shared:** express server route cache bypass ([#592](https://github.com/forepath/one/issues/592)) ([755e775](https://github.com/forepath/one/commit/755e77576514969be398681a16102e98c058fb75))
+
 ## [2.28.0](https://github.com/forepath/one/compare/v2.27.0...v2.28.0) (2026-09-03)
 
 
