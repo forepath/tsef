@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.28.0](https://github.com/forepath/one/compare/v2.27.0...v2.28.0) (2026-09-03)
+
+
+### Features
+
+* **decabill:** payed at date marker ([#587](https://github.com/forepath/one/issues/587)) ([071b853](https://github.com/forepath/one/commit/071b853277f3460947d217987625df57b3328405))
+* **decabill:** supplier invoices ([#586](https://github.com/forepath/one/issues/586)) ([d8b82ee](https://github.com/forepath/one/commit/d8b82ee32b29a02168599f7cad96c31aed334c37))
+* **decabill:** usage-meter included usage ([#584](https://github.com/forepath/one/issues/584)) ([e3b003f](https://github.com/forepath/one/commit/e3b003f0a81b5ada2d9e4fb89d0fc09cc652aebb))
+* **forepath:** ghost blog integration ([#590](https://github.com/forepath/one/issues/590)) ([215d7be](https://github.com/forepath/one/commit/215d7be2b6f0e21f590a42a59adcf28687466052))
+* peristent storage providers ([#583](https://github.com/forepath/one/issues/583)) ([d376578](https://github.com/forepath/one/commit/d376578aba95da115fd8103e1aea43f01d1f2a2e))
+
+
+### Chores
+
+* unified page styling ([#589](https://github.com/forepath/one/issues/589)) ([313dbb2](https://github.com/forepath/one/commit/313dbb21fb560694c1f0d8c97e2a64a493c0971a))
+
 ## [2.27.0](https://github.com/forepath/one/compare/v2.26.1...v2.27.0) (2026-08-27)
 
 
