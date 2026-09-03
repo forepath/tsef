@@ -25,6 +25,7 @@ export interface CreateDelegatingServerOptions {
   availableLocales?: readonly string[];
   defaultLocale?: string;
   port?: number | string;
+  shouldBypassStatic?: (pathname: string) => boolean;
   /**
    * Optional override for loading locale `server.mjs` modules (tests).
    * Defaults to a dynamic `import()` of the file URL.
@@ -187,7 +188,7 @@ export function createDelegatingServer(options: CreateDelegatingServerOptions): 
   const availableLocales = options.availableLocales ?? ['en', 'de'];
   const defaultLocale = options.defaultLocale ?? 'en';
   const port = options.port ?? process.env['PORT'] ?? 4000;
-  const { serverRoot } = options;
+  const { serverRoot, shouldBypassStatic } = options;
   const loadLocaleServerModule = options.loadLocaleServerModule ?? defaultLoadLocaleServerModule;
   let localeServers = new Map<string, LocaleExpressHandler>();
 
@@ -215,7 +216,9 @@ export function createDelegatingServer(options: CreateDelegatingServerOptions): 
 
       const pathnameForLocale = stripLocalePrefixFromPath(requestUrl.pathname, locale);
       const browserLocaleRoot = join(serverRoot, 'browser', locale);
-      const staticFilePath = resolveLocalizedStaticFilePath(browserLocaleRoot, pathnameForLocale);
+      const staticFilePath = shouldBypassStatic?.(pathnameForLocale)
+        ? null
+        : resolveLocalizedStaticFilePath(browserLocaleRoot, pathnameForLocale);
 
       if (staticFilePath) {
         sendStaticFile(res, staticFilePath);

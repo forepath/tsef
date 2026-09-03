@@ -20,6 +20,7 @@ export interface CreateSsrExpressAppOptions {
   apexDomains: readonly string[];
   bootstrap: SsrExpressBootstrap;
   serverDistFolder: string;
+  shouldBypassStatic?: (pathname: string) => boolean;
 }
 
 export interface SsrExpressAppHandle {
@@ -33,10 +34,18 @@ export interface SsrExpressAppHandle {
  * start-time memory cache first, then falls back to Angular CommonEngine SSR.
  */
 export function createSsrExpressApp(options: CreateSsrExpressAppOptions): SsrExpressAppHandle {
-  const { apexDomains, bootstrap, serverDistFolder } = options;
+  const { apexDomains, bootstrap, serverDistFolder, shouldBypassStatic } = options;
   const browserDistFolder = resolveLocalizedBrowserDistFolder(serverDistFolder);
   const indexHtml = join(serverDistFolder, 'index.server.html');
   const app = express();
+  const memoryStaticMiddleware = createMemoryStaticMiddleware({
+    root: browserDistFolder,
+    index: 'index.html',
+  });
+  const diskStaticMiddleware = express.static(browserDistFolder, {
+    maxAge: '1y',
+    index: 'index.html',
+  });
   const commonEngine = new CommonEngine({
     allowedHosts: buildSsrAllowedHosts(apexDomains),
   });
@@ -44,22 +53,22 @@ export function createSsrExpressApp(options: CreateSsrExpressAppOptions): SsrExp
   app.use(createSecurityHeadersMiddleware());
   registerRuntimeConfigEndpoint(app);
 
-  app.get(
-    '**',
-    createMemoryStaticMiddleware({
-      root: browserDistFolder,
-      index: 'index.html',
-    }),
-  );
+  app.get('**', (req: Request, res: Response, next: NextFunction) => {
+    if (shouldBypassStatic?.(req.path)) {
+      return next();
+    }
+
+    return memoryStaticMiddleware(req, res, next);
+  });
 
   // Disk fallback when STATIC_MEMORY_CACHE=false or a file was not warmed.
-  app.get(
-    '**',
-    express.static(browserDistFolder, {
-      maxAge: '1y',
-      index: 'index.html',
-    }),
-  );
+  app.get('**', (req: Request, res: Response, next: NextFunction) => {
+    if (shouldBypassStatic?.(req.path)) {
+      return next();
+    }
+
+    return diskStaticMiddleware(req, res, next);
+  });
 
   app.get('**', (req: Request, res: Response, next: NextFunction) => {
     const { protocol, originalUrl, baseUrl, headers } = req;

@@ -213,6 +213,30 @@ describe('create-delegating-server', () => {
       }
     });
 
+    it('delegates to SSR when static output is bypassed for a route', async () => {
+      const handle = createDelegatingServer({
+        serverRoot,
+        availableLocales: ['en'],
+        defaultLocale: 'en',
+        port: 0,
+        shouldBypassStatic: (pathname) => pathname === '/',
+        loadLocaleServerModule: createLocaleLoader({ en: enHandler }),
+      });
+
+      await handle.listen();
+      const address = handle.server.address();
+      const port = typeof address === 'object' && address ? address.port : 0;
+
+      try {
+        const response = await httpGet(port, '/');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toBe('ssr-en:/');
+      } finally {
+        await closeServer(handle.server);
+      }
+    });
+
     it('serves from disk when the memory cache was cleared after warm', async () => {
       const handle = createDelegatingServer({
         serverRoot,
