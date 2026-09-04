@@ -367,6 +367,7 @@
 }
 
 .home-human-meets__photo {
+  position: relative;
   width: 100%;
   min-height: 14rem;
   background-image: url('/assets/images/home-human-meets-machine.png');
@@ -398,6 +399,13 @@
     min-height: 100%;
     margin-bottom: 0;
   }
+}
+
+.home-human-meets__ai-label {
+  width: auto;
+  height: 2.5rem;
+  max-width: 40%;
+  object-fit: contain;
 }
 
 .home-roots-crest {

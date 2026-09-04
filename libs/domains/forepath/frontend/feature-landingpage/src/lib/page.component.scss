@@ -187,6 +187,14 @@ section {
   font-size: 0.875rem;
 }
 
+.blog-card__tag {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.35rem;
+  background: rgba(255, 107, 53, 0.1);
+  color: var(--bs-body-color);
+}
+
 .logo-partner {
   filter: grayscale(100%);
   opacity: 0.5;

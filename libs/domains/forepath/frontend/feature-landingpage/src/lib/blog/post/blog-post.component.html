@@ -23,26 +23,52 @@
               <span i18n="@@featureForepathBlogPost-backToBlog">Back to blog</span>
             </a>
           </p>
-          @if (currentPost.primary_tag) {
+          @if (primaryDisplayTag(currentPost); as primaryTag) {
             <p class="blog-post__eyebrow small text-primary fw-semibold mb-2">
-              {{ currentPost.primary_tag.name }}
+              {{ primaryTag.name }}
             </p>
           }
           <h1 class="display-5 fw-semibold hero-title mb-3">{{ currentPost.title }}</h1>
-          <div class="blog-post__meta text-muted small d-flex flex-wrap gap-3">
-            @if (currentPost.published_at) {
-              <time [attr.datetime]="currentPost.published_at">
-                {{ currentPost.published_at | date: 'longDate' }}
-              </time>
-            }
-            @if (currentPost.primary_author?.name) {
-              <span>{{ currentPost.primary_author?.name }}</span>
-            }
-            @if (currentPost.reading_time) {
-              <span
-                >{{ currentPost.reading_time }}
-                <span i18n="@@featureForepathBlogPost-readingTimeUnit">min read</span></span
-              >
+          <div
+            class="blog-post__meta text-muted small d-flex flex-wrap align-items-center justify-content-between gap-3"
+          >
+            <div class="d-flex flex-wrap gap-3">
+              @if (currentPost.published_at) {
+                <time [attr.datetime]="currentPost.published_at">
+                  {{ currentPost.published_at | date: 'longDate' }}
+                </time>
+              }
+              @if (currentPost.primary_author?.name) {
+                <span>{{ currentPost.primary_author?.name }}</span>
+              }
+              @if (currentPost.reading_time) {
+                <span
+                  >{{ currentPost.reading_time }}
+                  <span i18n="@@featureForepathBlogPost-readingTimeUnit">min read</span></span
+                >
+              }
+            </div>
+            @if (aiMarkers(currentPost); as markers) {
+              @if (markers.generated || markers.modified) {
+                <div class="blog-post__ai-markers d-flex flex-wrap align-items-center gap-2">
+                  @if (markers.generated) {
+                    <img
+                      [src]="aiGeneratedLabelSrc"
+                      class="blog-post__ai-label"
+                      i18n-alt="@@featureForepathBlog-aiGeneratedAlt"
+                      alt="AI Generated"
+                    />
+                  }
+                  @if (markers.modified) {
+                    <img
+                      [src]="aiModifiedLabelSrc"
+                      class="blog-post__ai-label"
+                      i18n-alt="@@featureForepathBlog-aiModifiedAlt"
+                      alt="AI Modified"
+                    />
+                  }
+                </div>
+              }
             }
           </div>
         </header>
@@ -67,11 +93,11 @@
           <div class="ghost-content" [innerHTML]="html"></div>
         }
 
-        @if (currentPost.tags?.length) {
+        @if (displayTags(currentPost).length) {
           <ul class="blog-post__tags list-unstyled d-flex flex-wrap gap-2 mt-5 mb-0">
-            @for (tag of currentPost.tags; track tag.id) {
+            @for (tag of displayTags(currentPost); track tag.id) {
               <li>
-                <span class="blog-post__tag small">{{ tag.name }}</span>
+                <span class="blog-card__tag small">{{ tag.name }}</span>
               </li>
             }
           </ul>
