@@ -2581,6 +2581,14 @@
         <source>Read more</source>
         <target>Weiterlesen</target>
       </trans-unit>
+      <trans-unit id="featureForepathBlog-aiGeneratedAlt" datatype="html">
+        <source>AI Generated</source>
+        <target>KI-generiert</target>
+      </trans-unit>
+      <trans-unit id="featureForepathBlog-aiModifiedAlt" datatype="html">
+        <source>AI Modified</source>
+        <target>KI-überarbeitet</target>
+      </trans-unit>
       <trans-unit id="featureForepathBlogPost-backToBlog" datatype="html">
         <source>Back to blog</source>
         <target>Zurück zum Blog</target>

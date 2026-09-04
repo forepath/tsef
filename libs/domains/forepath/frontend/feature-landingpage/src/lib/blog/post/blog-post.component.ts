@@ -14,12 +14,20 @@ import { catchError, of, switchMap } from 'rxjs';
 
 import { GhostContentApiService } from '../ghost-content-api.service';
 import {
+  GHOST_AI_GENERATED_LABEL_SRC,
+  GHOST_AI_MODIFIED_LABEL_SRC,
+  filterGhostDisplayTags,
+  getGhostAiMarkers,
+  resolveGhostPrimaryDisplayTag,
+  type GhostAiMarkers,
+} from '../ghost-ai-tags.util';
+import {
   resolveGhostPostAuthorName,
   resolveGhostPostDescription,
   resolveGhostPostImageUrl,
   resolveGhostPostKeywords,
 } from '../ghost-post-meta.util';
-import type { GhostPost } from '../ghost.types';
+import type { GhostPost, GhostTag } from '../ghost.types';
 
 function isGhostNotFoundError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
@@ -55,6 +63,21 @@ export class ForepathBlogPostComponent implements OnInit {
   readonly loading = signal(true);
   readonly notFound = signal(false);
   readonly errorMessage = signal<string | null>(null);
+
+  readonly aiGeneratedLabelSrc = GHOST_AI_GENERATED_LABEL_SRC;
+  readonly aiModifiedLabelSrc = GHOST_AI_MODIFIED_LABEL_SRC;
+
+  primaryDisplayTag(post: GhostPost): GhostTag | null {
+    return resolveGhostPrimaryDisplayTag(post);
+  }
+
+  displayTags(post: GhostPost): GhostTag[] {
+    return filterGhostDisplayTags(post.tags);
+  }
+
+  aiMarkers(post: GhostPost): GhostAiMarkers {
+    return getGhostAiMarkers(post);
+  }
 
   ngOnInit(): void {
     this.destroyRef.onDestroy(() => {

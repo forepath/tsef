@@ -30,6 +30,7 @@
 }
 
 .blog-card__media {
+  position: relative;
   aspect-ratio: 16 / 10;
   overflow: hidden;
   background: var(--bs-tertiary-bg);
@@ -39,6 +40,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+.blog-card__ai-label {
+  width: auto;
+  height: 1.75rem;
+  max-width: 70%;
+  object-fit: contain;
   display: block;
 }
 
@@ -64,12 +73,4 @@
 .blog-card__read-more {
   display: inline-flex;
   align-items: center;
-}
-
-.blog-card__tag {
-  display: inline-block;
-  padding: 0.15rem 0.55rem;
-  border-radius: 0.35rem;
-  background: rgba(255, 107, 53, 0.1);
-  color: var(--bs-body-color);
 }

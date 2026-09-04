@@ -1,4 +1,5 @@
 import type { GhostPost } from './ghost.types';
+import { filterGhostDisplayTags } from './ghost-ai-tags.util';
 
 export function resolveGhostPostDescription(post: GhostPost): string {
   return (post.meta_description ?? post.custom_excerpt ?? post.excerpt ?? '').trim();
@@ -9,7 +10,9 @@ export function resolveGhostPostImageUrl(post: GhostPost, fallbackImageUrl: stri
 }
 
 export function resolveGhostPostKeywords(post: GhostPost): string | undefined {
-  const tags = post.tags?.map((tag) => tag.name).filter(Boolean) ?? [];
+  const tags = filterGhostDisplayTags(post.tags)
+    .map((tag) => tag.name)
+    .filter(Boolean);
   if (tags.length === 0) {
     return undefined;
   }

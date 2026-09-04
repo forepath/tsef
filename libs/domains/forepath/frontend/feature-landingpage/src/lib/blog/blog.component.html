@@ -46,10 +46,70 @@
                       class="blog-card__image"
                       loading="lazy"
                     />
+                    @if (aiMarkers(post); as markers) {
+                      @if (markers.generated || markers.modified) {
+                        <div
+                          class="blog-card__ai-markers position-absolute bottom-0 start-0 ms-3 mb-3 d-flex flex-column gap-1"
+                        >
+                          @if (markers.generated) {
+                            <img
+                              [src]="aiGeneratedLabelOnImageSrc"
+                              class="blog-card__ai-label"
+                              i18n-alt="@@featureForepathBlog-aiGeneratedAlt"
+                              alt="AI Generated"
+                            />
+                          }
+                          @if (markers.modified) {
+                            <img
+                              [src]="aiModifiedLabelOnImageSrc"
+                              class="blog-card__ai-label"
+                              i18n-alt="@@featureForepathBlog-aiModifiedAlt"
+                              alt="AI Modified"
+                            />
+                          }
+                        </div>
+                      }
+                    }
                   </div>
                 }
                 <div class="blog-card__body">
-                  @if (post.published_at) {
+                  @if (!post.feature_image) {
+                    @if (aiMarkers(post); as markers) {
+                      @if (markers.generated || markers.modified) {
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                          @if (post.published_at) {
+                            <time class="blog-card__date small text-muted" [attr.datetime]="post.published_at">
+                              {{ post.published_at | date: 'mediumDate' }}
+                            </time>
+                          } @else {
+                            <span></span>
+                          }
+                          <div class="blog-card__ai-markers d-flex flex-wrap align-items-center gap-1">
+                            @if (markers.generated) {
+                              <img
+                                [src]="aiGeneratedLabelSrc"
+                                class="blog-card__ai-label"
+                                i18n-alt="@@featureForepathBlog-aiGeneratedAlt"
+                                alt="AI Generated"
+                              />
+                            }
+                            @if (markers.modified) {
+                              <img
+                                [src]="aiModifiedLabelSrc"
+                                class="blog-card__ai-label"
+                                i18n-alt="@@featureForepathBlog-aiModifiedAlt"
+                                alt="AI Modified"
+                              />
+                            }
+                          </div>
+                        </div>
+                      } @else if (post.published_at) {
+                        <time class="blog-card__date small text-muted" [attr.datetime]="post.published_at">
+                          {{ post.published_at | date: 'mediumDate' }}
+                        </time>
+                      }
+                    }
+                  } @else if (post.published_at) {
                     <time class="blog-card__date small text-muted" [attr.datetime]="post.published_at">
                       {{ post.published_at | date: 'mediumDate' }}
                     </time>
@@ -58,9 +118,9 @@
                   @if (post.excerpt) {
                     <p class="blog-card__excerpt text-muted mb-3">{{ post.excerpt }}</p>
                   }
-                  @if (post.tags?.length) {
+                  @if (displayTags(post).length) {
                     <ul class="blog-card__tags list-unstyled d-flex flex-wrap gap-2 mb-3">
-                      @for (tag of post.tags; track tag.id) {
+                      @for (tag of displayTags(post); track tag.id) {
                         <li>
                           <span class="blog-card__tag small">{{ tag.name }}</span>
                         </li>

@@ -38,11 +38,10 @@
   display: block;
 }
 
-.blog-post__tag {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  border-radius: 0.35rem;
-  background: rgba(255, 107, 53, 0.1);
+.blog-post__ai-label {
+  width: auto;
+  height: 1.25rem;
+  object-fit: contain;
 }
 
 .ghost-content {

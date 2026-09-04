@@ -9,7 +9,16 @@ import { addPageMetaTags, buildPageMetaTags } from '@forepath/shared/frontend/ut
 import { Subject, catchError, debounceTime, distinctUntilChanged, finalize, of, switchMap, tap } from 'rxjs';
 
 import { GhostContentApiService } from './ghost-content-api.service';
-import type { GhostPagination, GhostPost } from './ghost.types';
+import {
+  GHOST_AI_GENERATED_LABEL_ON_IMAGE_SRC,
+  GHOST_AI_GENERATED_LABEL_SRC,
+  GHOST_AI_MODIFIED_LABEL_ON_IMAGE_SRC,
+  GHOST_AI_MODIFIED_LABEL_SRC,
+  filterGhostDisplayTags,
+  getGhostAiMarkers,
+  type GhostAiMarkers,
+} from './ghost-ai-tags.util';
+import type { GhostPagination, GhostPost, GhostTag } from './ghost.types';
 
 @Component({
   selector: 'framework-forepath-blog',
@@ -37,6 +46,19 @@ export class ForepathBlogComponent implements OnInit {
   readonly loadingMore = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly activeQuery = signal('');
+
+  readonly aiGeneratedLabelSrc = GHOST_AI_GENERATED_LABEL_SRC;
+  readonly aiModifiedLabelSrc = GHOST_AI_MODIFIED_LABEL_SRC;
+  readonly aiGeneratedLabelOnImageSrc = GHOST_AI_GENERATED_LABEL_ON_IMAGE_SRC;
+  readonly aiModifiedLabelOnImageSrc = GHOST_AI_MODIFIED_LABEL_ON_IMAGE_SRC;
+
+  displayTags(post: GhostPost): GhostTag[] {
+    return filterGhostDisplayTags(post.tags);
+  }
+
+  aiMarkers(post: GhostPost): GhostAiMarkers {
+    return getGhostAiMarkers(post);
+  }
 
   ngOnInit(): void {
     this.applyListMeta();

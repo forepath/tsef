@@ -1943,6 +1943,12 @@
       <trans-unit id="featureForepathBlog-readMore" datatype="html">
         <source>Read more</source>
         </trans-unit>
+      <trans-unit id="featureForepathBlog-aiGeneratedAlt" datatype="html">
+        <source>AI Generated</source>
+        </trans-unit>
+      <trans-unit id="featureForepathBlog-aiModifiedAlt" datatype="html">
+        <source>AI Modified</source>
+        </trans-unit>
       <trans-unit id="featureForepathBlogPost-backToBlog" datatype="html">
         <source>Back to blog</source>
         </trans-unit>
