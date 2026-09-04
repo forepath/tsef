@@ -2641,6 +2641,10 @@
         <source>Learn more</source>
         <target>Mehr erfahren</target>
       </trans-unit>
+      <trans-unit id="utilCookieConsent-policy" datatype="html">
+        <source>Cookie Policy</source>
+        <target>Cookie-Richtlinie</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

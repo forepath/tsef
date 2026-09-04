@@ -4745,6 +4745,10 @@
         <source>Learn more</source>
         <target>Mehr erfahren</target>
       </trans-unit>
+      <trans-unit id="utilCookieConsent-policy" datatype="html">
+        <source>Cookie Policy</source>
+        <target>Cookie-Richtlinie</target>
+      </trans-unit>
       <trans-unit id="featureAtlassianImportAdmin-create" datatype="html">
         <source> Create </source>
         <target>Erstellen</target>

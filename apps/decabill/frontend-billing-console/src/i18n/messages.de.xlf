@@ -3954,6 +3954,10 @@
         <source>Learn more</source>
         <target>Mehr erfahren</target>
       </trans-unit>
+      <trans-unit id="utilCookieConsent-policy" datatype="html">
+        <source>Cookie Policy</source>
+        <target>Cookie-Richtlinie</target>
+      </trans-unit>
       <trans-unit id="featureBilling-subscriptionStatusPendingConfigChange" datatype="html">
         <source>Applying configuration change</source>
         <target>Konfigurationsänderung wird angewendet</target>
