@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.28.2](https://github.com/forepath/one/compare/v2.28.1...v2.28.2) (2026-09-04)
+
+
+### Bug Fixes
+
+* **forepath:** link hover states ([#596](https://github.com/forepath/one/issues/596)) ([7bb0084](https://github.com/forepath/one/commit/7bb00845d188c1f1e51e1395e979344ec151c22a))
+* **shared:** cookie consent settings button ([#593](https://github.com/forepath/one/issues/593)) ([aacbe8f](https://github.com/forepath/one/commit/aacbe8fa159cd90b788c870927d554c918f9f955))
+
+
+### Chores
+
+* **forepath:** eu ai act compliance changes ([#594](https://github.com/forepath/one/issues/594)) ([82b0a03](https://github.com/forepath/one/commit/82b0a0349a5ddeb7b3f76c6c16b08f58cde8d71d))
+
 ## [2.28.1](https://github.com/forepath/one/compare/v2.28.0...v2.28.1) (2026-09-03)
 
 
