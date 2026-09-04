@@ -4100,6 +4100,9 @@
       <trans-unit id="utilCookieConsent-link" datatype="html">
         <source>Learn more</source>
         </trans-unit>
+      <trans-unit id="utilCookieConsent-policy" datatype="html">
+        <source>Cookie Policy</source>
+        </trans-unit>
     </body>
   </file>
 </xliff>

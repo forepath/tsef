@@ -36,4 +36,33 @@
   color: rgb(255, 255, 255);
   font-family: var(--bs-body-font-family);
   text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  width: 2.5em;
+  height: 2.5em;
+  padding: 0;
+  border-radius: 50%;
+  // Keep the revoke control visible (library defaults hide it until hover when animated).
+  transform: none !important;
+
+  &.cc-bottom {
+    bottom: 1em;
+    border-radius: 50%;
+  }
+
+  &.cc-left {
+    left: 1em;
+  }
+
+  &:hover {
+    text-decoration: none !important;
+  }
+
+  .bi-cookie {
+    font-size: 1.25rem;
+    line-height: 1;
+    pointer-events: none;
+  }
 }

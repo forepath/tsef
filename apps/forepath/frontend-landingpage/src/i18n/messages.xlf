@@ -1808,6 +1808,9 @@
       <trans-unit id="utilCookieConsent-link" datatype="html">
         <source>Learn more</source>
         </trans-unit>
+      <trans-unit id="utilCookieConsent-policy" datatype="html">
+        <source>Cookie Policy</source>
+        </trans-unit>
       <trans-unit id="sharedFeatureLandingpageContact-metaTitle" datatype="html">
         <source>Contact :: <x id="productName" equiv-text="productName"/></source>
         </trans-unit>
