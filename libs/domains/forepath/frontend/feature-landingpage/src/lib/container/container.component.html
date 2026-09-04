@@ -127,11 +127,13 @@
                 <li>
                   <a
                     routerLink="/pricing/estimate"
-                    class="dropdown-item portal-nav-dropdown-item portal-nav-dropdown-item--stacked bg-primary text-white border border-primary"
+                    class="dropdown-item portal-nav-dropdown-item portal-nav-dropdown-item--stacked portal-nav-dropdown-item--highlight"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
                     (click)="closeMobileMenu()"
                   >
                     <span i18n="@@featureForepath-navProjectEstimate">Instant quote</span>
-                    <span class="small text-white-50" i18n="@@featureForepath-navProjectEstimateCaption"
+                    <span class="small" i18n="@@featureForepath-navProjectEstimateCaption"
                       >From your project description, in seconds</span
                     >
                   </a>
