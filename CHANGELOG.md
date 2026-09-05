@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.28.3](https://github.com/forepath/one/compare/v2.28.2...v2.28.3) (2026-09-05)
+
+
+### Bug Fixes
+
+* **forepath:** blog post content pre-rendering ([#597](https://github.com/forepath/one/issues/597)) ([689656e](https://github.com/forepath/one/commit/689656e4fc6d984ea0f61c9fc834e46bfb22d547))
+
 ## [2.28.2](https://github.com/forepath/one/compare/v2.28.1...v2.28.2) (2026-09-04)
 
 
