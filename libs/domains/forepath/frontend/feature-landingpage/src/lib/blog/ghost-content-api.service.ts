@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, PendingTasks, inject } from '@angular/core';
 import { ENVIRONMENT, type Environment } from '@forepath/shared/frontend/util-configuration';
 import GhostContentAPI from '@tryghost/content-api';
-import { Observable, defer, from, throwError } from 'rxjs';
+import { Observable, defer, finalize, from, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { BrowseGhostPostsParams, GhostPost, GhostPostsBrowseResult } from './ghost.types';
@@ -25,6 +25,7 @@ export function buildGhostTitleSearchFilter(query: string): string | undefined {
 @Injectable({ providedIn: 'root' })
 export class GhostContentApiService {
   private readonly environment = inject<Environment>(ENVIRONMENT);
+  private readonly pendingTasks = inject(PendingTasks);
   private readonly api = this.createApi();
 
   browsePosts(params: BrowseGhostPostsParams = {}): Observable<GhostPostsBrowseResult> {
@@ -36,20 +37,22 @@ export class GhostContentApiService {
     const limit = params.limit ?? DEFAULT_PAGE_LIMIT;
     const filter = params.query ? buildGhostTitleSearchFilter(params.query) : undefined;
 
-    return defer(() =>
-      from(
-        this.api!.posts.browse({
-          page,
-          limit,
-          include: POST_INCLUDE,
-          ...(filter ? { filter } : {}),
-        }),
+    return this.trackPendingTask(
+      defer(() =>
+        from(
+          this.api!.posts.browse({
+            page,
+            limit,
+            include: POST_INCLUDE,
+            ...(filter ? { filter } : {}),
+          }),
+        ),
+      ).pipe(
+        map((browseResult) => ({
+          posts: browseResult as GhostPost[],
+          meta: browseResult.meta,
+        })),
       ),
-    ).pipe(
-      map((browseResult) => ({
-        posts: browseResult as GhostPost[],
-        meta: browseResult.meta,
-      })),
     );
   }
 
@@ -63,9 +66,22 @@ export class GhostContentApiService {
       return throwError(() => new Error('Post slug is required.'));
     }
 
-    return defer(() => from(this.api!.posts.read({ slug: normalizedSlug }, { include: POST_INCLUDE }))).pipe(
-      map((post) => post as GhostPost),
+    return this.trackPendingTask(
+      defer(() => from(this.api!.posts.read({ slug: normalizedSlug }, { include: POST_INCLUDE }))).pipe(
+        map((post) => post as GhostPost),
+      ),
     );
+  }
+
+  /**
+   * Registers Ghost axios fetches with Angular PendingTasks so SSR/prerender
+   * waits for content instead of serializing the loading UI.
+   */
+  private trackPendingTask<T>(source$: Observable<T>): Observable<T> {
+    return defer(() => {
+      const removeTask = this.pendingTasks.add();
+      return source$.pipe(finalize(removeTask));
+    });
   }
 
   private createApi(): ReturnType<typeof GhostContentAPI> | null {

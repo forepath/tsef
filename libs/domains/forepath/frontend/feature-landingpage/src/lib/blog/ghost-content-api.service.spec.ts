@@ -1,3 +1,4 @@
+import { PendingTasks } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ENVIRONMENT } from '@forepath/shared/frontend/util-configuration';
 import GhostContentAPI from '@tryghost/content-api';
@@ -34,9 +35,25 @@ describe('buildGhostTitleSearchFilter', () => {
 });
 
 describe('GhostContentApiService', () => {
+  const removeTask = jest.fn();
+  const pendingTasksAdd = jest.fn(() => removeTask);
+
+  function configureService(environment: unknown): GhostContentApiService {
+    TestBed.configureTestingModule({
+      providers: [
+        GhostContentApiService,
+        { provide: ENVIRONMENT, useValue: environment },
+        { provide: PendingTasks, useValue: { add: pendingTasksAdd } },
+      ],
+    });
+    return TestBed.inject(GhostContentApiService);
+  }
+
   beforeEach(() => {
     browseMock.mockReset();
     readMock.mockReset();
+    removeTask.mockReset();
+    pendingTasksAdd.mockClear();
     GhostContentAPIMock.mockReset();
     GhostContentAPIMock.mockImplementation(
       () =>
@@ -57,22 +74,12 @@ describe('GhostContentApiService', () => {
     Object.assign(posts, { meta });
     browseMock.mockResolvedValue(posts);
 
-    TestBed.configureTestingModule({
-      providers: [
-        GhostContentApiService,
-        {
-          provide: ENVIRONMENT,
-          useValue: {
-            blog: {
-              contentApiUrl: 'https://blog.forepath.io',
-              contentApiKey: 'test-key',
-            },
-          },
-        },
-      ],
+    const service = configureService({
+      blog: {
+        contentApiUrl: 'https://blog.forepath.io',
+        contentApiKey: 'test-key',
+      },
     });
-
-    const service = TestBed.inject(GhostContentApiService);
     const result = await firstValueFrom(service.browsePosts({ page: 2, limit: 6, query: 'ai' }));
 
     expect(browseMock).toHaveBeenCalledWith({
@@ -89,43 +96,75 @@ describe('GhostContentApiService', () => {
     const post = { id: '1', slug: 'welcome', title: 'Welcome' };
     readMock.mockResolvedValue(post);
 
-    TestBed.configureTestingModule({
-      providers: [
-        GhostContentApiService,
-        {
-          provide: ENVIRONMENT,
-          useValue: {
-            blog: {
-              contentApiUrl: 'https://blog.forepath.io/',
-              contentApiKey: 'test-key',
-            },
-          },
-        },
-      ],
+    const service = configureService({
+      blog: {
+        contentApiUrl: 'https://blog.forepath.io/',
+        contentApiKey: 'test-key',
+      },
     });
-
-    const service = TestBed.inject(GhostContentApiService);
     const result = await firstValueFrom(service.getPostBySlug(' welcome '));
 
     expect(readMock).toHaveBeenCalledWith({ slug: 'welcome' }, { include: 'tags,authors' });
     expect(result).toEqual(post);
   });
 
-  it('errors when blog config is missing', async () => {
-    TestBed.configureTestingModule({
-      providers: [
-        GhostContentApiService,
-        {
-          provide: ENVIRONMENT,
-          useValue: {},
-        },
-      ],
+  it('registers and clears PendingTasks around browsePosts', async () => {
+    const posts = [{ id: '1', slug: 'hello', title: 'Hello' }];
+    Object.assign(posts, {
+      meta: { pagination: { page: 1, limit: 12, pages: 1, total: 1, next: null, prev: null } },
+    });
+    browseMock.mockResolvedValue(posts);
+
+    const service = configureService({
+      blog: {
+        contentApiUrl: 'https://blog.forepath.io',
+        contentApiKey: 'test-key',
+      },
     });
 
-    const service = TestBed.inject(GhostContentApiService);
+    await firstValueFrom(service.browsePosts());
+
+    expect(pendingTasksAdd).toHaveBeenCalledTimes(1);
+    expect(removeTask).toHaveBeenCalledTimes(1);
+  });
+
+  it('registers and clears PendingTasks around getPostBySlug', async () => {
+    readMock.mockResolvedValue({ id: '1', slug: 'welcome', title: 'Welcome' });
+
+    const service = configureService({
+      blog: {
+        contentApiUrl: 'https://blog.forepath.io',
+        contentApiKey: 'test-key',
+      },
+    });
+
+    await firstValueFrom(service.getPostBySlug('welcome'));
+
+    expect(pendingTasksAdd).toHaveBeenCalledTimes(1);
+    expect(removeTask).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears PendingTasks when browsePosts errors', async () => {
+    browseMock.mockRejectedValue(new Error('network'));
+
+    const service = configureService({
+      blog: {
+        contentApiUrl: 'https://blog.forepath.io',
+        contentApiKey: 'test-key',
+      },
+    });
+
+    await expect(firstValueFrom(service.browsePosts())).rejects.toThrow('network');
+    expect(pendingTasksAdd).toHaveBeenCalledTimes(1);
+    expect(removeTask).toHaveBeenCalledTimes(1);
+  });
+
+  it('errors when blog config is missing', async () => {
+    const service = configureService({});
 
     await expect(firstValueFrom(service.browsePosts())).rejects.toThrow('Ghost blog is not configured.');
     expect(GhostContentAPIMock).not.toHaveBeenCalled();
+    expect(pendingTasksAdd).not.toHaveBeenCalled();
   });
 
   it('falls back to null api when GhostContentAPI construction throws', async () => {
@@ -134,27 +173,18 @@ describe('GhostContentApiService', () => {
       throw new Error('invalid key');
     });
 
-    TestBed.configureTestingModule({
-      providers: [
-        GhostContentApiService,
-        {
-          provide: ENVIRONMENT,
-          useValue: {
-            blog: {
-              contentApiUrl: 'https://blog.forepath.io',
-              contentApiKey: 'bad-key',
-            },
-          },
-        },
-      ],
+    const service = configureService({
+      blog: {
+        contentApiUrl: 'https://blog.forepath.io',
+        contentApiKey: 'bad-key',
+      },
     });
-
-    const service = TestBed.inject(GhostContentApiService);
 
     await expect(firstValueFrom(service.browsePosts())).rejects.toThrow('Ghost blog is not configured.');
     await expect(firstValueFrom(service.getPostBySlug('any'))).rejects.toThrow('Ghost blog is not configured.');
     expect(GhostContentAPIMock).toHaveBeenCalled();
     expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to create Ghost Content API instance:', expect.any(Error));
+    expect(pendingTasksAdd).not.toHaveBeenCalled();
 
     consoleErrorSpy.mockRestore();
   });

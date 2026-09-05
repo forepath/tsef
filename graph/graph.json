@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-02T15:52:04.159Z",
+  "generatedAt": "2026-09-05T11:26:27.519Z",
   "nodes": [
     {
       "id": "project:@forepath/test/mounted-plugin-fixture",
@@ -71443,6 +71443,11 @@
     {
       "from": "concept:forepath-features",
       "to": "api:HTTP:GET:/otel/metrics",
+      "type": "documents"
+    },
+    {
+      "from": "concept:forepath-implementation",
+      "to": "api:HTTP:POST:/auth/register",
       "type": "documents"
     },
     {

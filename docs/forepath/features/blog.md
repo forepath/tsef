@@ -29,3 +29,4 @@ Content API keys are read-only and intended for browser use. Other product envir
 - Feature UI and Ghost client: `libs/domains/forepath/frontend/feature-landingpage/src/lib/blog/`
 - Client library: `@tryghost/content-api`
 - Titles follow `Title :: ForePath`; post meta (description, image, tags, author) prefers Ghost SEO fields with sensible fallbacks
+- Ghost fetches register with Angular `PendingTasks` so SSR/prerender waits for post data instead of serializing the loading UI (axios does not contribute to stability by itself)
