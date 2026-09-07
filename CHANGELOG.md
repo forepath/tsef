@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.28.4](https://github.com/forepath/one/compare/v2.28.3...v2.28.4) (2026-09-07)
+
+
+### Bug Fixes
+
+* **forepath:** blogpost download embed styling ([#598](https://github.com/forepath/one/issues/598)) ([c9641e4](https://github.com/forepath/one/commit/c9641e409c9fce60b320ae98986b604533e9498d))
+
 ## [2.28.3](https://github.com/forepath/one/compare/v2.28.2...v2.28.3) (2026-09-05)
 
 
