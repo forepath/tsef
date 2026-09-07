@@ -3,6 +3,218 @@
 // Page hosts default to display:inline; keep the outlet sibling block-level above the footer.
 :host {
   display: block;
+
+  // Ghost HTML is injected via [innerHTML], so it has no encapsulation attributes.
+  // ::ng-deep is required for descendant rules to reach that content.
+  ::ng-deep {
+    .ghost-content {
+      font-size: 1.0625rem;
+      line-height: 1.75;
+      color: var(--bs-body-color);
+
+      :where(h1, h2, h3, h4, h5, h6) {
+        letter-spacing: -0.01em;
+        margin-top: 2rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+      }
+
+      :where(p, ul, ol, blockquote, pre, figure, .kg-card) {
+        margin-bottom: 1.25rem;
+      }
+
+      // Keep the last block's margin inside the article box (Ghost HTML almost always ends with one).
+      > :last-child {
+        margin-bottom: 0;
+      }
+
+      :where(a) {
+        color: var(--bs-primary);
+      }
+
+      :where(img) {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        display: block;
+      }
+
+      :where(blockquote) {
+        border-left: 3px solid var(--bs-primary);
+        padding-left: 1rem;
+        color: var(--bs-secondary-color);
+      }
+
+      :where(pre) {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: var(--bs-tertiary-bg);
+        overflow-x: auto;
+      }
+
+      :where(code) {
+        font-size: 0.92em;
+      }
+
+      :where(figcaption) {
+        font-size: 0.875rem;
+        color: var(--bs-secondary-color);
+        margin-top: 0.5rem;
+      }
+
+      // Ghost file download embeds (kg-file-card)
+      .kg-file-card,
+      .kg-file-card * {
+        box-sizing: border-box;
+      }
+
+      .kg-file-card {
+        display: flex;
+      }
+
+      .kg-file-card + .kg-file-card {
+        margin-top: -0.25rem;
+      }
+
+      a.kg-file-card-container {
+        display: flex;
+        align-items: stretch;
+        justify-content: space-between;
+        gap: 0.75rem;
+        width: 100%;
+        min-height: 5.75rem;
+        padding: 0.875rem;
+        color: var(--bs-body-color);
+        text-decoration: none;
+        background: var(--bs-white);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 0.75rem;
+        box-shadow: var(--bs-box-shadow-sm);
+
+        &:hover {
+          color: var(--bs-body-color);
+          background: var(--bs-white);
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--bs-primary);
+          outline-offset: 2px;
+        }
+      }
+
+      .kg-file-card-contents {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 0.25rem;
+        margin: 0.25rem 0.5rem;
+        min-width: 0;
+        width: 100%;
+      }
+
+      .kg-file-card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.35;
+        letter-spacing: -0.01em;
+        color: var(--bs-body-emphasis-color);
+      }
+
+      .kg-file-card-caption {
+        font-size: 0.875rem;
+        line-height: 1.4;
+        color: var(--bs-secondary-color);
+      }
+
+      .kg-file-card-title + .kg-file-card-caption {
+        flex-grow: 1;
+      }
+
+      .kg-file-card-metadata {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+        font-size: 0.8125rem;
+        line-height: 1.35;
+        color: var(--bs-secondary-color);
+      }
+
+      .kg-file-card-filename {
+        font-weight: 500;
+        overflow-wrap: anywhere;
+      }
+
+      .kg-file-card-filesize {
+        display: inline-block;
+        padding: 0.15rem 0.55rem;
+        border-radius: 0.35rem;
+        background: var(--bs-dark);
+        color: var(--bs-white);
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1.3;
+        white-space: nowrap;
+      }
+
+      .kg-file-card-icon {
+        position: relative;
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: 4.5rem;
+        min-width: 4.5rem;
+        min-height: 4.5rem;
+        color: var(--bs-primary);
+
+        &::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 0.5rem;
+          background: currentColor;
+          opacity: 0.08;
+          transition: opacity 0.2s ease;
+        }
+      }
+
+      a.kg-file-card-container:hover .kg-file-card-icon::before {
+        opacity: 0.12;
+      }
+
+      .kg-file-card-icon svg {
+        position: relative;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+
+      .kg-file-card-medium a.kg-file-card-container {
+        min-height: 4.5rem;
+      }
+
+      .kg-file-card-small a.kg-file-card-container {
+        align-items: center;
+        min-height: 3.25rem;
+      }
+
+      .kg-file-card-small .kg-file-card-metadata {
+        margin-top: 0;
+      }
+
+      .kg-file-card-small .kg-file-card-icon {
+        width: 3.25rem;
+        min-width: 3.25rem;
+        min-height: 3.25rem;
+
+        svg {
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+      }
+    }
+  }
 }
 
 .grid-section {
@@ -42,60 +254,4 @@
   width: auto;
   height: 1.25rem;
   object-fit: contain;
-}
-
-.ghost-content {
-  font-size: 1.0625rem;
-  line-height: 1.75;
-  color: var(--bs-body-color);
-
-  :where(h1, h2, h3, h4, h5, h6) {
-    letter-spacing: -0.01em;
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-  }
-
-  :where(p, ul, ol, blockquote, pre, figure) {
-    margin-bottom: 1.25rem;
-  }
-
-  // Keep the last block's margin inside the article box (Ghost HTML almost always ends with one).
-  > :last-child {
-    margin-bottom: 0;
-  }
-
-  :where(a) {
-    color: var(--bs-primary);
-  }
-
-  :where(img) {
-    max-width: 100%;
-    height: auto;
-    border-radius: 0.5rem;
-    display: block;
-  }
-
-  :where(blockquote) {
-    border-left: 3px solid var(--bs-primary);
-    padding-left: 1rem;
-    color: var(--bs-secondary-color);
-  }
-
-  :where(pre) {
-    padding: 1rem;
-    border-radius: 0.5rem;
-    background: var(--bs-tertiary-bg);
-    overflow-x: auto;
-  }
-
-  :where(code) {
-    font-size: 0.92em;
-  }
-
-  :where(figcaption) {
-    font-size: 0.875rem;
-    color: var(--bs-secondary-color);
-    margin-top: 0.5rem;
-  }
 }
